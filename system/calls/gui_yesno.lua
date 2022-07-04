@@ -28,15 +28,19 @@ window:set(2, 3, colors.lightGray, colors.green, " ███ ")
 window:set(2, 4, colors.lightGray, colors.green, "█████")
 window:set(4, 3, colors.green, colors.white, "?")
 
-window:set(32 - 4, 7, colors.green, colors.white, " no ")
-window:set(2, 7, colors.red, colors.white, " yes ")
+window:set(32 - 4, 7, colors.red, colors.white, " no ")
+window:set(2, 7, colors.lime, colors.white, " yes ")
 
 while true do
     local eventData = {event.pull()}
     local windowEventData = window:uploadEvent(eventData)
     if windowEventData[4] == 7 and windowEventData[3] > (32 - 5) and windowEventData[3] <= ((32 - 5) + 4) then
+        window:set(32 - 4, 7, colors.yellow, colors.white, " no ")
+        event.sleep(0.1)
         return false
     elseif windowEventData[4] == 7 and windowEventData[3] >= 2 and windowEventData[3] <= (2 + 4) then
+        window:set(2, 7, colors.green, colors.white, " yes ")
+        event.sleep(0.1)
         return true
     end
 end

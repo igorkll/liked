@@ -34,6 +34,8 @@ while true do
     local eventData = {event.pull()}
     local windowEventData = window:uploadEvent(eventData)
     if windowEventData[4] == 7 and windowEventData[3] > (32 - 5) and windowEventData[3] <= ((32 - 5) + 4) then
+        window:set(32 - 4, 7, colors.lightBlue, colors.white, " ok ")
+        event.sleep(0.1)
         break
     end
 end
