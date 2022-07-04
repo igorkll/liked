@@ -3,6 +3,7 @@ local component = require("component")
 local computer = require("computer")
 local event = require("event")
 local calls = require("calls")
+local unicode = require("unicode")
 local explorer = require("explorer")
 
 local colors = explorer.colors
@@ -22,7 +23,7 @@ local function draw()
     local str = "12:00"
     window:set(window.sizeX - unicode.len(str), 1, colors.gray, colors.white, str)
 
-    window:set(1, 1, colors.gray, colors.white, "OS")
+    window:set(2, 1, colors.gray, colors.white, "OS")
 end
 draw()
 
@@ -30,12 +31,15 @@ while true do
     local eventData = {event.pull()}
     local windowEventData = window:uploadEvent(eventData)
     if windowEventData[1] == "touch" then
-        if windowEventData[4] == 1 and windowEventData[3] >= 1 and windowEventData[3] <= 2 then
+        if windowEventData[4] == 1 and windowEventData[3] >= 2 and windowEventData[3] <= 3 then
             local str, num = calls.call("gui_context", screen, 2, 2,
-            {"shutdown", "reboot"})
+            {"  about", "------------------", "  shutdown", "  reboot"},
+            {true, false, true, true})
             if num == 1 then
+                calls.call("gui_warn", screen, "about is not found")
+            elseif num == 3 then
                 computer.shutdown()
-            elseif num == 2 then
+            elseif num == 4 then
                 computer.shutdown(true)
             end
             draw()
