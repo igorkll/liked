@@ -34,10 +34,17 @@ while true do
     local eventData = {event.pull()}
     local windowEventData = window:uploadEvent(eventData)
     if windowEventData[1] == "touch" and windowEventData[5] == 0 then
-        if windowEventData[4] == 7 and windowEventData[3] > (32 - 5) and windowEventData[3] <= ((32 - 5) + 4) then
-            window:set(32 - 4, 7, colors.lightBlue, colors.white, " ok ")
-            event.sleep(0.1)
-            break
+        local num = windowEventData[4]
+        if not active or active[num] then
+            window:set(1, num, colors.lightBlue, colors.gray, strs[num])
+            return strs[num], num
+        end
+    else
+        if eventData[1] == "touch" or
+        eventData[1] == "drag" or 
+        eventData[1] == "drop" or 
+        eventData[1] == "scroll" then
+            event.push(table.unpack(eventData))
         end
     end
 end
