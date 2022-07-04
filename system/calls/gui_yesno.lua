@@ -23,17 +23,20 @@ window:fill(2, 2, window.sizeX, window.sizeY, colors.gray, 0, " ")
 window:clear(colors.lightGray)
 window:set(10, 2, colors.lightGray, colors.white, str)
 
-window:set(2, 2, colors.lightGray, colors.yellow, "  █")
-window:set(2, 3, colors.lightGray, colors.yellow, " ███ ")
-window:set(2, 4, colors.lightGray, colors.yellow, "█████")
-window:set(4, 3, colors.yellow, colors.white, "!")
+window:set(2, 2, colors.lightGray, colors.green, "  █")
+window:set(2, 3, colors.lightGray, colors.green, " ███ ")
+window:set(2, 4, colors.lightGray, colors.green, "█████")
+window:set(4, 3, colors.green, colors.white, "?")
 
-window:set(32 - 4, 7, colors.blue, colors.white, " ok ")
+window:set(32 - 4, 7, colors.green, colors.white, " no ")
+window:set(2, 7, colors.red, colors.white, " yes ")
 
 while true do
     local eventData = {event.pull()}
     local windowEventData = window:uploadEvent(eventData)
     if windowEventData[4] == 7 and windowEventData[3] > (32 - 5) and windowEventData[3] <= ((32 - 5) + 4) then
-        break
+        return false
+    elseif windowEventData[4] == 7 and windowEventData[3] >= 2 and windowEventData[3] <= (2 + 4) then
+        return true
     end
 end

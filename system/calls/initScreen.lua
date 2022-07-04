@@ -2,7 +2,9 @@ local graphic = require("graphic")
 local calls = require("calls")
 local explorer = require("explorer")
 
-local gpu = ...
+local screen = ...
+local gpu = graphic.findGpu(screen)
+
 calls.call("graphicInit", gpu)
 
 local count = 0
