@@ -15,13 +15,13 @@ local window = graphic.classWindow:new(screen, 1, 1, rx, ry)
 while true do
     window:clear(0x000000)
 
-    calls.call("gui_warn", screen, "memory: " .. tostring(math.floor(computer.totalMemory() / 1024)) .. "кб")
+    calls.call("gui_warn", screen, "memory: " .. tostring(math.floor(computer.totalMemory() / 1024)) .. "kb")
     window:clear(0x000000)
 
-    calls.call("gui_warn", screen, "free memory: " .. tostring(math.floor(computer.freeMemory() / 1024)) .. "кб")
+    calls.call("gui_warn", screen, "free memory: " .. tostring(math.floor(computer.freeMemory() / 1024)) .. "kb")
     window:clear(0x000000)
 
-    calls.call("gui_warn", screen, "used memory: " .. tostring(math.floor((computer.totalMemory() - computer.freeMemory()) / 1024)) .. "кб")
+    calls.call("gui_warn", screen, "used memory: " .. tostring(math.floor((computer.totalMemory() - computer.freeMemory()) / 1024)) .. "kb")
     window:clear(0x000000)
 
     if calls.call("gui_yesno", screen, "beep 2000?") then
