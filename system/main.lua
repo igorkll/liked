@@ -32,9 +32,9 @@ while true do
 
     window:clear(0x000000)
 
-    local num = calls.call("gui_context", screen, 18, 8,
-    {"beep 2000", "beep 1000", "---------", "beep 200", "beep 100"},
-    {true, true, false, true, true})
+    local _, num = calls.call("gui_context", screen, 18, 8,
+    {"  beep 2000         ", "  beep 1000         ", "-----------------------", "  beep 200          ", "  beep 100          "},
+    {true, true, false, false, true})
     if num then
         if num == 1 then
             computer.beep(2000)

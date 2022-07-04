@@ -20,13 +20,13 @@ end
 
 local window = graphic.classWindow:new(screen, posX, posY, sizeX, sizeY)
 window:fill(2, 2, window.sizeX, window.sizeY, colors.gray, 0, " ")
-window:fill(1, 1, window.sizeX, window.sizeY, colors.lightGray, 0, " ")
+window:fill(1, 1, window.sizeX, window.sizeY, colors.white, 0, " ")
 
 for i, v in ipairs(strs) do
     if not active or active[i] then
-        window:set(1, i, colors.lightGray, colors.black, v)
+        window:set(1, i, colors.white, colors.black, v)
     else
-        window:set(1, i, colors.lightGray, colors.gray, v)
+        window:set(1, i, colors.white, colors.lightGray, v)
     end
 end
 
@@ -36,15 +36,16 @@ while true do
     if windowEventData[1] == "touch" and windowEventData[5] == 0 then
         local num = windowEventData[4]
         if not active or active[num] then
-            window:set(1, num, colors.lightBlue, colors.gray, strs[num])
+            window:set(1, num, colors.blue, colors.white, strs[num] .. (string.rep(" ", sizeX - unicode.len(strs[num]))))
+            event.sleep(0.1)
             return strs[num], num
         end
     else
         if eventData[1] == "touch" or
         eventData[1] == "drag" or 
-        eventData[1] == "drop" or 
         eventData[1] == "scroll" then
             event.push(table.unpack(eventData))
+            return nil, nil
         end
     end
 end
