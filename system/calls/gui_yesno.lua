@@ -34,13 +34,15 @@ window:set(2, 7, colors.lime, colors.white, " yes ")
 while true do
     local eventData = {event.pull()}
     local windowEventData = window:uploadEvent(eventData)
-    if windowEventData[4] == 7 and windowEventData[3] > (32 - 5) and windowEventData[3] <= ((32 - 5) + 4) then
-        window:set(32 - 4, 7, colors.yellow, colors.white, " no ")
-        event.sleep(0.1)
-        return false
-    elseif windowEventData[4] == 7 and windowEventData[3] >= 2 and windowEventData[3] <= (2 + 4) then
-        window:set(2, 7, colors.green, colors.white, " yes ")
-        event.sleep(0.1)
-        return true
+    if windowEventData[1] == "touch" and windowEventData[5] == 0 then
+        if windowEventData[4] == 7 and windowEventData[3] > (32 - 5) and windowEventData[3] <= ((32 - 5) + 4) then
+            window:set(32 - 4, 7, colors.yellow, colors.white, " no ")
+            event.sleep(0.1)
+            return false
+        elseif windowEventData[4] == 7 and windowEventData[3] >= 2 and windowEventData[3] <= (2 + 4) then
+            window:set(2, 7, colors.green, colors.white, " yes ")
+            event.sleep(0.1)
+            return true
+        end
     end
 end

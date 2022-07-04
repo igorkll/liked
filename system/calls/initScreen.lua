@@ -6,6 +6,8 @@ local screen = ...
 local gpu = graphic.findGpu(screen)
 
 calls.call("graphicInit", gpu)
+gpu.setDepth(4)
+gpu.setResolution(80, 25)
 
 local count = 0
 for i, v in pairs(explorer.colors) do
