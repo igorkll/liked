@@ -3,6 +3,9 @@ local component = require("component")
 local computer = require("computer")
 local event = require("event")
 local calls = require("calls")
+local explorer = require("explorer")
+
+local colors = explorer.colors
 
 ------------------------------------
 
@@ -11,6 +14,34 @@ calls.call("initScreen", screen)
 local rx, ry = graphic.findGpu(screen).getResolution()
 
 local window = graphic.classWindow:new(screen, 1, 1, rx, ry)
+
+local function draw()
+    window:clear(colors.lightBlue)
+    window:fill(1, 1, rx, 1, colors.gray, 0, " ")
+
+    local str = "12:00"
+    window:set(window.sizeX - unicode.len(str), 1, colors.gray, colors.white, str)
+
+    window:set(1, 1, colors.gray, colors.white, "OS")
+end
+draw()
+
+while true do
+    local eventData = {event.pull()}
+    local windowEventData = window:uploadEvent(eventData)
+    if windowEventData[1] == "touch" then
+        if windowEventData[4] == 1 and windowEventData[3] >= 1 and windowEventData[3] <= 2 then
+            local str, num = calls.call("gui_context", screen, 2, 2,
+            {"shutdown", "reboot"})
+            if num == 1 then
+                computer.shutdown()
+            elseif num == 2 then
+                computer.shutdown(true)
+            end
+            draw()
+        end
+    end
+end
 
 while true do
     window:clear(0x000000)
