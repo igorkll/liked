@@ -20,26 +20,31 @@ end
 
 local window = graphic.classWindow:new(screen, posX, posY, sizeX, sizeY)
 window:fill(2, 2, window.sizeX, window.sizeY, colors.gray, 0, " ")
-window:fill(1, 1, window.sizeX, window.sizeY, colors.white, 0, " ")
 
-for i, v in ipairs(strs) do
-    if not active or active[i] then
-        window:set(1, i, colors.white, colors.black, v)
-    else
-        window:set(1, i, colors.white, colors.lightGray, v)
+local function redrawStrs(selected)
+    for i, v in ipairs(strs) do
+        local color = colors.white
+        if selected == i then color = colors.blue end
+        if not active or active[i] then
+            window:set(1, i, color, colors.black, strs[i] .. (string.rep(" ", sizeX - unicode.len(strs[i]))))
+        else
+            window:set(1, i, color, colors.lightGray, strs[i] .. (string.rep(" ", sizeX - unicode.len(strs[i]))))
+        end
     end
 end
+
 
 while true do
     local eventData = {event.pull()}
     local windowEventData = window:uploadEvent(eventData)
-    if windowEventData[1] == "touch" and windowEventData[5] == 0 then
+    if windowEventData[1] == "drop" and windowEventData[5] == 0 then
         local num = windowEventData[4]
         if not active or active[num] then
-            window:set(1, num, colors.blue, colors.white, strs[num] .. (string.rep(" ", sizeX - unicode.len(strs[num]))))
             event.sleep(0.1)
             return strs[num], num
         end
+    elseif (windowEventData[1] == "touch" or windowEventData[1] == "drag") and windowEventData[5] == 0 then
+        redrawStrs(windowEventData[4])
     else
         if eventData[1] == "touch" or
         eventData[1] == "drag" or 

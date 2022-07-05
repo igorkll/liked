@@ -28,14 +28,14 @@ window:set(2, 3, colors.lightGray, colors.yellow, " ███ ")
 window:set(2, 4, colors.lightGray, colors.yellow, "█████")
 window:set(4, 3, colors.yellow, colors.white, "!")
 
-window:set(32 - 4, 7, colors.blue, colors.white, " ok ")
+window:set(32 - 4, 7, colors.lightBlue, colors.white, " ok ")
 
 while true do
     local eventData = {event.pull()}
     local windowEventData = window:uploadEvent(eventData)
     if windowEventData[1] == "touch" and windowEventData[5] == 0 then
         if windowEventData[4] == 7 and windowEventData[3] > (32 - 5) and windowEventData[3] <= ((32 - 5) + 4) then
-            window:set(32 - 4, 7, colors.lightBlue, colors.white, " ok ")
+            window:set(32 - 4, 7, colors.blue, colors.white, " ok ")
             event.sleep(0.1)
             break
         end
