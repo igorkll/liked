@@ -33,11 +33,16 @@ while true do
     if windowEventData[1] == "touch" then
         if windowEventData[4] == 1 and windowEventData[3] >= 2 and windowEventData[3] <= 3 then
             local str, num = calls.call("gui_context", screen, 2, 2,
-            {"  about", "  menu           >", "------------------", "  shutdown", "  reboot"},
-            {true, true, false, true, true})
+            {"  about", "  read", "  menu           >", "------------------", "  shutdown", "  reboot"},
+            {true, true, true, false, true, true})
             if num == 1 then
-                calls.call("gui_warn", screen, 10, 4, "about is not found")
+                calls.call("gui_warn", screen, nil, nil, "about is not found")
             elseif num == 2 then
+                local data = calls.call("gui_input", screen, nil, nil, "enter data")
+                if data then
+                    calls.call("gui_warn", screen, nil, nil, "data: " .. data)
+                end
+            elseif num == 3 then
                 local str, num = calls.call("gui_context", screen, 20, 3,
                 {"beep 2000", "beep 1000"})
                 if str then
@@ -49,9 +54,9 @@ while true do
                         end
                     end
                 end
-            elseif num == 4 then
-                computer.shutdown()
             elseif num == 5 then
+                computer.shutdown()
+            elseif num == 6 then
                 computer.shutdown(true)
             end
             draw()
