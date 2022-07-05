@@ -1,6 +1,7 @@
 local graphic = require("graphic")
 local gui_container = require("gui_container")
 local event = require("event")
+local unicode = require("unicode")
 
 local colors = gui_container.colors
 
@@ -31,11 +32,11 @@ window:set(pos, 1, colors.gray, colors.white, str)
 window:set(32 - 4, 7, colors.lightBlue, colors.white, " ok ")
 window:set(2, 7, colors.red, colors.white, " cancel ")
 
-local reader = window:read(2, 3, window.sizeX - 2, 1, colors.gray)
+local reader = window:read(2, 3, window.sizeX - 2, colors.gray, colors.white)
 
 while true do
     local eventData = {event.pull()}
-    local out = reader.unloadEvent(eventData)
+    local out = reader.uploadEvent(eventData)
     if out then return out end
     local windowEventData = window:uploadEvent(eventData)
     if windowEventData[1] == "touch" and windowEventData[5] == 0 then
@@ -43,7 +44,7 @@ while true do
             window:set(32 - 4, 7, colors.blue, colors.white, " ok ")
             event.sleep(0.1)
             return reader.getBuffer()
-        elseif windowEventData[4] == 7 and windowEventData[3] >= 2 and windowEventData[3] <= (2 + 4) then
+        elseif windowEventData[4] == 7 and windowEventData[3] >= 2 and windowEventData[3] <= (2 + 7) then
             window:set(2, 7, colors.yellow, colors.white, " cancel ")
             event.sleep(0.1)
             return true --true в из input означает что пользователь отменил ввод

@@ -36,10 +36,21 @@ while true do
             {"  about", "  read", "  menu           >", "------------------", "  shutdown", "  reboot"},
             {true, true, true, false, true, true})
             if num == 1 then
-                calls.call("gui_warn", screen, nil, nil, "about is not found")
+                --calls.call("gui_warn", screen, nil, nil, "about is not found")
+                for i = 1, 5 do computer.pullSignal(0.2) end
+                local free = computer.freeMemory()
+
+                calls.call("gui_warn", screen, nil, nil, "memory: " .. tostring(math.floor(computer.totalMemory() / 1024)) .. "kb")
+                draw()
+
+                calls.call("gui_warn", screen, nil, nil, "free memory: " .. tostring(math.floor(free / 1024)) .. "kb")
+                draw()
+
+                calls.call("gui_warn", screen, nil, nil, "used memory: " .. tostring(math.floor((computer.totalMemory() - free) / 1024)) .. "kb")
+                draw()
             elseif num == 2 then
                 local data = calls.call("gui_input", screen, nil, nil, "enter data")
-                if data then
+                if data and data ~= true then
                     calls.call("gui_warn", screen, nil, nil, "data: " .. data)
                 end
             elseif num == 3 then
@@ -64,6 +75,7 @@ while true do
     end
 end
 
+--[[
 while true do
     window:clear(0x000000)
 
@@ -99,3 +111,4 @@ while true do
         end
     end
 end
+]]
