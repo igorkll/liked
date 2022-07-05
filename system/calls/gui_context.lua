@@ -24,9 +24,13 @@ window:fill(2, 2, window.sizeX, window.sizeY, colors.gray, 0, " ")
 local function redrawStrs(selected)
     for i, v in ipairs(strs) do
         local color = colors.white
+        local color2 = colors.black
         if not active or active[i] then
-            if selected == i then color = colors.blue end
-            window:set(1, i, color, colors.black, strs[i] .. (string.rep(" ", sizeX - unicode.len(strs[i]))))
+            if selected == i then
+                color = colors.blue
+                color2 = colors.white
+            end
+            window:set(1, i, color, color2, strs[i] .. (string.rep(" ", sizeX - unicode.len(strs[i]))))
         else
             window:set(1, i, color, colors.lightGray, strs[i] .. (string.rep(" ", sizeX - unicode.len(strs[i]))))
         end
