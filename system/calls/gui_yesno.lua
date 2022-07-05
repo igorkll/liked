@@ -1,21 +1,23 @@
 local graphic = require("graphic")
-local explorer = require("explorer")
+local gui_container = require("gui_container")
 local event = require("event")
 
-local colors = explorer.colors
+local colors = gui_container.colors
 
 ------------------------------------
 
-local screen, str = ...
+local screen, cx, cy, str = ...
 local gpu = graphic.findGpu(screen)
 
-local cx, cy = gpu.getResolution()
-cx = cx / 2
-cy = cy / 2
-cx = cx - 16
-cy = cy - 4
-cx = math.floor(cx)
-cy = math.floor(cy)
+if not cx or not cy then
+    cx, cy = gpu.getResolution()
+    cx = cx / 2
+    cy = cy / 2
+    cx = cx - 16
+    cy = cy - 4
+    cx = math.floor(cx)
+    cy = math.floor(cy)
+end
 
 local window = graphic.classWindow:new(screen, cx, cy, 32, 8)
 

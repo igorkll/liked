@@ -4,9 +4,9 @@ local computer = require("computer")
 local event = require("event")
 local calls = require("calls")
 local unicode = require("unicode")
-local explorer = require("explorer")
+local gui_container = require("gui_container")
 
-local colors = explorer.colors
+local colors = gui_container.colors
 
 ------------------------------------
 
@@ -33,13 +33,25 @@ while true do
     if windowEventData[1] == "touch" then
         if windowEventData[4] == 1 and windowEventData[3] >= 2 and windowEventData[3] <= 3 then
             local str, num = calls.call("gui_context", screen, 2, 2,
-            {"  about", "------------------", "  shutdown", "  reboot"},
-            {true, false, true, true})
+            {"  about", "  menu           >", "------------------", "  shutdown", "  reboot"},
+            {true, true, false, true, true})
             if num == 1 then
-                calls.call("gui_warn", screen, "about is not found")
-            elseif num == 3 then
-                computer.shutdown()
+                calls.call("gui_warn", screen, 10, 4, "about is not found")
+            elseif num == 2 then
+                local str, num = calls.call("gui_context", screen, 20, 3,
+                {"beep 2000", "beep 1000"})
+                if str then
+                    if calls.call("gui_yesno", screen, nil, nil, str .. "?") then
+                        if num == 1 then
+                            computer.beep(2000)
+                        elseif num == 2 then
+                            computer.beep(1000)
+                        end
+                    end
+                end
             elseif num == 4 then
+                computer.shutdown()
+            elseif num == 5 then
                 computer.shutdown(true)
             end
             draw()

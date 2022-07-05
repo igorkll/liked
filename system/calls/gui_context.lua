@@ -1,9 +1,9 @@
 local graphic = require("graphic") --только при отрисовке в оперу лезет
-local explorer = require("explorer")
+local gui_container = require("gui_container")
 local event = require("event")
 local unicode = require("unicode")
 
-local colors = explorer.colors
+local colors = gui_container.colors
 
 ------------------------------------
 
@@ -24,15 +24,15 @@ window:fill(2, 2, window.sizeX, window.sizeY, colors.gray, 0, " ")
 local function redrawStrs(selected)
     for i, v in ipairs(strs) do
         local color = colors.white
-        if selected == i then color = colors.blue end
         if not active or active[i] then
+            if selected == i then color = colors.blue end
             window:set(1, i, color, colors.black, strs[i] .. (string.rep(" ", sizeX - unicode.len(strs[i]))))
         else
             window:set(1, i, color, colors.lightGray, strs[i] .. (string.rep(" ", sizeX - unicode.len(strs[i]))))
         end
     end
 end
-
+redrawStrs()
 
 while true do
     local eventData = {event.pull()}
@@ -40,17 +40,14 @@ while true do
     if windowEventData[1] == "drop" and windowEventData[5] == 0 then
         local num = windowEventData[4]
         if not active or active[num] then
-            event.sleep(0.1)
             return strs[num], num
         end
     elseif (windowEventData[1] == "touch" or windowEventData[1] == "drag") and windowEventData[5] == 0 then
         redrawStrs(windowEventData[4])
-    else
-        if eventData[1] == "touch" or
-        eventData[1] == "drag" or 
-        eventData[1] == "scroll" then
-            event.push(table.unpack(eventData))
-            return nil, nil
-        end
+    elseif eventData[1] == "drag" then
+        redrawStrs()
+    elseif eventData[1] == "touch" or eventData[1] == "scroll" then
+        event.push(table.unpack(eventData))
+        return nil, nil
     end
 end
