@@ -14,24 +14,38 @@ local screen = "20108ef5-444e-46bc-bd6c-48aee518009e"
 calls.call("initScreen", screen)
 local rx, ry = graphic.findGpu(screen).getResolution()
 
-local window = graphic.classWindow:new(screen, 1, 1, rx, ry)
+local statusWindow = graphic.classWindow:new(screen, 1, 1, rx, 1)
+local window = graphic.classWindow:new(screen, 1, 2, rx, ry)
+
+local function drawStatus()
+    local hours, minutes, seconds = calls.call("getRealTime", 3)
+    hours = tostring(hours)
+    minutes = tostring(minutes)
+    if #hours > 1 then hours = "0" .. hours end
+    if #minutes > 1 then minutes = "0" .. minutes end
+    local str = hours .. ":" .. minutes
+
+    statusWindow:fill(1, 1, rx, 1, colors.gray, 0, " ")
+    statusWindow:set(window.sizeX - unicode.len(str), 1, colors.gray, colors.white, str)
+    statusWindow:set(2, 1, colors.gray, colors.white, "OS")
+end
 
 local function draw()
+    drawStatus()
     window:clear(colors.lightBlue)
-    window:fill(1, 1, rx, 1, colors.gray, 0, " ")
-
-    local str = "12:00"
-    window:set(window.sizeX - unicode.len(str), 1, colors.gray, colors.white, str)
-
-    window:set(2, 1, colors.gray, colors.white, "OS")
 end
 draw()
+
+event.timer(10, function()
+    drawStatus()
+end, math.huge)
 
 while true do
     local eventData = {event.pull()}
     local windowEventData = window:uploadEvent(eventData)
-    if windowEventData[1] == "touch" then
-        if windowEventData[4] == 1 and windowEventData[3] >= 2 and windowEventData[3] <= 3 then
+    local statusWindowEventData = window:uploadEvent(eventData)
+    if statusWindowEventData[1] == "touch" then
+        if statusWindowEventData[4] == 1 and statusWindowEventData[3] >= 2 and statusWindowEventData[3] <= 3 then
             local str, num = calls.call("gui_context", screen, 2, 2,
             {"  about", "  read", "  menu           >", "------------------", "  shutdown", "  reboot"},
             {true, true, true, false, true, true})
