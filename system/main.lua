@@ -41,8 +41,6 @@ event.timer(10, function()
     drawStatus()
 end, math.huge)
 
-
-
 while true do
     local eventData = {event.pull()}
     local windowEventData = window:uploadEvent(eventData)
@@ -55,23 +53,27 @@ while true do
             if num == 1 then
                 local id
                 local function checkFunc(...)
-                    local statusWindowEventData = statusWindow:uploadEvent(...)
-                    if statusWindowEventData[4] == 1 and statusWindowEventData[3] >= 2 and statusWindowEventData[3] <= 3 then
-                        event.cancel(id)
-                        local str, num = calls.call("gui_context", screen, 2, 2,
-                        {"  close", "------------------", "  shutdown", "  reboot"},
-                        {true, false, true, true})
-                        id = event.listen("touch", checkFunc)
-                        if num == 1 then
-                            event.push("closePressed")
-                        elseif num == 3 then
-                            computer.shutdown()
-                        elseif num == 4 then
-                            computer.shutdown(true)
+                    local statusWindowEventData = statusWindow:uploadEvent({...})
+                    if statusWindowEventData[1] == "touch" then
+                        if statusWindowEventData[4] == 1 and statusWindowEventData[3] >= 2 and statusWindowEventData[3] <= 3 then
+                            event.cancel(id)
+                            local clear = calls.call("screenshot", screen, 2, 2, 19, 5)
+                            local str, num = calls.call("gui_context", screen, 2, 2,
+                            {"  close", "------------------", "  shutdown", "  reboot"},
+                            {true, false, true, true})
+                            clear()
+                            id = event.listen("touch", checkFunc)
+                            if num == 1 then
+                                event.push("closePressed")
+                            elseif num == 3 then
+                                computer.shutdown()
+                            elseif num == 4 then
+                                computer.shutdown(true)
+                            end
                         end
                     end
                 end
-                id = event.listen("touch", checkFunc)
+                id = event.listen(nil, checkFunc)
                 programs.execute("about")
                 event.cancel(id)
             elseif num == 3 then

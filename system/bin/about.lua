@@ -34,4 +34,7 @@ while true do
     if windowEventData[1] == "touch" and windowEventData[3] == rx and windowEventData[4] == 1 then
         break
     end
+    if eventData[1] == "closePressed" then
+        break
+    end
 end
