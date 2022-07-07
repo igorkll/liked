@@ -49,7 +49,7 @@ while true do
         if statusWindowEventData[4] == 1 and statusWindowEventData[3] >= 2 and statusWindowEventData[3] <= 3 then
             local str, num = calls.call("gui_context", screen, 2, 2,
             {"  about", "------------------", "  shutdown", "  reboot"},
-            {true, true, true, false, true, true})
+            {true, false, true, true})
             if num == 1 then
                 programs.execute("about")
             elseif num == 3 then

@@ -10,16 +10,20 @@ local rx, ry = gpu.getResolution()
 --------------------------------------------
 
 local window = graphic.classWindow:new(screen, 1, 2, rx, ry - 1, true)
-window:clear(colors.lightGray)
+window:clear(colors.white)
 
 local strs = {
     "OS INFO",
+    "-----------------OS",
     "distributive: liked",
-    "core verion: " .. _COREVERSION, "core version id:" .. tostring(_G._COREVERSIONID)
+    "-----------------CORE",
+    "OS core: likeOS",
+    "core verion: " .. _COREVERSION,
+    "core version id:" .. tostring(_G._COREVERSIONID)
 }
 
 for i, v in ipairs(strs) do
-    window:write(v, colors.lightGray, colors.gray)
+    window:write(v .. "\n", colors.white, colors.black)
 end
 
 window:set(rx, 1, colors.red, colors.white, "X")
