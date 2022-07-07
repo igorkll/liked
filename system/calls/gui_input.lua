@@ -7,7 +7,7 @@ local colors = gui_container.colors
 
 ------------------------------------
 
-local screen, cx, cy, str = ...
+local screen, cx, cy, str, crypto = ...
 local gpu = graphic.findGpu(screen)
 
 if not cx or not cy then
@@ -32,7 +32,7 @@ window:set(pos, 1, colors.gray, colors.white, str)
 window:set(32 - 4, 7, colors.lightBlue, colors.white, " ok ")
 window:set(2, 7, colors.red, colors.white, " cancel ")
 
-local reader = window:read(2, 3, window.sizeX - 2, colors.gray, colors.white)
+local reader = window:read(2, 3, window.sizeX - 2, colors.gray, colors.white, nil, crypto)
 
 while true do
     local eventData = {event.pull()}

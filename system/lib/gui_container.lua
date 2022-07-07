@@ -1,6 +1,8 @@
-local explorer = {}
+local gui_container = {}
 
-explorer.colors = { --computercraft colors
+gui_container.screen = "20108ef5-444e-46bc-bd6c-48aee518009e"
+
+gui_container.colors = { --computercraft colors
     white     = 0xF0F0F0,
     orange    = 0xF2B233,
     magenta   = 0xE57FD8,
@@ -19,4 +21,4 @@ explorer.colors = { --computercraft colors
     black     = 0x191919
 }
 
-return explorer
+return gui_container
