@@ -18,6 +18,7 @@ local rx, ry = graphic.findGpu(screen).getResolution()
 local statusWindow = graphic.classWindow:new(screen, 1, 1, rx, 1)
 local window = graphic.classWindow:new(screen, 1, 2, rx, ry)
 
+local statusMode2 = false
 local function drawStatus()
     local hours, minutes, seconds = calls.call("getRealTime", 3)
     hours = tostring(hours)
@@ -28,7 +29,11 @@ local function drawStatus()
 
     statusWindow:fill(1, 1, rx, 1, colors.gray, 0, " ")
     statusWindow:set(window.sizeX - unicode.len(str), 1, colors.gray, colors.white, str)
-    statusWindow:set(2, 1, colors.gray, colors.white, "OS")
+    if statusMode2 then
+        statusWindow:set(1, 1, colors.lightGray, colors.white, " PROGRAMM ")
+    else
+        statusWindow:set(1, 1, colors.lightGray, colors.white, " OS ")
+    end
 end
 
 local function draw()
@@ -42,41 +47,28 @@ event.timer(10, function()
     drawStatus()
 end, math.huge)
 
+local function execute(name)
+    statusMode2 = true
+    drawStatus()
+    local ok, err = programs.execute(name)
+    statusMode2 = false
+    drawStatus()
+    if not ok then
+        calls.call("gui_warn", screen, nil, nil, err or "unknown error")
+    end
+end
+
 while true do
     local eventData = {event.pull()}
     local windowEventData = window:uploadEvent(eventData)
     local statusWindowEventData = statusWindow:uploadEvent(eventData)
     if statusWindowEventData[1] == "touch" then
-        if statusWindowEventData[4] == 1 and statusWindowEventData[3] >= 2 and statusWindowEventData[3] <= 3 then
+        if statusWindowEventData[4] == 1 and statusWindowEventData[3] >= 1 and statusWindowEventData[3] <= (statusMode2 and 4 or 10) then
             local str, num = calls.call("gui_context", screen, 2, 2,
             {"  about", "------------------", "  shutdown", "  reboot"},
             {true, false, true, true})
             if num == 1 then
-                local id
-                local function checkFunc(...)
-                    local statusWindowEventData = statusWindow:uploadEvent({...})
-                    if statusWindowEventData[1] == "touch" then
-                        if statusWindowEventData[4] == 1 and statusWindowEventData[3] >= 2 and statusWindowEventData[3] <= 3 then
-                            event.cancel(id)
-                            local clear = calls.call("screenshot", screen, 2, 2, 19, 5)
-                            local str, num = calls.call("gui_context", screen, 2, 2,
-                            {"  close", "------------------", "  shutdown", "  reboot"},
-                            {true, false, true, true})
-                            clear()
-                            id = event.listen("touch", checkFunc)
-                            if num == 1 then
-                                event.push("closePressed")
-                            elseif num == 3 then
-                                computer.shutdown()
-                            elseif num == 4 then
-                                computer.shutdown(true)
-                            end
-                        end
-                    end
-                end
-                id = event.listen(nil, checkFunc)
-                programs.execute("about")
-                event.cancel(id)
+                execute("about")
             elseif num == 3 then
                 computer.shutdown()
             elseif num == 4 then

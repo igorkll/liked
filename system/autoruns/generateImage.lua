@@ -1,3 +1,5 @@
+do return end
+
 local fs = require("filesystem")
 
 local file = fs.open("/image.t2p", "wb")
