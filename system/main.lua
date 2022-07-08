@@ -12,7 +12,7 @@ local colors = gui_container.colors
 ------------------------------------
 
 local screen = gui_container.screen
-calls.call("initScreen", screen)
+calls.call("gui_initScreen", screen)
 local rx, ry = graphic.findGpu(screen).getResolution()
 
 local statusWindow = graphic.classWindow:new(screen, 1, 1, rx, 1)

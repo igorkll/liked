@@ -16,10 +16,11 @@ local strs = {
     "OS INFO",
     "-----------------OS",
     "distributive: liked",
+    "distributive version: v0.1",
     "-----------------CORE",
     "OS core: likeOS",
     "core verion: " .. _COREVERSION,
-    "core version id:" .. tostring(_G._COREVERSIONID)
+    "core version id: " .. tostring(_COREVERSIONID)
 }
 
 for i, v in ipairs(strs) do

@@ -21,4 +21,23 @@ gui_container.colors = { --computercraft colors
     black     = 0x191919
 }
 
+gui_container.indexsColors = { --computercraft colors
+    0xF0F0F0,
+    0xF2B233,
+    0xE57FD8,
+    0x99B2F2,
+    0xDEDE6C,
+    0x7FCC19,
+    0xF2B2CC,
+    0x4C4C4C,
+    0x999999,
+    0x4C99B2,
+    0xB266E5,
+    0x3366CC,
+    0x7F664C,
+    0x57A64E,
+    0xCC4C4C,
+    0x191919
+}
+
 return gui_container
