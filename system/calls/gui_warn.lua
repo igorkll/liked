@@ -1,6 +1,7 @@
 local graphic = require("graphic") --только при отрисовке в оперу лезет
 local gui_container = require("gui_container")
 local event = require("event")
+local calls = require("calls")
 
 local colors = gui_container.colors
 
@@ -23,7 +24,19 @@ local window = graphic.classWindow:new(screen, cx, cy, 32, 8)
 
 window:fill(2, 2, window.sizeX, window.sizeY, colors.gray, 0, " ")
 window:clear(colors.lightGray)
-window:set(10, 2, colors.lightGray, colors.white, str)
+
+local strs = calls.call("split", str, "\n")
+local newstrs = {}
+for i, v in ipairs(strs) do
+    local lnewstrs = calls.call("toParts", v, 23)
+    for i, v in ipairs(lnewstrs) do
+        table.insert(newstrs, v)
+    end
+end
+
+for i, v in ipairs(newstrs) do
+    window:set(10, i + 1, colors.lightGray, colors.white, v)
+end
 
 window:set(2, 2, colors.lightGray, colors.yellow, "  █  ")
 window:set(2, 3, colors.lightGray, colors.yellow, " ███ ")
