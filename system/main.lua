@@ -6,6 +6,7 @@ local calls = require("calls")
 local unicode = require("unicode")
 local programs = require("programs")
 local gui_container = require("gui_container")
+local fs = require("filesystem")
 
 local colors = gui_container.colors
 
@@ -17,6 +18,8 @@ local rx, ry = graphic.findGpu(screen).getResolution()
 
 local statusWindow = graphic.classWindow:new(screen, 1, 1, rx, 1)
 local window = graphic.classWindow:new(screen, 1, 2, rx, ry)
+
+local wallpaperPath = "/system/data/wallpaper.t2p"
 
 ------------------------------------
 
@@ -35,7 +38,12 @@ end
 local function draw()
     drawStatus()
     window:clear(colors.lightBlue)
-    calls.call("gui_drawimage", screen, "/image.t2p", window:toRealPos(16, 8))
+
+    if fs.exists(wallpaperPath) then
+        local sx, sy = calls.call("gui_readimagesize", wallpaperPath)
+        local ix, iy = ((window.sizeX / 2) - (sx / 2)) + 1, ((window.sizeY / 2) - (sy / 2)) + 1
+        calls.call("gui_drawimage", screen, wallpaperPath, ix, iy)
+    end
 end
 draw()
 
