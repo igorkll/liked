@@ -34,6 +34,7 @@ end
 local function draw()
     drawStatus()
     window:clear(colors.lightBlue)
+    calls.call("gui_drawimage", screen, "/image.t2p", window:toRealPos(16, 8))
 end
 draw()
 

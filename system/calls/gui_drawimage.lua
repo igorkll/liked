@@ -14,21 +14,35 @@ local colors = gui_container.indexsColors
 ------------------------------------
 
 local file = fs.open(path, "rb")
-local sx = string.char(file.read(1))
-local sy = string.char(file.read(1))
-file.seek("cur", 8)
+local buffer = file.readAll()
+file.close()
+local function read(bytecount)
+    local str = buffer:sub(1, bytecount)
+    buffer = buffer:sub(bytecount + 1, #buffer)
+    return str
+end
 
+------------------------------------
+
+local sx = string.byte(read(1))
+local sy = string.byte(read(1))
+read(8)
+
+local oldbackground = gpu.getBackground()
+local oldforeground = gpu.getBackground()
+
+local colorByte, countCharBytes, background, foreground, char
 for cy = 1, sy do
     for cx = 1, sx do
-        local colorByte      = string.byte(file.read(1))
-        local countCharBytes = string.byte(file.read(1))
+        colorByte      = string.byte(read(1))
+        countCharBytes = string.byte(read(1))
 
-        local background = 
+        background = 
         ((readbit(colorByte, 1) and 1 or 0) * 1) + 
         ((readbit(colorByte, 2) and 1 or 0) * 2) + 
         ((readbit(colorByte, 3) and 1 or 0) * 4) + 
         ((readbit(colorByte, 4) and 1 or 0) * 8)
-        local foreground = 
+        foreground = 
         ((readbit(colorByte, 5) and 1 or 0) * 1) + 
         ((readbit(colorByte, 6) and 1 or 0) * 2) + 
         ((readbit(colorByte, 7) and 1 or 0) * 4) + 
@@ -36,9 +50,15 @@ for cy = 1, sy do
         background = colors[background]
         foreground = colors[foreground]
 
-        local char = file.read(countCharBytes)
-        gpu.setBackground(background)
-        gpu.setForeground(foreground)
-        gpu.set(cx, cy, char)
+        char = read(countCharBytes)
+        if background ~= oldbackground then
+            gpu.setBackground(background)
+            oldbackground = background
+        end
+        if foreground ~= oldforeground then
+            gpu.setForeground(foreground)
+            oldforeground = foreground
+        end
+        gpu.set(cx + (x - 1), cy + (y - 1), char)
     end
 end
