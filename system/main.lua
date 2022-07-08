@@ -18,7 +18,8 @@ local rx, ry = graphic.findGpu(screen).getResolution()
 local statusWindow = graphic.classWindow:new(screen, 1, 1, rx, 1)
 local window = graphic.classWindow:new(screen, 1, 2, rx, ry)
 
-local statusMode2 = false
+------------------------------------
+
 local function drawStatus()
     local hours, minutes, seconds = calls.call("getRealTime", 3)
     hours = tostring(hours)
@@ -29,13 +30,8 @@ local function drawStatus()
 
     statusWindow:fill(1, 1, rx, 1, colors.gray, 0, " ")
     statusWindow:set(window.sizeX - unicode.len(str), 1, colors.gray, colors.white, str)
-    if statusMode2 then
-        statusWindow:set(1, 1, colors.lightGray, colors.white, " PROGRAMM ")
-    else
-        statusWindow:set(1, 1, colors.lightGray, colors.white, " OS ")
-    end
+    statusWindow:set(1, 1, colors.lightGray, colors.white, " OS ")
 end
-
 local function draw()
     drawStatus()
     window:clear(colors.lightBlue)
@@ -43,16 +39,25 @@ local function draw()
 end
 draw()
 
-event.timer(10, function()
-    drawStatus()
-end, math.huge)
+------------------------------------
+
+local statusTimer
+local function startStatusTimer()
+    statusTimer = event.timer(10, function()
+        drawStatus()
+    end, math.huge)
+end
+local function stopStatusTimer()
+    event.cancel(statusTimer)
+end
+startStatusTimer()
+
+------------------------------------
 
 local function execute(name)
-    statusMode2 = true
-    drawStatus()
+    stopStatusTimer()
     local ok, err = programs.execute(name)
-    statusMode2 = false
-    drawStatus()
+    startStatusTimer()
     if not ok then
         calls.call("gui_warn", screen, nil, nil, err or "unknown error")
     end
@@ -63,7 +68,7 @@ while true do
     local windowEventData = window:uploadEvent(eventData)
     local statusWindowEventData = statusWindow:uploadEvent(eventData)
     if statusWindowEventData[1] == "touch" then
-        if statusWindowEventData[4] == 1 and statusWindowEventData[3] >= 1 and statusWindowEventData[3] <= (statusMode2 and 4 or 10) then
+        if statusWindowEventData[4] == 1 and statusWindowEventData[3] >= 1 and statusWindowEventData[3] <= 4 then
             local str, num = calls.call("gui_context", screen, 2, 2,
             {"  about", "------------------", "  shutdown", "  reboot"},
             {true, false, true, true})

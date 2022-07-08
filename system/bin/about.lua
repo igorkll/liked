@@ -2,6 +2,7 @@ local graphic = require("graphic")
 local event = require("event")
 local gui_container = require("gui_container")
 local computer = require("computer")
+local calls = require("calls")
 
 local colors = gui_container.colors
 local screen = gui_container.screen
@@ -10,7 +11,7 @@ local rx, ry = gpu.getResolution()
 
 --------------------------------------------
 
-local window = graphic.classWindow:new(screen, 1, 2, rx, ry - 1, true)
+local window = graphic.classWindow:new(screen, 1, 1, rx, ry, true)
 
 local function update()
     for i = 1, 5 do
@@ -45,44 +46,39 @@ update()
 
 --------------------------------------------
 
-local timers = {}
+
+
+local listens = {}
+
 local function offTimers()
-    for i, v in ipairs(timers) do
+    for i, v in ipairs(listens) do
         event.cancel(v)
     end
-    timers = {}
+    listens = {}
 end
+
+local closeFlag = false
+local function exit()
+    closeFlag = true
+    offTimers()
+end
+
 local function onTimers()
-    table.insert(timers, event.timer(2, function()
+    table.insert(listens, event.timer(2, function()
         update()
     end, math.huge))
+    table.insert(listens, event.listen(nil, function(...)
+        local windowEventData = window:uploadEvent(...)
+        if windowEventData[1] == "touch" and windowEventData[3] == rx and windowEventData[4] == 1 then
+            exit()
+            break
+        end
+    end))
 end
 onTimers()
 
-local watchdog = event.listen("redraw", function(_, state)
-    if state then
-        onTimers()
-    else
-        offTimers()
-    end
-end)
-
-local function exit()
-    offTimers()
-    event.cancel(watchdog)
-end
-
 --------------------------------------------
 
-while true do
-    local eventData = {event.pull(0.5)}
-    local windowEventData = window:uploadEvent(eventData)
-    if windowEventData[1] == "touch" and windowEventData[3] == rx and windowEventData[4] == 1 then
-        exit()
-        break
-    end
-    if eventData[1] == "closePressed" then
-        exit()
-        break
-    end
+while closeFlag do
+    event.sleep(1)
 end
