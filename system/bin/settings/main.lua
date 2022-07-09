@@ -20,7 +20,7 @@ local modulesPath = paths.concat(path, "modules")
 ------------------------------------
 
 local selectWindow = graphic.classWindow:new(screen, 1, 1, rx // 4, ry)
-local modulWindow = graphic.classWindow:new(screen, rx // 4, 1, (rx - (rx // 4)) + 1, ry)
+local modulWindow = graphic.classWindow:new(screen, (rx // 4) + 1, 1, (rx - (rx // 4)), ry)
 
 local scroll = 1
 local function draw()
