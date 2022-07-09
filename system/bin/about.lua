@@ -5,7 +5,7 @@ local computer = require("computer")
 local calls = require("calls")
 
 local colors = gui_container.colors
-local screen = gui_container.screen
+local screen = ...
 local gpu = graphic.findGpu(screen)
 local rx, ry = gpu.getResolution()
 
