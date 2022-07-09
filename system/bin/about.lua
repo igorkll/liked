@@ -60,18 +60,14 @@ local listens = {}
 
 local function check()
     if t:status() == "dead" then
-        computer.beep(150, 1)
         exit()
         return true
     end
 end
 
 table.insert(listens, event.timer(2, function()
-    computer.beep(2000, 0.01)
     if check() then return false end
-    computer.beep(1500, 0.01)
     update()
-    computer.beep(1000, 0.01)
 end, math.huge))
 table.insert(listens, event.listen(nil, function(...)
     if check() then return false end
@@ -89,7 +85,6 @@ function offTimers()
 end
 
 function exit()
-    computer.beep(1000, 0.5)
     closeFlag = false
     offTimers()
 end
