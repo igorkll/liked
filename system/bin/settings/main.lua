@@ -27,7 +27,7 @@ local selected = 1
 local limit = 0
 local modules = {}
 for i, file in ipairs(fs.list(modulesPath) or {}) do
-    limit = 1
+    limit = limit + 1
     table.insert(modules, file)
 end
 
@@ -36,7 +36,6 @@ local function draw()
     modulWindow:clear(colors.gray)
     statusWindow:clear(colors.black)
 
-    limit = 0
     selectWindow:setCursor(1, 1)
     for i, file in ipairs(modules) do
         local background = colors.lightGray
@@ -46,9 +45,9 @@ local function draw()
         selectWindow:write("║", background, foreground)
         selectWindow:write(file, background, foreground)
         selectWindow:write("║" .. "\n", background, foreground)
-        selectWindow:write("╚" .. string.rep("═", unicode.len(file)) .. "╝\n", background, foreground)
+        selectWindow:write("╚" .. string.rep("═", unicode.len(file)) .. "╝", background, foreground)
 
-        limit = limit + 1
+        if i ~= limit then selectWindow:write("\n") end
     end
 end
 draw()
@@ -64,6 +63,27 @@ while true do
             selected = selected - 1
             if selected < 1 then selected = 1 end
         else
+            selected = selected + 1
+            if selected > limit then selected = limit end
+        end
+        if selected ~= oldselected then
+            draw()
+        end
+    elseif selectWindowEventData[1] == "touch" then
+        local posY = ((selectWindowEventData[4] - 1) // 3) + 1
+
+        if posY >= 1 and posY <= limit then
+            if posY ~= selected then
+                selected = posY
+                draw()
+            end
+        end
+    elseif selectWindowEventData[1] == "key_down" then
+        local oldselected = selected
+        if selectWindowEventData[4] == 200 then
+            selected = selected - 1
+            if selected < 1 then selected = 1 end
+        elseif selectWindowEventData[4] == 208 then
             selected = selected + 1
             if selected > limit then selected = limit end
         end
