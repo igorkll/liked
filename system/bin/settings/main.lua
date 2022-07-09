@@ -20,7 +20,7 @@ local modulesPath = paths.concat(path, "modules")
 ------------------------------------
 
 local selectWindow = graphic.classWindow:new(screen, 1, 1, rx // 4, ry)
-local modulWindow = graphic.classWindow:new(screen, rx // 4, 1, rx - (rx // 4), ry)
+local modulWindow = graphic.classWindow:new(screen, rx // 4, 1, (rx - (rx // 4)) + 1, ry)
 
 local scroll = 1
 local function draw()
@@ -28,12 +28,14 @@ local function draw()
     modulWindow:clear(colors.gray)
 
     selectWindow:setCursor(1, scroll)
+    selectWindow:write(modulesPath .. "\n")
     for _, file in ipairs(fs.list(modulesPath) or {}) do
-        selectWindow:write("╔" .. string.char("═", unicode.len(file)) .. "╗" .. "\n")
-        selectWindow:write("║" .. file .. "║")
-        selectWindow:write("╚" .. string.char("═", unicode.len(file)) .. "╝" .. "\n")
+        selectWindow:write("╔" .. string.rep("═", unicode.len(file)) .. "╗\n")
+        selectWindow:write("║" .. file .. "║\n")
+        selectWindow:write("╚" .. string.rep("═", unicode.len(file)) .. "╝\n")
     end
 end
+draw()
 
 while true do
     local eventData = {event.pull()}
