@@ -19,26 +19,33 @@ local modulesPath = paths.concat(path, "modules")
 
 ------------------------------------
 
-local statusWindow = graphic.classWindow:new(screen, 1, 2, rx // 4, ry - 1)
+local statusWindow = graphic.classWindow:new(screen, 1, 1, rx // 4, 1)
 local selectWindow = graphic.classWindow:new(screen, 1, 2, rx // 4, ry - 1)
 local modulWindow = graphic.classWindow:new(screen, (rx // 4) + 1, 1, (rx - (rx // 4)), ry)
 
 local selected = 1
-local limit
+local limit = 0
+local modules = {}
+for i, file in ipairs(fs.list(modulesPath) or {}) do
+    limit = 1
+    table.insert(modules, file)
+end
+
 local function draw()
-    selectWindow:clear(colors.white)
+    selectWindow:clear(colors.lightGray)
     modulWindow:clear(colors.gray)
+    statusWindow:clear(colors.black)
 
     limit = 0
-    selectWindow:write(modulesPath .. "\n")
-    for i, file in ipairs(fs.list(modulesPath) or {}) do
-        local background = selected == i and 0xFFFFFF or 0
-        local foreground = selected == i and 0 or 0xFFFFFF
+    selectWindow:setCursor(1, 1)
+    for i, file in ipairs(modules) do
+        local background = colors.lightGray
+        local foreground = selected == i and colors.white or colors.black
 
         selectWindow:write("╔" .. string.rep("═", unicode.len(file)) .. "╗\n", background, foreground)
         selectWindow:write("║", background, foreground)
-        selectWindow:write(file)
-        selectWindow:write("║", background, foreground)
+        selectWindow:write(file, background, foreground)
+        selectWindow:write("║" .. "\n", background, foreground)
         selectWindow:write("╚" .. string.rep("═", unicode.len(file)) .. "╝\n", background, foreground)
 
         limit = limit + 1
@@ -52,6 +59,7 @@ while true do
     local modulWindowEventData = selectWindow:uploadEvent(eventData)
 
     if selectWindowEventData[1] == "scroll" then
+        local oldselected = selected
         if selectWindowEventData[5] > 0 then
             selected = selected - 1
             if selected < 1 then selected = 1 end
@@ -59,6 +67,8 @@ while true do
             selected = selected + 1
             if selected > limit then selected = limit end
         end
-        draw()
+        if selected ~= oldselected then
+            draw()
+        end
     end
 end

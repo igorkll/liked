@@ -65,8 +65,8 @@ local function execute(name)
     local ok, err = programs.execute(name, screen)
     startStatusTimer()
     if not ok then
-        calls.call("gui_warn", screen, nil, nil, err or "unknown error")
         draw()
+        calls.call("gui_warn", screen, nil, nil, err or "unknown error")
     end
 end
 
