@@ -41,25 +41,27 @@ redrawStrs()
 local selectedNum
 while true do
     local eventData = {event.pull()}
-    local windowEventData = window:uploadEvent(eventData)
-    if windowEventData[1] == "drop" and windowEventData[5] == 0 then
-        local num = windowEventData[4]
-        if not active or active[num] then
-            return strs[num], num
-        end
-    elseif (windowEventData[1] == "touch" or windowEventData[1] == "drag") and windowEventData[5] == 0 then
-        if windowEventData[1] == "touch" and selectedNum and selectedNum == windowEventData[4] then
-            if not active or active[selectedNum] then
-                return strs[selectedNum], selectedNum
+    if eventData[2] == screen then
+        local windowEventData = window:uploadEvent(eventData)
+        if windowEventData[1] == "drop" and windowEventData[5] == 0 then
+            local num = windowEventData[4]
+            if not active or active[num] then
+                return strs[num], num
             end
+        elseif (windowEventData[1] == "touch" or windowEventData[1] == "drag") and windowEventData[5] == 0 then
+            if windowEventData[1] == "touch" and selectedNum and selectedNum == windowEventData[4] then
+                if not active or active[selectedNum] then
+                    return strs[selectedNum], selectedNum
+                end
+            end
+            redrawStrs(windowEventData[4])
+            selectedNum = windowEventData[4]
+        elseif eventData[1] == "drag" then
+            selectedNum = nil
+            redrawStrs()
+        elseif eventData[1] == "touch" or eventData[1] == "scroll" then
+            event.push(table.unpack(eventData))
+            return nil, nil
         end
-        redrawStrs(windowEventData[4])
-        selectedNum = windowEventData[4]
-    elseif eventData[1] == "drag" then
-        selectedNum = nil
-        redrawStrs()
-    elseif eventData[1] == "touch" or eventData[1] == "scroll" then
-        event.push(table.unpack(eventData))
-        return nil, nil
     end
 end
