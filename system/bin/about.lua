@@ -19,7 +19,7 @@ local function update()
     local totalMemory = computer.totalMemory()
     local beforeGarbageCollector = computer.freeMemory()
     for i = 1, 5 do
-        --event.sleep(0.1)
+        event.sleep(0.1)
     end
     local afterGarbageCollector = computer.freeMemory()
 
@@ -60,6 +60,7 @@ local listens = {}
 
 local function check()
     if t:status() == "dead" then
+        computer.beep(200)
         exit()
         return true
     end
@@ -92,5 +93,5 @@ end
 --------------------------------------------
 
 while closeFlag do
-    event.sleep(1)
+    event.sleep(0.1)
 end

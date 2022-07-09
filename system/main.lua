@@ -8,16 +8,17 @@ local event = require("event")
 
 ------------------------------------
 
+local desktop = programs.load("desktop")
+
 for address in component.list("screen") do
     local gpu = graphic.findGpu(address)
-    if gpu.getDepth() ~= 1 then
+    if gpu.maxDepth() ~= 1 then
         calls.call("gui_initScreen", address)
-        local desktop = programs.load("desktop")
         local t = thread.create(desktop, address)
         t:resume()
     end
 end
 
-while true do
-    event.sleep(2)
+while #thread.threads do
+    event.sleep(0.1)
 end
