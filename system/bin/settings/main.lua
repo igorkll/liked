@@ -19,20 +19,29 @@ local modulesPath = paths.concat(path, "modules")
 
 ------------------------------------
 
-local selectWindow = graphic.classWindow:new(screen, 1, 1, rx // 4, ry)
+local statusWindow = graphic.classWindow:new(screen, 1, 2, rx // 4, ry - 1)
+local selectWindow = graphic.classWindow:new(screen, 1, 2, rx // 4, ry - 1)
 local modulWindow = graphic.classWindow:new(screen, (rx // 4) + 1, 1, (rx - (rx // 4)), ry)
 
-local scroll = 1
+local selected = 1
+local limit
 local function draw()
     selectWindow:clear(colors.white)
     modulWindow:clear(colors.gray)
 
-    selectWindow:setCursor(1, scroll)
+    limit = 0
     selectWindow:write(modulesPath .. "\n")
-    for _, file in ipairs(fs.list(modulesPath) or {}) do
-        selectWindow:write("╔" .. string.rep("═", unicode.len(file)) .. "╗\n")
-        selectWindow:write("║" .. file .. "║\n")
-        selectWindow:write("╚" .. string.rep("═", unicode.len(file)) .. "╝\n")
+    for i, file in ipairs(fs.list(modulesPath) or {}) do
+        local background = selected == i and 0xFFFFFF or 0
+        local foreground = selected == i and 0 or 0xFFFFFF
+
+        selectWindow:write("╔" .. string.rep("═", unicode.len(file)) .. "╗\n", background, foreground)
+        selectWindow:write("║", background, foreground)
+        selectWindow:write(file)
+        selectWindow:write("║", background, foreground)
+        selectWindow:write("╚" .. string.rep("═", unicode.len(file)) .. "╝\n", background, foreground)
+
+        limit = limit + 1
     end
 end
 draw()
@@ -43,7 +52,13 @@ while true do
     local modulWindowEventData = selectWindow:uploadEvent(eventData)
 
     if selectWindowEventData[1] == "scroll" then
-        scroll = scroll + selectWindowEventData[5]
+        if selectWindowEventData[5] > 0 then
+            selected = selected - 1
+            if selected < 1 then selected = 1 end
+        else
+            selected = selected + 1
+            if selected > limit then selected = limit end
+        end
         draw()
     end
 end
