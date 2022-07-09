@@ -64,9 +64,9 @@ local function execute(name)
     stopStatusTimer()
     local ok, err = programs.execute(name, screen)
     startStatusTimer()
-    draw()
     if not ok then
         calls.call("gui_warn", screen, nil, nil, err or "unknown error")
+        draw()
     end
 end
 
