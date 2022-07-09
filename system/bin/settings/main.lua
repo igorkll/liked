@@ -35,6 +35,7 @@ local function draw()
     selectWindow:clear(colors.lightGray)
     modulWindow:clear(colors.gray)
     statusWindow:clear(colors.black)
+    statusWindow:set(1, 1, colors.red, colors.white, "X")
 
     selectWindow:setCursor(1, 1)
     for i, file in ipairs(modules) do
@@ -58,6 +59,7 @@ while true do
     local eventData = {event.pull()}
     local selectWindowEventData = selectWindow:uploadEvent(eventData)
     local modulWindowEventData = selectWindow:uploadEvent(eventData)
+    local statusWindowEventData = statusWindow:uploadEvent(eventData)
 
     if selectWindowEventData[1] == "scroll" then
         local oldselected = selected
@@ -91,6 +93,12 @@ while true do
         end
         if selected ~= oldselected then
             draw()
+        end
+    end
+
+    if statusWindowEventData[1] == "touch" then
+        if statusWindowEventData[4] == 1 and statusWindowEventData[3] == 1 then
+            break
         end
     end
 end
