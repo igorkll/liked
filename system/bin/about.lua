@@ -3,11 +3,13 @@ local event = require("event")
 local gui_container = require("gui_container")
 local computer = require("computer")
 local calls = require("calls")
+local thread = require("thread")
 
 local colors = gui_container.colors
 local screen = ...
 local gpu = graphic.findGpu(screen)
 local rx, ry = gpu.getResolution()
+local t = thread.current()
 
 --------------------------------------------
 
@@ -17,7 +19,7 @@ local function update()
     local totalMemory = computer.totalMemory()
     local beforeGarbageCollector = computer.freeMemory()
     for i = 1, 5 do
-        event.sleep(0.1)
+        --event.sleep(0.1)
     end
     local afterGarbageCollector = computer.freeMemory()
 
@@ -53,33 +55,44 @@ update()
 
 --------------------------------------------
 
+local closeFlag = true
 local listens = {}
 
-local function offTimers()
+local function check()
+    if t:status() == "dead" then
+        computer.beep(150, 1)
+        exit()
+        return true
+    end
+end
+
+table.insert(listens, event.timer(2, function()
+    computer.beep(2000, 0.01)
+    if check() then return false end
+    computer.beep(1500, 0.01)
+    update()
+    computer.beep(1000, 0.01)
+end, math.huge))
+table.insert(listens, event.listen(nil, function(...)
+    if check() then return false end
+    local windowEventData = window:uploadEvent({...})
+    if windowEventData[1] == "touch" and windowEventData[3] == window.sizeX and windowEventData[4] == 1 then
+        exit()
+    end
+end))
+
+function offTimers()
     for i, v in ipairs(listens) do
         event.cancel(v)
     end
     listens = {}
 end
 
-local closeFlag = true
-local function exit()
+function exit()
+    computer.beep(1000, 0.5)
     closeFlag = false
     offTimers()
 end
-
-local function onTimers()
-    table.insert(listens, event.timer(2, function()
-        update()
-    end, math.huge))
-    table.insert(listens, event.listen(nil, function(...)
-        local windowEventData = window:uploadEvent({...})
-        if windowEventData[1] == "touch" and windowEventData[3] == window.sizeX and windowEventData[4] == 1 then
-            exit()
-        end
-    end))
-end
-onTimers()
 
 --------------------------------------------
 
