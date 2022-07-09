@@ -38,14 +38,16 @@ local function draw()
 
     selectWindow:setCursor(1, 1)
     for i, file in ipairs(modules) do
+        local str = file .. string.rep(" ", (selectWindow.sizeX - 2) - unicode.len(file))
+
         local background = colors.lightGray
         local foreground = selected == i and colors.white or colors.black
 
-        selectWindow:write("╔" .. string.rep("═", unicode.len(file)) .. "╗\n", background, foreground)
+        selectWindow:write("╔" .. string.rep("═", unicode.len(str)) .. "╗\n", background, foreground)
         selectWindow:write("║", background, foreground)
-        selectWindow:write(file, background, foreground)
+        selectWindow:write(str, background, foreground)
         selectWindow:write("║" .. "\n", background, foreground)
-        selectWindow:write("╚" .. string.rep("═", unicode.len(file)) .. "╝", background, foreground)
+        selectWindow:write("╚" .. string.rep("═", unicode.len(str)) .. "╝", background, foreground)
 
         if i ~= limit then selectWindow:write("\n") end
     end
