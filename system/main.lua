@@ -8,7 +8,7 @@ local event = require("event")
 
 ------------------------------------
 
-local desktop = programs.load("desktop")
+local desktop = assert(programs.load("desktop"))
 
 for address in component.list("screen") do
     local gpu = graphic.findGpu(address)

@@ -77,13 +77,15 @@ while true do
     if statusWindowEventData[1] == "touch" then
         if statusWindowEventData[4] == 1 and statusWindowEventData[3] >= 1 and statusWindowEventData[3] <= 4 then
             local str, num = calls.call("gui_context", screen, 2, 2,
-            {"  about", "------------------", "  shutdown", "  reboot"},
-            {true, false, true, true})
+            {"  about", "  settings", "------------------", "  shutdown", "  reboot"},
+            {true, true, false, true, true})
             if num == 1 then
                 execute("about")
-            elseif num == 3 then
-                computer.shutdown()
+            elseif num == 2 then
+                execute("settings")
             elseif num == 4 then
+                computer.shutdown()
+            elseif num == 5 then
                 computer.shutdown(true)
             end
             draw()

@@ -17,11 +17,7 @@ local window = graphic.classWindow:new(screen, 1, 1, rx, ry, true)
 
 local function update()
     local totalMemory = computer.totalMemory()
-    local beforeGarbageCollector = computer.freeMemory()
-    for i = 1, 5 do
-        --event.sleep(0.1)
-    end
-    local afterGarbageCollector = computer.freeMemory()
+    local freeMemory = computer.freeMemory()
 
     window:clear(colors.white)
 
@@ -36,12 +32,8 @@ local function update()
         "core version id: " .. tostring(_COREVERSIONID),
         "------------------------------------------HARDWARE",
         "total memory: " .. math.floor(totalMemory / 1024),
-        "----before collecting garbage",
-        "free  memory: " .. math.floor(beforeGarbageCollector / 1024),
-        "used  memory: " .. math.floor((totalMemory - beforeGarbageCollector) / 1024),
-        "----after collecting garbage",
-        "free  memory: " .. math.floor(afterGarbageCollector / 1024),
-        "used  memory: " .. math.floor((totalMemory - afterGarbageCollector) / 1024)
+        "free  memory: " .. math.floor(freeMemory / 1024),
+        "used  memory: " .. math.floor((totalMemory - freeMemory) / 1024)
     }
     
     window:setCursor(1, 1)
@@ -58,21 +50,10 @@ update()
 local closeFlag = true
 local listens = {}
 
-local function check()
-    do return end
-    if t:status() == "dead" then
-        computer.beep(200)
-        exit()
-        return true
-    end
-end
-
 table.insert(listens, event.timer(2, function()
-    if check() then return false end
     update()
 end, math.huge))
 table.insert(listens, event.listen(nil, function(...)
-    if check() then return false end
     local windowEventData = window:uploadEvent({...})
     if windowEventData[1] == "touch" and windowEventData[3] == window.sizeX and windowEventData[4] == 1 then
         exit()
