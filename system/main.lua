@@ -19,6 +19,6 @@ for address in component.list("screen") do
     end
 end
 
-while #thread.threads > 0 or true do
+while #thread.threads > 0 do
     event.sleep(0.1)
 end

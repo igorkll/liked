@@ -48,7 +48,8 @@ local function draw(set)
     selectWindow:clear(colors.gray)
     selectWindow:setCursor(1, 1)
     for i, file in ipairs(themes) do
-        local str = paths.hideExtension(file) .. string.rep(" ", (selectWindow.sizeX - 2) - unicode.len(file))
+        file = paths.hideExtension(file)
+        local str = file .. string.rep(" ", (selectWindow.sizeX - 2) - unicode.len(file))
 
         local background = colors.gray
         local foreground = selected == i and colors.white or colors.black
