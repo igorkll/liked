@@ -26,7 +26,7 @@ fs.makeDirectory(userRoot)
 ------------------------------------
 
 local selectStr = 0
-local selectedIcon
+local selectedIcon = 1
 
 local function drawStatus()
     local hours, minutes, seconds = calls.call("getRealTime", 3)
@@ -64,18 +64,19 @@ local function draw()
         local iconValue = i
 
         if iconValue > 0 then
-            local pad = 8
+            local pad = 16
             local padY = pad // 2
             local posX = (((iconValue * pad) - 1) % rx) + 1
             local posY = (((iconValue - 1) // rx) + 1) * padY
+            local size = 10
+            local sizeY = size // 2
 
-            local drawPointX = posX - (pad // 2)
-            local drawPointY = posY - (padY // 2)
-            if selectedIcon then
-                window:fill(drawPointX, drawPointY, 8, 4, colors.blue, 0, " ")
+            local drawPointX = posX - (size // 2)
+            local drawPointY = posY - (sizeY // 2)
+            if selectedIcon == i then
+                window:fill(drawPointX - 1, drawPointY - 1, size + 2, sizeY + 1, colors.blue, 0, " ")
             end
-
-            window:set(posX, posY + padY, colors.lightBlue, colors.white, v)
+            window:set(posX - (unicode.len(v) // 2), posY + sizeY - 2, colors.lightBlue, colors.white, v)
         end
     end
 end
