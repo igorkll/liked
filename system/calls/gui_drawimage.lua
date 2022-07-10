@@ -50,15 +50,17 @@ for cy = 1, sy do
         background = colors[background]
         foreground = colors[foreground]
 
-        char = read(countCharBytes)
-        if background ~= oldbackground then
-            gpu.setBackground(background)
-            oldbackground = background
+        if background == 0 and foreground == 0 then
+            char = read(countCharBytes)
+            if background ~= oldbackground then
+                gpu.setBackground(background)
+                oldbackground = background
+            end
+            if foreground ~= oldforeground then
+                gpu.setForeground(foreground)
+                oldforeground = foreground
+            end
+            gpu.set(cx + (x - 1), cy + (y - 1), char)
         end
-        if foreground ~= oldforeground then
-            gpu.setForeground(foreground)
-            oldforeground = foreground
-        end
-        gpu.set(cx + (x - 1), cy + (y - 1), char)
     end
 end
