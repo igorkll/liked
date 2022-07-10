@@ -1,4 +1,6 @@
 local graphic = require("graphic")
+local serialization = require("serialization")
+local fs = require("filesystem")
 
 ------------------------------------
 
@@ -8,4 +10,7 @@ local rx, ry = gpu.getResolution()
 
 ------------------------------------
 
-local 
+
+local selectwindow = graphic.classWindow:new(screen, posX, posY, 16, ry - (posY - 1))
+
+------------------------------------

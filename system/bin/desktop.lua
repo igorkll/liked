@@ -17,7 +17,7 @@ local rx, ry = graphic.findGpu(screen).getResolution()
 local statusWindow = graphic.classWindow:new(screen, 1, 1, rx, 1)
 local window = graphic.classWindow:new(screen, 1, 2, rx, ry)
 
-local wallpaperPath = "/system/data/wallpaper.t2p"
+local wallpaperPath = "/data/wallpaper.t2p"
 
 ------------------------------------
 
