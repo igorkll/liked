@@ -1,5 +1,7 @@
 local fs = require("filesystem")
 local calls = require("calls")
+local component  = require("component")
+local graphic = require("graphic")
 local gui_container = gui_container or require("gui_container")
 local path = ...
 
@@ -33,4 +35,15 @@ for k, v in pairs(newcolors) do
 end
 for k, v in pairs(newindexcolors) do
     gui_container.indexsColors[k] = newindexcolors[k]
+end
+
+for address in component.list("screen") do
+    local gpu = graphic.findGpu(address)
+    if gpu.maxDepth() ~= 1 then
+        local count = 0
+        for i, v in pairs(gui_container.colors) do
+            gpu.setPaletteColor(count, v)
+            count = count + 1
+        end
+    end
 end

@@ -4,6 +4,7 @@ local gui_container = require("gui_container")
 local paths = require("paths")
 local unicode = require("unicode")
 local event = require("event")
+local calls = require("calls")
 
 local colors = gui_container.colors
 
@@ -17,19 +18,33 @@ local themesPath = "/system/themes"
 
 ------------------------------------
 
+local currentThemeData
+if fs.exists("/data/theme.plt") then
+    local file = assert(fs.open("/data/theme.plt", "rb"))
+    currentThemeData = file.readAll()--получаем файл текуший темы для сравнения
+    file.close()
+end
+
 local selectWindow = graphic.classWindow:new(screen, posX, posY, 16, ry - (posY - 1))
 local limit = 0
+local selected = 1
 local themes = {}
 for i, file in ipairs(fs.list(themesPath) or {}) do
     limit = limit + 1
     table.insert(themes, file)
-end
 
-local selected = 1
+    local file = assert(fs.open(paths.concat(themesPath, file), "rb"))
+    local data = file.readAll()--получаем файл темы
+    file.close()
+
+    if data == currentThemeData then
+        selected = i
+    end
+end
 
 ------------------------------------
 
-local function draw()
+local function draw(set)
     selectWindow:clear(colors.gray)
     selectWindow:setCursor(1, 1)
     for i, file in ipairs(themes) do
@@ -45,6 +60,10 @@ local function draw()
         selectWindow:write("╚" .. string.rep("═", unicode.len(str)) .. "╝", background, foreground)
 
         if i ~= limit then selectWindow:write("\n") end
+    end
+
+    if set then
+        calls.call("system_setTheme", paths.concat(themesPath, themes[selected]))
     end
 end
 draw()
@@ -64,7 +83,7 @@ return function(eventData)
             if selected > limit then selected = limit end
         end
         if selected ~= oldselected then
-            draw()
+            draw(true)
         end
     elseif selectWindowEventData[1] == "touch" then
         local posY = ((selectWindowEventData[4] - 1) // 3) + 1
@@ -72,7 +91,7 @@ return function(eventData)
         if posY >= 1 and posY <= limit then
             if posY ~= selected then
                 selected = posY
-                draw()
+                draw(true)
             end
         end
     elseif selectWindowEventData[1] == "key_down" then
@@ -85,7 +104,7 @@ return function(eventData)
             if selected > limit then selected = limit end
         end
         if selected ~= oldselected then
-            draw()
+            draw(true)
         end
     end
 end
