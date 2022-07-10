@@ -25,6 +25,8 @@ local image
 
 local function drawSelectedColors()
     nullWindow2:fill(1, 1, nullWindow2.sizeX, nullWindow2.sizeY, colors.green, colors.black, "▒")
+    nullWindow2:set(2, nullWindow2.sizeY, colors.green, colors.black, "B")
+    nullWindow2:set(nullWindow2.sizeX - 2, nullWindow2.sizeY, colors.green, colors.black, "F")
     nullWindow2:fill(2, 2, 2, nullWindow2.sizeY - 2, gui_container.indexsColors[selectedColor1], 0, " ")
     nullWindow2:fill(nullWindow2.sizeX - 2, 2, 2, nullWindow2.sizeY - 2, gui_container.indexsColors[selectedColor2], 0, " ")
 end
@@ -48,7 +50,14 @@ local function drawUi()
 end
 
 local function drawImage()
-    
+    if image then
+        mainWindow:fill(1, 1, image.sizeX, image.sizeY, colors.white, colors.black, "▒")
+        for y, tbl in ipairs(image) do
+            for x, pixel in ipairs(tbl) do
+                mainWindow:set(1, 1, pixel[1], pixel[2], pixel[3])
+            end
+        end
+    end
 end
 
 local function draw()
@@ -124,7 +133,7 @@ while true do
         end
     end
 
-    if paletteWindowEventData[1] == "touch" then
+    if paletteWindowEventData[1] == "touch" or paletteWindowEventData[1] == "drag" then
         if paletteWindowEventData[4] >= 2 and paletteWindowEventData[4] <= paletteWindow.sizeY - 1 then
             local colorIndex = paletteWindowEventData[4] - 1
             local to
