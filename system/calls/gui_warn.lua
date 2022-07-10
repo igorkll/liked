@@ -28,7 +28,7 @@ window:clear(colors.lightGray)
 local strs = calls.call("split", str, "\n")
 local newstrs = {}
 for i, v in ipairs(strs) do
-    local lnewstrs = calls.call("toParts", v, 23)
+    local lnewstrs = calls.call("toParts", v, 22)
     for i, v in ipairs(lnewstrs) do
         table.insert(newstrs, v)
     end

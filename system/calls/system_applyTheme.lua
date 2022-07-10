@@ -1,6 +1,6 @@
 local fs = require("filesystem")
 local calls = require("calls")
-local gui_container = require("gui_container")
+local gui_container = gui_container or require("gui_container")
 local path = ...
 
 local file = assert(fs.open(path, "rb"))
@@ -28,9 +28,9 @@ local newcolors = {
     black     = tbl[16]
 }
 
-for k, v in pairs(gui_container.colors) do
+for k, v in pairs(newcolors) do
     gui_container.colors[k] = newcolors[k]
 end
-for k, v in pairs(gui_container.indexsColors) do
+for k, v in pairs(newindexcolors) do
     gui_container.indexsColors[k] = newindexcolors[k]
 end

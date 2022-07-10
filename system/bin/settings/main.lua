@@ -19,9 +19,10 @@ local modulesPath = paths.concat(path, "modules")
 
 ------------------------------------
 
-local statusWindow = graphic.classWindow:new(screen, 1, 1, rx // 4, 1)
+local statusWindow = graphic.classWindow:new(screen, 1, 1, rx, 1)
 local selectWindow = graphic.classWindow:new(screen, 1, 2, rx // 4, ry - 1)
-local modulWindow = graphic.classWindow:new(screen, (rx // 4) + 1, 1, (rx - (rx // 4)), ry)
+local modulWindow = graphic.classWindow:new(screen, (rx // 4) + 2, 2, (rx - (rx // 4)) - 1, ry - 2)
+local lineWindows = graphic.classWindow:new(screen, (rx // 4) + 1, 2, 1, ry - 1)
 
 local selected = 1
 local limit = 0
@@ -35,31 +36,32 @@ local function draw()
     selectWindow:clear(colors.lightGray)
     modulWindow:clear(colors.gray)
     statusWindow:clear(colors.black)
+    lineWindows:clear(colors.brown)
     statusWindow:set(1, 1, colors.red, colors.white, "X")
 
     selectWindow:setCursor(1, 1)
     for i, file in ipairs(modules) do
-        local str = file .. string.rep(" ", (selectWindow.sizeX - 2) - unicode.len(file))
+        local str = paths.hideExtension(file) .. string.rep(" ", (selectWindow.sizeX - 2) - unicode.len(file))
 
         local background = colors.lightGray
         local foreground = selected == i and colors.white or colors.black
 
         selectWindow:write("╔" .. string.rep("═", unicode.len(str)) .. "╗\n", background, foreground)
         selectWindow:write("║", background, foreground)
-        selectWindow:write(paths.hideExtension(str), background, foreground)
+        selectWindow:write(str, background, foreground)
         selectWindow:write("║" .. "\n", background, foreground)
         selectWindow:write("╚" .. string.rep("═", unicode.len(str)) .. "╝", background, foreground)
 
         if i ~= limit then selectWindow:write("\n") end
     end
 
-    local currentFile = paths.concat(path, modules[selected])
+    local currentFile = paths.concat(modulesPath, modules[selected])
     local file = assert(fs.open(currentFile, "rb"))
     local data = file.readAll()
     file.close()
 
     local code = assert(load(data, "=module", nil, calls.call("createEnv")))
-    code(screen, modulWindow.sizeX, modulWindow.sizeY)
+    code(screen, modulWindow.x, modulWindow.y)
 end
 draw()
 
