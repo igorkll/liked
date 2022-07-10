@@ -46,7 +46,7 @@ local function draw()
 
         selectWindow:write("╔" .. string.rep("═", unicode.len(str)) .. "╗\n", background, foreground)
         selectWindow:write("║", background, foreground)
-        selectWindow:write(str, background, foreground)
+        selectWindow:write(paths.hideExtension(str), background, foreground)
         selectWindow:write("║" .. "\n", background, foreground)
         selectWindow:write("╚" .. string.rep("═", unicode.len(str)) .. "╝", background, foreground)
 
