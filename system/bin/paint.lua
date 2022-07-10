@@ -75,6 +75,8 @@ local function load()
     local sizeY = string.byte(read(1))
     read(8)
 
+    mainWindow:fill(1, 1, sizeX, sizeY, colors.gray, colors.white, "▒")
+
     local colorByte, countCharBytes, background, foreground, char
     for cy = 1, sizeY do
         for cx = 1, sizeX do
@@ -96,15 +98,7 @@ local function load()
 
             if background ~= 0 and foreground ~= 0 then
                 char = read(countCharBytes)
-                if background ~= oldbackground then
-                    gpu.setBackground(background)
-                    oldbackground = background
-                end
-                if foreground ~= oldforeground then
-                    gpu.setForeground(foreground)
-                    oldforeground = foreground
-                end
-                gpu.set(cx + (x - 1), cy + (y - 1), char)
+                mainWindow:set(1, 1, background, foreground, char)
             end
         end
     end
