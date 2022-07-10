@@ -21,7 +21,7 @@ local modulesPath = paths.concat(path, "modules")
 
 local statusWindow = graphic.classWindow:new(screen, 1, 1, rx, 1)
 local selectWindow = graphic.classWindow:new(screen, 1, 2, rx // 4, ry - 1)
-local modulWindow = graphic.classWindow:new(screen, (rx // 4) + 2, 2, (rx - (rx // 4)) - 1, ry - 2)
+local modulWindow = graphic.classWindow:new(screen, (rx // 4) + 2, 2, (rx - (rx // 4)) - 1, ry)
 local lineWindows = graphic.classWindow:new(screen, (rx // 4) + 1, 2, 1, ry - 1)
 
 local selected = 1
@@ -32,6 +32,7 @@ for i, file in ipairs(fs.list(modulesPath) or {}) do
     table.insert(modules, file)
 end
 
+local currentModule
 local function draw()
     selectWindow:clear(colors.lightGray)
     modulWindow:clear(colors.gray)
@@ -61,14 +62,13 @@ local function draw()
     file.close()
 
     local code = assert(load(data, "=module", nil, calls.call("createEnv")))
-    code(screen, modulWindow.x, modulWindow.y)
+    currentModule = code(screen, modulWindow.x, modulWindow.y)
 end
 draw()
 
 while true do
     local eventData = {event.pull()}
     local selectWindowEventData = selectWindow:uploadEvent(eventData)
-    local modulWindowEventData = selectWindow:uploadEvent(eventData)
     local statusWindowEventData = statusWindow:uploadEvent(eventData)
 
     if selectWindowEventData[1] == "scroll" then
@@ -110,5 +110,9 @@ while true do
         if statusWindowEventData[4] == 1 and statusWindowEventData[3] == 1 then
             break
         end
+    end
+
+    if currentModule then
+        currentModule(eventData)
     end
 end
