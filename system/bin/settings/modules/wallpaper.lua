@@ -69,6 +69,7 @@ local function draw(set)
         else
             fs.copy(paths.concat(wallpapersPath, wallpapaers[selected]), "/data/wallpaper.t2p")
         end
+        event.push("redrawDesktop")
     end
 end
 draw()

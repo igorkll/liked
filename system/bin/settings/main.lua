@@ -39,6 +39,7 @@ local function draw()
     statusWindow:clear(colors.black)
     lineWindows:clear(colors.brown)
     statusWindow:set(1, 1, colors.red, colors.white, "X")
+    statusWindow:set(3, 1, colors.black, colors.white, "settings")
 
     selectWindow:setCursor(1, 1)
     for i, file in ipairs(modules) do

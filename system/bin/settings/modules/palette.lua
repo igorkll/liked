@@ -26,6 +26,7 @@ if fs.exists("/data/theme.plt") then
 end
 
 local selectWindow = graphic.classWindow:new(screen, posX, posY, 16, ry - (posY - 1))
+local colorsWindow = graphic.classWindow:new(screen, posX + 17, posY, 8, 18)
 local limit = 0
 local selected = 1
 local themes = {}
@@ -46,7 +47,13 @@ end
 
 local function draw(set)
     selectWindow:clear(colors.gray)
+    colorsWindow:fill(1, 1, colorsWindow.sizeX, colorsWindow.sizeY, colors.gray, colors.brown, "▒")
     selectWindow:setCursor(1, 1)
+
+    for i, v in ipairs(gui_container.indexsColors) do
+        colorsWindow:set(2, i + 1, v, 0, "      ")
+    end
+
     for i, file in ipairs(themes) do
         file = paths.hideExtension(file)
         local str = file .. string.rep(" ", (selectWindow.sizeX - 2) - unicode.len(file))

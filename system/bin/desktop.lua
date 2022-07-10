@@ -91,4 +91,8 @@ while true do
             draw()
         end
     end
+
+    if eventData[1] == "redrawDesktop" then
+        draw()
+    end
 end
