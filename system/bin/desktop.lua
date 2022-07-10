@@ -67,7 +67,7 @@ local function draw()
             local pad = 16
             local padY = pad // 2
             local posX = (((iconValue * pad) - 1) % rx) + 1
-            local posY = (((iconValue - 1) // rx) + 1) * padY
+            local posY = (((iconValue * pad) // rx) + 1) * padY
             local size = 10
             local sizeY = size // 2
 
