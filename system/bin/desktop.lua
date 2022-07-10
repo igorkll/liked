@@ -97,9 +97,9 @@ startStatusTimer()
 
 ------------------------------------
 
-local function execute(name)
+local function execute(name, ...)
     stopStatusTimer()
-    local ok, err = programs.execute(name, screen)
+    local ok, err = programs.execute(name, screen, ...)
     startStatusTimer()
     if not ok then
         draw()
@@ -119,9 +119,9 @@ while true do
             if num == 1 then
                 execute("about")
             elseif num == 2 then
-                execute("settings.app")
+                execute("settings")
             elseif num == 3 then
-                execute("paint")
+                execute("paint", "/data/temp.t2p")
             elseif num == 5 then
                 computer.shutdown()
             elseif num == 6 then
