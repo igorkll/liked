@@ -8,8 +8,8 @@ local data = file.readAll()
 file.close()
 
 local tbl = calls.call("unserialization", data)
-gui_container.indexsColors = tbl
-gui_container.colors = {
+local newindexcolors = tbl
+local newcolors = {
     white     = tbl[1],
     orange    = tbl[2],
     magenta   = tbl[3],
@@ -27,3 +27,10 @@ gui_container.colors = {
     red       = tbl[15],
     black     = tbl[16]
 }
+
+for k, v in pairs(gui_container.colors) do
+    gui_container.colors[k] = newcolors[k]
+end
+for k, v in pairs(gui_container.indexsColors) do
+    gui_container.indexsColors[k] = newindexcolors[k]
+end
