@@ -1,0 +1,11 @@
+local graphic = require("graphic")
+
+------------------------------------
+
+local screen, posX, posY = ...
+local gpu = graphic.findGpu(screen)
+local rx, ry = gpu.getResolution()
+
+------------------------------------
+
+local 

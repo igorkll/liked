@@ -52,6 +52,14 @@ local function draw()
 
         if i ~= limit then selectWindow:write("\n") end
     end
+
+    local currentFile = paths.concat(path, modules[selected])
+    local file = assert(fs.open(currentFile, "rb"))
+    local data = file.readAll()
+    file.close()
+
+    local code = assert(load(data, "=module", nil, calls.call("createEnv")))
+    code(screen, modulWindow.sizeX, modulWindow.sizeY)
 end
 draw()
 
