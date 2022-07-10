@@ -6,6 +6,7 @@ local unicode = require("unicode")
 local programs = require("programs")
 local gui_container = require("gui_container")
 local fs = require("filesystem")
+local paths = require("paths")
 
 local colors = gui_container.colors
 
@@ -18,8 +19,13 @@ local statusWindow = graphic.classWindow:new(screen, 1, 1, rx, 1)
 local window = graphic.classWindow:new(screen, 1, 2, rx, ry)
 
 local wallpaperPath = "/data/wallpaper.t2p"
+local userRoot = "/data/userdata"
+local userPath = userRoot
+fs.makeDirectory(userRoot)
 
 ------------------------------------
+
+local selectstr = 0
 
 local function drawStatus()
     local hours, minutes, seconds = calls.call("getRealTime", 3)
@@ -41,6 +47,28 @@ local function draw()
         local sx, sy = calls.call("gui_readimagesize", wallpaperPath)
         local ix, iy = ((window.sizeX / 2) - (sx / 2)) + 1, ((window.sizeY / 2) - (sy / 2)) + 1
         calls.call("gui_drawimage", screen, wallpaperPath, ix, iy)
+    end
+
+    for i, v in ipairs(fs.list(userPath)) do
+        local path = paths.concat(userPath, v)
+        local exp = paths.extension(path)
+        local icon
+        if exp then
+            icon = paths.concat("/system/icons", exp .. ".t2p")
+            if not fs.exists(icon) then
+                icon = nil
+            end
+        end
+
+        local iconValue = i
+
+        if iconValue > 0 then
+            local pad = 16
+            local padY = pad // 2
+            local posX = (((iconValue * pad) - 1) % rx) + 1
+            local posY = (((iconValue * pad) - 1) // rx) + 1
+            window:set(posX, posY, colors.black, colors.white, "0")
+        end
     end
 end
 draw()
@@ -82,7 +110,7 @@ while true do
             if num == 1 then
                 execute("about")
             elseif num == 2 then
-                execute("settings")
+                execute("settings.app")
             elseif num == 4 then
                 computer.shutdown()
             elseif num == 5 then
