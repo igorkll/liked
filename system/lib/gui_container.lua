@@ -1,3 +1,8 @@
+local fs = require("filesystem")
+local calls = require("calls")
+
+--------------------------------------------
+
 local gui_container = {}
 
 gui_container.screen = "20108ef5-444e-46bc-bd6c-48aee518009e"
@@ -39,5 +44,8 @@ gui_container.indexsColors = { --computercraft colors
     0xCC4C4C, --15) red
     0x191919  --16) black
 }
+if fs.exists("/data/theme.plt") then
+    calls.call("system_applyTheme", "/data/theme.plt")
+end
 
 return gui_container
