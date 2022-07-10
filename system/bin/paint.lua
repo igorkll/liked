@@ -21,7 +21,12 @@ local nullWindow2 = graphic.classWindow:new(screen, rx - 7, 2 + paletteWindow.si
 
 local selectedColor1 = 1
 local selectedColor2 = 1
-local image
+local image = {sizeX = 3, sizeY = 1,
+{
+    {colors.black, colors.white, "P"},
+    {colors.black, colors.white, "I"},
+    {colors.black, colors.white, "C"}
+}}
 
 local function drawSelectedColors()
     nullWindow2:fill(1, 1, nullWindow2.sizeX, nullWindow2.sizeY, colors.green, colors.black, "▒")
@@ -69,6 +74,8 @@ end
 draw()
 
 local function load()
+    image = {}
+
     local readbit = calls.load("readbit")
 
     local file = assert(fs.open(filepath, "rb"))
@@ -84,10 +91,14 @@ local function load()
     local sizeY = string.byte(read(1))
     read(8)
 
+    image.sizeX = sizeX
+    image.sizeY = sizeY
+
     mainWindow:fill(1, 1, sizeX, sizeY, colors.gray, colors.white, "▒")
 
     local colorByte, countCharBytes, background, foreground, char
     for cy = 1, sizeY do
+        image[cy] = {}
         for cx = 1, sizeX do
             colorByte      = string.byte(read(1))
             countCharBytes = string.byte(read(1))
@@ -107,12 +118,34 @@ local function load()
 
             if background ~= 0 and foreground ~= 0 then
                 char = read(countCharBytes)
-                mainWindow:set(1, 1, background, foreground, char)
+                image[cy][cx] = {background, foreground, char}
             end
         end
     end
 end
-load()
+
+local function save()
+    if not image then return end
+    local file = assert(fs.open(filepath, "wb"))
+    file.write(string.char(image.sizeX))
+    file.write(string.char(image.sizeY))
+    file.write(string.rep(string.char(0), 8))
+    
+    for y, tbl in ipairs(image) do
+        for x, pixel in ipairs(tbl) do
+            
+        end
+    end
+
+    file.close()
+end
+
+if fs.exists(filepath) then
+    load()
+else
+    save()
+end
+
 
 while true do
     local eventData = {event.pull()}
