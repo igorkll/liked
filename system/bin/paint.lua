@@ -139,11 +139,12 @@ end
 
 local function save()
     noSaved = false
+    local buffer = ""
     if not image then return end
-    local file = assert(fs.open(filepath, "wb"))
-    file.write(string.char(image.sizeX))
-    file.write(string.char(image.sizeY))
-    file.write(string.rep(string.char(0), 8))
+    
+    buffer = buffer .. string.char(image.sizeX)
+    buffer = buffer .. string.char(image.sizeY)
+    buffer = buffer .. string.rep(string.char(0), 8)
 
     local writebit = calls.load("writebit")
     local readbit = calls.load("readbit")
@@ -155,12 +156,14 @@ local function save()
                 bg = writebit(bg, i, readbit(pixel[1], i))
                 bg = writebit(bg, i + 4, readbit(pixel[2], i))
             end
-            file.write(string.char(bg))
-            file.write(string.char(#pixel[3]))
-            file.write(pixel[3])
+            buffer = buffer .. string.char(bg)
+            buffer = buffer .. string.char(#pixel[3])
+            buffer = buffer .. pixel[3]
         end
     end
 
+    local file = assert(fs.open(filepath, "wb"))
+    file.write(buffer)
     file.close()
 end
 
@@ -192,32 +195,38 @@ local function resize(newx, newy)
         clear()
     end
 
-    if newx > image.sizeX then
-        for i = image.sizeX, newx do
-            local tbl = {}
-            for i = 1, image.sizeX do
-                table.insert(tbl, {0, 0, " "})
-            end
-            table.insert(image, tbl)
-        end
-    elseif newx < image.sizeX then
-        for i = newx, image.sizeX do
-            table.remove(image, #image)
-        end
-    end
     if newy > image.sizeY then
-        for i = image.sizeY, newy do
+        for i = 1, math.abs(image.sizeY - newy) do
             local tbl = {}
             for i = 1, image.sizeX do
                 table.insert(tbl, {0, 0, " "})
             end
             table.insert(image, tbl)
         end
-    elseif newy < image.sizeY then
-        for i = newy, image.sizeY do
+    end
+    if newx > image.sizeX then
+        for i, v in ipairs(image) do
+            for i = 1, math.abs(image.sizeX - newx) do
+                table.insert(v, {0, 0, " "})
+            end
+        end
+    end
+    
+    if newy < image.sizeY then
+        for i = 1, math.abs(image.sizeY - newy) do
             table.remove(image, #image)
         end
     end
+    if newx < image.sizeX then
+        for i, v in ipairs(image) do
+            for i = 1, math.abs(image.sizeX - newx) do
+                table.remove(v, #v)
+            end
+        end
+    end
+
+    image.sizeX = newx
+    image.sizeY = newy
 
     draw()
 end
@@ -253,7 +262,21 @@ while true do
             {true})
             clear()
             if num == 1 then
-                
+                local clear = saveZone()
+                local str = calls.call("gui_input", screen, nil, nil, "newX newY")
+                clear()
+                if str ~= true then
+                    local x, y = table.unpack(calls.call("split", str, " "))
+                    x = tonumber(x)
+                    y = tonumber(y)
+                    if x and y then
+                        resize(x, y)
+                    else
+                        local clear = saveZone()
+                        calls.call("gui_warn", screen, nil, nil, "uncorrent input", colors.white)
+                        clear()
+                    end
+                end
             end
         end
     end
