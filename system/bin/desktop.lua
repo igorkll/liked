@@ -79,11 +79,7 @@ local function draw()
             end
         end
 
-        for cx = 1, iconsX do
-            for cy = 1, iconsY do
-
-            end
-        end
+        
 
         local iconValue = i
 
@@ -101,6 +97,15 @@ local function draw()
                 window:fill(drawPointX - 1, drawPointY - 1, size + 2, sizeY + 1, colors.blue, 0, " ")
             end
             window:set(posX - (unicode.len(v) // 2), posY + sizeY - 2, colors.lightBlue, colors.white, v)
+        end
+    end
+
+    for cx = 1, iconsX do
+        for cy = 1, iconsY do
+            local iconX = math.floor(window.sizeX / iconsX * cx)
+            local iconY = math.floor(window.sizeY / iconsY * cy)
+
+            
         end
     end
 end
