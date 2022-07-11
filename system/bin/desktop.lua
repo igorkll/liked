@@ -28,8 +28,13 @@ fs.makeDirectory(userRoot)
 local iconsX = 4
 local iconsY = 2
 
-local startIconsPos = 0
+local iconSizeX = 8
+local iconSizeY = 4
+
+local startIconsPos = 1
 local selectedIcon = 1
+
+local icons
 
 local function drawStatus()
     local hours, minutes, seconds = calls.call("getRealTime", 3)
@@ -62,24 +67,28 @@ local function draw()
         startIconsPos = 1
     end
 
+    icons = {}
     local count = 0
     for i, v in ipairs(fs.list(userPath)) do
-        count = count + 1
-        if count > (iconsX * iconsY) then
-            break
-        end
-
-        local path = paths.concat(userPath, v)
-        local exp = paths.extension(path)
-        local icon
-        if exp then
-            icon = paths.concat("/system/icons", exp .. ".t2p")
-            if not fs.exists(icon) then
-                icon = nil
+        if i >= startIconsPos then
+            count = count + 1
+            if count > (iconsX * iconsY) then
+                break
             end
-        end
 
-        
+            
+            local path = paths.concat(userPath, v)
+            local exp = paths.extension(path)
+            local icon
+            if exp then
+                icon = paths.concat("/system/icons", exp .. ".t2p")
+                if not fs.exists(icon) then
+                    icon = nil
+                end
+            end
+
+            table.insert(icons, {icon = icon, path = path, exp, index = i, name = v})
+        end
 
         local iconValue = i
 
@@ -100,12 +109,19 @@ local function draw()
         end
     end
 
+    local count = 0
     for cx = 1, iconsX do
         for cy = 1, iconsY do
+            count = count + 1
             local iconX = math.floor(window.sizeX / iconsX * cx)
             local iconY = math.floor(window.sizeY / iconsY * cy)
-
-            
+            local icon = icons[count]
+            if icon then
+                if selectedIcon == icon.index then
+                    window:fill(iconX - 1, drawPointY - 1, iconSizeX + 2, sizeY + 1, colors.blue, 0, " ")
+                end
+                window:set(iconX - (unicode.len(icon.name) // 2), iconY + sizeY - 2, colors.lightBlue, colors.white, v)
+            end
         end
     end
 end
