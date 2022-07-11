@@ -130,10 +130,22 @@ local function save()
     file.write(string.char(image.sizeX))
     file.write(string.char(image.sizeY))
     file.write(string.rep(string.char(0), 8))
+
+    local writebit = calls.load("writebit")
+    local readbit = calls.load("readbit")
     
     for y, tbl in ipairs(image) do
         for x, pixel in ipairs(tbl) do
-            
+            local bg = 0
+            for i = 0, 3 do
+                bg = writebit(writebit, i, readbit(pixel[1], i))
+            end
+            for i = 4, 7 do
+                bg = writebit(writebit, i, readbit(pixel[2], i))
+            end
+            file.write(bg)
+            file.write(#pixel[3])
+            file.write(pixel[3])
         end
     end
 
@@ -162,6 +174,7 @@ while true do
             if num == 1 then
                 break
             elseif num == 3 then
+                save()
             end
         end
     end
