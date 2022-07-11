@@ -7,7 +7,7 @@ local colors = gui_container.colors
 
 ------------------------------------
 
-local screen, cx, cy, str = ...
+local screen, cx, cy, str, backgroundColor = ...
 local gpu = graphic.findGpu(screen)
 
 if not cx or not cy then
@@ -23,7 +23,7 @@ end
 local window = graphic.classWindow:new(screen, cx, cy, 32, 8)
 
 window:fill(2, 2, window.sizeX, window.sizeY, colors.gray, 0, " ")
-window:clear(colors.lightGray)
+window:clear(backgroundColor or colors.lightGray)
 
 local strs = calls.call("split", str, "\n")
 local newstrs = {}

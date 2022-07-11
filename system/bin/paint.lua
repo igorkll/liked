@@ -228,11 +228,14 @@ while true do
     if nullWindowEventData[1] == "touch" then
         if nullWindowEventData[3] >= 4 and nullWindowEventData[3] <= 5 and nullWindowEventData[4] == nullWindow2.sizeY - 1 then
             ::tonew::
-            local clear = calls.call("screenshot", screen, rx / 2 - 16, )
-            local entered = calls.call("gui_input", screen, nil, nil, "char")
+            local clear = calls.call("screenshot", screen, rx / 2 - 16, ry / 2 - 4, 33, 9)
+            local entered = calls.call("gui_input", screen, nil, nil, "char", nil, colors.white)
+            clear()
             if entered ~= true then
                 if unicode.len(entered) ~= 1 then
-                    calls.call("gui_warn", screen, nil, nil, "enter one char\nor ckip menu")
+                    local clear = calls.call("screenshot", screen, rx / 2 - 16, ry / 2 - 4, 33, 9, colors.white)
+                    calls.call("gui_warn", screen, nil, nil, "enter one char\nor cancel menu")
+                    clear()
                     goto tonew
                 else
                     selectedChar = entered

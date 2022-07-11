@@ -7,7 +7,7 @@ local colors = gui_container.colors
 
 ------------------------------------
 
-local screen, cx, cy, str, crypto = ...
+local screen, cx, cy, str, crypto, backgroundColor = ...
 local gpu = graphic.findGpu(screen)
 
 if not cx or not cy then
@@ -23,7 +23,7 @@ end
 local window = graphic.classWindow:new(screen, cx, cy, 32, 8, true)
 
 window:fill(2, 2, window.sizeX, window.sizeY, colors.gray, 0, " ")
-window:clear(colors.lightGray)
+window:clear(backgroundColor or colors.lightGray)
 
 local pos = math.floor(((window.sizeX / 2) - (unicode.len(str) / 2)) + 0.5)
 window:fill(1, 1, window.sizeX, 1, colors.gray, 0, " ")
