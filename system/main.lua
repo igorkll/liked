@@ -23,8 +23,8 @@ end
 
 while true do
     for i, v in ipairs(threads) do
-        if v:state() == "dead" then
-            error("crash thread " .. tostring(i) .. " " .. (v.out[2] or "unknown error"))
+        if v:status() == "dead" then
+            error("crash thread " .. tostring(i) .. " " .. (v.out[2] or "unknown error") .. " traceback " .. (v.out[3] or "not found"))
         end
     end
     event.sleep(1)
