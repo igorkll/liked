@@ -174,7 +174,11 @@ else
 end
 
 local function exitAllow()
-    return not noSaved or calls.call("gui_yesno", screen, nil, nil, "image do not saved!\nare you sure you want to get out?")
+    if not noSaved then return true end
+    local clear = calls.call("screenshot", screen, rx / 2 - 16, ry / 2 - 4, 33, 9)
+    local ok = calls.call("gui_yesno", screen, nil, nil, "image do not saved!\nare you sure you want to get out?")
+    clear()
+    return ok
 end
 
 while true do
