@@ -168,12 +168,8 @@ local function save()
 end
 
 if fs.exists(filepath) then
-    --calls.call("gui_warn", screen, nil, nil, "load!")
     load()
     drawImage()
-else
-    --calls.call("gui_warn", screen, nil, nil, "save!")
-    save()
 end
 
 local function saveZone()
@@ -193,6 +189,7 @@ local function resize(newx, newy)
         local clear = saveZone()
         calls.call("gui_warn", screen, nil, nil, "uncorrent input", colors.white)
         clear()
+        return
     end
 
     if newy > image.sizeY then
