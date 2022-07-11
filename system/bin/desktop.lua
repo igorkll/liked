@@ -25,7 +25,10 @@ fs.makeDirectory(userRoot)
 
 ------------------------------------
 
-local selectStr = 0
+local iconsX = 4
+local iconsY = 2
+
+local startIconsPos = 0
 local selectedIcon = 1
 
 local function drawStatus()
@@ -40,6 +43,7 @@ local function drawStatus()
     statusWindow:set(window.sizeX - unicode.len(str), 1, colors.gray, colors.white, str)
     statusWindow:set(1, 1, colors.lightGray, colors.white, " OS ")
 end
+
 local function draw()
     drawStatus()
     window:clear(colors.lightBlue)
@@ -50,7 +54,21 @@ local function draw()
         calls.call("gui_drawimage", screen, wallpaperPath, ix, iy)
     end
 
+    local iconsCount = 0
     for i, v in ipairs(fs.list(userPath)) do
+        iconsCount = iconsCount + 1
+    end
+    if startIconsPos > iconsCount then
+        startIconsPos = 1
+    end
+
+    local count = 0
+    for i, v in ipairs(fs.list(userPath)) do
+        count = count + 1
+        if count > (iconsX * iconsY) then
+            break
+        end
+
         local path = paths.concat(userPath, v)
         local exp = paths.extension(path)
         local icon
@@ -61,10 +79,11 @@ local function draw()
             end
         end
 
-        local iconsX = 4
-        local iconsY = 2
+        for cx = 1, iconsX do
+            for cy = 1, iconsY do
 
-        for 
+            end
+        end
 
         local iconValue = i
 
