@@ -60,6 +60,9 @@ for cy = 1, sy do
                 gpu.setForeground(colors[foreground + 1])
                 oldforeground = foreground
             end
+            if background == foreground then --во избежаниия визуальных артефактов символом unicode
+                char = " "
+            end
             gpu.set(cx + (x - 1), cy + (y - 1), char)
         end
     end

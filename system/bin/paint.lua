@@ -132,6 +132,11 @@ local function load()
             ((readbit(colorByte, 7) and 1 or 0) * 8)
 
             char = read(countCharBytes)
+
+            if background == foreground then --во избежаниия визуальных артефактов отбражения unicode
+                char = " "
+            end
+
             image[cy][cx] = {background, foreground, char}
         end
     end
