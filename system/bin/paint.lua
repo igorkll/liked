@@ -27,9 +27,9 @@ local selectedColor2 = 1
 local selectedChar = " "
 local image = {sizeX = 3, sizeY = 1,
 {
-    {16, 1, "P"},
-    {16, 1, "I"},
-    {16, 1, "C"}
+    {15, 0, "P"},
+    {15, 0, "I"},
+    {15, 0, "C"}
 }}
 
 local function drawSelectedColors()
@@ -69,8 +69,8 @@ local function drawImage()
         mainWindow:fill(1, 1, image.sizeX, image.sizeY, colors.white, colors.black, "░")
         for y, tbl in ipairs(image) do
             for x, pixel in ipairs(tbl) do
-                if pixel[1] ~= 1 or pixel[2] ~= 1 then
-                    mainWindow:set(x, y, indexsColors[pixel[1]], indexsColors[pixel[2]], pixel[3])
+                if pixel[1] ~= 0 or pixel[2] ~= 0 then
+                    mainWindow:set(x, y, indexsColors[pixel[1] + 1], indexsColors[pixel[2] + 1], pixel[3])
                 end
             end
         end
