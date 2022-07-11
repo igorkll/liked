@@ -90,6 +90,7 @@ local function draw()
             table.insert(icons, {icon = icon, path = path, exp, index = i, name = v})
         end
 
+        --[[
         local iconValue = i
 
         if iconValue > 0 then
@@ -107,20 +108,22 @@ local function draw()
             end
             window:set(posX - (unicode.len(v) // 2), posY + sizeY - 2, colors.lightBlue, colors.white, v)
         end
+        ]]
     end
 
     local count = 0
     for cx = 1, iconsX do
         for cy = 1, iconsY do
             count = count + 1
-            local iconX = math.floor(window.sizeX / iconsX * cx)
-            local iconY = math.floor(window.sizeY / iconsY * cy)
+            local iconX = math.floor((window.sizeX / iconsX) * cx - (iconSizeX / 2))
+            local iconY = math.floor((window.sizeY / iconsY) * cy - (iconSizeY / 2))
             local icon = icons[count]
             if icon then
                 if selectedIcon == icon.index then
-                    window:fill(iconX - 1, drawPointY - 1, iconSizeX + 2, sizeY + 1, colors.blue, 0, " ")
+                    window:fill(iconX - 2, iconY - 1, iconSizeX + 4, iconY + 2, colors.blue, 0, " ")
                 end
-                window:set(iconX - (unicode.len(icon.name) // 2), iconY + sizeY - 2, colors.lightBlue, colors.white, v)
+                window:set(iconX - (unicode.len(icon.name) // 2), iconY + iconY - 2, colors.lightBlue, colors.white, icon.name)
+                calls.call("gui_drawimage", screen, icon.icon, window:toRealPos(iconX, iconY))
             end
         end
     end

@@ -10,15 +10,22 @@ local event = require("event")
 
 local desktop = assert(programs.load("desktop"))
 
+local threads = {}
 for address in component.list("screen") do
     local gpu = graphic.findGpu(address)
     if gpu.maxDepth() ~= 1 then
         calls.call("gui_initScreen", address)
         local t = thread.create(desktop, address)
         t:resume()
+        table.insert(threads, t)
     end
 end
 
-while #thread.threads > 0 do
-    event.sleep(0.1)
+while true do
+    for i, v in ipairs(threads) do
+        if v:state() == "dead" then
+            error("crash thread " .. tostring(i) .. " " .. (v.out[2] or "unknown error"))
+        end
+    end
+    event.sleep(1)
 end
