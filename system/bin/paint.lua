@@ -4,6 +4,7 @@ local event = require("event")
 local gui_container = require("gui_container")
 local calls = require("calls")
 local component = require("component")
+local unicode = require("unicode")
 
 local colors = gui_container.colors
 local indexsColors = gui_container.indexsColors
@@ -65,10 +66,12 @@ end
 
 local function drawImage()
     if image then
-        mainWindow:fill(1, 1, image.sizeX, image.sizeY, colors.white, colors.black, "▒")
+        mainWindow:fill(1, 1, image.sizeX, image.sizeY, colors.white, colors.black, "░")
         for y, tbl in ipairs(image) do
             for x, pixel in ipairs(tbl) do
-                mainWindow:set(x, y, indexsColors[pixel[1]], indexsColors[pixel[2]], pixel[3])
+                if pixel[1] ~= 0 or pixel[2] ~= 0 then
+                    mainWindow:set(x, y, indexsColors[pixel[1]], indexsColors[pixel[2]], pixel[3])
+                end
             end
         end
     end
@@ -224,7 +227,18 @@ while true do
 
     if nullWindowEventData[1] == "touch" then
         if nullWindowEventData[3] >= 4 and nullWindowEventData[3] <= 5 and nullWindowEventData[4] == nullWindow2.sizeY - 1 then
-            require("computer").beep(2000)
+            ::tonew::
+            local clear = calls.call("screenshot", screen, rx / 2 - 16, )
+            local entered = calls.call("gui_input", screen, nil, nil, "char")
+            if entered ~= true then
+                if unicode.len(entered) ~= 1 then
+                    calls.call("gui_warn", screen, nil, nil, "enter one char\nor ckip menu")
+                    goto tonew
+                else
+                    selectedChar = entered
+                    drawSelectedColors()
+                end
+            end
         end
     end
 end
