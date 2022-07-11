@@ -5,6 +5,7 @@ local gui_container = require("gui_container")
 local calls = require("calls")
 
 local colors = gui_container.colors
+local indexsColors = gui_container.indexsColors
 
 ------------------------------------
 
@@ -23,22 +24,22 @@ local selectedColor1 = 1
 local selectedColor2 = 1
 local image = {sizeX = 3, sizeY = 1,
 {
-    {colors.black, colors.white, "P"},
-    {colors.black, colors.white, "I"},
-    {colors.black, colors.white, "C"}
+    {1, 15, "P"},
+    {1, 15, "I"},
+    {1, 15, "C"}
 }}
 
 local function drawSelectedColors()
     nullWindow2:fill(1, 1, nullWindow2.sizeX, nullWindow2.sizeY, colors.green, colors.black, "▒")
     nullWindow2:set(2, nullWindow2.sizeY, colors.green, colors.black, "B")
     nullWindow2:set(nullWindow2.sizeX - 2, nullWindow2.sizeY, colors.green, colors.black, "F")
-    nullWindow2:fill(2, 2, 2, nullWindow2.sizeY - 2, gui_container.indexsColors[selectedColor1], 0, " ")
-    nullWindow2:fill(nullWindow2.sizeX - 2, 2, 2, nullWindow2.sizeY - 2, gui_container.indexsColors[selectedColor2], 0, " ")
+    nullWindow2:fill(2, 2, 2, nullWindow2.sizeY - 2, indexsColors[selectedColor1], 0, " ")
+    nullWindow2:fill(nullWindow2.sizeX - 2, 2, 2, nullWindow2.sizeY - 2, indexsColors[selectedColor2], 0, " ")
 end
 
 local function drawColors()
     paletteWindow:fill(1, 1, paletteWindow.sizeX, paletteWindow.sizeY, colors.brown, colors.black, "▒")
-    for i, v in ipairs(gui_container.indexsColors) do
+    for i, v in ipairs(indexsColors) do
         paletteWindow:set(2, i + 1, v, 0, "      ")
     end
     paletteWindow:fill(4, 1, 2, paletteWindow.sizeY, colors.brown, colors.black, "▒")
@@ -59,7 +60,7 @@ local function drawImage()
         mainWindow:fill(1, 1, image.sizeX, image.sizeY, colors.white, colors.black, "▒")
         for y, tbl in ipairs(image) do
             for x, pixel in ipairs(tbl) do
-                mainWindow:set(1, 1, pixel[1], pixel[2], pixel[3])
+                mainWindow:set(x, y, indexsColors[pixel[1]], indexsColors[pixel[2]], pixel[3])
             end
         end
     end
@@ -94,8 +95,6 @@ local function load()
     image.sizeX = sizeX
     image.sizeY = sizeY
 
-    mainWindow:fill(1, 1, sizeX, sizeY, colors.gray, colors.white, "▒")
-
     local colorByte, countCharBytes, background, foreground, char
     for cy = 1, sizeY do
         image[cy] = {}
@@ -104,17 +103,15 @@ local function load()
             countCharBytes = string.byte(read(1))
 
             background = 
-            ((readbit(colorByte, 1) and 1 or 0) * 1) + 
-            ((readbit(colorByte, 2) and 1 or 0) * 2) + 
-            ((readbit(colorByte, 3) and 1 or 0) * 4) + 
-            ((readbit(colorByte, 4) and 1 or 0) * 8)
+            ((readbit(colorByte, 0) and 1 or 0) * 1) + 
+            ((readbit(colorByte, 1) and 1 or 0) * 2) + 
+            ((readbit(colorByte, 2) and 1 or 0) * 4) + 
+            ((readbit(colorByte, 3) and 1 or 0) * 8)
             foreground = 
-            ((readbit(colorByte, 5) and 1 or 0) * 1) + 
-            ((readbit(colorByte, 6) and 1 or 0) * 2) + 
-            ((readbit(colorByte, 7) and 1 or 0) * 4) + 
-            ((readbit(colorByte, 8) and 1 or 0) * 8)
-            background = colors[background]
-            foreground = colors[foreground]
+            ((readbit(colorByte, 4) and 1 or 0) * 1) + 
+            ((readbit(colorByte, 5) and 1 or 0) * 2) + 
+            ((readbit(colorByte, 6) and 1 or 0) * 4) + 
+            ((readbit(colorByte, 7) and 1 or 0) * 8)
 
             if background ~= 0 and foreground ~= 0 then
                 char = read(countCharBytes)
@@ -138,13 +135,11 @@ local function save()
         for x, pixel in ipairs(tbl) do
             local bg = 0
             for i = 0, 3 do
-                bg = writebit(writebit, i, readbit(pixel[1], i))
+                bg = writebit(bg, i, readbit(pixel[1], i))
+                bg = writebit(bg, i + 4, readbit(pixel[2], i))
             end
-            for i = 4, 7 do
-                bg = writebit(writebit, i, readbit(pixel[2], i))
-            end
-            file.write(bg)
-            file.write(#pixel[3])
+            file.write(string.char(bg))
+            file.write(string.char(#pixel[3]))
             file.write(pixel[3])
         end
     end

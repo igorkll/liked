@@ -99,11 +99,21 @@ startStatusTimer()
 
 local function execute(name, ...)
     stopStatusTimer()
-    local ok, err = programs.execute(name, screen, ...)
+    local code, err = programs.load(name)
+    local ok = true
+    if code then
+        local ok2, err2 = xpcall(code, debug.traceback, screen, ...)
+        if not ok2 then
+            err = err2
+            ok = false
+        end
+    else
+        ok = false
+    end
     startStatusTimer()
     if not ok then
         draw()
-        calls.call("gui_warn", screen, nil, nil, err or "unknown error")
+        calls.call("gui_warn", screen, 1, 2, err or "unknown error")
     end
 end
 
