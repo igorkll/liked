@@ -38,26 +38,26 @@ for cy = 1, sy do
         countCharBytes = string.byte(read(1))
 
         background = 
-        ((readbit(colorByte, 1) and 1 or 0) * 1) + 
-        ((readbit(colorByte, 2) and 1 or 0) * 2) + 
-        ((readbit(colorByte, 3) and 1 or 0) * 4) + 
-        ((readbit(colorByte, 4) and 1 or 0) * 8)
+        ((readbit(colorByte, 0) and 1 or 0) * 1) + 
+        ((readbit(colorByte, 1) and 1 or 0) * 2) + 
+        ((readbit(colorByte, 2) and 1 or 0) * 4) + 
+        ((readbit(colorByte, 3) and 1 or 0) * 8)
         foreground = 
-        ((readbit(colorByte, 5) and 1 or 0) * 1) + 
-        ((readbit(colorByte, 6) and 1 or 0) * 2) + 
-        ((readbit(colorByte, 7) and 1 or 0) * 4) + 
-        ((readbit(colorByte, 8) and 1 or 0) * 8)
+        ((readbit(colorByte, 4) and 1 or 0) * 1) + 
+        ((readbit(colorByte, 5) and 1 or 0) * 2) + 
+        ((readbit(colorByte, 6) and 1 or 0) * 4) + 
+        ((readbit(colorByte, 7) and 1 or 0) * 8)
         --background = colors[background]
         --foreground = colors[foreground]
 
         if background ~= 0 or foreground ~= 0 then
             char = read(countCharBytes)
             if background ~= oldbackground then
-                gpu.setBackground(colors[background])
+                gpu.setBackground(colors[background + 1])
                 oldbackground = background
             end
             if foreground ~= oldforeground then
-                gpu.setForeground(colors[foreground])
+                gpu.setForeground(colors[foreground + 1])
                 oldforeground = foreground
             end
             gpu.set(cx + (x - 1), cy + (y - 1), char)

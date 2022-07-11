@@ -114,9 +114,12 @@ local function draw()
     for cx = 1, iconsX do
         for cy = 1, iconsY do
             count = count + 1
-            local iconX = math.floor(((window.sizeX / iconsX) * cx) - (iconSizeX / 2))
-            local iconY = math.floor(((window.sizeY / iconsY) * cy) - (iconSizeY / 2))
+            local iconX = math.floor(((window.sizeX / (iconsX + 1)) * cx) - (iconSizeX / 2))
+            local iconY = math.floor(((window.sizeY / (iconsY + 1)) * cy) - (iconSizeY / 2))
             local icon = icons[count]
+            icon.iconX = iconX
+            icon.iconY = iconY
+            
             if icon then
                 if selectedIcon == icon.index then
                     window:fill(iconX - 2, iconY - 1, iconSizeX + 4, iconSizeY + 2, colors.blue, 0, " ")
