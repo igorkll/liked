@@ -82,7 +82,10 @@ local function draw()
             if exp then
                 icon = paths.concat("/system/icons", exp .. ".t2p")
                 if not fs.exists(icon) then
-                    icon = nil
+                    icon = "/system/icons/unkownfile.t2p"
+                    if not fs.exists(icon) then
+                        icon = nil
+                    end
                 end
             end
 

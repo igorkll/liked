@@ -50,8 +50,8 @@ for cy = 1, sy do
         --background = colors[background]
         --foreground = colors[foreground]
 
+        char = read(countCharBytes)
         if background ~= 0 or foreground ~= 0 then
-            char = read(countCharBytes)
             if background ~= oldbackground then
                 gpu.setBackground(colors[background + 1])
                 oldbackground = background
