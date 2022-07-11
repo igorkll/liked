@@ -34,14 +34,15 @@ local image = {sizeX = 3, sizeY = 1,
 local function drawSelectedColors()
     nullWindow2:fill(1, 1, nullWindow2.sizeX, nullWindow2.sizeY, colors.green, colors.black, "▒")
 
-    nullWindow2:set(2, nullWindow2.sizeY, colors.green, colors.black, "BG")
-    nullWindow2:set(nullWindow2.sizeX - 2, nullWindow2.sizeY, colors.green, colors.black, "FG")
-    nullWindow2:set(nullWindow2.sizeX - 4, nullWindow2.sizeY, colors.green, colors.black, "CR")
+    nullWindow2:set(2, nullWindow2.sizeY, colors.green, colors.black, "B")
+    nullWindow2:set(nullWindow2.sizeX - 2, nullWindow2.sizeY, colors.green, colors.black, "F")
+    nullWindow2:set(nullWindow2.sizeX - 4, nullWindow2.sizeY, colors.green, colors.black, "C")
 
     nullWindow2:fill(2, 2, 2, nullWindow2.sizeY - 2, indexsColors[selectedColor1], 0, " ")
     nullWindow2:fill(nullWindow2.sizeX - 2, 2, 2, nullWindow2.sizeY - 2, indexsColors[selectedColor2], 0, " ")
 
-    nullWindow2:set(nullWindow2.sizeX - 4, nullWindow2.sizeY, colors.green, colors.black, "CR")
+    nullWindow2:set(nullWindow2.sizeX - 4, nullWindow2.sizeY - 1, colors.green, colors.lime, ">")
+    nullWindow2:set(nullWindow2.sizeX - 3, nullWindow2.sizeY - 1, indexsColors[selectedColor1], indexsColors[selectedColor2], selectedChar)
 end
 
 local function drawColors()
@@ -168,6 +169,7 @@ while true do
     local eventData = {event.pull()}
     local statusWindowEventData = statusWindow:uploadEvent(eventData)
     local paletteWindowEventData = paletteWindow:uploadEvent(eventData)
+    local nullWindowEventData = nullWindow2:uploadEvent(eventData)
 
     if statusWindowEventData[1] == "touch" then
         if statusWindowEventData[3] == 1 and statusWindowEventData[4] == 1 then
@@ -217,6 +219,12 @@ while true do
             if eventData[3] == 19 and eventData[4] == 31 then
                 save()
             end
+        end
+    end
+
+    if nullWindowEventData[1] == "touch" then
+        if nullWindowEventData[3] >= 4 and nullWindowEventData[3] <= 5 and nullWindowEventData[4] == nullWindow2.sizeY - 1 then
+            require("computer").beep(2000)
         end
     end
 end
