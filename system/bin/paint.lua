@@ -68,12 +68,14 @@ end
 local function drawPixel(x, y, pixel)
     if pixel[1] ~= 0 or pixel[2] ~= 0 then
         mainWindow:set(x, y, indexsColors[pixel[1] + 1], indexsColors[pixel[2] + 1], pixel[3])
+    else
+        mainWindow:set(x, y, colors.white, colors.black, "░")
     end
 end
 
 local function drawImage()
     if image then
-        mainWindow:fill(1, 1, image.sizeX, image.sizeY, colors.white, colors.black, "░")
+        --mainWindow:fill(1, 1, image.sizeX, image.sizeY, colors.white, colors.black, "░")
         for y, tbl in ipairs(image) do
             for x, pixel in ipairs(tbl) do
                 drawPixel(x, y, pixel)
@@ -171,6 +173,9 @@ else
     save()
 end
 
+local function exitAllow()
+    return not noSaved or calls.call("gui_yesno", screen, nil, nil, "image do not saved!\nare you sure you want to get out?")
+end
 
 while true do
     local eventData = {event.pull()}
@@ -180,7 +185,7 @@ while true do
     local mainWindowEventData = mainWindow:uploadEvent(eventData)
 
     if statusWindowEventData[1] == "touch" then
-        if statusWindowEventData[3] == 1 and statusWindowEventData[4] == 1 then
+        if statusWindowEventData[3] == 1 and statusWindowEventData[4] == 1 and exitAllow() then
             break
         end
         if statusWindowEventData[3] >= 3 and statusWindowEventData[3] <= 6 then
@@ -189,7 +194,9 @@ while true do
             {true, false, true})
             clear()
             if num == 1 then
-                break
+                if exitAllow() then
+                    break
+                end
             elseif num == 3 then
                 save()
             end
@@ -227,7 +234,7 @@ while true do
             if eventData[3] == 19 and eventData[4] == 31 then
                 save()
             elseif eventData[3] == 23 and eventData[4] == 17 then
-                if not noSaved or calls.call("gui_yesno", screen, nil, nil, "image do not saved!\nare you sure you want to get out?") then
+                if exitAllow() then
                     break
                 end
             end
@@ -259,12 +266,16 @@ while true do
         mainWindowEventData[4] <= image.sizeY then
             local pixel = image[mainWindowEventData[4]][mainWindowEventData[3]]
             if mainWindowEventData[5] == 0 then
-                pixel[1] = selectedColor1
-                pixel[2] = selectedColor2
+                pixel[1] = selectedColor1 - 1
+                pixel[2] = selectedColor2 - 1
                 pixel[3] = selectedChar
+                if pixel[1] == pixel[2] and pixel[1] == 0 then
+                    pixel[2] = 15
+                    pixel[3] = " "
+                end
             else
-                pixel[1] = 1
-                pixel[2] = 1
+                pixel[1] = 0
+                pixel[2] = 0
                 pixel[3] = " "
             end
             drawPixel(mainWindowEventData[3], mainWindowEventData[4], pixel)

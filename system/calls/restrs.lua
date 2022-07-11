@@ -1,3 +1,5 @@
+local calls = require("calls")
+
 local str, max = ...
 local strs = calls.call("split", str, "\n")
 local newstrs = {}
