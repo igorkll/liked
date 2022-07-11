@@ -56,7 +56,7 @@ local function drawColors()
 end
 
 local function drawUi()
-    mainWindow:clear(colors.lightGray)
+    mainWindow:fill(1, 1, mainWindow.sizeX, mainWindow.sizeY, colors.white, colors.black, "▓")
 
     statusWindow:clear(colors.gray)
     statusWindow:set(1, 1, colors.red, colors.white, "X")
@@ -69,7 +69,7 @@ local function drawPixel(x, y, pixel)
     if pixel[1] ~= 0 or pixel[2] ~= 0 then
         mainWindow:set(x, y, indexsColors[pixel[1] + 1], indexsColors[pixel[2] + 1], pixel[3])
     else
-        mainWindow:set(x, y, colors.white, colors.black, "░")
+        mainWindow:set(x, y, colors.white, colors.black, "▒")
     end
 end
 
@@ -173,12 +173,53 @@ else
     save()
 end
 
+local function saveZone()
+    return calls.call("screenshot", screen, rx / 2 - 16, ry / 2 - 4, 33, 9)
+end
+
 local function exitAllow()
     if not noSaved then return true end
-    local clear = calls.call("screenshot", screen, rx / 2 - 16, ry / 2 - 4, 33, 9)
+    local clear = saveZone()
     local ok = calls.call("gui_yesno", screen, nil, nil, "image do not saved!\nare you sure you want to get out?")
     clear()
     return ok
+end
+
+local function resize(newx, newy)
+    if newx <= 0 or newy <= 0 then
+        local clear = saveZone()
+        calls.call("gui_warn", screen, nil, nil, "uncorrent input", colors.white)
+        clear()
+    end
+
+    if newx > image.sizeX then
+        for i = image.sizeX, newx do
+            local tbl = {}
+            for i = 1, image.sizeX do
+                table.insert(tbl, {0, 0, " "})
+            end
+            table.insert(image, tbl)
+        end
+    elseif newx < image.sizeX then
+        for i = newx, image.sizeX do
+            table.remove(image, #image)
+        end
+    end
+    if newy > image.sizeY then
+        for i = image.sizeY, newy do
+            local tbl = {}
+            for i = 1, image.sizeX do
+                table.insert(tbl, {0, 0, " "})
+            end
+            table.insert(image, tbl)
+        end
+    elseif newy < image.sizeY then
+        for i = newy, image.sizeY do
+            table.remove(image, #image)
+        end
+    end
+
+    draw()
 end
 
 while true do
@@ -203,6 +244,16 @@ while true do
                 end
             elseif num == 3 then
                 save()
+            end
+        end
+
+        if statusWindowEventData[3] >= 8 and statusWindowEventData[3] <= 11 then
+            local clear = calls.call("screenshot", screen, 4, 2, 19, 4)
+            local str, num = calls.call("gui_context", screen, 4, 2, {"  resize"},
+            {true})
+            clear()
+            if num == 1 then
+                
             end
         end
     end
@@ -248,12 +299,12 @@ while true do
     if nullWindowEventData[1] == "touch" then
         if nullWindowEventData[3] >= 4 and nullWindowEventData[3] <= 5 and nullWindowEventData[4] == nullWindow2.sizeY - 1 then
             ::tonew::
-            local clear = calls.call("screenshot", screen, rx / 2 - 16, ry / 2 - 4, 33, 9)
+            local clear = saveZone()
             local entered = calls.call("gui_input", screen, nil, nil, "char", nil, colors.white)
             clear()
             if entered ~= true then
                 if unicode.len(entered) ~= 1 then
-                    local clear = calls.call("screenshot", screen, rx / 2 - 16, ry / 2 - 4, 33, 9)
+                    local clear = saveZone()
                     calls.call("gui_warn", screen, nil, nil, "enter one char\nor cancel menu", colors.white)
                     clear()
                     goto tonew
