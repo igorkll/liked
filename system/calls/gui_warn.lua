@@ -27,16 +27,7 @@ local color = backgroundColor or colors.lightGray
 window:fill(2, 2, window.sizeX, window.sizeY, colors.gray, 0, " ")
 window:clear(color)
 
-local strs = calls.call("split", str, "\n")
-local newstrs = {}
-for i, v in ipairs(strs) do
-    local lnewstrs = calls.call("toParts", v, 22)
-    for i, v in ipairs(lnewstrs) do
-        table.insert(newstrs, v)
-    end
-end
-
-for i, v in ipairs(newstrs) do
+for i, v in ipairs(calls.call("restrs", str, 22)) do
     local textColor = colors.white
     if color == textColor then
         textColor = colors.black

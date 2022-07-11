@@ -24,7 +24,14 @@ local color = backgroundColor or colors.lightGray
 
 window:fill(2, 2, window.sizeX, window.sizeY, colors.gray, 0, " ")
 window:clear(color)
-window:set(10, 2, color, colors.white, str)
+
+for i, v in ipairs(calls.call("restrs", str, 22)) do
+    local textColor = colors.white
+    if color == textColor then
+        textColor = colors.black
+    end
+    window:set(10, i + 1, color, textColor, v)
+end
 
 window:set(2, 2, color, colors.green, "  █")
 window:set(2, 3, color, colors.green, " ███ ")

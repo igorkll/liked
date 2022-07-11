@@ -24,6 +24,7 @@ local nullWindow2 = graphic.classWindow:new(screen, rx - 7, 2 + paletteWindow.si
 
 local selectedColor1 = 1
 local selectedColor2 = 1
+local noSaved
 local selectedChar = " "
 local image = {sizeX = 3, sizeY = 1,
 {
@@ -61,7 +62,7 @@ local function drawUi()
     statusWindow:set(1, 1, colors.red, colors.white, "X")
     statusWindow:set(rx - 5, 1, colors.gray, colors.white, "paint")
     statusWindow:set(3, 1, colors.white, colors.black, "file")
-    statusWindow:set(8, 1, colors.white, colors.black, "settings")
+    statusWindow:set(8, 1, colors.white, colors.black, "edit")
 end
 
 local function drawPixel(x, y, pixel)
@@ -135,6 +136,7 @@ local function load()
 end
 
 local function save()
+    noSaved = false
     if not image then return end
     local file = assert(fs.open(filepath, "wb"))
     file.write(string.char(image.sizeX))
@@ -224,6 +226,10 @@ while true do
         if ok then
             if eventData[3] == 19 and eventData[4] == 31 then
                 save()
+            elseif eventData[3] == 23 and eventData[4] == 17 then
+                if not noSaved or calls.call("gui_yesno", screen, nil, nil, "image do not saved!\nare you sure you want to get out?") then
+                    break
+                end
             end
         end
     end
@@ -248,7 +254,7 @@ while true do
         end
     end
 
-    if mainWindowEventData[1] == "touch" and image then
+    if (mainWindowEventData[1] == "touch" or mainWindowEventData[1] == "drag") and image then
         if mainWindowEventData[3] <= image.sizeX and
         mainWindowEventData[4] <= image.sizeY then
             local pixel = image[mainWindowEventData[4]][mainWindowEventData[3]]
@@ -262,6 +268,7 @@ while true do
                 pixel[3] = " "
             end
             drawPixel(mainWindowEventData[3], mainWindowEventData[4], pixel)
+            noSaved = true
         end
     end
 end
