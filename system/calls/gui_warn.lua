@@ -37,7 +37,11 @@ for i, v in ipairs(strs) do
 end
 
 for i, v in ipairs(newstrs) do
-    window:set(10, i + 1, color, colors.white, v)
+    local textColor = colors.white
+    if color == textColor then
+        textColor = colors.black
+    end
+    window:set(10, i + 1, color, textColor, v)
 end
 
 window:set(2, 2, color, colors.yellow, "  █  ")

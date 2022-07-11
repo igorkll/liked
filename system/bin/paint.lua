@@ -69,7 +69,7 @@ local function drawImage()
         mainWindow:fill(1, 1, image.sizeX, image.sizeY, colors.white, colors.black, "░")
         for y, tbl in ipairs(image) do
             for x, pixel in ipairs(tbl) do
-                if pixel[1] ~= 0 or pixel[2] ~= 0 then
+                if pixel[1] ~= 1 or pixel[2] ~= 1 then
                     mainWindow:set(x, y, indexsColors[pixel[1]], indexsColors[pixel[2]], pixel[3])
                 end
             end
@@ -124,10 +124,8 @@ local function load()
             ((readbit(colorByte, 6) and 1 or 0) * 4) + 
             ((readbit(colorByte, 7) and 1 or 0) * 8)
 
-            if background ~= 0 and foreground ~= 0 then
-                char = read(countCharBytes)
-                image[cy][cx] = {background, foreground, char}
-            end
+            char = read(countCharBytes)
+            image[cy][cx] = {background, foreground, char}
         end
     end
 end
