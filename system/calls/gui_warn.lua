@@ -22,8 +22,10 @@ end
 
 local window = graphic.classWindow:new(screen, cx, cy, 32, 8)
 
+local color = backgroundColor or colors.lightGray
+
 window:fill(2, 2, window.sizeX, window.sizeY, colors.gray, 0, " ")
-window:clear(backgroundColor or colors.lightGray)
+window:clear(color)
 
 local strs = calls.call("split", str, "\n")
 local newstrs = {}
@@ -35,12 +37,12 @@ for i, v in ipairs(strs) do
 end
 
 for i, v in ipairs(newstrs) do
-    window:set(10, i + 1, colors.lightGray, colors.white, v)
+    window:set(10, i + 1, color, colors.white, v)
 end
 
-window:set(2, 2, colors.lightGray, colors.yellow, "  █  ")
-window:set(2, 3, colors.lightGray, colors.yellow, " ███ ")
-window:set(2, 4, colors.lightGray, colors.yellow, "█████")
+window:set(2, 2, color, colors.yellow, "  █  ")
+window:set(2, 3, color, colors.yellow, " ███ ")
+window:set(2, 4, color, colors.yellow, "█████")
 window:set(4, 3, colors.yellow, colors.white, "!")
 
 window:set(32 - 4, 7, colors.lightBlue, colors.white, " ok ")

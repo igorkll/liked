@@ -20,14 +20,15 @@ if not cx or not cy then
 end
 
 local window = graphic.classWindow:new(screen, cx, cy, 32, 8)
+local color = backgroundColor or colors.lightGray
 
 window:fill(2, 2, window.sizeX, window.sizeY, colors.gray, 0, " ")
-window:clear(backgroundColor or colors.lightGray)
-window:set(10, 2, colors.lightGray, colors.white, str)
+window:clear(color)
+window:set(10, 2, color, colors.white, str)
 
-window:set(2, 2, colors.lightGray, colors.green, "  █")
-window:set(2, 3, colors.lightGray, colors.green, " ███ ")
-window:set(2, 4, colors.lightGray, colors.green, "█████")
+window:set(2, 2, color, colors.green, "  █")
+window:set(2, 3, color, colors.green, " ███ ")
+window:set(2, 4, color, colors.green, "█████")
 window:set(4, 3, colors.green, colors.white, "?")
 
 window:set(32 - 4, 7, colors.red, colors.white, " no ")

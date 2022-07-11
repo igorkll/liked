@@ -233,8 +233,8 @@ while true do
             clear()
             if entered ~= true then
                 if unicode.len(entered) ~= 1 then
-                    local clear = calls.call("screenshot", screen, rx / 2 - 16, ry / 2 - 4, 33, 9, colors.white)
-                    calls.call("gui_warn", screen, nil, nil, "enter one char\nor cancel menu")
+                    local clear = calls.call("screenshot", screen, rx / 2 - 16, ry / 2 - 4, 33, 9)
+                    calls.call("gui_warn", screen, nil, nil, "enter one char\nor cancel menu", colors.white)
                     clear()
                     goto tonew
                 else
