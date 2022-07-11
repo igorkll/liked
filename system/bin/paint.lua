@@ -24,15 +24,15 @@ local selectedColor1 = 1
 local selectedColor2 = 1
 local image = {sizeX = 3, sizeY = 1,
 {
-    {1, 15, "P"},
-    {1, 15, "I"},
-    {1, 15, "C"}
+    {16, 1, "P"},
+    {16, 1, "I"},
+    {16, 1, "C"}
 }}
 
 local function drawSelectedColors()
     nullWindow2:fill(1, 1, nullWindow2.sizeX, nullWindow2.sizeY, colors.green, colors.black, "▒")
-    nullWindow2:set(2, nullWindow2.sizeY, colors.green, colors.black, "B")
-    nullWindow2:set(nullWindow2.sizeX - 2, nullWindow2.sizeY, colors.green, colors.black, "F")
+    nullWindow2:set(2, nullWindow2.sizeY, colors.green, colors.black, "BG")
+    nullWindow2:set(nullWindow2.sizeX - 2, nullWindow2.sizeY, colors.green, colors.black, "FG")
     nullWindow2:fill(2, 2, 2, nullWindow2.sizeY - 2, indexsColors[selectedColor1], 0, " ")
     nullWindow2:fill(nullWindow2.sizeX - 2, 2, 2, nullWindow2.sizeY - 2, indexsColors[selectedColor2], 0, " ")
 end
@@ -148,8 +148,10 @@ local function save()
 end
 
 if fs.exists(filepath) then
+    calls.call("gui_warn", screen, nil, nil, "load!")
     load()
 else
+    calls.call("gui_warn", screen, nil, nil, "save!")
     save()
 end
 
@@ -164,8 +166,10 @@ while true do
             break
         end
         if statusWindowEventData[3] >= 3 and statusWindowEventData[3] <= 6 then
-            local num, str = calls.call("gui_context", screen, 4, 2, {"  close", "------------------", "  save"},
+            local clear = calls.call("screenshot", screen, 4, 2, 19, 4)
+            local str, num = calls.call("gui_context", screen, 4, 2, {"  close", "------------------", "  save"},
             {true, false, true})
+            clear()
             if num == 1 then
                 break
             elseif num == 3 then
