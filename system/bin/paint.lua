@@ -64,14 +64,18 @@ local function drawUi()
     statusWindow:set(8, 1, colors.white, colors.black, "settings")
 end
 
+local function drawPixel(x, y, pixel)
+    if pixel[1] ~= 0 or pixel[2] ~= 0 then
+        mainWindow:set(x, y, indexsColors[pixel[1] + 1], indexsColors[pixel[2] + 1], pixel[3])
+    end
+end
+
 local function drawImage()
     if image then
         mainWindow:fill(1, 1, image.sizeX, image.sizeY, colors.white, colors.black, "░")
         for y, tbl in ipairs(image) do
             for x, pixel in ipairs(tbl) do
-                if pixel[1] ~= 0 or pixel[2] ~= 0 then
-                    mainWindow:set(x, y, indexsColors[pixel[1] + 1], indexsColors[pixel[2] + 1], pixel[3])
-                end
+                drawPixel(x, y, pixel)
             end
         end
     end
@@ -171,6 +175,7 @@ while true do
     local statusWindowEventData = statusWindow:uploadEvent(eventData)
     local paletteWindowEventData = paletteWindow:uploadEvent(eventData)
     local nullWindowEventData = nullWindow2:uploadEvent(eventData)
+    local mainWindowEventData = mainWindow:uploadEvent(eventData)
 
     if statusWindowEventData[1] == "touch" then
         if statusWindowEventData[3] == 1 and statusWindowEventData[4] == 1 then
@@ -240,6 +245,23 @@ while true do
                     drawSelectedColors()
                 end
             end
+        end
+    end
+
+    if mainWindowEventData[1] == "touch" and image then
+        if mainWindowEventData[3] <= image.sizeX and
+        mainWindowEventData[4] <= image.sizeY then
+            local pixel = image[mainWindowEventData[4]][mainWindowEventData[3]]
+            if mainWindowEventData[5] == 0 then
+                pixel[1] = selectedColor1
+                pixel[2] = selectedColor2
+                pixel[3] = selectedChar
+            else
+                pixel[1] = 1
+                pixel[2] = 1
+                pixel[3] = " "
+            end
+            drawPixel(mainWindowEventData[3], mainWindowEventData[4], pixel)
         end
     end
 end
