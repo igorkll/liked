@@ -3,6 +3,7 @@ local fs = require("filesystem")
 local event = require("event")
 local gui_container = require("gui_container")
 local calls = require("calls")
+local component = require("component")
 
 local colors = gui_container.colors
 local indexsColors = gui_container.indexsColors
@@ -148,10 +149,11 @@ local function save()
 end
 
 if fs.exists(filepath) then
-    calls.call("gui_warn", screen, nil, nil, "load!")
+    --calls.call("gui_warn", screen, nil, nil, "load!")
     load()
+    drawImage()
 else
-    calls.call("gui_warn", screen, nil, nil, "save!")
+    --calls.call("gui_warn", screen, nil, nil, "save!")
     save()
 end
 
@@ -193,6 +195,21 @@ while true do
             elseif to == false then
                 selectedColor1 = colorIndex
                 drawSelectedColors()
+            end
+        end
+    end
+
+    if eventData[1] == "key_down" then
+        local ok
+        for i, v in ipairs(component.invoke(screen, "getKeyboards")) do
+            if v == eventData[2] then
+                ok = true
+                break
+            end
+        end
+        if ok then
+            if eventData[3] == 19 and eventData[4] == 31 then
+                save()
             end
         end
     end
