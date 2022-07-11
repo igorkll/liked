@@ -23,6 +23,7 @@ local nullWindow2 = graphic.classWindow:new(screen, rx - 7, 2 + paletteWindow.si
 
 local selectedColor1 = 1
 local selectedColor2 = 1
+local selectedChar = " "
 local image = {sizeX = 3, sizeY = 1,
 {
     {16, 1, "P"},
@@ -32,10 +33,15 @@ local image = {sizeX = 3, sizeY = 1,
 
 local function drawSelectedColors()
     nullWindow2:fill(1, 1, nullWindow2.sizeX, nullWindow2.sizeY, colors.green, colors.black, "▒")
+
     nullWindow2:set(2, nullWindow2.sizeY, colors.green, colors.black, "BG")
     nullWindow2:set(nullWindow2.sizeX - 2, nullWindow2.sizeY, colors.green, colors.black, "FG")
+    nullWindow2:set(nullWindow2.sizeX - 4, nullWindow2.sizeY, colors.green, colors.black, "CR")
+
     nullWindow2:fill(2, 2, 2, nullWindow2.sizeY - 2, indexsColors[selectedColor1], 0, " ")
     nullWindow2:fill(nullWindow2.sizeX - 2, 2, 2, nullWindow2.sizeY - 2, indexsColors[selectedColor2], 0, " ")
+
+    nullWindow2:set(nullWindow2.sizeX - 4, nullWindow2.sizeY, colors.green, colors.black, "CR")
 end
 
 local function drawColors()
