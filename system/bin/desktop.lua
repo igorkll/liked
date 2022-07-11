@@ -119,7 +119,7 @@ local function draw()
             local icon = icons[count]
             if icon then
                 if selectedIcon == icon.index then
-                    window:fill(iconX - 2, iconY - 1, iconSizeX + 4, iconY + 2, colors.blue, 0, " ")
+                    window:fill(iconX - 2, iconY - 1, iconSizeX + 4, iconSizeY + 2, colors.blue, 0, " ")
                 end
                 window:set(iconX - (unicode.len(icon.name) // 2), iconY + iconY - 2, colors.lightBlue, colors.white, icon.name)
                 if icon.icon then
