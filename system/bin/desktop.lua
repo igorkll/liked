@@ -76,7 +76,6 @@ local function draw()
                 break
             end
 
-            
             local path = paths.concat(userPath, v)
             local exp = paths.extension(path)
             local icon
@@ -115,15 +114,17 @@ local function draw()
     for cx = 1, iconsX do
         for cy = 1, iconsY do
             count = count + 1
-            local iconX = math.floor((window.sizeX / iconsX) * cx - (iconSizeX / 2))
-            local iconY = math.floor((window.sizeY / iconsY) * cy - (iconSizeY / 2))
+            local iconX = math.floor(((window.sizeX / iconsX) * cx) - (iconSizeX / 2))
+            local iconY = math.floor(((window.sizeY / iconsY) * cy) - (iconSizeY / 2))
             local icon = icons[count]
             if icon then
                 if selectedIcon == icon.index then
                     window:fill(iconX - 2, iconY - 1, iconSizeX + 4, iconY + 2, colors.blue, 0, " ")
                 end
                 window:set(iconX - (unicode.len(icon.name) // 2), iconY + iconY - 2, colors.lightBlue, colors.white, icon.name)
-                calls.call("gui_drawimage", screen, icon.icon, window:toRealPos(iconX, iconY))
+                if icon.icon then
+                    calls.call("gui_drawimage", screen, icon.icon, window:toRealPos(iconX, iconY))
+                end
             end
         end
     end
