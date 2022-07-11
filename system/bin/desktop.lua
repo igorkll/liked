@@ -61,6 +61,11 @@ local function draw()
             end
         end
 
+        local iconsX = 4
+        local iconsY = 2
+
+        for 
+
         local iconValue = i
 
         if iconValue > 0 then
