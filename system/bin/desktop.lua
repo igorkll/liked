@@ -301,22 +301,27 @@ while true do
                             clear()
                             fileDescriptor(v)
                         elseif num == 3 then
-                            local clear = saveZone()
+                            local clear2 = saveZone()
                             local state = calls.call("gui_yesno", screen, nil, nil, "remove?")
-                            clear()
+                            clear2()
+
                             if state then
                                 fs.remove(v.path)
                                 draw()
+                            else
+                                clear()
                             end
                         elseif num == 4 then
-                            local clear = saveZone()
+                            local clear2 = saveZone()
                             local name = calls.call("gui_input", screen, nil, nil, "new name")
-                            clear()
+                            clear2()
 
                             if type(name) == "string" then
                                 local path = paths.concat(userPath, name)
                                 fs.rename(v.path, path)
                                 draw()
+                            else
+                                clear()
                             end
                         else
                             clear()
