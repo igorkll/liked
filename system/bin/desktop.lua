@@ -281,17 +281,24 @@ while true do
             if windowEventData[3] >= v.iconX and windowEventData[3] < (v.iconX + iconSizeX) then
                 if windowEventData[4] >= v.iconY and windowEventData[4] < (v.iconY + iconSizeY) then
                     iconCliked = true
-                    fileDescriptor(v)
+                    if windowEventData[5] == 0 then
+                        fileDescriptor(v)
+                    else
+                        
+                    end
                     break
                 end
             end
         end
-        if not iconCliked then
+        if not iconCliked and windowEventData[5] == 1 then
+            local isRedraw
+            local clear = calls.call("screenshot", screen, windowEventData[3], windowEventData[4], 19, 6)
             local str, num = calls.call("gui_context", screen, windowEventData[3], windowEventData[4],
-            {"  back", "------------------", "  new image", "new folder", "paste"},
+            {"  back", "------------------", "  new image", "  new folder", "  paste"},
             {true, false, true, true, true})
             if num == 1 then
                 folderBack()
+                isRedraw = true
             elseif num == 3 then
                 local clear = saveZone()
                 local name = calls.call("gui_input", screen, nil, nil, "image name")
@@ -300,8 +307,23 @@ while true do
                 if type(name) == "string" then
                     local path = paths.concat(userPath, name .. ".t2p")
                     execute("paint", path)
+                    draw()
+                    isRedraw = true
                 end
-            elseif num 
+            elseif num == 4 then
+                local clear = saveZone()
+                local name = calls.call("gui_input", screen, nil, nil, "image name")
+                clear()
+
+                if type(name) == "string" then
+                    local path = paths.concat(userPath, name)
+                    fs.makeDirectory(path)
+                    draw()
+                    isRedraw = true
+                end
+            end
+            if not isRedraw then
+                clear()
             end
         end
     end
