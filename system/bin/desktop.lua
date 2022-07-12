@@ -194,6 +194,8 @@ local function fileDescriptor(icon)
         draw()
     elseif icon.exp == "t2p" then
         execute("paint", screen, icon.path)
+    else
+        warn("file is not supported")
     end
 end
 
@@ -232,6 +234,16 @@ function execute(name, ...)
     end
 end
 
+function saveZone()
+    return calls.call("screenshot", screen, rx / 2 - 16, ry / 2 - 4, 33, 9)
+end
+
+function warn(str)
+    local clear = saveZone()
+    calls.call("gui_warn", screen, nil, nil, str)
+    clear()
+end
+
 while true do
     local eventData = {computer.pullSignal()}
     local windowEventData = window:uploadEvent(eventData)
@@ -265,9 +277,9 @@ while true do
             end
         end
         for i, v in ipairs(icons) do
-            if windowEventData[3] >= v.iconX and windowEventData[3] < (v.iconX + v.sizeX) then
-                if windowEventData[4] >= v.iconX and windowEventData[4] < (v.iconY + v.sizeY) then
-                    fileDescriptor(v.path)
+            if windowEventData[3] >= v.iconX and windowEventData[3] < (v.iconX + iconSizeX) then
+                if windowEventData[4] >= v.iconY and windowEventData[4] < (v.iconY + iconSizeY) then
+                    fileDescriptor(v)
                     break
                 end
             end
