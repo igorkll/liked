@@ -19,7 +19,7 @@ local statusWindow = graphic.classWindow:new(screen, 1, 1, rx, 1)
 local window = graphic.classWindow:new(screen, 1, 2, rx, ry - 1)
 
 local wallpaperPath = "/data/wallpaper.t2p"
-local userRoot = "/data/userdata"
+local userRoot = "/data/userdata/"
 local userPath = userRoot
 fs.makeDirectory(userRoot)
 
@@ -65,8 +65,16 @@ local function draw()
 
     drawStatus()
     window:clear(colors.lightBlue)
-    window:set(1, window.sizeY, colors.lightGray, colors.gray, "<")
-    window:set(window.sizeX, window.sizeY, colors.lightGray, colors.gray, ">")
+
+    window:set(1, window.sizeY - 3, colors.lightGray, colors.gray, " /")
+    window:set(1, window.sizeY - 2, colors.lightGray, colors.gray, "/ ")
+    window:set(1, window.sizeY - 1, colors.lightGray, colors.gray, "\\ ")
+    window:set(1, window.sizeY - 0, colors.lightGray, colors.gray, " \\")
+
+    window:set(window.sizeX - 1, window.sizeY - 3, colors.lightGray, colors.gray, "\\ ")
+    window:set(window.sizeX - 1, window.sizeY - 2, colors.lightGray, colors.gray, " \\")
+    window:set(window.sizeX - 1, window.sizeY - 1, colors.lightGray, colors.gray, " /")
+    window:set(window.sizeX - 1, window.sizeY - 0, colors.lightGray, colors.gray, "/ ")
 
     if fs.exists(wallpaperPath) then
         local sx, sy = calls.call("gui_readimagesize", wallpaperPath)
@@ -161,7 +169,7 @@ local function listForward()
     checkData()
     local startIconsPos = startIconsPoss[userPath]
     local selectedIcon = selectedIcons[userPath]
-    
+
     startIconsPos = startIconsPos + (iconsX * iconsY)
     draw()
 end
@@ -176,6 +184,23 @@ local function listBack()
         startIconsPos = 1
     end
     draw()
+end
+
+local function folderBack()
+    userPath = paths.path(userPath)
+    if unicode.sub(userPath, 1, unicode.len(userRoot)) ~= userPath then
+        userPath = userRoot
+    end
+    draw()
+end
+
+local function fileDescriptor(icon)
+    if fs.isDirectory(icon.path) then
+        userPath = icon.path
+        draw()
+    else
+
+    end
 end
 
 ------------------------------------
