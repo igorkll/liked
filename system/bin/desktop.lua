@@ -291,12 +291,24 @@ while true do
                     if windowEventData[5] == 0 then
                         fileDescriptor(v)
                     else
+                        local strs, active =
+                        {"  open", "------------------", "  remove", "  rename", "  copy", "  cut"},
+                        {true, false, true, true, true, true}
+
+                        if v.exp == "t2p" then
+                            table.insert(strs, "------------------")
+                            table.insert(active, false)
+
+                            table.insert(strs, "  set as wallpaper")
+                            table.insert(active, true)
+                        end
+
                         local posX, posY = window:toRealPos(windowEventData[3], windowEventData[4])
 
                         local clear = calls.call("screenshot", screen, posX, posY, 19, 7)
                         local str, num = calls.call("gui_context", screen, posX, posY,
-                        {"  open", "------------------", "  remove", "  rename", "  copy", "  cut"},
-                        {true, false, true, true, true, true})
+                        strs, active)
+
                         if num == 1 then
                             clear()
                             fileDescriptor(v)
@@ -323,6 +335,8 @@ while true do
                             else
                                 clear()
                             end
+                        elseif str == "  set as wallpaper" then
+                            
                         else
                             clear()
                         end
