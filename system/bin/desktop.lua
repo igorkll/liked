@@ -293,12 +293,12 @@ while true do
                     else
                         local posX, posY = window:toRealPos(windowEventData[3], windowEventData[4])
 
-                        local clearFlag, refiles = true
                         local clear = calls.call("screenshot", screen, posX, posY, 19, 7)
                         local str, num = calls.call("gui_context", screen, posX, posY,
                         {"  open", "------------------", "  remove", "  rename", "  copy", "  cut"},
                         {true, false, true, true, true, true})
                         if num == 1 then
+                            clear()
                             fileDescriptor(v)
                         elseif num == 3 then
                             local clear = saveZone()
@@ -306,7 +306,7 @@ while true do
                             clear()
                             if state then
                                 fs.remove(v.path)
-                                refiles = true
+                                draw()
                             end
                         elseif num == 4 then
                             local clear = saveZone()
@@ -316,14 +316,10 @@ while true do
                             if type(name) == "string" then
                                 local path = paths.concat(userPath, name)
                                 fs.rename(v.path, path)
-                                refiles = true
+                                draw()
                             end
-                        end
-                        if clearFlag then
+                        else
                             clear()
-                        end
-                        if refiles then
-                            draw()
                         end
                     end
                     break
