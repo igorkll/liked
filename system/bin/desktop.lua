@@ -64,6 +64,10 @@ local function draw(old)
     drawStatus()
     window:clear(colors.lightBlue)
 
+    local str = "path: " .. userPath
+    window:set(math.floor(((window.sizeX / 2) - (unicode.len(str) / 2)) + 0.5),
+    window.sizeY, colors.lightGray, colors.gray, str)
+
     window:set(1, window.sizeY - 3, colors.lightGray, colors.gray, " /")
     window:set(1, window.sizeY - 2, colors.lightGray, colors.gray, "/ ")
     window:set(1, window.sizeY - 1, colors.lightGray, colors.gray, "\\ ")
@@ -92,6 +96,10 @@ local function draw(old)
     if startIconsPoss[userPath] >= iconsCount then
         startIconsPoss[userPath] = old or 1
     end
+
+    local str = tostring(math.floor(startIconsPoss[userPath] // (iconsX * iconsY)) + 1) .. "/" ..
+    tostring(math.floor(iconsCount // (iconsX * iconsY)) + 1)
+    window:set(math.floor(((window.sizeX / 2) - (unicode.len(str) / 2)) + 0.5), window.sizeY - 1, colors.lightGray, colors.gray, str)
 
     icons = {}
     local count = 0
@@ -287,6 +295,8 @@ while true do
             if windowEventData[3] >= v.iconX and windowEventData[3] < (v.iconX + iconSizeX) then
                 if windowEventData[4] >= v.iconY and windowEventData[4] < (v.iconY + iconSizeY) then
                     selectedIcons[userPath] = v.index
+                    draw()
+                    
                     iconCliked = true
                     if windowEventData[5] == 0 then
                         fileDescriptor(v)
