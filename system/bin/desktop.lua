@@ -192,7 +192,7 @@ end
 
 local function folderBack()
     userPath = paths.path(userPath)
-    if unicode.sub(userPath, 1, unicode.len(userRoot)) ~= userPath then
+    if unicode.sub(userPath, 1, unicode.len(userRoot)) ~= userRoot then
         userPath = userRoot
     end
     draw()
