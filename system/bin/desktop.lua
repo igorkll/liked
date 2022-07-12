@@ -16,7 +16,7 @@ local screen = ...
 local rx, ry = graphic.findGpu(screen).getResolution()
 
 local statusWindow = graphic.classWindow:new(screen, 1, 1, rx, 1)
-local window = graphic.classWindow:new(screen, 1, 2, rx, ry)
+local window = graphic.classWindow:new(screen, 1, 2, rx, ry - 1)
 
 local wallpaperPath = "/data/wallpaper.t2p"
 local userRoot = "/data/userdata"
@@ -31,10 +31,19 @@ local iconsY = 2
 local iconSizeX = 8
 local iconSizeY = 4
 
-local startIconsPos = 1
-local selectedIcon = 1
+local startIconsPoss = {}
+local selectedIcons = {}
 
 local icons
+
+local function checkData()
+    if not startIconsPoss[userPath] then
+        startIconsPoss[userPath] = 1
+    end
+    if not selectedIcons[userPath] then
+        selectedIcons[userPath] = 1
+    end
+end
 
 local function drawStatus()
     local hours, minutes, seconds = calls.call("getRealTime", 3)
@@ -50,6 +59,10 @@ local function drawStatus()
 end
 
 local function draw()
+    checkData()
+    local startIconsPos = startIconsPoss[userPath]
+    local selectedIcon = selectedIcons[userPath]
+
     drawStatus()
     window:clear(colors.lightBlue)
     window:set(1, window.sizeY, colors.lightGray, colors.gray, "<")
@@ -124,10 +137,11 @@ local function draw()
             local iconX = math.floor((centerIconX - (iconSizeX / 2)) + 0.5)
             local iconY = math.floor((centerIconY - (iconSizeY / 2)) + 0.5)
             local icon = icons[count]
-            icon.iconX = iconX
-            icon.iconY = iconY
             
             if icon then
+                icon.iconX = iconX
+                icon.iconY = iconY
+
                 if selectedIcon == icon.index then
                     window:fill(iconX - 2, iconY - 1, iconSizeX + 4, iconSizeY + 2, colors.blue, 0, " ")
                 end
@@ -144,11 +158,19 @@ end
 draw()
 
 local function listForward()
+    checkData()
+    local startIconsPos = startIconsPoss[userPath]
+    local selectedIcon = selectedIcons[userPath]
+    
     startIconsPos = startIconsPos + (iconsX * iconsY)
     draw()
 end
 
 local function listBack()
+    checkData()
+    local startIconsPos = startIconsPoss[userPath]
+    local selectedIcon = selectedIcons[userPath]
+
     startIconsPos = startIconsPos - (iconsX * iconsY)
     if startIconsPos < 1 then
         startIconsPos = 1
