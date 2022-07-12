@@ -215,6 +215,10 @@ local function fileDescriptor(icon)
         execute("paint", icon.path)
         draw()
         return true
+    elseif icon.exp == "lua" then
+        execute(icon.path)
+        draw()
+        return true
     else
         warn("file is not supported")
     end
