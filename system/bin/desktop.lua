@@ -429,13 +429,19 @@ while true do
                     isRedraw = true
                 end
             elseif num == 5 then
-                fs.copy(copyObject, paths.concat(userPath, paths.name(copyObject)))
-                
-                if isCut then
-                    isCut
+                local toPath = paths.concat(userPath, paths.name(copyObject))
+                if not fs.exists(toPath) or calls.call("gui_yesno", screen, nil, nil, "") then
+                    
+                    fs.copy(copyObject, toPath)
+                    
+                    if isCut then
+                        isCut = false
+                        fs.remove(copyObject)
+                    end
+                    copyObject = nil
+                    isCut = false
                 end
-                copyObject = nil
-                isCut = false
+                draw()
             end
             if not isRedraw then
                 clear()
