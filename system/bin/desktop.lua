@@ -293,15 +293,18 @@ while true do
                     else
                         local posX, posY = window:toRealPos(windowEventData[3], windowEventData[4])
 
-                        local refiles
+                        local clearFlag, refiles = true
                         local clear = calls.call("screenshot", screen, posX, posY, 19, 7)
                         local str, num = calls.call("gui_context", screen, posX, posY,
-                        {"  open", "------------------", "  remove", "  rename", "copy", "cut"},
+                        {"  open", "------------------", "  remove", "  rename", "  copy", "  cut"},
                         {true, false, true, true, true, true})
                         if num == 1 then
                             fileDescriptor(v)
                         elseif num == 3 then
-                            if calls.call("gui_yesno", screen, nil, nil, "remove?") then
+                            local clear = saveZone()
+                            local state = calls.call("gui_yesno", screen, nil, nil, "remove?")
+                            clear()
+                            if state then
                                 fs.remove(v.path)
                                 refiles = true
                             end
@@ -316,10 +319,11 @@ while true do
                                 refiles = true
                             end
                         end
+                        if clearFlag then
+                            clear()
+                        end
                         if refiles then
                             draw()
-                        else
-                            clear()
                         end
                     end
                     break
