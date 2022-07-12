@@ -58,7 +58,7 @@ local function drawStatus()
     statusWindow:set(1, 1, colors.lightGray, colors.white, " OS ")
 end
 
-local function draw()
+local function draw(old)
     checkData()
 
     drawStatus()
@@ -85,7 +85,7 @@ local function draw()
         iconsCount = iconsCount + 1
     end
     if startIconsPoss[userPath] >= iconsCount then
-        startIconsPoss[userPath] = iconsCount - 1
+        startIconsPoss[userPath] = old
     end
 
     icons = {}
@@ -97,7 +97,7 @@ local function draw()
                 break
             end
 
-            local path = paths.concat(userPath, v)
+            local path = paths.concat(userPath, v) .. "/"
             local exp = paths.extension(path)
             local icon
             if exp and #exp > 0 then
@@ -165,8 +165,9 @@ draw()
 local function listForward()
     checkData()
 
+    local old = startIconsPoss[userPath]
     startIconsPoss[userPath] = startIconsPoss[userPath] + (iconsX * iconsY)
-    draw()
+    draw(old)
 end
 
 local function listBack()
