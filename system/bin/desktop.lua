@@ -398,6 +398,11 @@ while true do
         if not iconCliked and windowEventData[5] == 1 then
             local posX, posY = window:toRealPos(windowEventData[3], windowEventData[4])
 
+            if not fs.exists(copyObject) then
+                copyObject = nil
+                isCut = false
+            end
+
             local isRedraw
             local clear = calls.call("screenshot", screen, posX, posY, 19, 6)
             local str, num = calls.call("gui_context", screen, posX, posY,
@@ -430,8 +435,10 @@ while true do
                 end
             elseif num == 5 then
                 local toPath = paths.concat(userPath, paths.name(copyObject))
-                if not fs.exists(toPath) or calls.call("gui_yesno", screen, nil, nil, "") then
-                    
+                if not fs.exists(toPath) or calls.call("gui_yesno", screen, nil, nil, "an object with this name is already present in this folder, should I replace it?") then
+                    if fs.exists(toPath) then
+                        fs.remove(toPath)
+                    end
                     fs.copy(copyObject, toPath)
                     
                     if isCut then
