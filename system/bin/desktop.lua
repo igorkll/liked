@@ -61,7 +61,7 @@ local function draw(old)
     drawStatus()
     window:clear(colors.lightBlue)
 
-    local str = "path: " .. userPath
+    local str = "path: " .. unicode.sub(userPath, unicode.len(userRoot), unicode.len(userPath))
     window:set(math.floor(((window.sizeX / 2) - (unicode.len(str) / 2)) + 0.5),
     window.sizeY, colors.lightGray, colors.gray, str)
 
