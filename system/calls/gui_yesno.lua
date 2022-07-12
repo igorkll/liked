@@ -2,6 +2,7 @@ local graphic = require("graphic")
 local gui_container = require("gui_container")
 local event = require("event")
 local calls = require("calls")
+local computer = require("computer")
 
 local colors = gui_container.colors
 
@@ -43,7 +44,7 @@ window:set(32 - 4, 7, colors.red, colors.white, " no ")
 window:set(2, 7, colors.lime, colors.white, " yes ")
 
 while true do
-    local eventData = {event.pull()}
+    local eventData = {computer.pullSignal()}
     local windowEventData = window:uploadEvent(eventData)
     if windowEventData[1] == "touch" and windowEventData[5] == 0 then
         if windowEventData[4] == 7 and windowEventData[3] > (32 - 5) and windowEventData[3] <= ((32 - 5) + 4) then

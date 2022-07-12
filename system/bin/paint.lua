@@ -5,6 +5,7 @@ local gui_container = require("gui_container")
 local calls = require("calls")
 local component = require("component")
 local unicode = require("unicode")
+local computer = require("computer")
 
 local colors = gui_container.colors
 local indexsColors = gui_container.indexsColors
@@ -234,7 +235,7 @@ local function resize(newx, newy)
 end
 
 while true do
-    local eventData = {event.pull()}
+    local eventData = {computer.pullSignal()}
     local statusWindowEventData = statusWindow:uploadEvent(eventData)
     local paletteWindowEventData = paletteWindow:uploadEvent(eventData)
     local nullWindowEventData = nullWindow2:uploadEvent(eventData)

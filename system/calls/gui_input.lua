@@ -1,6 +1,6 @@
 local graphic = require("graphic")
 local gui_container = require("gui_container")
-local event = require("event")
+local computer = require("computer")
 local unicode = require("unicode")
 
 local colors = gui_container.colors
@@ -35,7 +35,7 @@ window:set(2, 7, colors.red, colors.white, " cancel ")
 local reader = window:read(2, 3, window.sizeX - 2, colors.gray, colors.white, nil, crypto)
 
 while true do
-    local eventData = {event.pull()}
+    local eventData = {computer.pullSignal()}
     local out = reader.uploadEvent(eventData)
     if out then return out end
     local windowEventData = window:uploadEvent(eventData)

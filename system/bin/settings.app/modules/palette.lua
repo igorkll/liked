@@ -73,6 +73,7 @@ local function draw(set)
     if set then
         calls.call("system_setTheme", paths.concat(themesPath, themes[selected]))
     end
+    event.push("redrawDesktop")
 end
 draw()
 

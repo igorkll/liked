@@ -177,7 +177,7 @@ local function execute(name, ...)
 end
 
 while true do
-    local eventData = {event.pull()}
+    local eventData = {computer.pullSignal()}
     local windowEventData = window:uploadEvent(eventData)
     local statusWindowEventData = statusWindow:uploadEvent(eventData)
     if statusWindowEventData[1] == "touch" then

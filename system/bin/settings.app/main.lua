@@ -6,6 +6,7 @@ local calls = require("calls")
 local gui_container = require("gui_container")
 local paths = require("paths")
 local unicode = require("unicode")
+local computer = require("computer")
 
 local colors = gui_container.colors
 
@@ -68,7 +69,7 @@ end
 draw()
 
 while true do
-    local eventData = {event.pull()}
+    local eventData = {computer.pullSignal()}
     local selectWindowEventData = selectWindow:uploadEvent(eventData)
     local statusWindowEventData = statusWindow:uploadEvent(eventData)
 

@@ -1,7 +1,8 @@
 local graphic = require("graphic") --только при отрисовке в оперу лезет
 local gui_container = require("gui_container")
-local event = require("event")
+local computer = require("computer")
 local unicode = require("unicode")
+local event = require("event")
 
 local colors = gui_container.colors
 
@@ -40,7 +41,7 @@ redrawStrs()
 
 local selectedNum
 while true do
-    local eventData = {event.pull()}
+    local eventData = {computer.pullSignal()}
     if eventData[2] == screen then
         local windowEventData = window:uploadEvent(eventData)
         if windowEventData[1] == "drop" and windowEventData[5] == 0 then
