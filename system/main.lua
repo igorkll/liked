@@ -22,12 +22,10 @@ for address in component.list("screen") do
 end
 
 while true do
-    --[[
     for i, v in ipairs(threads) do
         if v:status() == "dead" then
             error("crash thread is monitor " .. v.screen:sub(1, 4) .. " " .. (v.out[2] or "unknown error") .. " " .. (v.out[3] or "not found"))
         end
     end
-    ]]
     event.sleep(1)
 end

@@ -90,12 +90,12 @@ local function draw(old)
     for i, v in ipairs(fs.list(userPath)) do
         iconsCount = iconsCount + 1
     end
-    if startIconsPoss[userPath] >= iconsCount then
+    if startIconsPoss[userPath] > iconsCount then
         startIconsPoss[userPath] = old or 1
     end
 
     local str = tostring(math.floor(startIconsPoss[userPath] // (iconsX * iconsY)) + 1) .. "/" ..
-    tostring(math.floor(iconsCount // (iconsX * iconsY)) + 1)
+    tostring(math.floor((iconsCount - 1) // (iconsX * iconsY)) + 1)
     window:set(math.floor(((window.sizeX / 2) - (unicode.len(str) / 2)) + 0.5), window.sizeY - 1, colors.lightGray, colors.gray, str)
 
     icons = {}
@@ -281,10 +281,13 @@ while true do
         if windowEventData[4] >= window.sizeY - 3 then
             if windowEventData[3] >= 1 and windowEventData[3] <= 2 then
                 listBack()
+                goto bigSkip
             elseif windowEventData[3] <= window.sizeX and windowEventData[3] >= window.sizeX - 1 then
                 listForward()
+                goto bigSkip
             elseif windowEventData[3] >= 3 and windowEventData[3] <= 4 then
                 folderBack()
+                goto bigSkip
             end
         end
         local iconCliked = false
@@ -368,7 +371,7 @@ while true do
                 end
             end
         end
-        if not iconCliked then
+        if not iconCliked and selectedIcons[userPath] then
             selectedIcons[userPath] = nil
             draw()
         end
@@ -410,6 +413,7 @@ while true do
                 clear()
             end
         end
+        ::bigSkip::
     end
 
     if eventData[1] == "redrawDesktop" then
