@@ -41,6 +41,9 @@ local startIconsPoss = {}
 
 local icons
 
+local copyObject
+local isCut = false
+
 local function checkData()
     if not startIconsPoss[userPath] then
         startIconsPoss[userPath] = 1
@@ -367,6 +370,12 @@ while true do
                             else
                                 clear()
                             end
+                        elseif num == 5 then
+                            copyObject = v.path
+                            isCut = false
+                        elseif num == 6 then
+                            copyObject = v.path
+                            isCut = true
                         elseif str == "  set as wallpaper" then
                             fs.copy(v.path, "/data/wallpaper.t2p")
                             event.push("redrawDesktop")
@@ -393,7 +402,7 @@ while true do
             local clear = calls.call("screenshot", screen, posX, posY, 19, 6)
             local str, num = calls.call("gui_context", screen, posX, posY,
             {"  back", "------------------", "  new image", "  new folder", "  paste"},
-            {true, false, true, true, true})
+            {true, false, true, true, not not copyObject})
             if num == 1 then
                 folderBack()
                 isRedraw = true
@@ -419,6 +428,14 @@ while true do
                     draw()
                     isRedraw = true
                 end
+            elseif num == 5 then
+                fs.copy(copyObject, paths.concat(userPath, paths.name(copyObject)))
+                
+                if isCut then
+                    isCut
+                end
+                copyObject = nil
+                isCut = false
             end
             if not isRedraw then
                 clear()
