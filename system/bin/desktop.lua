@@ -276,12 +276,32 @@ while true do
                 listForward()
             end
         end
+        local iconCliked = false
         for i, v in ipairs(icons) do
             if windowEventData[3] >= v.iconX and windowEventData[3] < (v.iconX + iconSizeX) then
                 if windowEventData[4] >= v.iconY and windowEventData[4] < (v.iconY + iconSizeY) then
+                    iconCliked = true
                     fileDescriptor(v)
                     break
                 end
+            end
+        end
+        if not iconCliked then
+            local str, num = calls.call("gui_context", screen, windowEventData[3], windowEventData[4],
+            {"  back", "------------------", "  new image", "new folder", "paste"},
+            {true, false, true, true, true})
+            if num == 1 then
+                folderBack()
+            elseif num == 3 then
+                local clear = saveZone()
+                local name = calls.call("gui_input", screen, nil, nil, "image name")
+                clear()
+
+                if type(name) == "string" then
+                    local path = paths.concat(userPath, name .. ".t2p")
+                    execute("paint", path)
+                end
+            elseif num 
             end
         end
     end

@@ -8,13 +8,12 @@ local event = require("event")
 
 ------------------------------------
 
-local desktop = assert(programs.load("desktop"))
-
 local threads = {}
 for address in component.list("screen") do
     local gpu = graphic.findGpu(address)
     if gpu.maxDepth() ~= 1 then
         calls.call("gui_initScreen", address)
+        local desktop = assert(programs.load("desktop")) --один раз загрузить не выйдит, потому что тогда у них будут один _ENV что приведет к путанице глобалов, которые должны оставаться личьными
         local t = thread.create(desktop, address)
         t:resume()
         table.insert(threads, t)
