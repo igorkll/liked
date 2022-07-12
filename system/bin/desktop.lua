@@ -293,24 +293,17 @@ while true do
                     else
                         local posX, posY = window:toRealPos(windowEventData[3], windowEventData[4])
 
-                        local isRedraw
-                        local clear = calls.call("screenshot", screen, posX, posY, 19, 6)
+                        local refiles
+                        local clear = calls.call("screenshot", screen, posX, posY, 19, 7)
                         local str, num = calls.call("gui_context", screen, posX, posY,
-                        {"  open", "------------------", "remove", "rename"},
-                        {true, false, true, true, true})
+                        {"  open", "------------------", "  remove", "  rename", "copy", "cut"},
+                        {true, false, true, true, true, true})
                         if num == 1 then
-                            folderBack()
-                            isRedraw = true
+                            fileDescriptor(v)
                         elseif num == 3 then
-                            local clear = saveZone()
-                            local name = calls.call("gui_input", screen, nil, nil, "image name")
-                            clear()
-
-                            if type(name) == "string" then
-                                local path = paths.concat(userPath, name .. ".t2p")
-                                execute("paint", path)
-                                draw()
-                                isRedraw = true
+                            if calls.call("gui_yesno", screen, nil, nil, "remove?") then
+                                fs.remove(v.path)
+                                refiles = true
                             end
                         elseif num == 4 then
                             local clear = saveZone()
@@ -319,12 +312,13 @@ while true do
 
                             if type(name) == "string" then
                                 local path = paths.concat(userPath, name)
-                                fs.makeDirectory(path)
-                                draw()
-                                isRedraw = true
+                                fs.rename(path, paths.concat(userPath, name))
+                                refiles
                             end
                         end
-                        if not isRedraw then
+                        if refiles then
+                            draw()
+                        else
                             clear()
                         end
                     end
