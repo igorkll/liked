@@ -60,8 +60,6 @@ end
 
 local function draw()
     checkData()
-    local startIconsPos = startIconsPoss[userPath]
-    local selectedIcon = selectedIcons[userPath]
 
     drawStatus()
     window:clear(colors.lightBlue)
@@ -86,14 +84,14 @@ local function draw()
     for i, v in ipairs(fs.list(userPath)) do
         iconsCount = iconsCount + 1
     end
-    if startIconsPos >= iconsCount then
-        startIconsPos = iconsCount - 1
+    if startIconsPoss[userPath] >= iconsCount then
+        startIconsPoss[userPath] = iconsCount - 1
     end
 
     icons = {}
     local count = 0
     for i, v in ipairs(fs.list(userPath)) do
-        if i >= startIconsPos and i <= iconsCount then
+        if i >= startIconsPoss[userPath] and i <= iconsCount then
             count = count + 1
             if count > (iconsX * iconsY) then
                 break
@@ -150,7 +148,7 @@ local function draw()
                 icon.iconX = iconX
                 icon.iconY = iconY
 
-                if selectedIcon == icon.index then
+                if selectedIcons[userPath] == icon.index then
                     window:fill(iconX - 2, iconY - 1, iconSizeX + 4, iconSizeY + 2, colors.blue, 0, " ")
                 end
                 local x, y = window:toRealPos(math.floor((centerIconX - (unicode.len(icon.name) / 2)) + 0.5), centerIconY + 2)
@@ -167,21 +165,17 @@ draw()
 
 local function listForward()
     checkData()
-    local startIconsPos = startIconsPoss[userPath]
-    local selectedIcon = selectedIcons[userPath]
 
-    startIconsPos = startIconsPos + (iconsX * iconsY)
+    startIconsPoss[userPath] = startIconsPoss[userPath] + (iconsX * iconsY)
     draw()
 end
 
 local function listBack()
     checkData()
-    local startIconsPos = startIconsPoss[userPath]
-    local selectedIcon = selectedIcons[userPath]
 
-    startIconsPos = startIconsPos - (iconsX * iconsY)
-    if startIconsPos < 1 then
-        startIconsPos = 1
+    startIconsPoss[userPath] = startIconsPoss[userPath] - (iconsX * iconsY)
+    if startIconsPoss[userPath] < 1 then
+        startIconsPoss[userPath] = 1
     end
     draw()
 end
@@ -198,8 +192,8 @@ local function fileDescriptor(icon)
     if fs.isDirectory(icon.path) then
         userPath = icon.path
         draw()
-    else
-
+    elseif icon.exp == "t2p" then
+        execute("paint", screen, icon.path)
     end
 end
 
@@ -218,7 +212,7 @@ startStatusTimer()
 
 ------------------------------------
 
-local function execute(name, ...)
+function execute(name, ...)
     stopStatusTimer()
     local code, err = programs.load(name)
     local ok = true
@@ -263,11 +257,19 @@ while true do
     end
 
     if windowEventData[1] == "touch" then
-        if windowEventData[4] == window.sizeY then
-            if windowEventData[3] == 1 then
+        if windowEventData[4] >= window.sizeY - 3 then
+            if windowEventData[3] >= 1 and windowEventData[3] <= 2 then
                 listBack()
-            elseif windowEventData[3] == window.sizeX then
+            elseif windowEventData[3] <= window.sizeX and windowEventData[3] >= window.sizeX - 1 then
                 listForward()
+            end
+        end
+        for i, v in ipairs(icons) do
+            if windowEventData[3] >= v.iconX and windowEventData[3] < (v.iconX + v.sizeX) then
+                if windowEventData[4] >= v.iconX and windowEventData[4] < (v.iconY + v.sizeY) then
+                    fileDescriptor(v.path)
+                    break
+                end
             end
         end
     end
