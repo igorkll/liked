@@ -69,6 +69,11 @@ local function draw(old)
     window:set(1, window.sizeY - 1, colors.lightGray, colors.gray, "\\ ")
     window:set(1, window.sizeY - 0, colors.lightGray, colors.gray, " \\")
 
+    window:set(3, window.sizeY - 3, colors.red, colors.gray, " /")
+    window:set(3, window.sizeY - 2, colors.red, colors.gray, "/ ")
+    window:set(3, window.sizeY - 1, colors.red, colors.gray, "\\ ")
+    window:set(3, window.sizeY - 0, colors.red, colors.gray, " \\")
+
     window:set(window.sizeX - 1, window.sizeY - 3, colors.lightGray, colors.gray, "\\ ")
     window:set(window.sizeX - 1, window.sizeY - 2, colors.lightGray, colors.gray, " \\")
     window:set(window.sizeX - 1, window.sizeY - 1, colors.lightGray, colors.gray, " /")
@@ -85,7 +90,7 @@ local function draw(old)
         iconsCount = iconsCount + 1
     end
     if startIconsPoss[userPath] >= iconsCount then
-        startIconsPoss[userPath] = old
+        startIconsPoss[userPath] = old or 1
     end
 
     icons = {}
@@ -274,6 +279,8 @@ while true do
                 listBack()
             elseif windowEventData[3] <= window.sizeX and windowEventData[3] >= window.sizeX - 1 then
                 listForward()
+            elseif windowEventData[3] >= 3 and windowEventData[3] <= 4 then
+                folderBack()
             end
         end
         local iconCliked = false
@@ -284,7 +291,42 @@ while true do
                     if windowEventData[5] == 0 then
                         fileDescriptor(v)
                     else
-                        
+                        local posX, posY = window:toRealPos(windowEventData[3], windowEventData[4])
+
+                        local isRedraw
+                        local clear = calls.call("screenshot", screen, posX, posY, 19, 6)
+                        local str, num = calls.call("gui_context", screen, posX, posY,
+                        {"  open", "------------------", "remove", "rename"},
+                        {true, false, true, true, true})
+                        if num == 1 then
+                            folderBack()
+                            isRedraw = true
+                        elseif num == 3 then
+                            local clear = saveZone()
+                            local name = calls.call("gui_input", screen, nil, nil, "image name")
+                            clear()
+
+                            if type(name) == "string" then
+                                local path = paths.concat(userPath, name .. ".t2p")
+                                execute("paint", path)
+                                draw()
+                                isRedraw = true
+                            end
+                        elseif num == 4 then
+                            local clear = saveZone()
+                            local name = calls.call("gui_input", screen, nil, nil, "folder name")
+                            clear()
+
+                            if type(name) == "string" then
+                                local path = paths.concat(userPath, name)
+                                fs.makeDirectory(path)
+                                draw()
+                                isRedraw = true
+                            end
+                        end
+                        if not isRedraw then
+                            clear()
+                        end
                     end
                     break
                 end
