@@ -52,6 +52,8 @@ end
 local function draw()
     drawStatus()
     window:clear(colors.lightBlue)
+    window:set(1, window.sizeY, colors.lightGray, colors.gray, "<")
+    window:set(window.sizeX, window.sizeY, colors.lightGray, colors.gray, ">")
 
     if fs.exists(wallpaperPath) then
         local sx, sy = calls.call("gui_readimagesize", wallpaperPath)
@@ -63,14 +65,14 @@ local function draw()
     for i, v in ipairs(fs.list(userPath)) do
         iconsCount = iconsCount + 1
     end
-    if startIconsPos > iconsCount then
-        startIconsPos = 1
+    if startIconsPos >= iconsCount then
+        startIconsPos = iconsCount - 1
     end
 
     icons = {}
     local count = 0
     for i, v in ipairs(fs.list(userPath)) do
-        if i >= startIconsPos then
+        if i >= startIconsPos and i <= iconsCount then
             count = count + 1
             if count > (iconsX * iconsY) then
                 break
@@ -141,6 +143,19 @@ local function draw()
 end
 draw()
 
+local function listForward()
+    startIconsPos = startIconsPos + (iconsX * iconsY)
+    draw()
+end
+
+local function listBack()
+    startIconsPos = startIconsPos - (iconsX * iconsY)
+    if startIconsPos < 1 then
+        startIconsPos = 1
+    end
+    draw()
+end
+
 ------------------------------------
 
 local statusTimer
@@ -197,6 +212,16 @@ while true do
                 computer.shutdown(true)
             end
             draw()
+        end
+    end
+
+    if windowEventData[1] == "touch" then
+        if windowEventData[4] == window.sizeY then
+            if windowEventData[3] == 1 then
+                listBack()
+            elseif windowEventData[3] == window.sizeX then
+                listForward()
+            end
         end
     end
 
