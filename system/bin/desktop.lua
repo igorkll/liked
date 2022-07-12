@@ -436,7 +436,14 @@ while true do
             elseif num == 5 then
                 local copyFlag = true
                 local toPath = paths.concat(userPath, paths.name(copyObject))
-                calls.call("gui_yesno", screen, nil, nil, "an object with this name is already present in this folder, should I replace it?")
+                if fs.exists(copyObject) then
+                    local clear = saveZone()
+                    local replaseAllow = calls.call("gui_yesno", screen, nil, nil, "an object with this name is already present in this folder, should I replace it?")
+                    if not replaseAllow then
+                        clear()
+                        copyFlag = false
+                    end
+                end
 
                 if copyFlag then
                     if fs.exists(toPath) then
