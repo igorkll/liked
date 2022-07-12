@@ -301,6 +301,12 @@ while true do
 
                             table.insert(strs, "  set as wallpaper")
                             table.insert(active, true)
+                        elseif v.exp == "plt" then
+                            table.insert(strs, "------------------")
+                            table.insert(active, false)
+
+                            table.insert(strs, "  set as theme")
+                            table.insert(active, true)
                         end
 
                         local posX, posY = window:toRealPos(windowEventData[3], windowEventData[4])
@@ -336,7 +342,9 @@ while true do
                                 clear()
                             end
                         elseif str == "  set as wallpaper" then
-                            
+                            fs.copy(v.path, "/data/wallpaper.t2p")
+                        elseif str == "  set as theme" then
+                            fs.copy(v.path, "/data/theme.plt")
                         else
                             clear()
                         end
