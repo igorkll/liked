@@ -26,14 +26,12 @@ if fs.exists("/data/wallpaper.t2p") then
 end
 
 local selectWindow = graphic.classWindow:new(screen, posX, posY, 16, ry - (posY - 1))
-local limit = 1
 local selected = 1
 local wallpapaers = {"none"}
 
 if currentWallpaperData then
-    selected = 1
+    selected = nil
     for i, file in ipairs(fs.list(wallpapersPath) or {}) do
-        limit = limit + 1
         table.insert(wallpapaers, file)
 
         local file = assert(fs.open(paths.concat(wallpapersPath, file), "rb"))
@@ -41,7 +39,8 @@ if currentWallpaperData then
         file.close()
 
         if data == currentWallpaperData then
-            selected = limit
+            selected = i
+            break
         end
     end
 end
@@ -64,7 +63,7 @@ local function draw(set)
         selectWindow:write("║" .. "\n", background, foreground)
         selectWindow:write("╚" .. string.rep("═", unicode.len(str)) .. "╝", background, foreground)
 
-        if i ~= limit then selectWindow:write("\n") end
+        if i ~= #wallpapaers then selectWindow:write("\n") end
     end
 
     if set then
@@ -91,7 +90,7 @@ return function(eventData)
                 if selected < 1 then selected = 1 end
             else
                 selected = selected + 1
-                if selected > limit then selected = limit end
+                if selected > #wallpapaers then selected = #wallpapaers end
             end
             if selected ~= oldselected then
                 draw(true)
@@ -102,7 +101,7 @@ return function(eventData)
     elseif selectWindowEventData[1] == "touch" then
         local posY = ((selectWindowEventData[4] - 1) // 3) + 1
 
-        if posY >= 1 and posY <= limit then
+        if posY >= 1 and posY <= #wallpapaers then
             if posY ~= selected then
                 selected = posY
                 draw(true)
@@ -116,7 +115,7 @@ return function(eventData)
                 if selected < 1 then selected = 1 end
             elseif selectWindowEventData[4] == 208 then
                 selected = selected + 1
-                if selected > limit then selected = limit end
+                if selected > #wallpapaers then selected = #wallpapaers end
             end
             if selected ~= oldselected then
                 draw(true)
