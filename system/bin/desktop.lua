@@ -114,7 +114,7 @@ local function draw(old)
                 icon = "/system/icons/unkownfile.t2p"
             end
 
-            table.insert(icons, {icon = icon, path = path, exp, index = i, name = v})
+            table.insert(icons, {icon = icon, path = path, exp = exp, index = i, name = v})
         end
 
         --[[
