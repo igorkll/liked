@@ -28,12 +28,13 @@ end
 local selectWindow = graphic.classWindow:new(screen, posX, posY, 16, ry - (posY - 1))
 local selected = 1
 local wallpapaers = {"none"}
+for i, file in ipairs(fs.list(wallpapersPath) or {}) do
+    table.insert(wallpapaers, file)
+end
 
 if currentWallpaperData then
     selected = nil
     for i, file in ipairs(fs.list(wallpapersPath) or {}) do
-        table.insert(wallpapaers, file)
-
         local file = assert(fs.open(paths.concat(wallpapersPath, file), "rb"))
         local data = file.readAll()--получаем файл темы
         file.close()

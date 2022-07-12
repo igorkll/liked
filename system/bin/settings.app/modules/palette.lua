@@ -28,13 +28,15 @@ end
 local selectWindow = graphic.classWindow:new(screen, posX, posY, 16, ry - (posY - 1))
 local colorsWindow = graphic.classWindow:new(screen, posX + 17, posY, 8, 18)
 
-local selected
+local selected = 1
 local themes = {}
+for i, file in ipairs(fs.list(themesPath) or {}) do
+    table.insert(themes, file)
+end
 
 if currentThemeData then
+    selected = nil
     for i, file in ipairs(fs.list(themesPath) or {}) do
-        table.insert(themes, file)
-
         local file = assert(fs.open(paths.concat(themesPath, file), "rb"))
         local data = file.readAll()--получаем файл темы
         file.close()
@@ -75,8 +77,8 @@ local function draw(set)
 
     if set then
         calls.call("system_setTheme", paths.concat(themesPath, themes[selected]))
+        event.push("redrawDesktop")
     end
-    event.push("redrawDesktop")
 end
 draw()
 

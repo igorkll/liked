@@ -19,8 +19,13 @@ local statusWindow = graphic.classWindow:new(screen, 1, 1, rx, 1)
 local window = graphic.classWindow:new(screen, 1, 2, rx, ry - 1)
 
 local wallpaperPath = "/data/wallpaper.t2p"
+--[[
 local userRoot = "/data/userdata/"
 local userPath = userRoot
+]]
+local userRoot = "/"
+local userPath = "/data/userdata/"
+
 fs.makeDirectory(userRoot)
 
 ------------------------------------
@@ -32,7 +37,7 @@ local iconSizeX = 8
 local iconSizeY = 4
 
 local startIconsPoss = {}
-local selectedIcons = {}
+--local selectedIcons = {}
 
 local icons
 
@@ -157,9 +162,9 @@ local function draw(old)
                 icon.iconX = iconX
                 icon.iconY = iconY
 
-                if selectedIcons[userPath] == icon.index then
-                    window:fill(iconX - 2, iconY - 1, iconSizeX + 4, iconSizeY + 2, colors.blue, 0, " ")
-                end
+                --if selectedIcons[userPath] == icon.index then
+                --    window:fill(iconX - 2, iconY - 1, iconSizeX + 4, iconSizeY + 2, colors.blue, 0, " ")
+                --end
                 local x, y = window:toRealPos(math.floor((centerIconX - (unicode.len(icon.name) / 2)) + 0.5), centerIconY + 2)
                 calls.call("gui_drawtext", screen, x, y, colors.white, icon.name)
                 --window:set(iconX - (unicode.len(icon.name) // 2), iconY + iconY - 2, colors.lightBlue, colors.white, icon.name)
@@ -202,9 +207,11 @@ local function fileDescriptor(icon)
     if fs.isDirectory(icon.path) then
         userPath = icon.path
         draw()
+        return true
     elseif icon.exp == "t2p" then
         execute("paint", icon.path)
         draw()
+        return true
     else
         warn("file is not supported")
     end
@@ -225,7 +232,7 @@ startStatusTimer()
 
 ------------------------------------
 
-function execute(name, ...)
+function execute(name, ...) --эта функция доступна толко в desktop хотя и обьявленна как глобальныя
     stopStatusTimer()
     local code, err = programs.load(name)
     local ok = true
@@ -261,19 +268,23 @@ while true do
     local statusWindowEventData = statusWindow:uploadEvent(eventData)
     if statusWindowEventData[1] == "touch" then
         if statusWindowEventData[4] == 1 and statusWindowEventData[3] >= 1 and statusWindowEventData[3] <= 4 then
+            local clear = calls.call("screenshot", screen, 2, 2, 19, 6)
             local str, num = calls.call("gui_context", screen, 2, 2,
             {"  about", "  settings", "------------------", "  shutdown", "  reboot"},
             {true, true, false, true, true})
             if num == 1 then
                 execute("about")
+                draw()
             elseif num == 2 then
                 execute("settings")
+                draw()
             elseif num == 4 then
                 computer.shutdown()
             elseif num == 5 then
                 computer.shutdown(true)
+            else
+                clear()
             end
-            draw()
         end
     end
 
@@ -294,8 +305,8 @@ while true do
         for i, v in ipairs(icons) do
             if windowEventData[3] >= v.iconX and windowEventData[3] < (v.iconX + iconSizeX) then
                 if windowEventData[4] >= v.iconY and windowEventData[4] < (v.iconY + iconSizeY) then
-                    selectedIcons[userPath] = v.index
-                    draw()
+                    --selectedIcons[userPath] = v.index
+                    --draw()
                     
                     iconCliked = true
                     if windowEventData[5] == 0 then
@@ -358,11 +369,11 @@ while true do
                             end
                         elseif str == "  set as wallpaper" then
                             fs.copy(v.path, "/data/wallpaper.t2p")
-                            draw()
+                            event.push("redrawDesktop")
                         elseif str == "  set as theme" then
                             fs.copy(v.path, "/data/theme.plt")
                             calls.call("system_applyTheme", "/data/theme.plt")
-                            draw()
+                            event.push("redrawDesktop")
                         else
                             clear()
                         end
@@ -371,10 +382,10 @@ while true do
                 end
             end
         end
-        if not iconCliked and selectedIcons[userPath] then
-            selectedIcons[userPath] = nil
-            draw()
-        end
+        --if not iconCliked and selectedIcons[userPath] then
+            --selectedIcons[userPath] = nil
+            --draw()
+        --end
         if not iconCliked and windowEventData[5] == 1 then
             local posX, posY = window:toRealPos(windowEventData[3], windowEventData[4])
 
