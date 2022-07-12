@@ -40,9 +40,6 @@ local function checkData()
     if not startIconsPoss[userPath] then
         startIconsPoss[userPath] = 1
     end
-    if not selectedIcons[userPath] then
-        selectedIcons[userPath] = 1
-    end
 end
 
 local function drawStatus()
@@ -370,6 +367,10 @@ while true do
                     break
                 end
             end
+        end
+        if not iconCliked then
+            selectedIcons[userPath] = nil
+            draw()
         end
         if not iconCliked and windowEventData[5] == 1 then
             local posX, posY = window:toRealPos(windowEventData[3], windowEventData[4])
