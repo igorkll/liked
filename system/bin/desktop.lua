@@ -100,22 +100,13 @@ local function draw()
             local path = paths.concat(userPath, v)
             local exp = paths.extension(path)
             local icon
-            if exp then
+            if exp and #exp > 0 then
                 icon = paths.concat("/system/icons", exp .. ".t2p")
-                if not fs.exists(icon) then
-                    icon = "/system/icons/unkownfile.t2p"
-                    if not fs.exists(icon) then
-                        icon = nil
-                    end
-                end
-            else
+            elseif fs.isDirectory(path) then
+                icon = "/system/icons/folder.t2p"
+            end
+            if not icon or not fs.exists(icon) then
                 icon = "/system/icons/unkownfile.t2p"
-                if fs.isDirectory(path) then
-                    icon = "/system/icons/folder.t2p"
-                    if not fs.exists(icon) then
-                        icon = nil
-                    end
-                end
             end
 
             table.insert(icons, {icon = icon, path = path, exp, index = i, name = v})
@@ -299,9 +290,11 @@ while true do
             end
         end
         if not iconCliked and windowEventData[5] == 1 then
+            local posX, posY = window:toRealPos(windowEventData[3], windowEventData[4])
+
             local isRedraw
-            local clear = calls.call("screenshot", screen, windowEventData[3], windowEventData[4], 19, 6)
-            local str, num = calls.call("gui_context", screen, windowEventData[3], windowEventData[4],
+            local clear = calls.call("screenshot", screen, posX, posY, 19, 6)
+            local str, num = calls.call("gui_context", screen, posX, posY,
             {"  back", "------------------", "  new image", "  new folder", "  paste"},
             {true, false, true, true, true})
             if num == 1 then
@@ -320,7 +313,7 @@ while true do
                 end
             elseif num == 4 then
                 local clear = saveZone()
-                local name = calls.call("gui_input", screen, nil, nil, "image name")
+                local name = calls.call("gui_input", screen, nil, nil, "folder name")
                 clear()
 
                 if type(name) == "string" then
