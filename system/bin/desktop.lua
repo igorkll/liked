@@ -307,13 +307,13 @@ while true do
                             end
                         elseif num == 4 then
                             local clear = saveZone()
-                            local name = calls.call("gui_input", screen, nil, nil, "folder name")
+                            local name = calls.call("gui_input", screen, nil, nil, "new name")
                             clear()
 
                             if type(name) == "string" then
                                 local path = paths.concat(userPath, name)
-                                fs.rename(path, paths.concat(userPath, name))
-                                refiles
+                                fs.rename(v.path, path)
+                                refiles = true
                             end
                         end
                         if refiles then
