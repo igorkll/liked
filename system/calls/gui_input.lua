@@ -2,6 +2,7 @@ local graphic = require("graphic")
 local gui_container = require("gui_container")
 local computer = require("computer")
 local unicode = require("unicode")
+local event = require("event")
 
 local colors = gui_container.colors
 

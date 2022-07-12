@@ -108,6 +108,14 @@ local function draw()
                         icon = nil
                     end
                 end
+            else
+                icon = "/system/icons/unkownfile.t2p"
+                if fs.isDirectory(path) then
+                    icon = "/system/icons/folder.t2p"
+                    if not fs.exists(icon) then
+                        icon = nil
+                    end
+                end
             end
 
             table.insert(icons, {icon = icon, path = path, exp, index = i, name = v})

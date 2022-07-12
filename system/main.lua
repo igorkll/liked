@@ -16,6 +16,7 @@ for address in component.list("screen") do
         local desktop = assert(programs.load("desktop")) --один раз загрузить не выйдит, потому что тогда у них будут один _ENV что приведет к путанице глобалов, которые должны оставаться личьными
         local t = thread.create(desktop, address)
         t:resume()
+        t.screen = address
         table.insert(threads, t)
     end
 end
@@ -23,7 +24,7 @@ end
 while true do
     for i, v in ipairs(threads) do
         if v:status() == "dead" then
-            error("crash thread " .. tostring(i) .. " " .. (v.out[2] or "unknown error") .. " " .. (v.out[3] or "not found"))
+            error("crash thread is monitor " .. v.screen:sub(1, 4) .. " " .. (v.out[2] or "unknown error") .. " " .. (v.out[3] or "not found"))
         end
     end
     event.sleep(1)
