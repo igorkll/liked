@@ -348,8 +348,11 @@ while true do
                             end
                         elseif str == "  set as wallpaper" then
                             fs.copy(v.path, "/data/wallpaper.t2p")
+                            draw()
                         elseif str == "  set as theme" then
                             fs.copy(v.path, "/data/theme.plt")
+                            calls.call("system_applyTheme", "/data/theme.plt")
+                            draw()
                         else
                             clear()
                         end
