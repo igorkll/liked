@@ -29,16 +29,20 @@ local selectWindow = graphic.classWindow:new(screen, posX, posY, 16, ry - (posY 
 local limit = 1
 local selected = 1
 local wallpapaers = {"none"}
-for i, file in ipairs(fs.list(wallpapersPath) or {}) do
-    limit = limit + 1
-    table.insert(wallpapaers, file)
 
-    local file = assert(fs.open(paths.concat(wallpapersPath, file), "rb"))
-    local data = file.readAll()--получаем файл темы
-    file.close()
+if currentWallpaperData then
+    selected = 1
+    for i, file in ipairs(fs.list(wallpapersPath) or {}) do
+        limit = limit + 1
+        table.insert(wallpapaers, file)
 
-    if data == currentWallpaperData then
-        selected = limit
+        local file = assert(fs.open(paths.concat(wallpapersPath, file), "rb"))
+        local data = file.readAll()--получаем файл темы
+        file.close()
+
+        if data == currentWallpaperData then
+            selected = limit
+        end
     end
 end
 
@@ -80,16 +84,20 @@ return function(eventData)
     local selectWindowEventData = selectWindow:uploadEvent(eventData)
 
     if selectWindowEventData[1] == "scroll" then
-        local oldselected = selected
-        if selectWindowEventData[5] > 0 then
-            selected = selected - 1
-            if selected < 1 then selected = 1 end
+        if selected then
+            local oldselected = selected
+            if selectWindowEventData[5] > 0 then
+                selected = selected - 1
+                if selected < 1 then selected = 1 end
+            else
+                selected = selected + 1
+                if selected > limit then selected = limit end
+            end
+            if selected ~= oldselected then
+                draw(true)
+            end
         else
-            selected = selected + 1
-            if selected > limit then selected = limit end
-        end
-        if selected ~= oldselected then
-            draw(true)
+            selected = 1
         end
     elseif selectWindowEventData[1] == "touch" then
         local posY = ((selectWindowEventData[4] - 1) // 3) + 1
@@ -101,16 +109,20 @@ return function(eventData)
             end
         end
     elseif selectWindowEventData[1] == "key_down" then
-        local oldselected = selected
-        if selectWindowEventData[4] == 200 then
-            selected = selected - 1
-            if selected < 1 then selected = 1 end
-        elseif selectWindowEventData[4] == 208 then
-            selected = selected + 1
-            if selected > limit then selected = limit end
-        end
-        if selected ~= oldselected then
-            draw(true)
+        if selected then
+            local oldselected = selected
+            if selectWindowEventData[4] == 200 then
+                selected = selected - 1
+                if selected < 1 then selected = 1 end
+            elseif selectWindowEventData[4] == 208 then
+                selected = selected + 1
+                if selected > limit then selected = limit end
+            end
+            if selected ~= oldselected then
+                draw(true)
+            end
+        else
+            selected = 1
         end
     end
 end
