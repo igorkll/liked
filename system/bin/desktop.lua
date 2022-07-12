@@ -198,7 +198,8 @@ local function fileDescriptor(icon)
         userPath = icon.path
         draw()
     elseif icon.exp == "t2p" then
-        execute("paint", screen, icon.path)
+        execute("paint", icon.path)
+        draw()
     else
         warn("file is not supported")
     end
@@ -256,17 +257,15 @@ while true do
     if statusWindowEventData[1] == "touch" then
         if statusWindowEventData[4] == 1 and statusWindowEventData[3] >= 1 and statusWindowEventData[3] <= 4 then
             local str, num = calls.call("gui_context", screen, 2, 2,
-            {"  about", "  settings", "  paint(temp)", "------------------", "  shutdown", "  reboot"},
-            {true, true, true, false, true, true})
+            {"  about", "  settings", "------------------", "  shutdown", "  reboot"},
+            {true, true, false, true, true})
             if num == 1 then
                 execute("about")
             elseif num == 2 then
                 execute("settings")
-            elseif num == 3 then
-                execute("paint", "/data/temp.t2p")
-            elseif num == 5 then
+            elseif num == 4 then
                 computer.shutdown()
-            elseif num == 6 then
+            elseif num == 5 then
                 computer.shutdown(true)
             end
             draw()
@@ -287,6 +286,7 @@ while true do
         for i, v in ipairs(icons) do
             if windowEventData[3] >= v.iconX and windowEventData[3] < (v.iconX + iconSizeX) then
                 if windowEventData[4] >= v.iconY and windowEventData[4] < (v.iconY + iconSizeY) then
+                    selectedIcons[userPath] = v.index
                     iconCliked = true
                     if windowEventData[5] == 0 then
                         fileDescriptor(v)
