@@ -373,9 +373,11 @@ while true do
                         elseif num == 5 then
                             copyObject = v.path
                             isCut = false
+                            clear()
                         elseif num == 6 then
                             copyObject = v.path
                             isCut = true
+                            clear()
                         elseif str == "  set as wallpaper" then
                             fs.copy(v.path, "/data/wallpaper.t2p")
                             event.push("redrawDesktop")
@@ -436,7 +438,7 @@ while true do
             elseif num == 5 then
                 local copyFlag = true
                 local toPath = paths.concat(userPath, paths.name(copyObject))
-                if fs.exists(copyObject) then
+                if fs.exists(toPath) then
                     local clear = saveZone()
                     local replaseAllow = calls.call("gui_yesno", screen, nil, nil, "an object with this name is already present in this folder, should I replace it?")
                     if not replaseAllow then
