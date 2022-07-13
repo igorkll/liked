@@ -494,7 +494,7 @@ while true do
             end
             
             local isRedraw
-            local clear = calls.call("screenshot", screen, posX, posY, 19, 6)
+            local clear = calls.call("screenshot", screen, posX, posY, 19, 7)
             local str, num = calls.call("gui_context", screen, posX, posY,
             {"  back", "------------------", "  new image", "  new folder", "------------------", "  paste"},
             {true, false, true, true, not not copyObject})
