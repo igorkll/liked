@@ -23,6 +23,11 @@ end)
 
 event.listen("component_added", function(_, uuid, name)
     if name == "filesystem" then
-        for name
+        for _, tbl in ipairs(fs.mountList) do
+            if tbl[1].address == uuid then
+                fs.umount(tbl[2])
+                break
+            end
+        end
     end
 end)
