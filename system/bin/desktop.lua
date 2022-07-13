@@ -363,7 +363,7 @@ while true do
                         local screenshotY = 7
                         local strs, active =
                         {"  open", "----------------------", "  remove", "  rename", "  copy", "  cut"},
-                        {true, false, true, true, true, true}
+                        {true, false, not v.isAlias, not v.isAlias, not v.isAlias, not v.isAlias}
 
                         if v.exp == "t2p" then
                             table.insert(strs, "----------------------")
