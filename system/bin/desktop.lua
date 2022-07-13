@@ -380,7 +380,7 @@ while true do
                                 if #name ~= 0 and not name:find("%\\") and not name:find("%/") then
                                     local newexp = ""
                                     local exp = paths.extension(name)
-                                    if v.exp ~= "" and exp == "" then
+                                    if (v.exp ~= "" or v.exp) and (exp == "" or not exp) then
                                         newexp = newexp .. "." .. v.exp
                                     end
                                     local path = paths.concat(userPath, name .. newexp)
