@@ -376,14 +376,20 @@ while true do
                             local name = calls.call("gui_input", screen, nil, nil, "new name")
                             clear2()
 
-                            if type(name) == "string" and #name > 0 then
-                                local exp = paths.extension(name)
-                                if v.exp ~= "" and exp ~= "" then
-                                    
+                            if type(name) == "string" then
+                                if #name ~= 0 then
+                                    local newexp = ""
+                                    local exp = paths.extension(name)
+                                    if v.exp ~= "" and exp == "" then
+                                        newexp = newexp .. "." .. v.exp
+                                    end
+                                    local path = paths.concat(userPath, name .. newexp)
+                                    fs.rename(v.path, path)
+                                    draw()
+                                else
+                                    warn("name is not entered")
+                                    clear()
                                 end
-                                local path = paths.concat(userPath, name .. "." .. )
-                                fs.rename(v.path, path)
-                                draw()
                             else
                                 clear()
                             end
