@@ -23,7 +23,7 @@ local wallpaperPath = "/data/wallpaper.t2p"
 local userRoot = "/data/userdata/"
 local userPath = userRoot
 ]]
-local userRoot = "/"
+local userRoot = "/data/userdata/"
 local userPath = "/data/userdata/"
 local iconsPath = "/data/userdata/"
 local iconAliases = {"/system/bin/settings.app"}
