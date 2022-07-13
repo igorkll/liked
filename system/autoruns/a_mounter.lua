@@ -16,7 +16,7 @@ end
 
 event.listen("component_added", function(_, uuid, name)
     if name == "filesystem" then
-        fs.mount(uuid, genName())
+        assert(fs.mount(uuid, genName()))
         event.push("redrawDesktop")
     end
 end)
@@ -25,9 +25,11 @@ event.listen("component_removed", function(_, uuid, name)
     if name == "filesystem" then
         for _, tbl in ipairs(fs.mountList) do
             if tbl[1].address == uuid then
-                fs.umount(tbl[2])
+                assert(fs.umount(tbl[2]))
                 break
             end
         end
     end
 end)
+
+assert(fs.mount("8e04e2bf-a910-428d-bbbb-f5fdb308d912", "/data/userdata/asd"))
