@@ -157,7 +157,7 @@ local function draw(old)
             icon = "/system/icons/unkownfile.t2p"
         end
 
-        table.insert(icons, {icon = icon, path = path, exp = exp, index = i, name = paths.name(path), isAlias = not not customPath})
+        table.insert(icons, {icon = icon, path = path, exp = exp, index = i, name = paths.name(paths.hideExtension(path)), isAlias = not not customPath})
     end
 
     local tbl = {}
@@ -183,8 +183,8 @@ local function draw(old)
     end
 
     local count = 0
-    for cx = 1, iconsX do
-        for cy = 1, iconsY do
+    for cy = 1, iconsY do
+        for cx = 1, iconsX do
             count = count + 1
             local centerIconX = math.floor(((window.sizeX / (iconsX + 1)) * cx) + 0.5)
             local centerIconY = math.floor(((window.sizeY / (iconsY + 1)) * cy) + 0.5)
@@ -416,7 +416,8 @@ while true do
                             clear2()
 
                             if type(name) == "string" then
-                                if #name ~= 0 and not name:find("%\\") and not name:find("%/") then
+                                if #name ~= 0 and not name:find("%\\") and not name:find("%/") and
+                                not name:find("%.") then --change expansion disabled
                                     local newexp = ""
                                     local exp = paths.extension(name)
                                     if (v.exp ~= "" or v.exp) and (exp == "" or not exp) then
