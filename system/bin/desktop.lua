@@ -497,7 +497,7 @@ while true do
             local clear = calls.call("screenshot", screen, posX, posY, 19, 7)
             local str, num = calls.call("gui_context", screen, posX, posY,
             {"  back", "------------------", "  new image", "  new folder", "------------------", "  paste"},
-            {true, false, true, true, not not copyObject})
+            {true, false, true, true, false, not not copyObject})
             if num == 1 then
                 folderBack()
                 isRedraw = true
@@ -508,7 +508,7 @@ while true do
 
                 if type(name) == "string" then
                     local path = paths.concat(userPath, name .. ".t2p")
-                    if fs.exists(path) then
+                    if not fs.exists(path) then
                         execute("paint", path)
                         draw()
                         isRedraw = true
@@ -523,7 +523,7 @@ while true do
 
                 if type(name) == "string" then
                     local path = paths.concat(userPath, name)
-                    if fs.exists(path) then
+                    if not fs.exists(path) then
                         fs.makeDirectory(path)
                         draw()
                         isRedraw = true
