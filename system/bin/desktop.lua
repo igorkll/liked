@@ -119,10 +119,18 @@ local function draw(old)
             local path = paths.concat(userPath, v) .. "/"
             local exp = paths.extension(path)
             local icon
-            if exp and #exp > 0 then
+            if exp and #exp > 0 and exp ~= "app" then
                 icon = paths.concat("/system/icons", exp .. ".t2p")
+            elseif exp == "app" then
+                icon = "/system/icons/app.t2p"
+                if fs.isDirectory(path) and fs.exists(paths.concat(path, "icon.t2p")) then
+                    icon = paths.concat(path, "icon.t2p")
+                end
             elseif fs.isDirectory(path) then
                 icon = "/system/icons/folder.t2p"
+                if fs.exists(paths.concat(path, "icon.t2p")) then
+                    icon = paths.concat(path, "icon.t2p")
+                end
             end
             if not icon or not fs.exists(icon) then
                 icon = "/system/icons/unkownfile.t2p"
