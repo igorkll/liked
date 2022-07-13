@@ -112,7 +112,12 @@ local function draw(old)
     end
 
     local iconsCount = 0
-    for i, v in ipairs(fs.list(userPath)) do
+    local tbl = fs.list(userPath)
+    if not tbl then
+        userPath = userRoot
+        return draw()
+    end
+    for i, v in ipairs(tbl) do
         iconsCount = iconsCount + 1
     end
 
@@ -567,6 +572,4 @@ while true do
         end
         ::bigSkip::
     end
-
-
 end
