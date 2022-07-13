@@ -121,13 +121,18 @@ local function draw(old)
     icons = {}
     local count = 0
 
-    local function addIcon(i, v)
+    local function addIcon(i, v, customPath)
         count = count + 1
         if count > (iconsX * iconsY) then
             return true
         end
 
-        local path = paths.concat(userPath, v) .. "/"
+        local path
+        if customPath then
+            path = customPath
+        else
+            path = paths.concat(userPath, v) .. "/"
+        end
         local exp = paths.extension(path)
         local icon
         if exp and #exp > 0 and exp ~= "app" then
@@ -147,13 +152,17 @@ local function draw(old)
             icon = "/system/icons/unkownfile.t2p"
         end
 
-        table.insert(icons, {icon = icon, path = path, exp = exp, index = i, name = v})
+        table.insert(icons, {icon = icon, path = path, exp = exp, index = i, name = v, isAlias = not not customPath})
     end
 
     if paths.canonical(userPath) == paths.canonical(iconsPath) then
         for i, v in ipairs(iconAliases) do
             if fs.exists(v) then
-                iconsCount = iconsCount + 1
+                if i >= startIconsPoss[userPath] and i <= iconsCount then
+                    if addIcon(i, v) then
+                        break
+                    end
+                end
             end
         end
     end
