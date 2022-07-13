@@ -208,7 +208,15 @@ local function folderBack()
 end
 
 local function fileDescriptor(icon)
-    if fs.isDirectory(icon.path) then
+    if icon.exp == "app" then
+        if fs.isDirectory(icon.path) then
+            execute(paths.concat(icon.path, "main.lua"))
+        else
+            execute(icon.path)
+        end
+        draw()
+        return true
+    elseif fs.isDirectory(icon.path) then
         userPath = icon.path
         draw()
         return true
@@ -218,10 +226,6 @@ local function fileDescriptor(icon)
         return true
     elseif icon.exp == "lua" then
         execute(icon.path)
-        draw()
-        return true
-    elseif icon.exp == "app" then
-        execute(paths.concat(icon.path))
         draw()
         return true
     else
@@ -372,8 +376,12 @@ while true do
                             local name = calls.call("gui_input", screen, nil, nil, "new name")
                             clear2()
 
-                            if type(name) == "string" then
-                                local path = paths.concat(userPath, name)
+                            if type(name) == "string" and #name > 0 then
+                                local exp = paths.extension(name)
+                                if v.exp ~= "" and exp ~= "" then
+                                    
+                                end
+                                local path = paths.concat(userPath, name .. "." .. )
                                 fs.rename(v.path, path)
                                 draw()
                             else
