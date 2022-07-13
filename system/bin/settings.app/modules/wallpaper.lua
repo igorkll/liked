@@ -40,7 +40,7 @@ if currentWallpaperData then
         file.close()
 
         if data == currentWallpaperData then
-            selected = i
+            selected = i + 1
             break
         end
     end
