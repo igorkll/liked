@@ -26,10 +26,9 @@ event.listen("component_removed", function(_, uuid, name)
         for _, tbl in ipairs(fs.mountList) do
             if tbl[1].address == uuid then
                 assert(fs.umount(tbl[2]))
+                event.push("redrawDesktop")
                 break
             end
         end
     end
 end)
-
-assert(fs.mount("8e04e2bf-a910-428d-bbbb-f5fdb308d912", "/data/userdata/asd"))
