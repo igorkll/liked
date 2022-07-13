@@ -7,7 +7,7 @@ local gpu = graphic.findGpu(screen)
 
 calls.call("graphicInit", gpu)
 gpu.setDepth(4)
-gpu.setResolution(80, 25)
+--gpu.setResolution(80, 25)
 
 local count = 0
 for i, v in pairs(gui_container.colors) do

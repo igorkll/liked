@@ -36,6 +36,11 @@ fs.makeDirectory(userPath)
 local iconsX = 4
 local iconsY = 2
 
+if rx == 160 and ry == 50 then
+    iconsX = 8
+    iconsY = 4
+end
+
 local iconSizeX = 8
 local iconSizeY = 4
 
@@ -166,14 +171,14 @@ local function draw(old)
     end
 
     for i, v in ipairs(fs.list(userPath)) do
-        if i >= startIconsPoss[userPath] and i <= iconsCount then
-            table.insert(tbl, {v})
-        end
+        table.insert(tbl, {v})
     end
 
     for i, v in ipairs(tbl) do
-        if addIcon(i, v[1], v[2]) then
-            break
+        if i >= startIconsPoss[userPath] and i <= iconsCount then
+            if addIcon(i, v[1], v[2]) then
+                break
+            end
         end
     end
 
