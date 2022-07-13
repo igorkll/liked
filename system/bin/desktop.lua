@@ -145,12 +145,29 @@ local function draw(old)
         end
         local exp = paths.extension(path)
         local icon
-        if exp and #exp > 0 and exp ~= "app" then
+        if exp and #exp > 0 and exp ~= "app" and exp ~= "t2p" then
             icon = paths.concat("/system/icons", exp .. ".t2p")
         elseif exp == "app" then
             icon = "/system/icons/app.t2p"
             if fs.isDirectory(path) and fs.exists(paths.concat(path, "icon.t2p")) then
                 icon = paths.concat(path, "icon.t2p")
+            end
+        elseif exp == "t2p" then
+            icon = "/system/icons/t2p.t2p"
+            local iconPath
+            if fs.isDirectory(path) then
+                if fs.exists(paths.concat(path, "icon.t2p")) then
+                    iconPath = paths.concat(path, "icon.t2p")
+                end
+            else
+                iconPath = path
+            end
+
+            if iconPath then
+                local ok, sx, sy = pcall(calls.call, "gui_readimagesize", iconPath)
+                if ok and sx == 8 and sy == 4 then
+                    icon = iconPath
+                end
             end
         elseif fs.isDirectory(path) then
             icon = "/system/icons/folder.t2p"
