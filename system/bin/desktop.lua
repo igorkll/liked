@@ -25,6 +25,8 @@ local userPath = userRoot
 ]]
 local userRoot = "/"
 local userPath = "/data/userdata/"
+local iconsPath = "/data/userdata/"
+local iconAliases = {"/system/bin/settings.app"}
 
 fs.makeDirectory(userRoot)
 fs.makeDirectory(userPath)
@@ -99,6 +101,15 @@ local function draw(old)
     for i, v in ipairs(fs.list(userPath)) do
         iconsCount = iconsCount + 1
     end
+
+    if paths.canonical(userPath) == paths.canonical(iconsPath) then
+        for i, v in ipairs(iconAliases) do
+            if fs.exists(v) then
+                iconsCount = iconsCount + 1
+            end
+        end
+    end
+
     if startIconsPoss[userPath] > iconsCount then
         startIconsPoss[userPath] = old or 1
     end
@@ -109,55 +120,50 @@ local function draw(old)
 
     icons = {}
     local count = 0
+
+    local function addIcon(i, v)
+        count = count + 1
+        if count > (iconsX * iconsY) then
+            return true
+        end
+
+        local path = paths.concat(userPath, v) .. "/"
+        local exp = paths.extension(path)
+        local icon
+        if exp and #exp > 0 and exp ~= "app" then
+            icon = paths.concat("/system/icons", exp .. ".t2p")
+        elseif exp == "app" then
+            icon = "/system/icons/app.t2p"
+            if fs.isDirectory(path) and fs.exists(paths.concat(path, "icon.t2p")) then
+                icon = paths.concat(path, "icon.t2p")
+            end
+        elseif fs.isDirectory(path) then
+            icon = "/system/icons/folder.t2p"
+            if fs.exists(paths.concat(path, "icon.t2p")) then
+                icon = paths.concat(path, "icon.t2p")
+            end
+        end
+        if not icon or not fs.exists(icon) then
+            icon = "/system/icons/unkownfile.t2p"
+        end
+
+        table.insert(icons, {icon = icon, path = path, exp = exp, index = i, name = v})
+    end
+
+    if paths.canonical(userPath) == paths.canonical(iconsPath) then
+        for i, v in ipairs(iconAliases) do
+            if fs.exists(v) then
+                iconsCount = iconsCount + 1
+            end
+        end
+    end
+
     for i, v in ipairs(fs.list(userPath)) do
         if i >= startIconsPoss[userPath] and i <= iconsCount then
-            count = count + 1
-            if count > (iconsX * iconsY) then
+            if addIcon(i, v) then
                 break
             end
-
-            local path = paths.concat(userPath, v) .. "/"
-            local exp = paths.extension(path)
-            local icon
-            if exp and #exp > 0 and exp ~= "app" then
-                icon = paths.concat("/system/icons", exp .. ".t2p")
-            elseif exp == "app" then
-                icon = "/system/icons/app.t2p"
-                if fs.isDirectory(path) and fs.exists(paths.concat(path, "icon.t2p")) then
-                    icon = paths.concat(path, "icon.t2p")
-                end
-            elseif fs.isDirectory(path) then
-                icon = "/system/icons/folder.t2p"
-                if fs.exists(paths.concat(path, "icon.t2p")) then
-                    icon = paths.concat(path, "icon.t2p")
-                end
-            end
-            if not icon or not fs.exists(icon) then
-                icon = "/system/icons/unkownfile.t2p"
-            end
-
-            table.insert(icons, {icon = icon, path = path, exp = exp, index = i, name = v})
         end
-
-        --[[
-        local iconValue = i
-
-        if iconValue > 0 then
-            local pad = 16
-            local padY = pad // 2
-            local posX = (((iconValue * pad) - 1) % rx) + 1
-            local posY = (((iconValue * pad) // rx) + 1) * padY
-            local size = 10
-            local sizeY = size // 2
-
-            local drawPointX = posX - (size // 2)
-            local drawPointY = posY - (sizeY // 2)
-            if selectedIcon == i then
-                window:fill(drawPointX - 1, drawPointY - 1, size + 2, sizeY + 1, colors.blue, 0, " ")
-            end
-            window:set(posX - (unicode.len(v) // 2), posY + sizeY - 2, colors.lightBlue, colors.white, v)
-        end
-        ]]
     end
 
     local count = 0
