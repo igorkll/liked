@@ -99,7 +99,7 @@ local function draw(old)
     if fs.exists(wallpaperPath) then
         local sx, sy = calls.call("gui_readimagesize", wallpaperPath)
         local ix, iy = ((window.sizeX / 2) - (sx / 2)) + 1, ((window.sizeY / 2) - (sy / 2)) + 1
-        calls.call("gui_drawimage", screen, wallpaperPath, ix, iy)
+        pcall(calls.call, "gui_drawimage", screen, wallpaperPath, ix, iy)
     end
 
     local iconsCount = 0

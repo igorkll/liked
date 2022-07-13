@@ -18,10 +18,9 @@ end
 
 _G.gui_container = gui_container
 if fs.exists("/data/theme.plt") then
-    calls.call("system_applyTheme", "/data/theme.plt")
+    calls.call("system_setTheme", "/data/theme.plt")
 else
-    pcall(fs.copy, "/system/themes/classic.plt", "/data/theme.plt")
-    calls.call("system_applyTheme", "/system/themes/classic.plt")
+    calls.call("system_setTheme", "/system/themes/classic.plt")
 end
 _G.gui_container = nil
 
