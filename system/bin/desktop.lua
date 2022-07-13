@@ -230,7 +230,7 @@ local function fileDescriptor(icon)
         return true
     elseif icon.exp == "plt" then
         local clear = saveZone()
-        local state = calls.call("gui_yesno", screen, nil, nil, "aply this theme?")
+        local state = calls.call("gui_yesno", screen, nil, nil, "apply this theme?")
         clear()
 
         if state then
