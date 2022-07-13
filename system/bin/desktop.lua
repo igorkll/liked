@@ -152,26 +152,28 @@ local function draw(old)
             icon = "/system/icons/unkownfile.t2p"
         end
 
-        table.insert(icons, {icon = icon, path = path, exp = exp, index = i, name = v, isAlias = not not customPath})
+        table.insert(icons, {icon = icon, path = path, exp = exp, index = i, name = paths.name(path), isAlias = not not customPath})
     end
+
+    local tbl = {}
 
     if paths.canonical(userPath) == paths.canonical(iconsPath) then
         for i, v in ipairs(iconAliases) do
             if fs.exists(v) then
-                if i >= startIconsPoss[userPath] and i <= iconsCount then
-                    if addIcon(i, v) then
-                        break
-                    end
-                end
+                table.insert(tbl, {nil, v})
             end
         end
     end
 
     for i, v in ipairs(fs.list(userPath)) do
         if i >= startIconsPoss[userPath] and i <= iconsCount then
-            if addIcon(i, v) then
-                break
-            end
+            table.insert(tbl, {v})
+        end
+    end
+
+    for i, v in ipairs(tbl) do
+        if addIcon(i, v[1], v[2]) then
+            break
         end
     end
 
