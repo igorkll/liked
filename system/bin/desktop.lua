@@ -377,7 +377,7 @@ while true do
                             clear2()
 
                             if type(name) == "string" then
-                                if #name ~= 0 then
+                                if #name ~= 0 and not name:find("%\\") and not name:find("%/") then
                                     local newexp = ""
                                     local exp = paths.extension(name)
                                     if v.exp ~= "" and exp == "" then
@@ -387,7 +387,7 @@ while true do
                                     fs.rename(v.path, path)
                                     draw()
                                 else
-                                    warn("name is not entered")
+                                    warn("error in name")
                                     clear()
                                 end
                             else
