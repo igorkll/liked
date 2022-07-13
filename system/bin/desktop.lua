@@ -75,7 +75,7 @@ local function drawStatus()
     statusWindow:set(window.sizeX - unicode.len(str), 1, colors.gray, colors.white, str)
     statusWindow:set(1, 1, colors.lightGray, colors.white, " OS ")
 
-    local str = tostring(math.floor(calls.call("map", computer.energy(), 0, computer.maxEnergy(), 0, 100))) .. "%"
+    local str = tostring(math.floor(calls.call("map", computer.energy(), 0, computer.maxEnergy(), 0, 100) + 0.5)) .. "%"
     statusWindow:set(window.sizeX - 7 - unicode.len(str), 1, colors.gray, colors.white, str)
 end
 
