@@ -1,24 +1,17 @@
 local fs = require("filesystem")
 local paths = require("paths")
 local event = require("event")
+local component = require("component")
 local computer = require("computer")
 
-local function genName()
-    local number = 1
-    while true do
-        if fs.exists(paths.concat("/data/userdata", "disk" .. tostring(number))) then
-            number = number + 1
-        else
-            break
-        end
-    end
-    return paths.concat("/data/userdata", "disk" .. tostring(number))
+local function genName(uuid)
+    return paths.concat("/data/userdata", (component.invoke(uuid, "getLabel") or "disk") .. "-" .. uuid:sub(1, 5))
 end
 
 event.listen("component_added", function(_, uuid, name)
     if name == "filesystem" then
         computer.beep(2000, 0.1)
-        assert(fs.mount(uuid, genName()))
+        assert(fs.mount(uuid, genName(uuid)))
         event.push("redrawDesktop")
     end
 end)
@@ -35,3 +28,9 @@ event.listen("component_removed", function(_, uuid, name)
         end
     end
 end)
+
+for address in component.list("filesystem") do
+    if address ~= computer.tmpAddress() and address ~= fs.bootaddress then
+        assert(fs.mount(address, genName(address)))
+    end
+end
