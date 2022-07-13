@@ -47,6 +47,11 @@ local iconSizeY = 4
 local startIconsPoss = {}
 --local selectedIcons = {}
 
+local redrawFlag = false
+event.listen("redrawDesktop", function()
+    redrawFlag = true
+end)
+
 local icons
 
 local copyObject
@@ -318,7 +323,11 @@ function warn(str)
 end
 
 while true do
-    local eventData = {computer.pullSignal()}
+    if redrawFlag then
+        redrawFlag = false
+        draw()
+    end
+    local eventData = {computer.pullSignal(0.5)}
     local windowEventData = window:uploadEvent(eventData)
     local statusWindowEventData = statusWindow:uploadEvent(eventData)
     if statusWindowEventData[1] == "touch" then
@@ -529,9 +538,5 @@ while true do
             end
         end
         ::bigSkip::
-    end
-
-    if eventData[1] == "redrawDesktop" then
-        draw()
     end
 end
