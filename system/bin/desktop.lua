@@ -420,7 +420,7 @@ while true do
                                 not name:find("%.") then --change expansion disabled
                                     local newexp = ""
                                     local exp = paths.extension(name)
-                                    if (v.exp ~= "" or v.exp) and (exp == "" or not exp) then
+                                    if v.exp and v.exp ~= "" and (exp == "" or not exp) then
                                         newexp = newexp .. "." .. v.exp
                                     end
                                     local path = paths.concat(userPath, name .. newexp)
