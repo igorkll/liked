@@ -228,6 +228,15 @@ local function fileDescriptor(icon)
         execute(icon.path)
         draw()
         return true
+    elseif icon.exp == "plt" then
+        local clear = saveZone()
+        local state = calls.call("gui_yesno", screen, nil, nil, "aply this theme?")
+        clear()
+
+        if state then
+            calls.call("system_setTheme", icon.path)
+            event.push("redrawDesktop")
+        end
     else
         warn("file is not supported")
     end
@@ -405,8 +414,7 @@ while true do
                             fs.copy(v.path, "/data/wallpaper.t2p")
                             event.push("redrawDesktop")
                         elseif str == "  set as theme" then
-                            fs.copy(v.path, "/data/theme.plt")
-                            calls.call("system_applyTheme", "/data/theme.plt")
+                            calls.call("system_setTheme", v.path)
                             event.push("redrawDesktop")
                         else
                             clear()
