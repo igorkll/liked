@@ -492,11 +492,11 @@ while true do
                 copyObject = nil
                 isCut = false
             end
-
+            
             local isRedraw
             local clear = calls.call("screenshot", screen, posX, posY, 19, 6)
             local str, num = calls.call("gui_context", screen, posX, posY,
-            {"  back", "------------------", "  new image", "  new folder", "  paste"},
+            {"  back", "------------------", "  new image", "  new folder", "------------------", "  paste"},
             {true, false, true, true, not not copyObject})
             if num == 1 then
                 folderBack()
@@ -508,9 +508,13 @@ while true do
 
                 if type(name) == "string" then
                     local path = paths.concat(userPath, name .. ".t2p")
-                    execute("paint", path)
-                    draw()
-                    isRedraw = true
+                    if fs.exists(path) then
+                        execute("paint", path)
+                        draw()
+                        isRedraw = true
+                    else
+                        warn("this name is occupied")
+                    end
                 end
             elseif num == 4 then
                 local clear = saveZone()
@@ -519,11 +523,15 @@ while true do
 
                 if type(name) == "string" then
                     local path = paths.concat(userPath, name)
-                    fs.makeDirectory(path)
-                    draw()
-                    isRedraw = true
+                    if fs.exists(path) then
+                        fs.makeDirectory(path)
+                        draw()
+                        isRedraw = true
+                    else
+                        warn("this name is occupied")
+                    end
                 end
-            elseif num == 5 then
+            elseif num == 6 then
                 local copyFlag = true
                 local toPath = paths.concat(userPath, paths.name(copyObject))
                 if fs.exists(toPath) then
