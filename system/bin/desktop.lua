@@ -77,6 +77,7 @@ local function drawStatus()
 end
 
 local function draw(old)
+    redrawFlag = false
     checkData()
 
     drawStatus()
@@ -341,7 +342,6 @@ end
 
 while true do
     if redrawFlag then
-        redrawFlag = false
         draw()
     end
     local eventData = {computer.pullSignal(0.5)}
