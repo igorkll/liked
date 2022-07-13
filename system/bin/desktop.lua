@@ -27,6 +27,7 @@ local userRoot = "/"
 local userPath = "/data/userdata/"
 
 fs.makeDirectory(userRoot)
+fs.makeDirectory(userPath)
 
 ------------------------------------
 
@@ -217,6 +218,10 @@ local function fileDescriptor(icon)
         return true
     elseif icon.exp == "lua" then
         execute(icon.path)
+        draw()
+        return true
+    elseif icon.exp == "app" then
+        execute(paths.concat(icon.path))
         draw()
         return true
     else
