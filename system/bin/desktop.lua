@@ -549,7 +549,7 @@ while true do
                 if type(name) == "string" then
                     local path = paths.concat(userPath, name .. ".t2p")
                     if not fs.exists(path) then
-                        if name:find("%.") and not devMode then
+                        if name:find("%.") or name:find("%/") or name:find("%\\") then
                             warn("error in name")
                         else
                             execute("paint", path)
@@ -568,7 +568,7 @@ while true do
                 if type(name) == "string" then
                     local path = paths.concat(userPath, name)
                     if not fs.exists(path) then
-                        if name:find("%.") and not devMode then
+                        if (name:find("%.") and not devMode) or name:find("%/") or name:find("%\\") then
                             warn("error in name")
                         else
                             fs.makeDirectory(path)
