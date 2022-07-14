@@ -12,7 +12,7 @@ local screen, path = ...
 local colors = gui_container.colors
 local rx, ry
 do
-    local gpu = graphic.findGpu()
+    local gpu = graphic.findGpu(screen)
     rx, ry = gpu.getResolution()
 end
 

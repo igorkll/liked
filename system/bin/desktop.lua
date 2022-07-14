@@ -555,6 +555,8 @@ while true do
                             event.push("redrawDesktop")
                         elseif str == "  inside the package" then
                             fileDescriptor(v, true)
+                        elseif str == "  edit" then
+                            execute("edit", screen, v.path)
                         else
                             clear()
                         end
