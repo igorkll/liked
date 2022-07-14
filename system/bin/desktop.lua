@@ -23,9 +23,10 @@ local wallpaperPath = "/data/wallpaper.t2p"
 local userRoot = "/data/userdata/"
 local userPath = userRoot
 ]]
-local userRoot = "/data/userdata/"
-local userPath = "/data/userdata/"
-local iconsPath = "/data/userdata/"
+local userRootMain = "/data/userdata/"
+local userRoot = userRootMain
+local userPath = userRootMain
+local iconsPath = userRootMain
 local iconAliases = {"/system/bin/settings.app"}
 
 fs.makeDirectory(userRoot)
@@ -56,6 +57,8 @@ local icons
 
 local copyObject
 local isCut = false
+
+local devMode = false
 
 local function checkData()
     if not startIconsPoss[userPath] then
@@ -260,11 +263,15 @@ local function listBack()
     draw()
 end
 
-local function folderBack()
-    userPath = paths.path(userPath)
+local function checkFolder()
     if unicode.sub(userPath, 1, unicode.len(userRoot)) ~= userRoot then
         userPath = userRoot
     end
+end
+
+local function folderBack()
+    userPath = paths.path(userPath)
+    checkFolder()
     draw()
 end
 
@@ -301,6 +308,18 @@ local function fileDescriptor(icon)
     else
         warn("file is not supported")
     end
+end
+
+local function setDevMode(state)
+    if state == devMode then return end
+    if state then
+        userRoot = "/"
+    else
+        userRoot = userRootMain
+    end
+    checkFolder()
+    draw()
+    devMode = state
 end
 
 ------------------------------------
@@ -571,5 +590,11 @@ while true do
             end
         end
         ::bigSkip::
+    end
+
+    if eventData[1] == "touch" then
+        if eventData[4] == 200 then
+            setDevMode(not devMode)
+        end
     end
 end
