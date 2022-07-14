@@ -578,12 +578,12 @@ while true do
             local isRedraw
             local clear = calls.call("screenshot", screen, posX, posY, 19, 7)
             local str, num = calls.call("gui_context", screen, posX, posY,
-            {"  back", "------------------", "  new image", "  new folder", "  new text file", "------------------", "  paste"},
-            {true, false, true, true, true, false, not not copyObject})
+            {"  back", "  paste", "------------------", "  new image", "  new folder", "  new text file"},
+            {true, not not copyObject, false, true, true, true})
             if num == 1 then
                 folderBack()
                 isRedraw = true
-            elseif num == 3 then --new image
+            elseif num == 4 then --new image
                 local clear = saveZone()
                 local name = calls.call("gui_input", screen, nil, nil, "image name")
                 clear()
@@ -602,7 +602,7 @@ while true do
                         warn("this name is occupied")
                     end
                 end
-            elseif num == 4 then --new folder
+            elseif num == 5 then --new folder
                 local clear = saveZone()
                 local name = calls.call("gui_input", screen, nil, nil, "folder name")
                 clear()
@@ -621,7 +621,7 @@ while true do
                         warn("this name is occupied")
                     end
                 end
-            elseif num == 5 then --new text file
+            elseif num == 6 then --new text file
                 local clear = saveZone()
                 local name = calls.call("gui_input", screen, nil, nil, "text file name")
                 clear()
@@ -640,7 +640,7 @@ while true do
                         warn("this name is occupied")
                     end
                 end
-            elseif num == 7 then
+            elseif num == 2 then
                 local copyFlag = true
                 local toPath = paths.concat(userPath, paths.name(copyObject))
                 if fs.exists(toPath) then
