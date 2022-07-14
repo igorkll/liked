@@ -160,8 +160,26 @@ local fs = require("filesystem")
 local text = require("text")
 local unicode = require("unicode")
 local graphic = require("graphic")
+local event = require("event")
 
 local screen, filename = ...
+
+local blinkingTerm = true
+local cx, cy = 1, 1
+local term = {clear = function()
+    local gpu = graphic.findGpu(screen)
+    local rx, ry = gpu.getResolution()
+    gpu.fill(1, 1, rx, ry, " ")
+end, pull = function(...)
+    if blinkingTerm then
+        gpu.set()
+    end
+    local eventData = {event.pull()}
+end, setCursor = function(x, y)
+    cx, cy = x, y
+end, getCursor = function()
+    return cx, cy
+end}
 
 local readonly = fs.get(filename).isReadOnly()
 
@@ -842,5 +860,11 @@ while running do
         else
             blink = false
         end
+        if blink then
+            term.setCursorBlink(true)
+        end
     end
 end
+
+term.clear()
+term.setCursorBlink(true)
