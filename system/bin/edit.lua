@@ -104,7 +104,8 @@ local function checkPos()
         py = #lines
     end
     if px > linesize then
-        cursorX = linesize
+        cursorX = 1
+        cursorY = cursorY + 1
         checkPos()
         redraw()
     end
