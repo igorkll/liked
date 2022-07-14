@@ -326,6 +326,9 @@ local function fileDescriptor(icon, alternative)
             calls.call("system_setTheme", icon.path)
             event.push("redrawDesktop")
         end
+    elseif icon.exp == "txt" then
+        execute("edit", icon.path)
+        draw()
     else
         warn("file is not supported")
     end
