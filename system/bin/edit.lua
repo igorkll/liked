@@ -37,6 +37,8 @@ end
 
 local offsetX = 0
 local offsetY = 0
+local cursorX = 1
+local cursorY = 1
 
 local function redraw()
     local gpu = graphic.findGpu(screen)
@@ -49,5 +51,53 @@ local function redraw()
             gpu.set(1 + offsetX, cy, line)
         end
     end
+    local char, fore, back = gpu.get(cursorX, cursorY)
+    gpu.setForeground(back)
+    gpu.setForeground(fore)
+    gpu.set(cursorX, cursorY, char)
 end
 redraw()
+
+------------------------------------
+
+local function mathLinePos()
+    return cursorX - offsetX, cursorY - offsetY
+end
+
+local function getLine()
+    local px, py = mathLinePos()
+    return lines[py], px
+end
+
+local function checkPos()
+    if cursorX > rx then
+        cursorX = rx
+    elseif cursorX < 1 then
+        cursorX = 1
+    end
+    if cursorY > ry then
+        cursorY = ry
+    elseif cursorY < 1 then
+        cursorY = 1
+    end
+
+    local linesize = #getLine()
+    local px, py = mathLinePos()
+    if py > #lines then
+        py = #lines
+    end
+    if px > linesize then
+        
+    end
+end
+
+local function moveCursorXPos()
+    local linesize = #getLine()
+
+end
+
+------------------------------------
+
+while true do
+    
+end
