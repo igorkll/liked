@@ -490,13 +490,14 @@ while true do
                             if type(name) == "string" then
                                 if #name ~= 0 and not name:find("%\\") and not name:find("%/") and
                                 (not name:find("%.") or devMode) then --change expansion disabled
-                                    local newexp = v.exp
+                                    local newexp = v.exp or ""
                                     if devMode then
                                         newexp = ""
                                     end
-                                    local path = paths.concat(userPath, name .. newexp)
+                                    local path = paths.concat(userPath, name .. "." .. newexp)
                                     if fs.exists(path) then
                                         warn("name exists")
+                                        clear()
                                     else
                                         fs.rename(v.path, path)
                                         draw()
