@@ -621,8 +621,25 @@ while true do
                         warn("this name is occupied")
                     end
                 end
-            elseif num == 5 then
-                
+            elseif num == 5 then --new text file
+                local clear = saveZone()
+                local name = calls.call("gui_input", screen, nil, nil, "text file name")
+                clear()
+
+                if type(name) == "string" then
+                    local path = paths.concat(userPath, name)
+                    if not fs.exists(path) then
+                        if (name:find("%.") and not devMode) or name:find("%/") or name:find("%\\") then
+                            warn("error in name")
+                        else
+                            execute("edit", screen, path .. (devMode and "" or ".txt"))
+                            draw()
+                            isRedraw = true
+                        end
+                    else
+                        warn("this name is occupied")
+                    end
+                end
             elseif num == 7 then
                 local copyFlag = true
                 local toPath = paths.concat(userPath, paths.name(copyObject))
