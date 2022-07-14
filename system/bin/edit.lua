@@ -92,6 +92,9 @@ local function checkPos()
     if offsetX > 0 then
         offsetX = 0
     end
+    if offsetY < 0 then
+        offsetY = 0
+    end
 
     local line = getLine()
     if not line then return end
