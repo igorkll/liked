@@ -158,7 +158,9 @@ local function draw(old)
         end
         local exp = paths.extension(path)
         local icon
-        if exp and #exp > 0 and exp ~= "app" and exp ~= "t2p" then
+        if fs.isDirectory(path) and fs.exists(paths.concat(path, "icon.t2p")) then
+            icon = paths.concat(path, "icon.t2p")
+        elseif exp and #exp > 0 and exp ~= "app" and exp ~= "t2p" then
             icon = paths.concat("/system/icons", exp .. ".t2p")
         elseif exp == "app" then
             icon = "/system/icons/app.t2p"
