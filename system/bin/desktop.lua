@@ -454,7 +454,7 @@ while true do
                         local screenshotY = 7
                         local strs, active =
                         {"  open", "----------------------", "  remove", "  rename", "  copy", "  cut"},
-                        {true, false, not v.isAlias, not v.isAlias, not v.isAlias, not v.isAlias}
+                        {true, false, not v.isAlias, not v.isAlias and (not v.exp == "app" or devMode), not v.isAlias, not v.isAlias}
 
                         if v.exp == "t2p" then
                             table.insert(strs, "----------------------")
@@ -477,6 +477,14 @@ while true do
                             table.insert(active, false)
 
                             table.insert(strs, "  inside the package")
+                            table.insert(active, true)
+
+                            screenshotY = screenshotY + 2
+                        elseif devMode and v.exp == "lua" and not fs.isDirectory(v.path) then
+                            table.insert(strs, "----------------------")
+                            table.insert(active, false)
+
+                            table.insert(strs, "  edit")
                             table.insert(active, true)
 
                             screenshotY = screenshotY + 2
