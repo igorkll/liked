@@ -1713,6 +1713,13 @@ end
 while running do
     local event, address, arg1, arg2, arg3 = term.pull()
     if address == term.keyboard() or address == term.screen() then
+        if event == "key_down" then
+            if arg1 == 19 and arg2 == 31 then
+                keyBindHandlers["save"]()
+            elseif arg1 == 23 and arg2 == 17 then
+                keyBindHandlers["close"]()
+            end
+        end
         local blink = true
         if event == "key_down" then
             onKeyDown(arg1, arg2)
@@ -1733,9 +1740,5 @@ while running do
         if blink then
             term.setCursorBlink(true)
         end
-    elseif arg1 == 19 and arg2 == 31 then
-        keyBindHandlers["save"]()
-    elseif arg1 == 23 and arg2 == 17 then
-        keyBindHandlers["close"]()
     end
 end
