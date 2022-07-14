@@ -73,10 +73,6 @@ local function getLine()
 end
 
 local function checkPos()
-    if offsetX > 0 then
-        offsetX = 0
-    end
-
     if cursorX > rx then
         offsetX = offsetX - 1
         cursorX = rx
@@ -91,6 +87,10 @@ local function checkPos()
     elseif cursorY < 1 then
         offsetY = offsetY - 1
         cursorY = 1
+    end
+
+    if offsetX > 0 then
+        offsetX = 0
     end
 
     local line = getLine()
@@ -136,9 +136,9 @@ while true do
                 cursorX = cursorX + 1
                 checkPos()
                 redraw()
-            elseif eventData[4] == 23 and eventData[4] == 17 then --exit
+            elseif eventData[3] == 23 and eventData[4] == 17 then --exit
                 break
-            elseif eventData[4] == 19 and eventData[4] == 31 then --save
+            elseif eventData[3] == 19 and eventData[4] == 31 then --save
                 saveFile()
             end
         end
