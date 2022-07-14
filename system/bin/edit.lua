@@ -469,8 +469,6 @@ function text.internal.words(input, options)
   return tokens
 end
 
-local process = require("process")
-
 -- separate string value into an array of words delimited by whitespace
 -- groups by quotes
 -- options is a table used for internal undocumented purposes
