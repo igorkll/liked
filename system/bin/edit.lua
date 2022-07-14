@@ -1041,7 +1041,7 @@ end, getCursorBlink = function()
 end, screen = function()
     return screen
 end, keyboard = function()
-    return component.invoke(screen, "getKeyboards")
+    return component.invoke(screen, "getKeyboards")[1]
 end, getGlobalArea = function()
     local sx, sy = graphic.findGpu(screen).getResolution()
     return 1, 1, sx, sy
@@ -1733,5 +1733,9 @@ while running do
         if blink then
             term.setCursorBlink(true)
         end
+    elseif arg1 == 19 and arg2 == 31 then
+        keyBindHandlers["save"]()
+    elseif arg1 == 23 and arg2 == 17 then
+        keyBindHandlers["close"]()
     end
 end
