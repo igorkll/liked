@@ -56,7 +56,7 @@ local function redraw()
     end
     local char, fore, back = gpu.get(cursorX, cursorY)
     gpu.setForeground(back)
-    gpu.setForeground(fore)
+    gpu.setBackground(fore)
     gpu.set(cursorX, cursorY, char)
 end
 redraw()

@@ -557,6 +557,7 @@ while true do
                             fileDescriptor(v, true)
                         elseif str == "  edit" then
                             execute("edit", screen, v.path)
+                            draw()
                         else
                             clear()
                         end
