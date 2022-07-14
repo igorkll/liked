@@ -549,9 +549,13 @@ while true do
                 if type(name) == "string" then
                     local path = paths.concat(userPath, name .. ".t2p")
                     if not fs.exists(path) then
-                        execute("paint", path)
-                        draw()
-                        isRedraw = true
+                        if name:find("%.") and not devMode then
+                            warn("error in name")
+                        else
+                            execute("paint", path)
+                            draw()
+                            isRedraw = true
+                        end
                     else
                         warn("this name is occupied")
                     end
