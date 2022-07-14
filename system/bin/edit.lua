@@ -73,6 +73,8 @@ local function getLine()
 end
 
 local function checkPos()
+    local line = getLine()
+
     if cursorX > rx then
         offsetX = offsetX - 1
         cursorX = rx
@@ -92,18 +94,20 @@ local function checkPos()
     if offsetX > 0 then
         offsetX = 0
         cursorY = cursorY - 1
+        if line then
+            cursorX = unicode.len(line)
+        end
         checkPos()
     end
     if offsetY < 0 then
         offsetY = 0
     end
 
-    local line = getLine()
     if not line then return end
-    local linesize = #line
+    local linesize = unicode.len(line)
     local px, py = mathLinePos()
-    if py > #lines then
-        py = #lines
+    if py > linesize then
+        py = linesize
     end
     if px > linesize then
         cursorX = 1
