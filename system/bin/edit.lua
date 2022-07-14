@@ -91,6 +91,8 @@ local function checkPos()
 
     if offsetX > 0 then
         offsetX = 0
+        cursorY = cursorY - 1
+        checkPos()
     end
     if offsetY < 0 then
         offsetY = 0
