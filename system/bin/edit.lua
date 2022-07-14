@@ -161,6 +161,7 @@ local text = require("text")
 local unicode = require("unicode")
 local graphic = require("graphic")
 local event = require("event")
+local colors = require("colors")
 
 local screen, filename = ...
 
@@ -172,9 +173,16 @@ local term = {clear = function()
     gpu.fill(1, 1, rx, ry, " ")
 end, pull = function(...)
     if blinkingTerm then
-        gpu.set()
+        local gpu = graphic.findGpu(screen)
+        gpu.setBackground()
+        gpu.set(cx, cy, " ")
     end
-    local eventData = {event.pull()}
+    local eventData = {event.pull(...)}
+    if blinkingTerm then
+        local gpu = graphic.findGpu(screen)
+        gpu.set(cx, cy, " ")
+    end
+    return table.insert(eventData)
 end, setCursor = function(x, y)
     cx, cy = x, y
 end, getCursor = function()
