@@ -192,7 +192,13 @@ local function draw(old)
             icon = "/system/icons/unkownfile.t2p"
         end
 
-        table.insert(icons, {icon = icon, path = path, exp = exp, index = i, name = paths.name(paths.hideExtension(path)), isAlias = not not customPath})
+        local name
+        if devMode then
+            name = paths.name(path)
+        else
+            name = paths.name(paths.hideExtension(path))
+        end
+        table.insert(icons, {icon = icon, path = path, exp = exp, index = i, name = name, isAlias = not not customPath})
     end
 
     local tbl = {}
