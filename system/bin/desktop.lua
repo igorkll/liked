@@ -7,6 +7,7 @@ local programs = require("programs")
 local gui_container = require("gui_container")
 local fs = require("filesystem")
 local paths = require("paths")
+local component = require("component")
 
 local colors = gui_container.colors
 
@@ -592,9 +593,23 @@ while true do
         ::bigSkip::
     end
 
-    if eventData[1] == "touch" then
-        if eventData[4] == 200 then
-            setDevMode(not devMode)
+    if eventData[1] == "key_down" then
+        local ok
+        for i, v in ipairs(component.invoke("getKeyboards")) do
+            if eventData[2] == v then
+                ok = true
+            end
+        end
+        if ok then
+            if eventData[4] == 200 then
+                setDevMode(not devMode)
+            elseif eventData[4] == 208 then
+                folderBack()
+            elseif eventData[4] == 203 then
+                listBack()
+            elseif eventData[4] == 205 then
+                listForward()
+            end
         end
     end
 end
