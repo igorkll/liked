@@ -783,7 +783,7 @@ end, pull = function(...)
         gpu.setBackground(gpu.setForeground(gpu.getBackground()))
         gpu.set(cx, cy, " ")
     end
-    return table.insert(eventData)
+    return table.unpack(eventData)
 end, setCursor = function(x, y)
     cx, cy = x, y
 end, getCursor = function()
@@ -796,6 +796,9 @@ end, screen = function()
     return screen
 end, keyboard = function()
     return component.invoke(screen, "getKeyboards")
+end, getGlobalArea = function()
+    local sx, sy = graphic.findGpu(screen).getResolution()
+    return 1, 1, sx, sy
 end}
 
 local readonly = fs.get(filename).isReadOnly()
@@ -884,7 +887,7 @@ end
 
 local function getArea()
     local gpu = graphic.findGpu(screen)
-    local x, y, w, h = gpu.getResolution()
+    local x, y, w, h = term.getGlobalArea()
     return x, y, w, h - 1
 end
 
