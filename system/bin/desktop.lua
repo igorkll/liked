@@ -368,6 +368,18 @@ function warn(str)
     clear()
 end
 
+local function addExp(name, exp)
+    if not devMode then
+        return name .. "." .. exp
+    else
+        local realexp = paths.extension(name)
+        if not realexp or realexp == "" then
+            name = name .. "." .. exp
+        end
+        return name
+    end
+end
+
 while true do
     if redrawFlag then
         draw()
@@ -471,7 +483,7 @@ while true do
 
                             if type(name) == "string" then
                                 if #name ~= 0 and not name:find("%\\") and not name:find("%/") and
-                                not name:find("%.") then --change expansion disabled
+                                (not name:find("%.") or devMode) then --change expansion disabled
                                     local newexp = ""
                                     local exp = paths.extension(name)
                                     if v.exp and v.exp ~= "" and (exp == "" or not exp) then
@@ -552,9 +564,13 @@ while true do
                 if type(name) == "string" then
                     local path = paths.concat(userPath, name)
                     if not fs.exists(path) then
-                        fs.makeDirectory(path)
-                        draw()
-                        isRedraw = true
+                        if name:find("%.") and not devMode then
+                            warn("error in name")
+                        else
+                            fs.makeDirectory(path)
+                            draw()
+                            isRedraw = true
+                        end
                     else
                         warn("this name is occupied")
                     end
@@ -595,7 +611,7 @@ while true do
 
     if eventData[1] == "key_down" then
         local ok
-        for i, v in ipairs(component.invoke("getKeyboards")) do
+        for i, v in ipairs(component.invoke(screen, "getKeyboards")) do
             if eventData[2] == v then
                 ok = true
             end
