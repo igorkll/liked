@@ -111,9 +111,17 @@ while true do
         end
         if ok then
             if eventData[4] == 200 then
-                cursorX = cursorX + 1
+                cursorY = cursorY + 1
                 checkPos()
             elseif eventData[4] == 208 then
+                cursorY = cursorY - 1
+                checkPos()
+            elseif eventData[4] == 203 then
+                cursorX = cursorX - 1
+                checkPos()
+            elseif eventData[4] == 205 then
+                cursorX = cursorX + 1
+                checkPos()
             end
         end
     end
