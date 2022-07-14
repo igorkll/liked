@@ -73,13 +73,18 @@ local function getLine()
 end
 
 local function checkPos()
+    if offsetX < 0 then
+        offsetX = 0
+    end
+
     if cursorX > rx then
-        offsetX = offsetX + 1
+        offsetX = offsetX - 1
         cursorX = rx
     elseif cursorX < 1 then
-        offsetX = offsetX - 1
+        offsetX = offsetX + 1
         cursorX = 1
     end
+
     if cursorY > ry then
         offsetY = offsetY + 1
         cursorY = ry
@@ -88,13 +93,17 @@ local function checkPos()
         cursorY = 1
     end
 
-    local linesize = #getLine()
+    local line = getLine()
+    if not line then return end
+    local linesize = #line
     local px, py = mathLinePos()
     if py > #lines then
         py = #lines
     end
     if px > linesize then
-        
+        cursorX = linesize
+        checkPos()
+        redraw()
     end
 end
 
@@ -111,11 +120,11 @@ while true do
             end
         end
         if ok then
-            if eventData[4] == 200 then
+            if eventData[4] == 208 then
                 cursorY = cursorY + 1
                 checkPos()
                 redraw()
-            elseif eventData[4] == 208 then
+            elseif eventData[4] == 200 then
                 cursorY = cursorY - 1
                 checkPos()
                 redraw()
