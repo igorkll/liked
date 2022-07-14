@@ -754,12 +754,12 @@ end
 
 local graphic = require("graphic")
 local event = require("event")
-local colors = require("colors")
+local colors = require("gui_container").colors
 local component = require("component")
 local paths = require("paths")
 
 local screen, filename = ...
-local file_parentpath = fs.path(filename)
+local file_parentpath = paths.path(filename)
 
 local gpu = graphic.findGpu(screen)
 gpu.setBackground(colors.gray)
@@ -1453,10 +1453,10 @@ do
         else
             format = [["%s" %dL,%dC]]
         end
-        setStatus(string.format(format, fs.name(filename), #buffer, chars))
+        setStatus(string.format(format, paths.name(filename), #buffer, chars))
     else
         table.insert(buffer, "")
-        setStatus(string.format([["%s" [New File] ]], fs.name(filename)))
+        setStatus(string.format([["%s" [New File] ]], paths.name(filename)))
     end
     setCursor(1, 1)
 end
