@@ -578,8 +578,8 @@ while true do
             local isRedraw
             local clear = calls.call("screenshot", screen, posX, posY, 19, 7)
             local str, num = calls.call("gui_context", screen, posX, posY,
-            {"  back", "------------------", "  new image", "  new folder", "------------------", "  paste"},
-            {true, false, true, true, false, not not copyObject})
+            {"  back", "------------------", "  new image", "  new folder", "  new text file", "------------------", "  paste"},
+            {true, false, true, true, true, false, not not copyObject})
             if num == 1 then
                 folderBack()
                 isRedraw = true
@@ -621,7 +621,9 @@ while true do
                         warn("this name is occupied")
                     end
                 end
-            elseif num == 6 then
+            elseif num == 5 then
+                
+            elseif num == 7 then
                 local copyFlag = true
                 local toPath = paths.concat(userPath, paths.name(copyObject))
                 if fs.exists(toPath) then
