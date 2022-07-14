@@ -21,7 +21,7 @@ end
 local lines = {}
 
 local function saveFile()
-    local file = fs.open(path, "w")
+    local file = assert(fs.open(path, "w"))
     for i, v in ipairs(lines) do
         file.write(v .. "\n")
     end
@@ -29,11 +29,12 @@ local function saveFile()
 end
 
 local function loadFile()
-    local file = fs.open(path, "r")
+    local file = assert(fs.open(path, "r"))
     local data = file.readAll()
     file.close()
     lines = calls.call("split", data, "\n")
 end
+loadFile()
 
 ------------------------------------
 
@@ -50,7 +51,7 @@ local function redraw()
     for cy = 1, ry do
         local line = lines[cy + offsetY]
         if line then
-            gpu.set(1 + offsetX, cy, line)
+            gpu.set(offsetX + 1, cy, line)
         end
     end
     local char, fore, back = gpu.get(cursorX, cursorY)
