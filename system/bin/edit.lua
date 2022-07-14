@@ -162,8 +162,15 @@ local unicode = require("unicode")
 local graphic = require("graphic")
 local event = require("event")
 local colors = require("colors")
+local component = require("component")
+local paths = require("paths")
 
 local screen, filename = ...
+local file_parentpath = fs.path(filename)
+
+local gpu = graphic.findGpu(screen)
+gpu.setBackground(colors.gray)
+gpu.setForeground(colors.lightGray)
 
 local blinkingTerm = true
 local cx, cy = 1, 1
@@ -174,12 +181,13 @@ local term = {clear = function()
 end, pull = function(...)
     if blinkingTerm then
         local gpu = graphic.findGpu(screen)
-        gpu.setBackground()
+        gpu.setBackground(gpu.setForeground(gpu.getBackground()))
         gpu.set(cx, cy, " ")
     end
     local eventData = {event.pull(...)}
     if blinkingTerm then
         local gpu = graphic.findGpu(screen)
+        gpu.setBackground(gpu.setForeground(gpu.getBackground()))
         gpu.set(cx, cy, " ")
     end
     return table.insert(eventData)
@@ -187,6 +195,14 @@ end, setCursor = function(x, y)
     cx, cy = x, y
 end, getCursor = function()
     return cx, cy
+end, setCursorBlink = function(state)
+    blinkingTerm = state
+end, getCursorBlink = function()
+    return blinkingTerm
+end, screen = function()
+    return screen
+end, keyboard = function()
+    return component.invoke(screen, "getKeyboards")
 end}
 
 local readonly = fs.get(filename).isReadOnly()
@@ -218,7 +234,7 @@ local function loadConfig()
     return env
 end
 
---clear
+term.clear()
 
 local running = true
 local buffer = {}
@@ -692,7 +708,7 @@ local keyBindHandlers = {
         if not fs.exists(file_parentpath) then
             fs.makeDirectory(file_parentpath)
         end
-        local f, reason = io.open(filename, "w")
+        local f, reason = fs.open(filename, "w")
         if f then
             local chars, firstLine = 0, true
             for _, bline in ipairs(buffer) do
@@ -700,17 +716,17 @@ local keyBindHandlers = {
                     bline = "\n" .. bline
                 end
                 firstLine = false
-                f:write(bline)
+                f.write(bline)
                 chars = chars + unicode.len(bline)
             end
-            f:close()
+            f.close()
             local format
             if new then
                 format = [["%s" [New] %dL,%dC written]]
             else
                 format = [["%s" %dL,%dC written]]
             end
-            setStatus(string.format(format, fs.name(filename), #buffer, chars))
+            setStatus(string.format(format, paths.name(filename), #buffer, chars))
         else
             setStatus(reason)
         end
@@ -819,11 +835,14 @@ end
 -------------------------------------------------------------------------------
 
 do
-    local f = io.open(filename)
+    local f = fs.open(filename)
     if f then
+        local data = f.readAll()
+        f.close()
+
         local x, y, w, h = getArea()
         local chars = 0
-        for fline in f:lines() do
+        for fline in ipairs(data) do
             table.insert(buffer, fline)
             chars = chars + unicode.len(fline)
             if #buffer <= h then
@@ -850,7 +869,7 @@ end
 
 while running do
     local event, address, arg1, arg2, arg3 = term.pull()
-    if address ==  or address == term.screen() then
+    if address == term.keyboard() or address == term.screen() then
         local blink = true
         if event == "key_down" then
             onKeyDown(arg1, arg2)
@@ -873,6 +892,3 @@ while running do
         end
     end
 end
-
-term.clear()
-term.setCursorBlink(true)
