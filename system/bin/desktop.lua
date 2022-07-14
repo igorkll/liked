@@ -198,7 +198,7 @@ local function draw(old)
         else
             name = paths.name(paths.hideExtension(path))
         end
-        table.insert(icons, {icon = icon, path = path, exp = exp, index = i, name = name, isAlias = not not customPath})
+        table.insert(icons, {icon = icon, path = path, exp = exp, index = i, name = name, isAlias = not not customPath, isDir = fs.isDirectory(path)})
     end
 
     local tbl = {}
@@ -456,7 +456,7 @@ while true do
                         {"  open", "----------------------", "  remove", "  rename", "  copy", "  cut"},
                         {true, false, not v.isAlias, not v.isAlias and (not v.exp == "app" or devMode), not v.isAlias, not v.isAlias}
 
-                        if v.exp == "t2p" then
+                        if v.exp == "t2p" and not v.isDir then
                             table.insert(strs, "----------------------")
                             table.insert(active, false)
 
@@ -464,7 +464,7 @@ while true do
                             table.insert(active, true)
 
                             screenshotY = screenshotY + 2
-                        elseif v.exp == "plt" then
+                        elseif v.exp == "plt" and not v.isDir then
                             table.insert(strs, "----------------------")
                             table.insert(active, false)
 
@@ -472,7 +472,7 @@ while true do
                             table.insert(active, true)
 
                             screenshotY = screenshotY + 2
-                        elseif devMode and v.exp == "app" and fs.isDirectory(v.path) then
+                        elseif devMode and v.exp == "app" and v.isDir then
                             table.insert(strs, "----------------------")
                             table.insert(active, false)
 
@@ -480,7 +480,7 @@ while true do
                             table.insert(active, true)
 
                             screenshotY = screenshotY + 2
-                        elseif devMode and v.exp == "lua" and not fs.isDirectory(v.path) then
+                        elseif devMode and v.exp == "lua" and not v.isDir then
                             table.insert(strs, "----------------------")
                             table.insert(active, false)
 
