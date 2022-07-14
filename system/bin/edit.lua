@@ -3,7 +3,9 @@ local unicode = require("unicode")
 local calls = require("calls")
 local graphic = require("graphic")
 local calls = require("calls")
+local computer = require("computer")
 local gui_container = require("gui_container")
+local component = require("component")
 
 local screen, path = ...
 
@@ -71,13 +73,17 @@ end
 
 local function checkPos()
     if cursorX > rx then
+        offsetX = offsetX + 1
         cursorX = rx
     elseif cursorX < 1 then
+        offsetX = offsetX - 1
         cursorX = 1
     end
     if cursorY > ry then
+        offsetY = offsetY + 1
         cursorY = ry
     elseif cursorY < 1 then
+        offsetY = offsetY - 1
         cursorY = 1
     end
 
@@ -91,13 +97,24 @@ local function checkPos()
     end
 end
 
-local function moveCursorXPos()
-    local linesize = #getLine()
-
-end
-
 ------------------------------------
 
 while true do
-    
+    local eventData = {computer.pullSignal()}
+    if eventData[1] == "key_down" then
+        local ok
+        for i, v in ipairs(component.invoke(screen, "getKeyboards")) do
+            if v == eventData[2] then
+                ok = true
+                break
+            end
+        end
+        if ok then
+            if eventData[4] == 200 then
+                cursorX = cursorX + 1
+                checkPos()
+            elseif eventData[4] == 208 then
+            end
+        end
+    end
 end
