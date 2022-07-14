@@ -154,7 +154,7 @@ local function draw(old)
         if customPath then
             path = customPath
         else
-            path = paths.concat(userPath, v) .. "/"
+            path = paths.concat(userPath, v)
         end
         local exp = paths.extension(path)
         local icon
@@ -556,7 +556,7 @@ while true do
                         elseif str == "  inside the package" then
                             fileDescriptor(v, true)
                         elseif str == "  edit" then
-                            execute("edit", screen, v.path)
+                            execute("edit", v.path)
                             draw()
                         else
                             clear()

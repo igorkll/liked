@@ -114,15 +114,19 @@ while true do
             if eventData[4] == 200 then
                 cursorY = cursorY + 1
                 checkPos()
+                redraw()
             elseif eventData[4] == 208 then
                 cursorY = cursorY - 1
                 checkPos()
+                redraw()
             elseif eventData[4] == 203 then
                 cursorX = cursorX - 1
                 checkPos()
+                redraw()
             elseif eventData[4] == 205 then
                 cursorX = cursorX + 1
                 checkPos()
+                redraw()
             end
         end
     end
