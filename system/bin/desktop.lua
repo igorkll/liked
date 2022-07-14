@@ -282,11 +282,17 @@ local function folderBack()
     draw()
 end
 
-local function fileDescriptor(icon, isFolder)
-    if isFolder and fs.isDirectory(icon.path) then
-        userPath = icon.path
-        draw()
-        return true
+local function fileDescriptor(icon, alternative)
+    if alternative then
+        if fs.isDirectory(icon.path) then
+            userPath = icon.path
+            draw()
+            return true
+        elseif icon.exp == "lua" then
+            execute("edit", screen, icon.path)
+            draw()
+            return true
+        end
     end
 
     if icon.exp == "app" then
@@ -466,7 +472,7 @@ while true do
                             table.insert(active, true)
 
                             screenshotY = screenshotY + 2
-                        elseif v.exp == "app" and fs.isDirectory("") then
+                        elseif devMode and v.exp == "app" and fs.isDirectory(v.path) then
                             table.insert(strs, "----------------------")
                             table.insert(active, false)
 
