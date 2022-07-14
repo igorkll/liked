@@ -95,7 +95,7 @@ local function checkPos()
         offsetX = 0
         cursorY = cursorY - 1
         if line then
-            cursorX = unicode.len(line)
+            --cursorX = unicode.len(line)
         end
         checkPos()
     end
@@ -104,12 +104,8 @@ local function checkPos()
     end
 
     if not line then return end
-    local linesize = unicode.len(line)
     local px, py = mathLinePos()
-    if py > linesize then
-        py = linesize
-    end
-    if px > linesize then
+    if px > unicode.len(line) then
         cursorX = 1
         cursorY = cursorY + 1
         checkPos()
