@@ -456,7 +456,7 @@ while true do
                         local screenshotY = 7
                         local strs, active =
                         {"  open", "----------------------", "  remove", "  rename", "  copy", "  cut"},
-                        {true, false, not v.isAlias, not v.isAlias and (not v.exp == "app" or devMode), not v.isAlias, not v.isAlias}
+                        {true, false, not v.isAlias, not v.isAlias and (v.exp ~= "app" or devMode), not v.isAlias, not v.isAlias}
 
                         if v.exp == "t2p" and not v.isDir then
                             table.insert(strs, "----------------------")
