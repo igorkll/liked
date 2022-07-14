@@ -324,9 +324,9 @@ local function setDevMode(state)
     else
         userRoot = userRootMain
     end
+    devMode = state
     checkFolder()
     draw()
-    devMode = state
 end
 
 ------------------------------------
@@ -490,14 +490,17 @@ while true do
                             if type(name) == "string" then
                                 if #name ~= 0 and not name:find("%\\") and not name:find("%/") and
                                 (not name:find("%.") or devMode) then --change expansion disabled
-                                    local newexp = ""
-                                    local exp = paths.extension(name)
-                                    if v.exp and v.exp ~= "" and (exp == "" or not exp) then
-                                        newexp = newexp .. "." .. v.exp
+                                    local newexp = v.exp
+                                    if devMode then
+                                        newexp = ""
                                     end
                                     local path = paths.concat(userPath, name .. newexp)
-                                    fs.rename(v.path, path)
-                                    draw()
+                                    if fs.exists(path) then
+                                        warn("name exists")
+                                    else
+                                        fs.rename(v.path, path)
+                                        draw()
+                                    end
                                 else
                                     warn("error in name")
                                     clear()
@@ -547,7 +550,7 @@ while true do
             if num == 1 then
                 folderBack()
                 isRedraw = true
-            elseif num == 3 then
+            elseif num == 3 then --new image
                 local clear = saveZone()
                 local name = calls.call("gui_input", screen, nil, nil, "image name")
                 clear()
@@ -566,7 +569,7 @@ while true do
                         warn("this name is occupied")
                     end
                 end
-            elseif num == 4 then
+            elseif num == 4 then --new folder
                 local clear = saveZone()
                 local name = calls.call("gui_input", screen, nil, nil, "folder name")
                 clear()
