@@ -282,7 +282,13 @@ local function folderBack()
     draw()
 end
 
-local function fileDescriptor(icon)
+local function fileDescriptor(icon, isFolder)
+    if isFolder and fs.isDirectory(icon.path) then
+        userPath = icon.path
+        draw()
+        return true
+    end
+
     if icon.exp == "app" then
         if fs.isDirectory(icon.path) then
             execute(paths.concat(icon.path, "main.lua"))
@@ -460,6 +466,14 @@ while true do
                             table.insert(active, true)
 
                             screenshotY = screenshotY + 2
+                        elseif v.exp == "app" and fs.isDirectory("") then
+                            table.insert(strs, "----------------------")
+                            table.insert(active, false)
+
+                            table.insert(strs, "  inside the package")
+                            table.insert(active, true)
+
+                            screenshotY = screenshotY + 2
                         end
 
                         local posX, posY = window:toRealPos(windowEventData[3], windowEventData[4])
@@ -523,6 +537,8 @@ while true do
                         elseif str == "  set as theme" then
                             calls.call("system_setTheme", v.path)
                             event.push("redrawDesktop")
+                        elseif str == "  inside the package" then
+                            fileDescriptor(v, true)
                         else
                             clear()
                         end
