@@ -1009,7 +1009,7 @@ local file_parentpath = paths.path(filename)
 
 local gpu = graphic.findGpu(screen)
 gpu.setBackground(colors.gray)
-gpu.setForeground(colors.lightGray)
+gpu.setForeground(colors.white)
 
 local blinkingTerm = true
 local cx, cy = 1, 1
