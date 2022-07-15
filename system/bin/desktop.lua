@@ -641,7 +641,7 @@ while true do
                         if (name:find("%.") and not devMode) or name:find("%/") or name:find("%\\") then
                             warn("error in name")
                         else
-                            execute("edit", screen, path .. (devMode and "" or ".txt"))
+                            execute("edit", path .. (devMode and "" or ".txt"))
                             draw()
                             isRedraw = true
                         end
