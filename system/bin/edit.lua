@@ -1537,17 +1537,6 @@ local keyBindHandlers = {
             return
         end
         local new = not fs.exists(filename)
-        local backup
-        if not new then
-            backup = filename .. "~"
-            for i = 1, math.huge do
-                if not fs.exists(backup) then
-                    break
-                end
-                backup = filename .. "~" .. i
-            end
-            fs.copy(filename, backup)
-        end
         if not fs.exists(file_parentpath) then
             fs.makeDirectory(file_parentpath)
         end
@@ -1572,9 +1561,6 @@ local keyBindHandlers = {
             setStatus(string.format(format, paths.name(filename), #buffer, chars))
         else
             setStatus(reason)
-        end
-        if not new then
-            fs.remove(backup)
         end
     end,
     close = function()
@@ -1678,21 +1664,23 @@ end
 -------------------------------------------------------------------------------
 
 do
-    local f = fs.open(filename)
+    local f = fs.open(filename, "r")
     if f then
-        local data = f.readAll()
+        local data = require("calls").call("split", f.readAll(), "\n")
         f.close()
 
         local x, y, w, h = getArea()
         local chars = 0
         for fline in ipairs(data) do
+            fline = text.removeEscapes(fline)
+            fline = text.detab(fline, 2)
             table.insert(buffer, fline)
             chars = chars + unicode.len(fline)
             if #buffer <= h then
                 drawLine(x, y, w, h, #buffer)
             end
         end
-        f:close()
+        f.close()
         if #buffer == 0 then
             table.insert(buffer, "")
         end
