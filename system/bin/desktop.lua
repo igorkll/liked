@@ -122,7 +122,7 @@ local function draw(old)
     local iconsCount = 0
     local tbl = fs.list(userPath)
     if not tbl then
-        userPath = userRoot
+        userPath = userRootMain
         return draw()
     end
     for i, v in ipairs(tbl) do
