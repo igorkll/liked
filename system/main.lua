@@ -20,18 +20,15 @@ local desktop = assert(programs.load("desktop"))--подгружаю один р
 ------------------------------------
 
 if #screens > 0 then
-    local thread = require("thread")
-    
+    local thread = require("thread") --подгружаю thread опционально, для экономии энергии
 
     local threads = {}
-    for address in component.list("screen") do
-        
-            calls.call("gui_initScreen", address)
-            local t = thread.create(desktop, address)
-            t:resume()
-            t.screen = address
-            table.insert(threads, t)
-        end
+    for _, address in ipairs(screens) do
+        calls.call("gui_initScreen", address)
+        local t = thread.create(desktop, address)
+        t:resume() --поток по умалчанию спит
+        t.screen = address
+        table.insert(threads, t)
     end
 
     while true do
@@ -43,7 +40,9 @@ if #screens > 0 then
         event.sleep(1)
     end
 elseif #screens == 1 then
-    
+    local screen = screens[1]
+    calls.call("gui_initScreen", screen)
+    assert(xpcall(desktop, debug.traceback, screen))
 else
     error("no supported screen found", 0)
 end
