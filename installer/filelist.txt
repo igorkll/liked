@@ -33,3 +33,8 @@
 /system/icons/lua.t2p
 /system/main.lua
 /system/lib/gui_container.lua
+/system/icons/robot.t2p
+/system/icons/tablet.t2p
+/system/icons/eeprom.t2p
+/system/icons/dfpwm.t2p
+/system/icons/txt.t2p
