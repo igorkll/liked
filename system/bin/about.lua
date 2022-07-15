@@ -3,13 +3,11 @@ local event = require("event")
 local gui_container = require("gui_container")
 local computer = require("computer")
 local calls = require("calls")
-local thread = require("thread")
 
 local colors = gui_container.colors
 local screen = ...
 local gpu = graphic.findGpu(screen)
 local rx, ry = gpu.getResolution()
-local t = thread.current()
 
 --------------------------------------------
 

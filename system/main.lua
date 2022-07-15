@@ -1,9 +1,8 @@
-local gui_container = require("gui_container")
+require("gui_container")
 local component = require("component")
 local graphic = require("graphic")
 local programs = require("programs")
 local calls = require("calls")
-local event = require("event")
 
 ------------------------------------
 
@@ -21,6 +20,7 @@ local desktop = assert(programs.load("desktop"))--подгружаю один р
 
 if #screens > 0 then
     local thread = require("thread") --подгружаю thread опционально, для экономии энергии
+    local event = require("event")
 
     local threads = {}
     for _, address in ipairs(screens) do

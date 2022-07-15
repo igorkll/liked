@@ -371,20 +371,20 @@ setmetatable(keyboard.keys,
 
 
 
+local term
 
 
 
 
 
-
-
-
-
-
-
-
-
-
+local function onKeyChangeFoKeyboard(ev, uuid, char, code)
+  -- nil might be slightly more mem friendly during runtime
+  -- and `or nil` appears to only cost 30 bytes
+  if term.keyboard() == uuid then
+    keyboard.pressedChars[char] = ev == "key_down" or nil
+    keyboard.pressedCodes[code] = ev == "key_down" or nil
+  end
+end
 
 
 
@@ -1013,7 +1013,7 @@ gpu.setForeground(colors.white)
 
 local blinkingTerm = true
 local cx, cy = 1, 1
-local term = {clear = function()
+term = {clear = function()
     local gpu = graphic.findGpu(screen)
     local rx, ry = gpu.getResolution()
     gpu.fill(1, 1, rx, ry, " ")
@@ -1026,6 +1026,9 @@ end, pull = function(...)
         gpu.set(cx, cy, char)
     end
     local eventData = {event.pull(...)}
+    if eventData[1] == "key_down" or eventData[1] == "key_up" then
+      onKeyChangeFoKeyboard(table.unpack(eventData))
+    end
     if blinkingTerm then
       local gpu = graphic.findGpu(screen)
       local char, fore, back = gpu.get(cx, cy)
