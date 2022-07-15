@@ -1020,14 +1020,18 @@ local term = {clear = function()
 end, pull = function(...)
     if blinkingTerm then
         local gpu = graphic.findGpu(screen)
-        gpu.setBackground(gpu.setForeground(gpu.getBackground()))
-        gpu.set(cx, cy, " ")
+        local char, fore, back = gpu.get(cx, cy)
+        gpu.setBackground(fore)
+        gpu.setForeground(back)
+        gpu.set(cx, cy, char)
     end
     local eventData = {event.pull(...)}
     if blinkingTerm then
-        local gpu = graphic.findGpu(screen)
-        gpu.setBackground(gpu.setForeground(gpu.getBackground()))
-        gpu.set(cx, cy, " ")
+      local gpu = graphic.findGpu(screen)
+      local char, fore, back = gpu.get(cx, cy)
+      gpu.setBackground(fore)
+      gpu.setForeground(back)
+      gpu.set(cx, cy, char)
     end
     return table.unpack(eventData)
 end, setCursor = function(x, y)
@@ -1671,7 +1675,7 @@ do
 
         local x, y, w, h = getArea()
         local chars = 0
-        for fline in ipairs(data) do
+        for _, fline in ipairs(data) do
             fline = text.removeEscapes(fline)
             fline = text.detab(fline, 2)
             table.insert(buffer, fline)

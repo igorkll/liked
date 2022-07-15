@@ -291,7 +291,7 @@ local function fileDescriptor(icon, alternative)
             draw()
             return true
         elseif icon.exp == "lua" then
-            execute("edit", screen, icon.path)
+            execute("edit", icon.path)
             draw()
             return true
         end
@@ -403,6 +403,9 @@ local function addExp(name, exp)
     end
 end
 
+local devModeCount = 0
+local devModeResetTime = 0
+
 while true do
     if redrawFlag then
         draw()
@@ -459,7 +462,7 @@ while true do
                         local screenshotY = 7
                         local strs, active =
                         {"  open", "----------------------", "  remove", "  rename", "  copy", "  cut"},
-                        {true, false, not v.isAlias, not v.isAlias and (v.exp ~= "app" or devMode), not v.isAlias, not v.isAlias}
+                        {true, false, not v.isAlias, not v.isAlias, not v.isAlias, not v.isAlias}
 
                         if v.exp == "t2p" and not v.isDir then
                             table.insert(strs, "----------------------")
@@ -689,7 +692,7 @@ while true do
         end
         if ok then
             if eventData[4] == 200 then
-                setDevMode(not devMode)
+                devModeCount = devModeCount + 1
             elseif eventData[4] == 208 then
                 folderBack()
             elseif eventData[4] == 203 then
@@ -698,5 +701,19 @@ while true do
                 listForward()
             end
         end
+    end
+
+    if computer.uptime() - devModeResetTime > 1 then
+        devModeResetTime = computer.uptime()
+        if devModeCount > 15 then
+            if not devMode then
+                computer.beep(2000)
+            else
+                computer.beep(1000)
+            end
+            setDevMode(not devMode)
+            event.sleep(1)
+        end
+        devModeCount = 0
     end
 end
