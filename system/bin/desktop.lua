@@ -1,3 +1,7 @@
+--ВНИМАНИЯ, для кономии оперативной памяти, я загружаю данный файл один раз и создаю на него патоки
+--соответственно таблица _ENV для всех desktop обшая, и тут нельзя использовать глобалы
+local warn, saveZone, execute
+
 local graphic = require("graphic")
 local computer = require("computer")
 local event = require("event")
