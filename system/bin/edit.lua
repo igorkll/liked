@@ -1461,22 +1461,24 @@ local function find()
         term.setCursor(7 + unicode.wlen(findText), h + 1)
         setStatus("Find: " .. findText)
 
-        local _, address, char, code = term.pull("key_down")
-        if address == term.keyboard() then
-            local handler, name = getKeyBindHandler(code)
-            highlight(cbx, cby, unicode.wlen(findText), false)
-            if name == "newline" then
-                break
-            elseif name == "close" then
-                handler()
-            elseif name == "backspace" then
-                findText = unicode.sub(findText, 1, -2)
-            elseif name == "find" or name == "findnext" then
-                ibx = cbx + 1
-                iby = cby
-            elseif not keyboard.isControl(char) then
-                findText = findText .. unicode.char(char)
-            end
+        local eventt, address, char, code = term.pull() 
+        if eventt == "key_down" then
+          if address == term.keyboard() then
+              local handler, name = getKeyBindHandler(code)
+              highlight(cbx, cby, unicode.wlen(findText), false)
+              if name == "newline" then
+                  break
+              elseif name == "close" then
+                  handler()
+              elseif name == "backspace" then
+                  findText = unicode.sub(findText, 1, -2)
+              elseif name == "find" or name == "findnext" then
+                  ibx = cbx + 1
+                  iby = cby
+              elseif not keyboard.isControl(char) then
+                  findText = findText .. unicode.char(char)
+              end
+          end
         end
     end
     setCursor(cbx, cby)
