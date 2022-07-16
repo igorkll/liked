@@ -33,6 +33,14 @@ local function writeInitLua()
     fs.copy(paths.concat(path, "init.lua"), "/init.lua")
 end
 
+local function removeUserData()
+    for i, file in ipairs(fs.list("/") or {}) do
+        if file ~= "init.lua" and file ~= "system/" and file ~= "external-data/" then
+            fs.remove("/" .. file)
+        end
+    end
+end
+
 --------------------------------------------
 
 while true do
@@ -69,7 +77,7 @@ while true do
                     if calls.call("gui_yesno", screen, nil, nil, "reinstall os? all data will be deleted!") then
                         writeInitLua()
                         fs.remove("/system")
-                        fs.remove("/data")
+                        removeUserData()
                         computer.shutdown("fast")
                     else
                         draw()
@@ -90,7 +98,7 @@ while true do
                 end
             elseif windowEventData[4] == (ry // 2) + 3 then --factory reset
                 if calls.call("gui_yesno", screen, nil, nil, "factory reset? all data will be deleted!") then
-                    fs.remove("/data")
+                    removeUserData()
                     computer.shutdown("fast")
                 else
                     draw()
