@@ -191,6 +191,8 @@ local function exitAllow()
 end
 
 local function resize(newx, newy)
+    newx = math.floor(newx + 0.5)
+    newy = math.floor(newy + 0.5)
     if newx <= 0 or newy <= 0 then
         local clear = saveZone()
         calls.call("gui_warn", screen, nil, nil, "uncorrent input", colors.white)

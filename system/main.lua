@@ -18,7 +18,7 @@ local desktop = assert(programs.load("desktop"))--подгружаю один р
 
 ------------------------------------
 
-if #screens > 0 then
+if #screens > 1 then
     local thread = require("thread") --подгружаю thread опционально, для экономии энергии
     local event = require("event")
 

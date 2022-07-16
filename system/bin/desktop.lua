@@ -32,7 +32,7 @@ local userRootMain = "/data/userdata/"
 local userRoot = userRootMain
 local userPath = userRootMain
 local iconsPath = userRootMain
-local iconAliases = {"/system/bin/settings.app"}
+local iconAliases = {"/system/bin/settings.app", "/system/bin/update.app"}
 
 fs.makeDirectory(userRoot)
 fs.makeDirectory(userPath)
@@ -72,7 +72,17 @@ local function checkData()
 end
 
 local function drawStatus()
-    local hours, minutes, seconds = calls.call("getRealTime", 3)
+    local timeZone = 3
+    local timeZonePath = "/data/timeZone.dat"
+    if fs.exists(timeZonePath) then
+        local file = fs.open(timeZonePath, "rb")
+        local data = tonumber(file.readAll())
+        file.close()
+        if data then
+            timeZone = data
+        end
+    end
+    local hours, minutes, seconds = calls.call("getRealTime", timeZone)
     hours = tostring(hours)
     minutes = tostring(minutes)
     if #hours == 1 then hours = "0" .. hours end
@@ -154,7 +164,7 @@ local function draw(old)
             return true
         end
 
-        local path
+        local path, preName
         if customPath then
             path = customPath
         else
@@ -168,9 +178,6 @@ local function draw(old)
             icon = paths.concat("/system/icons", exp .. ".t2p")
         elseif exp == "app" then
             icon = "/system/icons/app.t2p"
-            if fs.isDirectory(path) and fs.exists(paths.concat(path, "icon.t2p")) then
-                icon = paths.concat(path, "icon.t2p")
-            end
         elseif exp == "t2p" then
             icon = "/system/icons/t2p.t2p"
             local iconPath
@@ -190,19 +197,44 @@ local function draw(old)
             end
         elseif fs.isDirectory(path) then
             icon = "/system/icons/folder.t2p"
-            if fs.exists(paths.concat(path, "icon.t2p")) then
-                icon = paths.concat(path, "icon.t2p")
+
+            for _, tbl in ipairs(fs.mountList) do
+                if paths.canonical(path) .. "/" == tbl[2] then
+                    local info = computer.getDeviceInfo()[tbl[1].address]
+                    if not info then
+                        event.sleep(2)
+                    end
+                    local clock = info and info.clock
+                    local iconpath = paths.concat(path, "external-data/devivetype.dat")
+                    if fs.exists(iconpath) then
+                        local file = fs.open(iconpath, "rb")
+                        local data = file.readAll()
+                        file.close()
+
+                        icon = paths.concat("/system/icons", data .. ".t2p")
+                        preName = (component.invoke(tbl[1].address, "getLabel") or data) .. "-" .. tbl[1].address:sub(1, 5)
+                    elseif tbl[1].address == computer.tmpAddress() then
+                        icon = "/system/icons/tmp.t2p"
+                    elseif clock == "20/20/20" then
+                        icon = "/system/icons/fdd.t2p"
+                    else
+                        icon = "/system/icons/hdd.t2p"
+                    end
+                    break
+                end
             end
         end
         if not icon or not fs.exists(icon) then
             icon = "/system/icons/unkownfile.t2p"
         end
 
-        local name
-        if devMode then
-            name = paths.name(path)
-        else
-            name = paths.name(paths.hideExtension(path))
+        local name = preName
+            if not name then
+            if devMode then
+                name = paths.name(path)
+            else
+                name = paths.name(paths.hideExtension(path))
+            end
         end
         table.insert(icons, {icon = icon, path = path, exp = exp, index = i, name = name, isAlias = not not customPath, isDir = fs.isDirectory(path)})
     end
