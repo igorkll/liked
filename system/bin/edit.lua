@@ -1651,7 +1651,6 @@ local function onClipboard(value)
     if l then
         repeat
             local next_line = string.sub(value, start, l - 1)
-            next_line = text.detab(next_line, 2)
             insert(next_line)
             enter()
             start = l + 1
@@ -1681,8 +1680,6 @@ do
         local x, y, w, h = getArea()
         local chars = 0
         for _, fline in ipairs(data) do
-            fline = text.removeEscapes(fline)
-            fline = text.detab(fline, 2)
             table.insert(buffer, fline)
             chars = chars + unicode.len(fline)
             if #buffer <= h then
