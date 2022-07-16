@@ -8,7 +8,7 @@
 /system/bin/paint.lua
 /system/bin/desktop.lua
 /system/bin/update.app/icon.t2p
-/system/bin/update.app/update.lua
+/system/bin/update.app/init.lua
 /system/bin/update.app/main.lua
 /system/bin/edit.lua
 /system/bin/settings.app/icon.t2p
