@@ -76,7 +76,7 @@ local function fs_path(path)
 end
 
 local function installUrl(url)
-    local filelist = split(assert(getInternetFile(url .. "/filelist.txt")), "\n")
+    local filelist = split(assert(getInternetFile(url .. "/installer/filelist.txt")), "\n")
     for i, v in ipairs(filelist) do
         local filedata = assert(getInternetFile(url .. v))
 
@@ -88,5 +88,5 @@ local function installUrl(url)
 end
 
 proxy.remove("/system")
-installUrl("https://raw.githubusercontent.com/igorkll/likeOS/main/installer")
-installUrl("https://raw.githubusercontent.com/igorkll/liked/main/installer")
+installUrl("https://raw.githubusercontent.com/igorkll/likeOS/main")
+installUrl("https://raw.githubusercontent.com/igorkll/liked/main")
