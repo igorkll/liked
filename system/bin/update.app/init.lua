@@ -90,3 +90,4 @@ end
 proxy.remove("/system")
 installUrl("https://raw.githubusercontent.com/igorkll/likeOS/main")
 installUrl("https://raw.githubusercontent.com/igorkll/liked/main")
+computer.shutdown("fast")
