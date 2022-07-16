@@ -20,7 +20,7 @@ local setPos = (rx // 2) - 5
 
 local function draw()
     window:clear(colors.white)
-    window:set(setPos, 1, colors.lightGray, colors.white, "current versio: " .. calls.call("getOSversion"))
+    window:set(setPos, 1, colors.lightGray, colors.white, "current version: " .. calls.call("getOSversion"))
     window:set(setPos, (ry // 2) + 0, colors.lightGray, colors.white, "Update")
     window:set(setPos, (ry // 2) + 1, colors.lightGray, colors.white, "Reinstall OS")
     window:set(setPos, (ry // 2) + 2, colors.lightGray, colors.white, "Recover OS")
@@ -30,7 +30,7 @@ end
 draw()
 
 local function writeInitLua()
-    fs.copy(fs.concat(path, "init.lua"), "/init.lua")
+    fs.copy(paths.concat(path, "init.lua"), "/init.lua")
 end
 
 --------------------------------------------
