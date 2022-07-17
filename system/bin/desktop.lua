@@ -672,12 +672,12 @@ while true do
                 clear()
 
                 if type(name) == "string" then
-                    local path = paths.concat(userPath, name)
+                    local path = paths.concat(userPath, name .. (devMode and "" or ".txt"))
                     if not fs.exists(path) then
                         if (name:find("%.") and not devMode) or name:find("%/") or name:find("%\\") then
                             warn("error in name")
                         else
-                            execute("edit", path .. (devMode and "" or ".txt"))
+                            execute("edit", path)
                             draw()
                             isRedraw = true
                         end
