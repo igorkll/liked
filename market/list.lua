@@ -22,5 +22,14 @@ return {
         isInstalled = function()
             return fs.exists("/data/userdata/nanomachines.app")
         end
-    }
+    },
+    nullapp1 = {
+
+    },
+    nullapp2 = {
+
+    },
+    nullapp3 = {
+
+    },
 }

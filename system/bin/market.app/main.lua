@@ -30,6 +30,8 @@ local listOffSet = 1
 local appsTbl = {}
 local function draw()
     statusWindow:clear(colors.gray)
+    window:clear(colors.white)
+
     statusWindow:set(1, 1, colors.gray, colors.white, "MARKET")
     statusWindow:set(statusWindow.sizeX, statusWindow.sizeY, colors.red, colors.white, "X")
 
@@ -38,11 +40,12 @@ local function draw()
     for k, v in pairs(list) do
         if count >= listOffSet and count <= window.sizeY then
             window:set(1, 1, colors.gray, colors.white, k .. ":" .. (v.isInstalled() and "installed" or "no installed"))
-            table.insert(appsTbl, 2)
+            table.insert(appsTbl, v)
         end
         count = count + 1
     end
 end
+draw()
 
 ------------------------------------
 
