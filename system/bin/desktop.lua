@@ -108,6 +108,12 @@ local function draw(old)
 
     drawStatus()
     window:clear(colors.lightBlue)
+    if fs.exists(wallpaperPath) then
+        local sx, sy = calls.call("gui_readimagesize", wallpaperPath)
+        local ix, iy = math.floor(((window.sizeX / 2) - (sx / 2)) + 0.5) + 1, math.floor(((window.sizeY / 2) - (sy / 2)) + 0.5) + 1
+        ix, iy = window:toRealPos(ix, iy)
+        pcall(calls.call, "gui_drawimage", screen, wallpaperPath, ix, iy)
+    end
 
     local str = "path: " .. unicode.sub(userPath, unicode.len(userRoot), unicode.len(userPath))
     window:set(math.floor(((window.sizeX / 2) - (unicode.len(str) / 2)) + 0.5),
@@ -127,12 +133,6 @@ local function draw(old)
     window:set(window.sizeX - 1, window.sizeY - 2, colors.lightGray, colors.white, " \\")
     window:set(window.sizeX - 1, window.sizeY - 1, colors.lightGray, colors.white, " /")
     window:set(window.sizeX - 1, window.sizeY - 0, colors.lightGray, colors.white, "/ ")
-
-    if fs.exists(wallpaperPath) then
-        local sx, sy = calls.call("gui_readimagesize", wallpaperPath)
-        local ix, iy = ((window.sizeX / 2) - (sx / 2)) + 1, ((window.sizeY / 2) - (sy / 2)) + 1
-        pcall(calls.call, "gui_drawimage", screen, wallpaperPath, ix, iy)
-    end
 
     local iconsCount = 0
     local tbl = fs.list(userPath)
