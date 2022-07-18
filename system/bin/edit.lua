@@ -1004,7 +1004,7 @@ local colors = require("gui_container").colors
 local component = require("component")
 local paths = require("paths")
 
-local screen, filename = ...
+local screen, filename, readonly = ...
 local file_parentpath = paths.path(filename)
 
 local gpu = graphic.findGpu(screen)
@@ -1054,7 +1054,7 @@ end, getGlobalArea = function()
     return 1, 1, sx, sy
 end}
 
-local readonly = fs.get(filename).isReadOnly()
+local readonly = readonly or fs.get(filename).isReadOnly()
 
 local function loadConfig()
     local env = {}

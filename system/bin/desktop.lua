@@ -32,7 +32,12 @@ local userRootMain = "/data/userdata/"
 local userRoot = userRootMain
 local userPath = userRootMain
 local iconsPath = userRootMain
-local iconAliases = {"/system/bin/settings.app", "/system/bin/update.app"}
+local iconAliases = {
+    "/system/bin/settings.app",
+    "/system/bin/update.app",
+    "/system/bin/market.app"
+}
+local usrBin = "/data/bin"
 
 fs.makeDirectory(userRoot)
 fs.makeDirectory(userPath)
@@ -108,20 +113,20 @@ local function draw(old)
     window:set(math.floor(((window.sizeX / 2) - (unicode.len(str) / 2)) + 0.5),
     window.sizeY, colors.lightGray, colors.gray, str)
 
-    window:set(1, window.sizeY - 3, colors.lightGray, colors.gray, " /")
-    window:set(1, window.sizeY - 2, colors.lightGray, colors.gray, "/ ")
-    window:set(1, window.sizeY - 1, colors.lightGray, colors.gray, "\\ ")
-    window:set(1, window.sizeY - 0, colors.lightGray, colors.gray, " \\")
+    window:set(1, window.sizeY - 3, colors.lightGray, colors.white, " /")
+    window:set(1, window.sizeY - 2, colors.lightGray, colors.white, "/ ")
+    window:set(1, window.sizeY - 1, colors.lightGray, colors.white, "\\ ")
+    window:set(1, window.sizeY - 0, colors.lightGray, colors.white, " \\")
 
-    window:set(3, window.sizeY - 3, colors.red, colors.gray, " /")
-    window:set(3, window.sizeY - 2, colors.red, colors.gray, "/ ")
-    window:set(3, window.sizeY - 1, colors.red, colors.gray, "\\ ")
-    window:set(3, window.sizeY - 0, colors.red, colors.gray, " \\")
+    window:set(3, window.sizeY - 3, colors.red, colors.white, " /")
+    window:set(3, window.sizeY - 2, colors.red, colors.white, "/ ")
+    window:set(3, window.sizeY - 1, colors.red, colors.white, "\\ ")
+    window:set(3, window.sizeY - 0, colors.red, colors.white, " \\")
 
-    window:set(window.sizeX - 1, window.sizeY - 3, colors.lightGray, colors.gray, "\\ ")
-    window:set(window.sizeX - 1, window.sizeY - 2, colors.lightGray, colors.gray, " \\")
-    window:set(window.sizeX - 1, window.sizeY - 1, colors.lightGray, colors.gray, " /")
-    window:set(window.sizeX - 1, window.sizeY - 0, colors.lightGray, colors.gray, "/ ")
+    window:set(window.sizeX - 1, window.sizeY - 3, colors.lightGray, colors.white, "\\ ")
+    window:set(window.sizeX - 1, window.sizeY - 2, colors.lightGray, colors.white, " \\")
+    window:set(window.sizeX - 1, window.sizeY - 1, colors.lightGray, colors.white, " /")
+    window:set(window.sizeX - 1, window.sizeY - 0, colors.lightGray, colors.white, "/ ")
 
     if fs.exists(wallpaperPath) then
         local sx, sy = calls.call("gui_readimagesize", wallpaperPath)
@@ -145,6 +150,9 @@ local function draw(old)
                 iconsCount = iconsCount + 1
             end
         end
+        for i, file in ipairs(fs.list(usrBin) or {}) do
+            iconsCount = iconsCount + 1
+        end
     end
 
     if startIconsPoss[userPath] > iconsCount then
@@ -157,6 +165,8 @@ local function draw(old)
 
     icons = {}
     local count = 0
+
+    local gui_readimagesize = calls.load("gui_readimagesize")
 
     local function addIcon(i, v, customPath)
         count = count + 1
@@ -190,7 +200,7 @@ local function draw(old)
             end
 
             if iconPath then
-                local ok, sx, sy = pcall(calls.call, "gui_readimagesize", iconPath)
+                local ok, sx, sy = pcall(gui_readimagesize, iconPath)
                 if ok and sx == 8 and sy == 4 then
                     icon = iconPath
                 end
@@ -247,6 +257,9 @@ local function draw(old)
                 table.insert(tbl, {nil, v})
             end
         end
+        for i, file in ipairs(fs.list(usrBin) or {}) do
+            table.insert(tbl, {nil, file})
+        end
     end
 
     for i, v in ipairs(fs.list(userPath)) do
@@ -260,6 +273,9 @@ local function draw(old)
             end
         end
     end
+
+    local gui_drawtext = calls.load("gui_drawtext")
+    local gui_drawimage = calls.load("gui_drawimage")
 
     local count = 0
     for cy = 1, iconsY do
@@ -279,10 +295,10 @@ local function draw(old)
                 --    window:fill(iconX - 2, iconY - 1, iconSizeX + 4, iconSizeY + 2, colors.blue, 0, " ")
                 --end
                 local x, y = window:toRealPos(math.floor((centerIconX - (unicode.len(icon.name) / 2)) + 0.5), centerIconY + 2)
-                calls.call("gui_drawtext", screen, x, y, colors.white, icon.name)
+                gui_drawtext(screen, x, y, colors.white, icon.name)
                 --window:set(iconX - (unicode.len(icon.name) // 2), iconY + iconY - 2, colors.lightBlue, colors.white, icon.name)
                 if icon.icon then
-                    calls.call("gui_drawimage", screen, icon.icon, window:toRealPos(iconX, iconY))
+                    gui_drawimage(screen, icon.icon, window:toRealPos(iconX, iconY))
                 end
             end
         end
@@ -362,9 +378,18 @@ local function fileDescriptor(icon, alternative)
             calls.call("system_setTheme", icon.path)
             event.push("redrawDesktop")
         end
-    elseif icon.exp == "txt" then
-        execute("edit", icon.path)
+    elseif icon.exp == "txt" or icon.exp == "log" or (icon.exp == "dat" and devMode) then
+        execute("edit", icon.path, icon.exp == "log")
         draw()
+    elseif icon.exp == "mid" or icon.exp == "midi" then
+        if programs.find("midi") then
+            execute("midi", icon.path)
+            draw()
+        else
+            local clear = saveZone()
+            warn("pleas, download programm midi from market")
+            clear()
+        end
     else
         warn("file is not supported")
     end
@@ -500,38 +525,48 @@ while true do
                         {"  open", "----------------------", "  remove", "  rename", "  copy", "  cut"},
                         {true, false, not v.isAlias, not v.isAlias, not v.isAlias, not v.isAlias}
 
+                        local isLine
+                        local function addLine()
+                            if not isLine then
+                                table.insert(strs, "----------------------")
+                                table.insert(active, false)
+                                isLine = true
+                                screenshotY = screenshotY + 1
+                            end
+                        end
                         if v.exp == "t2p" and not v.isDir then
-                            table.insert(strs, "----------------------")
-                            table.insert(active, false)
+                            addLine()
 
                             table.insert(strs, "  set as wallpaper")
                             table.insert(active, true)
 
-                            screenshotY = screenshotY + 2
-                        elseif v.exp == "plt" and not v.isDir then
-                            table.insert(strs, "----------------------")
-                            table.insert(active, false)
+                            screenshotY = screenshotY + 1
+                        end
+                        --[[
+                        if v.exp == "plt" and not v.isDir then
+                            addLine()
 
                             table.insert(strs, "  set as theme")
                             table.insert(active, true)
 
-                            screenshotY = screenshotY + 2
-                        elseif devMode and v.exp == "app" and v.isDir then
-                            table.insert(strs, "----------------------")
-                            table.insert(active, false)
+                            screenshotY = screenshotY + 1
+                        end
+                        ]]
+                        if devMode and v.exp == "app" and v.isDir then
+                            addLine()
 
                             table.insert(strs, "  inside the package")
                             table.insert(active, true)
 
-                            screenshotY = screenshotY + 2
-                        elseif devMode and v.exp == "lua" and not v.isDir then
-                            table.insert(strs, "----------------------")
-                            table.insert(active, false)
+                            screenshotY = screenshotY + 1
+                        end
+                        if devMode and (v.exp == "lua" or v.exp == "plt") and not v.isDir then
+                            addLine()
 
                             table.insert(strs, "  edit")
                             table.insert(active, true)
 
-                            screenshotY = screenshotY + 2
+                            screenshotY = screenshotY + 1
                         end
 
                         local posX, posY = window:toRealPos(windowEventData[3], windowEventData[4])
