@@ -27,6 +27,7 @@ local list = assert(load(assert(calls.call("getInternetFile", mainurl))))()
 ------------------------------------
 
 local listOffSet = 1
+local appCount = 1
 local appsTbl = {}
 local function draw()
     statusWindow:clear(colors.gray)
@@ -36,13 +37,13 @@ local function draw()
     statusWindow:set(statusWindow.sizeX, statusWindow.sizeY, colors.red, colors.white, "X")
 
     appsTbl = {}
-    local count = 1
+    appCount = 1
     for k, v in pairs(list) do
-        if count >= listOffSet and count <= window.sizeY then
-            window:set(1, 1, colors.gray, colors.white, k .. ":" .. (v.isInstalled() and "installed" or "no installed"))
+        if appCount >= listOffSet and appCount <= window.sizeY then
+            window:set(1, #appsTbl + 1, colors.gray, colors.white, k .. ":" .. (v.isInstalled() and "installed" or "no installed"))
             table.insert(appsTbl, v)
         end
-        count = count + 1
+        appCount = appCount + 1
     end
 end
 draw()
@@ -79,16 +80,16 @@ while true do
         end
     elseif windowEventData[1] == "scroll" then
         if windowEventData[5] > 0 then
-            listOffSet = listOffSet + 1
-        else
             listOffSet = listOffSet - 1
-        end
-        if listOffSet > #appsTbl then
-            listOffSet = #appsTbl
-        elseif listOffSet < 1 then
-            listOffSet = 1
         else
-            draw()
+            listOffSet = listOffSet + 1
         end
+        if listOffSet > appCount - 1 then
+            listOffSet = appCount - 1
+        end
+        if listOffSet < 1 then
+            listOffSet = 1
+        end
+        draw()
     end
 end

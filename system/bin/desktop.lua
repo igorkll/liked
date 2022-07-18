@@ -336,7 +336,7 @@ local function folderBack()
     draw()
 end
 
-local function fileDescriptor(icon, alternative)
+local function fileDescriptor(icon, alternative, nikname)
     if alternative then
         if fs.isDirectory(icon.path) then
             userPath = icon.path
@@ -351,9 +351,9 @@ local function fileDescriptor(icon, alternative)
 
     if icon.exp == "app" then
         if fs.isDirectory(icon.path) then
-            execute(paths.concat(icon.path, "main.lua"))
+            execute(paths.concat(icon.path, "main.lua"), nikname)
         else
-            execute(icon.path)
+            execute(icon.path, nikname)
         end
         draw()
         return true
@@ -366,7 +366,7 @@ local function fileDescriptor(icon, alternative)
         draw()
         return true
     elseif icon.exp == "lua" then
-        execute(icon.path)
+        execute(icon.path, nikname)
         draw()
         return true
     elseif icon.exp == "plt" then
@@ -467,6 +467,22 @@ end
 local devModeCount = 0
 local devModeResetTime = 0
 
+event.listen("key_down", function(_, uuid, char, code)
+    if devMode then
+        local ok
+        for i, v in ipairs(component.invoke(screen, "getKeyboards")) do
+            if v == uuid then
+                ok = true
+            end
+        end
+        if ok then
+            if char == 0 and code == 46 then
+                event.interruptFlag = true
+            end
+        end
+    end
+end)
+
 while true do
     if redrawFlag then
         draw()
@@ -518,7 +534,7 @@ while true do
                     
                     iconCliked = true
                     if windowEventData[5] == 0 then
-                        fileDescriptor(v)
+                        fileDescriptor(v, nil, windowEventData[6])
                     else
                         local screenshotY = 7
                         local strs, active =
@@ -577,7 +593,7 @@ while true do
 
                         if num == 1 then
                             clear()
-                            fileDescriptor(v)
+                            fileDescriptor(v, nil, windowEventData[6])
                         elseif num == 3 then
                             local clear2 = saveZone()
                             local state = calls.call("gui_yesno", screen, nil, nil, "remove?")
