@@ -691,7 +691,7 @@ while true do
             local isRedraw
             local clear = calls.call("screenshot", screen, posX, posY, 19, 8)
             local str, num = calls.call("gui_context", screen, posX, posY,
-            {"  back", "  paste", "--------------------", "  new image", "  new folder", "  new text file"},
+            {"  back", "  paste", "------------------", "  new image", "  new folder", "  new text file"},
             {true, not not copyObject, false, true, true, true, not not component.list("internet")()})
             if num == 1 then
                 folderBack()
