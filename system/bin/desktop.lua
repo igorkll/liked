@@ -38,6 +38,7 @@ local iconAliases = {
     "/system/bin/market.app"
 }
 local usrBin = "/data/bin"
+local timeZonePath = "/data/timeZone.dat"
 
 fs.makeDirectory(userRoot)
 fs.makeDirectory(userPath)
@@ -71,22 +72,26 @@ local isCut = false
 local devMode = false
 
 local function checkData()
-    if not startIconsPoss[userPath] then
-        startIconsPoss[userPath] = 1
+    if not startIconsPoss[paths.canonical(userPath)] then
+        startIconsPoss[paths.canonical(userPath)] = 1
     end
 end
 
 local function drawStatus()
-    local timeZone = 3
-    local timeZonePath = "/data/timeZone.dat"
-    if fs.exists(timeZonePath) then
-        local file = fs.open(timeZonePath, "rb")
-        local data = tonumber(file.readAll())
-        file.close()
-        if data then
-            timeZone = data
+    local timeZone = _G.timeZone or 3
+    if not _G.timeZone then
+        if fs.exists(timeZonePath) then
+            local file = fs.open(timeZonePath, "rb")
+            local data = tonumber(file.readAll())
+            file.close()
+            if data then
+                timeZone = data
+            end
         end
     end
+    _G.timeZone = timeZone or 3
+    timeZone = _G.timeZone
+    
     local hours, minutes, seconds = calls.call("getRealTime", timeZone)
     hours = tostring(hours)
     minutes = tostring(minutes)
@@ -155,11 +160,12 @@ local function draw(old)
         end
     end
 
-    if startIconsPoss[userPath] > iconsCount then
-        startIconsPoss[userPath] = old or 1
+    local lUserPath = paths.canonical(userPath)
+    if startIconsPoss[lUserPath] > iconsCount then
+        startIconsPoss[lUserPath] = old or 1
     end
 
-    local str = tostring(math.floor(startIconsPoss[userPath] // (iconsX * iconsY)) + 1) .. "/" ..
+    local str = tostring(math.floor(startIconsPoss[lUserPath] // (iconsX * iconsY)) + 1) .. "/" ..
     tostring(math.floor((iconsCount - 1) // (iconsX * iconsY)) + 1)
     window:set(math.floor(((window.sizeX / 2) - (unicode.len(str) / 2)) + 0.5), window.sizeY - 1, colors.lightGray, colors.gray, str)
 
@@ -267,7 +273,7 @@ local function draw(old)
     end
 
     for i, v in ipairs(tbl) do
-        if i >= startIconsPoss[userPath] and i <= iconsCount then
+        if i >= startIconsPoss[lUserPath] and i <= iconsCount then
             if addIcon(i, v[1], v[2]) then
                 break
             end
@@ -309,17 +315,19 @@ draw()
 local function listForward()
     checkData()
 
-    local old = startIconsPoss[userPath]
-    startIconsPoss[userPath] = startIconsPoss[userPath] + (iconsX * iconsY)
+    local lUserPath = paths.canonical(userPath)
+    local old = startIconsPoss[lUserPath]
+    startIconsPoss[lUserPath] = startIconsPoss[lUserPath] + (iconsX * iconsY)
     draw(old)
 end
 
 local function listBack()
     checkData()
 
-    startIconsPoss[userPath] = startIconsPoss[userPath] - (iconsX * iconsY)
-    if startIconsPoss[userPath] < 1 then
-        startIconsPoss[userPath] = 1
+    local lUserPath = paths.canonical(userPath)
+    startIconsPoss[lUserPath] = startIconsPoss[lUserPath] - (iconsX * iconsY)
+    if startIconsPoss[lUserPath] < 1 then
+        startIconsPoss[lUserPath] = 1
     end
     draw()
 end
@@ -383,11 +391,20 @@ local function fileDescriptor(icon, alternative, nikname)
         draw()
     elseif icon.exp == "mid" or icon.exp == "midi" then
         if programs.find("midi") then
-            execute("midi", icon.path)
+            execute("midi", nikname, icon.path)
             draw()
         else
             local clear = saveZone()
             warn("pleas, download programm midi from market")
+            clear()
+        end
+    elseif icon.exp == "dfpwm" then
+        if programs.find("tape") then
+            execute("tape", nikname, icon.path)
+            draw()
+        else
+            local clear = saveZone()
+            warn("pleas, download programm tape from market")
             clear()
         end
     else
@@ -672,10 +689,10 @@ while true do
             end
             
             local isRedraw
-            local clear = calls.call("screenshot", screen, posX, posY, 19, 7)
+            local clear = calls.call("screenshot", screen, posX, posY, 33, 8)
             local str, num = calls.call("gui_context", screen, posX, posY,
-            {"  back", "  paste", "------------------", "  new image", "  new folder", "  new text file"},
-            {true, not not copyObject, false, true, true, true})
+            {"  back", "  paste", "--------------------------------", "  new image", "  new folder", "  new text file", "  download file from internet"},
+            {true, not not copyObject, false, true, true, true, not not component.list("internet")()})
             if num == 1 then
                 folderBack()
                 isRedraw = true
@@ -687,7 +704,7 @@ while true do
                 if type(name) == "string" then
                     local path = paths.concat(userPath, name .. ".t2p")
                     if not fs.exists(path) then
-                        if name:find("%.") or name:find("%/") or name:find("%\\") then
+                        if #name == 0 or name:find("%.") or name:find("%/") or name:find("%\\") then
                             warn("error in name")
                         else
                             execute("paint", path)
@@ -706,7 +723,7 @@ while true do
                 if type(name) == "string" then
                     local path = paths.concat(userPath, name)
                     if not fs.exists(path) then
-                        if (name:find("%.") and not devMode) or name:find("%/") or name:find("%\\") then
+                        if #name == 0 or (name:find("%.") and not devMode) or name:find("%/") or name:find("%\\") then
                             warn("error in name")
                         else
                             fs.makeDirectory(path)
@@ -725,7 +742,7 @@ while true do
                 if type(name) == "string" then
                     local path = paths.concat(userPath, name .. (devMode and "" or ".txt"))
                     if not fs.exists(path) then
-                        if (name:find("%.") and not devMode) or name:find("%/") or name:find("%\\") then
+                        if #name == 0 or (name:find("%.") and not devMode) or name:find("%/") or name:find("%\\") then
                             warn("error in name")
                         else
                             execute("edit", path)
@@ -762,6 +779,8 @@ while true do
                     isCut = false
                     draw()
                 end
+            elseif num == 7 then
+
             end
             if not isRedraw then
                 clear()

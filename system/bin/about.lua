@@ -12,6 +12,8 @@ local rx, ry = gpu.getResolution()
 
 --------------------------------------------
 
+local version = calls.call("getOSversion")
+
 local statusWindow = graphic.classWindow:new(screen, 1, 1, rx, 1, true)
 local window = graphic.classWindow:new(screen, 1, 2, rx, ry - 1, true)
 
@@ -28,7 +30,7 @@ local function update()
     local strs = {
         "------------------------------------------OS",
         "distributive: liked",
-        "distributive version: v" .. tostring(calls.call("getOSversion")),
+        "distributive version: v" .. tostring(version),
         "------------------------------------------CORE",
         "core: likeOS",
         "core verion: " .. _COREVERSION,

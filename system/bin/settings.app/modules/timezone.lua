@@ -52,6 +52,7 @@ return function(eventData)
                     local file = fs.open(timeZonePath, "wb")
                     file.write(tostring(data))
                     file.close()
+                    _G.timeZone = nil
                 end
             end
             draw()

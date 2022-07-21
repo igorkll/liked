@@ -46,7 +46,7 @@ while true do
             event.sleep(0.1)
             return reader.getBuffer()
         elseif windowEventData[4] == 7 and windowEventData[3] >= 2 and windowEventData[3] <= (2 + 7) then
-            window:set(2, 7, colors.yellow, colors.white, " cancel ")
+            window:set(2, 7, colors.orange, colors.white, " cancel ")
             event.sleep(0.1)
             return true --true в из input означает что пользователь отменил ввод
         end

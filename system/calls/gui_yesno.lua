@@ -52,7 +52,7 @@ while true do
             event.sleep(0.1)
             return true
         elseif windowEventData[4] == 7 and windowEventData[3] >= 2 and windowEventData[3] <= (2 + 3) then
-            window:set(2, 7, colors.yellow, colors.white, " no ")
+            window:set(2, 7, colors.orange, colors.white, " no ")
             event.sleep(0.1)
             return false
         end
