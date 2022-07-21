@@ -689,9 +689,9 @@ while true do
             end
             
             local isRedraw
-            local clear = calls.call("screenshot", screen, posX, posY, 33, 8)
+            local clear = calls.call("screenshot", screen, posX, posY, 19, 8)
             local str, num = calls.call("gui_context", screen, posX, posY,
-            {"  back", "  paste", "--------------------------------", "  new image", "  new folder", "  new text file", "  download file from internet"},
+            {"  back", "  paste", "--------------------", "  new image", "  new folder", "  new text file"},
             {true, not not copyObject, false, true, true, true, not not component.list("internet")()})
             if num == 1 then
                 folderBack()
@@ -780,7 +780,7 @@ while true do
                     draw()
                 end
             elseif num == 7 then
-
+                
             end
             if not isRedraw then
                 clear()
