@@ -25,7 +25,7 @@ if fs.exists("/data/wallpaper.t2p") then
     file.close()
 end
 
-local selectWindow = graphic.classWindow:new(screen, posX, posY, 16, ry - (posY - 1))
+local selectWindow = graphic.createWindow(screen, posX, posY, 16, ry - (posY - 1))
 local selected = 1
 local wallpapaers = {"none"}
 for i, file in ipairs(fs.list(wallpapersPath) or {}) do

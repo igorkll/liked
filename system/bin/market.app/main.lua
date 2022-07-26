@@ -16,8 +16,8 @@ do
     rx, ry = gpu.getResolution()
 end
 
-local statusWindow = graphic.classWindow:new(screen, 1, 1, rx, 1)
-local window = graphic.classWindow:new(screen, 1, 2, rx, ry - 1)
+local statusWindow = graphic.createWindow(screen, 1, 1, rx, 1)
+local window = graphic.createWindow(screen, 1, 2, rx, ry - 1)
 
 ------------------------------------
 

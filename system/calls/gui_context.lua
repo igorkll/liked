@@ -19,7 +19,7 @@ for i, v in ipairs(strs) do
     end
 end
 
-local window = graphic.classWindow:new(screen, posX, posY, sizeX, sizeY)
+local window = graphic.createWindow(screen, posX, posY, sizeX, sizeY)
 window:fill(2, 2, window.sizeX, window.sizeY, colors.gray, 0, " ")
 
 local function redrawStrs(selected)

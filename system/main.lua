@@ -20,11 +20,11 @@ do --используйте автозагрузку для программ в�
     
             local func, err = programs.load(full_path)
             if not func then
-                event.tmpLog("err " .. (err or "unknown error") .. ", to load programm " .. full_path)
+                event.errLog("err " .. (err or "unknown error") .. ", to load programm " .. full_path)
             else
                 local ok, err = pcall(func)
                 if not ok then
-                    event.tmpLog("err " .. (err or "unknown error") .. ", in programm " .. full_path)
+                    event.errLog("err " .. (err or "unknown error") .. ", in programm " .. full_path)
                 end
             end        
         end

@@ -21,7 +21,7 @@ if not cx or not cy then
     cy = math.floor(cy)
 end
 
-local window = graphic.classWindow:new(screen, cx, cy, 32, 8, true)
+local window = graphic.createWindow(screen, cx, cy, 32, 8, true)
 
 window:fill(2, 2, window.sizeX, window.sizeY, colors.gray, 0, " ")
 window:clear(backgroundColor or colors.lightGray)
@@ -48,7 +48,7 @@ while true do
         elseif windowEventData[4] == 7 and windowEventData[3] >= 2 and windowEventData[3] <= (2 + 7) then
             window:set(2, 7, colors.orange, colors.white, " cancel ")
             event.sleep(0.1)
-            return true --true в из input означает что пользователь отменил ввод
+            return false
         end
     end
 end

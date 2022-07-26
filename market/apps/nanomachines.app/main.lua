@@ -160,7 +160,7 @@ end
 
 ------------------------------------
 
-local window = graphic.classWindow:new(screen, 1, 1, rx, ry)
+local window = graphic.createWindow(screen, 1, 1, rx, ry)
 
 local function draw()
     window:clear(colors.white)
@@ -197,7 +197,7 @@ local function controlNote(nikname, profile, index)
             end
             if windowEventData[4] == 6 then
                 local data = calls.call("gui_input", screen, nil, nil, "new note")
-                if data ~= true then
+                if data then
                     profile.notes[index] = data
                     saveProfile(nikname, profile)
                 end
@@ -208,7 +208,7 @@ local function controlNote(nikname, profile, index)
 end
 
 local function controlFor(nikname)
-    local window = graphic.classWindow:new(screen, 1, 1, rx, ry)
+    local window = graphic.createWindow(screen, 1, 1, rx, ry)
 
     local profile, err = assert(getProfile(nikname))
     if err == "exit" then

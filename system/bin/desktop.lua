@@ -20,8 +20,8 @@ local colors = gui_container.colors
 local screen = ...
 local rx, ry = graphic.findGpu(screen).getResolution()
 
-local statusWindow = graphic.classWindow:new(screen, 1, 1, rx, 1)
-local window = graphic.classWindow:new(screen, 1, 2, rx, ry - 1)
+local statusWindow = graphic.createWindow(screen, 1, 1, rx, 1)
+local window = graphic.createWindow(screen, 1, 2, rx, ry - 1)
 
 local wallpaperPath = "/data/wallpaper.t2p"
 --[[
@@ -689,9 +689,9 @@ while true do
             end
             
             local isRedraw
-            local clear = calls.call("screenshot", screen, posX, posY, 19, 8)
+            local clear = calls.call("screenshot", screen, posX, posY, 33, 8)
             local str, num = calls.call("gui_context", screen, posX, posY,
-            {"  back", "  paste", "--------------------", "  new image", "  new folder", "  new text file"},
+            {"  back", "  paste", "--------------------------------", "  new image", "  new folder", "  new text file", "  download file from internet"},
             {true, not not copyObject, false, true, true, true, not not component.list("internet")()})
             if num == 1 then
                 folderBack()
@@ -780,7 +780,49 @@ while true do
                     draw()
                 end
             elseif num == 7 then
-                
+                local clear = saveZone()
+                local url = gui_input(screen, nil, nil, "url")
+                clear()
+                if url then
+                    local filename = url
+                    local index = string.find(filename, "/[^/]*$")
+                    if index then
+                        filename = string.sub(filename, index + 1)
+                    end
+                    index = string.find(filename, "?", 1, true)
+                    if index then
+                        filename = string.sub(filename, 1, index - 1)
+                    end
+
+                    local path = paths.sconcat(userPath, filename)
+                    if path then
+                        local replaceAllow
+                        if fs.exists(path) then
+                            local clear = saveZone()
+                            replaceAllow = calls.call("gui_yesno", screen, nil, nil, "an object with this name is already present in this folder, should I replace it?")
+                            clear()
+                        end
+                        if not fs.exists(path) or replaceAllow then
+                            local clear = saveZone()
+                            gui_status(screen, nil, nil, "downloading file")
+                            local data, err = getInternetFile(url)
+                            clear()
+                            if data then
+                                local file, err = fs.open(path, "wb")
+                                if file then
+                                    file.write(data)
+                                    file.close()
+                                else
+                                    warn("save error " .. (err or "unknown error"))
+                                end
+                            else
+                                warn("download error " .. (err or "unknown error"))
+                            end
+                        end
+                    else
+                        warn("error in name")
+                    end
+                end
             end
             if not isRedraw then
                 clear()

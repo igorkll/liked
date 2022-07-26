@@ -25,8 +25,8 @@ if fs.exists("/data/theme.plt") then
     file.close()
 end
 
-local selectWindow = graphic.classWindow:new(screen, posX, posY, 16, ry - (posY - 1))
-local colorsWindow = graphic.classWindow:new(screen, posX + 17, posY, 8, 18)
+local selectWindow = graphic.createWindow(screen, posX, posY, 16, ry - (posY - 1))
+local colorsWindow = graphic.createWindow(screen, posX + 17, posY, 8, 18)
 
 local selected = 1
 local themes = {}

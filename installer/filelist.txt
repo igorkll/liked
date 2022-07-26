@@ -59,3 +59,4 @@
 /system/themes/neon.plt
 /system/autoruns/a_write_external_data.lua
 /system/autoruns/b_mounter.lua
+/system/calls/gui_status.lua

@@ -4,6 +4,7 @@ local gui_container = require("gui_container")
 local computer = require("computer")
 local calls = require("calls")
 local unicode = require("unicode")
+local fs = require("filesystem")
 
 local colors = gui_container.colors
 local screen = ...
@@ -13,9 +14,11 @@ local rx, ry = gpu.getResolution()
 --------------------------------------------
 
 local version = calls.call("getOSversion")
+local hddTotalSpace = fs.get("/").spaceTotal()
+local hddUsedSpace = fs.get("/").spaceUsed()
 
-local statusWindow = graphic.classWindow:new(screen, 1, 1, rx, 1, true)
-local window = graphic.classWindow:new(screen, 1, 2, rx, ry - 1, true)
+local statusWindow = graphic.createWindow(screen, 1, 1, rx, 1, true)
+local window = graphic.createWindow(screen, 1, 2, rx, ry - 1, true)
 
 local function update()
     local totalMemory = computer.totalMemory()
@@ -36,10 +39,14 @@ local function update()
         "core verion: " .. _COREVERSION,
         "core version id: " .. tostring(_COREVERSIONID),
         "------------------------------------------HARDWARE",
-        "-----------MEMORY",
-        "total memory: " .. math.floor(totalMemory / 1024),
-        "free  memory: " .. math.floor(freeMemory / 1024),
-        "used  memory: " .. math.floor((totalMemory - freeMemory) / 1024)
+        "-----------MEMORY(RAM)",
+        "total memory: " .. math.floor(totalMemory / 1024) .. "kb",
+        "free  memory: " .. math.floor(freeMemory / 1024) .. "kb",
+        "used  memory: " .. math.floor((totalMemory - freeMemory) / 1024) .. "kb",
+        "-----------MEMORY(HDD)",
+        "total memory: " .. math.floor(hddTotalSpace / 1024) .. "kb",
+        "free  memory: " .. math.floor((hddTotalSpace - hddUsedSpace) / 1024) .. "kb",
+        "used  memory: " .. math.floor(hddUsedSpace / 1024) .. "kb",
     }
     
     window:setCursor(1, 1)

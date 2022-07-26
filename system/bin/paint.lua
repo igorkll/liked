@@ -16,10 +16,10 @@ local screen, filepath = ...
 local gpu = graphic.findGpu(screen)
 local rx, ry = gpu.getResolution()
 
-local statusWindow = graphic.classWindow:new(screen, 1, 1, rx, 1)
-local mainWindow = graphic.classWindow:new(screen, 1, 2, rx - 8, ry - 1)
-local paletteWindow = graphic.classWindow:new(screen, rx - 7, 2, 8, 18)
-local nullWindow2 = graphic.classWindow:new(screen, rx - 7, 2 + paletteWindow.sizeY, 8, ry - 19)
+local statusWindow = graphic.createWindow(screen, 1, 1, rx, 1)
+local mainWindow = graphic.createWindow(screen, 1, 2, rx - 8, ry - 1)
+local paletteWindow = graphic.createWindow(screen, rx - 7, 2, 8, 18)
+local nullWindow2 = graphic.createWindow(screen, rx - 7, 2 + paletteWindow.sizeY, 8, ry - 19)
 
 ------------------------------------
 
@@ -268,9 +268,9 @@ while true do
             clear()
             if num == 1 then
                 local clear = saveZone()
-                local str = calls.call("gui_input", screen, nil, nil, "newX newY")
+                local str = calls.call("gui_input", screen, nil, nil, "newX newY", nil, colors.white)
                 clear()
-                if str ~= true then
+                if str then
                     local x, y = table.unpack(calls.call("split", str, " "))
                     x = tonumber(x)
                     y = tonumber(y)
@@ -330,7 +330,7 @@ while true do
             local clear = saveZone()
             local entered = calls.call("gui_input", screen, nil, nil, "char", nil, colors.white)
             clear()
-            if entered ~= true then
+            if entered then
                 if unicode.len(entered) ~= 1 then
                     local clear = saveZone()
                     calls.call("gui_warn", screen, nil, nil, "enter one char\nor cancel menu", colors.white)

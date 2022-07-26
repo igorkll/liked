@@ -20,10 +20,10 @@ local modulesPath = paths.concat(path, "modules")
 
 ------------------------------------
 
-local statusWindow = graphic.classWindow:new(screen, 1, 1, rx, 1)
-local selectWindow = graphic.classWindow:new(screen, 1, 2, rx // 4, ry - 1)
-local modulWindow = graphic.classWindow:new(screen, (rx // 4) + 2, 2, (rx - (rx // 4)) - 1, ry)
-local lineWindows = graphic.classWindow:new(screen, (rx // 4) + 1, 2, 1, ry - 1)
+local statusWindow = graphic.createWindow(screen, 1, 1, rx, 1)
+local selectWindow = graphic.createWindow(screen, 1, 2, rx // 4, ry - 1)
+local modulWindow = graphic.createWindow(screen, (rx // 4) + 2, 2, (rx - (rx // 4)) - 1, ry)
+local lineWindows = graphic.createWindow(screen, (rx // 4) + 1, 2, 1, ry - 1)
 
 local selected = 1
 local limit = 0

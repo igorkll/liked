@@ -14,7 +14,7 @@ local path = paths.path(calls.call("getPath"))
 
 --------------------------------------------
 
-local window = graphic.classWindow:new(screen, 1, 1, rx, ry)
+local window = graphic.createWindow(screen, 1, 1, rx, ry)
 
 local setPos = (rx // 2) - 5
 

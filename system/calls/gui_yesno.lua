@@ -21,7 +21,7 @@ if not cx or not cy then
     cy = math.floor(cy)
 end
 
-local window = graphic.classWindow:new(screen, cx, cy, 32, 8)
+local window = graphic.createWindow(screen, cx, cy, 32, 8)
 local color = backgroundColor or colors.lightGray
 
 window:fill(2, 2, window.sizeX, window.sizeY, colors.gray, 0, " ")
@@ -35,9 +35,13 @@ for i, v in ipairs(calls.call("restrs", str, 22)) do
     window:set(10, i + 1, color, textColor, v)
 end
 
-window:set(2, 2, color, colors.green, "  █")
-window:set(2, 3, color, colors.green, " ███ ")
-window:set(2, 4, color, colors.green, "█████")
+--window:set(2, 2, color, colors.green, "  █")
+--window:set(2, 3, color, colors.green, " ███ ")
+--window:set(2, 4, color, colors.green, "█████")
+
+window:set(2, 2, color, colors.green, "  ▃  ")
+window:set(2, 3, color, colors.green, " ◢█◣ ")
+window:set(2, 4, color, colors.green, "◢███◣")
 window:set(4, 3, colors.green, colors.white, "?")
 
 window:set(32 - 5, 7, colors.lime, colors.white, " yes ")
