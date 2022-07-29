@@ -3,6 +3,7 @@ local gui_container = require("gui_container")
 local event = require("event")
 local calls = require("calls")
 local computer = require("computer")
+local unicode = require("unicode")
 
 local colors = gui_container.colors
 
@@ -40,7 +41,7 @@ end
 --window:set(2, 3, color, colors.blue, " ███ ")
 --window:set(2, 4, color, colors.blue, "█████")
 
-window:set(2, 2, color, colors.blue, "  ▃  ")
+window:set(2, 2, color, colors.blue, "  " .. unicode.char(0x2800+192) ..  "  ")
 window:set(2, 3, color, colors.blue, " ◢█◣ ")
 window:set(2, 4, color, colors.blue, "◢███◣")
 

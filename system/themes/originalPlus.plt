@@ -1,6 +1,6 @@
-{ --original tier 2 opencomputers colors
+{
     0xffffff, --1)  white
-    0xffcc33, --2)  orange
+    0xFFA500, --2)  orange
     0xcc66cc, --3)  magenta
     0x6699ff, --4)  lightBlue
     0xffff33, --5)  yellow

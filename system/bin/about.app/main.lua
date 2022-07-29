@@ -44,6 +44,7 @@ local function update()
         "free  memory: " .. math.floor(freeMemory / 1024) .. "kb",
         "used  memory: " .. math.floor((totalMemory - freeMemory) / 1024) .. "kb",
         "-----------MEMORY(HDD)",
+        "hdd address : " .. fs.bootaddress,
         "total memory: " .. math.floor(hddTotalSpace / 1024) .. "kb",
         "free  memory: " .. math.floor((hddTotalSpace - hddUsedSpace) / 1024) .. "kb",
         "used  memory: " .. math.floor(hddUsedSpace / 1024) .. "kb",
@@ -63,7 +64,7 @@ update()
 local closeFlag = true
 local listens = {}
 
-table.insert(listens, event.timer(2, function()
+table.insert(listens, event.timer(6, function()
     update()
 end, math.huge))
 table.insert(listens, event.listen(nil, function(...)

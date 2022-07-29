@@ -38,7 +38,12 @@ local reader = window:read(2, 3, window.sizeX - 2, colors.gray, colors.white, ni
 while true do
     local eventData = {computer.pullSignal()}
     local out = reader.uploadEvent(eventData)
-    if out then return out end
+    if out then
+        if out == true then
+            return false
+        end
+        return out
+    end
     local windowEventData = window:uploadEvent(eventData)
     if windowEventData[1] == "touch" and windowEventData[5] == 0 then
         if windowEventData[4] == 7 and windowEventData[3] > (32 - 5) and windowEventData[3] <= ((32 - 5) + 4) then

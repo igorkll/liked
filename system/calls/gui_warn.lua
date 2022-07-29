@@ -3,6 +3,7 @@ local gui_container = require("gui_container")
 local event = require("event")
 local calls = require("calls")
 local computer = require("computer")
+local unicode = require("unicode")
 --◢▲◣▲▴▴
 local colors = gui_container.colors
 
@@ -36,7 +37,7 @@ for i, v in ipairs(calls.call("restrs", str, 22)) do
     window:set(10, i + 1, color, textColor, v)
 end
 
-window:set(2, 2, color, colors.yellow, "  ▃  ")
+window:set(2, 2, color, colors.yellow, "  " .. unicode.char(0x2800+192) ..  "  ")
 window:set(2, 3, color, colors.yellow, " ◢█◣ ")
 window:set(2, 4, color, colors.yellow, "◢███◣")
 window:set(4, 3, colors.yellow, colors.white, "!")
