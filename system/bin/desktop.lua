@@ -83,8 +83,8 @@ end
 
 local contextMenuOpen = false
 local function drawStatus()
-    local timeZone = _G.timeZone or 3
-    if not _G.timeZone then
+    local timeZone = _G.timeZone
+    if not timeZone then
         if fs.exists(timeZonePath) then
             local file = fs.open(timeZonePath, "rb")
             local data = tonumber(file.readAll())
@@ -92,10 +92,11 @@ local function drawStatus()
             if data then
                 timeZone = data
             end
+        else
+            timeZone = 3
         end
+        _G.timeZone = timeZone
     end
-    _G.timeZone = timeZone or 3
-    timeZone = _G.timeZone
     
     local hours, minutes, seconds = calls.call("getRealTime", timeZone)
     hours = tostring(hours)
