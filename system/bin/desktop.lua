@@ -563,7 +563,7 @@ while true do
             drawStatus()
             local clear = calls.call("screenshot", screen, 2, 2, 19, 7)
             local str, num = calls.call("gui_context", screen, 2, 2,
-            {"  about", "  settings", "  unlogin", "------------------", "  shutdown", "  reboot"},
+            {"  about", "  settings", "  lock screen", "------------------", "  shutdown", "  reboot"},
             {true, true, fs.exists(passwordFilePath), false, true, true})
             contextMenuOpen = false
             drawStatus()
@@ -621,6 +621,7 @@ while true do
                             local clear = calls.call("screenshot", screen, posX, posY, 23, screenshotY)
                             local str, num = calls.call("gui_context", screen, posX, posY,
                             strs, active)
+                            clear()
 
                             if num == 1 then
                                 fileDescriptor(v, nil, windowEventData[6])
@@ -628,8 +629,7 @@ while true do
                                 local clear2 = saveZone()
                                 local state = calls.call("gui_yesno", screen, nil, nil, "format?")
                                 clear2()
-                                clear()
-
+                                
                                 if state then
                                     v.fs.remove("/")
                                 end
@@ -639,15 +639,13 @@ while true do
 
                                 if newlabel then
                                     if not pcall(v.fs.setLabel, newlabel) then
-                                        clear2()
-                                        clear()
                                         warn("error in name")
+                                        clear2()
                                     else
                                         draw()
                                     end
                                 else
                                     clear2()
-                                    clear()
                                 end
                             elseif num == 5 then
                                 local clear2 = saveZone()
@@ -658,10 +656,7 @@ while true do
                                     draw()
                                 else
                                     clear2()
-                                    clear()
                                 end
-                            else
-                                clear()
                             end
                         else
                             local screenshotY = 7
@@ -711,6 +706,7 @@ while true do
                                 v.exp ~= "plt" and
                                 v.exp ~= "mid" and
                                 v.exp ~= "midi" and
+                                v.exp ~= "dat" and
                                 v.exp ~= "app" then
                                 addLine()
 
@@ -735,9 +731,10 @@ while true do
                             local clear = calls.call("screenshot", screen, posX, posY, 23, screenshotY)
                             local str, num = calls.call("gui_context", screen, posX, posY,
                             strs, active)
+                            clear()
 
                             if num == 1 then
-                                --clear()
+                                
                                 fileDescriptor(v, nil, windowEventData[6])
                             elseif num == 3 then
                                 local clear2 = saveZone()
@@ -746,8 +743,6 @@ while true do
                                 if state then
                                     fs.remove(v.path)
                                     draw()
-                                else
-                                    clear()
                                 end
                             elseif num == 4 then
                                 local clear2 = saveZone()
@@ -764,26 +759,20 @@ while true do
                                         local path = paths.concat(userPath, name .. "." .. newexp)
                                         if fs.exists(path) then
                                             warn("name exists")
-                                            clear()
                                         else
                                             fs.rename(v.path, path)
                                             draw()
                                         end
                                     else
                                         warn("error in name")
-                                        clear()
                                     end
-                                else
-                                    clear()
                                 end
                             elseif num == 5 then
                                 copyObject = v.path
                                 isCut = false
-                                clear()
                             elseif num == 6 then
                                 copyObject = v.path
                                 isCut = true
-                                clear()
                             elseif str == "  set as wallpaper" then
                                 fs.copy(v.path, "/data/wallpaper.t2p")
                                 event.push("redrawDesktop")
@@ -795,8 +784,6 @@ while true do
                             elseif str == "  edit" or str == "  open is text editor" then
                                 execute("edit", v.path)
                                 draw()
-                            else
-                                clear()
                             end
                         end
                         
@@ -822,6 +809,8 @@ while true do
             local str, num = calls.call("gui_context", screen, posX, posY,
             {"  back", "  paste", "--------------------------------", "  new image", "  new folder", "  new text file", "  download file from internet"},
             {true, not not copyObject, false, true, true, true, not not component.list("internet")()})
+            clear()
+            
             if num == 1 then
                 folderBack()
                 isRedraw = true
@@ -955,9 +944,6 @@ while true do
                         warn("error in name")
                     end
                 end
-            end
-            if not isRedraw then
-                clear()
             end
         end
         ::bigSkip::

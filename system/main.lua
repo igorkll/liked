@@ -8,6 +8,30 @@ table.insert(programs.paths, "/data/userdata")
 table.insert(programs.paths, "/data/userdata/apps")
 --table.insert(programs.paths, "/data/bin")
 
+do
+    local fs = require("filesystem")
+    local paths = require("paths")
+    local event = require("event")
+    local programs = require("programs")
+
+    local function autorunsIn(path)
+        for i, v in ipairs(fs.list(path)) do
+            local full_path = paths.concat(path, v)
+    
+            local func, err = programs.load(full_path)
+            if not func then
+                event.errLog("err " .. (err or "unknown error") .. ", to load programm " .. full_path)
+            else
+                local ok, err = pcall(func)
+                if not ok then
+                    event.errLog("err " .. (err or "unknown error") .. ", in programm " .. full_path)
+                end
+            end        
+        end
+    end
+    autorunsIn("/data/autoruns")
+end
+
 ------------------------------------
 
 local screens = {}

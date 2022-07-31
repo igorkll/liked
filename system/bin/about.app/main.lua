@@ -37,7 +37,6 @@ local function update()
         "------------------------------------------CORE",
         "core: likeOS",
         "core verion: " .. _COREVERSION,
-        "core version id: " .. tostring(_COREVERSIONID),
         "------------------------------------------HARDWARE",
         "-----------MEMORY(RAM)",
         "total memory: " .. math.floor(totalMemory / 1024) .. "kb",
