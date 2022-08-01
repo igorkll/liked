@@ -658,11 +658,39 @@ while true do
                                     clear2()
                                 end
                             end
+                        elseif v.isAlias then
+                            local uninstallPath = paths.concat(v.path, "uninstall.lua")
+
+                            local screenshotY = 4
+                            local strs, active =
+                            {"  open", "----------------------", "  uninstall"},
+                            {true, false, fs.exists(uninstallPath)}
+
+                            local posX, posY = window:toRealPos(windowEventData[3], windowEventData[4])
+
+                            local clear = calls.call("screenshot", screen, posX, posY, 23, screenshotY)
+                            local str, num = calls.call("gui_context", screen, posX, posY,
+                            strs, active)
+                            clear()
+
+                            if num == 1 then
+                                fileDescriptor(v, nil, windowEventData[6])
+                            elseif num == 3 then
+                                local clear = saveZone()
+                                local ok = gui_yesno(screen, nil, nil, "uninstall")
+
+                                if ok then
+                                    assert(programs.execute(uninstallPath))
+                                    draw()
+                                else
+                                    clear()
+                                end
+                            end
                         else
                             local screenshotY = 7
                             local strs, active =
                             {"  open", "----------------------", "  remove", "  rename", "  copy", "  cut"},
-                            {true, false, not v.isAlias, not v.isAlias, not v.isAlias, not v.isAlias}
+                            {true, false, true, true, true, true}
 
                             local isLine
                             local function addLine()
