@@ -14,7 +14,7 @@ return {
         install = function()
             fs.makeDirectory("/data/bin/nanomachines.app")
             saveFile("/data/bin/nanomachines.app/main.lua", assert(calls.call("getInternetFile", "https://raw.githubusercontent.com/igorkll/liked/main/market/apps/nanomachines.app/main.lua")))
-            saveFile("/data/bin/nanomachines.app/icon.t2p", assert(calls.call("getInternetFile", "https://raw.githubusercontent.com/igorkll/liked/main/bin/apps/nanomachines.app/icon.t2p")))
+            saveFile("/data/bin/nanomachines.app/icon.t2p", assert(calls.call("getInternetFile", "https://raw.githubusercontent.com/igorkll/liked/main/market/apps/nanomachines.app/icon.t2p")))
             saveFile("/data/bin/nanomachines.app/uninstall.lua", assert(calls.call("getInternetFile", "https://raw.githubusercontent.com/igorkll/liked/main/market/apps/nanomachines.app/uninstall.lua")))
         end,
         uninstall = function()
