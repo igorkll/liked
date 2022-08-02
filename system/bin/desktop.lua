@@ -119,11 +119,7 @@ local function drawStatus()
     end
 end
 
-local function draw(old)
-    redrawFlag = false
-    checkData()
-
-    drawStatus()
+local function drawWallpaper()
     window:clear(colors.lightBlue)
     if fs.exists(wallpaperPath) then
         local sx, sy = calls.call("gui_readimagesize", wallpaperPath)
@@ -131,6 +127,14 @@ local function draw(old)
         ix, iy = window:toRealPos(ix, iy)
         pcall(calls.call, "gui_drawimage", screen, wallpaperPath, ix, iy)
     end
+end
+
+local function draw(old)
+    redrawFlag = false
+    checkData()
+
+    drawStatus()
+    drawWallpaper()
 
     local str = "path: " .. unicode.sub(userPath, unicode.len(userRoot), unicode.len(userPath))
     window:set(math.floor(((window.sizeX / 2) - (unicode.len(str) / 2)) + 0.5),
@@ -200,7 +204,7 @@ local function draw(old)
         end
         local exp = paths.extension(path)
         local icon
-        local readonly
+        local readonly = fs.get(path).isReadOnly()
         local labelReadonly
         local isFs
         local fsd
@@ -525,9 +529,9 @@ local function lock()
 
     lockFlag = true
     drawStatus()
+    drawWallpaper()
 
     while true do
-        window:clear(colors.lightBlue)
         local data = gui_input(screen, nil, nil, "enter password", true)
         if data then
             if sha256(data) == passwordHesh then
@@ -664,7 +668,7 @@ while true do
                             local screenshotY = 4
                             local strs, active =
                             {"  open", "----------------------", "  uninstall"},
-                            {true, false, fs.exists(uninstallPath)}
+                            {true, false, fs.exists(uninstallPath) and not v.readonly}
 
                             local posX, posY = window:toRealPos(windowEventData[3], windowEventData[4])
 
@@ -690,7 +694,7 @@ while true do
                             local screenshotY = 7
                             local strs, active =
                             {"  open", "----------------------", "  remove", "  rename", "  copy", "  cut"},
-                            {true, false, true, true, true, true}
+                            {true, false, not v.readonly, not v.readonly, true, not v.readonly}
 
                             local isLine
                             local function addLine()
@@ -831,12 +835,13 @@ while true do
                 copyObject = nil
                 isCut = false
             end
+            local readonly = fs.get(userPath).isReadOnly()
             
             local isRedraw
             local clear = calls.call("screenshot", screen, posX, posY, 33, 8)
             local str, num = calls.call("gui_context", screen, posX, posY,
             {"  back", "  paste", "--------------------------------", "  new image", "  new folder", "  new text file", "  download file from internet"},
-            {true, not not copyObject, false, true, true, true, not not component.list("internet")()})
+            {true, not not copyObject and not readonly, false, not readonly, not readonly, not readonly, not not component.list("internet")() and not readonly})
             clear()
             
             if num == 1 then
