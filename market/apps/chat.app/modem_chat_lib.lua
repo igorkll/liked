@@ -72,6 +72,7 @@ end
 ------------------------------------
 
 event.listen("modem_message", function(_, deviceUuid, _, lport, dist, messageLabel, messageUuid, sendedDist, partNumber, maxPartNumber, part)
+    if not _G.chat_allow then return end
     if lport == port and messageLabel == "modem_chat_lib" and not messagesUuidBlackList[messageUuid] then
         --computer.beep(2000, 0.1)
         local mathDist = dist + sendedDist

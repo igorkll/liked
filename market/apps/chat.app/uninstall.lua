@@ -1,3 +1,5 @@
+_G.chat_allow = nil
+
 local paths = require("paths")
 local fs = require("filesystem")
 

@@ -63,6 +63,7 @@ local function beep(f, d)
 end
 
 event.listen("raw_chat_message", function(_, dist, label, nikname, color, messageType, message)
+    if not _G.chat_allow then return end
     if label == "likedChatMessage" then
         dist = math.floor(dist + 0.5)
 
