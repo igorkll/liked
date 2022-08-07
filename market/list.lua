@@ -49,7 +49,7 @@ local list = {
     }
 }
 
-for i, v in ipairs(list) do
+for k, v in pairs(list) do
     function v.uninstall()
         programs.execute(paths.concat(v.path, "uninstall.lua"))
     end
