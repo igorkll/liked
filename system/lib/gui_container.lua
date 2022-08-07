@@ -7,6 +7,8 @@ local gui_container = {}
 
 gui_container.colors = {}
 gui_container.indexsColors = {}
+gui_container.filesExps = {}
+gui_container.devModeStates = {}
 
 local function attempt(path)
     if fs.exists(path) then

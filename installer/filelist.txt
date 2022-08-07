@@ -62,4 +62,6 @@
 /system/calls/gui_yesno.lua
 /system/calls/gui_context.lua
 /system/calls/gui_initScreen.lua
+/system/calls/findPos.lua
+/system/calls/gui_selectfile.lua
 /system/version.cfg

@@ -9,6 +9,7 @@ local colors = gui_container.colors
 ------------------------------------
 
 local screen, posX, posY, strs, active = ...
+
 local gpu = graphic.findGpu(screen)
 local cx, cy = gpu.getResolution()
 

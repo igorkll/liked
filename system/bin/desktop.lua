@@ -136,7 +136,7 @@ local function draw(old)
     drawStatus()
     drawWallpaper()
 
-    local str = "path: " .. unicode.sub(userPath, unicode.len(userRoot), unicode.len(userPath))
+    local str = "path: " .. paths.canonical(unicode.sub(userPath, unicode.len(userRoot), unicode.len(userPath)))
     window:set(math.floor(((window.sizeX / 2) - (unicode.len(str) / 2)) + 0.5),
     window.sizeY, colors.lightGray, colors.gray, str)
 
@@ -367,6 +367,15 @@ local function folderBack()
 end
 
 local function fileDescriptor(icon, alternative, nikname)
+    --[[
+    for i, v in ipairs(gui_container.filesExps) do
+        if not v[1] or v[1] == icon.exp then
+            execute(v[2], nikname, icon.path)
+            return
+        end
+    end
+    ]]
+
     if alternative then
         if fs.isDirectory(icon.path) then
             userPath = icon.path
@@ -442,6 +451,7 @@ local function setDevMode(state)
         userRoot = userRootMain
     end
     devMode = state
+    gui_container.devModeStates[screen] = state
     checkFolder()
     draw()
 end
@@ -622,6 +632,7 @@ while true do
 
                             local posX, posY = window:toRealPos(windowEventData[3], windowEventData[4])
 
+                            posX, posY = findPos(posX, posY, 23, screenshotY, rx, ry)
                             local clear = calls.call("screenshot", screen, posX, posY, 23, screenshotY)
                             local str, num = calls.call("gui_context", screen, posX, posY,
                             strs, active)
@@ -672,6 +683,7 @@ while true do
 
                             local posX, posY = window:toRealPos(windowEventData[3], windowEventData[4])
 
+                            posX, posY = findPos(posX, posY, 23, screenshotY, rx, ry)
                             local clear = calls.call("screenshot", screen, posX, posY, 23, screenshotY)
                             local str, num = calls.call("gui_context", screen, posX, posY,
                             strs, active)
@@ -681,7 +693,7 @@ while true do
                                 fileDescriptor(v, nil, windowEventData[6])
                             elseif num == 3 then
                                 local clear = saveZone()
-                                local ok = gui_yesno(screen, nil, nil, "uninstall")
+                                local ok = gui_yesno(screen, nil, nil, "uninstall?")
 
                                 if ok then
                                     assert(programs.execute(uninstallPath))
@@ -727,6 +739,8 @@ while true do
 
                                 screenshotY = screenshotY + 1
                             end
+
+
                             if not v.isDir and
                                 v.exp ~= "lua" and
                                 v.exp ~= "t2p" and
@@ -747,6 +761,18 @@ while true do
 
                                 screenshotY = screenshotY + 1
                             end
+
+                            isLine = false
+                            for i, v2 in ipairs(gui_container.filesExps) do
+                                if (not v2[1] or v2[1] == v.exp) and (v2[5] == nil or v2[5] == v.isDir) then
+                                    addLine()
+
+                                    table.insert(strs, "  " .. v2[3])
+                                    table.insert(active, v2[4])
+
+                                    screenshotY = screenshotY + 1
+                                end
+                            end
                             --[[
                             if v.exp == "plt" and not v.isDir then
                                 addLine()
@@ -760,13 +786,13 @@ while true do
 
                             local posX, posY = window:toRealPos(windowEventData[3], windowEventData[4])
 
+                            posX, posY = findPos(posX, posY, 23, screenshotY, rx, ry)
                             local clear = calls.call("screenshot", screen, posX, posY, 23, screenshotY)
                             local str, num = calls.call("gui_context", screen, posX, posY,
                             strs, active)
                             clear()
 
                             if num == 1 then
-                                
                                 fileDescriptor(v, nil, windowEventData[6])
                             elseif num == 3 then
                                 local clear2 = saveZone()
@@ -784,11 +810,13 @@ while true do
                                 if name then
                                     if #name ~= 0 and not name:find("%\\") and not name:find("%/") and
                                     (not name:find("%.") or devMode or not v.exp or v.exp == "") then --change expansion disabled
-                                        local newexp = v.exp or ""
-                                        if devMode then
-                                            newexp = ""
+                                        local newexp = ""
+                                        if not devMode then
+                                            if v.exp and v.exp ~= "" then
+                                                newexp = "." .. v.exp
+                                            end
                                         end
-                                        local path = paths.concat(userPath, name .. "." .. newexp)
+                                        local path = paths.concat(userPath, name .. newexp)
                                         if fs.exists(path) then
                                             warn("name exists")
                                         else
@@ -816,6 +844,14 @@ while true do
                             elseif str == "  edit" or str == "  open is text editor" then
                                 execute("edit", v.path)
                                 draw()
+                            else
+                                for i, v2 in ipairs(gui_container.filesExps) do
+                                    if "  " .. v2[3] == str then
+                                        execute(v2[2], windowEventData[6], v.path .. (v2[6] or ""))
+                                        draw()
+                                        break
+                                    end
+                                end
                             end
                         end
                         
@@ -837,6 +873,7 @@ while true do
             end
             local readonly = fs.get(userPath).isReadOnly()
             
+            posX, posY = findPos(posX, posY, 33, 8, rx, ry)
             local isRedraw
             local clear = calls.call("screenshot", screen, posX, posY, 33, 8)
             local str, num = calls.call("gui_context", screen, posX, posY,
