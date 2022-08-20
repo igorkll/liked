@@ -9,8 +9,4 @@ calls.call("graphicInit", gpu)
 gpu.setDepth(4)
 --gpu.setResolution(80, 25)
 
-local count = 0
-for i, v in pairs(gui_container.colors) do
-    gpu.setPaletteColor(count, v)
-    count = count + 1
-end
+system_setTheme("/data/theme.plt")

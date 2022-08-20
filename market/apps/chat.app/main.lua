@@ -259,8 +259,13 @@ while true do
 
     if windowEventData[1] == "touch" or windowEventData[1] == "drag" then
         if windowEventData[3] == window.sizeX and windowEventData[4] > 1 and windowEventData[4] < window.sizeY then
-            scroll = math.floor(map(windowEventData[4], 2, window.sizeY - 1, #history - window.sizeY, 0) + 0.5)
-            draw()
+            local newscroll = math.floor(map(windowEventData[4], 2, window.sizeY - 1, #history - window.sizeY, 0) + 0.5)
+            if newscroll <= (#history - window.sizeY) and newscroll > 0 then
+                if newscroll ~= scroll then
+                    scroll = newscroll
+                    draw()
+                end
+            end
         end
     end
 end

@@ -6,42 +6,35 @@ local gui_container = gui_container or require("gui_container")
 local path = ...
 
 local file = assert(fs.open(path, "rb"))
-local data = file.readAll()
+local themeData = file.readAll()
 file.close()
 
-local tbl = calls.call("unserialization", data)
-local newindexcolors = tbl
-local newcolors = {
-    white     = tbl[1],
-    orange    = tbl[2],
-    magenta   = tbl[3],
-    lightBlue = tbl[4],
-    yellow    = tbl[5],
-    lime      = tbl[6],
-    pink      = tbl[7],
-    gray      = tbl[8],
-    lightGray = tbl[9],
-    cyan      = tbl[10],
-    purple    = tbl[11],
-    blue      = tbl[12],
-    brown     = tbl[13],
-    green     = tbl[14],
-    red       = tbl[15],
-    black     = tbl[16]
-}
-
-for k, v in pairs(newcolors) do
-    gui_container.colors[k] = newcolors[k]
-end
-for k, v in pairs(newindexcolors) do
-    gui_container.indexsColors[k] = newindexcolors[k]
-end
+local colors = calls.call("unserialization", themeData)
+movetable(gui_container.indexsColors, colors)
+movetable(gui_container.colors, {
+    white     = colors[1],
+    orange    = colors[2],
+    magenta   = colors[3],
+    lightBlue = colors[4],
+    yellow    = colors[5],
+    lime      = colors[6],
+    pink      = colors[7],
+    gray      = colors[8],
+    lightGray = colors[9],
+    cyan      = colors[10],
+    purple    = colors[11],
+    blue      = colors[12],
+    brown     = colors[13],
+    green     = colors[14],
+    red       = colors[15],
+    black     = colors[16]
+})
 
 for address in component.list("screen") do
     local gpu = graphic.findGpu(address)
     if gpu.maxDepth() ~= 1 then
         local count = 0
-        for i, v in pairs(gui_container.colors) do
+        for i, v in ipairs(colors) do
             gpu.setPaletteColor(count, v)
             count = count + 1
         end

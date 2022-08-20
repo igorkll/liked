@@ -92,34 +92,13 @@ function createProfile()
     end
 
     for i = 1, inputs do
-        status("offing input: " .. tostring(i))
-        local _, err = nanoCall("setInput", i, false)
+        status("checking input: " .. tostring(i) .. "/" .. tostring(math.floor(inputs)))
+        local _, err, state = nanoCall("getInput", i)
         if err == "exit" then
             return nil, "exit"
         end
-    end
-    for i = 1, inputs do
-        status("chicking input: " .. tostring(i))
-        local _, err = nanoCall("setInput", i, true)
-        if err == "exit" then
-            return nil, "exit"
-        end
-        
-        local _, note = nanoCall("getActiveEffects")
-        if note == "exit" then
-            return nil, "exit"
-        end
-        if note == "{}" then
-            note = nil
-        end
-
-        tbl.states[i] = false
-        tbl.notes[i] = note
-
-        local _, err = nanoCall("setInput", i, false)
-        if err == "exit" then
-            return nil, "exit"
-        end
+        tbl.states[i] = state
+        tbl.notes[i] = false
     end
     return tbl
 end

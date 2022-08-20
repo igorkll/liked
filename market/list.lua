@@ -3,13 +3,6 @@ local fs = require("filesystem")
 local paths = require("paths")
 local programs = require("programs")
 
-local function saveFile(path, data)
-    fs.makeDirectory(paths.path(path))
-    local file = fs.open(path, "wb")
-    file.write(data)
-    file.close()
-end
-
 local list = {
     nanomachines = {
         path = "/data/bin/nanomachines.app",
@@ -45,6 +38,31 @@ local list = {
             saveFile("/data/lib/modem_chat_lib.lua", assert(calls.call("getInternetFile", "https://raw.githubusercontent.com/igorkll/liked/main/market/apps/chat.app/modem_chat_lib.lua")))
         
             programs.execute("/data/autoruns/chat_demon.lua")
+        end
+    },
+    --[[
+    spaceshoter = {
+        path = "/data/bin/spaceshot.app",
+        install = function()
+            fs.makeDirectory("/data/bin/spaceshoter.app")
+            saveFile("/data/bin/spaceshoter.app/main.lua", assert(calls.call("getInternetFile", "https://raw.githubusercontent.com/igorkll/liked/main/market/apps/spaceshoter.app/main.lua")))
+            saveFile("/data/bin/spaceshoter.app/icon.t2p", assert(calls.call("getInternetFile", "https://raw.githubusercontent.com/igorkll/liked/main/market/apps/spaceshoter.app/icon.t2p")))
+            saveFile("/data/bin/spaceshoter.app/uninstall.lua", assert(calls.call("getInternetFile", "https://raw.githubusercontent.com/igorkll/liked/main/market/apps/spaceshoter.app/uninstall.lua")))
+        end
+    }
+    ]]
+    irc = {
+        path = "/data/bin/irc.app",
+        install = function()
+            fs.makeDirectory("/data/bin/irc.app")
+            saveFile("/data/bin/irc.app/main.lua", assert(calls.call("getInternetFile", "https://raw.githubusercontent.com/igorkll/liked/main/market/apps/irc.app/main.lua")))
+            saveFile("/data/bin/irc.app/icon.t2p", assert(calls.call("getInternetFile", "https://raw.githubusercontent.com/igorkll/liked/main/market/apps/irc.app/icon.t2p")))
+            saveFile("/data/bin/irc.app/uninstall.lua", assert(calls.call("getInternetFile", "https://raw.githubusercontent.com/igorkll/liked/main/market/apps/irc.app/uninstall.lua")))
+
+            --[[
+            fs.makeDirectory("/data/lib")
+            saveFile("/data/lib/irc.lua", assert(calls.call("getInternetFile", "https://raw.githubusercontent.com/igorkll/liked/main/market/apps/irc.app/lib.lua")))
+            ]]
         end
     }
 }
