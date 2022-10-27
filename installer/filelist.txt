@@ -67,7 +67,7 @@
 /system/calls/findPos.lua
 /system/calls/gui_selectfile.lua
 /system/version.cfg
-/system/autoruns/a_vendor.cfg
+/system/autoruns/a_vendor.lua
 /system/icons/afpx.t2p
 /system/icons/arch.t2p
 /system/icons/avi.t2p
