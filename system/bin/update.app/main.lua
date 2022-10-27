@@ -34,11 +34,14 @@ local function writeInitLua()
 end
 
 local function removeUserData()
+    --[[
     for i, file in ipairs(fs.list("/") or {}) do
         if file ~= "init.lua" and file ~= "system/" and file ~= "external-data/" then
             fs.remove("/" .. file)
         end
     end
+    ]]
+    fs.remove("/data")
 end
 
 --------------------------------------------

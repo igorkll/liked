@@ -53,5 +53,9 @@ while true do
             event.sleep(0.1)
             break
         end
+    elseif windowEventData[1] == "key_down" and windowEventData[4] == 28 then
+        window:set(32 - 4, 7, colors.blue, colors.white, " ok ")
+        event.sleep(0.1)
+        break
     end
 end

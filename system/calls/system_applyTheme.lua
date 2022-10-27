@@ -31,11 +31,10 @@ movetable(gui_container.colors, {
 })
 
 for address in component.list("screen") do
-    local gpu = graphic.findGpu(address)
-    if gpu.maxDepth() ~= 1 then
+    if graphic.maxDepth(address) ~= 1 then
         local count = 0
         for i, v in ipairs(colors) do
-            gpu.setPaletteColor(count, v)
+            graphic.setPaletteColor(address, count, v)
             count = count + 1
         end
     end

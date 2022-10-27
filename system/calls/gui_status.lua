@@ -46,3 +46,8 @@ window:set(2, 3, color, colors.blue, " ◢█◣ ")
 window:set(2, 4, color, colors.blue, "◢███◣")
 
 window:set(4, 3, colors.blue, colors.white, "P")
+
+local tbl = {event.pull(0.1)}
+if #tbl > 0 then
+    event.push(table.unpack(tbl))
+end

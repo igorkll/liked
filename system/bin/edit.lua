@@ -1018,6 +1018,8 @@ term = {clear = function()
     local rx, ry = gpu.getResolution()
     gpu.fill(1, 1, rx, ry, " ")
 end, pull = function(...)
+      graphic.update(screen)
+
     if blinkingTerm then
         local gpu = graphic.findGpu(screen)
         local char, fore, back = gpu.get(cx, cy)
@@ -1036,6 +1038,9 @@ end, pull = function(...)
       gpu.setForeground(back)
       gpu.set(cx, cy, char)
     end
+
+      graphic.update(screen)
+
     return table.unpack(eventData)
 end, setCursor = function(x, y)
     cx, cy = x, y
@@ -1552,14 +1557,16 @@ local keyBindHandlers = {
         local f, reason = fs.open(filename, "w")
         if f then
             local chars, firstLine = 0, true
+            local filedata = ""
             for _, bline in ipairs(buffer) do
                 if not firstLine then
                     bline = "\n" .. bline
                 end
                 firstLine = false
-                f.write(bline)
+                filedata = filedata .. bline
                 chars = chars + unicode.len(bline)
             end
+            f.write(filedata)
             f.close()
             local format
             if new then

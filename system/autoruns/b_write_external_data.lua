@@ -17,5 +17,7 @@ end
 
 ------------------------------------
 
-write("devivetype", calls.call("getDeviceType"))
-write("deviveaddress", computer.address())
+if not vendor.doNotWriteExternalData then
+    write("devivetype", calls.call("getDeviceType"))
+    write("deviveaddress", computer.address())
+end

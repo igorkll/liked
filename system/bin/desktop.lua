@@ -39,7 +39,10 @@ local iconAliases = {
     "/system/bin/update.app",
     "/system/bin/market.app"
 }
-local usrBin = "/data/bin"
+local userPaths = {
+    "/vendor/bin",
+    "/data/bin",
+}
 local timeZonePath = "/data/timeZone.dat"
 local passwordFilePath = "/data/password.sha256"
 
@@ -72,8 +75,6 @@ local icons
 
 local copyObject
 local isCut = false
-
-local devMode = false
 
 local function checkData()
     if not startIconsPoss[paths.canonical(userPath)] then
@@ -171,8 +172,10 @@ local function draw(old)
                 iconsCount = iconsCount + 1
             end
         end
-        for i, file in ipairs(fs.list(usrBin) or {}) do
-            iconsCount = iconsCount + 1
+        for i, path in ipairs(userPaths) do
+            for i, file in ipairs(fs.list(path) or {}) do
+                iconsCount = iconsCount + 1
+            end
         end
     end
 
@@ -269,7 +272,7 @@ local function draw(old)
 
         local name = preName
             if not name then
-            if devMode then
+            if gui_container.devModeStates[screen] then
                 name = paths.name(path)
             else
                 name = paths.name(paths.hideExtension(path))
@@ -286,8 +289,10 @@ local function draw(old)
                 table.insert(tbl, {nil, v})
             end
         end
-        for i, file in ipairs(fs.list(usrBin) or {}) do
-            table.insert(tbl, {nil, paths.concat(usrBin, file)})
+        for i, path in ipairs(userPaths) do
+            for i, file in ipairs(fs.list(path) or {}) do
+                table.insert(tbl, {nil, paths.concat(path, file)})
+            end
         end
     end
 
@@ -417,7 +422,7 @@ local function fileDescriptor(icon, alternative, nikname)
             calls.call("system_setTheme", icon.path)
             event.push("redrawDesktop")
         end
-    elseif icon.exp == "txt" or icon.exp == "log" or (icon.exp == "dat" and devMode) then
+    elseif icon.exp == "txt" or icon.exp == "log" or icon.exp == "cfg" or (icon.exp == "dat" and gui_container.devModeStates[screen]) then
         execute("edit", icon.path, icon.exp == "log")
         draw()
     elseif icon.exp == "mid" or icon.exp == "midi" then
@@ -444,13 +449,12 @@ local function fileDescriptor(icon, alternative, nikname)
 end
 
 local function setDevMode(state)
-    if state == devMode then return end
+    if state == gui_container.devModeStates[screen] then return end
     if state then
         userRoot = "/"
     else
         userRoot = userRootMain
     end
-    devMode = state
     gui_container.devModeStates[screen] = state
     checkFolder()
     draw()
@@ -472,8 +476,21 @@ startStatusTimer()
 ------------------------------------
 
 function execute(name, ...) --локалезирована выше
+    local path = programs.find(name)
+
+    if fs.exists("/vendor/appChecker.lua") then
+        local out = {programs.execute("/vendor/appChecker.lua", path)}
+        if not out[1] then
+            calls.call("gui_warn", screen, nil, nil, out[2])
+            return
+        elseif not out[2] then
+            calls.call("gui_warn", screen, nil, nil, "you cannot run this application")
+            return
+        end
+    end
+
     stopStatusTimer()
-    local code, err = programs.load(name)
+    local code, err = programs.load(path)
     local ok = true
     if code then
         local ok2, err2 = xpcall(code, debug.traceback, screen, ...)
@@ -502,7 +519,7 @@ function warn(str)
 end
 
 local function addExp(name, exp)
-    if not devMode then
+    if not gui_container.devModeStates[screen] then
         return name .. "." .. exp
     else
         local realexp = paths.extension(name)
@@ -517,7 +534,7 @@ local devModeCount = 0
 local devModeResetTime = 0
 
 event.listen("key_down", function(_, uuid, char, code)
-    if devMode then
+    if gui_container.devModeStates[screen] then
         local ok
         for i, v in ipairs(component.invoke(screen, "getKeyboards")) do
             if v == uuid then
@@ -724,14 +741,14 @@ while true do
                                 table.insert(active, true)
 
                                 screenshotY = screenshotY + 1
-                            elseif devMode and v.exp == "app" and v.isDir then
+                            elseif gui_container.devModeStates[screen] and v.exp == "app" and v.isDir then
                                 addLine()
 
                                 table.insert(strs, "  inside the package")
                                 table.insert(active, true)
 
                                 screenshotY = screenshotY + 1
-                            elseif devMode and (v.exp == "lua" or v.exp == "plt") and not v.isDir then
+                            elseif gui_container.devModeStates[screen] and (v.exp == "lua" or v.exp == "plt") and not v.isDir then
                                 addLine()
 
                                 table.insert(strs, "  edit")
@@ -753,7 +770,8 @@ while true do
                                 v.exp ~= "mid" and
                                 v.exp ~= "midi" and
                                 v.exp ~= "dat" and
-                                v.exp ~= "app" then
+                                v.exp ~= "app" and
+                                v.exp ~= "log" then
                                 addLine()
 
                                 table.insert(strs, "  open is text editor")
@@ -809,9 +827,9 @@ while true do
 
                                 if name then
                                     if #name ~= 0 and not name:find("%\\") and not name:find("%/") and
-                                    (not name:find("%.") or devMode or not v.exp or v.exp == "") then --change expansion disabled
+                                    (not name:find("%.") or gui_container.devModeStates[screen] or not v.exp or v.exp == "") then --change expansion disabled
                                         local newexp = ""
-                                        if not devMode then
+                                        if not gui_container.devModeStates[screen] then
                                             if v.exp and v.exp ~= "" then
                                                 newexp = "." .. v.exp
                                             end
@@ -842,7 +860,7 @@ while true do
                             elseif str == "  inside the package" then
                                 fileDescriptor(v, true)
                             elseif str == "  edit" or str == "  open is text editor" then
-                                execute("edit", v.path)
+                                execute("edit", v.path, str == "  open is text editor")
                                 draw()
                             else
                                 for i, v2 in ipairs(gui_container.filesExps) do
@@ -911,7 +929,7 @@ while true do
                 if type(name) == "string" then
                     local path = paths.concat(userPath, name)
                     if not fs.exists(path) then
-                        if #name == 0 or (name:find("%.") and not devMode) or name:find("%/") or name:find("%\\") then
+                        if #name == 0 or (name:find("%.") and not gui_container.devModeStates[screen]) or name:find("%/") or name:find("%\\") then
                             warn("error in name")
                         else
                             fs.makeDirectory(path)
@@ -928,9 +946,9 @@ while true do
                 clear()
 
                 if type(name) == "string" then
-                    local path = paths.concat(userPath, name .. (devMode and "" or ".txt"))
+                    local path = paths.concat(userPath, name .. (gui_container.devModeStates[screen] and "" or ".txt"))
                     if not fs.exists(path) then
-                        if #name == 0 or (name:find("%.") and not devMode) or name:find("%/") or name:find("%\\") then
+                        if #name == 0 or (name:find("%.") and not gui_container.devModeStates[screen]) or name:find("%/") or name:find("%\\") then
                             warn("error in name")
                         else
                             execute("edit", path)
@@ -954,15 +972,17 @@ while true do
                 end
 
                 if copyFlag then
-                    if fs.exists(toPath) then
-                        fs.remove(toPath)
+                    if paths.canonical(toPath) ~= paths.canonical(copyObject) then
+                        if fs.exists(toPath) then
+                            fs.remove(toPath)
+                        end
+                        fs.copy(copyObject, toPath)
+                        
+                        if isCut then
+                            fs.remove(copyObject)
+                        end
                     end
-                    fs.copy(copyObject, toPath)
-                    
-                    if isCut then
-                        isCut = false
-                        fs.remove(copyObject)
-                    end
+
                     copyObject = nil
                     isCut = false
                     isRedraw = true
@@ -1042,13 +1062,18 @@ while true do
     if computer.uptime() - devModeResetTime > 1 then
         devModeResetTime = computer.uptime()
         if devModeCount > 15 then
-            if not devMode then
-                computer.beep(2000)
+            if not vendor.disableDevShortcut then
+                if not gui_container.devModeStates[screen] then
+                    computer.beep(2000)
+                else
+                    computer.beep(1000)
+                end
+                setDevMode(not gui_container.devModeStates[screen])
+                event.sleep(1)
             else
-                computer.beep(1000)
+                computer.beep(200)
+                warn("dev mode shortcut disabled vendor")
             end
-            setDevMode(not devMode)
-            event.sleep(1)
         end
         devModeCount = 0
     end

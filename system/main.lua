@@ -3,6 +3,7 @@ local component = require("component")
 local graphic = require("graphic")
 local programs = require("programs")
 local calls = require("calls")
+local fs = require("filesystem")
 
 table.insert(programs.paths, "/data/userdata")
 table.insert(programs.paths, "/data/userdata/apps")
@@ -29,7 +30,11 @@ do
             end        
         end
     end
+
     autorunsIn("/data/autoruns")
+    if fs.exists("/vendor/autoruns") then
+        autorunsIn("/vendor/autoruns")
+    end
 end
 
 ------------------------------------
