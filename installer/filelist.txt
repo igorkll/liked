@@ -74,7 +74,7 @@
 /system/icons/bmp.t2p
 /system/icons/computer.t2p
 /system/icons/jpg.t2p
-/system/icons/jpes.t2p
+/system/icons/jpeg.t2p
 /system/icons/mp3.t2p
 /system/icons/mp4.t2p
 /system/icons/ocv.t2p
