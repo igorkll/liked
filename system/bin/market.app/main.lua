@@ -2,9 +2,11 @@ local graphic = require("graphic")
 local fs = require("filesystem")
 local calls = require("calls")
 local eventData = require("event")
-local colors = require("gui_container").colors
+local gui_container = require("gui_container")
 local component = require("component")
 local computer = require("computer")
+
+local colors = gui_container.colors
 
 ------------------------------------
 
@@ -18,6 +20,20 @@ end
 
 local statusWindow = graphic.createWindow(screen, 1, 1, rx, 1)
 local window = graphic.createWindow(screen, 1, 2, rx, ry - 1)
+
+------------------------------------
+
+local netver = getInternetFile("https://raw.githubusercontent.com/igorkll/liked/main/system/version.cfg")
+
+if not netver then
+    gui_warn(screen, nil, nil, "connection error")
+    return
+end
+
+if tonumber(netver) > getOSversion() then
+    gui_warn(screen, nil, nil, "please update the system, until the system is updated, the market will not work")
+    return
+end
 
 ------------------------------------
 
@@ -39,8 +55,10 @@ local function draw()
     appsTbl = {}
     appCount = 1
     for k, v in pairs(list) do
-        if appCount >= listOffSet and appCount <= window.sizeY then
-            window:set(1, #appsTbl + 1, colors.gray, colors.white, k .. ":" .. (v.isInstalled() and "installed" or "no installed"))
+        if (not v.hided or gui_container.devModeStates[screen]) and appCount >= listOffSet and appCount <= window.sizeY then
+            local installed = v.isInstalled()
+            window:set(1, #appsTbl + 1, colors.white, installed and colors.green or colors.red, (v.name or k))
+            --window:set(#(v.name or k) + 3, #appsTbl + 1, colors.white, installed and colors.green or colors.red, installed and "√" or "╳")
             table.insert(appsTbl, v)
         end
         appCount = appCount + 1

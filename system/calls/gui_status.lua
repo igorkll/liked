@@ -44,8 +44,12 @@ end
 window:set(2, 2, color, colors.blue, "  " .. unicode.char(0x2800+192) ..  "  ")
 window:set(2, 3, color, colors.blue, " ◢█◣ ")
 window:set(2, 4, color, colors.blue, "◢███◣")
-
 window:set(4, 3, colors.blue, colors.white, "P")
+
+event.sleep(0.2)
+if require("registry").soundEnable then
+    computer.beep(500, 0.5)
+end
 
 local tbl = {event.pull(0.1)}
 if #tbl > 0 then

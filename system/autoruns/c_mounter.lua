@@ -3,6 +3,7 @@ local paths = require("paths")
 local event = require("event")
 local component = require("component")
 local computer = require("computer")
+local registry = require("registry")
 
 local function genName(uuid)
     return paths.concat("/data/userdata", (component.invoke(uuid, "getLabel") or "disk") .. "-" .. uuid:sub(1, 5))
@@ -11,7 +12,9 @@ end
 if not vendor.doNotMoundDrives then
     event.listen("component_added", function(_, uuid, name)
         if name == "filesystem" then
-            computer.beep(2000, 0.1)
+            if registry.soundEnable then
+                computer.beep(2000, 0.1)
+            end
             assert(fs.mount(uuid, genName(uuid)))
             event.push("redrawDesktop")
         end
@@ -21,7 +24,9 @@ if not vendor.doNotMoundDrives then
         if name == "filesystem" then
             for _, tbl in ipairs(fs.mountList) do
                 if tbl[1].address == uuid then
-                    computer.beep(1000, 0.1)
+                    if registry.soundEnable then
+                        computer.beep(1000, 0.1)
+                    end
                     assert(fs.umount(tbl[2]))
                     event.push("redrawDesktop")
                     break

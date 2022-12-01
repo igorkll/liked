@@ -53,9 +53,9 @@ local function draw()
     end
 
     window:clear(colors.black)
-    window:set(1, 1, colors.lightGray, fs.exists(passwordPath) and colors.lime or colors.red, "lock: " .. tostring(fs.exists(passwordPath)))
-    window:set(1, 2, colors.lightGray, colors.white, "remove password")
-    window:set(1, 3, colors.lightGray, colors.white, "set    password")
+    window:set(1, 1, colors.black, fs.exists(passwordPath) and colors.lime or colors.red, "lock: " .. tostring(fs.exists(passwordPath)))
+    window:set(1, 3, colors.lightGray, colors.white, "remove password")
+    window:set(1, 4, colors.lightGray, colors.white, "set    password")
 end
 draw()
 
@@ -64,7 +64,7 @@ draw()
 return function(eventData)
     local windowEventData = window:uploadEvent(eventData)
     if windowEventData[1] == "touch" then
-        if windowEventData[4] == 2 and windowEventData[3] >= 1 and windowEventData[3] <= 15 then
+        if windowEventData[4] == 3 and windowEventData[3] >= 1 and windowEventData[3] <= 15 then
             if fs.exists(passwordPath) then
                 if checkPassword() then
                     fs.remove(passwordPath)
@@ -73,7 +73,7 @@ return function(eventData)
                 gui_warn(screen, nil, nil, "password is not setted")
             end
             draw()
-        elseif windowEventData[4] == 3 and windowEventData[3] >= 1 and windowEventData[3] <= 15 then
+        elseif windowEventData[4] == 4 and windowEventData[3] >= 1 and windowEventData[3] <= 15 then
             if checkPassword() then
                 local password1 = gui_input(screen, nil, nil, "enter password", true)
                 if password1 then

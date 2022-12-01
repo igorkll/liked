@@ -1,3 +1,5 @@
+_OSVERSION = "liked: " .. tostring(getOSversion())
+
 require("gui_container")
 local component = require("component")
 local graphic = require("graphic")
@@ -32,9 +34,7 @@ do
     end
 
     autorunsIn("/data/autoruns")
-    if fs.exists("/vendor/autoruns") then
-        autorunsIn("/vendor/autoruns")
-    end
+    autorunsIn("/vendor/autoruns")
 end
 
 ------------------------------------

@@ -12,7 +12,7 @@ local colors = gui_container.colors
 ------------------------------------
 --mode1 == get file
 --mode2 == save file
-local screen, cx, cy, mode, exps, typename, expNames, standartFileName, standartDir = ...
+local screen, cx, cy, mode, exps, typename, expNames, standartFileName, standartDir, useFolders = ...
 local gpu = graphic.findGpu(screen)
 local rx, ry = gpu.getResolution()
 
@@ -28,6 +28,10 @@ end
 
 if type(exps) == "string" then
     exps = {exps}
+end
+
+if exps and #exps == 0 then
+    exps = nil
 end
 
 if not cx or not cy then
@@ -50,17 +54,21 @@ local formatButtonSizeX
 local okButtonPosX
 local okButtonSizeX
 local inputbox
-local selectedExp = exps[1]
+local selectedExp = exps and exps[1]
 if mode == 2 then
     inputbox = window:read(1, window.sizeY - 1, window.sizeX - 16, colors.gray, colors.white)
     inputbox.setBuffer(standartFileName or "")
 end
 
+local function isDirectory(path)
+    return fs.isDirectory(path) and paths.extension(path) ~= "app"
+end
+
 local function findObjectName(path, noCheckFolder)
-    if not noCheckFolder and fs.isDirectory(path) then
+    if not noCheckFolder and isDirectory(path) then
         return "FOLDER"
     else
-        if expNames then
+        if expNames and exps then
             local exp = paths.extension(path)
             for i, v in ipairs(exps) do
                 if v == exp and expNames[i] then
@@ -68,7 +76,7 @@ local function findObjectName(path, noCheckFolder)
                 end
             end
         end
-        return "UNKNOWN"
+        return (paths.extension(path) or "absent"):upper()
     end
 end
 
@@ -109,7 +117,7 @@ local function draw()
     window:fill(window.sizeX, 2, 1, zonesize, colors.orange, 0, " ")
 
     if mode == 2 then
-        local str = findObjectName("0." .. selectedExp)
+        local str = findObjectName("0." .. (selectedExp or ""))
         formatButtonSizeX = unicode.len(str)
         formatButtonPosX = window.sizeX - 14
         window:set(formatButtonPosX, window.sizeY - 1, colors.red, colors.orange, str)
@@ -123,17 +131,28 @@ local function draw()
     local number = 2
     for _, file in ipairs(fs.list(userPath)) do
         local full_path = paths.concat(userPath, file)
-        if fs.isDirectory(full_path) or (not paths.extension(file) and #exps == 0) or inTable(exps, paths.extension(file)) then
-            if devMode or not fs.isDirectory(full_path) or not paths.extension(file) then
+        if isDirectory(full_path) or not exps or inTable(exps, paths.extension(file)) then
+            if devMode or not isDirectory(full_path) or not paths.extension(file) then
                 count = count + 1
                 local posY = (number - scroll)
                 if posY >= 2 and posY <= (zonesize + 1) then
                     table.insert(variantes, file)
                     local color
-                    if fs.isDirectory(full_path) then
+                    local exp = paths.extension(full_path)
+                    if isDirectory(full_path) then
                         color = colors.yellow
                     else
-                        color = colors.lightBlue
+                        if exp == "app" then
+                            color = colors.red
+                        elseif exp == "lua" then
+                            color = colors.lime
+                        elseif exp == "plt" then
+                            color = colors.white
+                        elseif exp == "t2p" then
+                            color = colors.white
+                        else
+                            color = colors.lightBlue
+                        end
                     end
                     window:fill(1, posY, window.sizeX - 1, 1, color, 0, " ")
                     local filename = paths.canonical(file)
@@ -172,11 +191,11 @@ while true do
                 return nil
             elseif #out > 0 then
                 local path = paths.concat(userPath, selectedExp and (out .. "." .. selectedExp) or out)
-                if fs.isDirectory(path) then
-                    gui_warn(screen, nil, nil, "is directory")
+                if (isDirectory(path) and not useFolders) or (not isDirectory(path) and useFolders) then
+                    gui_warn(screen, nil, nil, "is " .. (isDirectory(path) and "directory" or "file"))
                     draw()
                 else
-                    if not fs.exists(path) or gui_yesno(screen, nil, nil, "replase this file?") then
+                    if not fs.exists(path) or gui_yesno(screen, nil, nil, "replase this?") then
                         return path
                     end
                     draw()
@@ -210,11 +229,16 @@ while true do
         elseif formatButtonPosX and windowEventData[4] == window.sizeY - 1 and windowEventData[3] >= formatButtonPosX and windowEventData[3] < (formatButtonPosX + formatButtonSizeX) then
             if mode == 2 then
                 local strs = {}
-                local sizeX = 0
-                for i, v in ipairs(exps) do
-                    table.insert(strs, "  " .. findObjectName("0." .. v, true) .. "  ")
-                    if unicode.len(strs[#strs]) > sizeX then
-                        sizeX = unicode.len(strs[#strs])
+                if not exps then
+                    table.insert(strs, "  ABSENT  ")
+                end
+                local sizeX = 4
+                if exps then
+                    for i, v in ipairs(exps) do
+                        table.insert(strs, "  " .. findObjectName("0." .. v, true) .. "  ")
+                        if unicode.len(strs[#strs]) > sizeX then
+                            sizeX = unicode.len(strs[#strs])
+                        end
                     end
                 end
                 local sizeY = #strs + 1
@@ -225,7 +249,11 @@ while true do
                 local _, num = gui_context(screen, posX, posY, strs)
                 clear()
                 if num then
-                    selectedExp = exps[num]
+                    if exps then
+                        selectedExp = exps[num]
+                    else
+                        selectedExp = nil
+                    end
                     draw()
                 end
             end
@@ -233,17 +261,29 @@ while true do
             local filename = variantes[windowEventData[4] - 1]
             if filename then
                 local full_path = paths.concat(userPath, filename)
-                if fs.isDirectory(full_path) then
-                    userPath = full_path
-                    scroll = 0
-                    draw()
+                if isDirectory(full_path) then
+                    if windowEventData[5] == 1 then
+                        if inputbox then
+                            inputbox.setBuffer(paths.hideExtension(paths.name(full_path)))
+                            selectedExp = paths.extension(full_path)
+                            draw()
+                        else
+                            return full_path
+                        end
+                    else
+                        userPath = full_path
+                        scroll = 0
+                        draw()
+                    end
                 else
-                    if mode == 1 then
+                    if mode == 1 and not windowEventData[5] == 1 then
                         return full_path
                     else
-                        inputbox.setBuffer(paths.hideExtension(paths.name(full_path)))
-                        selectedExp = paths.extension(full_path)
-                        draw()
+                        if inputbox then
+                            inputbox.setBuffer(paths.hideExtension(paths.name(full_path)))
+                            selectedExp = paths.extension(full_path)
+                            draw()
+                        end
                     end
                 end
             end

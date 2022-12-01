@@ -48,11 +48,13 @@ while true do
         if windowEventData[1] == "drop" and windowEventData[5] == 0 then
             local num = windowEventData[4]
             if not active or active[num] then
+                event.sleep(0.2)
                 return strs[num], num
             end
         elseif (windowEventData[1] == "touch" or windowEventData[1] == "drag") and windowEventData[5] == 0 then
             if windowEventData[1] == "touch" and selectedNum and selectedNum == windowEventData[4] then
                 if not active or active[selectedNum] then
+                    event.sleep(0.2)
                     return strs[selectedNum], selectedNum
                 end
             end

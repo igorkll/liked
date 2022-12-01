@@ -1011,6 +1011,9 @@ local gpu = graphic.findGpu(screen)
 gpu.setBackground(colors.gray)
 gpu.setForeground(colors.white)
 
+local oldAllowBuffer = graphic.getBufferStateOnScreen(screen)
+graphic.setBufferStateOnScreen(screen, false)
+
 local blinkingTerm = true
 local cx, cy = 1, 1
 term = {clear = function()
@@ -1743,3 +1746,5 @@ while running do
         end
     end
 end
+
+graphic.setBufferStateOnScreen(screen, oldAllowBuffer)

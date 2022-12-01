@@ -5,6 +5,8 @@ local computer = require("computer")
 local calls = require("calls")
 local unicode = require("unicode")
 local fs = require("filesystem")
+local paths = require("paths")
+local programs = require("programs")
 
 local colors = gui_container.colors
 local screen = ...
@@ -38,15 +40,19 @@ local function update()
         "core: likeOS",
         "core verion: " .. _COREVERSION,
         "------------------------------------------HARDWARE",
+        "-----------MAIN",
+        "device type: " .. getDeviceType(),
         "-----------MEMORY(RAM)",
-        "total memory: " .. math.floor(totalMemory / 1024) .. "kb",
-        "free  memory: " .. math.floor(freeMemory / 1024) .. "kb",
-        "used  memory: " .. math.floor((totalMemory - freeMemory) / 1024) .. "kb",
+        "total memory: " .. math.round(totalMemory / 1024) .. "kb",
+        "free  memory: " .. math.round(freeMemory / 1024) .. "kb",
+        "used  memory: " .. math.round((totalMemory - freeMemory) / 1024) .. "kb",
+        "used  memory: " .. math.round((1 - (freeMemory / totalMemory)) * 100) .. "%",
         "-----------MEMORY(HDD)",
         "hdd address : " .. fs.bootaddress,
-        "total memory: " .. math.floor(hddTotalSpace / 1024) .. "kb",
-        "free  memory: " .. math.floor((hddTotalSpace - hddUsedSpace) / 1024) .. "kb",
-        "used  memory: " .. math.floor(hddUsedSpace / 1024) .. "kb",
+        "total memory: " .. math.round(hddTotalSpace / 1024) .. "kb",
+        "free  memory: " .. math.round((hddTotalSpace - hddUsedSpace) / 1024) .. "kb",
+        "used  memory: " .. math.round(hddUsedSpace / 1024) .. "kb",
+        "used  memory: " .. math.round((hddUsedSpace / hddTotalSpace) * 100) .. "%",
     }
     
     window:setCursor(1, 1)
@@ -55,38 +61,31 @@ local function update()
     end
     
     statusWindow:set(rx, 1, colors.red, colors.white, "X")
+
+    window:set(1, window.sizeY, colors.blue, colors.white, "list of components")
 end
 update()
 
 --------------------------------------------
 
-local closeFlag = true
-local listens = {}
+local oldtime = computer.uptime()
 
-table.insert(listens, event.timer(6, function()
-    update()
-end, math.huge))
-table.insert(listens, event.listen(nil, function(...)
-    local statusWindowEventData = statusWindow:uploadEvent({...})
+while true do
+    local eventData = {event.pull(0.5)}
+
+    local statusWindowEventData = statusWindow:uploadEvent(eventData)
     if statusWindowEventData[1] == "touch" and statusWindowEventData[3] == window.sizeX and statusWindowEventData[4] == 1 then
-        exit()
+        break
     end
-end))
 
-function offTimers()
-    for i, v in ipairs(listens) do
-        event.cancel(v)
+    local windowEventData = window:uploadEvent(eventData)
+    if windowEventData[1] == "touch" and windowEventData[3] >= 1 and windowEventData[3] <= 18 and windowEventData[4] == window.sizeY then
+        assert(programs.execute(paths.concat(paths.path(getPath()), "componentlist.lua"), screen))
+        update()
     end
-    listens = {}
-end
 
-function exit()
-    offTimers()
-    closeFlag = false
-end
-
---------------------------------------------
-
-while closeFlag do
-    event.sleep(0.1)
+    if computer.uptime() - oldtime > 1 then
+        oldtime = computer.uptime()
+        update()
+    end
 end

@@ -22,7 +22,7 @@ if not cx or not cy then
     cy = math.floor(cy)
 end
 
-local window = graphic.createWindow(screen, cx, cy, 32, 8)
+local window = graphic.createWindow(screen, cx, cy, 32, 8, true)
 local color = backgroundColor or colors.lightGray
 
 window:fill(2, 2, window.sizeX, window.sizeY, colors.gray, 0, " ")
@@ -48,17 +48,22 @@ window:set(4, 3, colors.green, colors.white, "?")
 window:set(32 - 5, 7, colors.lime, colors.white, " yes ")
 window:set(2, 7, colors.red, colors.white, " no ")
 
+event.sleep(0.2)
+if require("registry").soundEnable then
+    computer.beep(2000)
+end
+
 while true do
     local eventData = {computer.pullSignal()}
     local windowEventData = window:uploadEvent(eventData)
     if windowEventData[1] == "touch" and windowEventData[5] == 0 then
         if windowEventData[4] == 7 and windowEventData[3] > (32 - 6) and windowEventData[3] <= ((32 - 5) + 4) then
             window:set(32 - 5, 7, colors.green, colors.white, " yes ")
-            event.sleep(0.1)
+            event.sleep(0.2)
             return true
         elseif windowEventData[4] == 7 and windowEventData[3] >= 2 and windowEventData[3] <= (2 + 3) then
             window:set(2, 7, colors.orange, colors.white, " no ")
-            event.sleep(0.1)
+            event.sleep(0.2)
             return false
         end
     end

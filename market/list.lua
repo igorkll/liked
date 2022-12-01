@@ -58,13 +58,75 @@ local list = {
             saveFile("/data/bin/irc.app/main.lua", assert(calls.call("getInternetFile", "https://raw.githubusercontent.com/igorkll/liked/main/market/apps/irc.app/main.lua")))
             saveFile("/data/bin/irc.app/icon.t2p", assert(calls.call("getInternetFile", "https://raw.githubusercontent.com/igorkll/liked/main/market/apps/irc.app/icon.t2p")))
             saveFile("/data/bin/irc.app/uninstall.lua", assert(calls.call("getInternetFile", "https://raw.githubusercontent.com/igorkll/liked/main/market/apps/irc.app/uninstall.lua")))
-
-            --[[
+        end
+    },
+    archiver = {
+        path = "/data/bin/archiver.app",
+        install = function()
+            fs.makeDirectory("/data/bin/archiver.app")
+            saveFile("/data/bin/archiver.app/main.lua", assert(calls.call("getInternetFile", "https://raw.githubusercontent.com/igorkll/liked/main/market/apps/archiver.app/main.lua")))
+            saveFile("/data/bin/archiver.app/icon.t2p", assert(calls.call("getInternetFile", "https://raw.githubusercontent.com/igorkll/liked/main/market/apps/archiver.app/icon.t2p")))
+            saveFile("/data/bin/archiver.app/uninstall.lua", assert(calls.call("getInternetFile", "https://raw.githubusercontent.com/igorkll/liked/main/market/apps/archiver.app/uninstall.lua")))
+        end
+    },
+    brainfuck = {
+        path = "/data/bin/brainfuck.app",
+        install = function()
+            fs.makeDirectory("/data/bin/brainfuck.app")
             fs.makeDirectory("/data/lib")
-            saveFile("/data/lib/irc.lua", assert(calls.call("getInternetFile", "https://raw.githubusercontent.com/igorkll/liked/main/market/apps/irc.app/lib.lua")))
-            ]]
+            saveFile("/data/bin/brainfuck.app/main.lua", assert(calls.call("getInternetFile", "https://raw.githubusercontent.com/igorkll/liked/main/market/apps/brainfuck.app/main.lua")))
+            saveFile("/data/bin/brainfuck.app/icon.t2p", assert(calls.call("getInternetFile", "https://raw.githubusercontent.com/igorkll/liked/main/market/apps/brainfuck.app/icon.t2p")))
+            saveFile("/data/bin/brainfuck.app/uninstall.lua", assert(calls.call("getInternetFile", "https://raw.githubusercontent.com/igorkll/liked/main/market/apps/brainfuck.app/uninstall.lua")))
+            saveFile("/data/lib/brainfuck.lua", assert(calls.call("getInternetFile", "https://raw.githubusercontent.com/igorkll/liked/main/market/apps/brainfuck.app/lib.lua")))
+        end
+    },
+    --[[
+    eeprom = {
+        path = "/data/bin/eeprom.app",
+        install = function()
+            fs.makeDirectory("/data/bin/eeprom.app")
+            saveFile("/data/bin/eeprom.app/main.lua", assert(calls.call("getInternetFile", "https://raw.githubusercontent.com/igorkll/liked/main/market/apps/eeprom.app/main.lua")))
+            saveFile("/data/bin/eeprom.app/icon.t2p", assert(calls.call("getInternetFile", "https://raw.githubusercontent.com/igorkll/liked/main/market/apps/eeprom.app/icon.t2p")))
+            saveFile("/data/bin/eeprom.app/uninstall.lua", assert(calls.call("getInternetFile", "https://raw.githubusercontent.com/igorkll/liked/main/market/apps/eeprom.app/uninstall.lua")))
+        end
+    },
+    ]]
+    legacyRender = {
+        name = "legacy render",
+        path = "/data/bin/legacyRender.app",
+        install = function()
+            fs.makeDirectory("/data/autoruns")
+            fs.makeDirectory("/data/bin/legacyRender.app")
+
+            saveFile("/data/bin/legacyRender.app/main.lua", assert(calls.call("getInternetFile", "https://raw.githubusercontent.com/igorkll/liked/main/market/apps/legacyRender.app/main.lua")))
+            saveFile("/data/bin/legacyRender.app/icon.t2p", assert(calls.call("getInternetFile", "https://raw.githubusercontent.com/igorkll/liked/main/market/apps/legacyRender.app/icon.t2p")))
+            saveFile("/data/bin/legacyRender.app/uninstall.lua", assert(calls.call("getInternetFile", "https://raw.githubusercontent.com/igorkll/liked/main/market/apps/legacyRender.app/uninstall.lua")))
+            saveFile("/data/autoruns/legacyRender.lua", assert(calls.call("getInternetFile", "https://raw.githubusercontent.com/igorkll/liked/main/market/apps/legacyRender.app/autorun.lua")))
+            
+            programs.execute("/data/autoruns/legacyRender.lua")
+        end
+    },
+    lua = {
+        path = "/data/bin/lua.app",
+        install = function()
+            fs.makeDirectory("/data/bin/lua.app")
+            saveFile("/data/bin/lua.app/main.lua", assert(calls.call("getInternetFile", "https://raw.githubusercontent.com/igorkll/liked/main/market/apps/lua.app/main.lua")))
+            saveFile("/data/bin/lua.app/icon.t2p", assert(calls.call("getInternetFile", "https://raw.githubusercontent.com/igorkll/liked/main/market/apps/lua.app/icon.t2p")))
+            saveFile("/data/bin/lua.app/uninstall.lua", assert(calls.call("getInternetFile", "https://raw.githubusercontent.com/igorkll/liked/main/market/apps/lua.app/uninstall.lua")))
+        end
+    },
+    --[[
+    openbox = {
+        hided = true,
+        path = "/data/bin/openbox.app",
+        install = function()
+            fs.makeDirectory("/data/bin/openbox.app")
+            saveFile("/data/bin/openbox.app/main.lua", assert(calls.call("getInternetFile", "https://raw.githubusercontent.com/igorkll/liked/main/market/apps/openbox.app/main.lua")))
+            saveFile("/data/bin/openbox.app/icon.t2p", assert(calls.call("getInternetFile", "https://raw.githubusercontent.com/igorkll/liked/main/market/apps/openbox.app/icon.t2p")))
+            saveFile("/data/bin/openbox.app/uninstall.lua", assert(calls.call("getInternetFile", "https://raw.githubusercontent.com/igorkll/liked/main/market/apps/openbox.app/uninstall.lua")))
         end
     }
+    ]]
 }
 
 for k, v in pairs(list) do

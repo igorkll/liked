@@ -19,7 +19,7 @@ local colors = gui_container.colors
 ------------------------------------
 
 local screen = ...
-local rx, ry = graphic.findGpu(screen).getResolution()
+local rx, ry = graphic.getResolution(screen)
 
 local statusWindow = graphic.createWindow(screen, 1, 1, rx, 1)
 local window = graphic.createWindow(screen, 1, 2, rx, ry - 1)
@@ -317,7 +317,7 @@ local function draw(old)
             count = count + 1
             local centerIconX = math.floor(((window.sizeX / (iconsX + 1)) * cx) + 0.5)
             local centerIconY = math.floor(((window.sizeY / (iconsY + 1)) * cy) + 0.5)
-            local iconX = math.floor((centerIconX - (iconSizeX / 2)) + 0.5)
+            local iconX = math.floor((centerIconX - (iconSizeX / 2)) + 0.5) + 1
             local iconY = math.floor((centerIconY - (iconSizeY / 2)) + 0.5)
             local icon = icons[count]
             
@@ -329,7 +329,7 @@ local function draw(old)
                 --    window:fill(iconX - 2, iconY - 1, iconSizeX + 4, iconSizeY + 2, colors.blue, 0, " ")
                 --end
                 local x, y = window:toRealPos(math.floor((centerIconX - (unicode.len(icon.name) / 2)) + 0.5), centerIconY + 2)
-                gui_drawtext(screen, x, y, colors.white, icon.name)
+                gui_drawtext(screen, x + 1, y, colors.white, icon.name)
                 --window:set(iconX - (unicode.len(icon.name) // 2), iconY + iconY - 2, colors.lightBlue, colors.white, icon.name)
                 if icon.icon then
                     pcall(gui_drawimage, screen, icon.icon, window:toRealPos(iconX, iconY))
@@ -443,6 +443,15 @@ local function fileDescriptor(icon, alternative, nikname)
             warn("pleas, download programm tape from market")
             clear()
         end
+    elseif icon.exp == "afpx" then
+        if programs.find("archiver") then
+            execute("archiver", nikname, icon.path)
+            draw()
+        else
+            local clear = saveZone()
+            warn("pleas, download programm archiver from market")
+            clear()
+        end
     else
         warn("file is not supported")
     end
@@ -462,34 +471,38 @@ end
 
 ------------------------------------
 
-local statusTimer
+local timerEnable = true
+local statusTimer = event.timer(10, function()
+    if not timerEnable then return end
+    drawStatus()
+end, math.huge)
+
 local function startStatusTimer()
-    statusTimer = event.timer(10, function()
-        drawStatus()
-    end, math.huge)
+    timerEnable = true
 end
 local function stopStatusTimer()
-    event.cancel(statusTimer)
+    timerEnable = false
 end
-startStatusTimer()
 
 ------------------------------------
 
 function execute(name, ...) --локалезирована выше
+    stopStatusTimer()
+
     local path = programs.find(name)
 
     if fs.exists("/vendor/appChecker.lua") then
-        local out = {programs.execute("/vendor/appChecker.lua", path)}
+        local out = {programs.execute("/vendor/appChecker.lua", path, screen)}
         if not out[1] then
             calls.call("gui_warn", screen, nil, nil, out[2])
             return
         elseif not out[2] then
-            calls.call("gui_warn", screen, nil, nil, "you cannot run this application")
+            --calls.call("gui_warn", screen, nil, nil, "you cannot run this application")
             return
         end
     end
 
-    stopStatusTimer()
+    
     local code, err = programs.load(path)
     local ok = true
     if code then
@@ -501,7 +514,9 @@ function execute(name, ...) --локалезирована выше
     else
         ok = false
     end
+    
     startStatusTimer()
+
     if not ok then
         draw()
         calls.call("gui_warn", screen, 1, 2, err or "unknown error")
@@ -543,7 +558,7 @@ event.listen("key_down", function(_, uuid, char, code)
         end
         if ok then
             if char == 0 and code == 46 then
-                event.interruptFlag = true
+                event.interruptFlag = screen
             end
         end
     end
@@ -759,18 +774,28 @@ while true do
 
 
                             if not v.isDir and
-                                v.exp ~= "lua" and
-                                v.exp ~= "t2p" and
+                                v.exp ~= "zip" and
+                                v.exp ~= "rar" and
+                                v.exp ~= "afpx" and
+                                v.exp ~= "arch" and
+
                                 v.exp ~= "dfpwm" and
                                 v.exp ~= "mp3" and
                                 v.exp ~= "wav" and
-                                v.exp ~= "avi" and
-                                v.exp ~= "mp4" and
-                                v.exp ~= "plt" and
                                 v.exp ~= "mid" and
                                 v.exp ~= "midi" and
-                                v.exp ~= "dat" and
+
+                                v.exp ~= "lua" and
                                 v.exp ~= "app" and
+
+                                v.exp ~= "t2p" and
+                                v.exp ~= "plt" and
+                                
+                                v.exp ~= "avi" and
+                                v.exp ~= "mp4" and
+                                
+                                v.exp ~= "dat" and
+                                v.exp ~= "cfg" and
                                 v.exp ~= "log" then
                                 addLine()
 
@@ -992,7 +1017,7 @@ while true do
                 local clear = saveZone()
                 local url = gui_input(screen, nil, nil, "url")
                 clear()
-                if url then
+                if url and url ~= "" then
                     local filename = url
                     local index = string.find(filename, "/[^/]*$")
                     if index then

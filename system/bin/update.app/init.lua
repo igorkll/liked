@@ -1,3 +1,46 @@
+
+local function initScreen(gpu, screen)
+    if gpu.getScreen() ~= screen then
+        gpu.bind(screen, false)
+    end
+    gpu.setDepth(1)
+    gpu.setDepth(gpu.maxDepth())
+    gpu.setResolution(50, 16)
+    gpu.setBackground(0)
+    gpu.setForeground(0xFFFFFF)
+    gpu.fill(1, 1, 50, 16, " ")
+end
+
+local function printState(num)
+    local str = "working with updates: " .. tostring(math.floor((num * 100) + 0.5)) .. "%"
+    local gpu = component.proxy(component.list("gpu")() or "")
+    if gpu then
+        for screen in component.list("screen") do
+            initScreen(gpu, screen)
+
+            if gpu.getDepth() > 1 then
+                gpu.setPaletteColor(0, 0x5bb9f0)
+                gpu.setPaletteColor(1, 0xffffff)
+
+                gpu.setBackground(0, true)
+                gpu.setForeground(1, true)
+            else
+                gpu.setBackground(0xFFFFFF)
+                gpu.setForeground(0x000000)
+            end
+
+            local rx, ry = gpu.getResolution()
+
+            gpu.fill(1, 1, rx, ry, " ")
+            gpu.set((math.floor(rx / 2) - (#str / 2)) + 1, math.floor(ry / 2), str)
+        end
+    end
+end
+
+printState(0)
+
+--------------------------------
+
 local internet = component.proxy(component.list("internet")() or error("no internet card found", 0))
 local proxy = component.proxy(computer.getBootAddress())
 
@@ -75,10 +118,14 @@ local function fs_path(path)
     end
 end
 
-local function installUrl(url)
+local function installUrl(url, state2)
     local filelist = split(assert(getInternetFile(url .. "/installer/filelist.txt")), "\n")
     for i, v in ipairs(filelist) do
         local filedata = assert(getInternetFile(url .. v))
+
+        if i % 10 == 0 then
+            printState((((i - 1) // (#filelist - 1)) / 2) + (state2 and 0.5 or 0))
+        end
 
         proxy.makeDirectory(fs_path(v))
         local file = proxy.open(v, "wb")
@@ -89,5 +136,5 @@ end
 
 proxy.remove("/system")
 installUrl("https://raw.githubusercontent.com/igorkll/likeOS/main")
-installUrl("https://raw.githubusercontent.com/igorkll/liked/main")
+installUrl("https://raw.githubusercontent.com/igorkll/liked/main", true)
 computer.shutdown("fast")

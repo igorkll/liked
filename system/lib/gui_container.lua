@@ -9,6 +9,13 @@ gui_container.colors = {}
 gui_container.indexsColors = {}
 gui_container.filesExps = {}
 gui_container.devModeStates = {}
+gui_container.typecolors = {
+    app = gui_container.colors.red,
+    lua = gui_container.colors.lime
+}
+gui_container.typenames = {
+    t2p = "image",
+}
 
 _G.gui_container = gui_container
 if fs.exists("/data/theme.plt") then

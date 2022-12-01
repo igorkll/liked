@@ -892,10 +892,10 @@ env._G = env
 
 local func = assert(load(programmData, nil, nil, env))
 
-local oldAllowBuffer = graphic.allowBuffer
-graphic.setAllowBuffer(false)
+local oldAllowBuffer = graphic.getBufferStateOnScreen(screen)
+graphic.setBufferStateOnScreen(screen, false)
 local ok, err = pcall(func, ...)
-graphic.setAllowBuffer(oldAllowBuffer)
+graphic.setBufferStateOnScreen(screen, oldAllowBuffer)
 if not ok then
     if err == "interrupted" then
         return

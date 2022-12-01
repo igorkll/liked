@@ -2,6 +2,7 @@
 /system/bin/paint.lua
 /system/bin/about.app/icon.t2p
 /system/bin/about.app/main.lua
+/system/bin/about.app/componentlist.lua
 /system/bin/update.app/icon.t2p
 /system/bin/update.app/main.lua
 /system/bin/update.app/init.lua
@@ -10,6 +11,8 @@
 /system/bin/settings.app/modules/timezone.lua
 /system/bin/settings.app/modules/lock.lua
 /system/bin/settings.app/modules/palette.lua
+/system/bin/settings.app/modules/sound.lua
+/system/bin/settings.app/modules/users.lua
 /system/bin/settings.app/main.lua
 /system/bin/edit.lua
 /system/bin/market.app/icon.t2p
@@ -66,6 +69,7 @@
 /system/calls/gui_initScreen.lua
 /system/calls/findPos.lua
 /system/calls/gui_selectfile.lua
+/system/calls/gui_filepicker.lua
 /system/version.cfg
 /system/autoruns/a_vendor.lua
 /system/icons/afpx.t2p
@@ -81,3 +85,6 @@
 /system/icons/png.t2p
 /system/icons/server.t2p
 /system/icons/wav.t2p
+/system/icons/cfg.t2p
+/system/logo.lua
+/system/registry.dat
