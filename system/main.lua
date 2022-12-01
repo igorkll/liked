@@ -1,4 +1,4 @@
-_OSVERSION = "liked: " .. tostring(getOSversion())
+_G._OSVERSION = "liked: " .. tostring(getOSversion())
 
 require("gui_container")
 local component = require("component")
