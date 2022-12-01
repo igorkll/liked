@@ -26,13 +26,12 @@ local window = graphic.createWindow(screen, 1, 2, rx, ry - 1)
 
 local wallpaperPath = "/data/wallpaper.t2p"
 --[[
-local userRoot = "/data/userdata/"
-local userPath = userRoot
+local gui_container.userRoot = "/data/userdata/"
+local userPath = gui_container.userRoot
 ]]
 local userRootMain = "/data/userdata/"
-local userRoot = userRootMain
-local userPath = userRootMain
-local iconsPath = userRootMain
+local userPath = gui_container.userRoot
+local iconsPath = gui_container.userRoot
 local iconAliases = {
     "/system/bin/about.app",
     "/system/bin/settings.app",
@@ -46,7 +45,7 @@ local userPaths = {
 local timeZonePath = "/data/timeZone.dat"
 local passwordFilePath = "/data/password.sha256"
 
-fs.makeDirectory(userRoot)
+fs.makeDirectory(gui_container.userRoot)
 fs.makeDirectory(userPath)
 
 ------------------------------------
@@ -137,7 +136,7 @@ local function draw(old)
     drawStatus()
     drawWallpaper()
 
-    local str = "path: " .. paths.canonical(unicode.sub(userPath, unicode.len(userRoot), unicode.len(userPath)))
+    local str = "path: " .. paths.canonical(unicode.sub(userPath, unicode.len(gui_container.userRoot), unicode.len(userPath)))
     window:set(math.floor(((window.sizeX / 2) - (unicode.len(str) / 2)) + 0.5),
     window.sizeY, colors.lightGray, colors.gray, str)
 
@@ -159,7 +158,7 @@ local function draw(old)
     local iconsCount = 0
     local tbl = fs.list(userPath)
     if not tbl then
-        userPath = userRootMain
+        userPath = gui_container.userRoot
         return draw()
     end
     for i, v in ipairs(tbl) do
@@ -360,8 +359,8 @@ local function listBack()
 end
 
 local function checkFolder()
-    if unicode.sub(userPath, 1, unicode.len(userRoot)) ~= userRoot then
-        userPath = userRoot
+    if unicode.sub(userPath, 1, unicode.len(gui_container.userRoot)) ~= gui_container.userRoot then
+        userPath = gui_container.userRoot
     end
 end
 
@@ -459,11 +458,13 @@ end
 
 local function setDevMode(state)
     if state == gui_container.devModeStates[screen] then return end
+    --[[
     if state then
-        userRoot = "/"
+        gui_container.userRoot = "/"
     else
-        userRoot = userRootMain
+        gui_container.userRoot = userRootMain
     end
+    ]]
     gui_container.devModeStates[screen] = state
     checkFolder()
     draw()

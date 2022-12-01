@@ -17,8 +17,8 @@ local gpu = graphic.findGpu(screen)
 local rx, ry = gpu.getResolution()
 
 local devMode = gui_container.devModeStates[screen]
-local userRoot = devMode and "/" or "/data/userdata/"
-local userPath = standartDir or "/data/userdata/"
+local userRoot = _G.userRoot
+local userPath = standartDir or _G.userRoot
 
 local function checkFolder()
     if unicode.sub(userPath, 1, unicode.len(userRoot)) ~= userRoot then

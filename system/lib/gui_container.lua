@@ -25,4 +25,6 @@ else
 end
 _G.gui_container = nil
 
+gui_container.userRoot = "/data/userdata/"
+
 return gui_container
