@@ -5,18 +5,20 @@ local eventData = require("event")
 local gui_container = require("gui_container")
 local component = require("component")
 local computer = require("computer")
+local paths = require("paths")
 
 local colors = gui_container.colors
 
 ------------------------------------
 
 local screen = ...
-
 local rx, ry
 do
     local gpu = graphic.findGpu(screen)
     rx, ry = gpu.getResolution()
 end
+
+------------------------------------
 
 local statusWindow = graphic.createWindow(screen, 1, 1, rx, 1)
 local window = graphic.createWindow(screen, 1, 2, rx, ry - 1)
@@ -42,6 +44,95 @@ local list = assert(load(assert(calls.call("getInternetFile", mainurl))))()
 
 ------------------------------------
 
+local function applicationLabel(data, x, y)
+    local applabel = graphic.createWindow(screen, x, y, rx - 2, 6)
+
+    local img
+    if data.icon then
+        img = "/tmp/currentApp.t2p"
+        local file = fs.open(img, "wb")
+        file.write(getInternetFile(data.icon))
+        file.close()
+    else
+        img = "/system/icons/app.t2p"
+    end
+
+    local installed = data:isInstalled()
+
+    local function draw()
+        applabel:clear(colors.gray)
+        applabel:set(12, 2, colors.gray, colors.white, "name: " .. (data.name or "unknown"))
+        applabel:set(12, 3, colors.gray, colors.white, "verion: " .. (data.version or "unknown"))
+        applabel:set(12, 4, colors.gray, colors.white, "vendor: " .. (data.vendor or "unknown"))
+
+        if installed then
+            applabel:set(applabel.sizeX - 13, 2, colors.red, colors.white,   "   remove   ")
+        else
+            applabel:set(applabel.sizeX - 13, 2, colors.green, colors.white, "   install  ") 
+        end
+
+        gui_drawimage(screen, img, applabel:toRealPos(2, 2))
+    end
+    draw()
+    
+    return {tick = function (eventData)
+        local windowEventData = applabel:uploadEvent(eventData)
+        if windowEventData[1] == "touch" then
+            if windowEventData[3] >= (applabel.sizeX - 13) and windowEventData[3] < ((applabel.sizeX - 13) + 12) and windowEventData[4] == 2 then
+                if installed then
+                    if gui_yesno(screen, nil, nil, "remove current?") then
+                        data:uninstall()
+                    end
+                else
+                    if gui_yesno(screen, nil, nil, "install current?") then
+                        data:install()
+                    end
+                end
+
+                installed = data:isInstalled()
+                draw()
+                return true
+            end
+        end
+    end}
+end
+
+local function appInfo(data)
+    local emptyDeskWindows = graphic.createWindow(screen, 2, 17, rx - 2, ry - 17)
+    local deskWindows = graphic.createWindow(screen, 3, 18, rx - 4, ry - 19)
+
+    local appLabel
+    local function ldraw()
+        statusWindow:clear(colors.gray)
+        --statusWindow:set(1, 1, colors.gray, colors.white, "   ")
+        statusWindow:set(statusWindow.sizeX, statusWindow.sizeY, colors.red, colors.white, "<")
+
+        window:clear(colors.white)
+
+        appLabel = applicationLabel(data, 2, 3)
+        
+        emptyDeskWindows:clear(colors.gray)
+        deskWindows:clear(colors.gray)
+        deskWindows:setCursor(1, 1)
+        deskWindows:write(data.description or "this application does not contain a description\nO_o", colors.gray, colors.white, true)
+    end
+    ldraw()
+    
+    while true do
+        local eventData = {computer.pullSignal()}
+        if appLabel.tick(eventData) then
+            ldraw()
+        end
+
+        local statusWindowEventData = statusWindow:uploadEvent(eventData)    
+        if statusWindowEventData[1] == "touch" then
+            if statusWindowEventData[3] == statusWindow.sizeX and statusWindowEventData[4] == statusWindow.sizeY then
+                break
+            end
+        end
+    end
+end
+
 local listOffSet = 1
 local appCount = 1
 local appsTbl = {}
@@ -49,7 +140,7 @@ local function draw()
     statusWindow:clear(colors.gray)
     window:clear(colors.white)
 
-    statusWindow:set(1, 1, colors.gray, colors.white, "MARKET")
+    statusWindow:set(1, 1, colors.gray, colors.white, "   MARKET")
     statusWindow:set(statusWindow.sizeX, statusWindow.sizeY, colors.red, colors.white, "X")
 
     appsTbl = {}
@@ -82,19 +173,8 @@ while true do
     if windowEventData[1] == "touch" then
         local current = appsTbl[windowEventData[4]]
         if current then
-            if current.isInstalled() then
-                local yes = calls.call("gui_yesno", screen, nil, nil, "remove current?")
-                if yes then
-                    current.uninstall()
-                end
-                draw()
-            else
-                local yes = calls.call("gui_yesno", screen, nil, nil, "install current?")
-                if yes then
-                    current.install()
-                end
-                draw()
-            end
+            appInfo(current)
+            draw()
         end
     elseif windowEventData[1] == "scroll" then
         if windowEventData[5] > 0 then

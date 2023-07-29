@@ -1,5 +1,5 @@
 --все приложения должны содержать
---посля name, vendor, version
+--посля name, vendor, version, description
 --url иконки в поле icon
 --функцию для установки
 
@@ -14,6 +14,7 @@ local list = {
         version = "1.3",
         vendor = "Logic",
         icon = "https://raw.githubusercontent.com/igorkll/liked/main/market/apps/nanomachines.app/icon.t2p",
+        description = "allows you to control nanobots using a wireless modem",
 
         path = "/data/bin/nanomachines.app",
         install = function(self)

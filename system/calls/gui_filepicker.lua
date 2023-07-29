@@ -3,7 +3,7 @@ local gui_container = require("gui_container")
 local paths = require("paths")
 local fs = require("filesystem")
 local unicode = require("unicode")
-local event = require("event")
+local computer = require("computer")
 
 local colors = gui_container.colors
 
@@ -14,7 +14,6 @@ local screen, cx, cy, dir, exp, save, dirmode = ...
 local gpu = graphic.findGpu(screen)
 local rx, ry = gpu.getResolution()
 
-local devMode = gui_container.devModeStates[screen]
 local userRoot = gui_container.userRoot
 local userPath = dir or gui_container.userRoot
 
@@ -48,6 +47,7 @@ local function draw()
 
     window:set(window.sizeX, 1, colors.red, colors.white, "X")
     window:set(1, window.sizeY, colors.red, colors.white, "<")
+    window:set(2, window.sizeY, colors.red, colors.white, "+")
     window:set(window.sizeX, window.sizeY, colors.green, colors.white, ">")
 
     window:set(20, window.sizeY, colors.lightGray, colors.white, paths.canonical(unicode.sub(userPath, unicode.len(userRoot), unicode.len(userPath))))
@@ -69,9 +69,13 @@ end
 draw()
 
 while true do
-    local eventData = {event.pull()}
+    local eventData = {computer.pullSignal()}
     local windowEventData = window:uploadEvent(eventData)
-    reader.uploadEvent(eventData)
+
+    local readResult = reader.uploadEvent(eventData)
+    if readResult == true then
+        return
+    end
 
     if windowEventData[1] == "touch" then
         local pos = windowEventData[4] - 1
@@ -80,7 +84,7 @@ while true do
             local fullpath = paths.concat(userPath, filename)
             if fs.isDirectory(fullpath) then
                 if dirmode and windowEventData[5] == 1 then
-                    if not save or gui_yesno(screen, nil, nil, "overwrite directory?") then
+                    if not save or gui_yesno(screen, nil, nil, "overwrite/combine directory?") then
                         return fullpath
                     end
                 else
@@ -98,17 +102,42 @@ while true do
             return
         end
 
+        if windowEventData[3] == 2 and windowEventData[4] == window.sizeY then
+            local str = gui_input(screen, nil, nil, "directory name")
+            if str then
+                if str:find("%.") or str:find("%/") or str:find("%\\") then
+                    gui_warn(screen, nil, nil, "invalid name")
+                else
+                    fs.makeDirectory(paths.concat(userPath, str))
+                end
+            end
+            draw()
+        end
+
         if windowEventData[3] == 1 and windowEventData[4] == window.sizeY then
             userPath = paths.path(userPath)
             checkFolder()
             draw()
         end
+    end
 
-        if windowEventData[3] == window.sizeX and windowEventData[4] == window.sizeY then
-            local filename = reader.getBuffer() .. (exp and ("." .. exp) or "")
+    if (windowEventData[3] == window.sizeX and windowEventData[4] == window.sizeY) or (readResult and readResult ~= true) then
+        local buff = reader.getBuffer()
+        if buff ~= "" and (not exp or not buff:find("%.")) and not buff:find("%/") and not buff:find("%\\") then
+            local filename = buff .. (exp and ("." .. exp) or "")
             local filepath = paths.concat(userPath, filename)
             if (fs.exists(filepath) or save) and (not fs.exists(filepath) or fs.isDirectory(filepath) == not not dirmode) then
-                return paths.concat(userPath, filename)
+                local fullpath = paths.concat(userPath, filename)
+                if fs.isDirectory(fullpath) then
+                    if not save or not fs.exists(fullpath) or gui_yesno(screen, nil, nil, "overwrite/combine directory?") then
+                        return fullpath
+                    end
+                else
+                    if not save or not fs.exists(fullpath) or gui_yesno(screen, nil, nil, "overwrite file?") then
+                        return fullpath
+                    end
+                end
+                draw()
             else
                 if fs.isDirectory(filepath) ~= not not dirmode then
                     if dirmode then
@@ -121,6 +150,9 @@ while true do
                 end
                 draw()
             end
+        else
+            gui_warn(screen, nil, nil, "invalid name")
+            draw()
         end
     end
 end

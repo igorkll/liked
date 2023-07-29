@@ -1,3 +1,5 @@
+--this method is legacy, use gui_filepicker
+
 local graphic = require("graphic")
 local gui_container = require("gui_container")
 local event = require("event")
@@ -17,8 +19,8 @@ local gpu = graphic.findGpu(screen)
 local rx, ry = gpu.getResolution()
 
 local devMode = gui_container.devModeStates[screen]
-local userRoot = _G.userRoot
-local userPath = standartDir or _G.userRoot
+local userRoot = gui_container.userRoot
+local userPath = standartDir or userRoot
 
 local function checkFolder()
     if unicode.sub(userPath, 1, unicode.len(userRoot)) ~= userRoot then

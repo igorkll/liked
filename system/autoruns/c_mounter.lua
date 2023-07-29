@@ -5,7 +5,7 @@ local component = require("component")
 local computer = require("computer")
 local registry = require("registry")
 
-local function genName(uuid)
+function fs.genName(uuid)
     return paths.concat("/data/userdata", (component.invoke(uuid, "getLabel") or "disk") .. "-" .. uuid:sub(1, 5))
 end
 
@@ -15,7 +15,7 @@ if not vendor.doNotMoundDrives then
             if registry.soundEnable then
                 computer.beep(2000, 0.1)
             end
-            assert(fs.mount(uuid, genName(uuid)))
+            assert(fs.mount(uuid, fs.genName(uuid)))
             event.push("redrawDesktop")
         end
     end)
@@ -34,10 +34,10 @@ if not vendor.doNotMoundDrives then
             end
         end
     end)
-
+    
     for address in component.list("filesystem") do
         if address ~= computer.tmpAddress() and address ~= fs.bootaddress then
-            assert(fs.mount(address, genName(address)))
+            assert(fs.mount(address, fs.genName(address)))
         end
     end
 end

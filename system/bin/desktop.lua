@@ -1,6 +1,5 @@
 --ВНИМАНИЯ, для кономии оперативной памяти, я загружаю данный файл один раз и создаю на него патоки
 --соответственно таблица _ENV для всех desktop обшая, и тут нельзя использовать глобалы
-local warn, saveZone, execute
 
 local graphic = require("graphic")
 local computer = require("computer")
@@ -16,7 +15,31 @@ local sha256 = require("sha256").sha256
 
 local colors = gui_container.colors
 
-------------------------------------
+------------------------------------------------------------------------ settings
+
+local knownExps = { --данные файлы не будет предложинно открыть в текстовом редакторе
+    ["zip"] = true,
+    ["rar"] = true,
+    ["afpx"] = true,
+    ["arch"] = true,
+    ["dfpwm"] = true,
+    ["mp3"] = true,
+    ["wav"] = true,
+    ["mid"] = true,
+    ["midi"] = true,
+    ["lua"] = true,
+    ["app"] = true,
+    ["t2p"] = true,
+    ["plt"] = true,
+    ["avi"] = true,
+    ["mp4"] = true,             
+    ["dat"] = true,
+    ["cfg"] = true,
+    ["log"] = true,
+    ["txt"] = true --текстовому документу не нужно отдельная кнопка, он по умалчанию открываеться через редактор
+}
+
+------------------------------------------------------------------------ init
 
 local screen = ...
 local rx, ry = graphic.getResolution(screen)
@@ -25,10 +48,6 @@ local statusWindow = graphic.createWindow(screen, 1, 1, rx, 1)
 local window = graphic.createWindow(screen, 1, 2, rx, ry - 1)
 
 local wallpaperPath = "/data/wallpaper.t2p"
---[[
-local gui_container.userRoot = "/data/userdata/"
-local userPath = gui_container.userRoot
-]]
 local userRootMain = "/data/userdata/"
 local userPath = gui_container.userRoot
 local iconsPath = gui_container.userRoot
@@ -48,32 +67,27 @@ local passwordFilePath = "/data/password.sha256"
 fs.makeDirectory(gui_container.userRoot)
 fs.makeDirectory(userPath)
 
-------------------------------------
+local function isDev()
+    return not not gui_container.devModeStates[screen]
+end
+
+local redrawFlag = true
+
+------------------------------------------------------------------------ icons
 
 local iconsX = 4
-local iconsY = 2
-local lockFlag = false
-
+local iconsY = 3
 if rx == 160 and ry == 50 then
     iconsX = 8
-    iconsY = 4
+    iconsY = 7
 end
 
 local iconSizeX = 8
 local iconSizeY = 4
 
-local startIconsPoss = {}
+local startIconsPoss = {} --тут храниться страница выбраная на конкретном пути
 --local selectedIcons = {}
-
-local redrawFlag = false
-event.listen("redrawDesktop", function()
-    redrawFlag = true
-end)
-
 local icons
-
-local copyObject
-local isCut = false
 
 local function checkData()
     if not startIconsPoss[paths.canonical(userPath)] then
@@ -81,7 +95,11 @@ local function checkData()
     end
 end
 
+------------------------------------------------------------------------ draw
+
 local contextMenuOpen = false
+local lockFlag = false
+
 local function drawStatus()
     local timeZone = _G.timeZone
     if not timeZone then
@@ -98,19 +116,19 @@ local function drawStatus()
         _G.timeZone = timeZone
     end
     
-    local hours, minutes, seconds = calls.call("getRealTime", timeZone)
+    local hours, minutes, seconds = getRealTime(timeZone)
     hours = tostring(hours)
     minutes = tostring(minutes)
     if #hours == 1 then hours = "0" .. hours end
     if #minutes == 1 then minutes = "0" .. minutes end
 
-    local gameHours, gameMinutes = calls.call("getGameTime")
+    local gameHours, gameMinutes = getGameTime()
     gameHours = tostring(gameHours)
     gameMinutes = tostring(gameMinutes)
     if #gameHours == 1 then gameHours = "0" .. gameHours end
     if #gameMinutes == 1 then gameMinutes = "0" .. gameMinutes end
 
-    local str = "real time: " .. hours .. ":" .. minutes .. "   game time: " .. gameHours .. ":" .. gameMinutes .. "   " .. tostring(math.floor(calls.call("map", computer.energy(), 0, computer.maxEnergy(), 0, 100) + 0.5)) .. "%"
+    local str = "real time: " .. hours .. ":" .. minutes .. "   game time: " .. gameHours .. ":" .. gameMinutes .. "   " .. tostring(math.floor(map(computer.energy(), 0, computer.maxEnergy(), 0, 100) + 0.5)) .. "%"
 
     statusWindow:fill(1, 1, rx, 1, colors.gray, 0, " ")
     statusWindow:set(window.sizeX - unicode.len(str), 1, colors.gray, colors.white, str)
@@ -122,15 +140,14 @@ end
 local function drawWallpaper()
     window:clear(colors.lightBlue)
     if fs.exists(wallpaperPath) then
-        local sx, sy = calls.call("gui_readimagesize", wallpaperPath)
+        local sx, sy = gui_readimagesize(wallpaperPath)
         local ix, iy = math.floor(((window.sizeX / 2) - (sx / 2)) + 0.5) + 1, math.floor(((window.sizeY / 2) - (sy / 2)) + 0.5) + 1
         ix, iy = window:toRealPos(ix, iy)
         pcall(calls.call, "gui_drawimage", screen, wallpaperPath, ix, iy)
     end
 end
 
-local function draw(old)
-    redrawFlag = false
+local function draw(old) --вызывает все перерисовки
     checkData()
 
     drawStatus()
@@ -270,8 +287,8 @@ local function draw(old)
         end
 
         local name = preName
-            if not name then
-            if gui_container.devModeStates[screen] then
+        if not name then
+            if isDev() then
                 name = paths.name(path)
             else
                 name = paths.name(paths.hideExtension(path))
@@ -316,7 +333,7 @@ local function draw(old)
             count = count + 1
             local centerIconX = math.floor(((window.sizeX / (iconsX + 1)) * cx) + 0.5)
             local centerIconY = math.floor(((window.sizeY / (iconsY + 1)) * cy) + 0.5)
-            local iconX = math.floor((centerIconX - (iconSizeX / 2)) + 0.5) + 1
+            local iconX = math.floor((centerIconX - (iconSizeX / 2)) + 0.5)
             local iconY = math.floor((centerIconY - (iconSizeY / 2)) + 0.5)
             local icon = icons[count]
             
@@ -328,7 +345,7 @@ local function draw(old)
                 --    window:fill(iconX - 2, iconY - 1, iconSizeX + 4, iconSizeY + 2, colors.blue, 0, " ")
                 --end
                 local x, y = window:toRealPos(math.floor((centerIconX - (unicode.len(icon.name) / 2)) + 0.5), centerIconY + 2)
-                gui_drawtext(screen, x + 1, y, colors.white, icon.name)
+                gui_drawtext(screen, x, y, colors.white, icon.name)
                 --window:set(iconX - (unicode.len(icon.name) // 2), iconY + iconY - 2, colors.lightBlue, colors.white, icon.name)
                 if icon.icon then
                     pcall(gui_drawimage, screen, icon.icon, window:toRealPos(iconX, iconY))
@@ -370,11 +387,56 @@ local function folderBack()
     draw()
 end
 
-local function fileDescriptor(icon, alternative, nikname)
+local timerEnable = true
+event.timer(10, function()
+    if not timerEnable then return end
+    drawStatus()
+end, math.huge)
+
+local function saveZone()
+    return screenshot(screen, rx / 2 - 16, ry / 2 - 4, 33, 9)
+end
+
+local function warn(str)
+    local clear = saveZone()
+    gui_warn(screen, nil, nil, str)
+    clear()
+end
+
+local function execute(name, ...)
+    timerEnable = false
+
+    local path = programs.find(name)
+
+    if fs.exists("/vendor/appChecker.lua") then
+        local out = {programs.execute("/vendor/appChecker.lua", path, screen)}
+        if not out[1] then
+            gui_warn(screen, nil, nil, out[2])
+            return
+        elseif not out[2] then
+            --gui_warn(screen, nil, nil, "you cannot run this application")
+            return
+        end
+    end
+
+    local code, err = programs.load(path)
+    if code then
+        local ok, err = xpcall(code, debug.traceback, screen, ...)
+        if not ok then
+            gui_warn(screen, nil, nil, err or "unknown error")
+        end
+    end
+    
+    timerEnable = true
+    redrawFlag = nil
+    draw()
+end
+
+local function fileDescriptor(icon, alternative, nickname) --открывает файл, сам решает через какую программу это сделать
     --[[
     for i, v in ipairs(gui_container.filesExps) do
         if not v[1] or v[1] == icon.exp then
-            execute(v[2], nikname, icon.path)
+            execute(v[2], nickname, icon.path)
             return
         end
     end
@@ -387,18 +449,16 @@ local function fileDescriptor(icon, alternative, nikname)
             return true
         elseif icon.exp == "lua" then
             execute("edit", icon.path)
-            draw()
             return true
         end
     end
 
     if icon.exp == "app" then
         if fs.isDirectory(icon.path) then
-            execute(paths.concat(icon.path, "main.lua"), nikname)
+            execute(paths.concat(icon.path, "main.lua"), nickname)
         else
-            execute(icon.path, nikname)
+            execute(icon.path, nickname)
         end
-        draw()
         return true
     elseif fs.isDirectory(icon.path) then
         userPath = icon.path
@@ -406,136 +466,47 @@ local function fileDescriptor(icon, alternative, nikname)
         return true
     elseif icon.exp == "t2p" then
         execute("paint", icon.path)
-        draw()
         return true
     elseif icon.exp == "lua" then
-        execute(icon.path, nikname)
-        draw()
+        execute(icon.path, nickname)
         return true
     elseif icon.exp == "plt" then
         local clear = saveZone()
-        local state = calls.call("gui_yesno", screen, nil, nil, "apply this theme?")
+        local state = gui_yesno(screen, nil, nil, "apply this theme?")
         clear()
 
         if state then
-            calls.call("system_setTheme", icon.path)
+            system_setTheme(icon.path)
             event.push("redrawDesktop")
         end
-    elseif icon.exp == "txt" or icon.exp == "log" or icon.exp == "cfg" or (icon.exp == "dat" and gui_container.devModeStates[screen]) then
+    elseif icon.exp == "txt" or icon.exp == "log" or icon.exp == "cfg" or (icon.exp == "dat" and isDev()) then
         execute("edit", icon.path, icon.exp == "log")
-        draw()
     elseif icon.exp == "mid" or icon.exp == "midi" then
         if programs.find("midi") then
-            execute("midi", nikname, icon.path)
-            draw()
+            execute("midi", nickname, icon.path)
         else
-            local clear = saveZone()
-            warn("pleas, download programm midi from market")
-            clear()
+            warn("please, download programm \"midi\" from market")
         end
     elseif icon.exp == "dfpwm" then
         if programs.find("tape") then
-            execute("tape", nikname, icon.path)
-            draw()
+            execute("tape", nickname, icon.path)
         else
-            local clear = saveZone()
-            warn("pleas, download programm tape from market")
-            clear()
+            warn("please, download programm \"tape\" from market")
         end
     elseif icon.exp == "afpx" then
         if programs.find("archiver") then
-            execute("archiver", nikname, icon.path)
-            draw()
+            execute("archiver", nickname, icon.path)
         else
-            local clear = saveZone()
-            warn("pleas, download programm archiver from market")
-            clear()
+            warn("please, download programm \"archiver\" from market")
         end
     else
         warn("file is not supported")
     end
 end
 
-local function setDevMode(state)
-    if state == gui_container.devModeStates[screen] then return end
-    --[[
-    if state then
-        gui_container.userRoot = "/"
-    else
-        gui_container.userRoot = userRootMain
-    end
-    ]]
-    gui_container.devModeStates[screen] = state
-    checkFolder()
-    draw()
-end
-
-------------------------------------
-
-local timerEnable = true
-local statusTimer = event.timer(10, function()
-    if not timerEnable then return end
-    drawStatus()
-end, math.huge)
-
-local function startStatusTimer()
-    timerEnable = true
-end
-local function stopStatusTimer()
-    timerEnable = false
-end
-
-------------------------------------
-
-function execute(name, ...) --локалезирована выше
-    stopStatusTimer()
-
-    local path = programs.find(name)
-
-    if fs.exists("/vendor/appChecker.lua") then
-        local out = {programs.execute("/vendor/appChecker.lua", path, screen)}
-        if not out[1] then
-            calls.call("gui_warn", screen, nil, nil, out[2])
-            return
-        elseif not out[2] then
-            --calls.call("gui_warn", screen, nil, nil, "you cannot run this application")
-            return
-        end
-    end
-
-    
-    local code, err = programs.load(path)
-    local ok = true
-    if code then
-        local ok2, err2 = xpcall(code, debug.traceback, screen, ...)
-        if not ok2 then
-            err = err2
-            ok = false
-        end
-    else
-        ok = false
-    end
-    
-    startStatusTimer()
-
-    if not ok then
-        draw()
-        calls.call("gui_warn", screen, 1, 2, err or "unknown error")
-    end
-end
-
-function saveZone()
-    return calls.call("screenshot", screen, rx / 2 - 16, ry / 2 - 4, 33, 9)
-end
-
-function warn(str)
-    local clear = saveZone()
-    calls.call("gui_warn", screen, nil, nil, str)
-    clear()
-end
-
+--[[
 local function addExp(name, exp)
-    if not gui_container.devModeStates[screen] then
+    if not isDev() then
         return name .. "." .. exp
     else
         local realexp = paths.extension(name)
@@ -545,107 +516,42 @@ local function addExp(name, exp)
         return name
     end
 end
+]]
 
-local devModeCount = 0
-local devModeResetTime = 0
+local copyObject
+local isCut = false
 
-event.listen("key_down", function(_, uuid, char, code)
-    if gui_container.devModeStates[screen] then
-        local ok
-        for i, v in ipairs(component.invoke(screen, "getKeyboards")) do
-            if v == uuid then
-                ok = true
-            end
-        end
-        if ok then
-            if char == 0 and code == 46 then
-                event.interruptFlag = screen
-            end
+local function umountAll()
+    for address in component.list("filesystem") do
+        if address ~= computer.tmpAddress() and address ~= fs.bootaddress then
+            fs.umount(fs.genName(address))
         end
     end
-end)
-
-local function lock()
-    local file = fs.open(passwordFilePath, "rb")
-    local passwordHesh = file.readAll()
-    file.close()
-
-    lockFlag = true
-    drawStatus()
-    drawWallpaper()
-
-    while true do
-        local data = gui_input(screen, nil, nil, "enter password", true)
-        if data then
-            if sha256(data) == passwordHesh then
-                break
-            else
-                gui_warn(screen, nil, nil, "uncorrent password")
-            end
-        else
-            if gui_yesno(screen, nil, nil, "shutdown?") then
-                computer.shutdown()
-            end
-        end
-    end
-
-    lockFlag = false
-    drawStatus()
 end
-if fs.exists(passwordFilePath) then
-    lock()
-end
-draw()
 
-while true do
-    if redrawFlag then
-        draw()
-    end
-    local eventData = {computer.pullSignal(0.5)}
-    local windowEventData = window:uploadEvent(eventData)
-    local statusWindowEventData = statusWindow:uploadEvent(eventData)
-    if statusWindowEventData[1] == "touch" then
-        if statusWindowEventData[4] == 1 and statusWindowEventData[3] >= 1 and statusWindowEventData[3] <= 4 then
-            contextMenuOpen = true
-            drawStatus()
-            local clear = calls.call("screenshot", screen, 2, 2, 19, 7)
-            local str, num = calls.call("gui_context", screen, 2, 2,
-            {"  about", "  settings", "  lock screen", "------------------", "  shutdown", "  reboot"},
-            {true, true, fs.exists(passwordFilePath), false, true, true})
-            contextMenuOpen = false
-            drawStatus()
-            if num == 1 then
-                execute("about")
-                draw()
-            elseif num == 2 then
-                execute("settings")
-                draw()
-            elseif num == 3 then
-                lock()
-                draw()
-            elseif num == 5 then
-                computer.shutdown()
-            elseif num == 6 then
-                computer.shutdown(true)
-            else
-                clear()
-            end
+local function mountAll()
+    for address in component.list("filesystem") do
+        if address ~= computer.tmpAddress() and address ~= fs.bootaddress then
+            assert(fs.mount(address, fs.genName(address)))
         end
     end
+end
 
+local function doIcon(windowEventData)
     if windowEventData[1] == "touch" then
         if windowEventData[4] >= window.sizeY - 3 then
             if windowEventData[3] >= 1 and windowEventData[3] <= 2 then
                 listBack()
-                goto bigSkip
+                return
             elseif windowEventData[3] <= window.sizeX and windowEventData[3] >= window.sizeX - 1 then
                 listForward()
-                goto bigSkip
+                return
             elseif windowEventData[3] >= 3 and windowEventData[3] <= 4 then
                 folderBack()
-                goto bigSkip
+                return
             end
         end
+        
         local iconCliked = false
         for i, v in ipairs(icons) do
             if windowEventData[3] >= v.iconX and windowEventData[3] < (v.iconX + iconSizeX) then
@@ -666,8 +572,8 @@ while true do
                             local posX, posY = window:toRealPos(windowEventData[3], windowEventData[4])
 
                             posX, posY = findPos(posX, posY, 23, screenshotY, rx, ry)
-                            local clear = calls.call("screenshot", screen, posX, posY, 23, screenshotY)
-                            local str, num = calls.call("gui_context", screen, posX, posY,
+                            local clear = screenshot(screen, posX, posY, 23, screenshotY)
+                            local str, num = gui_context(screen, posX, posY,
                             strs, active)
                             clear()
 
@@ -675,7 +581,7 @@ while true do
                                 fileDescriptor(v, nil, windowEventData[6])
                             elseif num == 3 then
                                 local clear2 = saveZone()
-                                local state = calls.call("gui_yesno", screen, nil, nil, "format?")
+                                local state = gui_yesno(screen, nil, nil, "format?")
                                 clear2()
                                 
                                 if state then
@@ -683,13 +589,16 @@ while true do
                                 end
                             elseif num == 4 then
                                 local clear2 = saveZone()
-                                local newlabel = calls.call("gui_input", screen, nil, nil, "new label")
+                                local newlabel = gui_input(screen, nil, nil, "new label")
 
                                 if newlabel then
+                                    umountAll()
                                     if not pcall(v.fs.setLabel, newlabel) then
-                                        warn("error in name")
+                                        warn("invalid name")
                                         clear2()
+                                        mountAll()
                                     else
+                                        mountAll()
                                         draw()
                                     end
                                 else
@@ -697,10 +606,12 @@ while true do
                                 end
                             elseif num == 5 then
                                 local clear2 = saveZone()
-                                local state = calls.call("gui_yesno", screen, nil, nil, "clear label?")
+                                local state = gui_yesno(screen, nil, nil, "clear label?")
 
                                 if state then
+                                    umountAll()
                                     v.fs.setLabel(nil)
+                                    mountAll()
                                     draw()
                                 else
                                     clear2()
@@ -717,9 +628,8 @@ while true do
                             local posX, posY = window:toRealPos(windowEventData[3], windowEventData[4])
 
                             posX, posY = findPos(posX, posY, 23, screenshotY, rx, ry)
-                            local clear = calls.call("screenshot", screen, posX, posY, 23, screenshotY)
-                            local str, num = calls.call("gui_context", screen, posX, posY,
-                            strs, active)
+                            local clear = screenshot(screen, posX, posY, 23, screenshotY)
+                            local str, num = gui_context(screen, posX, posY, strs, active)
                             clear()
 
                             if num == 1 then
@@ -750,54 +660,38 @@ while true do
                                     screenshotY = screenshotY + 1
                                 end
                             end
-                            if v.exp == "t2p" and not v.isDir then
+                            
+                            if v.exp == "plt" and not v.isDir then
+                                addLine()
+
+                                table.insert(strs, "  set as theme")
+                                table.insert(active, true)
+
+                                screenshotY = screenshotY + 1
+                            elseif v.exp == "t2p" and not v.isDir then
                                 addLine()
 
                                 table.insert(strs, "  set as wallpaper")
                                 table.insert(active, true)
 
                                 screenshotY = screenshotY + 1
-                            elseif gui_container.devModeStates[screen] and v.exp == "app" and v.isDir then
+                            elseif isDev() and v.exp == "app" and v.isDir then
                                 addLine()
 
                                 table.insert(strs, "  inside the package")
                                 table.insert(active, true)
 
                                 screenshotY = screenshotY + 1
-                            elseif gui_container.devModeStates[screen] and (v.exp == "lua" or v.exp == "plt") and not v.isDir then
+                            end
+                            
+                            if isDev() and (v.exp == "lua" or v.exp == "plt") and not v.isDir then
                                 addLine()
 
                                 table.insert(strs, "  edit")
                                 table.insert(active, true)
 
                                 screenshotY = screenshotY + 1
-                            end
-
-
-                            if not v.isDir and
-                                v.exp ~= "zip" and
-                                v.exp ~= "rar" and
-                                v.exp ~= "afpx" and
-                                v.exp ~= "arch" and
-
-                                v.exp ~= "dfpwm" and
-                                v.exp ~= "mp3" and
-                                v.exp ~= "wav" and
-                                v.exp ~= "mid" and
-                                v.exp ~= "midi" and
-
-                                v.exp ~= "lua" and
-                                v.exp ~= "app" and
-
-                                v.exp ~= "t2p" and
-                                v.exp ~= "plt" and
-                                
-                                v.exp ~= "avi" and
-                                v.exp ~= "mp4" and
-                                
-                                v.exp ~= "dat" and
-                                v.exp ~= "cfg" and
-                                v.exp ~= "log" then
+                            elseif not v.isDir and not knownExps[v.exp] then
                                 addLine()
 
                                 table.insert(strs, "  open is text editor")
@@ -831,8 +725,8 @@ while true do
                             local posX, posY = window:toRealPos(windowEventData[3], windowEventData[4])
 
                             posX, posY = findPos(posX, posY, 23, screenshotY, rx, ry)
-                            local clear = calls.call("screenshot", screen, posX, posY, 23, screenshotY)
-                            local str, num = calls.call("gui_context", screen, posX, posY,
+                            local clear = screenshot(screen, posX, posY, 23, screenshotY)
+                            local str, num = gui_context(screen, posX, posY,
                             strs, active)
                             clear()
 
@@ -840,7 +734,7 @@ while true do
                                 fileDescriptor(v, nil, windowEventData[6])
                             elseif num == 3 then
                                 local clear2 = saveZone()
-                                local state = calls.call("gui_yesno", screen, nil, nil, "remove?")
+                                local state = gui_yesno(screen, nil, nil, "remove?")
                                 clear2()
                                 if state then
                                     fs.remove(v.path)
@@ -848,14 +742,15 @@ while true do
                                 end
                             elseif num == 4 then
                                 local clear2 = saveZone()
-                                local name = calls.call("gui_input", screen, nil, nil, "new name")
+                                local name = gui_input(screen, nil, nil, "new name")
                                 clear2()
 
                                 if name then
                                     if #name ~= 0 and not name:find("%\\") and not name:find("%/") and
-                                    (not name:find("%.") or gui_container.devModeStates[screen] or not v.exp or v.exp == "") then --change expansion disabled
+                                    (not name:find("%.") or isDev() or not v.exp or v.exp == "") then --change expansion disabled
                                         local newexp = ""
-                                        if not gui_container.devModeStates[screen] then
+                                        --if not isDev() then
+                                        if not name:find("%.") then --даже если в devmode вы не поставите кастомное разширения, то оно перенесеться
                                             if v.exp and v.exp ~= "" then
                                                 newexp = "." .. v.exp
                                             end
@@ -868,7 +763,7 @@ while true do
                                             draw()
                                         end
                                     else
-                                        warn("error in name")
+                                        warn("invalid name")
                                     end
                                 end
                             elseif num == 5 then
@@ -881,18 +776,16 @@ while true do
                                 fs.copy(v.path, "/data/wallpaper.t2p")
                                 event.push("redrawDesktop")
                             elseif str == "  set as theme" then
-                                calls.call("system_setTheme", v.path)
+                                system_setTheme(v.path)
                                 event.push("redrawDesktop")
                             elseif str == "  inside the package" then
                                 fileDescriptor(v, true)
                             elseif str == "  edit" or str == "  open is text editor" then
                                 execute("edit", v.path, str == "  open is text editor")
-                                draw()
                             else
                                 for i, v2 in ipairs(gui_container.filesExps) do
                                     if "  " .. v2[3] == str then
                                         execute(v2[2], windowEventData[6], v.path .. (v2[6] or ""))
-                                        draw()
                                         break
                                     end
                                 end
@@ -918,30 +811,26 @@ while true do
             local readonly = fs.get(userPath).isReadOnly()
             
             posX, posY = findPos(posX, posY, 33, 8, rx, ry)
-            local isRedraw
-            local clear = calls.call("screenshot", screen, posX, posY, 33, 8)
-            local str, num = calls.call("gui_context", screen, posX, posY,
+            local clear = screenshot(screen, posX, posY, 33, 8)
+            local str, num = gui_context(screen, posX, posY,
             {"  back", "  paste", "--------------------------------", "  new image", "  new folder", "  new text file", "  download file from internet"},
             {true, not not copyObject and not readonly, false, not readonly, not readonly, not readonly, not not component.list("internet")() and not readonly})
             clear()
             
             if num == 1 then
                 folderBack()
-                isRedraw = true
             elseif num == 4 then --new image
                 local clear = saveZone()
-                local name = calls.call("gui_input", screen, nil, nil, "image name")
+                local name = gui_input(screen, nil, nil, "image name")
                 clear()
 
                 if type(name) == "string" then
                     local path = paths.concat(userPath, name .. ".t2p")
                     if not fs.exists(path) then
                         if #name == 0 or name:find("%.") or name:find("%/") or name:find("%\\") then
-                            warn("error in name")
+                            warn("invalid name")
                         else
                             execute("paint", path)
-                            draw()
-                            isRedraw = true
                         end
                     else
                         warn("this name is occupied")
@@ -949,18 +838,17 @@ while true do
                 end
             elseif num == 5 then --new folder
                 local clear = saveZone()
-                local name = calls.call("gui_input", screen, nil, nil, "folder name")
+                local name = gui_input(screen, nil, nil, "folder name")
                 clear()
 
                 if type(name) == "string" then
                     local path = paths.concat(userPath, name)
                     if not fs.exists(path) then
-                        if #name == 0 or (name:find("%.") and not gui_container.devModeStates[screen]) or name:find("%/") or name:find("%\\") then
-                            warn("error in name")
+                        if #name == 0 or (name:find("%.") and not isDev()) or name:find("%/") or name:find("%\\") then
+                            warn("invalid name")
                         else
                             fs.makeDirectory(path)
                             draw()
-                            isRedraw = true
                         end
                     else
                         warn("this name is occupied")
@@ -968,18 +856,16 @@ while true do
                 end
             elseif num == 6 then --new text file
                 local clear = saveZone()
-                local name = calls.call("gui_input", screen, nil, nil, "text file name")
+                local name = gui_input(screen, nil, nil, "text file name")
                 clear()
 
                 if type(name) == "string" then
-                    local path = paths.concat(userPath, name .. (gui_container.devModeStates[screen] and "" or ".txt"))
+                    local path = paths.concat(userPath, name .. (name:find("%.") and "" or ".txt"))
                     if not fs.exists(path) then
-                        if #name == 0 or (name:find("%.") and not gui_container.devModeStates[screen]) or name:find("%/") or name:find("%\\") then
-                            warn("error in name")
+                        if #name == 0 or (name:find("%.") and not isDev()) or name:find("%/") or name:find("%\\") then
+                            warn("invalid name")
                         else
                             execute("edit", path)
-                            draw()
-                            isRedraw = true
                         end
                     else
                         warn("this name is occupied")
@@ -990,7 +876,7 @@ while true do
                 local toPath = paths.concat(userPath, paths.name(copyObject))
                 if fs.exists(toPath) then
                     local clear = saveZone()
-                    local replaseAllow = calls.call("gui_yesno", screen, nil, nil, "an object with this name is already present in this folder, should I replace it?")
+                    local replaseAllow = gui_yesno(screen, nil, nil, "an object with this name is already present in this folder, should I replace it?")
                     if not replaseAllow then
                         clear()
                         copyFlag = false
@@ -1011,7 +897,6 @@ while true do
 
                     copyObject = nil
                     isCut = false
-                    isRedraw = true
                     draw()
                 end
             elseif num == 7 then
@@ -1034,7 +919,7 @@ while true do
                         local replaceAllow
                         if fs.exists(path) then
                             local clear = saveZone()
-                            replaceAllow = calls.call("gui_yesno", screen, nil, nil, "an object with this name is already present in this folder, should I replace it?")
+                            replaceAllow = gui_yesno(screen, nil, nil, "an object with this name is already present in this folder, should I replace it?")
                             clear()
                         end
                         if not fs.exists(path) or replaceAllow then
@@ -1047,7 +932,6 @@ while true do
                                 if file then
                                     file.write(data)
                                     file.close()
-                                    isRedraw = true
                                     draw()
                                 else
                                     warn("save error " .. (err or "unknown error"))
@@ -1057,13 +941,140 @@ while true do
                             end
                         end
                     else
-                        warn("error in name")
+                        warn("invalid name")
                     end
                 end
             end
         end
-        ::bigSkip::
     end
+end
+
+------------------------------------------------------------------------ lock screen
+
+local function isMultiscreen()
+    local count = 0
+    for address in component.list("screen") do
+        if count >= 1 then
+            return true
+        end
+        count = count + 1
+    end
+end
+
+local function lock()
+    local file = fs.open(passwordFilePath, "rb")
+    local passwordHesh = file.readAll()
+    file.close()
+
+    lockFlag = true
+    drawStatus()
+    drawWallpaper()
+
+    while true do
+        local data = gui_input(screen, nil, nil, "enter password", true)
+        if data then
+            if sha256(data) == passwordHesh then
+                break
+            else
+                gui_warn(screen, nil, nil, "uncorrent password")
+            end
+        else
+            if isMultiscreen() then --нельзя выключить мультиманиторное устройтсво с заблокированого экрана, потому что один монитор может стоять на улице(знаю что редкий случай)
+                gui_warn(screen, nil, nil, "you cannot turn off a multi-monitor device from a locked screen")
+            else
+                if gui_yesno(screen, nil, nil, "shutdown?") then
+                    computer.shutdown()
+                end
+            end
+        end
+    end
+
+    lockFlag = false
+    drawStatus()
+end
+
+if fs.exists(passwordFilePath) then
+    lock()
+end
+
+------------------------------------------------------------------------ main
+
+local function setDev(state)
+    if state == isDev() then return end
+    --[[
+    if state then
+        gui_container.userRoot = "/"
+    else
+        gui_container.userRoot = userRootMain
+    end
+    ]]
+    gui_container.devModeStates[screen] = state
+    checkFolder()
+    draw()
+end
+
+event.listen("redrawDesktop", function()
+    redrawFlag = true
+end)
+
+event.listen("key_down", function(_, uuid, char, code)
+    if isDev() then
+        local ok
+        for i, v in ipairs(component.invoke(screen, "getKeyboards")) do
+            if v == uuid then
+                ok = true
+            end
+        end
+        if ok then
+            if char == 0 and code == 46 then
+                event.interruptFlag = screen
+            end
+        end
+    end
+end)
+
+local devModeCount = 0
+local devModeResetTime = 0
+
+while true do
+    if redrawFlag then
+        redrawFlag = false
+        draw()
+    end
+
+    local eventData = {computer.pullSignal(5)}
+    local windowEventData = window:uploadEvent(eventData)
+    local statusWindowEventData = statusWindow:uploadEvent(eventData)
+    if statusWindowEventData[1] == "touch" then
+        if statusWindowEventData[4] == 1 and statusWindowEventData[3] >= 1 and statusWindowEventData[3] <= 4 then
+            contextMenuOpen = true
+            drawStatus()
+            local clear = screenshot(screen, 2, 2, 19, 7)
+            local str, num = gui_context(screen, 2, 2,
+            {"  about", "  settings", "  lock screen", "------------------", "  shutdown", "  reboot"},
+            {true, true, fs.exists(passwordFilePath), false, true, true})
+            contextMenuOpen = false
+            drawStatus()
+            if num == 1 then
+                execute("about")
+                draw()
+            elseif num == 2 then
+                execute("settings")
+                draw()
+            elseif num == 3 then
+                lock()
+                draw()
+            elseif num == 5 then
+                computer.shutdown()
+            elseif num == 6 then
+                computer.shutdown(true)
+            else
+                clear()
+            end
+        end
+    end
+
+    doIcon(windowEventData)
 
     if eventData[1] == "key_down" then
         local ok
@@ -1089,12 +1100,12 @@ while true do
         devModeResetTime = computer.uptime()
         if devModeCount > 15 then
             if not vendor.disableDevShortcut then
-                if not gui_container.devModeStates[screen] then
+                if not isDev() then
                     computer.beep(2000)
                 else
                     computer.beep(1000)
                 end
-                setDevMode(not gui_container.devModeStates[screen])
+                setDev(not isDev())
                 event.sleep(1)
             else
                 computer.beep(200)
