@@ -121,16 +121,18 @@ end
 local function installUrl(url, state2)
     local filelist = split(assert(getInternetFile(url .. "/installer/filelist.txt")), "\n")
     for i, v in ipairs(filelist) do
-        local filedata = assert(getInternetFile(url .. v))
+        if v ~= "" then
+            local filedata = assert(getInternetFile(url .. v))
 
-        if i % 10 == 0 then
-            printState((((i - 1) // (#filelist - 1)) / 2) + (state2 and 0.5 or 0))
+            if i % 10 == 0 then
+                printState((((i - 1) // (#filelist - 1)) / 2) + (state2 and 0.5 or 0))
+            end
+
+            proxy.makeDirectory(fs_path(v))
+            local file = proxy.open(v, "wb")
+            proxy.write(file, filedata)
+            proxy.close(file)
         end
-
-        proxy.makeDirectory(fs_path(v))
-        local file = proxy.open(v, "wb")
-        proxy.write(file, filedata)
-        proxy.close(file)
     end
 end
 
