@@ -125,7 +125,7 @@ local function installUrl(url, state2)
             local filedata = assert(getInternetFile(url .. v))
 
             if i % 10 == 0 then
-                printState((((i - 1) // (#filelist - 1)) / 2) + (state2 and 0.5 or 0))
+                printState((((i - 1) / (#filelist - 1)) / 2) + (state2 and 0.5 or 0))
             end
 
             proxy.makeDirectory(fs_path(v))

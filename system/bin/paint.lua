@@ -27,12 +27,52 @@ local selectedColor1 = 1
 local selectedColor2 = 1
 local noSaved
 local selectedChar = " "
-local image = {sizeX = 3, sizeY = 1,
+local image = 
 {
-    {15, 0, "P"},
-    {15, 0, "I"},
-    {15, 0, "C"}
-}}
+    sizeX = 8,
+    sizeY = 4,
+
+    {
+        {0, 0, " "},
+        {0, 0, " "},
+        {0, 0, " "},
+        {0, 0, " "},
+        {0, 0, " "},
+        {0, 0, " "},
+        {0, 0, " "},
+        {0, 0, " "}
+    },
+    {
+        {0, 0, " "},
+        {0, 0, " "},
+        {0, 0, " "},
+        {0, 0, " "},
+        {0, 0, " "},
+        {0, 0, " "},
+        {0, 0, " "},
+        {0, 0, " "}
+    },
+    {
+        {0, 0, " "},
+        {0, 0, " "},
+        {0, 0, " "},
+        {0, 0, " "},
+        {0, 0, " "},
+        {0, 0, " "},
+        {0, 0, " "},
+        {0, 0, " "}
+    },
+    {
+        {0, 0, " "},
+        {0, 0, " "},
+        {0, 0, " "},
+        {0, 0, " "},
+        {0, 0, " "},
+        {0, 0, " "},
+        {0, 0, " "},
+        {0, 0, " "}
+    },
+}
 
 local function drawSelectedColors()
     nullWindow2:fill(1, 1, nullWindow2.sizeX, nullWindow2.sizeY, colors.green, colors.black, "▒")

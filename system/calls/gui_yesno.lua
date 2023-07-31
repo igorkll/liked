@@ -48,7 +48,7 @@ window:set(4, 3, colors.green, colors.white, "?")
 window:set(32 - 5, 7, colors.lime, colors.white, " yes ")
 window:set(2, 7, colors.red, colors.white, " no ")
 
-event.sleep(0.2)
+event.sleep(0.05)
 if require("registry").soundEnable then
     computer.beep(2000)
 end
@@ -59,11 +59,11 @@ while true do
     if windowEventData[1] == "touch" and windowEventData[5] == 0 then
         if windowEventData[4] == 7 and windowEventData[3] > (32 - 6) and windowEventData[3] <= ((32 - 5) + 4) then
             window:set(32 - 5, 7, colors.green, colors.white, " yes ")
-            event.sleep(0.2)
+            event.sleep(0.05)
             return true
         elseif windowEventData[4] == 7 and windowEventData[3] >= 2 and windowEventData[3] <= (2 + 3) then
             window:set(2, 7, colors.orange, colors.white, " no ")
-            event.sleep(0.2)
+            event.sleep(0.05)
             return false
         end
     end

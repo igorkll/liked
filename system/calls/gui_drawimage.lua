@@ -51,7 +51,7 @@ for cy = 1, sy do
         --foreground = colors[foreground]
 
         char = read(countCharBytes)
-        if background ~= 0 or foreground ~= 0 then
+        if background ~= 0 or foreground ~= 0 then --прозрачность, в реальной картинке такого не будет потому что если paint замечает оба нуля то он меняет одной значения чтобы пиксель не мог просто так стать прозрачным
             if background ~= oldbackground then
                 gpu.setBackground(colors[background + 1])
                 oldbackground = background
@@ -60,7 +60,7 @@ for cy = 1, sy do
                 gpu.setForeground(colors[foreground + 1])
                 oldforeground = foreground
             end
-            if background == foreground then --во избежаниия визуальных артефактов символом unicode
+            if background == foreground then --во избежаниия визуальных артефактов символом unicode при просметре от третего лица на монитор
                 char = " "
             end
             gpu.set(cx + (x - 1), cy + (y - 1), char)

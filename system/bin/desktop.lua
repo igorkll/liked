@@ -32,7 +32,7 @@ local knownExps = { --данные файлы не будет предложин
     ["t2p"] = true,
     ["plt"] = true,
     ["avi"] = true,
-    ["mp4"] = true,             
+    ["mp4"] = true,
     ["dat"] = true,
     ["cfg"] = true,
     ["log"] = true,
@@ -75,11 +75,20 @@ local redrawFlag = true
 
 ------------------------------------------------------------------------ icons
 
-local iconsX = 4
-local iconsY = 3
+local iconmode = 0
+-- 0 - all
+-- 1 - apps
+-- 2 - files
+-- 3 - disks
+
+local iconsX = 3
+local iconsY = 2
 if rx == 160 and ry == 50 then
-    iconsX = 8
+    iconsX = 9
     iconsY = 7
+elseif rx == 80 and ry == 25 then
+    iconsX = 5
+    iconsY = 3
 end
 
 local iconSizeX = 8
@@ -147,9 +156,25 @@ local function drawWallpaper()
     end
 end
 
+local function isUninstallAvailable(icon)
+    if icon.readonly then return false end
+    local check = "/data/"
+    return icon.path:sub(1, #check) == check
+end
+
+local function findIcon(name)
+    local path = paths.concat("/data/icons", name .. ".t2p")
+    if fs.exists(path) then
+        return path
+    end
+    path = paths.concat("/system/icons", name .. ".t2p")
+    if fs.exists(path) then
+        return path
+    end
+end
+
 local function draw(old) --вызывает все перерисовки
     checkData()
-
     drawStatus()
     drawWallpaper()
 
@@ -230,43 +255,43 @@ local function draw(old) --вызывает все перерисовки
         if fs.isDirectory(path) and fs.exists(paths.concat(path, "icon.t2p")) then
             icon = paths.concat(path, "icon.t2p")
         elseif exp and #exp > 0 and exp ~= "app" and exp ~= "t2p" then
-            icon = paths.concat("/system/icons", exp .. ".t2p")
+            icon = findIcon(exp)
         elseif exp == "app" then
-            icon = "/system/icons/app.t2p"
+            icon = findIcon("app")
         elseif fs.isDirectory(path) then
-            icon = "/system/icons/folder.t2p"
+            icon = findIcon("folder")
 
             for _, tbl in ipairs(fs.mountList) do
                 if paths.canonical(path) .. "/" == tbl[2] then
                     isFs = true
                     fsd = tbl[1]
-                    readonly = fsd.isReadOnly()
+                    readonly = fsd.isReadOnly() --realonly диска и readonly на лейбели ПОЛНОСТЬЮ НЕЗАВИСИМЫЕ
                     labelReadonly = not pcall(fsd.setLabel, fsd.getLabel() or nil) --getLabel может вернуть no value, который отличаеться от nil в данном случаи
+                    
                     local info = computer.getDeviceInfo()[fsd.address]
-                    if not info then
-                        event.sleep(2)
-                    end
                     local clock = info and info.clock
-                    local iconpath = paths.concat(path, "external-data/devivetype.dat")
-                    if fs.exists(iconpath) then
-                        local file = fs.open(iconpath, "rb")
-                        local data = file.readAll()
-                        file.close()
-
-                        icon = paths.concat("/system/icons", data .. ".t2p")
-                        preName = (component.invoke(fsd.address, "getLabel") or data) .. "-" .. fsd.address:sub(1, 5)
+                    local devtypepath = paths.concat(path, "external-data/devicetype.dat")
+                    if fs.exists(devtypepath) then
+                        local data = getFile(devtypepath)
+                        if data then
+                            icon = findIcon(data)
+                        end
                     elseif fsd.address == computer.tmpAddress() then
-                        icon = "/system/icons/tmp.t2p"
+                        icon = findIcon("tmp")
                     elseif clock == "20/20/20" then
-                        icon = "/system/icons/fdd.t2p"
+                        if fsd.exists("/init.lua") then
+                            icon = findIcon("bootdevice")
+                        else
+                            icon = findIcon("fdd")
+                        end
                     else
-                        icon = "/system/icons/hdd.t2p"
+                        icon = findIcon("hdd")
                     end
                     break
                 end
             end
         elseif exp == "t2p" then
-            icon = "/system/icons/t2p.t2p"
+            icon = findIcon("t2p")
             local iconPath = path
 
             if iconPath then
@@ -283,7 +308,7 @@ local function draw(old) --вызывает все перерисовки
             end
         end
         if not icon or not fs.exists(icon) then
-            icon = "/system/icons/unkownfile.t2p"
+            icon = findIcon("unkownfile")
         end
 
         local name = preName
@@ -312,8 +337,10 @@ local function draw(old) --вызывает все перерисовки
         end
     end
 
-    for i, v in ipairs(fs.list(userPath)) do
-        table.insert(tbl, {v})
+    if iconmode == 0 or iconmode == 1 then
+        for i, v in ipairs(fs.list(userPath)) do
+            table.insert(tbl, {v})
+        end
     end
 
     for i, v in ipairs(tbl) do
@@ -329,9 +356,9 @@ local function draw(old) --вызывает все перерисовки
 
     local count = 0
     for cy = 1, iconsY do
-        for cx = 1, iconsX do
+        for cx = -(iconsX // 2), (iconsX // 2) do
             count = count + 1
-            local centerIconX = math.floor(((window.sizeX / (iconsX + 1)) * cx) + 0.5)
+            local centerIconX = math.floor(((window.sizeX / 2) + (cx * 16) + 1) + 0.5)
             local centerIconY = math.floor(((window.sizeY / (iconsY + 1)) * cy) + 0.5)
             local iconX = math.floor((centerIconX - (iconSizeX / 2)) + 0.5)
             local iconY = math.floor((centerIconY - (iconSizeY / 2)) + 0.5)
@@ -406,15 +433,19 @@ end
 local function execute(name, ...)
     timerEnable = false
 
+    gui_status(screen, nil, nil, "loading...")
     local path = programs.find(name)
-
     if fs.exists("/vendor/appChecker.lua") then
         local out = {programs.execute("/vendor/appChecker.lua", path, screen)}
         if not out[1] then
             gui_warn(screen, nil, nil, out[2])
+            redrawFlag = nil
+            draw()
             return
         elseif not out[2] then
             --gui_warn(screen, nil, nil, "you cannot run this application")
+            redrawFlag = nil
+            draw()
             return
         end
     end
@@ -425,11 +456,22 @@ local function execute(name, ...)
         if not ok then
             gui_warn(screen, nil, nil, err or "unknown error")
         end
+    else
+        gui_warn(screen, nil, nil, err or "unknown error")
     end
     
     timerEnable = true
     redrawFlag = nil
     draw()
+end
+
+local function uninstallApp(path)
+    local uninstallPath = paths.concat(path, "uninstall.lua")
+    if fs.exists(uninstallPath) then
+        execute(uninstallPath)
+    else
+        fs.remove(path)
+    end
 end
 
 local function fileDescriptor(icon, alternative, nickname) --открывает файл, сам решает через какую программу это сделать
@@ -522,9 +564,14 @@ local copyObject
 local isCut = false
 
 local function umountAll()
-    for address in component.list("filesystem") do
-        if address ~= computer.tmpAddress() and address ~= fs.bootaddress then
-            fs.umount(fs.genName(address))
+    local newtbl = {}
+    for index, value in ipairs(fs.mountList) do
+        newtbl[index] = value
+    end
+
+    for _, mountpoint in ipairs(newtbl) do
+        if mountpoint[1].address ~= computer.tmpAddress() and mountpoint[1].address ~= fs.bootaddress then
+            assert(fs.umount(mountpoint[2]))
         end
     end
 end
@@ -568,6 +615,15 @@ local function doIcon(windowEventData)
                             local strs, active =
                             {"  open", "----------------------", "  format", "  set label", "  clear label"},
                             {true, false, not v.readonly, not v.labelReadonly, not v.labelReadonly}
+                            if v.fs.exists("/init.lua") then
+                                screenshotY = 8
+
+                                table.insert(strs, "----------------------")
+                                table.insert(active, false)
+
+                                table.insert(strs, "  boot from this disk")
+                                table.insert(active, true)
+                            end
 
                             local posX, posY = window:toRealPos(windowEventData[3], windowEventData[4])
 
@@ -595,12 +651,9 @@ local function doIcon(windowEventData)
                                     umountAll()
                                     if not pcall(v.fs.setLabel, newlabel) then
                                         warn("invalid name")
-                                        clear2()
-                                        mountAll()
-                                    else
-                                        mountAll()
-                                        draw()
                                     end
+                                    mountAll()
+                                    draw()
                                 else
                                     clear2()
                                 end
@@ -616,14 +669,16 @@ local function doIcon(windowEventData)
                                 else
                                     clear2()
                                 end
+                            elseif str == "  boot from this disk" then
+                                pcall(computer.setBootAddress, v.fs.address)
+                                pcall(computer.setBootFile, "/init.lua")
+                                pcall(computer.shutdown, "fast")
                             end
                         elseif v.isAlias then
-                            local uninstallPath = paths.concat(v.path, "uninstall.lua")
-
                             local screenshotY = 4
                             local strs, active =
                             {"  open", "----------------------", "  uninstall"},
-                            {true, false, fs.exists(uninstallPath) and not v.readonly}
+                            {true, false, isUninstallAvailable(v)}
 
                             local posX, posY = window:toRealPos(windowEventData[3], windowEventData[4])
 
@@ -639,7 +694,7 @@ local function doIcon(windowEventData)
                                 local ok = gui_yesno(screen, nil, nil, "uninstall?")
 
                                 if ok then
-                                    assert(programs.execute(uninstallPath))
+                                    uninstallApp(v.path)
                                     draw()
                                 else
                                     clear()
@@ -648,8 +703,36 @@ local function doIcon(windowEventData)
                         else
                             local screenshotY = 7
                             local strs, active =
-                            {"  open", "----------------------", "  remove", "  rename", "  copy", "  cut"},
-                            {true, false, not v.readonly, not v.readonly, true, not v.readonly}
+                            {"  open", "----------------------"},
+                            {true, false}
+
+                            if v.exp == "app" then
+                                table.insert(strs, "  uninstall")
+                                table.insert(active, isUninstallAvailable(v))
+
+                                if isDev() then
+                                    table.insert(strs, "  rename")
+                                    table.insert(active, not v.readonly)
+                                end
+
+                                table.insert(strs, "  copy")
+                                table.insert(active, true)
+
+                                table.insert(strs, "  cut")
+                                table.insert(active, not v.readonly)
+                            else
+                                table.insert(strs, "  remove")
+                                table.insert(active, not v.readonly)
+
+                                table.insert(strs, "  rename")
+                                table.insert(active, not v.readonly)
+
+                                table.insert(strs, "  copy")
+                                table.insert(active, true)
+
+                                table.insert(strs, "  cut")
+                                table.insert(active, not v.readonly)
+                            end
 
                             local isLine
                             local function addLine()
@@ -730,9 +813,9 @@ local function doIcon(windowEventData)
                             strs, active)
                             clear()
 
-                            if num == 1 then
+                            if str == "  open" then
                                 fileDescriptor(v, nil, windowEventData[6])
-                            elseif num == 3 then
+                            elseif str == "  remove" then
                                 local clear2 = saveZone()
                                 local state = gui_yesno(screen, nil, nil, "remove?")
                                 clear2()
@@ -740,7 +823,15 @@ local function doIcon(windowEventData)
                                     fs.remove(v.path)
                                     draw()
                                 end
-                            elseif num == 4 then
+                            elseif str == "  uninstall" then
+                                local clear2 = saveZone()
+                                local state = gui_yesno(screen, nil, nil, "uninstall?")
+                                clear2()
+                                if state then
+                                    uninstallApp(v.path)
+                                    draw()
+                                end
+                            elseif str == "  rename" then
                                 local clear2 = saveZone()
                                 local name = gui_input(screen, nil, nil, "new name")
                                 clear2()
@@ -766,10 +857,10 @@ local function doIcon(windowEventData)
                                         warn("invalid name")
                                     end
                                 end
-                            elseif num == 5 then
+                            elseif str == "  copy" then
                                 copyObject = v.path
                                 isCut = false
-                            elseif num == 6 then
+                            elseif str == "  cut" then
                                 copyObject = v.path
                                 isCut = true
                             elseif str == "  set as wallpaper" then
@@ -924,7 +1015,7 @@ local function doIcon(windowEventData)
                         end
                         if not fs.exists(path) or replaceAllow then
                             local clear = saveZone()
-                            gui_status(screen, nil, nil, "downloading file")
+                            gui_status(screen, nil, nil, "downloading file...")
                             local data, err = getInternetFile(url)
                             clear()
                             if data then
@@ -1053,14 +1144,11 @@ while true do
             local str, num = gui_context(screen, 2, 2,
             {"  about", "  settings", "  lock screen", "------------------", "  shutdown", "  reboot"},
             {true, true, fs.exists(passwordFilePath), false, true, true})
-            contextMenuOpen = false
-            drawStatus()
+            
             if num == 1 then
                 execute("about")
-                draw()
             elseif num == 2 then
                 execute("settings")
-                draw()
             elseif num == 3 then
                 lock()
                 draw()
@@ -1071,6 +1159,9 @@ while true do
             else
                 clear()
             end
+
+            contextMenuOpen = false
+            drawStatus()
         end
     end
 

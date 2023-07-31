@@ -43,7 +43,7 @@ window:set(2, 4, color, colors.yellow, "◢███◣")
 window:set(4, 3, colors.yellow, colors.white, "!")
 window:set(32 - 4, 7, colors.lightBlue, colors.white, " ok ")
 
-event.sleep(0.2)
+event.sleep(0.05)
 if require("registry").soundEnable then
     computer.beep(100)
     computer.beep(100)
@@ -55,12 +55,12 @@ while true do
     if windowEventData[1] == "touch" and windowEventData[5] == 0 then
         if windowEventData[4] == 7 and windowEventData[3] > (32 - 5) and windowEventData[3] <= ((32 - 5) + 4) then
             window:set(32 - 4, 7, colors.blue, colors.white, " ok ")
-            event.sleep(0.2)
+            event.sleep(0.05)
             break
         end
     elseif windowEventData[1] == "key_down" and windowEventData[4] == 28 then
         window:set(32 - 4, 7, colors.blue, colors.white, " ok ")
-        event.sleep(0.2)
+        event.sleep(0.05)
         break
     end
 end

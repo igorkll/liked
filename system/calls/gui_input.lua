@@ -35,7 +35,7 @@ window:set(2, 7, colors.red, colors.white, " cancel ")
 
 local reader = window:read(2, 3, window.sizeX - 2, colors.gray, colors.white, nil, crypto)
 
-event.sleep(0.2)
+event.sleep(0.05)
 if require("registry").soundEnable then
     computer.beep(2000)
     computer.beep(1500)
@@ -54,11 +54,11 @@ while true do
     if windowEventData[1] == "touch" and windowEventData[5] == 0 then
         if windowEventData[4] == 7 and windowEventData[3] > (32 - 5) and windowEventData[3] <= ((32 - 5) + 4) then
             window:set(32 - 4, 7, colors.blue, colors.white, " ok ")
-            event.sleep(0.2)
+            event.sleep(0.05)
             return reader.getBuffer()
         elseif windowEventData[4] == 7 and windowEventData[3] >= 2 and windowEventData[3] <= (2 + 7) then
             window:set(2, 7, colors.orange, colors.white, " cancel ")
-            event.sleep(0.2)
+            event.sleep(0.05)
             return false
         end
     end

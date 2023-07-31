@@ -50,9 +50,7 @@ local function applicationLabel(data, x, y)
     local img
     if data.icon then
         img = "/tmp/currentApp.t2p"
-        local file = fs.open(img, "wb")
-        file.write(getInternetFile(data.icon))
-        file.close()
+        saveFile(img, getInternetFile(data.icon))
     else
         img = "/system/icons/app.t2p"
     end
@@ -61,14 +59,16 @@ local function applicationLabel(data, x, y)
 
     local function draw()
         applabel:clear(colors.gray)
-        applabel:set(12, 2, colors.gray, colors.white, "name: " .. (data.name or "unknown"))
+        applabel:set(12, 2, colors.gray, colors.white, "name  : " .. (data.name or "unknown"))
         applabel:set(12, 3, colors.gray, colors.white, "verion: " .. (data.version or "unknown"))
         applabel:set(12, 4, colors.gray, colors.white, "vendor: " .. (data.vendor or "unknown"))
 
-        if installed then
-            applabel:set(applabel.sizeX - 13, 2, colors.red, colors.white,   "   remove   ")
+        if data.getVersion and data.getVersion() ~= data.version then
+            applabel:set(applabel.sizeX - 13, 2, colors.yellow, colors.white, "   update   ")
+        elseif installed then
+            applabel:set(applabel.sizeX - 13, 2, colors.red, colors.white,    " uninstall  ")
         else
-            applabel:set(applabel.sizeX - 13, 2, colors.green, colors.white, "   install  ") 
+            applabel:set(applabel.sizeX - 13, 2, colors.green, colors.white,  "  install   ")
         end
 
         gui_drawimage(screen, img, applabel:toRealPos(2, 2))
@@ -79,12 +79,19 @@ local function applicationLabel(data, x, y)
         local windowEventData = applabel:uploadEvent(eventData)
         if windowEventData[1] == "touch" then
             if windowEventData[3] >= (applabel.sizeX - 13) and windowEventData[3] < ((applabel.sizeX - 13) + 12) and windowEventData[4] == 2 then
-                if installed then
-                    if gui_yesno(screen, nil, nil, "remove current?") then
+                if data.getVersion and data.getVersion() ~= data.version then
+                    if gui_yesno(screen, nil, nil, "update?") then
+                        gui_status(screen, nil, nil, "updating...")
+                        data:install()
+                    end
+                elseif installed then
+                    if gui_yesno(screen, nil, nil, "uninstall?") then
+                        gui_status(screen, nil, nil, "uninstalling...")
                         data:uninstall()
                     end
                 else
-                    if gui_yesno(screen, nil, nil, "install current?") then
+                    if gui_yesno(screen, nil, nil, "install?") then
+                        gui_status(screen, nil, nil, "installation...")
                         data:install()
                     end
                 end
@@ -105,7 +112,7 @@ local function appInfo(data)
     local function ldraw()
         statusWindow:clear(colors.gray)
         --statusWindow:set(1, 1, colors.gray, colors.white, "   ")
-        statusWindow:set(statusWindow.sizeX, statusWindow.sizeY, colors.red, colors.white, "<")
+        statusWindow:set(1, statusWindow.sizeY, colors.red, colors.white, "<")
 
         window:clear(colors.white)
 
@@ -126,7 +133,7 @@ local function appInfo(data)
 
         local statusWindowEventData = statusWindow:uploadEvent(eventData)    
         if statusWindowEventData[1] == "touch" then
-            if statusWindowEventData[3] == statusWindow.sizeX and statusWindowEventData[4] == statusWindow.sizeY then
+            if statusWindowEventData[3] == 1 and statusWindowEventData[4] == statusWindow.sizeY then
                 break
             end
         end
@@ -140,8 +147,8 @@ local function draw()
     statusWindow:clear(colors.gray)
     window:clear(colors.white)
 
-    statusWindow:set(1, 1, colors.gray, colors.white, "   MARKET")
-    statusWindow:set(statusWindow.sizeX, statusWindow.sizeY, colors.red, colors.white, "X")
+    statusWindow:set(1, 1, colors.gray, colors.white, "  MARKET")
+    statusWindow:set(1, statusWindow.sizeY, colors.red, colors.white, "X")
 
     appsTbl = {}
     appCount = 1
@@ -165,7 +172,7 @@ while true do
     local windowEventData = window:uploadEvent(eventData)
 
     if statusWindowEventData[1] == "touch" then
-        if statusWindowEventData[3] == statusWindow.sizeX and statusWindowEventData[4] == statusWindow.sizeY then
+        if statusWindowEventData[3] == 1 and statusWindowEventData[4] == statusWindow.sizeY then
             break
         end
     end

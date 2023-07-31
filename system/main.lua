@@ -33,8 +33,8 @@ do
         end
     end
 
-    autorunsIn("/data/autoruns")
     autorunsIn("/vendor/autoruns")
+    autorunsIn("/data/autoruns")
 end
 
 ------------------------------------

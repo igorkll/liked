@@ -5,8 +5,22 @@ local component = require("component")
 local computer = require("computer")
 local registry = require("registry")
 
+local invoke = component.invoke
+local externalPath = "/external-data/devicetype.dat"
 function fs.genName(uuid)
-    return paths.concat("/data/userdata", (component.invoke(uuid, "getLabel") or "disk") .. "-" .. uuid:sub(1, 5))
+    local label = invoke(uuid, "getLabel")
+    if label then
+        label = label:sub(1, 8)
+    else
+        local externalData
+        if invoke(uuid, "exists", externalPath) then
+            local file = invoke(uuid, "open", externalPath, "rb")
+            externalData = invoke(uuid, "read", file, math.huge)
+            invoke(uuid, "close", file)
+        end
+        label = externalData or "disk"
+    end
+    return paths.concat("/data/userdata", label .. "-" .. uuid:sub(1, 5))
 end
 
 if not vendor.doNotMoundDrives then
