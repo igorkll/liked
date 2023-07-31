@@ -63,7 +63,7 @@ local function applicationLabel(data, x, y)
         applabel:set(12, 3, colors.gray, colors.white, "verion: " .. (data.version or "unknown"))
         applabel:set(12, 4, colors.gray, colors.white, "vendor: " .. (data.vendor or "unknown"))
 
-        if data.getVersion and data.getVersion() ~= data.version then
+        if installed and data.getVersion and data:getVersion() ~= data.version then
             applabel:set(applabel.sizeX - 13, 2, colors.yellow, colors.white, "   update   ")
         elseif installed then
             applabel:set(applabel.sizeX - 13, 2, colors.red, colors.white,    " uninstall  ")
@@ -79,7 +79,7 @@ local function applicationLabel(data, x, y)
         local windowEventData = applabel:uploadEvent(eventData)
         if windowEventData[1] == "touch" then
             if windowEventData[3] >= (applabel.sizeX - 13) and windowEventData[3] < ((applabel.sizeX - 13) + 12) and windowEventData[4] == 2 then
-                if data.getVersion and data.getVersion() ~= data.version then
+                if installed and data.getVersion and data:getVersion() ~= data.version then
                     if gui_yesno(screen, nil, nil, "update?") then
                         gui_status(screen, nil, nil, "updating...")
                         data:install()
@@ -154,7 +154,7 @@ local function draw()
     appCount = 1
     for k, v in pairs(list) do
         if (not v.hided or gui_container.devModeStates[screen]) and appCount >= listOffSet and appCount <= window.sizeY then
-            local installed = v.isInstalled()
+            local installed = v:isInstalled()
             window:set(1, #appsTbl + 1, colors.white, installed and colors.green or colors.red, (v.name or k))
             --window:set(#(v.name or k) + 3, #appsTbl + 1, colors.white, installed and colors.green or colors.red, installed and "√" or "╳")
             table.insert(appsTbl, v)
