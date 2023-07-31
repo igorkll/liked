@@ -166,7 +166,7 @@ local list = {
         path = "/data/userdata/events.app",
         install = function(self)
             fs.makeDirectory("/data/userdata/events.app")
-            saveFile("/data/userdata/events.app/main.lua", assert(calls.call("getInternetFile", "https://raw.githubusercontent.com/igorkll/liked/main/market/apps/lua.app/main.lua")))
+            saveFile("/data/userdata/events.app/main.lua", assert(calls.call("getInternetFile", "https://raw.githubusercontent.com/igorkll/liked/main/market/apps/events.app/main.lua")))
             saveFile("/data/userdata/events.app/icon.t2p", assert(calls.call("getInternetFile", self.icon)))
         end
     },
