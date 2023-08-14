@@ -48,7 +48,7 @@ window:set(4, 3, colors.blue, colors.white, "P")
 
 event.sleep(0.05)
 if require("registry").soundEnable then
-    computer.beep(500, 0.1)
+    --computer.beep(500, 0.1)
 end
 
 local tbl = {event.pull(0.1)}

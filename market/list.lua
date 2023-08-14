@@ -11,7 +11,7 @@ local paths = require("paths")
 local programs = require("programs")
 
 local list = {
-    nanomachines = {
+    {
         name = "nanomachines",
         version = "1.3",
         vendor = "logic",
@@ -25,11 +25,12 @@ local list = {
             saveFile("/data/userdata/nanomachines.app/icon.t2p", assert(calls.call("getInternetFile", self.icon)))
         end
     },
-    worm = {
+    {
         name = "worm",
         version = "1",
         vendor = "logic",
         icon = "https://raw.githubusercontent.com/igorkll/liked/main/market/apps/worm.app/icon.t2p",
+        description = "classic snake ported from computercraft",
 
         path = "/data/userdata/worm.app",
         install = function(self)
@@ -38,11 +39,12 @@ local list = {
             saveFile("/data/userdata/worm.app/icon.t2p", assert(calls.call("getInternetFile", self.icon)))
         end
     },
-    chat = {
+    {
         name = "chat",
         version = "1.7",
         vendor = "logic",
         icon = "https://raw.githubusercontent.com/igorkll/liked/main/market/apps/chat.app/icon.t2p",
+        description = "allows you to exchange messages, pictures and files between computers via a network card",
 
         path = "/data/bin/chat.app",
         install = function(self)
@@ -62,7 +64,7 @@ local list = {
         end
     },
     --[[
-    spaceshoter = {
+    {
         path = "/data/userdata/spaceshot.app",
         install = function()
             fs.makeDirectory("/data/userdata/spaceshoter.app")
@@ -71,11 +73,12 @@ local list = {
         end
     }
     ]]
-    irc = {
+    {
         name = "irc",
         version = "1",
-        vendor = "logic",
+        vendor = "Nathan Flynn / logic",
         icon = "https://raw.githubusercontent.com/igorkll/liked/main/market/apps/irc.app/icon.t2p",
+        description = "allows you to connect to IRC chats via an Internet card.\nprogram ported from openOS",
 
         path = "/data/userdata/irc.app",
         install = function(self)
@@ -84,11 +87,12 @@ local list = {
             saveFile("/data/userdata/irc.app/icon.t2p", assert(calls.call("getInternetFile", self.icon)))
         end
     },
-    archiver = {
+    {
         name = "archiver",
         version = "1.2",
         vendor = "logic",
         icon = "https://raw.githubusercontent.com/igorkll/liked/main/market/apps/archiver.app/icon.t2p",
+        description = "allows you to unpack and package archives in afpx format",
 
         path = "/data/bin/archiver.app",
         install = function(self)
@@ -99,11 +103,12 @@ local list = {
             saveFile("/data/icons/afpx.t2p", assert(calls.call("getInternetFile", "https://raw.githubusercontent.com/igorkll/liked/main/market/apps/archiver.app/afpx.t2p")))
         end
     },
-    brainfuck = {
+    {
         name = "brainfuck",
         version = "1",
         vendor = "logic",
         icon = "https://raw.githubusercontent.com/igorkll/liked/main/market/apps/brainfuck.app/icon.t2p",
+        description = "brainfuck code interpreter",
 
         path = "/data/bin/brainfuck.app",
         install = function(self)
@@ -125,11 +130,12 @@ local list = {
         end
     },
     ]]
-    legacyRender = {
+    {
         name = "legacy render",
         version = "1",
         vendor = "logic",
         icon = "https://raw.githubusercontent.com/igorkll/liked/main/market/apps/legacyRender.app/icon.t2p",
+        description = "allows you to switch between rendering options",
 
         path = "/data/bin/legacyRender.app",
         install = function(self)
@@ -144,11 +150,12 @@ local list = {
             programs.execute("/data/autoruns/legacyRender.lua")
         end
     },
-    lua = {
+    {
         name = "lua",
         version = "1",
         vendor = "logic",
         icon = "https://raw.githubusercontent.com/igorkll/liked/main/market/apps/lua.app/icon.t2p",
+        description = "lua code interpreter",
 
         path = "/data/userdata/lua.app",
         install = function(self)
@@ -157,11 +164,12 @@ local list = {
             saveFile("/data/userdata/lua.app/icon.t2p", assert(calls.call("getInternetFile", self.icon)))
         end
     },
-    events = {
+    {
         name = "events",
         version = "1",
         vendor = "logic",
         icon = "https://raw.githubusercontent.com/igorkll/liked/main/market/apps/events.app/icon.t2p",
+        description = "allows you to view computer events",
 
         path = "/data/userdata/events.app",
         install = function(self)
@@ -183,7 +191,7 @@ local list = {
     ]]
 }
 
-for k, v in pairs(list) do
+for i, v in ipairs(list) do
     local versionpath = paths.concat(v.path, "version.dat")
     function v.getVersion(self)
         if fs.exists(versionpath) then

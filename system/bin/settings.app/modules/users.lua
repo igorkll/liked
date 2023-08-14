@@ -31,8 +31,9 @@ local function draw()
 
     selectWindow:clear(colors.black)
     selectWindow:set(1, 1, colors.lightGray, colors.black, "     user add     ")
-    selectWindow:set(1, 2, colors.black, colors.lightGray, "------------------")
-    selectWindow:setCursor(1, 3)
+    selectWindow:set(1, 2, colors.lightGray, colors.black, "     auto add     ")
+    selectWindow:set(1, 3, colors.black, colors.lightGray, "------------------")
+    selectWindow:setCursor(1, 4)
     for i, user in ipairs({computer.users()}) do
         selectWindow:write(user .. "\n", colors.black, colors.green)
         table.insert(users, user)
@@ -47,7 +48,7 @@ return function(eventData)
     local selectWindowEventData = selectWindow:uploadEvent(eventData)
 
     if selectWindowEventData[1] == "touch" then
-        local posY = selectWindowEventData[4] - 2
+        local posY = selectWindowEventData[4] - 3
 
         if users[posY] then
             if gui_yesno(screen, nil, nil, "remove user \"" .. users[posY] .. "\"?") and selectWindowEventData[3] >= 1 and selectWindowEventData[3] <= 18 then
@@ -58,6 +59,14 @@ return function(eventData)
             local name = gui_input(screen, nil, nil, "user name")
             if name then
                 local ok, err = computer.addUser(name)
+                if not ok then
+                    gui_warn(screen, nil, nil, err or "unknown")
+                end
+            end
+            draw()
+        elseif selectWindowEventData[4] == 2 and selectWindowEventData[3] >= 1 and selectWindowEventData[3] <= 18 then
+            if gui_yesno(screen, nil, nil, "add user \"" .. selectWindowEventData[6] .. "\"?") then
+                local ok, err = computer.addUser(selectWindowEventData[6])
                 if not ok then
                     gui_warn(screen, nil, nil, err or "unknown")
                 end

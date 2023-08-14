@@ -4,6 +4,7 @@ local gui_container = require("gui_container")
 local paths = require("paths")
 local unicode = require("unicode")
 local event = require("event")
+local registry = require("registry")
 local calls = require("calls")
 
 local colors = gui_container.colors
@@ -14,25 +15,14 @@ local screen, posX, posY = ...
 local gpu = graphic.findGpu(screen)
 local rx, ry = gpu.getResolution()
 
-local timeZonePath = "/data/timeZone.dat"
-
 ------------------------------------
 
 local window = graphic.createWindow(screen, posX, posY, rx - (posX - 1), ry - (posY - 1))
 
 local function draw()
-    local currentTimezone = 3
-    if fs.exists(timeZonePath) then
-        local file = fs.open(timeZonePath, "rb")
-        local data = tonumber(file.readAll())
-        file.close()
-        if data then
-            currentTimezone = data
-        end
-    end
 
     window:clear(colors.black)
-    window:set(1, 1, colors.lightGray, colors.white, "current timezone: " .. tostring(currentTimezone))
+    window:set(1, 1, colors.lightGray, colors.white, "current timezone: " .. tostring(registry.timeZone or 0))
     window:set(1, 2, colors.lightGray, colors.white, "set new timezone")
 end
 draw()
@@ -49,10 +39,7 @@ return function(eventData)
                 if not data then
                     calls.call("gui_warn", screen, nil, nil, "uncorrent input")
                 else
-                    local file = fs.open(timeZonePath, "wb")
-                    file.write(tostring(data))
-                    file.close()
-                    _G.timeZone = nil
+                    registry.timeZone = data
                 end
             end
             draw()

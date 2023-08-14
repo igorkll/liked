@@ -24,6 +24,7 @@
 /system/bin/update.app/main.lua
 /system/calls/findPos.lua
 /system/calls/getOSversion.lua
+/system/calls/gui_checkPassword.lua
 /system/calls/gui_context.lua
 /system/calls/gui_drawimage.lua
 /system/calls/gui_drawtext.lua
@@ -35,7 +36,6 @@
 /system/calls/gui_status.lua
 /system/calls/gui_warn.lua
 /system/calls/gui_yesno.lua
-/system/calls/restrs.lua
 /system/calls/system_applyTheme.lua
 /system/calls/system_setTheme.lua
 /system/icons/app.t2p

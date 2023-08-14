@@ -6,10 +6,13 @@ local gui_container = require("gui_container")
 local component = require("component")
 local computer = require("computer")
 local paths = require("paths")
+local unicode = require("unicode")
 
 local colors = gui_container.colors
 
 ------------------------------------
+
+local title = "MARKET"
 
 local screen = ...
 local rx, ry
@@ -49,8 +52,10 @@ local function applicationLabel(data, x, y)
 
     local img
     if data.icon then
-        img = "/tmp/currentApp.t2p"
-        saveFile(img, getInternetFile(data.icon))
+        img = "/tmp/market/" .. (data.name or "unknown") .. ".t2p"
+        if not fs.exists(img) then
+            saveFile(img, getInternetFile(data.icon))
+        end
     else
         img = "/system/icons/app.t2p"
     end
@@ -58,17 +63,17 @@ local function applicationLabel(data, x, y)
     local installed = data:isInstalled()
 
     local function draw()
-        applabel:clear(colors.gray)
-        applabel:set(12, 2, colors.gray, colors.white, "name  : " .. (data.name or "unknown"))
-        applabel:set(12, 3, colors.gray, colors.white, "verion: " .. (data.version or "unknown"))
-        applabel:set(12, 4, colors.gray, colors.white, "vendor: " .. (data.vendor or "unknown"))
+        applabel:clear(colors.black)
+        applabel:set(12, 2, colors.black, colors.white, "name  : " .. (data.name or "unknown"))
+        applabel:set(12, 3, colors.black, colors.white, "verion: " .. (data.version or "unknown"))
+        applabel:set(12, 4, colors.black, colors.white, "vendor: " .. (data.vendor or "unknown"))
 
         if installed and data.getVersion and data:getVersion() ~= data.version then
-            applabel:set(applabel.sizeX - 13, 2, colors.yellow, colors.white, "   update   ")
+            applabel:set(applabel.sizeX - 13, 2, colors.orange, colors.white, "   update    ")
         elseif installed then
-            applabel:set(applabel.sizeX - 13, 2, colors.red, colors.white,    " uninstall  ")
+            applabel:set(applabel.sizeX - 13, 2, colors.red, colors.white,    "  uninstall  ")
         else
-            applabel:set(applabel.sizeX - 13, 2, colors.green, colors.white,  "  install   ")
+            applabel:set(applabel.sizeX - 13, 2, colors.green, colors.white,  "   install   ")
         end
 
         gui_drawimage(screen, img, applabel:toRealPos(2, 2))
@@ -78,7 +83,7 @@ local function applicationLabel(data, x, y)
     return {tick = function (eventData)
         local windowEventData = applabel:uploadEvent(eventData)
         if windowEventData[1] == "touch" then
-            if windowEventData[3] >= (applabel.sizeX - 13) and windowEventData[3] < ((applabel.sizeX - 13) + 12) and windowEventData[4] == 2 then
+            if windowEventData[3] >= (applabel.sizeX - 13) and windowEventData[3] < ((applabel.sizeX - 13) + 13) and windowEventData[4] == 2 then
                 if installed and data.getVersion and data:getVersion() ~= data.version then
                     if gui_yesno(screen, nil, nil, "update?") then
                         gui_status(screen, nil, nil, "updating...")
@@ -99,9 +104,11 @@ local function applicationLabel(data, x, y)
                 installed = data:isInstalled()
                 draw()
                 return true
+            else
+                return false
             end
         end
-    end}
+    end, draw = draw}
 end
 
 local function appInfo(data)
@@ -111,17 +118,18 @@ local function appInfo(data)
     local appLabel
     local function ldraw()
         statusWindow:clear(colors.gray)
-        --statusWindow:set(1, 1, colors.gray, colors.white, "   ")
+        statusWindow:set((statusWindow.sizeX / 2) - (unicode.len(title) / 2), 1, colors.gray, colors.white, title)
+        statusWindow:set(statusWindow.sizeX, statusWindow.sizeY, colors.red, colors.white, "X")
         statusWindow:set(1, statusWindow.sizeY, colors.red, colors.white, "<")
 
         window:clear(colors.white)
 
         appLabel = applicationLabel(data, 2, 3)
         
-        emptyDeskWindows:clear(colors.gray)
-        deskWindows:clear(colors.gray)
+        emptyDeskWindows:clear(colors.black)
+        deskWindows:clear(colors.black)
         deskWindows:setCursor(1, 1)
-        deskWindows:write(data.description or "this application does not contain a description\nO_o", colors.gray, colors.white, true)
+        deskWindows:write(data.description or "this application does not contain a description\nO_o", colors.black, colors.white, true)
     end
     ldraw()
     
@@ -136,6 +144,9 @@ local function appInfo(data)
             if statusWindowEventData[3] == 1 and statusWindowEventData[4] == statusWindow.sizeY then
                 break
             end
+            if statusWindowEventData[3] == statusWindow.sizeX and statusWindowEventData[4] == statusWindow.sizeY then
+                return true
+            end
         end
     end
 end
@@ -143,12 +154,13 @@ end
 local listOffSet = 1
 local appCount = 1
 local appsTbl = {}
+--[[
 local function draw()
-    statusWindow:clear(colors.gray)
     window:clear(colors.white)
 
-    statusWindow:set(1, 1, colors.gray, colors.white, "  MARKET")
-    statusWindow:set(1, statusWindow.sizeY, colors.red, colors.white, "X")
+    statusWindow:clear(colors.gray)
+    statusWindow:set((statusWindow.sizeX / 2) - (unicode.len(title) / 2), 1, colors.gray, colors.white, title)
+    statusWindow:set(statusWindow.sizeX, statusWindow.sizeY, colors.red, colors.white, "X")
 
     appsTbl = {}
     appCount = 1
@@ -162,6 +174,28 @@ local function draw()
         appCount = appCount + 1
     end
 end
+]]
+
+local appLabels = {}
+local function draw()
+    window:clear(colors.white)
+
+    appLabels = {}
+    appsTbl = {}
+    appCount = 1
+    for i, v in ipairs(list) do
+        if (not v.hided or gui_container.devModeStates[screen]) then
+            table.insert(appLabels, applicationLabel(v, 2, 4 + ((appCount - listOffSet) * 7)))
+            table.insert(appsTbl, v)
+        end
+        appCount = appCount + 1
+    end
+
+    
+    statusWindow:clear(colors.gray)
+    statusWindow:set((statusWindow.sizeX / 2) - (unicode.len(title) / 2), 1, colors.gray, colors.white, title)
+    statusWindow:set(statusWindow.sizeX, statusWindow.sizeY, colors.red, colors.white, "X")
+end
 draw()
 
 ------------------------------------
@@ -172,16 +206,28 @@ while true do
     local windowEventData = window:uploadEvent(eventData)
 
     if statusWindowEventData[1] == "touch" then
-        if statusWindowEventData[3] == 1 and statusWindowEventData[4] == statusWindow.sizeY then
+        if statusWindowEventData[3] == statusWindow.sizeX and statusWindowEventData[4] == statusWindow.sizeY then
             break
         end
     end
 
     if windowEventData[1] == "touch" then
+        for index, value in ipairs(appLabels) do
+            local ret = value.tick(eventData)
+            if ret == false then
+                gui_status(screen, nil, nil, "loading...")
+                if appInfo(appsTbl[index]) then
+                    return
+                end
+                draw()
+            elseif ret then
+                draw()
+            end
+        end
+
         local current = appsTbl[windowEventData[4]]
         if current then
-            appInfo(current)
-            draw()
+            
         end
     elseif windowEventData[1] == "scroll" then
         if windowEventData[5] > 0 then

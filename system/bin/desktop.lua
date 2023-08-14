@@ -11,6 +11,7 @@ local gui_container = require("gui_container")
 local fs = require("filesystem")
 local paths = require("paths")
 local component = require("component")
+local registry = require("registry")
 local sha256 = require("sha256").sha256
 
 local colors = gui_container.colors
@@ -61,8 +62,6 @@ local userPaths = {
     "/vendor/bin",
     "/data/bin",
 }
-local timeZonePath = "/data/timeZone.dat"
-local passwordFilePath = "/data/password.sha256"
 
 fs.makeDirectory(gui_container.userRoot)
 fs.makeDirectory(userPath)
@@ -110,20 +109,7 @@ local contextMenuOpen = false
 local lockFlag = false
 
 local function drawStatus()
-    local timeZone = _G.timeZone
-    if not timeZone then
-        if fs.exists(timeZonePath) then
-            local file = fs.open(timeZonePath, "rb")
-            local data = tonumber(file.readAll())
-            file.close()
-            if data then
-                timeZone = data
-            end
-        else
-            timeZone = 3
-        end
-        _G.timeZone = timeZone
-    end
+    local timeZone = registry.timeZone or 0
     
     local hours, minutes, seconds = getRealTime(timeZone)
     hours = tostring(hours)
@@ -147,12 +133,20 @@ local function drawStatus()
 end
 
 local function drawWallpaper()
-    window:clear(colors.lightBlue)
-    if fs.exists(wallpaperPath) then
-        local sx, sy = gui_readimagesize(wallpaperPath)
+    local function wdraw(path)
+        local sx, sy = gui_readimagesize(path)
         local ix, iy = math.floor(((window.sizeX / 2) - (sx / 2)) + 0.5) + 1, math.floor(((window.sizeY / 2) - (sy / 2)) + 0.5) + 1
         ix, iy = window:toRealPos(ix, iy)
-        pcall(calls.call, "gui_drawimage", screen, wallpaperPath, ix, iy)
+        pcall(calls.call, "gui_drawimage", screen, path, ix, iy)
+    end
+
+    window:clear(colors.lightBlue)
+
+    local customPath = paths.concat(userPath, paths.name(wallpaperPath))
+    if fs.exists(customPath) then
+        wdraw(customPath)
+    elseif fs.exists(wallpaperPath) then
+        wdraw(wallpaperPath)
     end
 end
 
@@ -174,6 +168,8 @@ local function findIcon(name)
 end
 
 local function draw(old) --вызывает все перерисовки
+    gui_status(screen, nil, nil, "loading file list...")
+
     checkData()
     drawStatus()
     drawWallpaper()
@@ -1053,23 +1049,15 @@ local function isMultiscreen()
 end
 
 local function lock()
-    local file = fs.open(passwordFilePath, "rb")
-    local passwordHesh = file.readAll()
-    file.close()
-
     lockFlag = true
     drawStatus()
     drawWallpaper()
 
     while true do
-        local data = gui_input(screen, nil, nil, "enter password", true)
-        if data then
-            if sha256(data) == passwordHesh then
-                break
-            else
-                gui_warn(screen, nil, nil, "uncorrent password")
-            end
-        else
+        local successful = gui_checkPassword(screen)
+        if successful then
+            break
+        elseif successful == false then
             if isMultiscreen() then --нельзя выключить мультиманиторное устройтсво с заблокированого экрана, потому что один монитор может стоять на улице(знаю что редкий случай)
                 gui_warn(screen, nil, nil, "you cannot turn off a multi-monitor device from a locked screen")
             else
@@ -1081,10 +1069,9 @@ local function lock()
     end
 
     lockFlag = false
-    drawStatus()
 end
 
-if fs.exists(passwordFilePath) then
+if registry.password then
     lock()
 end
 
@@ -1143,8 +1130,9 @@ while true do
             local clear = screenshot(screen, 2, 2, 19, 7)
             local str, num = gui_context(screen, 2, 2,
             {"  about", "  settings", "  lock screen", "------------------", "  shutdown", "  reboot"},
-            {true, true, fs.exists(passwordFilePath), false, true, true})
-            
+            {true, true, not not registry.password, false, true, true})
+            contextMenuOpen = false
+
             if num == 1 then
                 execute("about")
             elseif num == 2 then
@@ -1160,7 +1148,6 @@ while true do
                 clear()
             end
 
-            contextMenuOpen = false
             drawStatus()
         end
     end
@@ -1191,10 +1178,12 @@ while true do
         devModeResetTime = computer.uptime()
         if devModeCount > 15 then
             if not vendor.disableDevShortcut then
-                if not isDev() then
-                    computer.beep(2000)
-                else
-                    computer.beep(1000)
+                if registry.soundEnable then
+                    if not isDev() then
+                        computer.beep(2000)
+                    else
+                        computer.beep(1000)
+                    end
                 end
                 setDev(not isDev())
                 event.sleep(1)

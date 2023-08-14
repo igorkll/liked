@@ -6,48 +6,29 @@ local graphic = require("graphic")
 local programs = require("programs")
 local calls = require("calls")
 local fs = require("filesystem")
+local computer = require("computer")
 
 table.insert(programs.paths, "/data/userdata")
 table.insert(programs.paths, "/data/userdata/apps")
---table.insert(programs.paths, "/data/bin")
 
-do
-    local fs = require("filesystem")
-    local paths = require("paths")
-    local event = require("event")
-    local programs = require("programs")
+unittests("/vendor/unittests")
+unittests("/data/unittests")
 
-    local function autorunsIn(path)
-        for i, v in ipairs(fs.list(path)) do
-            local full_path = paths.concat(path, v)
-    
-            local func, err = programs.load(full_path)
-            if not func then
-                event.errLog("err " .. (err or "unknown error") .. ", to load programm " .. full_path)
-            else
-                local ok, err = pcall(func)
-                if not ok then
-                    event.errLog("err " .. (err or "unknown error") .. ", in programm " .. full_path)
-                end
-            end        
-        end
-    end
-
-    autorunsIn("/vendor/autoruns")
-    autorunsIn("/data/autoruns")
-end
+autorunsIn("/vendor/autoruns")
+autorunsIn("/data/autoruns")
 
 ------------------------------------
 
 local screens = {}
 for address in component.list("screen") do
     local gpu = graphic.findGpu(address)
-    if gpu.maxDepth() ~= 1 then
+    if gpu.setActiveBuffer and gpu.getActiveBuffer() ~= 0 then gpu.setActiveBuffer(0) end
+    if gpu and gpu.maxDepth() ~= 1 then
         table.insert(screens, address)
     end
 end
 
-local desktop = assert(programs.load("desktop"))--подгружаю один раз, таблица _ENV обшая, так что там нельзя юзать глобалки
+local desktop = assert(programs.load("desktop")) --подгружаю один раз, таблица _ENV обшая, так что там нельзя юзать глобалки
 
 ------------------------------------
 
@@ -77,5 +58,8 @@ elseif #screens == 1 then
     calls.call("gui_initScreen", screen)
     assert(xpcall(desktop, debug.traceback, screen))
 else
-    error("no supported screen found", 0)
+    printText("no supported screens/GPUs found")
+    while true do
+        computer.pullSignal()
+    end
 end

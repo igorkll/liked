@@ -1,10 +1,14 @@
 local graphic = require("graphic")
-local calls = require("calls")
 local gui_container = require("gui_container")
 
 local screen = ...
+local mx, my = graphic.maxResolution(screen)
 
 graphic.setDepth(screen, graphic.maxDepth(screen))
-graphic.setResolution(screen, graphic.maxResolution(screen))
+if mx > 80 or my > 25 then
+    mx = 80
+    my = 25
+end
+graphic.setResolution(screen, mx, my)
 
 system_setTheme("/data/theme.plt")

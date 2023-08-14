@@ -26,8 +26,9 @@ local function update()
     statusWindow:clear(colors.gray)
     window:clear(colors.white)
     statusWindow:set(rx, 1, colors.red, colors.white, "X")
+    statusWindow:set(1, 1, colors.red, colors.white, "<")
     
-    local title = "List of components"
+    local title = "List Of Components"
     statusWindow:set((statusWindow.sizeX / 2) - (unicode.len(title) / 2), 1, colors.gray, colors.white, title)
 
     local posY = 1
@@ -47,6 +48,9 @@ while true do
 
     local statusWindowEventData = statusWindow:uploadEvent(eventData)
     if statusWindowEventData[1] == "touch" and statusWindowEventData[3] == window.sizeX and statusWindowEventData[4] == 1 then
-        break
+        return true
+    end
+    if statusWindowEventData[1] == "touch" and statusWindowEventData[3] == 1 and statusWindowEventData[4] == 1 then
+        return
     end
 end
