@@ -12,11 +12,11 @@ local path = paths.path(calls.call("getPath"))
 fs.makeDirectory(paths.concat(path, "profiles"))
 
 local port = math.floor(math.random(1, 65535))
-local range = 4
+local range = 3
 
 ------------------------------------
 
-local screen, nikname = ...
+local screen, nickname = ...
 local rx, ry
 do
     local gpu = graphic.findGpu(screen)
@@ -29,6 +29,7 @@ local function status(str)
     gpu.setForeground(colors.gray)
     gpu.fill(1, 1, rx, ry, " ")
     gpu.set(math.floor(((rx / 2) - (unicode.len(str) / 2)) + 0.5), math.floor((ry / 2) + 0.5), str)
+    graphic.forceUpdate()
 end
 
 ------------------------------------
@@ -103,14 +104,14 @@ function createProfile()
     return tbl
 end
 
-function getProfile(nikname)
-    local path = paths.concat(path, "profiles", nikname)
+function getProfile(nickname)
+    local path = paths.concat(path, "profiles", nickname)
     if not fs.exists(path) then
         local tbl, err = createProfile()
         if err == "exit" then
             return nil, "exit"
         end
-        saveProfile(nikname, tbl)
+        saveProfile(nickname, tbl)
         return tbl
     end
     local file = assert(fs.open(path, "rb"))
@@ -119,8 +120,8 @@ function getProfile(nikname)
     return tbl
 end
 
-function saveProfile(nikname, profile)
-    local file = assert(fs.open(paths.concat(path, "profiles", nikname), "wb"))
+function saveProfile(nickname, profile)
+    local file = assert(fs.open(paths.concat(path, "profiles", nickname), "wb"))
     file.write(calls.call("serialization", profile))
     file.close()
     return true
@@ -146,13 +147,13 @@ local function draw()
     window:set(1, 1, colors.white, colors.red, "X")
 end
 
-local function controlNote(nikname, profile, index)
+local function controlNote(nickname, profile, index)
     index = math.floor(index)
 
     local function draw()
         window:clear(colors.white)
         window:set(1, 1, colors.red, colors.white, "<")
-        window:set(1, 2, colors.gray, colors.white, "profile: " .. nikname)
+        window:set(1, 2, colors.gray, colors.white, "profile: " .. nickname)
 
         window:set(1, 3, colors.gray, colors.white, "input info: " .. tostring(index) .. ":" .. tostring(profile.states[index]) .. ":" .. tostring(profile.notes[index] or "could not get input information"))
 
@@ -171,14 +172,14 @@ local function controlNote(nikname, profile, index)
             end
             if windowEventData[4] == 5 then
                 profile.notes[index] = nil
-                saveProfile(nikname, profile)
+                saveProfile(nickname, profile)
                 draw()
             end
             if windowEventData[4] == 6 then
                 local data = calls.call("gui_input", screen, nil, nil, "new note")
                 if data then
                     profile.notes[index] = data
-                    saveProfile(nikname, profile)
+                    saveProfile(nickname, profile)
                 end
                 draw()
             end
@@ -186,10 +187,10 @@ local function controlNote(nikname, profile, index)
     end
 end
 
-local function controlFor(nikname)
+local function controlFor(nickname)
     local window = graphic.createWindow(screen, 1, 1, rx, ry)
 
-    local profile, err = assert(getProfile(nikname))
+    local profile, err = assert(getProfile(nickname))
     if err == "exit" then
         return nil, "exit"
     end
@@ -197,7 +198,7 @@ local function controlFor(nikname)
     local function draw()
         window:clear(colors.white)
         window:set(1, 1, colors.red, colors.white, "X")
-        window:set(1, 2, colors.gray, colors.white, "profile: " .. nikname)
+        window:set(1, 2, colors.gray, colors.white, "profile: " .. nickname)
 
         for i = 1, totalInputCount do
             window:fill(1, i + 2, rx, 1, colors.gray, 0, " ")
@@ -227,10 +228,10 @@ local function controlFor(nikname)
                         if err == "exit" then
                             return nil, "exit"
                         end
-                        saveProfile(nikname, profile)
+                        saveProfile(nickname, profile)
                         draw()
                     else
-                        controlNote(nikname, profile, index)
+                        controlNote(nickname, profile, index)
                         draw()
                     end
                 end
@@ -240,4 +241,4 @@ local function controlFor(nikname)
 end
 
 status("pleas wait")
-controlFor(nikname)
+controlFor(nickname)

@@ -12,7 +12,7 @@ local indexsColors = gui_container.indexsColors
 
 ------------------------------------
 
-local screen, filepath = ...
+local screen, nickname, filepath = ...
 local gpu = graphic.findGpu(screen)
 local rx, ry = gpu.getResolution()
 

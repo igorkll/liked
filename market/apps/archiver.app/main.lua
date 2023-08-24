@@ -40,7 +40,7 @@ end
 --------------------------------------------
 
 local function unpack(path, unpackFolder)
-    fs.remove(unpackFolder)
+    --fs.remove(unpackFolder)
     fs.makeDirectory(unpackFolder)
 
     local ok, err = afpx.unpack(path, unpackFolder)
@@ -69,8 +69,7 @@ while true do
     if path then
         printBigScreen()
 
-        local unpackFolder = gui_filepicker(screen, nil, nil, nil, nil, true, true)
-
+        local unpackFolder = gui_filepicker(screen, nil, nil, nil, nil, true, true, true)
         if unpackFolder then
             unpack(path, unpackFolder)
         else
@@ -93,7 +92,7 @@ while true do
                 local archivePath = gui_filepicker(screen, nil, nil, nil, "afpx")
                 local unpackFolder
                 if archivePath then
-                    unpackFolder = gui_filepicker(screen, nil, nil, nil, nil, true, true)
+                    unpackFolder = gui_filepicker(screen, nil, nil, nil, nil, true, true, true)
                 end
                 if archivePath and unpackFolder then
                     unpack(archivePath, unpackFolder)
@@ -108,12 +107,7 @@ while true do
                     archivePath = gui_filepicker(screen, nil, nil, nil, "afpx", true)
                 end
                 if archivePath and packFolder then
-                    local ok, err = afpx.pack(packFolder, archivePath)
-                    if ok then
-                        printMainScreen()
-                    else
-                        printMainScreen(err)
-                    end
+                    pack(packFolder, archivePath)
                 else
                     printMainScreen()
                 end

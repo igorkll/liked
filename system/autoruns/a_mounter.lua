@@ -24,8 +24,12 @@ function fs.genName(uuid)
 end
 
 if not vendor.doNotMoundDrives then
+    local function allowMount(address)
+        return address ~= computer.tmpAddress() and address ~= fs.bootaddress
+    end
+
     event.listen("component_added", function(_, uuid, name)
-        if name == "filesystem" then
+        if name == "filesystem" and allowMount(uuid) then
             if registry.soundEnable then
                 computer.beep(2000, 0.1)
             end
@@ -35,7 +39,7 @@ if not vendor.doNotMoundDrives then
     end)
 
     event.listen("component_removed", function(_, uuid, name)
-        if name == "filesystem" then
+        if name == "filesystem" and allowMount(uuid) then
             for _, tbl in ipairs(fs.mountList) do
                 if tbl[1].address == uuid then
                     if registry.soundEnable then
@@ -50,7 +54,7 @@ if not vendor.doNotMoundDrives then
     end)
     
     for address in component.list("filesystem") do
-        if address ~= computer.tmpAddress() and address ~= fs.bootaddress then
+        if allowMount(address) then
             assert(fs.mount(address, fs.genName(address)))
         end
     end

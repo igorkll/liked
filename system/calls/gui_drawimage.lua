@@ -4,6 +4,8 @@ local fs = require("filesystem")
 local graphic = require("graphic")
 local calls = require("calls")
 local gui_container = require("gui_container")
+local cache = require("cache")
+local paths = require("paths")
 
 local screen, path, x, y = ...
 local gpu = graphic.findGpu(screen)
@@ -11,11 +13,31 @@ local gpu = graphic.findGpu(screen)
 local readbit = calls.load("readbit")
 local colors = gui_container.indexsColors
 
+path = paths.canonical(path)
+
 ------------------------------------
 
-local file = fs.open(path, "rb")
-local buffer = file.readAll()
-file.close()
+local function readIcon(path)
+    local file = fs.open(path, "rb")
+    local buffer
+    if file then
+        buffer = file.readAll()
+        file.close()
+    end
+    return buffer
+end
+
+cache.cache.images = cache.cache.images or {}
+
+local buffer
+local lcache = cache.cache.images[path]
+if lcache and fs.lastModified(path) == lcache[2] then
+    buffer = lcache[1]
+else
+    buffer = readIcon(path)
+    cache.cache.images[path] = {buffer, fs.lastModified(path)}
+end
+
 local function read(bytecount)
     local str = buffer:sub(1, bytecount)
     buffer = buffer:sub(bytecount + 1, #buffer)
@@ -28,42 +50,51 @@ local sx = string.byte(read(1))
 local sy = string.byte(read(1))
 read(8)
 
-local oldbackground = gpu.getBackground()
-local oldforeground = gpu.getBackground()
 
-local colorByte, countCharBytes, background, foreground, char
+local colorByte, countCharBytes
+local oldX, oldY = 1, 1
+local oldFore, oldBack
+local buff = ""
 for cy = 1, sy do
     for cx = 1, sx do
         colorByte      = string.byte(read(1))
         countCharBytes = string.byte(read(1))
 
-        background = 
+        local background = 
         ((readbit(colorByte, 0) and 1 or 0) * 1) + 
         ((readbit(colorByte, 1) and 1 or 0) * 2) + 
         ((readbit(colorByte, 2) and 1 or 0) * 4) + 
         ((readbit(colorByte, 3) and 1 or 0) * 8)
-        foreground = 
+        local foreground = 
         ((readbit(colorByte, 4) and 1 or 0) * 1) + 
         ((readbit(colorByte, 5) and 1 or 0) * 2) + 
         ((readbit(colorByte, 6) and 1 or 0) * 4) + 
         ((readbit(colorByte, 7) and 1 or 0) * 8)
-        --background = colors[background]
-        --foreground = colors[foreground]
+        if not oldFore then oldFore = foreground end
+        if not oldBack then oldBack = background end
 
-        char = read(countCharBytes)
-        if background ~= 0 or foreground ~= 0 then --прозрачность, в реальной картинке такого не будет потому что если paint замечает оба нуля то он меняет одной значения чтобы пиксель не мог просто так стать прозрачным
-            if background ~= oldbackground then
-                gpu.setBackground(colors[background + 1])
-                oldbackground = background
+        local char = read(countCharBytes)
+
+        if foreground ~= oldFore or background ~= oldBack or oldY ~= cy then
+            if oldBack ~= 0 or oldFore ~= 0 then --прозрачность, в реальной картинке такого не будет потому что если paint замечает оба нуля то он меняет одной значения чтобы пиксель не мог просто так стать прозрачным
+                gpu.setBackground(colors[oldBack + 1])
+                gpu.setForeground(colors[oldFore + 1])
+                gpu.set(oldX + (x - 1), oldY + (y - 1), buff)
             end
-            if foreground ~= oldforeground then
-                gpu.setForeground(colors[foreground + 1])
-                oldforeground = foreground
-            end
-            if background == foreground then --во избежаниия визуальных артефактов символом unicode при просметре от третего лица на монитор
-                char = " "
-            end
-            gpu.set(cx + (x - 1), cy + (y - 1), char)
+
+            oldFore = foreground
+            oldBack = background
+            oldX = cx
+            oldY = cy
+            buff = char
+        else
+            buff = buff .. char
         end
     end
+end
+
+if oldBack ~= 0 or oldFore ~= 0 then
+    gpu.setBackground(colors[oldBack + 1])
+    gpu.setForeground(colors[oldFore + 1])
+    gpu.set(oldX + (x - 1), oldY + (y - 1), buff)
 end

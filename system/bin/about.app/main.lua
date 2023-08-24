@@ -17,7 +17,8 @@ local title = "About"
 
 --------------------------------------------
 
-local version = getOSversion()
+local deviceType = getDeviceType()
+
 local hddTotalSpace = fs.get("/").spaceTotal()
 local hddUsedSpace = fs.get("/").spaceUsed()
 
@@ -77,13 +78,13 @@ local function update()
     ]]
     
     window:clear(colors.white)
-    window:set(2, 2, colors.white, colors.black, "Operating System : liked-" .. tostring(version) .. " / likeOS-" .. tostring(_COREVERSION))
-    window:set(2, 3, colors.white, colors.black, "Computer address : " .. computer.address())
+    window:set(2, 2, colors.white, colors.black, "Operating System : " .. tostring(_OSVERSION) .. " / " .. tostring(_COREVERSION))
+    window:set(2, 3, colors.white, colors.black, "Computer Address : " .. computer.address())
     window:set(2, 4, colors.white, colors.black, "Boot Disk        : " .. fs.bootaddress)
-    window:set(2, 5, colors.white, colors.black, "Device Type      : " .. getDeviceType())
+    window:set(2, 5, colors.white, colors.black, "Device Type      : " .. deviceType)
     window:set(2, 7, colors.blue, colors.white, "List Of Components")
 
-    window:set(2, window.sizeY - 2, colors.white, colors.black, "HDD")
+    window:set(2, window.sizeY - 2, colors.white, colors.black, "ROM")
     progressBar(window.sizeY - 2, hddUsedValue, colors.lime, colors.green)
     insertText(8, window.sizeY - 2, colors.white, math.round(hddUsedSpace / 1024) .. "kb / " .. math.round(hddTotalSpace / 1024) .. "kb")
 
@@ -112,8 +113,6 @@ while true do
         if result[1] and result[2] then
             break
         end
-        update()
-        graphic.forceUpdate()
     end
 
     if computer.uptime() - oldtime > 1 then

@@ -12,7 +12,6 @@ local fs = require("filesystem")
 local paths = require("paths")
 local component = require("component")
 local registry = require("registry")
-local sha256 = require("sha256").sha256
 
 local colors = gui_container.colors
 
@@ -42,7 +41,7 @@ local knownExps = { --данные файлы не будет предложин
 
 ------------------------------------------------------------------------ init
 
-local screen = ...
+local screen, isFirst = ...
 local rx, ry = graphic.getResolution(screen)
 
 local statusWindow = graphic.createWindow(screen, 1, 1, rx, 1)
@@ -123,7 +122,8 @@ local function drawStatus()
     if #gameHours == 1 then gameHours = "0" .. gameHours end
     if #gameMinutes == 1 then gameMinutes = "0" .. gameMinutes end
 
-    local str = "real time: " .. hours .. ":" .. minutes .. "   game time: " .. gameHours .. ":" .. gameMinutes .. "   " .. tostring(math.floor(map(computer.energy(), 0, computer.maxEnergy(), 0, 100) + 0.5)) .. "%"
+    local power = constrain(math.ceil(map(computer.energy(), 0, computer.maxEnergy(), 0, 100) + 0.5), 0, 100)
+    local str = "real time: " .. hours .. ":" .. minutes .. "   game time: " .. gameHours .. ":" .. gameMinutes .. "   " .. tostring(power) .. "%"
 
     statusWindow:fill(1, 1, rx, 1, colors.gray, 0, " ")
     statusWindow:set(window.sizeX - unicode.len(str), 1, colors.gray, colors.white, str)
@@ -150,10 +150,22 @@ local function drawWallpaper()
     end
 end
 
+local function isUninstallScript(icon)
+    return fs.exists(paths.concat(icon.path, "uninstall.lua"))
+end
+
 local function isUninstallAvailable(icon)
     if icon.readonly then return false end
-    local check = "/data/"
-    return icon.path:sub(1, #check) == check
+    if isDev() then return true end
+
+    local data = "/data/"
+    local vendor = "/vendor/"
+    if icon.path:sub(1, #data) == data then --вы всегда можете удалить приложения из data
+        return true
+    elseif icon.path:sub(1, #vendor) == vendor then --вы можете удалить приложения вендора только если в нем есть uninstall.lua
+        return isUninstallScript(icon)
+    end
+    return false
 end
 
 local function findIcon(name)
@@ -167,32 +179,8 @@ local function findIcon(name)
     end
 end
 
-local function draw(old) --вызывает все перерисовки
-    gui_status(screen, nil, nil, "loading file list...")
-
+local function draw(old, check) --вызывает все перерисовки
     checkData()
-    drawStatus()
-    drawWallpaper()
-
-    local str = "path: " .. paths.canonical(unicode.sub(userPath, unicode.len(gui_container.userRoot), unicode.len(userPath)))
-    window:set(math.floor(((window.sizeX / 2) - (unicode.len(str) / 2)) + 0.5),
-    window.sizeY, colors.lightGray, colors.gray, str)
-
-    window:set(1, window.sizeY - 3, colors.lightGray, colors.white, " /")
-    window:set(1, window.sizeY - 2, colors.lightGray, colors.white, "/ ")
-    window:set(1, window.sizeY - 1, colors.lightGray, colors.white, "\\ ")
-    window:set(1, window.sizeY - 0, colors.lightGray, colors.white, " \\")
-
-    window:set(3, window.sizeY - 3, colors.red, colors.white, " /")
-    window:set(3, window.sizeY - 2, colors.red, colors.white, "/ ")
-    window:set(3, window.sizeY - 1, colors.red, colors.white, "\\ ")
-    window:set(3, window.sizeY - 0, colors.red, colors.white, " \\")
-
-    window:set(window.sizeX - 1, window.sizeY - 3, colors.lightGray, colors.white, "\\ ")
-    window:set(window.sizeX - 1, window.sizeY - 2, colors.lightGray, colors.white, " \\")
-    window:set(window.sizeX - 1, window.sizeY - 1, colors.lightGray, colors.white, " /")
-    window:set(window.sizeX - 1, window.sizeY - 0, colors.lightGray, colors.white, "/ ")
-
     local iconsCount = 0
     local tbl = fs.list(userPath)
     if not tbl then
@@ -215,11 +203,36 @@ local function draw(old) --вызывает все перерисовки
             end
         end
     end
-
     local lUserPath = paths.canonical(userPath)
     if startIconsPoss[lUserPath] > iconsCount then
         startIconsPoss[lUserPath] = old or 1
     end
+    if check and startIconsPoss[lUserPath] == (old or 1) then
+        return
+    end
+
+    gui_status(screen, nil, nil, "loading file-list...")
+    drawStatus()
+    drawWallpaper()
+
+    local str = "path: " .. paths.canonical(unicode.sub(userPath, unicode.len(gui_container.userRoot), unicode.len(userPath)))
+    window:set(math.floor(((window.sizeX / 2) - (unicode.len(str) / 2)) + 0.5),
+    window.sizeY, colors.lightGray, colors.gray, str)
+
+    window:set(1, window.sizeY - 3, colors.lightGray, colors.white, " /")
+    window:set(1, window.sizeY - 2, colors.lightGray, colors.white, "/ ")
+    window:set(1, window.sizeY - 1, colors.lightGray, colors.white, "\\ ")
+    window:set(1, window.sizeY - 0, colors.lightGray, colors.white, " \\")
+
+    window:set(3, window.sizeY - 3, colors.red, colors.white, " /")
+    window:set(3, window.sizeY - 2, colors.red, colors.white, "/ ")
+    window:set(3, window.sizeY - 1, colors.red, colors.white, "\\ ")
+    window:set(3, window.sizeY - 0, colors.red, colors.white, " \\")
+
+    window:set(window.sizeX - 1, window.sizeY - 3, colors.lightGray, colors.white, "\\ ")
+    window:set(window.sizeX - 1, window.sizeY - 2, colors.lightGray, colors.white, " \\")
+    window:set(window.sizeX - 1, window.sizeY - 1, colors.lightGray, colors.white, " /")
+    window:set(window.sizeX - 1, window.sizeY - 0, colors.lightGray, colors.white, "/ ")
 
     local str = tostring(math.floor(startIconsPoss[lUserPath] // (iconsX * iconsY)) + 1) .. "/" ..
     tostring(math.floor((iconsCount - 1) // (iconsX * iconsY)) + 1)
@@ -384,18 +397,19 @@ local function listForward()
     local lUserPath = paths.canonical(userPath)
     local old = startIconsPoss[lUserPath]
     startIconsPoss[lUserPath] = startIconsPoss[lUserPath] + (iconsX * iconsY)
-    draw(old)
+    draw(old, true)
 end
 
 local function listBack()
     checkData()
 
     local lUserPath = paths.canonical(userPath)
+    local old = startIconsPoss[lUserPath]
     startIconsPoss[lUserPath] = startIconsPoss[lUserPath] - (iconsX * iconsY)
     if startIconsPoss[lUserPath] < 1 then
         startIconsPoss[lUserPath] = 1
     end
-    draw()
+    draw(old, true)
 end
 
 local function checkFolder()
@@ -405,9 +419,12 @@ local function checkFolder()
 end
 
 local function folderBack()
+    local oldPath = userPath
     userPath = paths.path(userPath)
     checkFolder()
-    draw()
+    if userPath ~= oldPath then
+        draw()
+    end
 end
 
 local timerEnable = true
@@ -416,23 +433,24 @@ event.timer(10, function()
     drawStatus()
 end, math.huge)
 
-local function saveZone()
-    return screenshot(screen, rx / 2 - 16, ry / 2 - 4, 33, 9)
-end
-
 local function warn(str)
-    local clear = saveZone()
+    local clear = saveZone(screen)
     gui_warn(screen, nil, nil, str)
     clear()
 end
 
-local function execute(name, ...)
+local function execute(name, nickname, ...)
     timerEnable = false
 
     gui_status(screen, nil, nil, "loading...")
     local path = programs.find(name)
+    if not path or not fs.exists(path) or fs.isDirectory(path) then
+        gui_warn(screen, nil, nil, "failed to launch application")
+        draw()
+        return
+    end
     if fs.exists("/vendor/appChecker.lua") then
-        local out = {programs.execute("/vendor/appChecker.lua", path, screen)}
+        local out = {programs.execute("/vendor/appChecker.lua", screen, nickname, path)}
         if not out[1] then
             gui_warn(screen, nil, nil, out[2])
             redrawFlag = nil
@@ -448,7 +466,7 @@ local function execute(name, ...)
 
     local code, err = programs.load(path)
     if code then
-        local ok, err = xpcall(code, debug.traceback, screen, ...)
+        local ok, err = xpcall(code, debug.traceback, screen, nickname, ...)
         if not ok then
             gui_warn(screen, nil, nil, err or "unknown error")
         end
@@ -461,10 +479,11 @@ local function execute(name, ...)
     draw()
 end
 
-local function uninstallApp(path)
+local function uninstallApp(path, nickname)
     local uninstallPath = paths.concat(path, "uninstall.lua")
     if fs.exists(uninstallPath) then
-        execute(uninstallPath)
+        execute(uninstallPath, nickname)
+        return true
     else
         fs.remove(path)
     end
@@ -486,7 +505,7 @@ local function fileDescriptor(icon, alternative, nickname) --открывает 
             draw()
             return true
         elseif icon.exp == "lua" then
-            execute("edit", icon.path)
+            execute("edit", nickname, icon.path)
             return true
         end
     end
@@ -503,13 +522,13 @@ local function fileDescriptor(icon, alternative, nickname) --открывает 
         draw()
         return true
     elseif icon.exp == "t2p" then
-        execute("paint", icon.path)
+        execute("paint", nickname, icon.path)
         return true
     elseif icon.exp == "lua" then
         execute(icon.path, nickname)
         return true
     elseif icon.exp == "plt" then
-        local clear = saveZone()
+        local clear = saveZone(screen)
         local state = gui_yesno(screen, nil, nil, "apply this theme?")
         clear()
 
@@ -518,24 +537,24 @@ local function fileDescriptor(icon, alternative, nickname) --открывает 
             event.push("redrawDesktop")
         end
     elseif icon.exp == "txt" or icon.exp == "log" or icon.exp == "cfg" or (icon.exp == "dat" and isDev()) then
-        execute("edit", icon.path, icon.exp == "log")
+        execute("edit", nickname, icon.path, icon.exp == "log")
     elseif icon.exp == "mid" or icon.exp == "midi" then
         if programs.find("midi") then
             execute("midi", nickname, icon.path)
         else
-            warn("please, download programm \"midi\" from market")
+            warn("please, download program \"midi\" from market")
         end
     elseif icon.exp == "dfpwm" then
         if programs.find("tape") then
             execute("tape", nickname, icon.path)
         else
-            warn("please, download programm \"tape\" from market")
+            warn("please, download program \"tape\" from market")
         end
     elseif icon.exp == "afpx" then
         if programs.find("archiver") then
             execute("archiver", nickname, icon.path)
         else
-            warn("please, download programm \"archiver\" from market")
+            warn("please, download program \"archiver\" from market")
         end
     else
         warn("file is not supported")
@@ -609,10 +628,28 @@ local function doIcon(windowEventData)
                         if v.isFs then
                             local screenshotY = 6
                             local strs, active =
-                            {"  open", "----------------------", "  format", "  set label", "  clear label"},
-                            {true, false, not v.readonly, not v.labelReadonly, not v.labelReadonly}
+                            {"  open", "  install os", "----------------------", "  set label", "  clear label"},
+                            {true, not v.readonly, false, not v.labelReadonly, not v.labelReadonly}
+
+                            --[[
+                            local likeDisk = isLikeOsDisk(v.fs.address)
+                            if likeDisk then
+                                screenshotY = screenshotY + 1
+
+                                table.insert(strs, 4, "  wipe data")
+                                table.insert(active, 4, not v.readonly and v.fs.exists("/data"))
+                            end
+                            ]]
+
+                            do
+                                screenshotY = screenshotY + 1
+
+                                table.insert(strs, 4, "  format")
+                                table.insert(active, 4, not v.readonly)
+                            end
+
                             if v.fs.exists("/init.lua") then
-                                screenshotY = 8
+                                screenshotY = screenshotY + 2
 
                                 table.insert(strs, "----------------------")
                                 table.insert(active, false)
@@ -631,17 +668,51 @@ local function doIcon(windowEventData)
 
                             if num == 1 then
                                 fileDescriptor(v, nil, windowEventData[6])
-                            elseif num == 3 then
-                                local clear2 = saveZone()
+                            elseif str == "  install os" then
+                                local success, err = sysclone(screen, posX, posY, v.fs)
+
+                                if success ~= "cancel" then
+                                    if success then
+                                        umountAll()
+                                        mountAll()
+                                    elseif err then
+                                        gui_warn(screen, nil, nil, err)
+                                    end
+                                    draw()
+                                end
+                            elseif str == "  format" then
+                                local clear2 = saveZone(screen)
                                 local state = gui_yesno(screen, nil, nil, "format?")
-                                clear2()
                                 
                                 if state then
+                                    gui_status(screen, nil, nil, "formatting...")
                                     v.fs.remove("/")
+                                    draw()
+                                else
+                                    clear2()
                                 end
-                            elseif num == 4 then
-                                local clear2 = saveZone()
-                                local newlabel = gui_input(screen, nil, nil, "new label")
+                                --[[
+                            elseif str == "  wipe data" then
+                                local clear2 = saveZone(screen)
+                                local state = gui_yesno(screen, nil, nil, "wipe data?")
+                                
+                                if state then
+                                    gui_status(screen, nil, nil, "wiping...")
+                                    v.fs.remove("/data")
+                                    draw()
+                                else
+                                    clear2()
+                                end
+                                ]]
+                            elseif str == "  set label" then
+                                local label = ""
+                                local result = {pcall(v.fs.getLabel)}
+                                if result[1] then
+                                    label = result[2] or ""
+                                end
+
+                                local clear2 = saveZone(screen)
+                                local newlabel = gui_input(screen, nil, nil, "new label", nil, nil, label)
 
                                 if newlabel then
                                     umountAll()
@@ -653,8 +724,8 @@ local function doIcon(windowEventData)
                                 else
                                     clear2()
                                 end
-                            elseif num == 5 then
-                                local clear2 = saveZone()
+                            elseif str == "  clear label" then
+                                local clear2 = saveZone(screen)
                                 local state = gui_yesno(screen, nil, nil, "clear label?")
 
                                 if state then
@@ -686,12 +757,13 @@ local function doIcon(windowEventData)
                             if num == 1 then
                                 fileDescriptor(v, nil, windowEventData[6])
                             elseif num == 3 then
-                                local clear = saveZone()
+                                local clear = saveZone(screen)
                                 local ok = gui_yesno(screen, nil, nil, "uninstall?")
 
                                 if ok then
-                                    uninstallApp(v.path)
-                                    draw()
+                                    if not uninstallApp(v.path, windowEventData[6]) then
+                                        draw()
+                                    end
                                 else
                                     clear()
                                 end
@@ -812,7 +884,7 @@ local function doIcon(windowEventData)
                             if str == "  open" then
                                 fileDescriptor(v, nil, windowEventData[6])
                             elseif str == "  remove" then
-                                local clear2 = saveZone()
+                                local clear2 = saveZone(screen)
                                 local state = gui_yesno(screen, nil, nil, "remove?")
                                 clear2()
                                 if state then
@@ -820,16 +892,21 @@ local function doIcon(windowEventData)
                                     draw()
                                 end
                             elseif str == "  uninstall" then
-                                local clear2 = saveZone()
+                                local clear2 = saveZone(screen)
                                 local state = gui_yesno(screen, nil, nil, "uninstall?")
                                 clear2()
                                 if state then
-                                    uninstallApp(v.path)
-                                    draw()
+                                    if not uninstallApp(v.path, windowEventData[6]) then
+                                        draw()
+                                    end
                                 end
                             elseif str == "  rename" then
-                                local clear2 = saveZone()
-                                local name = gui_input(screen, nil, nil, "new name")
+                                local clear2 = saveZone(screen)
+                                local fname = paths.name(v.path) or ""
+                                if not isDev() then
+                                    fname = paths.hideExtension(fname)
+                                end
+                                local name = gui_input(screen, nil, nil, "new name", nil, nil, fname)
                                 clear2()
 
                                 if name then
@@ -868,7 +945,7 @@ local function doIcon(windowEventData)
                             elseif str == "  inside the package" then
                                 fileDescriptor(v, true)
                             elseif str == "  edit" or str == "  open is text editor" then
-                                execute("edit", v.path, str == "  open is text editor")
+                                execute("edit", windowEventData[6], v.path, str == "  open is text editor" and not isDev())
                             else
                                 for i, v2 in ipairs(gui_container.filesExps) do
                                     if "  " .. v2[3] == str then
@@ -907,7 +984,7 @@ local function doIcon(windowEventData)
             if num == 1 then
                 folderBack()
             elseif num == 4 then --new image
-                local clear = saveZone()
+                local clear = saveZone(screen)
                 local name = gui_input(screen, nil, nil, "image name")
                 clear()
 
@@ -917,14 +994,14 @@ local function doIcon(windowEventData)
                         if #name == 0 or name:find("%.") or name:find("%/") or name:find("%\\") then
                             warn("invalid name")
                         else
-                            execute("paint", path)
+                            execute("paint", windowEventData[6], path)
                         end
                     else
                         warn("this name is occupied")
                     end
                 end
             elseif num == 5 then --new folder
-                local clear = saveZone()
+                local clear = saveZone(screen)
                 local name = gui_input(screen, nil, nil, "folder name")
                 clear()
 
@@ -942,7 +1019,7 @@ local function doIcon(windowEventData)
                     end
                 end
             elseif num == 6 then --new text file
-                local clear = saveZone()
+                local clear = saveZone(screen)
                 local name = gui_input(screen, nil, nil, "text file name")
                 clear()
 
@@ -952,7 +1029,7 @@ local function doIcon(windowEventData)
                         if #name == 0 or (name:find("%.") and not isDev()) or name:find("%/") or name:find("%\\") then
                             warn("invalid name")
                         else
-                            execute("edit", path)
+                            execute("edit", windowEventData[6], path)
                         end
                     else
                         warn("this name is occupied")
@@ -962,7 +1039,7 @@ local function doIcon(windowEventData)
                 local copyFlag = true
                 local toPath = paths.concat(userPath, paths.name(copyObject))
                 if fs.exists(toPath) then
-                    local clear = saveZone()
+                    local clear = saveZone(screen)
                     local replaseAllow = gui_yesno(screen, nil, nil, "an object with this name is already present in this folder, should I replace it?")
                     if not replaseAllow then
                         clear()
@@ -987,7 +1064,7 @@ local function doIcon(windowEventData)
                     draw()
                 end
             elseif num == 7 then
-                local clear = saveZone()
+                local clear = saveZone(screen)
                 local url = gui_input(screen, nil, nil, "url")
                 clear()
                 if url and url ~= "" then
@@ -1005,12 +1082,12 @@ local function doIcon(windowEventData)
                     if path then
                         local replaceAllow
                         if fs.exists(path) then
-                            local clear = saveZone()
+                            local clear = saveZone(screen)
                             replaceAllow = gui_yesno(screen, nil, nil, "an object with this name is already present in this folder, should I replace it?")
                             clear()
                         end
                         if not fs.exists(path) or replaceAllow then
-                            local clear = saveZone()
+                            local clear = saveZone(screen)
                             gui_status(screen, nil, nil, "downloading file...")
                             local data, err = getInternetFile(url)
                             clear()
@@ -1048,13 +1125,15 @@ local function isMultiscreen()
     end
 end
 
-local function lock()
+local function lock(firstLock)
     lockFlag = true
     drawStatus()
     drawWallpaper()
 
     while true do
-        local successful = gui_checkPassword(screen)
+        local successful = gui_checkPassword(screen, nil, nil, not isFirst and firstLock)
+        firstLock = nil
+
         if successful then
             break
         elseif successful == false then
@@ -1072,7 +1151,7 @@ local function lock()
 end
 
 if registry.password then
-    lock()
+    lock(true)
 end
 
 ------------------------------------------------------------------------ main
@@ -1134,9 +1213,9 @@ while true do
             contextMenuOpen = false
 
             if num == 1 then
-                execute("about")
+                execute("about", statusWindowEventData[6])
             elseif num == 2 then
-                execute("settings")
+                execute("settings", statusWindowEventData[6])
             elseif num == 3 then
                 lock()
                 draw()
@@ -1188,8 +1267,7 @@ while true do
                 setDev(not isDev())
                 event.sleep(1)
             else
-                computer.beep(200)
-                warn("dev mode shortcut disabled vendor")
+                warn("dev-mode shortcut disabled by vendor")
             end
         end
         devModeCount = 0

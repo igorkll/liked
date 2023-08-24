@@ -6,7 +6,6 @@ local unicode = require("unicode")
 local event = require("event")
 local calls = require("calls")
 local registry = require("registry")
-local sha256 = require("sha256").sha256
 
 local colors = gui_container.colors
 
@@ -37,6 +36,7 @@ return function(eventData)
             if registry.password then
                 if gui_checkPassword(screen) then
                     registry.password = nil
+                    registry.passwordSalt = nil
                 end
             else
                 gui_warn(screen, nil, nil, "the password is not set")
@@ -49,7 +49,9 @@ return function(eventData)
                     local password2 = gui_input(screen, nil, nil, "comfurm new password", true)
                     if password2 then
                         if password1 == password2 then
-                            registry.password = sha256(password1)
+                            local salt = uuid()
+                            registry.password = sha256(password1 .. salt)
+                            registry.passwordSalt = salt
                         else
                             gui_warn(screen, nil, nil, "passwords don't match")
                         end

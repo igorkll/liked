@@ -10,13 +10,16 @@ local fs = require("filesystem")
 local paths = require("paths")
 local programs = require("programs")
 
+local screen, nickname = ...
+
 local list = {
     {
         name = "nanomachines",
-        version = "1.3",
+        version = "1.4",
         vendor = "logic",
         icon = "https://raw.githubusercontent.com/igorkll/liked/main/market/apps/nanomachines.app/icon.t2p",
         description = "allows you to control nanobots using a wireless modem",
+        minDiskSpace = 64,
 
         path = "/data/userdata/nanomachines.app",
         install = function(self)
@@ -31,6 +34,7 @@ local list = {
         vendor = "logic",
         icon = "https://raw.githubusercontent.com/igorkll/liked/main/market/apps/worm.app/icon.t2p",
         description = "classic snake ported from computercraft",
+        minDiskSpace = 64,
 
         path = "/data/userdata/worm.app",
         install = function(self)
@@ -45,6 +49,7 @@ local list = {
         vendor = "logic",
         icon = "https://raw.githubusercontent.com/igorkll/liked/main/market/apps/chat.app/icon.t2p",
         description = "allows you to exchange messages, pictures and files between computers via a network card",
+        minDiskSpace = 64,
 
         path = "/data/bin/chat.app",
         install = function(self)
@@ -76,9 +81,10 @@ local list = {
     {
         name = "irc",
         version = "1",
-        vendor = "Nathan Flynn / logic",
+        vendor = "Nathan Flynn",
         icon = "https://raw.githubusercontent.com/igorkll/liked/main/market/apps/irc.app/icon.t2p",
         description = "allows you to connect to IRC chats via an Internet card.\nprogram ported from openOS",
+        minDiskSpace = 64,
 
         path = "/data/userdata/irc.app",
         install = function(self)
@@ -89,10 +95,11 @@ local list = {
     },
     {
         name = "archiver",
-        version = "1.2",
+        version = "1.3",
         vendor = "logic",
         icon = "https://raw.githubusercontent.com/igorkll/liked/main/market/apps/archiver.app/icon.t2p",
         description = "allows you to unpack and package archives in afpx format",
+        minDiskSpace = 64,
 
         path = "/data/bin/archiver.app",
         install = function(self)
@@ -109,6 +116,7 @@ local list = {
         vendor = "logic",
         icon = "https://raw.githubusercontent.com/igorkll/liked/main/market/apps/brainfuck.app/icon.t2p",
         description = "brainfuck code interpreter",
+        minDiskSpace = 64,
 
         path = "/data/bin/brainfuck.app",
         install = function(self)
@@ -130,6 +138,7 @@ local list = {
         end
     },
     ]]
+    --[[
     {
         name = "legacy render",
         version = "1",
@@ -150,12 +159,14 @@ local list = {
             programs.execute("/data/autoruns/legacyRender.lua")
         end
     },
+    ]]
     {
         name = "lua",
         version = "1",
         vendor = "logic",
         icon = "https://raw.githubusercontent.com/igorkll/liked/main/market/apps/lua.app/icon.t2p",
         description = "lua code interpreter",
+        minDiskSpace = 64,
 
         path = "/data/userdata/lua.app",
         install = function(self)
@@ -170,12 +181,61 @@ local list = {
         vendor = "logic",
         icon = "https://raw.githubusercontent.com/igorkll/liked/main/market/apps/events.app/icon.t2p",
         description = "allows you to view computer events",
+        minDiskSpace = 64,
 
         path = "/data/userdata/events.app",
         install = function(self)
             fs.makeDirectory("/data/userdata/events.app")
             saveFile("/data/userdata/events.app/main.lua", assert(calls.call("getInternetFile", "https://raw.githubusercontent.com/igorkll/liked/main/market/apps/events.app/main.lua")))
             saveFile("/data/userdata/events.app/icon.t2p", assert(calls.call("getInternetFile", self.icon)))
+        end
+    },
+    {
+        name = "OpenOS",
+        version = "1",
+        vendor = "MightyPirates",
+        icon = "https://raw.githubusercontent.com/igorkll/liked/main/market/apps/OpenOS.app/icon.t2p",
+        description = "configures dualboot between openOS and liked",
+        minDiskSpace = 1024,
+
+        path = "/vendor/bin/OpenOS.app",
+        install = function(self)
+            local afpxPath = self.path .. "/openOS.afpx"
+
+            fs.makeDirectory(self.path)
+            saveFile(self.path .. "/main.lua", assert(calls.call("getInternetFile", "https://raw.githubusercontent.com/igorkll/liked/main/market/apps/OpenOS.app/main.lua")))
+            saveFile(self.path .. "/uninstall.lua", assert(calls.call("getInternetFile", "https://raw.githubusercontent.com/igorkll/liked/main/market/apps/OpenOS.app/uninstall.lua")))
+            saveFile(self.path .. "/icon.t2p", assert(calls.call("getInternetFile", self.icon)))
+            
+            saveFile(afpxPath, assert(calls.call("getInternetFile", "https://raw.githubusercontent.com/igorkll/liked/main/market/apps/OpenOS.app/openOS.afpx")))
+            require("afpx").unpack(afpxPath, "/")
+            fs.remove(afpxPath)
+        end
+    },
+    {
+        name = "MineOS",
+        version = "1",
+        vendor = "IgorTimofeev",
+        icon = "https://raw.githubusercontent.com/igorkll/liked/main/market/apps/MineOS.app/icon.t2p",
+        license = "https://raw.githubusercontent.com/igorkll/liked/main/market/apps/MineOS.app/LICENSE",
+        description = "configures dualboot between mineOS and liked",
+        minDiskSpace = 1024 + 512,
+        minColorDepth = 8,
+
+        path = "/vendor/bin/MineOS.app",
+        install = function(self)
+            local afpxPath = self.path .. "/mineOS.afpx"
+
+            fs.makeDirectory(self.path)
+            saveFile(self.path .. "/main.lua", assert(calls.call("getInternetFile", "https://raw.githubusercontent.com/igorkll/liked/main/market/apps/MineOS.app/main.lua")))
+            saveFile(self.path .. "/uninstall.lua", assert(calls.call("getInternetFile", "https://raw.githubusercontent.com/igorkll/liked/main/market/apps/MineOS.app/uninstall.lua")))
+            saveFile(self.path .. "/icon.t2p", assert(calls.call("getInternetFile", self.icon)))
+
+            saveFile("/mineOS.lua", assert(calls.call("getInternetFile", "https://raw.githubusercontent.com/igorkll/liked/main/market/apps/MineOS.app/mineOS.lua")))
+            
+            saveFile(afpxPath, assert(calls.call("getInternetFile", "https://raw.githubusercontent.com/igorkll/liked/main/market/apps/MineOS.app/mineOS.afpx")))
+            require("afpx").unpack(afpxPath, "/")
+            fs.remove(afpxPath)
         end
     },
     --[[

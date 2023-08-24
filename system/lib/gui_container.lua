@@ -14,7 +14,8 @@ gui_container.typecolors = {
     lua = gui_container.colors.lime
 }
 gui_container.typenames = {
-    t2p = "image",
+    ["t2p"] = "image",
+    ["mid"] = "midi"
 }
 
 _G.gui_container = gui_container

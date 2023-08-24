@@ -1004,7 +1004,7 @@ local colors = require("gui_container").colors
 local component = require("component")
 local paths = require("paths")
 
-local screen, filename, readonly = ...
+local screen, nickname, filename, readonly = ...
 local file_parentpath = paths.path(filename)
 
 local gpu = graphic.findGpu(screen)

@@ -10,7 +10,7 @@ local screen = ...
 local gpu = graphic.findGpu(screen)
 local rx, ry = gpu.getResolution()
 
-local path = paths.path(calls.call("getPath"))
+local path = paths.path(getPath())
 
 --------------------------------------------
 
@@ -29,19 +29,21 @@ local function draw()
 end
 draw()
 
-local function writeInitLua()
-    fs.copy(paths.concat(path, "init.lua"), "/init.lua")
+
+local function writeCustomInit()
+    assert(fs.copy(paths.concat(path, "init.lua"), "/init.lua"))
 end
 
 local function removeUserData()
-    --[[
-    for i, file in ipairs(fs.list("/") or {}) do
-        if file ~= "init.lua" and file ~= "system/" and file ~= "external-data/" then
-            fs.remove("/" .. file)
-        end
-    end
-    ]]
     fs.remove("/data")
+end
+
+local function removeSystem()
+    fs.remove("/system")
+end
+
+local function endProcess()
+    computer.shutdown("fast") --fast для быстрой перезагрузки, чтобы не показывалось меню bios(мой стандарт)
 end
 
 --------------------------------------------
@@ -51,7 +53,7 @@ while true do
     local windowEventData = window:uploadEvent(eventData)
     if windowEventData[1] == "touch" then
         if windowEventData[3] >= setPos and windowEventData[3] <= setPos + 16 then
-            if windowEventData[4] == (ry // 2) + 0 then --updata
+            if windowEventData[4] == (ry // 2) + 0 then --Update
                 if not component.list("internet")() then
                     calls.call("gui_warn", screen, nil, nil, "no internet card found")
                     draw()
@@ -61,9 +63,9 @@ while true do
                     local localVersion = calls.call("getOSversion")
                     if inetVersion > localVersion then
                         if calls.call("gui_yesno", screen, nil, nil, "update to version " .. tostring(inetVersion)) then
-                            writeInitLua()
-                            fs.remove("/system")
-                            computer.shutdown("fast") --для быстрой перезагрузки, чтобы не показывалось меню bios(мой стандарт)
+                            writeCustomInit()
+                            removeSystem()
+                            endProcess()
                         else
                             draw()
                         end
@@ -78,10 +80,10 @@ while true do
                     draw()
                 else
                     if calls.call("gui_yesno", screen, nil, nil, "reinstall os? all data will be deleted!") then
-                        writeInitLua()
-                        fs.remove("/system")
+                        writeCustomInit()
+                        removeSystem()
                         removeUserData()
-                        computer.shutdown("fast")
+                        endProcess()
                     else
                         draw()
                     end
@@ -92,9 +94,9 @@ while true do
                     draw()
                 else
                     if calls.call("gui_yesno", screen, nil, nil, "recover os?") then
-                        writeInitLua()
-                        fs.remove("/system")
-                        computer.shutdown("fast")
+                        writeCustomInit()
+                        removeSystem()
+                        endProcess()
                     else
                         draw()
                     end
@@ -102,7 +104,7 @@ while true do
             elseif windowEventData[4] == (ry // 2) + 3 then --factory reset
                 if calls.call("gui_yesno", screen, nil, nil, "factory reset? all data will be deleted!") then
                     removeUserData()
-                    computer.shutdown("fast")
+                    endProcess()
                 else
                     draw()
                 end

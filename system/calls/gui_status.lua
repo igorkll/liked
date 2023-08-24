@@ -29,11 +29,11 @@ local color = backgroundColor or colors.lightGray
 window:fill(2, 2, window.sizeX, window.sizeY, colors.gray, 0, " ")
 window:clear(color)
 
-for i, v in ipairs(calls.call("restrs", str, 22)) do
-    local textColor = colors.white
-    if color == textColor then
-        textColor = colors.black
-    end
+local textColor = colors.white
+if color == textColor then
+    textColor = colors.black
+end
+for i, v in ipairs(restrs(str, 22)) do
     window:set(10, i + 1, color, textColor, v)
 end
 
@@ -46,12 +46,7 @@ window:set(2, 3, color, colors.blue, " ◢█◣ ")
 window:set(2, 4, color, colors.blue, "◢███◣")
 window:set(4, 3, colors.blue, colors.white, "P")
 
-event.sleep(0.05)
+graphic.forceUpdate()
 if require("registry").soundEnable then
     --computer.beep(500, 0.1)
-end
-
-local tbl = {event.pull(0.1)}
-if #tbl > 0 then
-    event.push(table.unpack(tbl))
 end

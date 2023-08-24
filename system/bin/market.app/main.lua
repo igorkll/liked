@@ -7,6 +7,7 @@ local component = require("component")
 local computer = require("computer")
 local paths = require("paths")
 local unicode = require("unicode")
+local programs = require("programs")
 
 local colors = gui_container.colors
 
@@ -14,12 +15,14 @@ local colors = gui_container.colors
 
 local title = "MARKET"
 
-local screen = ...
+local screen, nickname = ...
 local rx, ry
 do
     local gpu = graphic.findGpu(screen)
     rx, ry = gpu.getResolution()
 end
+
+local rootfs = fs.get("/")
 
 ------------------------------------
 
@@ -43,7 +46,7 @@ end
 ------------------------------------
 
 local mainurl = "https://raw.githubusercontent.com/igorkll/liked/main/market/list.lua"
-local list = assert(load(assert(calls.call("getInternetFile", mainurl))))()
+local list = assert(load(assert(calls.call("getInternetFile", mainurl))))(screen, nickname)
 
 ------------------------------------
 
@@ -62,41 +65,86 @@ local function applicationLabel(data, x, y)
 
     local installed = data:isInstalled()
 
+    local supportErr
+    if data.minDiskSpace then
+        local freeSpace = (rootfs.spaceTotal() - rootfs.spaceUsed()) / 1024
+        if freeSpace < data.minDiskSpace then
+            supportErr = "not enough space to install. need: " .. tostring(data.minDiskSpace) .. "KB"
+        end
+    end
+    if data.minColorDepth and graphic.findGpu(screen).maxDepth() < data.minColorDepth then
+        local level = -1
+        if data.minColorDepth == 1 then
+            level = 1
+        elseif data.minColorDepth == 4 then
+            level = 2
+        elseif data.minColorDepth == 8 then
+            level = 3
+        end
+        supportErr = "the graphics system level is too low. need: " .. tostring(level)
+    end
+
     local function draw()
         applabel:clear(colors.black)
         applabel:set(12, 2, colors.black, colors.white, "name  : " .. (data.name or "unknown"))
         applabel:set(12, 3, colors.black, colors.white, "verion: " .. (data.version or "unknown"))
         applabel:set(12, 4, colors.black, colors.white, "vendor: " .. (data.vendor or "unknown"))
 
+        if data.license then
+            applabel:set(applabel.sizeX - 13, 3, colors.blue, colors.white, "   license   ")
+        end
+
+        local altCol = supportErr and colors.gray
         if installed and data.getVersion and data:getVersion() ~= data.version then
-            applabel:set(applabel.sizeX - 13, 2, colors.orange, colors.white, "   update    ")
+            applabel:set(applabel.sizeX - 13, 2, altCol or colors.orange, colors.white, "   update    ")
         elseif installed then
-            applabel:set(applabel.sizeX - 13, 2, colors.red, colors.white,    "  uninstall  ")
+            applabel:set(applabel.sizeX - 13, 2, altCol or colors.red, colors.white,    "  uninstall  ")
         else
-            applabel:set(applabel.sizeX - 13, 2, colors.green, colors.white,  "   install   ")
+            applabel:set(applabel.sizeX - 13, 2, altCol or colors.green, colors.white,  "   install   ")
         end
 
         gui_drawimage(screen, img, applabel:toRealPos(2, 2))
     end
-    draw()
+
+    if y > -4 and y <= ry then
+        draw()
+    end
+    
     
     return {tick = function (eventData)
         local windowEventData = applabel:uploadEvent(eventData)
         if windowEventData[1] == "touch" then
-            if windowEventData[3] >= (applabel.sizeX - 13) and windowEventData[3] < ((applabel.sizeX - 13) + 13) and windowEventData[4] == 2 then
+            if windowEventData[3] >= (applabel.sizeX - 13) and windowEventData[3] < ((applabel.sizeX - 13) + 13) and windowEventData[4] == 3 then
+                if data.license then
+                    local license = "/tmp/market/" .. (data.name or "unknown") .. ".txt"
+
+                    gui_status(screen, nil, nil, "license loading...")
+                    assert(saveFile(license, assert(getInternetFile(data.license))))
+                    programs.execute("edit", screen, nickname, license, true)
+                    fs.remove(license)
+
+                    return true
+                end
+            elseif windowEventData[3] >= (applabel.sizeX - 13) and windowEventData[3] < ((applabel.sizeX - 13) + 13) and windowEventData[4] == 2 then
+                local formattedName = " \"" .. (data.name or "unknown") .. "\"?"
+                local formattedName2 = " \"" .. (data.name or "unknown") .. "\"..."
                 if installed and data.getVersion and data:getVersion() ~= data.version then
-                    if gui_yesno(screen, nil, nil, "update?") then
-                        gui_status(screen, nil, nil, "updating...")
+                    if supportErr then
+                        gui_warn(screen, nil, nil, supportErr)
+                    elseif gui_yesno(screen, nil, nil, "update" .. formattedName) then
+                        gui_status(screen, nil, nil, "updating" .. formattedName2)
                         data:install()
                     end
                 elseif installed then
-                    if gui_yesno(screen, nil, nil, "uninstall?") then
-                        gui_status(screen, nil, nil, "uninstalling...")
+                    if gui_yesno(screen, nil, nil, "uninstall" .. formattedName) then
+                        gui_status(screen, nil, nil, "uninstalling" .. formattedName2)
                         data:uninstall()
                     end
                 else
-                    if gui_yesno(screen, nil, nil, "install?") then
-                        gui_status(screen, nil, nil, "installation...")
+                    if supportErr then
+                        gui_warn(screen, nil, nil, supportErr)
+                    elseif gui_yesno(screen, nil, nil, "install" .. formattedName) then
+                        gui_status(screen, nil, nil, "installation" .. formattedName2)
                         data:install()
                     end
                 end
@@ -217,17 +265,12 @@ while true do
             if ret == false then
                 gui_status(screen, nil, nil, "loading...")
                 if appInfo(appsTbl[index]) then
-                    return
+                    break
                 end
                 draw()
             elseif ret then
                 draw()
             end
-        end
-
-        local current = appsTbl[windowEventData[4]]
-        if current then
-            
         end
     elseif windowEventData[1] == "scroll" then
         if windowEventData[5] > 0 then
@@ -237,10 +280,12 @@ while true do
         end
         if listOffSet > appCount - 1 then
             listOffSet = appCount - 1
-        end
-        if listOffSet < 1 then
+        elseif listOffSet < 1 then
             listOffSet = 1
+        else
+            draw()
         end
-        draw()
     end
 end
+
+fs.remove("/tmp/market")

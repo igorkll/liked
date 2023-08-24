@@ -9,13 +9,17 @@ local colors = gui_container.colors
 
 --------------------------------------------
 
-local screen, cx, cy, dir, exp, save, dirmode = ...
+local screen, cx, cy, dir, exp, save, dirmode, dircombine = ...
 
 local gpu = graphic.findGpu(screen)
 local rx, ry = gpu.getResolution()
 
 local userRoot = gui_container.userRoot
 local userPath = dir or gui_container.userRoot
+
+local function isDev()
+    return not not gui_container.devModeStates[screen]
+end
 
 local function checkFolder()
     if unicode.sub(userPath, 1, unicode.len(userRoot)) ~= userRoot then
@@ -57,13 +61,67 @@ local function draw()
     strs = {}
     local count = 1
     for i, file in ipairs(fs.list(userPath)) do
-        if fs.isDirectory(paths.concat(userPath, file)) or ((not exp or paths.extension(file) == exp) and not dirmode) then
-            window:fill(1, count + 1, window.sizeX, 1, colors.gray, 0, " ")
-            window:set(1, count + 1, colors.gray, colors.white, file)
-            strs[count] = file
-            count = count + 1
+        local dir = fs.isDirectory(paths.concat(userPath, file))
+        if dir or ((not exp or paths.extension(file) == exp) and not dirmode) then
+            local name = file
+            if name:sub(#name, #name) == "/" then
+                name = name:sub(1, #name - 1)
+            end
+            local lexp = paths.extension(file)
+            name = paths.hideExtension(name)
+
+            if (not dir or not lexp) or isDev() then
+                local lname = (lexp and gui_container.typenames[lexp]) or lexp
+                local ctype = (lname and ((dir and "DIR-" or "") .. lname) or (dir and "DIR" or "FILE")):upper()
+                local objcolor = dir and colors.black or colors.lightGray
+
+                if lexp == "lua" then
+                    objcolor = colors.green
+                elseif lexp == "afpx" then
+                    objcolor = colors.orange
+                elseif lexp == "app" then
+                    objcolor = colors.red
+                end
+
+                window:fill(1, count + 1, window.sizeX, 1, objcolor, 0, " ")
+                window:set(1, count + 1, objcolor, colors.white, name)
+                window:set(window.sizeX - #ctype, count + 1, objcolor, colors.white, ctype)
+                strs[count] = file
+                count = count + 1
+            end
         end
     end
+end
+
+local function checkName(filename)
+    local fullpath = paths.concat(userPath, filename)
+    if (fs.exists(fullpath) or save) and (not fs.exists(fullpath) or fs.isDirectory(fullpath) == not not dirmode) then
+        if fs.isDirectory(fullpath) then
+            if not save or not fs.exists(fullpath) or gui_yesno(screen, nil, nil, (dircombine and "combine" or "overwrite") .. " directory?") then
+                return fullpath
+            end
+        else
+            if not save or not fs.exists(fullpath) or gui_yesno(screen, nil, nil, "overwrite file?") then
+                return fullpath
+            end
+        end
+        draw()
+    else
+        if fs.isDirectory(fullpath) ~= not not dirmode then
+            if dirmode then
+                gui_warn(screen, nil, nil, "is not directory")
+            else
+                gui_warn(screen, nil, nil, "is directory")
+            end
+        else
+            gui_warn(screen, nil, nil, (dirmode and "directory" or "file") .. " not found")
+        end
+        draw()
+    end
+end
+
+local function checkFileName(str)
+    return (not str:find("%.") or isDev()) and not str:find("%/") and not str:find("%\\") and #str > 0
 end
 
 draw()
@@ -80,23 +138,21 @@ while true do
     if windowEventData[1] == "touch" then
         local pos = windowEventData[4] - 1
         if strs[pos] then
-            local filename = strs[pos]
-            local fullpath = paths.concat(userPath, filename)
-            if fs.isDirectory(fullpath) then
-                if dirmode and windowEventData[5] == 1 then
-                    if not save or gui_yesno(screen, nil, nil, "overwrite/combine directory?") then
-                        return fullpath
-                    end
-                else
-                    userPath = fullpath
+            if windowEventData[5] == 0 then
+                local ret = checkName(strs[pos])
+                if ret then
+                    return ret
                 end
             else
-                if not save or gui_yesno(screen, nil, nil, "overwrite file?") then
-                    return fullpath
-                end
+                local lpath = paths.concat(userPath, strs[pos])
+                if fs.isDirectory(lpath) then
+                    userPath = lpath
+                    draw()
+                end                
             end
-            draw()
         end
+        
+        
 
         if windowEventData[3] == window.sizeX and windowEventData[4] == 1 then
             return
@@ -105,10 +161,10 @@ while true do
         if windowEventData[3] == 2 and windowEventData[4] == window.sizeY then
             local str = gui_input(screen, nil, nil, "directory name")
             if str then
-                if str:find("%.") or str:find("%/") or str:find("%\\") then
-                    gui_warn(screen, nil, nil, "invalid name")
-                else
+                if checkFileName(str) then
                     fs.makeDirectory(paths.concat(userPath, str))
+                else
+                    gui_warn(screen, nil, nil, "invalid name")
                 end
             end
             draw()
@@ -121,34 +177,14 @@ while true do
         end
     end
 
-    if (windowEventData[3] == window.sizeX and windowEventData[4] == window.sizeY) or (readResult and readResult ~= true) then
+    if (windowEventData[1] == "touch" and windowEventData[3] == window.sizeX and windowEventData[4] == window.sizeY) or (readResult and readResult ~= true) then
         local buff = reader.getBuffer()
-        if buff ~= "" and (not exp or not buff:find("%.")) and not buff:find("%/") and not buff:find("%\\") then
+
+        if checkFileName(buff) then
             local filename = buff .. (exp and ("." .. exp) or "")
-            local filepath = paths.concat(userPath, filename)
-            if (fs.exists(filepath) or save) and (not fs.exists(filepath) or fs.isDirectory(filepath) == not not dirmode) then
-                local fullpath = paths.concat(userPath, filename)
-                if fs.isDirectory(fullpath) then
-                    if not save or not fs.exists(fullpath) or gui_yesno(screen, nil, nil, "overwrite/combine directory?") then
-                        return fullpath
-                    end
-                else
-                    if not save or not fs.exists(fullpath) or gui_yesno(screen, nil, nil, "overwrite file?") then
-                        return fullpath
-                    end
-                end
-                draw()
-            else
-                if fs.isDirectory(filepath) ~= not not dirmode then
-                    if dirmode then
-                        gui_warn(screen, nil, nil, "is not directory")
-                    else
-                        gui_warn(screen, nil, nil, "is directory")
-                    end
-                else
-                    gui_warn(screen, nil, nil, (dirmode and "directory" or "file") .. " not found")
-                end
-                draw()
+            local ret = checkName(filename)
+            if ret then
+                return ret
             end
         else
             gui_warn(screen, nil, nil, "invalid name")
