@@ -102,6 +102,7 @@ local function modifyList(lst)
         end
     
         local _install = v.install or function (self)
+            fs.makeDirectory(self.path)
             for _, name in ipairs(self.files or {"icon.t2p", "main.lua"}) do
                 save(paths.concat(self.path, name), download(self.urlPrimaryPart .. name))
             end

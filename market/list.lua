@@ -305,6 +305,12 @@ local list = {
             fs.makeDirectory(self.path)
             save(self.path .. "/main.lua", download("https://raw.githubusercontent.com/igorkll/liked/main/market/apps/redirection.app/main.lua"))
             save(self.path .. "/icon.t2p", download(self.icon))
+
+            fs.makeDirectory(paths.concat(self.path, "levels"))
+            for i = 0, 12 do
+                local name = tostring(i) .. ".dat"
+                save(paths.concat(self.path, "levels", name), download("https://raw.githubusercontent.com/igorkll/liked/main/market/apps/redirection.app/levels/" .. name))
+            end
         end
     },
     {
