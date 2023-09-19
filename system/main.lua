@@ -42,7 +42,7 @@ if not fs.exists("/data/theme.plt") then
 end
 
 if not fs.exists(gui_container.screenSaverPath) and not registry.screenSaverDefaultSetted then
-    pcall(fs.copy, "/system/screenSavers/black screen.scrsv", gui_container.screenSaverPath)
+    pcall(fs.copy, "/system/screenSavers/black_screen.scrsv", gui_container.screenSaverPath)
     registry.screenSaverDefaultSetted = true
 end
 
