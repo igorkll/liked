@@ -1,46 +1,54 @@
+--заметки для меня(актульны для этого файла)
 --все приложения должны содержать
---посля name, vendor, version, description
+--посля name, vendor, version, description, minDiskSpace
 --url иконки в поле icon
+--поле path с путем установки для того чтобы автогенерация функции uninstall в конце этого файла знала что удалять или где искать uninstall.lua
 --функцию для установки
---программы которые создают автораны или иначе встраиваються в систему должны ставиться по пути /data/bin
---программы которые пользователь сможет переносить между дисками должны ставиться в /data/userdata
 
-local calls = require("calls")
 local fs = require("filesystem")
 local paths = require("paths")
 local programs = require("programs")
+local internet = require("internet")
+
+local function download(url)
+    return assert(internet.getInternetFile(url))
+end
+
+local function save(path, data)
+    assert(fs.writeFile(path, data))
+end
 
 local screen, nickname = ...
 
 local list = {
     {
         name = "nanomachines",
-        version = "1.4",
+        version = "2",
         vendor = "logic",
         icon = "https://raw.githubusercontent.com/igorkll/liked/main/market/apps/nanomachines.app/icon.t2p",
         description = "allows you to control nanobots using a wireless modem",
         minDiskSpace = 64,
 
-        path = "/data/userdata/nanomachines.app",
+        path = "/data/bin/nanomachines.app",
         install = function(self)
-            fs.makeDirectory("/data/userdata/nanomachines.app")
-            saveFile("/data/userdata/nanomachines.app/main.lua", assert(calls.call("getInternetFile", "https://raw.githubusercontent.com/igorkll/liked/main/market/apps/nanomachines.app/main.lua")))
-            saveFile("/data/userdata/nanomachines.app/icon.t2p", assert(calls.call("getInternetFile", self.icon)))
+            fs.makeDirectory("/data/bin/nanomachines.app")
+            save("/data/bin/nanomachines.app/main.lua", download("https://raw.githubusercontent.com/igorkll/liked/main/market/apps/nanomachines.app/main.lua"))
+            save("/data/bin/nanomachines.app/icon.t2p", download(self.icon))
         end
     },
     {
         name = "worm",
         version = "1",
-        vendor = "logic",
+        vendor = "computercraft",
         icon = "https://raw.githubusercontent.com/igorkll/liked/main/market/apps/worm.app/icon.t2p",
         description = "classic snake ported from computercraft",
         minDiskSpace = 64,
 
-        path = "/data/userdata/worm.app",
+        path = "/data/bin/worm.app",
         install = function(self)
-            fs.makeDirectory("/data/userdata/worm.app")
-            saveFile("/data/userdata/worm.app/main.lua", assert(calls.call("getInternetFile", "https://raw.githubusercontent.com/igorkll/liked/main/market/apps/worm.app/main.lua")))
-            saveFile("/data/userdata/worm.app/icon.t2p", assert(calls.call("getInternetFile", self.icon)))
+            fs.makeDirectory("/data/bin/worm.app")
+            save("/data/bin/worm.app/main.lua", download("https://raw.githubusercontent.com/igorkll/liked/main/market/apps/worm.app/main.lua"))
+            save("/data/bin/worm.app/icon.t2p", download(self.icon))
         end
     },
     {
@@ -54,27 +62,27 @@ local list = {
         path = "/data/bin/chat.app",
         install = function(self)
             fs.makeDirectory("/data/bin/chat.app")
-            saveFile("/data/bin/chat.app/main.lua", assert(calls.call("getInternetFile", "https://raw.githubusercontent.com/igorkll/liked/main/market/apps/chat.app/main.lua")))
-            saveFile("/data/bin/chat.app/icon.t2p", assert(calls.call("getInternetFile", self.icon)))
-            saveFile("/data/bin/chat.app/uninstall.lua", assert(calls.call("getInternetFile", "https://raw.githubusercontent.com/igorkll/liked/main/market/apps/chat.app/uninstall.lua")))
+            save("/data/bin/chat.app/main.lua", download("https://raw.githubusercontent.com/igorkll/liked/main/market/apps/chat.app/main.lua"))
+            save("/data/bin/chat.app/icon.t2p", download(self.icon))
+            save("/data/bin/chat.app/uninstall.lua", download("https://raw.githubusercontent.com/igorkll/liked/main/market/apps/chat.app/uninstall.lua"))
 
             fs.makeDirectory("/data/autoruns")
-            saveFile("/data/autoruns/chat_demon.lua", assert(calls.call("getInternetFile", "https://raw.githubusercontent.com/igorkll/liked/main/market/apps/chat.app/autorun.lua")))
+            save("/data/autoruns/chat_demon.lua", download("https://raw.githubusercontent.com/igorkll/liked/main/market/apps/chat.app/autorun.lua"))
 
             fs.makeDirectory("/data/lib")
-            saveFile("/data/lib/chat_lib.lua", assert(calls.call("getInternetFile", "https://raw.githubusercontent.com/igorkll/liked/main/market/apps/chat.app/chat_lib.lua")))
-            saveFile("/data/lib/modem_chat_lib.lua", assert(calls.call("getInternetFile", "https://raw.githubusercontent.com/igorkll/liked/main/market/apps/chat.app/modem_chat_lib.lua")))
+            save("/data/lib/chat_lib.lua", download("https://raw.githubusercontent.com/igorkll/liked/main/market/apps/chat.app/chat_lib.lua"))
+            save("/data/lib/modem_chat_lib.lua", download("https://raw.githubusercontent.com/igorkll/liked/main/market/apps/chat.app/modem_chat_lib.lua"))
         
-            programs.execute("/data/autoruns/chat_demon.lua")
+            assert(programs.execute("/data/autoruns/chat_demon.lua"))
         end
     },
     --[[
     {
-        path = "/data/userdata/spaceshot.app",
+        path = "/data/bin/spaceshot.app",
         install = function()
-            fs.makeDirectory("/data/userdata/spaceshoter.app")
-            saveFile("/data/userdata/spaceshoter.app/main.lua", assert(calls.call("getInternetFile", "https://raw.githubusercontent.com/igorkll/liked/main/market/apps/spaceshoter.app/main.lua")))
-            saveFile("/data/userdata/spaceshoter.app/icon.t2p", assert(calls.call("getInternetFile", "https://raw.githubusercontent.com/igorkll/liked/main/market/apps/spaceshoter.app/icon.t2p")))
+            fs.makeDirectory("/data/bin/spaceshoter.app")
+            save("/data/bin/spaceshoter.app/main.lua", download("https://raw.githubusercontent.com/igorkll/liked/main/market/apps/spaceshoter.app/main.lua")))
+            save("/data/bin/spaceshoter.app/icon.t2p", download("https://raw.githubusercontent.com/igorkll/liked/main/market/apps/spaceshoter.app/icon.t2p")))
         end
     }
     ]]
@@ -86,28 +94,31 @@ local list = {
         description = "allows you to connect to IRC chats via an Internet card.\nprogram ported from openOS",
         minDiskSpace = 64,
 
-        path = "/data/userdata/irc.app",
+        path = "/data/bin/irc.app",
         install = function(self)
-            fs.makeDirectory("/data/userdata/irc.app")
-            saveFile("/data/userdata/irc.app/main.lua", assert(calls.call("getInternetFile", "https://raw.githubusercontent.com/igorkll/liked/main/market/apps/irc.app/main.lua")))
-            saveFile("/data/userdata/irc.app/icon.t2p", assert(calls.call("getInternetFile", self.icon)))
+            fs.makeDirectory("/data/bin/irc.app")
+            save("/data/bin/irc.app/main.lua", download("https://raw.githubusercontent.com/igorkll/liked/main/market/apps/irc.app/main.lua"))
+            save("/data/bin/irc.app/icon.t2p", download(self.icon))
         end
     },
     {
         name = "archiver",
-        version = "1.3",
+        version = "2",
         vendor = "logic",
         icon = "https://raw.githubusercontent.com/igorkll/liked/main/market/apps/archiver.app/icon.t2p",
-        description = "allows you to unpack and package archives in afpx format",
+        description = "allows you to unpack and package archives",
         minDiskSpace = 64,
 
         path = "/data/bin/archiver.app",
         install = function(self)
             fs.makeDirectory("/data/bin/archiver.app")
-            saveFile("/data/bin/archiver.app/main.lua", assert(calls.call("getInternetFile", "https://raw.githubusercontent.com/igorkll/liked/main/market/apps/archiver.app/main.lua")))
-            saveFile("/data/bin/archiver.app/icon.t2p", assert(calls.call("getInternetFile", self.icon)))
-            saveFile("/data/bin/archiver.app/uninstall.lua", assert(calls.call("getInternetFile", "https://raw.githubusercontent.com/igorkll/liked/main/market/apps/archiver.app/uninstall.lua")))
-            saveFile("/data/icons/afpx.t2p", assert(calls.call("getInternetFile", "https://raw.githubusercontent.com/igorkll/liked/main/market/apps/archiver.app/afpx.t2p")))
+            save("/data/bin/archiver.app/main.lua", download("https://raw.githubusercontent.com/igorkll/liked/main/market/apps/archiver.app/main.lua"))
+            save("/data/bin/archiver.app/icon.t2p", download(self.icon))
+            save("/data/bin/archiver.app/uninstall.lua", download("https://raw.githubusercontent.com/igorkll/liked/main/market/apps/archiver.app/uninstall.lua"))
+            save("/data/autoruns/archiver.lua", download("https://raw.githubusercontent.com/igorkll/liked/main/market/apps/archiver.app/autorun.lua"))
+            save("/data/icons/afpx.t2p", download("https://raw.githubusercontent.com/igorkll/liked/main/market/apps/archiver.app/afpx.t2p"))
+        
+            assert(programs.execute("/data/autoruns/archiver.lua"))
         end
     },
     {
@@ -122,19 +133,19 @@ local list = {
         install = function(self)
             fs.makeDirectory("/data/bin/brainfuck.app")
             fs.makeDirectory("/data/lib")
-            saveFile("/data/bin/brainfuck.app/main.lua", assert(calls.call("getInternetFile", "https://raw.githubusercontent.com/igorkll/liked/main/market/apps/brainfuck.app/main.lua")))
-            saveFile("/data/bin/brainfuck.app/icon.t2p", assert(calls.call("getInternetFile", self.icon)))
-            saveFile("/data/bin/brainfuck.app/uninstall.lua", assert(calls.call("getInternetFile", "https://raw.githubusercontent.com/igorkll/liked/main/market/apps/brainfuck.app/uninstall.lua")))
-            saveFile("/data/lib/brainfuck.lua", assert(calls.call("getInternetFile", "https://raw.githubusercontent.com/igorkll/liked/main/market/apps/brainfuck.app/lib.lua")))
+            save("/data/bin/brainfuck.app/main.lua", download("https://raw.githubusercontent.com/igorkll/liked/main/market/apps/brainfuck.app/main.lua"))
+            save("/data/bin/brainfuck.app/icon.t2p", download(self.icon))
+            save("/data/bin/brainfuck.app/uninstall.lua", download("https://raw.githubusercontent.com/igorkll/liked/main/market/apps/brainfuck.app/uninstall.lua"))
+            save("/data/lib/brainfuck.lua", download("https://raw.githubusercontent.com/igorkll/liked/main/market/apps/brainfuck.app/lib.lua"))
         end
     },
     --[[
     eeprom = {
-        path = "/data/userdata/eeprom.app",
+        path = "/data/bin/eeprom.app",
         install = function()
-            fs.makeDirectory("/data/userdata/eeprom.app")
-            saveFile("/data/userdata/eeprom.app/main.lua", assert(calls.call("getInternetFile", "https://raw.githubusercontent.com/igorkll/liked/main/market/apps/eeprom.app/main.lua")))
-            saveFile("/data/userdata/eeprom.app/icon.t2p", assert(calls.call("getInternetFile", "https://raw.githubusercontent.com/igorkll/liked/main/market/apps/eeprom.app/icon.t2p")))
+            fs.makeDirectory("/data/bin/eeprom.app")
+            save("/data/bin/eeprom.app/main.lua", download("https://raw.githubusercontent.com/igorkll/liked/main/market/apps/eeprom.app/main.lua")))
+            save("/data/bin/eeprom.app/icon.t2p", download("https://raw.githubusercontent.com/igorkll/liked/main/market/apps/eeprom.app/icon.t2p")))
         end
     },
     ]]
@@ -151,10 +162,10 @@ local list = {
             fs.makeDirectory("/data/autoruns")
             fs.makeDirectory("/data/bin/legacyRender.app")
 
-            saveFile("/data/bin/legacyRender.app/main.lua", assert(calls.call("getInternetFile", "https://raw.githubusercontent.com/igorkll/liked/main/market/apps/legacyRender.app/main.lua")))
-            saveFile("/data/bin/legacyRender.app/icon.t2p", assert(calls.call("getInternetFile", self.icon)))
-            saveFile("/data/bin/legacyRender.app/uninstall.lua", assert(calls.call("getInternetFile", "https://raw.githubusercontent.com/igorkll/liked/main/market/apps/legacyRender.app/uninstall.lua")))
-            saveFile("/data/autoruns/legacyRender.lua", assert(calls.call("getInternetFile", "https://raw.githubusercontent.com/igorkll/liked/main/market/apps/legacyRender.app/autorun.lua")))
+            save("/data/bin/legacyRender.app/main.lua", download("https://raw.githubusercontent.com/igorkll/liked/main/market/apps/legacyRender.app/main.lua")))
+            save("/data/bin/legacyRender.app/icon.t2p", download(self.icon)))
+            save("/data/bin/legacyRender.app/uninstall.lua", download("https://raw.githubusercontent.com/igorkll/liked/main/market/apps/legacyRender.app/uninstall.lua")))
+            save("/data/autoruns/legacyRender.lua", download("https://raw.githubusercontent.com/igorkll/liked/main/market/apps/legacyRender.app/autorun.lua")))
             
             programs.execute("/data/autoruns/legacyRender.lua")
         end
@@ -162,17 +173,17 @@ local list = {
     ]]
     {
         name = "lua",
-        version = "1",
+        version = "2",
         vendor = "logic",
         icon = "https://raw.githubusercontent.com/igorkll/liked/main/market/apps/lua.app/icon.t2p",
         description = "lua code interpreter",
         minDiskSpace = 64,
 
-        path = "/data/userdata/lua.app",
+        path = "/data/bin/lua.app",
         install = function(self)
-            fs.makeDirectory("/data/userdata/lua.app")
-            saveFile("/data/userdata/lua.app/main.lua", assert(calls.call("getInternetFile", "https://raw.githubusercontent.com/igorkll/liked/main/market/apps/lua.app/main.lua")))
-            saveFile("/data/userdata/lua.app/icon.t2p", assert(calls.call("getInternetFile", self.icon)))
+            fs.makeDirectory("/data/bin/lua.app")
+            save("/data/bin/lua.app/main.lua", download("https://raw.githubusercontent.com/igorkll/liked/main/market/apps/lua.app/main.lua"))
+            save("/data/bin/lua.app/icon.t2p", download(self.icon))
         end
     },
     {
@@ -183,16 +194,16 @@ local list = {
         description = "allows you to view computer events",
         minDiskSpace = 64,
 
-        path = "/data/userdata/events.app",
+        path = "/data/bin/events.app",
         install = function(self)
-            fs.makeDirectory("/data/userdata/events.app")
-            saveFile("/data/userdata/events.app/main.lua", assert(calls.call("getInternetFile", "https://raw.githubusercontent.com/igorkll/liked/main/market/apps/events.app/main.lua")))
-            saveFile("/data/userdata/events.app/icon.t2p", assert(calls.call("getInternetFile", self.icon)))
+            fs.makeDirectory("/data/bin/events.app")
+            save("/data/bin/events.app/main.lua", download("https://raw.githubusercontent.com/igorkll/liked/main/market/apps/events.app/main.lua"))
+            save("/data/bin/events.app/icon.t2p", download(self.icon))
         end
     },
     {
         name = "OpenOS",
-        version = "1",
+        version = "1.8.3",
         vendor = "MightyPirates",
         icon = "https://raw.githubusercontent.com/igorkll/liked/main/market/apps/OpenOS.app/icon.t2p",
         description = "configures dualboot between openOS and liked",
@@ -203,18 +214,21 @@ local list = {
             local afpxPath = self.path .. "/openOS.afpx"
 
             fs.makeDirectory(self.path)
-            saveFile(self.path .. "/main.lua", assert(calls.call("getInternetFile", "https://raw.githubusercontent.com/igorkll/liked/main/market/apps/OpenOS.app/main.lua")))
-            saveFile(self.path .. "/uninstall.lua", assert(calls.call("getInternetFile", "https://raw.githubusercontent.com/igorkll/liked/main/market/apps/OpenOS.app/uninstall.lua")))
-            saveFile(self.path .. "/icon.t2p", assert(calls.call("getInternetFile", self.icon)))
+            save(self.path .. "/main.lua", download("https://raw.githubusercontent.com/igorkll/liked/main/market/apps/OpenOS.app/main.lua"))
+            save(self.path .. "/uninstall.lua", download("https://raw.githubusercontent.com/igorkll/liked/main/market/apps/OpenOS.app/uninstall.lua"))
+            save(self.path .. "/icon.t2p", download(self.icon))
+
+            save(self.path .. "/lua5_2.lua", download("https://raw.githubusercontent.com/igorkll/liked/main/market/apps/OpenOS.app/lua5_2.lua"))
+            save(self.path .. "/actions.cfg", download("https://raw.githubusercontent.com/igorkll/liked/main/market/apps/OpenOS.app/actions.cfg"))
             
-            saveFile(afpxPath, assert(calls.call("getInternetFile", "https://raw.githubusercontent.com/igorkll/liked/main/market/apps/OpenOS.app/openOS.afpx")))
-            require("afpx").unpack(afpxPath, "/")
+            save(afpxPath, download("https://raw.githubusercontent.com/igorkll/liked/main/market/apps/OpenOS.app/openOS.afpx"))
+            require("archiver").unpack(afpxPath, "/")
             fs.remove(afpxPath)
         end
     },
     {
         name = "MineOS",
-        version = "1",
+        version = "2",
         vendor = "IgorTimofeev",
         icon = "https://raw.githubusercontent.com/igorkll/liked/main/market/apps/MineOS.app/icon.t2p",
         license = "https://raw.githubusercontent.com/igorkll/liked/main/market/apps/MineOS.app/LICENSE",
@@ -227,58 +241,93 @@ local list = {
             local afpxPath = self.path .. "/mineOS.afpx"
 
             fs.makeDirectory(self.path)
-            saveFile(self.path .. "/main.lua", assert(calls.call("getInternetFile", "https://raw.githubusercontent.com/igorkll/liked/main/market/apps/MineOS.app/main.lua")))
-            saveFile(self.path .. "/uninstall.lua", assert(calls.call("getInternetFile", "https://raw.githubusercontent.com/igorkll/liked/main/market/apps/MineOS.app/uninstall.lua")))
-            saveFile(self.path .. "/icon.t2p", assert(calls.call("getInternetFile", self.icon)))
-
-            saveFile("/mineOS.lua", assert(calls.call("getInternetFile", "https://raw.githubusercontent.com/igorkll/liked/main/market/apps/MineOS.app/mineOS.lua")))
+            save(self.path .. "/main.lua", download("https://raw.githubusercontent.com/igorkll/liked/main/market/apps/MineOS.app/main.lua"))
+            save(self.path .. "/uninstall.lua", download("https://raw.githubusercontent.com/igorkll/liked/main/market/apps/MineOS.app/uninstall.lua"))
+            save(self.path .. "/icon.t2p", download(self.icon))
+            save("/mineOS.lua", download("https://raw.githubusercontent.com/igorkll/liked/main/market/apps/MineOS.app/mineOS.lua"))
             
-            saveFile(afpxPath, assert(calls.call("getInternetFile", "https://raw.githubusercontent.com/igorkll/liked/main/market/apps/MineOS.app/mineOS.afpx")))
-            require("afpx").unpack(afpxPath, "/")
+            save(self.path .. "/lua5_2.lua", download("https://raw.githubusercontent.com/igorkll/liked/main/market/apps/MineOS.app/lua5_2.lua"))
+            save(self.path .. "/actions.cfg", download("https://raw.githubusercontent.com/igorkll/liked/main/market/apps/MineOS.app/actions.cfg"))
+            save(self.path .. "/LICENSE", download(self.license))
+
+            save(afpxPath, download("https://raw.githubusercontent.com/igorkll/liked/main/market/apps/MineOS.app/mineOS.afpx"))
+            require("archiver").unpack(afpxPath, "/")
             fs.remove(afpxPath)
         end
     },
+    {
+        name = "explode",
+        version = "1",
+        vendor = "logic",
+        icon = "https://raw.githubusercontent.com/igorkll/liked/main/market/apps/explode.app/icon.t2p",
+        description = "blow up your computer!",
+        minDiskSpace = 64,
+
+        path = "/data/bin/explode.app",
+        install = function(self)
+            fs.makeDirectory(self.path)
+            save(self.path .. "/main.lua", download("https://raw.githubusercontent.com/igorkll/liked/main/market/apps/explode.app/main.lua"))
+            save(self.path .. "/icon.t2p", download(self.icon))
+        end
+    },
+    {
+        name = "camera",
+        version = "1",
+        vendor = "logic",
+        icon = "https://raw.githubusercontent.com/igorkll/liked/main/market/apps/camera.app/icon.t2p",
+        description = "allows you to take pictures on the camera from the computronix addon.\n* allows you to select a camera from several\n* allows you to save a photo for loading on another computer",
+        minDiskSpace = 64,
+
+        path = "/data/bin/camera.app",
+        install = function(self)
+            fs.makeDirectory(self.path)
+            save(self.path .. "/uninstall.lua", download("https://raw.githubusercontent.com/igorkll/liked/main/market/apps/camera.app/uninstall.lua"))
+            save(self.path .. "/main.lua", download("https://raw.githubusercontent.com/igorkll/liked/main/market/apps/camera.app/main.lua"))
+            
+            local icon = download(self.icon)
+            save(self.path .. "/icon.t2p", icon)
+            save("/data/icons/cam.t2p", icon)
+
+            save("/data/autoruns/camera.lua", download("https://raw.githubusercontent.com/igorkll/liked/main/market/apps/camera.app/autorun.lua"))
+            assert(programs.execute("/data/autoruns/camera.lua"))
+        end
+    },
+    {
+        name = "redirection",
+        version = "1",
+        vendor = "computercraft",
+        icon = "https://raw.githubusercontent.com/igorkll/liked/main/market/apps/redirection.app/icon.t2p",
+        description = "the game was ported from computercraft",
+        minDiskSpace = 64,
+
+        path = "/data/bin/redirection.app",
+        install = function(self)
+            fs.makeDirectory(self.path)
+            save(self.path .. "/main.lua", download("https://raw.githubusercontent.com/igorkll/liked/main/market/apps/redirection.app/main.lua"))
+            save(self.path .. "/icon.t2p", download(self.icon))
+        end
+    },
+    {
+        name = "adventure",
+        version = "1",
+        vendor = "computercraft",
+        description = "the game was ported from computercraft",
+        minDiskSpace = 64,
+
+        path = "/data/bin/adventure.app",
+        urlPrimaryPart = "https://raw.githubusercontent.com/igorkll/liked/main/market/apps/adventure.app/" --часть url к которой будут присираться разные имена файлов для скачивания(обязателен / на конце)
+    }
     --[[
     openbox = {
         hided = true,
-        path = "/data/userdata/openbox.app",
+        path = "/data/bin/openbox.app",
         install = function()
-            fs.makeDirectory("/data/userdata/openbox.app")
-            saveFile("/data/userdata/openbox.app/main.lua", assert(calls.call("getInternetFile", "https://raw.githubusercontent.com/igorkll/liked/main/market/apps/openbox.app/main.lua")))
-            saveFile("/data/userdata/openbox.app/icon.t2p", assert(calls.call("getInternetFile", "https://raw.githubusercontent.com/igorkll/liked/main/market/apps/openbox.app/icon.t2p")))
+            fs.makeDirectory("/data/bin/openbox.app")
+            save("/data/bin/openbox.app/main.lua", download("https://raw.githubusercontent.com/igorkll/liked/main/market/apps/openbox.app/main.lua")))
+            save("/data/bin/openbox.app/icon.t2p", download("https://raw.githubusercontent.com/igorkll/liked/main/market/apps/openbox.app/icon.t2p")))
         end
     }
     ]]
 }
-
-for i, v in ipairs(list) do
-    local versionpath = paths.concat(v.path, "version.dat")
-    function v.getVersion(self)
-        if fs.exists(versionpath) then
-            return getFile(versionpath)
-        else
-            return "unknown"
-        end
-    end
-
-    function v.uninstall(self)
-        local uninstallPath = paths.concat(self.path, "uninstall.lua")
-        if fs.exists(uninstallPath) then
-            programs.execute(uninstallPath)
-        else
-            fs.remove(self.path)
-        end
-    end
-
-    function v.isInstalled(self)
-        return fs.exists(self.path)
-    end
-
-    local _install = v.install
-    function v.install(self)
-        _install(self)
-        saveFile(versionpath, self.version)
-    end
-end
 
 return list

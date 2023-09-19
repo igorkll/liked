@@ -3,7 +3,7 @@ local calls = require("calls")
 local component  = require("component")
 local graphic = require("graphic")
 local gui_container = gui_container or require("gui_container")
-local path = ...
+local path, screen = ...
 
 local file = assert(fs.open(path, "rb"))
 local themeData = file.readAll()
@@ -30,12 +30,20 @@ movetable(gui_container.colors, {
     black     = colors[16]
 })
 
-for address in component.list("screen") do
+local function applyOnScreen(address)
     if graphic.maxDepth(address) ~= 1 then
         local count = 0
         for i, v in ipairs(colors) do
             graphic.setPaletteColor(address, count, v)
             count = count + 1
         end
+    end
+end
+
+if screen then
+    applyOnScreen(screen)
+else
+    for address in component.list("screen") do
+        applyOnScreen(address)
     end
 end

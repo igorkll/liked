@@ -1,7 +1,7 @@
 local graphic = require("graphic")
 local fs = require("filesystem")
 local paths = require("paths")
-local afpx = require("afpx")
+local archiver = require("archiver")
 local event = require("event")
 local gui_container = require("gui_container")
 
@@ -43,7 +43,7 @@ local function unpack(path, unpackFolder)
     --fs.remove(unpackFolder)
     fs.makeDirectory(unpackFolder)
 
-    local ok, err = afpx.unpack(path, unpackFolder)
+    local ok, err = archiver.unpack(path, unpackFolder)
     if ok then
         printMainScreen()
     else
@@ -52,7 +52,7 @@ local function unpack(path, unpackFolder)
 end
 
 local function pack(packFolder, path)
-    local ok, err = afpx.pack(packFolder, path)
+    local ok, err = archiver.pack(packFolder, path)
     if ok then
         printMainScreen()
     else

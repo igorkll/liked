@@ -17,16 +17,6 @@ path = paths.canonical(path)
 
 ------------------------------------
 
-local function readIcon(path)
-    local file = fs.open(path, "rb")
-    local buffer
-    if file then
-        buffer = file.readAll()
-        file.close()
-    end
-    return buffer
-end
-
 cache.cache.images = cache.cache.images or {}
 
 local buffer
@@ -34,7 +24,7 @@ local lcache = cache.cache.images[path]
 if lcache and fs.lastModified(path) == lcache[2] then
     buffer = lcache[1]
 else
-    buffer = readIcon(path)
+    buffer = assert(fs.readFile(path))
     cache.cache.images[path] = {buffer, fs.lastModified(path)}
 end
 

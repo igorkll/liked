@@ -76,7 +76,7 @@ local function refreshFiles()
             fullpath = fs.concat(userPath, file),
             name = paths.hideExtension(file),
             typename = gui_container.typenames[paths.extension(files)] or paths.extension(file),
-            color = gui_container.typecolors[paths.extension(files)] or colors.lightGlue
+            color = gui_container.typecolors[paths.extension(files)] or colors.lightBlue
         })
     end
 end

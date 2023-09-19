@@ -18,14 +18,15 @@ if not cx or not cy then
     cy = cy / 2
     cx = cx - 16
     cy = cy - 4
-    cx = math.floor(cx)
-    cy = math.floor(cy)
+    cx = math.floor(cx) + 1
+    cy = math.floor(cy) + 1
 end
 
 local window = graphic.createWindow(screen, cx, cy, 32, 8, true)
 local color = backgroundColor or colors.lightGray
 
-window:fill(2, 2, window.sizeX, window.sizeY, colors.gray, 0, " ")
+--window:fill(2, 2, window.sizeX, window.sizeY, colors.gray, 0, " ")
+require("gui").shadow(gpu, window.x, window.y, window.sizeX, window.sizeY)
 window:clear(color)
 
 for i, v in ipairs(calls.call("restrs", str, 22)) do

@@ -1,0 +1,34 @@
+local graphic = require("graphic")
+local colors = require("colors")
+local event = require("event")
+local screen = ...
+
+local current = require("thread").current()
+current.kill = function (self)
+    gui_initScreen(screen)
+    self:raw_kill()
+end
+
+local color = {math.random(0, 255), math.random(0, 255), math.random(0, 255)}
+local newcolor = {math.random(0, 255), math.random(0, 255), math.random(0, 255)}
+
+local gpu = graphic.findGpu(screen)
+local mx, my = gpu.getResolution()
+gpu.setPaletteColor(0, colors.blend(color[1], color[2], color[3]))
+gpu.setBackground(0, true)
+gpu.fill(1, 1, mx, my, " ")
+
+while true do
+    local gpu = graphic.findGpu(screen)
+    gpu.setPaletteColor(0, colors.blend(color[1], color[2], color[3]))
+    local err = 0
+    for i = 1, 3 do
+        color[i] = color[i] + ((newcolor[i] - color[i]) * 0.1)
+        err = err + math.abs(newcolor[i] - color[i])
+    end
+    if err < 30 then
+        newcolor = {math.random(0, 255), math.random(0, 255), math.random(0, 255)}
+    end
+
+    event.yield()
+end

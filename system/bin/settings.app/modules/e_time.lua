@@ -20,7 +20,6 @@ local rx, ry = gpu.getResolution()
 local window = graphic.createWindow(screen, posX, posY, rx - (posX - 1), ry - (posY - 1))
 
 local function draw()
-
     window:clear(colors.black)
     window:set(1, 1, colors.lightGray, colors.white, "current timezone: " .. tostring(registry.timeZone or 0))
     window:set(1, 2, colors.lightGray, colors.white, "set new timezone")

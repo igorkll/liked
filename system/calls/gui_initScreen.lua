@@ -9,15 +9,22 @@ if mx > 80 or my > 25 then
     mx = 80
     my = 25
 end
+
+local function clr()
+    gpu.setBackground(0x000000)
+    gpu.setForeground(0xffffff)
+    gpu.fill(1, 1, mx, my, " ")
+end
+
 graphic.setResolution(screen, mx, my)
 
---ядро likeOS само сбрасывает палитру и устанавливает максимальную глубину цвета
---graphic.setDepth(screen, graphic.maxDepth(screen))
+clr()
 
+graphic.setDepth(screen, 1)
+graphic.setDepth(screen, graphic.maxDepth(screen))
 
-gpu.setBackground(0x000000)
-gpu.setForeground(0xffffff)
-gpu.fill(1, 1, mx, my, " ")
+clr()
 
+system_applyTheme("/data/theme.plt", screen)
 
-system_setTheme("/data/theme.plt")
+clr()

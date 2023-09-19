@@ -6,8 +6,8 @@
     0xFFFF00, --5)  yellow --
     0x00FF00, --6)  lime
     0xe998c0, --7)  pink --
-    0x808080, --8)  gray --
-    0xD3D3D3, --9)  lightGray --
+    0x444444, --8)  gray --
+    0xc1c1c1, --9)  lightGray --
     0x00ffff, --10) cyan --
     0xbf00ff, --11) purple --
     0x0000FF, --12) blue --

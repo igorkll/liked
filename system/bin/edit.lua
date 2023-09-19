@@ -1014,6 +1014,8 @@ gpu.setForeground(colors.white)
 local oldAllowBuffer = graphic.getBufferStateOnScreen(screen)
 graphic.setBufferStateOnScreen(screen, false)
 
+local keyaddr = component.invoke(screen, "getKeyboards")[1]
+
 local blinkingTerm = true
 local cx, cy = 1, 1
 term = {clear = function()
@@ -1056,7 +1058,7 @@ end, getCursorBlink = function()
 end, screen = function()
     return screen
 end, keyboard = function()
-    return component.invoke(screen, "getKeyboards")[1]
+    return keyaddr
 end, getGlobalArea = function()
     local sx, sy = graphic.findGpu(screen).getResolution()
     return 1, 1, sx, sy

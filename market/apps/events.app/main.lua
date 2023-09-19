@@ -1,7 +1,6 @@
 local graphic = require("graphic")
 local event = require("event")
 local gui_container = require("gui_container")
-local registry = require("registry")
 
 local colors = gui_container.colors
 

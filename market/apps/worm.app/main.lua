@@ -535,8 +535,6 @@ setmetatable(keyboard.keys,
 
 
 
-
-
 local computer = require("computer")
 local component = require("component")
 local unicode = require("unicode")
@@ -561,9 +559,17 @@ local cursorBlick = false
 
 --------------------------------------------
 
+local selfpath = require("system").getSelfScriptPath()
+local paths = require("paths")
+
+local ccqueue = {}
+
 local env
 env = {
     fs = {
+        getDir = function (path)
+            return paths.path(path)
+        end,
         list = function(path)
             local files = {}
             for file in fs.list(path) do
@@ -589,41 +595,48 @@ env = {
         delete = fs.remove,
         combine = fs.concat,
         open = function(path, mode)
-            local file, err = io.open(path, mode)
+            local file, err = fs.open(path, mode)
             if not file then return nil, err end
 
             local obj = {}
 
             function obj.readAll()
-                return su.getFile(path)
+                return file.readAll()
             end
 
             function obj.close()
-                return file:close()
+                return file.close()
             end
 
             function obj.write(str)
                 if type(str) == "string" then
-                    return file:write(str)
+                    return file.write(str)
                 else
-                    return file:write(string.byte(str))
+                    return file.write(string.byte(str))
                 end
             end
 
             function obj.writeLine(str)
-                return file:write(str .. "\n")
+                return file.write(str .. "\n")
             end
 
             function obj.read(bytes)
                 if bytes then
-                    return file:read(bytes)
+                    return file.read(bytes)
                 else
-                    return string.char(file:read(1))
+                    return string.char(file.read(1))
                 end
             end
             
             function obj.readLine()
-                return file:read()
+                local line = nil
+                while true do
+                    local char = file.read(1)
+                    if not char or char == "\n" then break end
+                    if not line then line = "" end
+                    line = line .. char
+                end
+                return line
             end
 
             return obj
@@ -709,35 +722,38 @@ env = {
         end,
         pullEvent = function(name)
             while true do
-                local eventData
-                if cursorBlick then
-                    eventData = {event.pull()}
-                else
-                    eventData = {event.pull()}
-                end
                 local newEventData
 
-                if eventData[1] == "touch" and eventData[2] == screen then
-                    newEventData = {"mouse_click", math.floor(eventData[5] + 1), math.floor(eventData[3]), math.floor(eventData[4])}
-                elseif eventData[1] == "key_down" and eventData[2] == keyboard2 and eventData[3] == 3 and eventData[4] == 46 then
-                    error("interrupted", 0)
-                elseif eventData[1] == "drop" and eventData[2] == screen then
-                    newEventData = {"mouse_up", math.floor(eventData[5] + 1), math.floor(eventData[3]), math.floor(eventData[4])}
-                elseif eventData[1] == "drag" and eventData[2] == screen then
-                    newEventData = {"mouse_drag", math.floor(eventData[5] + 1), math.floor(eventData[3]), math.floor(eventData[4])}
-                elseif eventData[1] == "scroll" and eventData[2] == screen then
-                    newEventData = {"mouse_scroll", math.floor(-eventData[5]), math.floor(eventData[3]), math.floor(eventData[4])}
-                elseif eventData[1] == "key_down" and eventData[2] == keyboard2 then
-                    newEventData = {"key", math.floor(eventData[4]), false}
-                    if eventData[3] >= 32 and eventData[3] <= 126 then
-                        event.push("ccevent", "char", string.char(eventData[3]))
+                if #ccqueue > 0 then
+                    newEventData = table.remove(ccqueue)
+                else
+                    local eventData
+                    if cursorBlick then
+                        eventData = {event.pull(0.1)}
+                    else
+                        eventData = {event.pull(0.1)}
                     end
-                elseif eventData[1] == "key_up" and eventData[2] == keyboard2 then
-                    newEventData = {"key_up", math.floor(eventData[4])}
-                elseif eventData[1] == "clipboard" and eventData[2] == keyboard2 then
-                    newEventData = {"paste", eventData[3]}
-                elseif eventData[1] == "ccevent" then
-                    newEventData = {table.unpack(eventData, 2)}
+
+                    if eventData[1] == "touch" and eventData[2] == screen then
+                        newEventData = {"mouse_click", math.floor(eventData[5] + 1), math.floor(eventData[3]), math.floor(eventData[4])}
+                    elseif eventData[1] == "key_down" and eventData[2] == keyboard2 and eventData[3] == 3 and eventData[4] == 46 then
+                        error("interrupted", 0)
+                    elseif eventData[1] == "drop" and eventData[2] == screen then
+                        newEventData = {"mouse_up", math.floor(eventData[5] + 1), math.floor(eventData[3]), math.floor(eventData[4])}
+                    elseif eventData[1] == "drag" and eventData[2] == screen then
+                        newEventData = {"mouse_drag", math.floor(eventData[5] + 1), math.floor(eventData[3]), math.floor(eventData[4])}
+                    elseif eventData[1] == "scroll" and eventData[2] == screen then
+                        newEventData = {"mouse_scroll", math.floor(-eventData[5]), math.floor(eventData[3]), math.floor(eventData[4])}
+                    elseif eventData[1] == "key_down" and eventData[2] == keyboard2 then
+                        newEventData = {"key", math.floor(eventData[4]), false}
+                        if eventData[3] >= 32 and eventData[3] <= 126 then
+                            table.insert(ccqueue, {"char", string.char(eventData[3])})
+                        end
+                    elseif eventData[1] == "key_up" and eventData[2] == keyboard2 then
+                        newEventData = {"key_up", math.floor(eventData[4])}
+                    elseif eventData[1] == "clipboard" and eventData[2] == keyboard2 then
+                        newEventData = {"paste", eventData[3]}
+                    end
                 end
 
                 if newEventData and (not name or newEventData[1] == name) then
@@ -748,12 +764,12 @@ env = {
         startTimer = function(time)
             local id
             id = event.timer(time, function()
-                event.push("ccevent", "timer", id)
+                table.insert(ccqueue, {"timer", id})
             end)
             return id
         end,
         queueEvent = function(name, ...)
-            event.push("ccevent", name, ...)
+            table.insert(ccqueue, {name, ...})
         end
     },
     parallel = {
@@ -764,7 +780,18 @@ env = {
                 table.insert(threads, thread.create(v))
             end
 
-            pcall(thread.waitForAny, threads)
+            while true do
+                local isBreak
+                for k, v in pairs(threads) do
+                    if v:status() == "dead" then
+                        isBreak = true
+                        break
+                    end
+                end
+                if isBreak then
+                    break
+                end
+            end
 
             for k, v in pairs(threads) do
                 v:kill()
@@ -777,7 +804,15 @@ env = {
                 table.insert(threads, thread.create(v))
             end
 
-            pcall(thread.waitForAll, threads)
+            repeat
+                local activeThread
+                for k, v in pairs(threads) do
+                    if v:status() ~= "dead" then
+                        activeThread = true
+                        break
+                    end
+                end
+            until not activeThread
 
             for k, v in pairs(threads) do
                 v:kill()
@@ -791,6 +826,9 @@ env = {
             return 0
         end,
         switchTab = function(num)
+        end,
+        getRunningProgram = function ()
+            return selfpath
         end
     },
     peripheral = { --заглушка
@@ -836,6 +874,21 @@ env = {
         end
     },
 
+    paintutils = {
+        drawPixel = function (x, y, col)
+            env.term.setBackgroundColor(col)
+            env.term.setCursorPos(x, y)
+            env.term.write(" ")
+        end,
+    },
+
+    write = function (...)
+        env.term.write(...)
+    end,
+    print = function (...)
+        env.term.write(...)
+    end,
+
     io = {
 
     },
@@ -868,7 +921,6 @@ env = {
     utf8 = utf8,
     getmetatable = getmetatable,
     setmetatable = setmetatable,
-    print = print,
     select = select,
     next = next,
 }
@@ -892,10 +944,7 @@ env._G = env
 
 local func = assert(load(programmData, nil, nil, env))
 
-local oldAllowBuffer = graphic.getBufferStateOnScreen(screen)
-graphic.setBufferStateOnScreen(screen, false)
 local ok, err = pcall(func, ...)
-graphic.setBufferStateOnScreen(screen, oldAllowBuffer)
 if not ok then
     if err == "interrupted" then
         return

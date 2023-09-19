@@ -1,12 +1,14 @@
 local fs = require("filesystem")
-local screen, posX, posY, vfs = ...
+local paths = require("paths")
+local screen, posX, posY, vfs, name = ...
 
-local clear = screenshot(screen, posX, posY, 23, 4)
+local clear = screenshot(screen, posX, posY, 31, 5)
 local str2, num2 = gui_context(screen, posX, posY, {
     "  likeOS installer",
     "  liked",
-    "  likeOS (core only)  "
-}, {true, true, true})
+    "  likeOS (core only)",
+    "  full cloning of the system  "
+}, {true, true, true, not vendor.banSystemCloning})
 clear()
 
 if not str2 then
@@ -17,14 +19,17 @@ str2 = str2:sub(3, #str2)
 local label = str2
 if num2 == 3 then
     label = "likeOS"
+elseif num2 == 4 then
+    label = "self-system"
 end
 
 local clear2 = saveZone(screen)
-if gui_yesno(screen, nil, nil, "install \"" .. label .. "\"?") then
-    gui_status(screen, nil, nil, "installing \"" .. label .. "\"...")
+if gui_yesno(screen, nil, nil, "install \"" .. label .. "\" to \"" .. name .. "\"?") then
+    gui_status(screen, nil, nil, "installing \"" .. label .. "\" to \"" .. name .. "\"...")
 
-    fs.umount("/tmp/tmpmount")
+    local rootfs = fs.get("/")
     do
+        fs.umount("/tmp/tmpmount")
         local success, err = fs.mount(vfs, "/tmp/tmpmount")
         if not success then return nil, err end
     end
@@ -33,13 +38,15 @@ if gui_yesno(screen, nil, nil, "install \"" .. label .. "\"?") then
         local success, err = fs.copy("/init.lua", "/tmp/tmpmount/init.lua")
         if not success then return nil, err end
     
-        local success, err = fs.copy("/system/core", "/tmp/tmpmount/system/core")
-        if not success then return nil, err end
-    
-        if liked then
+        if liked then --да сначала установиться liked, но и что, они всеравно не заменяют файлы друг-друга
+            fs.remove("/tmp/tmpmount/system") --удаляет старую систему чтобы не было канфликтов версий и не оставалось лишних файлов
             local success, err = fs.copy("/system", "/tmp/tmpmount/system")
             if not success then return nil, err end
         end
+
+        fs.remove("/tmp/tmpmount/system/core") --удаляет старую систему чтобы не было канфликтов версий и не оставалось лишних файлов
+        local success, err = fs.copy("/system/core", "/tmp/tmpmount/system/core")
+        if not success then return nil, err end
     
         return true
     end
@@ -54,6 +61,13 @@ if gui_yesno(screen, nil, nil, "install \"" .. label .. "\"?") then
         success, err = selfclone(true)
     elseif num2 == 3 then
         success, err = selfclone()
+    elseif num2 == 4 then
+        fs.remove("/tmp/tmpmount/system") --удаляет старую систему чтобы не было канфликтов версий и не оставалось лишних файлов
+
+        success, err = fs.copy("/", "/tmp/tmpmount", function (from)
+            if from == "/external-data" then return false end
+            return fs.get(from).address == rootfs.address
+        end)
     end
 
     if not success and not err then
@@ -61,8 +75,11 @@ if gui_yesno(screen, nil, nil, "install \"" .. label .. "\"?") then
     end
 
     if success then
+        if num2 == 4 then
+            label = rootfs.getLabel() or "liked"
+        end
         pcall(vfs.setLabel, label) --label может быть readonly(состояния label readonly полностью независимо от readonly на диске)
-        --у loot дискет можно менять label хотя они readonly, а tmpfs не readonly но label менять нельзя
+        --у loot дискет можно менять label хотя они readonly, а tmpfs не readonly но label менять нельзя(окозалось багом ocelot ну да ладно)
         --единсвенный кастыльный способ проверить являеться ли label readonly - это попытаться изменить его на точно такой же
         --в данном случаи если получиться изменить label то хорошо, а если не получиться то пофиг
     end

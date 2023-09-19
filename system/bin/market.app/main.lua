@@ -8,12 +8,13 @@ local computer = require("computer")
 local paths = require("paths")
 local unicode = require("unicode")
 local programs = require("programs")
+local internet = require("internet")
 
 local colors = gui_container.colors
 
 ------------------------------------
 
-local title = "MARKET"
+local title = "Market"
 
 local screen, nickname = ...
 local rx, ry
@@ -23,11 +24,7 @@ do
 end
 
 local rootfs = fs.get("/")
-
-------------------------------------
-
-local statusWindow = graphic.createWindow(screen, 1, 1, rx, 1)
-local window = graphic.createWindow(screen, 1, 2, rx, ry - 1)
+local maxDepth = graphic.findGpu(screen).maxDepth()
 
 ------------------------------------
 
@@ -45,34 +42,165 @@ end
 
 ------------------------------------
 
-local mainurl = "https://raw.githubusercontent.com/igorkll/liked/main/market/list.lua"
-local list = assert(load(assert(calls.call("getInternetFile", mainurl))))(screen, nickname)
+local gui_drawimage = calls.load("gui_drawimage")
+
+local statusWindow = graphic.createWindow(screen, 1, 1, rx, 1)
+local window = graphic.createWindow(screen, 1, 2, rx, ry - 1)
 
 ------------------------------------
 
+local freeSpace
+
+local function reFreeSpace()
+    freeSpace = (rootfs.spaceTotal() - rootfs.spaceUsed()) / 1024
+end
+
+reFreeSpace()
+
+------------------------------------
+
+local urls = {}
+local list = {}
+
+local function modifyList(lst)
+    local function download(url)
+        return assert(internet.getInternetFile(url))
+    end
+    
+    local function save(path, data)
+        assert(fs.writeFile(path, data))
+    end
+
+    for i, v in ipairs(lst) do
+        local versionpath = paths.concat(v.path, "version.dat")
+    
+        if not v.getVersion then
+            function v.getVersion(self)
+                if fs.exists(versionpath) then
+                    return fs.readFile(versionpath)
+                else
+                    return "unknown"
+                end
+            end
+        end
+    
+        if not v.uninstall then
+            function v.uninstall(self)
+                local uninstallPath = paths.concat(self.path, "uninstall.lua")
+                if fs.exists(uninstallPath) then
+                    assert(programs.execute(uninstallPath, screen, nickname))
+                else
+                    fs.remove(self.path)
+                end
+            end
+        end
+    
+        if not v.isInstalled then
+            function v.isInstalled(self)
+                return fs.exists(self.path)
+            end
+        end
+    
+        if not v.install then
+            local _install = v.install or function (self)
+                for _, name in ipairs(self.files or {"icon.t2p", "main.lua"}) do
+                    save(paths.concat(self.path, name), download(self.urlPrimaryPart .. name))
+                end
+            end
+            function v.install(self)
+                _install(self)
+                save(versionpath, self.version)
+            end
+        end
+    
+        if not v.icon and v.urlPrimaryPart then
+            v.icon = v.urlPrimaryPart .. "icon.t2p"
+        end
+    end
+end
+
+local function doList(path)
+    if fs.exists(path) then
+        local result = {pcall(getFile, path)}
+        if result[1] then
+            local result = {pcall(split2, unicode, result[2], {"\n"})}
+            if result[1] then
+                if type(result[2]) == "table" then
+                    for _, url in ipairs(result[2]) do
+                        if url ~= "" then
+                            table.insert(urls, url)
+                        end
+                    end
+                else
+                    gui_warn(screen, nil, nil, "list-type-err: " .. (type(result[2]) or "unknown"))
+                end
+            else
+                gui_warn(screen, nil, nil, "fail to parse list: " .. (result[2] or "unknown"))
+            end
+        else
+            gui_warn(screen, nil, nil, "fail to read list: " .. (result[2] or "unknown"))
+        end
+    end
+end
+
+local customPath = "/data/market_urls.txt"
+
+local function reList()
+    urls = {}
+    if not vendor.disableSystemMarketUrls then
+        doList("/system/market_urls.txt")
+    end
+    doList("/vendor/market_urls.txt")
+    if not vendor.disableCustomMarketUrls then
+        doList(customPath)
+    end
+
+    list = {}
+    for index, url in ipairs(urls) do
+        local id = tostring(index) .. "."
+    
+        local data, err = getInternetFile(url)
+        if data then
+            local code, err = load(data, "=list" .. index, "t", _ENV)
+            if code then
+                local result = {pcall(code, screen, nickname)}
+                if result[1] then
+                    if type(result[2]) == "table" then
+                        modifyList(result[2])
+                        for _, app in ipairs(result[2]) do
+                            table.insert(list, app)
+                        end
+                    else
+                        gui_warn(screen, nil, nil, id .. "list-type-err: " .. (type(result[2]) or "unknown"))
+                    end
+                else
+                    gui_warn(screen, nil, nil, id .. "list-err: " .. (result[2] or "unknown"))
+                end
+            else
+                gui_warn(screen, nil, nil, id .. "list-err: " .. (err or "unknown"))
+            end
+        else
+            gui_warn(screen, nil, nil, id .. "list-err: " .. (err or "unknown"))
+        end
+    end
+end
+reList()
+
+------------------------------------
+
+local instCache = {}
+local verCache = {}
+local downloaded = {}
 local function applicationLabel(data, x, y)
     local applabel = graphic.createWindow(screen, x, y, rx - 2, 6)
 
-    local img
-    if data.icon then
-        img = "/tmp/market/" .. (data.name or "unknown") .. ".t2p"
-        if not fs.exists(img) then
-            saveFile(img, getInternetFile(data.icon))
-        end
-    else
-        img = "/system/icons/app.t2p"
-    end
-
-    local installed = data:isInstalled()
-
     local supportErr
     if data.minDiskSpace then
-        local freeSpace = (rootfs.spaceTotal() - rootfs.spaceUsed()) / 1024
         if freeSpace < data.minDiskSpace then
             supportErr = "not enough space to install. need: " .. tostring(data.minDiskSpace) .. "KB"
         end
     end
-    if data.minColorDepth and graphic.findGpu(screen).maxDepth() < data.minColorDepth then
+    if data.minColorDepth and maxDepth < data.minColorDepth then
         local level = -1
         if data.minColorDepth == 1 then
             level = 1
@@ -84,8 +212,11 @@ local function applicationLabel(data, x, y)
         supportErr = "the graphics system level is too low. need: " .. tostring(level)
     end
 
-    local function draw()
+    local img
+
+    local function draw(custImg)
         applabel:clear(colors.black)
+        applabel:fill(1, 1, 10, 6, colors.gray, colors.lightGray, "▒")
         applabel:set(12, 2, colors.black, colors.white, "name  : " .. (data.name or "unknown"))
         applabel:set(12, 3, colors.black, colors.white, "verion: " .. (data.version or "unknown"))
         applabel:set(12, 4, colors.black, colors.white, "vendor: " .. (data.vendor or "unknown"))
@@ -94,48 +225,65 @@ local function applicationLabel(data, x, y)
             applabel:set(applabel.sizeX - 13, 3, colors.blue, colors.white, "   license   ")
         end
 
-        local altCol = supportErr and colors.gray
-        if installed and data.getVersion and data:getVersion() ~= data.version then
-            applabel:set(applabel.sizeX - 13, 2, altCol or colors.orange, colors.white, "   update    ")
-        elseif installed then
-            applabel:set(applabel.sizeX - 13, 2, altCol or colors.red, colors.white,    "  uninstall  ")
+        if custImg then
+            applabel:set(applabel.sizeX - 13, 2, colors.purple, colors.white, "   loading   ")
         else
-            applabel:set(applabel.sizeX - 13, 2, altCol or colors.green, colors.white,  "   install   ")
+            local altCol = supportErr and colors.gray
+            if instCache[data] and verCache[data] ~= data.version then
+                applabel:set(applabel.sizeX - 13, 2, altCol or colors.orange, colors.white, "   update    ")
+            elseif instCache[data] then
+                applabel:set(applabel.sizeX - 13, 2, colors.red, colors.white,    "  uninstall  ")
+            else
+                applabel:set(applabel.sizeX - 13, 2, altCol or colors.green, colors.white,  "   install   ")
+            end
         end
-
-        gui_drawimage(screen, img, applabel:toRealPos(2, 2))
-    end
-
-    if y > -4 and y <= ry then
-        draw()
+        
+        gui_drawimage(screen, custImg or img, applabel:toRealPos(2, 2))
     end
     
+    if data.icon then
+        img = "/tmp/market/" .. (data.name or "unknown") .. ".t2p"
+        if not downloaded[img] then
+            draw("/system/icons/app.t2p")
+            fs.writeFile(img, getInternetFile(data.icon))
+            downloaded[img] = true
+        end
+    else
+        img = "/system/icons/app.t2p"
+    end
+
+    if instCache[data] == nil then
+        instCache[data] = not not data:isInstalled()
+    end
+    if data.getVersion and verCache[data] == nil then
+        verCache[data] = data:getVersion()
+    end
+
+    draw()
     
     return {tick = function (eventData)
         local windowEventData = applabel:uploadEvent(eventData)
         if windowEventData[1] == "touch" then
-            if windowEventData[3] >= (applabel.sizeX - 13) and windowEventData[3] < ((applabel.sizeX - 13) + 13) and windowEventData[4] == 3 then
-                if data.license then
-                    local license = "/tmp/market/" .. (data.name or "unknown") .. ".txt"
+            if windowEventData[3] >= (applabel.sizeX - 13) and windowEventData[3] < ((applabel.sizeX - 13) + 13) and windowEventData[4] == 3 and data.license then
+                local license = "/tmp/market/" .. (data.name or "unknown") .. ".txt"
 
-                    gui_status(screen, nil, nil, "license loading...")
-                    assert(saveFile(license, assert(getInternetFile(data.license))))
-                    programs.execute("edit", screen, nickname, license, true)
-                    fs.remove(license)
+                gui_status(screen, nil, nil, "license loading...")
+                assert(saveFile(license, assert(getInternetFile(data.license))))
+                programs.execute("edit", screen, nickname, license, true)
+                fs.remove(license)
 
-                    return true
-                end
+                return true
             elseif windowEventData[3] >= (applabel.sizeX - 13) and windowEventData[3] < ((applabel.sizeX - 13) + 13) and windowEventData[4] == 2 then
                 local formattedName = " \"" .. (data.name or "unknown") .. "\"?"
                 local formattedName2 = " \"" .. (data.name or "unknown") .. "\"..."
-                if installed and data.getVersion and data:getVersion() ~= data.version then
+                if instCache[data] and verCache[data] ~= data.version then
                     if supportErr then
                         gui_warn(screen, nil, nil, supportErr)
                     elseif gui_yesno(screen, nil, nil, "update" .. formattedName) then
                         gui_status(screen, nil, nil, "updating" .. formattedName2)
                         data:install()
                     end
-                elseif installed then
+                elseif instCache[data] then
                     if gui_yesno(screen, nil, nil, "uninstall" .. formattedName) then
                         gui_status(screen, nil, nil, "uninstalling" .. formattedName2)
                         data:uninstall()
@@ -149,14 +297,19 @@ local function applicationLabel(data, x, y)
                     end
                 end
 
-                installed = data:isInstalled()
+                reFreeSpace()
+                instCache[data] = data:isInstalled()
+                verCache[data] = data:getVersion()
                 draw()
                 return true
             else
                 return false
             end
         end
-    end, draw = draw}
+    end, draw = draw, offset = function (offset)
+        y = y + offset
+        applabel.y = applabel.y + offset
+    end}
 end
 
 local function appInfo(data)
@@ -225,26 +378,63 @@ end
 ]]
 
 local appLabels = {}
-local function draw()
-    window:clear(colors.white)
+
+local function drawStatus()
+    statusWindow:clear(colors.gray)
+    statusWindow:set((statusWindow.sizeX / 2) - (unicode.len(title) / 2), 1, colors.gray, colors.white, title)
+    statusWindow:set(statusWindow.sizeX, statusWindow.sizeY, colors.red, colors.white, "X")
+    if not vendor.disableCustomMarketUrls then
+        statusWindow:set(1, statusWindow.sizeY, colors.orange, colors.white, "CUSTOM")
+    end
+end
+
+local function imitateLine(y)
+    window:fill(2, y, window.sizeX - 2, 1, colors.black, 0, " ")
+    window:fill(2, y, 10, 1, colors.gray, colors.lightGray, "▒")
+end
+
+local function draw(clear)
+    if clear then
+        window:clear(colors.white)
+        drawStatus()
+    end
 
     appLabels = {}
     appsTbl = {}
     appCount = 1
+    
+    local added = {}
+
     for i, v in ipairs(list) do
         if (not v.hided or gui_container.devModeStates[screen]) then
-            table.insert(appLabels, applicationLabel(v, 2, 4 + ((appCount - listOffSet) * 7)))
-            table.insert(appsTbl, v)
+            local y = math.floor((4 + ((appCount - listOffSet) * 7)) + 0.5)
+            if y > 1 and y < ry then
+                table.insert(appLabels, applicationLabel(v, 2, y))
+                table.insert(appsTbl, v)
+            end
+
+            if y < 1 then
+                imitateLine(1)
+            elseif y >= ry then
+                imitateLine(window.sizeY)
+            end
+
+            added[y] = true
         end
         appCount = appCount + 1
     end
 
-    
-    statusWindow:clear(colors.gray)
-    statusWindow:set((statusWindow.sizeX / 2) - (unicode.len(title) / 2), 1, colors.gray, colors.white, title)
-    statusWindow:set(statusWindow.sizeX, statusWindow.sizeY, colors.red, colors.white, "X")
+    if not clear then
+        if not added[-3] then
+            window:fill(2, 1, window.sizeX - 2, 1, colors.white, 0, " ")
+        end
+
+        if not added[window.sizeY + 1] then
+            window:fill(2, window.sizeY, window.sizeX - 2, 1, colors.white, 0, " ")
+        end
+    end
 end
-draw()
+draw(true)
 
 ------------------------------------
 
@@ -256,6 +446,15 @@ while true do
     if statusWindowEventData[1] == "touch" then
         if statusWindowEventData[3] == statusWindow.sizeX and statusWindowEventData[4] == statusWindow.sizeY then
             break
+        elseif statusWindowEventData[3] <= 6 and statusWindowEventData[4] == statusWindow.sizeY and not vendor.disableCustomMarketUrls then
+            programs.execute("edit", screen, nickname, customPath)
+            gui_status(screen, nil, nil, "list updating...")
+            reList()
+            instCache = {}
+            verCache = {}
+            downloaded = {}
+            listOffSet = 1
+            draw(true)
         end
     end
 
@@ -267,23 +466,48 @@ while true do
                 if appInfo(appsTbl[index]) then
                     break
                 end
-                draw()
+                draw(true)
             elseif ret then
-                draw()
+                draw(true)
             end
         end
     elseif windowEventData[1] == "scroll" then
         if windowEventData[5] > 0 then
+            --listOffSet = listOffSet - (1 / 7)
             listOffSet = listOffSet - 1
         else
+            --listOffSet = listOffSet + (1 / 7)
             listOffSet = listOffSet + 1
         end
-        if listOffSet > appCount - 1 then
-            listOffSet = appCount - 1
+
+        if listOffSet > appCount - 3 then
+            listOffSet = appCount - 3
         elseif listOffSet < 1 then
             listOffSet = 1
         else
             draw()
+        end
+    elseif windowEventData[1] == "key_down" then
+        if windowEventData[4] == 208 then
+            listOffSet = listOffSet + 1
+
+            if listOffSet > appCount - 3 then
+                listOffSet = appCount - 3
+            elseif listOffSet < 1 then
+                listOffSet = 1
+            else
+                draw()
+            end
+        elseif windowEventData[4] == 200 then
+            listOffSet = listOffSet - 1
+
+            if listOffSet > appCount - 3 then
+                listOffSet = appCount - 3
+            elseif listOffSet < 1 then
+                listOffSet = 1
+            else
+                draw()
+            end
         end
     end
 end

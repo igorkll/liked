@@ -14,18 +14,13 @@ local screen, cx, cy, dir, exp, save, dirmode, dircombine = ...
 local gpu = graphic.findGpu(screen)
 local rx, ry = gpu.getResolution()
 
-local userRoot = gui_container.userRoot
-local userPath = dir or gui_container.userRoot
+local userPath = dir or gui_container.getUserRoot(screen)
 
+--[[
 local function isDev()
     return not not gui_container.devModeStates[screen]
 end
-
-local function checkFolder()
-    if unicode.sub(userPath, 1, unicode.len(userRoot)) ~= userRoot then
-        userPath = userRoot
-    end
-end
+]]
 
 if not cx or not cy then
     cx, cy = gpu.getResolution()
@@ -42,6 +37,9 @@ local reader = window:read(3, window.sizeY, 16, colors.black, colors.white)
 
 --------------------------------------------
 
+local scroll = 0
+local maxScroll
+
 local strs
 local function draw()
     window:clear(colors.gray)
@@ -54,43 +52,45 @@ local function draw()
     window:set(2, window.sizeY, colors.red, colors.white, "+")
     window:set(window.sizeX, window.sizeY, colors.green, colors.white, ">")
 
-    window:set(20, window.sizeY, colors.lightGray, colors.white, paths.canonical(unicode.sub(userPath, unicode.len(userRoot), unicode.len(userPath))))
+    window:set(20, window.sizeY, colors.lightGray, colors.white, gui_container.shortPath(gui_container.toUserPath(screen, userPath), window.sizeX - 8 - 13))
 
     reader.redraw()
 
     strs = {}
-    local count = 1
+    local count = 0
     for i, file in ipairs(fs.list(userPath)) do
         local dir = fs.isDirectory(paths.concat(userPath, file))
         if dir or ((not exp or paths.extension(file) == exp) and not dirmode) then
             local name = file
             if name:sub(#name, #name) == "/" then
                 name = name:sub(1, #name - 1)
+                file = file:sub(1, #file - 1)
             end
             local lexp = paths.extension(file)
             name = paths.hideExtension(name)
 
-            if (not dir or not lexp) or isDev() then
+            --if (not dir or not lexp) or isDev() then
                 local lname = (lexp and gui_container.typenames[lexp]) or lexp
                 local ctype = (lname and ((dir and "DIR-" or "") .. lname) or (dir and "DIR" or "FILE")):upper()
+                
                 local objcolor = dir and colors.black or colors.lightGray
-
-                if lexp == "lua" then
-                    objcolor = colors.green
-                elseif lexp == "afpx" then
-                    objcolor = colors.orange
-                elseif lexp == "app" then
-                    objcolor = colors.red
+                if gui_container.typecolors[lexp] then
+                    objcolor = gui_container.typecolors[lexp]
                 end
 
-                window:fill(1, count + 1, window.sizeX, 1, objcolor, 0, " ")
-                window:set(1, count + 1, objcolor, colors.white, name)
-                window:set(window.sizeX - #ctype, count + 1, objcolor, colors.white, ctype)
-                strs[count] = file
                 count = count + 1
-            end
+                local pos = (count + 1) - scroll
+
+                if pos > 1 and pos < window.sizeY then
+                    window:fill(1, pos, window.sizeX, 1, objcolor, 0, " ")
+                    window:set(1, pos, objcolor, colors.white, name)
+                    window:set(window.sizeX - #ctype, pos, objcolor, colors.white, ctype)
+                    strs[pos - 1] = file
+                end
+            --end
         end
     end
+    maxScroll = count - 1
 end
 
 local function checkName(filename)
@@ -121,7 +121,8 @@ local function checkName(filename)
 end
 
 local function checkFileName(str)
-    return (not str:find("%.") or isDev()) and not str:find("%/") and not str:find("%\\") and #str > 0
+    --return (not str:find("%.") or isDev()) and not str:find("%/") and not str:find("%\\") and #str > 0
+    return not str:find("%/") and not str:find("%\\") and #str > 0
 end
 
 draw()
@@ -139,14 +140,20 @@ while true do
         local pos = windowEventData[4] - 1
         if strs[pos] then
             if windowEventData[5] == 0 then
+                --[[
                 local ret = checkName(strs[pos])
                 if ret then
                     return ret
                 end
+                ]]
+
+                reader.setBuffer(paths.hideExtension(strs[pos]))
+                reader.redraw()
             else
                 local lpath = paths.concat(userPath, strs[pos])
                 if fs.isDirectory(lpath) then
                     userPath = lpath
+                    scroll = 0
                     draw()
                 end                
             end
@@ -171,8 +178,22 @@ while true do
         end
 
         if windowEventData[3] == 1 and windowEventData[4] == window.sizeY then
-            userPath = paths.path(userPath)
-            checkFolder()
+            userPath = gui_container.checkPath(screen, paths.path(userPath))
+            scroll = 0
+            draw()
+        end
+    elseif windowEventData[1] == "scroll" then
+        if windowEventData[5] > 0 then
+            scroll = scroll - 1
+        else
+            scroll = scroll + 1
+        end
+
+        if scroll < 0 then
+            scroll = 0
+        elseif scroll > maxScroll then
+            scroll = maxScroll
+        else
             draw()
         end
     end

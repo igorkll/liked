@@ -51,8 +51,8 @@ end
 ------------------------------------
 
 local function draw(set)
-    selectWindow:clear(colors.gray)
-    colorsWindow:fill(1, 1, colorsWindow.sizeX, colorsWindow.sizeY, colors.gray, colors.brown, "▒")
+    selectWindow:clear(colors.black)
+    colorsWindow:fill(1, 1, colorsWindow.sizeX, colorsWindow.sizeY, colors.black, colors.brown, "▒")
     selectWindow:setCursor(1, 1)
 
     for i, v in ipairs(gui_container.indexsColors) do
@@ -63,8 +63,8 @@ local function draw(set)
         file = paths.hideExtension(file)
         local str = file .. string.rep(" ", (selectWindow.sizeX - 2) - unicode.len(file))
 
-        local background = colors.gray
-        local foreground = selected == i and colors.white or colors.black
+        local background = colors.black
+        local foreground = selected == i and colors.white or colors.gray
 
         selectWindow:write("╔" .. string.rep("═", unicode.len(str)) .. "╗\n", background, foreground)
         selectWindow:write("║", background, foreground)

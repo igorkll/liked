@@ -31,12 +31,30 @@ local function update()
     local title = "List Of Components"
     statusWindow:set((statusWindow.sizeX / 2) - (unicode.len(title) / 2), 1, colors.gray, colors.white, title)
 
+    local types = {}
+    local added = {}
+    for addr, ctype in component.list() do
+        if not added[ctype] then
+            table.insert(types, ctype)
+            added[ctype] = true
+        end
+    end
+    table.sort(types)
+
     local posY = 1
-    for address, ctype in component.list() do
-        window:fill(1, posY, window.sizeX, 1, colors.white, colors.gray, "-")
-        window:set(1, posY, colors.white, colors.red, address)
-        window:set(window.sizeX - (#ctype - 1), posY, colors.white, colors.blue, ctype)
-        posY = posY + 1
+    for _, ctype in ipairs(types) do
+        local addrs = {}
+        for addr in component.list(ctype, true) do
+            table.insert(addrs, addr)
+        end
+        table.sort(addrs)
+
+        for _, addr in ipairs(addrs) do
+            window:fill(1, posY, window.sizeX, 1, colors.white, colors.gray, "-")
+            window:set(1, posY, colors.white, colors.red, addr)
+            window:set(window.sizeX - (#ctype - 1), posY, colors.white, colors.blue, ctype)
+            posY = posY + 1
+        end
     end
 end
 update()

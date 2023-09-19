@@ -6,6 +6,7 @@ local calls = require("calls")
 local component = require("component")
 local unicode = require("unicode")
 local computer = require("computer")
+local lastinfo = require("lastinfo")
 
 local colors = gui_container.colors
 local indexsColors = gui_container.indexsColors
@@ -218,13 +219,9 @@ if fs.exists(filepath) then
     drawImage()
 end
 
-local function saveZone()
-    return calls.call("screenshot", screen, rx / 2 - 16, ry / 2 - 4, 33, 9)
-end
-
 local function exitAllow()
     if not noSaved then return true end
-    local clear = saveZone()
+    local clear = saveZone(screen)
     local ok = calls.call("gui_yesno", screen, nil, nil, "image do not saved!\nare you sure you want to get out?")
     clear()
     return ok
@@ -234,7 +231,7 @@ local function resize(newx, newy)
     newx = math.floor(newx + 0.5)
     newy = math.floor(newy + 0.5)
     if newx <= 0 or newy <= 0 then
-        local clear = saveZone()
+        local clear = saveZone(screen)
         calls.call("gui_warn", screen, nil, nil, "uncorrent input", colors.white)
         clear()
         return
@@ -288,8 +285,8 @@ while true do
             break
         end
         if statusWindowEventData[3] >= 3 and statusWindowEventData[3] <= 6 then
-            local clear = calls.call("screenshot", screen, 4, 2, 19, 4)
-            local str, num = calls.call("gui_context", screen, 4, 2, {"  close", "------------------", "  save"},
+            local clear = calls.call("screenshot", screen, 4, 2, 20, 4)
+            local str, num = calls.call("gui_context", screen, 4, 2, {"  close", true, "  save"},
             {true, false, true})
             clear()
             if num == 1 then
@@ -302,12 +299,12 @@ while true do
         end
 
         if statusWindowEventData[3] >= 8 and statusWindowEventData[3] <= 11 then
-            local clear = calls.call("screenshot", screen, 4, 2, 19, 4)
+            local clear = calls.call("screenshot", screen, 4, 2, 20, 4)
             local str, num = calls.call("gui_context", screen, 4, 2, {"  resize"},
             {true})
             clear()
             if num == 1 then
-                local clear = saveZone()
+                local clear = saveZone(screen)
                 local str = calls.call("gui_input", screen, nil, nil, "newX newY", nil, colors.white)
                 clear()
                 if str then
@@ -317,8 +314,8 @@ while true do
                     if x and y then
                         resize(x, y)
                     else
-                        local clear = saveZone()
-                        calls.call("gui_warn", screen, nil, nil, "uncorrent input", colors.white)
+                        local clear = saveZone(screen)
+                        calls.call("gui_warn", screen, nil, nil, "incorrent input", colors.white)
                         clear()
                     end
                 end
@@ -347,7 +344,7 @@ while true do
 
     if eventData[1] == "key_down" then
         local ok
-        for i, v in ipairs(component.invoke(screen, "getKeyboards")) do
+        for i, v in ipairs(lastinfo.keyboards[screen]) do
             if v == eventData[2] then
                 ok = true
                 break
@@ -367,12 +364,12 @@ while true do
     if nullWindowEventData[1] == "touch" then
         if nullWindowEventData[3] >= 4 and nullWindowEventData[3] <= 5 and nullWindowEventData[4] == nullWindow2.sizeY - 1 then
             ::tonew::
-            local clear = saveZone()
+            local clear = saveZone(screen)
             local entered = calls.call("gui_input", screen, nil, nil, "char", nil, colors.white)
             clear()
             if entered then
                 if unicode.len(entered) ~= 1 then
-                    local clear = saveZone()
+                    local clear = saveZone(screen)
                     calls.call("gui_warn", screen, nil, nil, "enter one char\nor cancel menu", colors.white)
                     clear()
                     goto tonew

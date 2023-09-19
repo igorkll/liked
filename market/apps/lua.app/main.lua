@@ -13,27 +13,13 @@ local screen = ...
 local sizeX, sizeY = graphic.getResolution(screen)
 local window = graphic.createWindow(screen, 1, 1, sizeX, sizeY, true)
 local reader = window:read(1, sizeY, sizeX, colors.gray, colors.white, "lua: ", nil, nil, nil, "lua")
-local strs = {}
 
-local function update()
+do
     local title = "Lua"
-
     window:clear(colors.black)
     window:set(1, 1, colors.gray, colors.white, string.rep(" ", sizeX))
     window:set(math.floor(((sizeX / 2) - (#title / 2)) + 0.5), 1, colors.gray, colors.white, title)
     window:set(sizeX, 1, colors.red, colors.white, "X")
-
-    for i, str in ipairs(strs) do
-        local posY = sizeY - i
-        if posY >= 2 then
-            window:set(1, posY, colors.black, str[1], str[2])
-            if str[3] then
-                local x, y = window:toRealPos(1, posY)
-                str[3](x + #str[2], y)
-            end
-        end
-    end
-
     reader.redraw()
 end
 
@@ -42,8 +28,9 @@ local function lprint(color, ...)
     for i = 1, #tbl do
         tbl[i] = tostring(tbl[i])
     end
-    table.insert(strs, 1, {color, table.concat(tbl, "    ")})
-    update()
+    window:copy(1, 3, sizeX, sizeY - 3, 0, -1)
+    window:fill(1, sizeY - 1, sizeX, 1, colors.black, 0, " ")
+    window:set(1, sizeY - 1, colors.black, color, table.concat(tbl, "    "))
 end
 
 --------------------------------
@@ -76,13 +63,9 @@ while true do
         end
 
         reader.setBuffer("")
-        do
-            local syntax = syntaxHighlighting.parse(readerData)
-            table.insert(strs, 1, {colors.green, "LUA> ", function (x, y)
-                syntaxHighlighting.draw(x, y, syntax, graphic.findGpu(screen))
-            end})
-            update()
-        end
+        reader.redraw()
+        lprint(colors.green, "LUA>")
+        syntaxHighlighting.draw(6, sizeY - 1, syntaxHighlighting.parse(readerData), graphic.findGpu(screen))
         
         if readerData:sub(1, 1) == "=" then
             readerData = "return " .. readerData:sub(2, #readerData)

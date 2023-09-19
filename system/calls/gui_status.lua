@@ -18,15 +18,16 @@ if not cx or not cy then
     cy = cy / 2
     cx = cx - 16
     cy = cy - 4
-    cx = math.floor(cx)
-    cy = math.floor(cy)
+    cx = math.floor(cx) + 1
+    cy = math.floor(cy) + 1
 end
 
 local window = graphic.createWindow(screen, cx, cy, 32, 8)
 
 local color = backgroundColor or colors.lightGray
 
-window:fill(2, 2, window.sizeX, window.sizeY, colors.gray, 0, " ")
+--window:fill(2, 2, window.sizeX, window.sizeY, colors.gray, 0, " ")
+require("gui").shadow(gpu, window.x, window.y, window.sizeX, window.sizeY)
 window:clear(color)
 
 local textColor = colors.white
@@ -47,6 +48,9 @@ window:set(2, 4, color, colors.blue, "◢███◣")
 window:set(4, 3, colors.blue, colors.white, "P")
 
 graphic.forceUpdate()
+event.yield()
+--[[
 if require("registry").soundEnable then
-    --computer.beep(500, 0.1)
+    computer.beep(500, 0.1)
 end
+]]

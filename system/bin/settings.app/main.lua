@@ -33,29 +33,29 @@ for i, file in ipairs(fs.list(modulesPath) or {}) do
     table.insert(modules, file)
 end
 
-local currentModule
+local currentModule, moduleEnd
 local function draw()
     selectWindow:clear(colors.lightGray)
     modulWindow:clear(colors.gray)
-    statusWindow:clear(colors.black)
+    statusWindow:clear(colors.gray)
     lineWindows:clear(colors.brown)
-    statusWindow:set(1, 1, colors.red, colors.white, "X")
-    statusWindow:set(3, 1, colors.black, colors.white, "settings")
+    statusWindow:set(statusWindow.sizeX, 1, colors.red, colors.white, "X")
+    statusWindow:set((statusWindow.sizeX / 2) - 4, 1, colors.gray, colors.white, "Settings")
 
-    selectWindow:setCursor(1, 1)
     for i, file in ipairs(modules) do
-        local str = paths.hideExtension(file) .. string.rep(" ", (selectWindow.sizeX - 2) - unicode.len(file))
+        file = file:sub(3, #file)
+        local str = paths.hideExtension(file)
 
-        local background = colors.lightGray
-        local foreground = selected == i and colors.white or colors.black
-
-        selectWindow:write("╔" .. string.rep("═", unicode.len(str)) .. "╗\n", background, foreground)
-        selectWindow:write("║", background, foreground)
-        selectWindow:write(str, background, foreground)
-        selectWindow:write("║" .. "\n", background, foreground)
-        selectWindow:write("╚" .. string.rep("═", unicode.len(str)) .. "╝", background, foreground)
-
-        if i ~= limit then selectWindow:write("\n") end
+        --selectWindow:write("╔" .. string.rep("═", unicode.len(str)) .. "╗\n", background, foreground)
+        --selectWindow:write("║", background, foreground)
+        local selColor = selected == i and colors.white or colors.black
+        selectWindow:fill(1, i, selectWindow.sizeX, 1, selColor, colors.lightGray, " ")
+        selectWindow:set(3, i, selColor, colors.lightGray, str)
+        if selected == i then
+            selectWindow:set(1, i, selColor, colors.lightGray, ">")
+        end
+        --selectWindow:write("║" .. "\n", background, foreground)
+        --selectWindow:write("╚" .. string.rep("═", unicode.len(str)) .. "╝", background, foreground)
     end
 
     local currentFile = paths.concat(modulesPath, modules[selected])
@@ -63,8 +63,12 @@ local function draw()
     local data = file.readAll()
     file.close()
 
-    local code = assert(load(data, "=module", nil, calls.call("createEnv")))
-    currentModule = code(screen, modulWindow.x, modulWindow.y)
+    if moduleEnd then
+        moduleEnd()
+    end
+    local code = assert(load(data, "=" .. currentFile, nil, calls.call("createEnv")))
+    modulWindow:clear(colors.black)
+    currentModule, moduleEnd = code(screen, modulWindow.x, modulWindow.y)
 end
 draw()
 
@@ -86,7 +90,8 @@ while true do
             draw()
         end
     elseif selectWindowEventData[1] == "touch" then
-        local posY = ((selectWindowEventData[4] - 1) // 3) + 1
+        --local posY = ((selectWindowEventData[4] - 1) // 3) + 1
+        local posY = (selectWindowEventData[4] - 1) + 1
 
         if posY >= 1 and posY <= limit then
             if posY ~= selected then
@@ -109,7 +114,10 @@ while true do
     end
 
     if statusWindowEventData[1] == "touch" then
-        if statusWindowEventData[4] == 1 and statusWindowEventData[3] == 1 then
+        if statusWindowEventData[4] == 1 and statusWindowEventData[3] == statusWindow.sizeX then
+            if moduleEnd then
+                moduleEnd()
+            end
             break
         end
     end
