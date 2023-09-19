@@ -26,7 +26,7 @@
 /system/bin/settings.app/modules/e_time.lua
 /system/bin/settings.app/modules/f_sound.lua
 /system/bin/settings.app/modules/g_components.lua
-/system/bin/settings.app/modules/h_screen saver.lua
+/system/bin/settings.app/modules/h_screen_saver.lua
 /system/bin/settings.app/modules/k_libraries.lua
 /system/bin/settings.app/modules/z_system.lua
 /system/calls/findPos.lua
@@ -76,15 +76,15 @@
 /system/lib/gui.lua
 /system/lib/gui_container.lua
 /system/lib/liked.lua
-/system/screenSavers/black screen.scrsv
-/system/screenSavers/color dots.scrsv
-/system/screenSavers/random colors.scrsv
+/system/screenSavers/black_screen.scrsv
+/system/screenSavers/color_dots.scrsv
+/system/screenSavers/random_colors.scrsv
 /system/themes/classic.plt
 /system/themes/neon.plt
 /system/themes/original.plt
 /system/wallpapers/box.t2p
 /system/wallpapers/car.t2p
-/system/wallpapers/cirtis board.t2p
+/system/wallpapers/cirtis_board.t2p
 /system/wallpapers/drone.t2p
 /system/wallpapers/flower.t2p
 /system/wallpapers/robot.t2p
