@@ -101,16 +101,14 @@ local function modifyList(lst)
             end
         end
     
-        if not v.install then
-            local _install = v.install or function (self)
-                for _, name in ipairs(self.files or {"icon.t2p", "main.lua"}) do
-                    save(paths.concat(self.path, name), download(self.urlPrimaryPart .. name))
-                end
+        local _install = v.install or function (self)
+            for _, name in ipairs(self.files or {"icon.t2p", "main.lua"}) do
+                save(paths.concat(self.path, name), download(self.urlPrimaryPart .. name))
             end
-            function v.install(self)
-                _install(self)
-                save(versionpath, self.version)
-            end
+        end
+        function v.install(self)
+            _install(self)
+            save(versionpath, self.version)
         end
     
         if not v.icon and v.urlPrimaryPart then
