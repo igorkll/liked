@@ -161,7 +161,7 @@ local function reList()
         if data then
             local code, err = load(data, "=list" .. index, "t", _ENV)
             if code then
-                local result = {pcall(code, screen, nickname)}
+                local result = {pcall(code, screen, nickname, url)}
                 if result[1] then
                     if type(result[2]) == "table" then
                         modifyList(result[2])
