@@ -23,7 +23,7 @@ function fs.genName(uuid)
     return paths.concat("/data/userdata", label .. "-" .. uuid:sub(1, 5))
 end
 
-if not vendor.doNotMoundDrives then
+if not registry.doNotMoundDisks then
     local function allowMount(address)
         return address ~= computer.tmpAddress() and address ~= fs.bootaddress
     end

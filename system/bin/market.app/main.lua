@@ -1,9 +1,8 @@
 local graphic = require("graphic")
 local fs = require("filesystem")
 local calls = require("calls")
-local eventData = require("event")
 local gui_container = require("gui_container")
-local component = require("component")
+local registry = require("registry")
 local computer = require("computer")
 local paths = require("paths")
 local unicode = require("unicode")
@@ -146,11 +145,11 @@ local customPath = "/data/market_urls.txt"
 
 local function reList()
     urls = {}
-    if not vendor.disableSystemMarketUrls then
+    if not registry.disableSystemMarketUrls then
         doList("/system/market_urls.txt")
     end
     doList("/vendor/market_urls.txt")
-    if not vendor.disableCustomMarketUrls then
+    if not registry.disableCustomMarketUrls then
         doList(customPath)
     end
 
@@ -382,7 +381,7 @@ local function drawStatus()
     statusWindow:clear(colors.gray)
     statusWindow:set((statusWindow.sizeX / 2) - (unicode.len(title) / 2), 1, colors.gray, colors.white, title)
     statusWindow:set(statusWindow.sizeX, statusWindow.sizeY, colors.red, colors.white, "X")
-    if not vendor.disableCustomMarketUrls then
+    if not registry.disableCustomMarketUrls then
         statusWindow:set(1, statusWindow.sizeY, colors.orange, colors.white, "CUSTOM")
     end
 end
@@ -445,7 +444,7 @@ while true do
     if statusWindowEventData[1] == "touch" then
         if statusWindowEventData[3] == statusWindow.sizeX and statusWindowEventData[4] == statusWindow.sizeY then
             break
-        elseif statusWindowEventData[3] <= 6 and statusWindowEventData[4] == statusWindow.sizeY and not vendor.disableCustomMarketUrls then
+        elseif statusWindowEventData[3] <= 6 and statusWindowEventData[4] == statusWindow.sizeY and not registry.disableCustomMarketUrls then
             programs.execute("edit", screen, nickname, customPath)
             gui_status(screen, nil, nil, "list updating...")
             reList()

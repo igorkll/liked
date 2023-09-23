@@ -6,15 +6,16 @@ local programs = require("programs")
 local fs = require("filesystem")
 local registry = require("registry")
 local event = require("event")
+local bootloader = require("bootloader")
 
 table.insert(programs.paths, "/data/userdata")
 table.insert(programs.paths, "/data/userdata/apps")
 
-unittests("/vendor/unittests")
-unittests("/data/unittests")
+bootloader.unittests("/vendor/unittests")
+bootloader.unittests("/data/unittests")
 
-autorunsIn("/vendor/autoruns")
-autorunsIn("/data/autoruns")
+bootloader.autorunsIn("/vendor/autoruns")
+bootloader.autorunsIn("/data/autoruns")
 
 ------------------------------------
 
@@ -94,6 +95,6 @@ if #screens > 0 then
 --    gui_initScreen(screen)
 --    desktop(screen, true)
 else
-    bootSplash("no supported screens/GPUs found")
+    bootloader.bootSplash("no supported screens/GPUs found")
     event.wait()
 end

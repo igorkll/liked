@@ -7,6 +7,7 @@ local component = require("component")
 local unicode = require("unicode")
 local computer = require("computer")
 local lastinfo = require("lastinfo")
+local gui = require("gui")
 
 local colors = gui_container.colors
 local indexsColors = gui_container.indexsColors
@@ -115,14 +116,47 @@ local function drawPixel(x, y, pixel)
     end
 end
 
+local function raw_save(path)
+    local buffer = ""
+    buffer = buffer .. string.char(image.sizeX)
+    buffer = buffer .. string.char(image.sizeY)
+    buffer = buffer .. string.rep(string.char(0), 8)
+
+    local writebit = calls.load("writebit")
+    local readbit = calls.load("readbit")
+    
+    for y, tbl in ipairs(image) do
+        for x, pixel in ipairs(tbl) do
+            local bg = 0
+            for i = 0, 3 do
+                bg = writebit(bg, i, readbit(pixel[1], i))
+                bg = writebit(bg, i + 4, readbit(pixel[2], i))
+            end
+            buffer = buffer .. string.char(bg)
+            buffer = buffer .. string.char(#pixel[3])
+            buffer = buffer .. pixel[3]
+        end
+    end
+
+    local file = assert(fs.open(path, "wb"))
+    file.write(buffer)
+    file.close()
+end
+
 local function drawImage()
     if image then
-        --mainWindow:fill(1, 1, image.sizeX, image.sizeY, colors.white, colors.black, "░")
+        mainWindow:fill(1, 1, image.sizeX, image.sizeY, colors.white, colors.black, "▒")
+        --[[
         for y, tbl in ipairs(image) do
             for x, pixel in ipairs(tbl) do
                 drawPixel(x, y, pixel)
             end
         end
+        ]]
+        local tmp = os.tmpname()
+        raw_save(tmp)
+        gui_drawimage(screen, tmp, mainWindow:toRealPos(1, 1))
+        fs.remove(tmp)
     end
 end
 
@@ -186,32 +220,8 @@ end
 
 local function save()
     noSaved = false
-    local buffer = ""
     if not image then return end
-    
-    buffer = buffer .. string.char(image.sizeX)
-    buffer = buffer .. string.char(image.sizeY)
-    buffer = buffer .. string.rep(string.char(0), 8)
-
-    local writebit = calls.load("writebit")
-    local readbit = calls.load("readbit")
-    
-    for y, tbl in ipairs(image) do
-        for x, pixel in ipairs(tbl) do
-            local bg = 0
-            for i = 0, 3 do
-                bg = writebit(bg, i, readbit(pixel[1], i))
-                bg = writebit(bg, i + 4, readbit(pixel[2], i))
-            end
-            buffer = buffer .. string.char(bg)
-            buffer = buffer .. string.char(#pixel[3])
-            buffer = buffer .. pixel[3]
-        end
-    end
-
-    local file = assert(fs.open(filepath, "wb"))
-    file.write(buffer)
-    file.close()
+    raw_save(filepath)
 end
 
 if fs.exists(filepath) then
@@ -299,11 +309,15 @@ while true do
         end
 
         if statusWindowEventData[3] >= 8 and statusWindowEventData[3] <= 11 then
-            local clear = calls.call("screenshot", screen, 4, 2, 20, 4)
-            local str, num = calls.call("gui_context", screen, 4, 2, {"  resize"},
-            {true})
-            clear()
+            local gclear = calls.call("screenshot", screen, 4, 2, 20, 4)
+            local str, num = gui.context(screen, 4, 2, {"  resize", "  color change", "  bg / fg invert"},
+            {true, true, true})
+            
             if num == 1 then
+                noSaved = true
+
+                gclear()
+
                 local clear = saveZone(screen)
                 local str = calls.call("gui_input", screen, nil, nil, "newX newY", nil, colors.white)
                 clear()
@@ -319,6 +333,45 @@ while true do
                         clear()
                     end
                 end
+            elseif num == 2 then
+                noSaved = true
+
+                local str, num = gui.context(screen, 21, 3, {"  background", "  foreground", "  bg / fg"})
+
+                if num then
+                    local from = gui.selectcolor(screen, nil, nil, "choose color to change")
+                    if from then
+                        local to = gui.selectcolor(screen, nil, nil, "choose new color")
+                        if to then
+                            for y, tbl in ipairs(image) do
+                                for x, pixel in ipairs(tbl) do
+                                    if num == 1 or num == 3 then
+                                        if pixel[1] == from then
+                                            pixel[1] = to
+                                        end
+                                    end
+                                    if num == 2 or num == 3 then
+                                        if pixel[2] == from then
+                                            pixel[2] = to
+                                        end
+                                    end
+                                end
+                            end
+                        end
+                    end
+                end
+
+                draw()
+            elseif num == 3 then
+                for y, tbl in ipairs(image) do
+                    for x, pixel in ipairs(tbl) do
+                        pixel[1], pixel[2] = pixel[2], pixel[1]
+                    end
+                end
+
+                draw()
+            else
+                gclear()
             end
         end
     end

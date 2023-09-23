@@ -49,6 +49,7 @@ function redraw()
 
     window:set(21, 2, colors.black, colors.white, "current version: " .. currentVersion)
     window:set(21, 3, colors.black, colors.white, "last    version: loading...")
+    graphic.forceUpdate()
 
     local function getLast()
         local lv, err = liked.lastVersion()
@@ -63,6 +64,7 @@ function redraw()
     local str = "last    version: " .. (lastVersion or getLast() or "unknown")
     window:set(21, 3, colors.black, colors.white, "last    version:                     ")
     window:set(21, 3, colors.black, colors.white, str)
+    graphic.forceUpdate()
 end
 redraw()
 

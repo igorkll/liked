@@ -1,14 +1,17 @@
 local fs = require("filesystem")
 local paths = require("paths")
+local gui = require("gui")
 local screen, posX, posY, vfs, name = ...
 
-local clear = screenshot(screen, posX, posY, 31, 5)
-local str2, num2 = gui_context(screen, posX, posY, {
+local strs = {
     "  likeOS installer",
     "  liked",
     "  likeOS (core only)",
     "  full cloning of the system  "
-}, {true, true, true, not vendor.banSystemCloning})
+}
+local posX, posY, sizeX, sizeY = gui.contentPos(screen, posX, posY, strs)
+local clear = screenshot(screen, posX, posY, sizeX + 2, sizeY + 1)
+local str2, num2 = gui.context(screen, posX, posY, strs, {true, true, true, not registry.banSystemCloning})
 clear()
 
 if not str2 then

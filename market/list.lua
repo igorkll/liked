@@ -257,7 +257,7 @@ local list = {
     },
     {
         name = "explode",
-        version = "1",
+        version = "2",
         vendor = "logic",
         icon = "https://raw.githubusercontent.com/igorkll/liked/main/market/apps/explode.app/icon.t2p",
         description = "blow up your computer!",

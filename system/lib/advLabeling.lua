@@ -23,5 +23,5 @@ function advLabeling.getLabel(address)
     return label
 end
 
-advLabeling.unloaded = true
+advLabeling.unloadable = true
 return advLabeling

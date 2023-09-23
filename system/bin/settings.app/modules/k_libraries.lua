@@ -28,7 +28,7 @@ local selector = thread.create(function ()
             table.insert(loadedLibraries, gui_container.shortPath(name, 47))
         end
         for name, data in pairs(package.cache) do
-            table.insert(loadedLibraries, gui_container.shortPath(name .. " (unloaded)", 47))
+            table.insert(loadedLibraries, gui_container.shortPath(name .. " (unloadable)", 47))
         end
         table.sort(loadedLibraries)
         local _, lscroll = gui_select(screen, x, y, "loaded libraries", loadedLibraries, scroll, true)

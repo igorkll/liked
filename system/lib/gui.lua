@@ -179,6 +179,60 @@ function gui.warn(screen, cx, cy, str, backgroundColor)
     end
 end
 
+function gui.selectcolor(screen, cx, cy, str)
+    --◢▲◣▲▴▴
+    local gpu = graphic.findGpu(screen)
+
+    if not cx or not cy then
+        cx, cy = gpu.getResolution()
+        cx = cx / 2
+        cy = cy / 2
+        cx = cx - 12
+        cy = cy - 6
+        cx = math.floor(cx) + 1
+        cy = math.floor(cy) + 1
+    end
+
+    local window = graphic.createWindow(screen, cx, cy, 24, 12, true)
+    gui.shadow(gpu, window.x, window.y, window.sizeX, window.sizeY)
+    window:clear(colors.gray)
+    window:fill(3, 2, 20, 10, colors.brown, colors.white, "▒")
+    window:set(2, 1, colors.gray, colors.white, str or "select color")
+    window:set(window.sizeX, 1, colors.red, colors.white, "X")
+
+    local cols = {}
+    for i = 1, 12 do
+        cols[i] = {}
+    end
+    for x = 0, 3 do
+        for y = 0, 3 do
+            local colNum = x + (y * 4)
+            local col = colors[colorslib[colNum]]
+            local setX, setY = 5 + (x * 4), 3 + (y * 2)
+            window:set(setX, setY, col, 0, "    ")
+            window:set(setX, setY + 1, col, 0, "    ")
+            for addY = 0, 1 do
+                for addX = 0, 3 do
+                    cols[setY + addY][setX + addX] = colNum
+                end
+            end
+        end
+    end
+    graphic.forceUpdate()
+
+    while true do
+        local eventData = {computer.pullSignal()}
+        local windowEventData = window:uploadEvent(eventData)
+        if windowEventData[1] == "touch" then
+            if windowEventData[3] == window.sizeX and windowEventData[4] == 1 then
+                return
+            elseif cols[windowEventData[4]] and cols[windowEventData[4]][windowEventData[3]] then
+                return cols[windowEventData[4]][windowEventData[3]]
+            end
+        end
+    end
+end
+
 function gui.input(screen, cx, cy, str, hidden, backgroundColor, default, disableStartSound)
     local gpu = graphic.findGpu(screen)
 
@@ -300,6 +354,7 @@ function gui.context(screen, posX, posY, strs, active)
                 window:set(1, i, color, colors.lightGray, str .. (string.rep(" ", sizeX - unicode.wlen(str))))
             end
         end
+        graphic.forceUpdate()
     end
     redrawStrs()
 
@@ -528,7 +583,7 @@ function gui.selectcomponent(screen, cx, cy, types, allowAutoConfirm, control) -
     local allTypesFlag
     local typesstr = "select "
     if types then
-        typesstr = typesstr .. table.concat(types, " or ")
+        typesstr = typesstr .. table.concat(types, "/")
     else
         typesstr = typesstr .. "component"
         allTypesFlag = true

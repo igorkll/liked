@@ -3,6 +3,7 @@ local fs = require("filesystem")
 
 fs.remove("/Mounts") --я знаю что это "виртуальные" директории, но они тоже могут создасться
 
+fs.remove("/MineOS")
 fs.remove("/Applications")
 fs.remove("/Extensions")
 fs.remove("/Icons")

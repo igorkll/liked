@@ -2,7 +2,7 @@ local graphic = require("graphic")
 local event = require("event")
 local gui_container = require("gui_container")
 local package = require("package")
-local syntaxHighlighting = require("syntaxHighlighting")
+local syntax = require("syntax")
 
 local colors = gui_container.colors
 
@@ -65,7 +65,7 @@ while true do
         reader.setBuffer("")
         reader.redraw()
         lprint(colors.green, "LUA>")
-        syntaxHighlighting.draw(6, sizeY - 1, syntaxHighlighting.parse(readerData), graphic.findGpu(screen))
+        syntax.draw(6, sizeY - 1, syntax.parse(readerData), graphic.findGpu(screen))
         
         if readerData:sub(1, 1) == "=" then
             readerData = "return " .. readerData:sub(2, #readerData)

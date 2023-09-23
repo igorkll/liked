@@ -83,5 +83,5 @@ function brainfuck.create(code) --создаст интерпритатор с �
     return interpreter
 end
 
-brainfuck.unloaded = true
+brainfuck.unloadable = true
 return brainfuck

@@ -15,6 +15,8 @@ local registry = require("registry")
 local thread = require("thread")
 local gui = require("gui")
 local lastinfo = require("lastinfo")
+local system = require("system")
+local liked = require("liked")
 
 local colors = gui_container.colors
 
@@ -329,8 +331,6 @@ local function draw(old, check) --вызывает все перерисовки
         local fsd
         if fs.isDirectory(path) and fs.exists(paths.concat(path, "icon.t2p")) then
             icon = paths.concat(path, "icon.t2p")
-        elseif exp and #exp > 0 and exp ~= "app" and exp ~= "t2p" then
-            icon = findIcon(exp)
         elseif exp == "app" then
             icon = findIcon("app")
         elseif fs.isDirectory(path) then
@@ -346,19 +346,29 @@ local function draw(old, check) --вызывает все перерисовки
                     local info = lastinfo.deviceinfo[fsd.address]
                     local clock = info and info.clock
                     local devtypepath = paths.concat(path, "external-data/devicetype.dat")
-                    if fsd.address == computer.tmpAddress() then
+                    local disklevel = system.getDiskLevel(fsd.address)
+
+                    if disklevel == "tmp" then
                         icon = findIcon("tmp")
-                    elseif clock == "20/20/20" then
+                    elseif disklevel == "fdd" then
                         if fsd.exists("/init.lua") then
                             icon = findIcon("bootdevice")
                         else
                             icon = findIcon("fdd")
                         end
+                    elseif disklevel == "raid" then
+                        icon = findIcon("raid")
                     elseif fs.exists(devtypepath) then --если это жесткий диск пренадлежащий устройству то отображаем иконку
                         local data = fs.readFile(devtypepath)
                         if data then
                             icon = findIcon(data)
                         end
+                    elseif disklevel == "tier1" then
+                        icon = findIcon("hdd1")
+                    elseif disklevel == "tier2" then
+                        icon = findIcon("hdd2")
+                    elseif disklevel == "tier3" then
+                        icon = findIcon("hdd3")
                     else
                         icon = findIcon("hdd")
                     end
@@ -375,6 +385,8 @@ local function draw(old, check) --вызывает все перерисовки
                     icon = iconPath
                 end
             end
+        elseif exp and #exp > 0 then
+            icon = findIcon(exp)
         end
         do
             local ok, sx, sy = pcall(gui_readimagesize, icon)
@@ -728,27 +740,6 @@ local function getActions(icon, nickname, strs, active, sep)
     end
 end
 
-local function umountAll()
-    local newtbl = {}
-    for index, value in ipairs(fs.mountList) do
-        newtbl[index] = value
-    end
-
-    for _, mountpoint in ipairs(newtbl) do
-        if mountpoint[1].address ~= computer.tmpAddress() and mountpoint[1].address ~= fs.bootaddress then
-            assert(fs.umount(mountpoint[2]))
-        end
-    end
-end
-
-local function mountAll()
-    for address in component.list("filesystem") do
-        if address ~= computer.tmpAddress() and address ~= fs.bootaddress then
-            assert(fs.mount(address, fs.genName(address)))
-        end
-    end
-end
-
 local function failCheck(ok, err)
     if not ok then
         warn(err)
@@ -827,7 +818,7 @@ local function doIcon(windowEventData)
                                 table.insert(active, false)
 
                                 table.insert(strs, "  boot from this disk")
-                                table.insert(active, not vendor.disableExternalBoot)
+                                table.insert(active, not registry.disableExternalBoot)
                             end
 
                             local posX, posY = window:toRealPos(windowEventData[3], windowEventData[4])
@@ -846,8 +837,7 @@ local function doIcon(windowEventData)
 
                                 if success ~= "cancel" then
                                     if success then
-                                        umountAll()
-                                        mountAll()
+                                        liked.remountAll()
                                     elseif err then
                                         gui_warn(screen, nil, nil, err)
                                     end
@@ -904,11 +894,11 @@ local function doIcon(windowEventData)
                                 local newlabel = gui_input(screen, nil, nil, "new label", nil, nil, label)
 
                                 if newlabel then
-                                    umountAll()
+                                    liked.umountAll()
                                     if not pcall(v.fs.setLabel, newlabel) then
                                         warn("invalid name")
                                     end
-                                    mountAll()
+                                    liked.mountAll()
                                     draw()
                                 else
                                     clear2()
@@ -918,21 +908,18 @@ local function doIcon(windowEventData)
                                 local state = gui_yesno(screen, nil, nil, "clear label on \"" .. (v.name or "disk") .. "\"?")
 
                                 if state then
-                                    umountAll()
+                                    liked.umountAll()
                                     v.fs.setLabel(nil)
-                                    mountAll()
+                                    liked.mountAll()
                                     draw()
                                 else
                                     clear2()
                                 end
                             elseif str == "  boot from this disk" then
-                                if not vendor.disableExternalBoot then
+                                if not registry.disableExternalBoot then
                                     pcall(computer.setBootAddress, v.fs.address)
                                     pcall(computer.setBootFile, "/init.lua")
                                     pcall(computer.shutdown, "fast")
-                                else
-                                    warn("booting from external disks is disabled by vendor")
-                                    draw()
                                 end
                             end
                         elseif v.isAlias then
@@ -1043,11 +1030,15 @@ local function doIcon(windowEventData)
 
                                 table.insert(strs, "  set as screensaver")
                                 table.insert(active, true)
-                            elseif v.exp == "app" and v.isDir then
+                            elseif v.exp == "app" then
                                 addLine()
 
-                                table.insert(strs, "  inside the package")
                                 table.insert(active, true)
+                                if v.isDir then
+                                    table.insert(strs, "  inside the package")
+                                else
+                                    table.insert(strs, "  edit")
+                                end
                             end
                             
                             if (v.exp == "lua" or v.exp == "plt" or v.exp == "scrsv") and not v.isDir then
@@ -1500,6 +1491,10 @@ event.listen("key_down", function(_, uuid, char, code)
 end)
 
 local function checkScreenSaver()
+    if gui_container.noScreenSaver[screen] then
+        lastScreenSaverTime = computer.uptime()
+    end
+
     if not screenSaver and (screenSaverDemo == screen or screenSaverDemo == true or (registry.screenSaverTimer and computer.uptime() - lastScreenSaverTime > registry.screenSaverTimer)) then
         lastScreenSaverTime = computer.uptime()
 
@@ -1616,7 +1611,7 @@ desktopTh = thread.create(function ()
                 local clear = screenshot(screen, 7, 2, 28, 3)
                 local str, num = gui.context(screen, 7, 2,
                 {gui_container.viewFileExps[screen] and "  hide file extensions  " or "  show file extensions  ", gui_container.userRoot[screen] and "  hide root directory" or "  show root directory"},
-                {true, true})
+                {not registry.disableFileExps, not registry.disableRootAccess})
                 contextMenuOpen = nil
 
                 if num == 1 then
@@ -1664,7 +1659,7 @@ desktopTh = thread.create(function ()
         if computer.uptime() - devModeResetTime > 1 then
             devModeResetTime = computer.uptime()
             if devModeCount > 15 then
-                if not vendor.disableDevShortcut then
+                if not registry.disableDevShortcut then
                     if registry.soundEnable then
                         if not isDev() then
                             computer.beep(2000)

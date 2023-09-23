@@ -7,6 +7,7 @@ local gui_container = require("gui_container")
 local paths = require("paths")
 local unicode = require("unicode")
 local computer = require("computer")
+local bootloader = require("bootloader")
 
 local colors = gui_container.colors
 
@@ -58,15 +59,10 @@ local function draw()
         --selectWindow:write("╚" .. string.rep("═", unicode.len(str)) .. "╝", background, foreground)
     end
 
-    local currentFile = paths.concat(modulesPath, modules[selected])
-    local file = assert(fs.open(currentFile, "rb"))
-    local data = file.readAll()
-    file.close()
-
     if moduleEnd then
         moduleEnd()
     end
-    local code = assert(load(data, "=" .. currentFile, nil, calls.call("createEnv")))
+    local code = loadfile(paths.concat(modulesPath, modules[selected]), nil, bootloader.createEnv())
     modulWindow:clear(colors.black)
     currentModule, moduleEnd = code(screen, modulWindow.x, modulWindow.y)
 end

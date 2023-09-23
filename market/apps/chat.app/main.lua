@@ -9,10 +9,12 @@ local unicode = require("unicode")
 
 local colors = gui_container.colors
 local indexsColors = gui_container.indexsColors
+local screen, nickname, path = ...
+
+gui_container.noBlockOnScreenSaver[screen] = true
 
 ------------------------------------
 
-local screen, nikname, path = ...
 local isSendImage
 if path and path:find("%:") then
     path = split(path, ":")[1]
@@ -185,8 +187,8 @@ local function draw()
 end
 draw()
 
-local function send(nikname, messageType, message)
-    local packet = {nikname, colorsApi.red, messageType, message, 0}
+local function send(nickname, messageType, message)
+    local packet = {nickname, colorsApi.red, messageType, message, 0}
     chat_lib.send(table.unpack(packet))
     table.insert(history, packet)
     addNullStrs(packet)
@@ -202,7 +204,7 @@ if path then
     local data = file.readAll()
     file.close()
 
-    send(nikname, isSendImage and "image" or "file", isSendImage and data or (paths.name(path) .. ":" .. data))
+    send(nickname, isSendImage and "image" or "file", isSendImage and data or (paths.name(path) .. ":" .. data))
 end
 
 while true do
@@ -212,8 +214,8 @@ while true do
     if inputData then
         if inputData ~= true then
             if inputData ~= "" then
-                local nikname = eventData[5]
-                send(nikname, "text", inputData)
+                local nickname = eventData[5]
+                send(nickname, "text", inputData)
             end
         else
             break
