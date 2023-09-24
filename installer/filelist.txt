@@ -31,6 +31,7 @@
 /system/bin/settings.app/modules/g_components.lua
 /system/bin/settings.app/modules/h_screen_saver.lua
 /system/bin/settings.app/modules/k_libraries.lua
+/system/bin/settings.app/modules/y_buffer.lua
 /system/bin/settings.app/modules/z_system.lua
 /system/calls/findPos.lua
 /system/calls/getOSversion.lua
@@ -91,7 +92,7 @@
 /system/themes/original.plt
 /system/wallpapers/box.t2p
 /system/wallpapers/car.t2p
-/system/wallpapers/cirtis_board.t2p
+/system/wallpapers/circuit_board.t2p
 /system/wallpapers/drone.t2p
 /system/wallpapers/flower.t2p
 /system/wallpapers/robot.t2p

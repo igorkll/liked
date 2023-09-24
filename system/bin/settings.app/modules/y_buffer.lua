@@ -4,6 +4,7 @@ local paths = require("paths")
 local unicode = require("unicode")
 local liked = require("liked")
 local registry = require("registry")
+local component = require("component")
 
 local colors = gui_container.colors
 
@@ -47,11 +48,18 @@ local function draw(set)
     end
 
     if set then
-        local clear = graphic.screenshot(screen)
+        local inits = {}
+        for address in component.list("screen") do
+            table.insert(inits, {address, graphic.screenshot(address)})
+        end
+
         registry.bufferType = modes[selected] or "none"
         liked.applyBufferType()
-        system_applyTheme("/data/theme.plt", screen)
-        clear()
+
+        for _, init in ipairs(inits) do
+            system_applyTheme("/data/theme.plt", init[1])
+            init[2]()
+        end
     end
 end
 draw()
