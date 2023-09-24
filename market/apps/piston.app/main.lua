@@ -29,19 +29,23 @@ local function updateAll()
     window:set(placeAt, 4, colors.lime, colors.white, "   PUSH    ")
     window:set(placeAt, 5, colors.lime, colors.white, "           ")
 
-    window:set(placeAt, 7, colors.green, colors.white, "           ")
-    window:set(placeAt, 8, colors.green, colors.white, "   PULL    ")
-    window:set(placeAt, 9, colors.green, colors.white, "           ")
+    local col = piston.pull and colors.green or colors.gray
+    window:set(placeAt, 7, col, colors.white, "           ")
+    window:set(placeAt, 8, col, colors.white, "   PULL    ")
+    window:set(placeAt, 9, col, colors.white, "           ")
 end
 updateAll()
 
 local function updateButton()
-    local stateCol = _G.pistonBg and colors.green or colors.gray
+    local stateCol = _G.pistonBg and colors.green or colors.lightGray
     window:set(placeAt, 11, stateCol, colors.white, "           ")
     window:set(placeAt, 12, stateCol, colors.white, " AUTO PUSH ")
     window:set(placeAt, 13, stateCol, colors.white, "           ")
 
-    local stateCol = _G.pistonBg2 and colors.green or colors.gray
+    local stateCol = _G.pistonBg2 and colors.green or colors.lightGray
+    if not piston.pull then
+        stateCol = colors.gray
+    end
     window:set(placeAt, 15, stateCol, colors.white, "           ")
     window:set(placeAt, 16, stateCol, colors.white, " AUTO PULL ")
     window:set(placeAt, 17, stateCol, colors.white, "           ")
@@ -62,27 +66,39 @@ while true do
         elseif checkButton(windowEventData, 3) then
             liked.assert(screen, piston.push())
         elseif checkButton(windowEventData, 7) then
-            liked.assert(screen, piston.pull())
+            if piston.pull then
+                liked.assert(screen, piston.pull())
+            else
+                local clear = saveZone(screen)
+                gui.warn(screen, nil, nil, "this piston does not support \"pull\"")
+                clear()
+            end
         elseif checkButton(windowEventData, 11) then
             if _G.pistonBg then
                 event.cancel(_G.pistonBg)
                 _G.pistonBg = nil
             else
-                _G.pistonBg = event.timer(0.1, function ()
+                _G.pistonBg = event.timer(0.3, function ()
                     pcall(piston.push)
                 end, math.huge)
             end
             updateButton()
         elseif checkButton(windowEventData, 15) then
-            if _G.pistonBg2 then
-                event.cancel(_G.pistonBg2)
-                _G.pistonBg2 = nil
+            if piston.pull then
+                if _G.pistonBg2 then
+                    event.cancel(_G.pistonBg2)
+                    _G.pistonBg2 = nil
+                else
+                    _G.pistonBg2 = event.timer(0.3, function ()
+                        pcall(piston.pull)
+                    end, math.huge)
+                end
+                updateButton()
             else
-                _G.pistonBg2 = event.timer(0.1, function ()
-                    pcall(piston.pull)
-                end, math.huge)
+                local clear = saveZone(screen)
+                gui.warn(screen, nil, nil, "this piston does not support \"pull\"")
+                clear()
             end
-            updateButton()
         end
     end
 end
