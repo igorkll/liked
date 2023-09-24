@@ -317,7 +317,6 @@ while true do
                 noSaved = true
 
                 gclear()
-
                 local clear = saveZone(screen)
                 local str = calls.call("gui_input", screen, nil, nil, "newX newY", nil, colors.white)
                 clear()
@@ -337,7 +336,6 @@ while true do
                 noSaved = true
 
                 local str, num = gui.context(screen, 21, 3, {"  background", "  foreground", "  bg / fg"})
-
                 if num then
                     local from = gui.selectcolor(screen, nil, nil, "choose color to change")
                     if from then
@@ -345,14 +343,16 @@ while true do
                         if to then
                             for y, tbl in ipairs(image) do
                                 for x, pixel in ipairs(tbl) do
-                                    if num == 1 or num == 3 then
-                                        if pixel[1] == from then
-                                            pixel[1] = to
+                                    if pixel[1] ~= pixel[2] or pixel[1] ~= 0 then
+                                        if num == 1 or num == 3 then
+                                            if pixel[1] == from then
+                                                pixel[1] = to
+                                            end
                                         end
-                                    end
-                                    if num == 2 or num == 3 then
-                                        if pixel[2] == from then
-                                            pixel[2] = to
+                                        if num == 2 or num == 3 then
+                                            if pixel[2] == from then
+                                                pixel[2] = to
+                                            end
                                         end
                                     end
                                 end
@@ -363,12 +363,12 @@ while true do
 
                 draw()
             elseif num == 3 then
+                noSaved = true
                 for y, tbl in ipairs(image) do
                     for x, pixel in ipairs(tbl) do
                         pixel[1], pixel[2] = pixel[2], pixel[1]
                     end
                 end
-
                 draw()
             else
                 gclear()
@@ -379,17 +379,11 @@ while true do
     if paletteWindowEventData[1] == "touch" or paletteWindowEventData[1] == "drag" then
         if paletteWindowEventData[4] >= 2 and paletteWindowEventData[4] <= paletteWindow.sizeY - 1 then
             local colorIndex = paletteWindowEventData[4] - 1
-            local to
             if paletteWindowEventData[3] >= 2 and paletteWindowEventData[3] <= 3 then
-                to = false
-            elseif paletteWindowEventData[3] >= 6 and paletteWindowEventData[3] <= 7 then
-                to = true
-            end
-            if to == true then
-                selectedColor2 = colorIndex
-                drawSelectedColors()
-            elseif to == false then
                 selectedColor1 = colorIndex
+                drawSelectedColors()
+            elseif paletteWindowEventData[3] >= 6 and paletteWindowEventData[3] <= 7 then
+                selectedColor2 = colorIndex
                 drawSelectedColors()
             end
         end
