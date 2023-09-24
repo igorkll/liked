@@ -532,6 +532,7 @@ local function warnNoClear(str)
     gui_warn(screen, nil, nil, str or "unknown error")
 end
 
+--[[
 local function appLoad(name, nickname)
     local path = programs.find(name)
     if not path or not fs.exists(path) or fs.isDirectory(path) then
@@ -570,15 +571,16 @@ local function getExecute(name, nickname, ...)
         warn(err)
     end
 end
+]]
 
 local function execute(name, nickname, ...)
     timerEnable = false
 
     gui_status(screen, nil, nil, "loading...")
     
-    local code, err = appLoad(name, nickname)
+    local code, err = liked.loadApp(name, screen, nickname)
     if code then
-        programTh = thread.createBackground(code, screen, nickname, ...) --запуск программы в потоке чтобы созданые в ней потоки закрылись вместе с ней
+        programTh = thread.createBackground(code, ...) --запуск программы в потоке чтобы созданые в ней потоки закрылись вместе с ней
         programTh:resume()
         local ok, err
         while true do
@@ -597,7 +599,6 @@ local function execute(name, nickname, ...)
 
         redrawFlag = nil
         draw()
-
     elseif err then
         gui_warn(screen, nil, nil, err)
         redrawFlag = nil
@@ -613,7 +614,7 @@ local function uninstallApp(path, nickname)
         execute(uninstallPath, nickname)
         return true
     else
-        fs.remove(path)
+        liked.assert(screen, fs.remove(path))
     end
 end
 
@@ -865,7 +866,7 @@ local function doIcon(windowEventData)
                                 
                                 if state then
                                     gui_status(screen, nil, nil, "formatting...")
-                                    v.fs.remove("/")
+                                    liked.assert(screen, v.fs.remove("/"))
                                     draw()
                                 else
                                     clear2()
@@ -1092,7 +1093,7 @@ local function doIcon(windowEventData)
                                 local state = gui_yesno(screen, nil, nil, "remove \"" .. v.name .. "\"?")
                                 clear2()
                                 if state then
-                                    fs.remove(v.path)
+                                    liked.assert(screen, fs.remove(v.path))
                                     draw()
                                 end
                             elseif str == "  uninstall" then
@@ -1304,7 +1305,7 @@ local function doIcon(windowEventData)
                         local tname = isDir and "directory" or "file"
                         gui_status(screen, nil, nil, isCut and ("moving the " .. tname .. "...") or ("copying the " .. tname .. "..."))
                         if failCheck(fs.copy(copyObject, toPath)) and isCut then
-                            fs.remove(copyObject)
+                            liked.assert(screen, fs.remove(copyObject))
                         end
                     end
 

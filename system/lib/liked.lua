@@ -3,6 +3,7 @@ local computer = require("computer")
 local component = require("component")
 local programs = require("programs")
 local gui = require("gui")
+local paths = require("paths")
 local liked = {}
 
 function liked.lastVersion()
@@ -43,27 +44,38 @@ end
 
 function liked.loadApp(name, screen, nickname)
     local path = programs.find(name)
-    if not path or not fs.exists(path) or fs.isDirectory(path) then
-        gui.warn(screen, nil, nil, "failed to launch application")
-        draw()
-        return
-    end
-    if fs.exists("/vendor/appChecker.lua") then
-        local out = {programs.execute("/vendor/appChecker.lua", screen, nickname, path)}
-        if not out[1] then
-            gui.warn(screen, nil, nil, out[2])
-            redrawFlag = nil
-            draw()
-            return
-        elseif not out[2] then
-            --gui_warn(screen, nil, nil, "you cannot run this application")
-            redrawFlag = nil
-            draw()
-            return
-        end
+    if not path then
+        return nil, "failed to launch application"
     end
 
-    return programs.load(path)
+    local exitFile = paths.concat(paths.path(path), "exit.lua")
+    if not fs.exists(exitFile) or fs.isDirectory(exitFile) then
+        exitFile = nil
+    end
+
+    local mainCode, err = programs.load(path)
+    if not mainCode then return nil, err end
+    local exitCode
+    if exitFile then
+        exitCode, err = programs.load(exitFile)
+        if not exitCode then return nil, err end
+    end
+
+    return function (...)
+        local result = {mainCode(screen, nickname, ...)}
+        if exitCode then exitCode(screen, nickname) end
+        return table.unpack(result)
+    end
+end
+
+function liked.assert(screen, successful, err)
+    if not successful then
+        local clear = saveZone(screen)
+        gui.warn(screen, nil, nil, err or "unknown error")
+        clear()
+    else
+        return true
+    end
 end
 
 liked.unloadable = true

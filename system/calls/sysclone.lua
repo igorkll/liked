@@ -1,5 +1,5 @@
 local fs = require("filesystem")
-local paths = require("paths")
+local registry = require("registry")
 local gui = require("gui")
 local screen, posX, posY, vfs, name = ...
 

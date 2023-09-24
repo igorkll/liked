@@ -33,8 +33,9 @@ end
 local function wipeUserData()
     if gui_checkPassword(screen) then
         if gui.pleaseType(screen, "WIPE") then
-            fs.remove("/data")
-            computer.shutdown("fast")
+            if liked.assert(screen, fs.remove("/data")) then
+                computer.shutdown("fast")
+            end
         end
     end
     redraw()

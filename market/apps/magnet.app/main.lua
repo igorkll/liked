@@ -16,32 +16,34 @@ local rx, ry = graphic.getResolution(screen)
 local window = graphic.createWindow(screen, 1, 1, rx, ry, true)
 local title = "Magnet"
 
+local placeAt = (rx // 2) - 4
+
 local function updateAll()
     window:clear(colors.black)
     window:fill(1, 1, rx, 1, colors.gray, 0, " ")
     window:set((window.sizeX / 2) - (unicode.len(title) / 2), 1, colors.gray, colors.white, title)
     window:set(rx, 1, colors.red, colors.white, "X")
 
-    window:set(2, 3, colors.red, colors.white, "           ")
-    window:set(2, 4, colors.red, colors.white, "   SUCK    ")
-    window:set(2, 5, colors.red, colors.white, "           ")
+    window:set(placeAt, 3, colors.red, colors.white, "           ")
+    window:set(placeAt, 4, colors.red, colors.white, "   SUCK    ")
+    window:set(placeAt, 5, colors.red, colors.white, "           ")
 
-    window:set(2, 7, colors.orange, colors.white, "           ")
-    window:set(2, 8, colors.orange, colors.white, " SUCK ALL  ")
-    window:set(2, 9, colors.orange, colors.white, "           ")
+    window:set(placeAt, 7, colors.orange, colors.white, "           ")
+    window:set(placeAt, 8, colors.orange, colors.white, " SUCK ALL  ")
+    window:set(placeAt, 9, colors.orange, colors.white, "           ")
 end
 updateAll()
 
 local function updateButton()
     local stateCol = _G.magnetBg and colors.green or colors.red
-    window:set(2, 11, stateCol, colors.white, "           ")
-    window:set(2, 12, stateCol, colors.white, " AUTO SUCK ")
-    window:set(2, 13, stateCol, colors.white, "           ")
+    window:set(placeAt, 11, stateCol, colors.white, "           ")
+    window:set(placeAt, 12, stateCol, colors.white, " AUTO SUCK ")
+    window:set(placeAt, 13, stateCol, colors.white, "           ")
 end
 updateButton()
 
 local function checkButton(windowEventData, startY)
-    return windowEventData[3] >= 2 and windowEventData[3] <= 12 and windowEventData[4] >= startY and windowEventData[4] <= startY + 2
+    return windowEventData[3] >= placeAt and windowEventData[3] <= (placeAt + 10) and windowEventData[4] >= startY and windowEventData[4] <= startY + 2
 end
 
 while true do
