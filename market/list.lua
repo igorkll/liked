@@ -352,7 +352,8 @@ local list = {
         minDiskSpace = 64,
 
         path = "/data/bin/piston.app",
-        urlPrimaryPart = selfurlpart .. "/apps/piston.app/" --часть url к которой будут присираться разные имена файлов для скачивания(обязателен / на конце)
+        urlPrimaryPart = selfurlpart .. "/apps/piston.app/", --часть url к которой будут присираться разные имена файлов для скачивания(обязателен / на конце)
+        files = {"main.lua", "icon.t2p", "uninstall.lua"}
     }
     --[[
     openbox = {

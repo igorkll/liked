@@ -39,6 +39,10 @@ local desktop = assert(programs.load("desktop")) --подгружаю один �
 
 ------------------------------------
 
+if not registry.timeZone then
+    registry.timeZone = 0
+end
+
 if not registry.branch then
     registry.branch = "main"
 end

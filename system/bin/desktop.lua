@@ -137,6 +137,7 @@ local contextMenuOpen = nil
 local lockFlag = false
 
 local function drawStatus()
+    --[[
     local timeZone = registry.timeZone or 0
     
     local hours, minutes, seconds = getRealTime(timeZone)
@@ -155,6 +156,9 @@ local function drawStatus()
 
     statusWindow:fill(1, 1, rx, 1, colors.gray, 0, " ")
     statusWindow:set(window.sizeX - unicode.len(str), 1, colors.gray, colors.white, str)
+    ]]
+
+    liked.drawUpBar(screen)
     if not lockFlag then
         statusWindow:set(1, 1, contextMenuOpen == 1 and colors.blue or colors.lightGray, colors.white, " OS ")
         statusWindow:set(6, 1, contextMenuOpen == 2 and colors.blue or colors.lightGray, colors.white, " FILES ")

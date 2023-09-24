@@ -6,6 +6,9 @@ local gui = require("gui")
 local paths = require("paths")
 local registry = require("registry")
 local graphic = require("graphic")
+local time = require("time")
+local gui_container = require("gui_container")
+local system = require("system")
 local liked = {}
 
 function liked.lastVersion()
@@ -86,6 +89,25 @@ function liked.applyBufferType()
     graphic.vgpus = {}
     graphic.bindCache = {}
     graphic.screensBuffers = {}
+end
+
+function liked.drawUpBar(screen)
+    local rtc = "RTC-" .. time.formatTime(time.addTimeZone(time.getRealTime(), registry.timeZone))
+    local gtc = "GTC-" .. time.formatTime(time.getGameTime())
+    local charge = system.getCharge()
+
+    local gpu = graphic.findGpu(screen)
+    local rx, ry = gpu.getResolution()
+    gpu.setBackground(gui_container.colors.gray)
+    gpu.setForeground(gui_container.colors.white)
+    gpu.fill(1, 1, rx, 1, " ")
+    gpu.set(rx - #rtc - 6, 1, rtc)
+    gpu.set(rx - #gtc - 17, 1, gtc)
+    if charge <= 20 then
+        gpu.setForeground(gui_container.colors.red)
+    end
+    charge = tostring(charge)
+    gpu.set(rx - #charge - 1, 1, tostring(charge) .. "%")
 end
 
 liked.unloadable = true
