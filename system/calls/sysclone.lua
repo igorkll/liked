@@ -45,11 +45,11 @@ if gui_yesno(screen, nil, nil, "install \"" .. label .. "\" to \"" .. name .. "\
             fs.remove("/tmp/tmpmount/system") --удаляет старую систему чтобы не было канфликтов версий и не оставалось лишних файлов
             local success, err = fs.copy("/system", "/tmp/tmpmount/system")
             if not success then return nil, err end
+        else
+            fs.remove("/tmp/tmpmount/system/core") --удаляет старое ядра чтобы не было канфликтов версий и не оставалось лишних файлов
+            local success, err = fs.copy("/system/core", "/tmp/tmpmount/system/core")
+            if not success then return nil, err end
         end
-
-        fs.remove("/tmp/tmpmount/system/core") --удаляет старую систему чтобы не было канфликтов версий и не оставалось лишних файлов
-        local success, err = fs.copy("/system/core", "/tmp/tmpmount/system/core")
-        if not success then return nil, err end
     
         return true
     end
