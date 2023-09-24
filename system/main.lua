@@ -38,6 +38,10 @@ local desktop = assert(programs.load("desktop")) --подгружаю один �
 
 ------------------------------------
 
+if not registry.branch then
+    registry.branch = "main"
+end
+
 if not fs.exists("/data/theme.plt") then
     pcall(fs.copy, "/system/themes/classic.plt", "/data/theme.plt")
 end

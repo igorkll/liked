@@ -4,6 +4,8 @@ local computer = require("computer")
 local fs = require("filesystem")
 local system = require("system")
 local paths = require("paths")
+local serialization = require("serialization")
+local registry = require("registry")
 local liked = require("liked")
 local gui = require("gui")
 
@@ -24,7 +26,11 @@ local function updateSystem()
     if not lastVersion then
         gui_warn(screen, nil, nil, "connection problems\ntry again later")
     elseif gui_checkPassword(screen) and gui_yesno(screen, nil, nil, currentVersion ~= lastVersion and "start updating now?" or "you have the latest version installed. do you still want to start updating?") then
-        assert(fs.copy(paths.concat(system.getSelfScriptPath(), "../update_init.lua"), "/init.lua"))
+        --assert(fs.copy(paths.concat(system.getSelfScriptPath(), "../update_init.lua"), "/init.lua"))
+
+        local installdata = {branch = registry.branch}
+        local updateinitPath = paths.concat(system.getSelfScriptPath(), "../update_init.lua")
+        assert(fs.writeFile("/init.lua", serialization.serialization(installdata) .. "\n" .. assert(fs.readFile(updateinitPath))))
         computer.shutdown("fast")
     end
     redraw()

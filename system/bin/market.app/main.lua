@@ -8,6 +8,8 @@ local paths = require("paths")
 local unicode = require("unicode")
 local programs = require("programs")
 local internet = require("internet")
+local liked = require("liked")
+local gui = require("gui")
 
 local colors = gui_container.colors
 
@@ -27,15 +29,15 @@ local maxDepth = graphic.findGpu(screen).maxDepth()
 
 ------------------------------------
 
-local netver = getInternetFile("https://raw.githubusercontent.com/igorkll/liked/main/system/version.cfg")
+local netver = liked.lastVersion()
 
 if not netver then
-    gui_warn(screen, nil, nil, "connection error")
+    gui.warn(screen, nil, nil, "connection error")
     return
 end
 
-if tonumber(netver) > getOSversion() then
-    gui_warn(screen, nil, nil, "please update the system, until the system is updated, the market will not work")
+if netver > liked.version() then
+    gui.warn(screen, nil, nil, "please update the system, until the system is updated, the market will not work")
     return
 end
 
@@ -130,13 +132,13 @@ local function doList(path)
                         end
                     end
                 else
-                    gui_warn(screen, nil, nil, "list-type-err: " .. (type(result[2]) or "unknown"))
+                    gui.warn(screen, nil, nil, "list-type-err: " .. (type(result[2]) or "unknown"))
                 end
             else
-                gui_warn(screen, nil, nil, "fail to parse list: " .. (result[2] or "unknown"))
+                gui.warn(screen, nil, nil, "fail to parse list: " .. (result[2] or "unknown"))
             end
         else
-            gui_warn(screen, nil, nil, "fail to read list: " .. (result[2] or "unknown"))
+            gui.warn(screen, nil, nil, "fail to read list: " .. (result[2] or "unknown"))
         end
     end
 end
@@ -146,7 +148,7 @@ local customPath = "/data/market_urls.txt"
 local function reList()
     urls = {}
     if not registry.disableSystemMarketUrls then
-        doList("/system/market_urls.txt")
+        doList("/system/market_urls_" .. registry.branch .. ".txt")
     end
     doList("/vendor/market_urls.txt")
     if not registry.disableCustomMarketUrls then
@@ -169,16 +171,16 @@ local function reList()
                             table.insert(list, app)
                         end
                     else
-                        gui_warn(screen, nil, nil, id .. "list-type-err: " .. (type(result[2]) or "unknown"))
+                        gui.warn(screen, nil, nil, id .. "list-type-err: " .. (type(result[2]) or "unknown"))
                     end
                 else
-                    gui_warn(screen, nil, nil, id .. "list-err: " .. (result[2] or "unknown"))
+                    gui.warn(screen, nil, nil, id .. "list-err: " .. (result[2] or "unknown"))
                 end
             else
-                gui_warn(screen, nil, nil, id .. "list-err: " .. (err or "unknown"))
+                gui.warn(screen, nil, nil, id .. "list-err: " .. (err or "unknown"))
             end
         else
-            gui_warn(screen, nil, nil, id .. "list-err: " .. (err or "unknown"))
+            gui.warn(screen, nil, nil, id .. "list-err: " .. (err or "unknown"))
         end
     end
 end
@@ -276,7 +278,7 @@ local function applicationLabel(data, x, y)
                 local formattedName2 = " \"" .. (data.name or "unknown") .. "\"..."
                 if instCache[data] and verCache[data] ~= data.version then
                     if supportErr then
-                        gui_warn(screen, nil, nil, supportErr)
+                        gui.warn(screen, nil, nil, supportErr)
                     elseif gui_yesno(screen, nil, nil, "update" .. formattedName) then
                         gui_status(screen, nil, nil, "updating" .. formattedName2)
                         data:install()
@@ -288,7 +290,7 @@ local function applicationLabel(data, x, y)
                     end
                 else
                     if supportErr then
-                        gui_warn(screen, nil, nil, supportErr)
+                        gui.warn(screen, nil, nil, supportErr)
                     elseif gui_yesno(screen, nil, nil, "install" .. formattedName) then
                         gui_status(screen, nil, nil, "installation" .. formattedName2)
                         data:install()
