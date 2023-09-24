@@ -10,6 +10,7 @@ local unicode = require("unicode")
 local component = require("component")
 local thread = require("thread")
 local paths = require("paths")
+local system = require("system")
 local gui = {}
 
 local smartShadowsColors = {
@@ -134,7 +135,7 @@ function gui.pleaseType(screen, str, tostr)
     return false
 end
 
-function gui.warn(screen, cx, cy, str, backgroundColor)
+function gui.smallWindow(screen, cx, cy, str, backgroundColor, icon)
     --◢▲◣▲▴▴
     local gpu = graphic.findGpu(screen)
 
@@ -156,30 +157,40 @@ function gui.warn(screen, cx, cy, str, backgroundColor)
     gui.shadow(gpu, window.x, window.y, window.sizeX, window.sizeY)
     window:clear(color)
 
-    for i, v in ipairs(restrs(str, 22)) do
+    for i, v in ipairs(restrs(str, 24)) do
         local textColor = colors.white
         if color == textColor then
             textColor = colors.black
         end
-        window:set(10, i + 1, color, textColor, v)
+        window:set(8, i + 1, color, textColor, v)
     end
 
-    window:set(2, 2, color, colors.yellow, "  " .. unicode.char(0x2800+192) ..  "  ")
-    window:set(2, 3, color, colors.yellow, " ◢█◣ ")
-    window:set(2, 4, color, colors.yellow, "◢███◣")
-    window:set(4, 3, colors.yellow, colors.white, "!")
+    if icon then
+        icon(window, color)
+    end
+
+    return window
+end
+
+function gui.warn(screen, cx, cy, str, backgroundColor)
+    local window = gui.smallWindow(screen, cx, cy, str, backgroundColor, function (window, color)
+        window:set(2, 2, color, colors.yellow, "  " .. unicode.char(0x2800+192) ..  "  ")
+        window:set(2, 3, color, colors.yellow, " ◢█◣ ")
+        window:set(2, 4, color, colors.yellow, "◢███◣")
+        window:set(4, 3, colors.yellow, colors.white, "!")
+    end)
+
     window:set(32 - 4, 7, colors.lightBlue, colors.white, " ok ")
+    local function drawYes()
+        window:set(32 - 4, 7, colors.blue, colors.white, " ok ")
+        graphic.forceUpdate()
+        event.sleep(0.1)
+    end
 
     graphic.forceUpdate()
     if registry.soundEnable then
         computer.beep(100)
         computer.beep(100)
-    end
-
-    local function drawYes()
-        window:set(32 - 4, 7, colors.blue, colors.white, " ok ")
-        graphic.forceUpdate()
-        event.sleep(0.1)
     end
 
     while true do
@@ -193,6 +204,52 @@ function gui.warn(screen, cx, cy, str, backgroundColor)
         elseif windowEventData[1] == "key_down" and windowEventData[4] == 28 then
             drawYes()
             break
+        end
+    end
+end
+
+function gui.pleaseCharge(screen, minCharge, str)
+    minCharge = minCharge or 40
+    str = str or "this action"
+
+    if system.getCharge() >= minCharge then return true end
+
+    local clear = saveZone(screen)
+
+    local window = gui.smallWindow(screen, nil, nil, "in order to make " .. str .. ",\nthe charge level of the device must be at least " .. tostring(math.floor(minCharge)) .. "%", nil, function (window, color)
+        window:set(3, 2, color,         colors.gray, unicode.char(0x2800+192) .. "█" .. unicode.char(0x2800+192))
+        window:set(3, 3, color,         colors.gray, "█ █")
+        window:set(3, 4, colors.yellow, colors.gray, "█ █")
+        window:set(3, 5, color,         colors.gray, "███")
+    end)
+
+    window:set(32 - 4, 7, colors.lightBlue, colors.white, " ok ")
+    local function drawYes()
+        window:set(32 - 4, 7, colors.blue, colors.white, " ok ")
+        graphic.forceUpdate()
+        event.sleep(0.1)
+    end
+
+    graphic.forceUpdate()
+    if registry.soundEnable then
+        computer.beep(300)
+        computer.beep(300)
+        computer.beep(600)
+    end
+
+    while true do
+        local eventData = {computer.pullSignal()}
+        local windowEventData = window:uploadEvent(eventData)
+        if windowEventData[1] == "touch" and windowEventData[5] == 0 then
+            if windowEventData[4] == 7 and windowEventData[3] > (32 - 5) and windowEventData[3] <= ((32 - 5) + 4) then
+                drawYes()
+                clear()
+                return false
+            end
+        elseif windowEventData[1] == "key_down" and windowEventData[4] == 28 then
+            drawYes()
+            clear()
+            return false
         end
     end
 end

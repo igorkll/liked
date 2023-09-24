@@ -151,8 +151,7 @@ local function drawStatus()
     if #gameHours == 1 then gameHours = "0" .. gameHours end
     if #gameMinutes == 1 then gameMinutes = "0" .. gameMinutes end
 
-    local power = constrain(math.ceil(map(computer.energy(), 0, computer.maxEnergy(), 0, 100) + 0.5), 0, 100)
-    local str = "real time: " .. hours .. ":" .. minutes .. "   game time: " .. gameHours .. ":" .. gameMinutes .. "   " .. tostring(power) .. "%"
+    local str = "real time: " .. hours .. ":" .. minutes .. "   game time: " .. gameHours .. ":" .. gameMinutes .. "   " .. tostring(system.getCharge()) .. "%"
 
     statusWindow:fill(1, 1, rx, 1, colors.gray, 0, " ")
     statusWindow:set(window.sizeX - unicode.len(str), 1, colors.gray, colors.white, str)

@@ -5,6 +5,7 @@ local programs = require("programs")
 local gui = require("gui")
 local paths = require("paths")
 local registry = require("registry")
+local graphic = require("graphic")
 local liked = {}
 
 function liked.lastVersion()
@@ -77,6 +78,14 @@ function liked.assert(screen, successful, err)
     else
         return true
     end
+end
+
+function liked.applyBufferType()
+    graphic.allowSoftwareBuffer = registry.bufferType == "software"
+    graphic.allowHardwareBuffer = registry.bufferType == "hardware"
+    graphic.vgpus = {}
+    graphic.bindCache = {}
+    graphic.screensBuffers = {}
 end
 
 liked.unloadable = true

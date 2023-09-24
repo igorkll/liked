@@ -7,6 +7,7 @@ local fs = require("filesystem")
 local registry = require("registry")
 local event = require("event")
 local bootloader = require("bootloader")
+local computer = require("computer")
 
 table.insert(programs.paths, "/data/userdata")
 table.insert(programs.paths, "/data/userdata/apps")
@@ -41,6 +42,15 @@ local desktop = assert(programs.load("desktop")) --подгружаю один �
 if not registry.branch then
     registry.branch = "main"
 end
+
+if not registry.bufferType then
+    if computer.totalMemory() / 1024 > 400 then
+        registry.bufferType = "software"
+    else
+        registry.bufferType = "none"
+    end
+end
+require("liked").applyBufferType()
 
 if not fs.exists("/data/theme.plt") then
     pcall(fs.copy, "/system/themes/classic.plt", "/data/theme.plt")
