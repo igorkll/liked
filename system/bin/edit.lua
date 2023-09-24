@@ -1011,9 +1011,6 @@ local gpu = graphic.findGpu(screen)
 gpu.setBackground(colors.gray)
 gpu.setForeground(colors.white)
 
-local oldAllowBuffer = graphic.getBufferStateOnScreen(screen)
-graphic.setBufferStateOnScreen(screen, false)
-
 local keyaddr = component.invoke(screen, "getKeyboards")[1]
 
 local blinkingTerm = true
@@ -1748,5 +1745,3 @@ while running do
         end
     end
 end
-
-graphic.setBufferStateOnScreen(screen, oldAllowBuffer)
