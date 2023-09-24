@@ -582,10 +582,14 @@ local function execute(name, nickname, ...)
     if code then
         programTh = thread.createBackground(code, ...) --запуск программы в потоке чтобы созданые в ней потоки закрылись вместе с ней
         programTh:resume()
-        local ok, err
+        local ok, err = true
         while true do
             if programTh:status() == "dead" then
-                ok, err = table.unpack(programTh.out)
+                if not programTh.out[1] then --если ошибка произошла в функции которую возврашяет liked.loadApp (чего быть не должно)
+                    ok, err = false, programTh.out[2]
+                elseif not programTh.out[2] then --если ошибка произошла в целевой программе
+                    ok, err = false, programTh.out[3]
+                end
                 break
             end
             event.yield()

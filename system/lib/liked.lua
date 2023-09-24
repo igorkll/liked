@@ -62,8 +62,8 @@ function liked.loadApp(name, screen, nickname)
     end
 
     return function (...)
-        local result = {mainCode(screen, nickname, ...)}
-        if exitCode then exitCode(screen, nickname) end
+        local result = {xpcall(mainCode, debug.traceback, screen, nickname, ...)}
+        pcall(exitCode, screen, nickname) --в exit.lua нет обработки ошибок
         return table.unpack(result)
     end
 end

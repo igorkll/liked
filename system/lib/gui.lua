@@ -16,7 +16,7 @@ local smartShadowsColors = {
     colorslib.lightGray, --1)  white
     colorslib.brown,     --2)  orange
     colorslib.purple,    --3)  magenta
-    colorslib.blue,      --4)  lightBlue
+    colorslib.cyan,      --4)  lightBlue
     colorslib.orange,    --5)  yellow
     colorslib.green,     --6)  lime
     colorslib.magenta,   --7)  pink
@@ -44,21 +44,31 @@ end
 
 ------------------------------------
 
-function gui.shadow(gpu, x, y, sx, sy, mul)
+function gui.shadow(gpu, x, y, sx, sy, mul, full)
     local function getPoses()
         local shadowPosesX = {}
         local shadowPosesY = {}
-        for i = x + 1, (x + sx) - 1 do
-            table.insert(shadowPosesX, i)
-            table.insert(shadowPosesY, y + sy)
-        end
-        for i = y + 1, y + sy do
-            table.insert(shadowPosesX, x + sx)
-            if registry.shadowMode == "full" then
-                table.insert(shadowPosesX, x + sx + 1)
+
+        if full then
+            for cx = x, x + (sx - 1) do
+                for cy = y, y + (sy - 1) do
+                    table.insert(shadowPosesX, cx)
+                    table.insert(shadowPosesY, cy)
+                end
+            end
+        else
+            for i = x + 1, (x + sx) - 1 do
+                table.insert(shadowPosesX, i)
+                table.insert(shadowPosesY, y + sy)
+            end
+            for i = y + 1, y + sy do
+                table.insert(shadowPosesX, x + sx)
+                if registry.shadowMode == "full" then
+                    table.insert(shadowPosesX, x + sx + 1)
+                    table.insert(shadowPosesY, i)
+                end
                 table.insert(shadowPosesY, i)
             end
-            table.insert(shadowPosesY, i)
         end
 
         return shadowPosesX, shadowPosesY
@@ -78,20 +88,28 @@ function gui.shadow(gpu, x, y, sx, sy, mul)
     elseif registry.shadowType == "smart" then
         local shadowPosesX, shadowPosesY = getPoses()
 
+        local palcache = {}
+        local function getPalCol(source)
+            for i = 0, 15 do
+                local col = palcache[i]
+                if not col then
+                    col = gpu.getPaletteColor(i)
+                    palcache[i] = col
+                end
+                if col == source then
+                    return i
+                end
+            end
+            return 0
+        end
+
         for i = 1, #shadowPosesX do
             local ok, char, fore, back, forePal, backPal = pcall(gpu.get, shadowPosesX[i], shadowPosesY[i])
             if ok and char and fore and back then
-                if forePal then
-                    gpu.setForeground(smartShadowsColors[forePal + 1], true)
-                else
-                    gpu.setForeground(colorslib.colorMul(fore, mul or 0.6))
-                end
-
-                if backPal then
-                    gpu.setBackground(smartShadowsColors[backPal + 1], true)
-                else
-                    gpu.setBackground(colorslib.colorMul(back, mul or 0.6))
-                end
+                if not forePal then forePal = getPalCol(fore) end
+                gpu.setForeground(smartShadowsColors[forePal + 1], true)
+                if not backPal then backPal = getPalCol(back) end
+                gpu.setBackground(smartShadowsColors[backPal + 1], true)
                 
                 gpu.set(shadowPosesX[i], shadowPosesY[i], char)
             end
