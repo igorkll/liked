@@ -91,23 +91,37 @@ function liked.applyBufferType()
     graphic.screensBuffers = {}
 end
 
-function liked.drawUpBar(screen)
+function liked.drawUpBarTask(screen, withoutFill, bgcolor)
+    local thread = require("thread")
+    local th = thread.create(function ()
+        while true do
+            liked.drawUpBar(screen, withoutFill, bgcolor)
+            os.sleep(1)
+        end
+    end)
+    th:resume()
+    return th
+end
+
+function liked.drawUpBar(screen, withoutFill, bgcolor)
     local rtc = "RTC-" .. time.formatTime(time.addTimeZone(time.getRealTime(), registry.timeZone))
     local gtc = "GTC-" .. time.formatTime(time.getGameTime())
     local charge = system.getCharge()
 
     local gpu = graphic.findGpu(screen)
     local rx, ry = gpu.getResolution()
-    gpu.setBackground(gui_container.colors.gray)
+    gpu.setBackground(bgcolor or gui_container.colors.gray)
     gpu.setForeground(gui_container.colors.white)
-    gpu.fill(1, 1, rx, 1, " ")
-    gpu.set(rx - #rtc - 6, 1, rtc)
-    gpu.set(rx - #gtc - 17, 1, gtc)
+    if not withoutFill then
+        gpu.fill(1, 1, rx, 1, " ")
+    end
+    gpu.set(rx - #rtc - 7, 1, rtc)
+    gpu.set(rx - #gtc - 18, 1, gtc)
     if charge <= 20 then
         gpu.setForeground(gui_container.colors.red)
     end
     charge = tostring(charge)
-    gpu.set(rx - #charge - 1, 1, tostring(charge) .. "%")
+    gpu.set(rx - #charge - 2, 1, tostring(charge) .. "%")
 end
 
 liked.unloadable = true

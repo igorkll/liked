@@ -4,10 +4,8 @@ local event = require("event")
 local gui_container = require("gui_container")
 local gui = require("gui")
 local unicode = require("unicode")
-local liked = require("liked")
 local sides = require("sides")
 local liked = require("liked")
-local thread = require("thread")
 local colors = gui_container.colors
 
 local screen = ...
@@ -17,7 +15,7 @@ if not piston then
 end
 piston = component.proxy(piston)
 local rx, ry = graphic.getResolution(screen)
-local window = graphic.createWindow(screen, 1, 2, rx, ry - 1, true)
+local window = graphic.createWindow(screen, 1, 1, rx, ry, true)
 local title = "Piston"
 
 local placeAt = (rx // 2) - 4
@@ -29,9 +27,9 @@ _G.pistonBg2 = _G.pistonBg2 or {}
 
 _G.pistonCurrentSide[piston] = _G.pistonCurrentSide[piston] or sides.front
 
-local function updateAll()
-    liked.drawUpBar(screen)
+liked.drawUpBarTask(screen, true, colors.gray)
 
+local function updateAll()
     window:clear(colors.black)
     window:fill(1, 1, rx, 1, colors.gray, 0, " ")
     window:set((window.sizeX / 2) - (unicode.len(title) / 2), 1, colors.gray, colors.white, title)
@@ -87,11 +85,6 @@ end
 local function checkButton2(windowEventData, startY)
     return windowEventData[3] >= placeAt2 and windowEventData[3] <= (placeAt2 + 10) and windowEventData[4] >= startY and windowEventData[4] <= startY + 2
 end
-
-thread.create(function ()
-    liked.drawUpBar(screen)
-    os.sleep(1)
-end):resume()
 
 while true do
     local eventData = {event.pull()}
