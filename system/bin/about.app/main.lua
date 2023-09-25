@@ -35,7 +35,7 @@ end
 
 local function draw()
     statusWindow:clear(colors.gray)
-    statusWindow:set((statusWindow.sizeX / 2) - (unicode.len(title) / 2), 1, colors.gray, colors.white, title)
+    statusWindow:set(2, 1, colors.gray, colors.white, title)
     statusWindow:set(rx, 1, colors.red, colors.white, "X")
 
     --[[

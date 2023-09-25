@@ -36,7 +36,7 @@ end
 
 statusWindow:clear(colors.gray)
 statusWindow:set(statusWindow.sizeX, 1, colors.red, colors.white, "X")
-statusWindow:set((statusWindow.sizeX / 2) - 4, 1, colors.gray, colors.white, "Settings")
+statusWindow:set(2, 1, colors.gray, colors.white, "Settings")
 
 local currentModule, moduleEnd
 local function draw()

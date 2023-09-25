@@ -29,8 +29,7 @@ local function update()
     statusWindow:set(rx, 1, colors.red, colors.white, "X")
     statusWindow:set(1, 1, colors.red, colors.white, "<")
     
-    local title = "List Of Components"
-    statusWindow:set((statusWindow.sizeX / 2) - (unicode.len(title) / 2), 1, colors.gray, colors.white, title)
+    statusWindow:set(3, 1, colors.gray, colors.white, "List Of Components")
 
     local types = {}
     local added = {}
