@@ -59,17 +59,17 @@ local function updateButtons()
     window:set(placeAt, 17, stateCol, colors.white, "           ")
 
 
-    local stateCol = _G.pistonCurrentSide[piston] == sides.front
+    local stateCol = _G.pistonCurrentSide[piston] == sides.front and colors.red or colors.lightGray
     window:set(placeAt2, 2, stateCol, colors.white, "           ")
     window:set(placeAt2, 4, stateCol, colors.white, "   FRONT   ")
     window:set(placeAt2, 5, stateCol, colors.white, "           ")
 
-    local stateCol = _G.pistonCurrentSide[piston] == sides.up
+    local stateCol = _G.pistonCurrentSide[piston] == sides.up and colors.red or colors.lightGray
     window:set(placeAt2, 7, stateCol, colors.white, "           ")
     window:set(placeAt2, 8, stateCol, colors.white, "     UP    ")
     window:set(placeAt2, 9, stateCol, colors.white, "           ")
 
-    local stateCol = _G.pistonCurrentSide[piston] == sides.bottom
+    local stateCol = _G.pistonCurrentSide[piston] == sides.bottom and colors.red or colors.lightGray
     window:set(placeAt2, 11, stateCol, colors.white, "           ")
     window:set(placeAt2, 12, stateCol, colors.white, "  BOTTOM   ")
     window:set(placeAt2, 13, stateCol, colors.white, "           ")

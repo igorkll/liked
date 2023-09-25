@@ -346,7 +346,7 @@ local list = {
     },
     {
         name = "piston",
-        version = "2",
+        version = "3",
         vendor = "logic",
         description = "a program for controlling a piston(piston-upgrade)",
         minDiskSpace = 64,
