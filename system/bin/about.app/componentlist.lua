@@ -16,10 +16,6 @@ liked.drawUpBarTask(screen, true, colors.gray)
 
 --------------------------------------------
 
-local version = calls.call("getOSversion")
-local hddTotalSpace = fs.get("/").spaceTotal()
-local hddUsedSpace = fs.get("/").spaceUsed()
-
 local statusWindow = graphic.createWindow(screen, 1, 1, rx, 1, true)
 local window = graphic.createWindow(screen, 1, 2, rx, ry - 1, true)
 
