@@ -19,6 +19,7 @@ local window = graphic.createWindow(screen, 1, 1, rx, ry, true)
 local title = "Piston"
 
 local placeAt = (rx // 2) - 4
+local placeAt2 = (rx // 2) + 10
 
 _G.pistonCurrentSide = _G.pistonCurrentSide or {}
 _G.pistonBg = _G.pistonBg or {}
@@ -43,7 +44,7 @@ local function updateAll()
 end
 updateAll()
 
-local function updateButton()
+local function updateButtons()
     local stateCol = _G.pistonBg[piston] and colors.green or colors.lightGray
     window:set(placeAt, 11, stateCol, colors.white, "           ")
     window:set(placeAt, 12, stateCol, colors.white, " AUTO PUSH ")
@@ -56,11 +57,31 @@ local function updateButton()
     window:set(placeAt, 15, stateCol, colors.white, "           ")
     window:set(placeAt, 16, stateCol, colors.white, " AUTO PULL ")
     window:set(placeAt, 17, stateCol, colors.white, "           ")
+
+
+    local stateCol = _G.pistonCurrentSide[piston] == sides.front
+    window:set(placeAt2, 2, stateCol, colors.white, "           ")
+    window:set(placeAt2, 4, stateCol, colors.white, "   FRONT   ")
+    window:set(placeAt2, 5, stateCol, colors.white, "           ")
+
+    local stateCol = _G.pistonCurrentSide[piston] == sides.up
+    window:set(placeAt2, 7, stateCol, colors.white, "           ")
+    window:set(placeAt2, 8, stateCol, colors.white, "     UP    ")
+    window:set(placeAt2, 9, stateCol, colors.white, "           ")
+
+    local stateCol = _G.pistonCurrentSide[piston] == sides.bottom
+    window:set(placeAt2, 11, stateCol, colors.white, "           ")
+    window:set(placeAt2, 12, stateCol, colors.white, "  BOTTOM   ")
+    window:set(placeAt2, 13, stateCol, colors.white, "           ")
 end
-updateButton()
+updateButtons()
 
 local function checkButton(windowEventData, startY)
     return windowEventData[3] >= placeAt and windowEventData[3] <= (placeAt + 10) and windowEventData[4] >= startY and windowEventData[4] <= startY + 2
+end
+
+local function checkButton2(windowEventData, startY)
+    return windowEventData[3] >= placeAt2 and windowEventData[3] <= (placeAt2 + 10) and windowEventData[4] >= startY and windowEventData[4] <= startY + 2
 end
 
 while true do
@@ -89,7 +110,7 @@ while true do
                     pcall(piston.push, _G.pistonCurrentSide[piston])
                 end, math.huge)
             end
-            updateButton()
+            updateButtons()
         elseif checkButton(windowEventData, 15) then
             if piston.pull then
                 if _G.pistonBg2[piston] then
@@ -100,12 +121,18 @@ while true do
                         pcall(piston.pull, _G.pistonCurrentSide[piston])
                     end, math.huge)
                 end
-                updateButton()
+                updateButtons()
             else
                 local clear = saveZone(screen)
                 gui.warn(screen, nil, nil, "this piston does not support \"pull\"")
                 clear()
             end
+        elseif checkButton2(windowEventData, 3) then
+            _G.pistonCurrentSide[piston] = sides.front
+        elseif checkButton2(windowEventData, 7) then
+            _G.pistonCurrentSide[piston] = sides.up
+        elseif checkButton2(windowEventData, 11) then
+            _G.pistonCurrentSide[piston] = sides.bottom
         end
     end
 end
