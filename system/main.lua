@@ -9,6 +9,8 @@ local event = require("event")
 local bootloader = require("bootloader")
 local computer = require("computer")
 
+bootloader.runlevel = "user"
+
 table.insert(programs.paths, "/data/userdata")
 table.insert(programs.paths, "/data/userdata/apps")
 
