@@ -60,7 +60,7 @@ local function updateButtons()
 
 
     local stateCol = _G.pistonCurrentSide[piston] == sides.front and colors.red or colors.lightGray
-    window:set(placeAt2, 2, stateCol, colors.white, "           ")
+    window:set(placeAt2, 3, stateCol, colors.white, "           ")
     window:set(placeAt2, 4, stateCol, colors.white, "   FRONT   ")
     window:set(placeAt2, 5, stateCol, colors.white, "           ")
 
@@ -129,10 +129,13 @@ while true do
             end
         elseif checkButton2(windowEventData, 3) then
             _G.pistonCurrentSide[piston] = sides.front
+            updateButtons()
         elseif checkButton2(windowEventData, 7) then
             _G.pistonCurrentSide[piston] = sides.up
+            updateButtons()
         elseif checkButton2(windowEventData, 11) then
             _G.pistonCurrentSide[piston] = sides.bottom
+            updateButtons()
         end
     end
 end
