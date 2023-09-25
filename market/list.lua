@@ -337,7 +337,7 @@ local list = {
         name = "magnet",
         version = "1",
         vendor = "logic",
-        description = "a program for controlling a magnet that attracts resources",
+        description = "a program for controlling a magnet that attracts resources(tractor_beam-upgrade)",
         minDiskSpace = 64,
 
         path = "/data/bin/magnet.app",
@@ -346,9 +346,9 @@ local list = {
     },
     {
         name = "piston",
-        version = "1",
+        version = "2",
         vendor = "logic",
-        description = "a program for controlling a piston",
+        description = "a program for controlling a piston(piston-upgrade)",
         minDiskSpace = 64,
 
         path = "/data/bin/piston.app",

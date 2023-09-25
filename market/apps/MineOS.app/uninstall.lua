@@ -14,6 +14,7 @@ fs.remove("/Screensavers")
 fs.remove("/Temporary")
 fs.remove("/Users")
 fs.remove("/Versions.cfg")
+fs.remove("/Autosave.proj")
 fs.remove("/OS.lua")
 
 fs.remove("/mineOS.lua")

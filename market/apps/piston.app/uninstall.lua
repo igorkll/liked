@@ -3,14 +3,20 @@ local fs = require("filesystem")
 local system = require("system")
 local paths = require("paths")
 
-fs.remove(paths.path(system.getSelfScriptPath()))
+_G.pistonCurrentSide = nil
 
 if _G.pistonBg then
-    event.cancel(_G.pistonBg)
+    for addr, id in pairs(_G.pistonBg) do
+        event.cancel(id)
+    end
     _G.pistonBg = nil
 end
 
 if _G.pistonBg2 then
-    event.cancel(_G.pistonBg2)
+    for addr, id in pairs(_G.pistonBg2) do
+        event.cancel(id)
+    end
     _G.pistonBg2 = nil
 end
+
+fs.remove(paths.path(system.getSelfScriptPath()))
