@@ -91,16 +91,27 @@ function liked.applyBufferType()
     graphic.screensBuffers = {}
 end
 
-function liked.drawUpBarTask(screen, withoutFill, bgcolor)
-    local thread = require("thread")
-    local th = thread.create(function ()
+function liked.raw_drawUpBarTask(method, screen, withoutFill, bgcolor)
+    local function redraw()
+        liked.drawUpBar(screen, withoutFill, bgcolor)
+        graphic.update(screen)
+    end
+    local th = method(function ()
         while true do
-            liked.drawUpBar(screen, withoutFill, bgcolor)
-            os.sleep(1)
+            redraw()
+            os.sleep(3)
         end
     end)
     th:resume()
-    return th
+    return th, redraw
+end
+
+function liked.drawUpBarTask(screen, withoutFill, bgcolor)
+    return liked.raw_drawUpBarTask(require("thread").create, screen, withoutFill, bgcolor)
+end
+
+function liked.drawUpBarTaskBg(screen, withoutFill, bgcolor)
+    return liked.raw_drawUpBarTask(require("thread").createBackground, screen, withoutFill, bgcolor)
 end
 
 function liked.drawUpBar(screen, withoutFill, bgcolor)

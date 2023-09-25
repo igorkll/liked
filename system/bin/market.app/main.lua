@@ -27,6 +27,15 @@ end
 local rootfs = fs.get("/")
 local maxDepth = graphic.findGpu(screen).maxDepth()
 
+local barTh, barRedraw = liked.drawUpBarTask(screen, true, colors.gray)
+
+local function exec(...)
+    barTh:suspend()
+    local result = {programs.execute(...)}
+    barTh:resume()
+    return table.unpack(result)
+end
+
 ------------------------------------
 
 local netver = liked.lastVersion()
@@ -89,7 +98,7 @@ local function modifyList(lst)
             function v.uninstall(self)
                 local uninstallPath = paths.concat(self.path, "uninstall.lua")
                 if fs.exists(uninstallPath) then
-                    assert(programs.execute(uninstallPath, screen, nickname))
+                    assert(exec(uninstallPath, screen, nickname))
                 else
                     fs.remove(self.path)
                 end
@@ -269,7 +278,7 @@ local function applicationLabel(data, x, y)
 
                 gui_status(screen, nil, nil, "license loading...")
                 assert(saveFile(license, assert(getInternetFile(data.license))))
-                programs.execute("edit", screen, nickname, license, true)
+                exec("edit", screen, nickname, license, true)
                 fs.remove(license)
 
                 return true
@@ -319,9 +328,10 @@ local function appInfo(data)
     local appLabel
     local function ldraw()
         statusWindow:clear(colors.gray)
-        statusWindow:set((statusWindow.sizeX / 2) - (unicode.len(title) / 2), 1, colors.gray, colors.white, title)
+        statusWindow:set(3, 1, colors.gray, colors.white, title)
         statusWindow:set(statusWindow.sizeX, statusWindow.sizeY, colors.red, colors.white, "X")
         statusWindow:set(1, statusWindow.sizeY, colors.red, colors.white, "<")
+        barRedraw()
 
         window:clear(colors.white)
 
@@ -381,11 +391,12 @@ local appLabels = {}
 
 local function drawStatus()
     statusWindow:clear(colors.gray)
-    statusWindow:set((statusWindow.sizeX / 2) - (unicode.len(title) / 2), 1, colors.gray, colors.white, title)
+    statusWindow:set(8, 1, colors.gray, colors.white, title)
     statusWindow:set(statusWindow.sizeX, statusWindow.sizeY, colors.red, colors.white, "X")
     if not registry.disableCustomMarketUrls then
         statusWindow:set(1, statusWindow.sizeY, colors.orange, colors.white, "CUSTOM")
     end
+    barRedraw()
 end
 
 local function imitateLine(y)
@@ -447,7 +458,7 @@ while true do
         if statusWindowEventData[3] == statusWindow.sizeX and statusWindowEventData[4] == statusWindow.sizeY then
             break
         elseif statusWindowEventData[3] <= 6 and statusWindowEventData[4] == statusWindow.sizeY and not registry.disableCustomMarketUrls then
-            programs.execute("edit", screen, nickname, customPath)
+            exec("edit", screen, nickname, customPath)
             gui_status(screen, nil, nil, "list updating...")
             reList()
             instCache = {}

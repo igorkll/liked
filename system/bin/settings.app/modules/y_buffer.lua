@@ -5,6 +5,8 @@ local unicode = require("unicode")
 local liked = require("liked")
 local registry = require("registry")
 local component = require("component")
+local computer = require("computer")
+local gui = require("gui")
 
 local colors = gui_container.colors
 
@@ -28,6 +30,7 @@ end
 
 ------------------------------------
 
+local oldselected
 local function draw(set)
     selectWindow:clear(colors.black)
     selectWindow:setCursor(1, 1)
@@ -48,19 +51,29 @@ local function draw(set)
     end
 
     if set then
-        local inits = {}
-        for address in component.list("screen") do
-            table.insert(inits, {address, graphic.screenshot(address)})
-        end
+        if selected ~= 2 or computer.totalMemory() >= (512 * 1024) then
+            local inits = {}
+            for address in component.list("screen") do
+                table.insert(inits, {address, graphic.screenshot(address)})
+            end
 
-        registry.bufferType = modes[selected] or "none"
-        liked.applyBufferType()
+            registry.bufferType = modes[selected] or "none"
+            liked.applyBufferType()
 
-        for _, init in ipairs(inits) do
-            system_applyTheme("/data/theme.plt", init[1])
-            init[2]()
+            for _, init in ipairs(inits) do
+                system_applyTheme("/data/theme.plt", init[1])
+                init[2]()
+            end
+        else
+            local clear = graphic.screenshot(screen)
+            gui.warn(screen, nil, nil, "A minimum of 512kb of RAM is required to activate software buffering")
+            selected = oldselected
+            clear()
+            draw()
         end
     end
+
+    oldselected = selected
 end
 draw()
 

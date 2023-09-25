@@ -1,17 +1,18 @@
 local graphic = require("graphic")
 local event = require("event")
 local gui_container = require("gui_container")
-local computer = require("computer")
 local calls = require("calls")
 local unicode = require("unicode")
 local fs = require("filesystem")
-local programs = require("programs")
+local liked = require("liked")
 local component = require("component")
 
 local colors = gui_container.colors
 local screen = ...
 local gpu = graphic.findGpu(screen)
 local rx, ry = gpu.getResolution()
+
+liked.drawUpBarTask(screen, true, colors.gray)
 
 --------------------------------------------
 
