@@ -152,7 +152,7 @@ while true do
             else
                 local lpath = paths.concat(userPath, strs[pos])
                 if fs.isDirectory(lpath) then
-                    userPath = lpath
+                    userPath = gui_container.checkPath(screen, lpath)
                     scroll = 0
                     draw()
                 end                

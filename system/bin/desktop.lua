@@ -656,7 +656,7 @@ local function fileDescriptor(icon, alternative, nickname) --открывает 
         end
         return true
     elseif fs.isDirectory(icon.path) then
-        userPath = icon.path
+        userPath = gui_container.checkPath(screen, icon.path)
         draw()
         return true
     elseif icon.exp == "t2p" then
