@@ -29,6 +29,8 @@ if not registry.doNotMoundDisks then
         return address ~= computer.tmpAddress() and address ~= fs.bootaddress
     end
 
+    local mountlist = {}
+
     event.listen("component_added", function(_, uuid, name)
         if name == "filesystem" and allowMount(uuid) then
             if bootloader.runlevel ~= "init" then
@@ -37,23 +39,23 @@ if not registry.doNotMoundDisks then
                 end
                 event.push("redrawDesktop")
             end
-            assert(fs.mount(uuid, fs.genName(uuid)))
+            local mountpoint = fs.genName(uuid)
+            assert(fs.mount(uuid, mountpoint))
+            mountlist[uuid] = mountpoint
         end
     end)
 
     event.listen("component_removed", function(_, uuid, name)
         if name == "filesystem" and allowMount(uuid) then
-            for _, tbl in ipairs(fs.mountList) do
-                if tbl[1].address == uuid then
-                    if bootloader.runlevel ~= "init" then
-                        if registry.soundEnable then
-                            computer.beep(1000, 0.1)
-                        end
-                        event.push("redrawDesktop")
+            if mountlist[uuid] then
+                if bootloader.runlevel ~= "init" then
+                    if registry.soundEnable then
+                        computer.beep(1000, 0.1)
                     end
-                    assert(fs.umount(tbl[2]))
-                    break
+                    event.push("redrawDesktop")
                 end
+                assert(fs.umount(mountlist[uuid]))
+                mountlist[uuid] = nil
             end
         end
     end)
