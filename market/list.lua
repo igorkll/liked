@@ -62,7 +62,7 @@ local list = {
     },
     {
         name = "chat",
-        version = "1.7",
+        version = "1.8",
         vendor = "logic",
         icon = selfurlpart .. "/apps/chat.app/icon.t2p",
         description = "allows you to exchange messages, pictures and files between computers via a network card",
@@ -212,55 +212,55 @@ local list = {
         end
     },
     {
-        name = "OpenOS",
-        version = "1.8.3",
+        name = "openOS",
+        version = "1.8.3;2",
         vendor = "MightyPirates",
-        icon = selfurlpart .. "/apps/OpenOS.app/icon.t2p",
+        icon = selfurlpart .. "/apps/openOS.app/icon.t2p",
         description = "configures dualboot between openOS and liked",
         minDiskSpace = 1024,
 
-        path = "/vendor/bin/OpenOS.app",
+        path = "/vendor/bin/openOS.app",
         install = function(self)
             local afpxPath = self.path .. "/openOS.afpx"
 
             fs.makeDirectory(self.path)
-            save(self.path .. "/main.lua", download(selfurlpart .. "/apps/OpenOS.app/main.lua"))
-            save(self.path .. "/uninstall.lua", download(selfurlpart .. "/apps/OpenOS.app/uninstall.lua"))
+            save(self.path .. "/main.lua", download(selfurlpart .. "/apps/openOS.app/main.lua"))
+            save(self.path .. "/uninstall.lua", download(selfurlpart .. "/apps/openOS.app/uninstall.lua"))
             save(self.path .. "/icon.t2p", download(self.icon))
 
-            save(self.path .. "/lua5_2.lua", download(selfurlpart .. "/apps/OpenOS.app/lua5_2.lua"))
-            save(self.path .. "/actions.cfg", download(selfurlpart .. "/apps/OpenOS.app/actions.cfg"))
+            save(self.path .. "/lua5_2.lua", download(selfurlpart .. "/apps/openOS.app/lua5_2.lua"))
+            save(self.path .. "/actions.cfg", download(selfurlpart .. "/apps/openOS.app/actions.cfg"))
             
-            save(afpxPath, download(selfurlpart .. "/apps/OpenOS.app/openOS.afpx"))
+            save(afpxPath, download(selfurlpart .. "/apps/openOS.app/openOS.afpx"))
             require("archiver").unpack(afpxPath, "/")
             fs.remove(afpxPath)
         end
     },
     {
-        name = "MineOS",
-        version = "2",
+        name = "mineOS",
+        version = "3",
         vendor = "IgorTimofeev",
-        icon = selfurlpart .. "/apps/MineOS.app/icon.t2p",
-        license = selfurlpart .. "/apps/MineOS.app/LICENSE",
+        icon = selfurlpart .. "/apps/mineOS.app/icon.t2p",
+        license = selfurlpart .. "/apps/mineOS.app/LICENSE",
         description = "configures dualboot between mineOS and liked",
         minDiskSpace = 1024 + 512,
         minColorDepth = 8,
 
-        path = "/vendor/bin/MineOS.app",
+        path = "/vendor/bin/mineOS.app",
         install = function(self)
             local afpxPath = self.path .. "/mineOS.afpx"
 
             fs.makeDirectory(self.path)
-            save(self.path .. "/main.lua", download(selfurlpart .. "/apps/MineOS.app/main.lua"))
-            save(self.path .. "/uninstall.lua", download(selfurlpart .. "/apps/MineOS.app/uninstall.lua"))
+            save(self.path .. "/main.lua", download(selfurlpart .. "/apps/mineOS.app/main.lua"))
+            save(self.path .. "/uninstall.lua", download(selfurlpart .. "/apps/mineOS.app/uninstall.lua"))
             save(self.path .. "/icon.t2p", download(self.icon))
-            save("/mineOS.lua", download(selfurlpart .. "/apps/MineOS.app/mineOS.lua"))
+            save("/mineOS.lua", download(selfurlpart .. "/apps/mineOS.app/mineOS.lua"))
             
-            save(self.path .. "/lua5_2.lua", download(selfurlpart .. "/apps/MineOS.app/lua5_2.lua"))
-            save(self.path .. "/actions.cfg", download(selfurlpart .. "/apps/MineOS.app/actions.cfg"))
+            save(self.path .. "/lua5_2.lua", download(selfurlpart .. "/apps/mineOS.app/lua5_2.lua"))
+            save(self.path .. "/actions.cfg", download(selfurlpart .. "/apps/mineOS.app/actions.cfg"))
             save(self.path .. "/LICENSE", download(self.license))
 
-            save(afpxPath, download(selfurlpart .. "/apps/MineOS.app/mineOS.afpx"))
+            save(afpxPath, download(selfurlpart .. "/apps/mineOS.app/mineOS.afpx"))
             require("archiver").unpack(afpxPath, "/")
             fs.remove(afpxPath)
         end

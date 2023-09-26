@@ -6,6 +6,7 @@ local chat_lib = require("chat_lib")
 local gui_container = require("gui_container")
 local colorsApi = require("colors")
 local unicode = require("unicode")
+local thread = require("thread")
 
 local colors = gui_container.colors
 local indexsColors = gui_container.indexsColors
@@ -109,8 +110,11 @@ local function getHistorySize()
 end
 ]]
 
+local isRedrawed
 local exportButtons = {}
 local function draw()
+    if gui_container.isScreenSaver[screen] then isRedrawed = true return end
+
     exportButtons = {}
 
     window:clear(colors.white)
@@ -186,6 +190,16 @@ local function draw()
     window:set(rx, pos, colors.green, 0, " ")
 end
 draw()
+
+thread.create(function ()
+    while true do
+        if isRedrawed and not gui_container.isScreenSaver[screen] then
+            isRedrawed = nil
+            draw()
+        end
+        os.sleep(1)
+    end
+end)
 
 local function send(nickname, messageType, message)
     local packet = {nickname, colorsApi.red, messageType, message, 0}
