@@ -9,6 +9,7 @@ local graphic = require("graphic")
 local time = require("time")
 local gui_container = require("gui_container")
 local system = require("system")
+local serialization = require("serialization")
 local liked = {}
 
 function liked.lastVersion()
@@ -133,6 +134,25 @@ function liked.drawUpBar(screen, withoutFill, bgcolor)
     end
     charge = tostring(charge)
     gpu.set(rx - #charge - 2, 1, tostring(charge) .. "%")
+end
+
+function liked.getRegistry(address)
+    local mountpoint = os.tmpname()
+    fs.mount(address or fs.get("/"), mountpoint)
+    local regPath = paths.concat(mountpoint, "data/registry.dat")
+
+    if fs.exists(regPath) or not fs.isDirectory(regPath) then
+        local regData = fs.readFile(regPath)
+        fs.umount(mountpoint)
+        if regData then
+            local ok, regTbl = pcall(serialization.unserialize, regData)
+            if ok and type(regTbl) == "table" then
+                return regTbl
+            end
+        end
+    else
+        fs.umount(mountpoint)
+    end
 end
 
 liked.unloadable = true

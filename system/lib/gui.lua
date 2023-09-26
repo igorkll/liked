@@ -13,6 +13,7 @@ local thread = require("thread")
 local paths = require("paths")
 local system = require("system")
 local serialization = require("serialization")
+local liked = require("liked")
 local gui = {}
 
 local smartShadowsColors = {
@@ -744,39 +745,27 @@ function gui.selectcomponent(screen, cx, cy, types, allowAutoConfirm, control) -
 end
 
 function gui.checkPassword(screen, cx, cy, disableStartSound, diskAddress)
-    local mountpoint = os.tmpname()
-    fs.mount(diskAddress or fs.get("/"), mountpoint)
-    local regPath = paths.concat(mountpoint, "data/registry.dat")
+    local regData = liked.getRegistry(diskAddress)
+    if regData then
+        if regData.password then
+            local clear = saveZone(screen)
+            local password = gui.input(screen, cx, cy, "enter password", true, nil, nil, disableStartSound)
+            clear()
 
-    if fs.exists(regPath) or not fs.isDirectory(regPath) then
-        local regData = fs.readFile(regPath)
-        fs.umount(mountpoint)
-        if regData then
-            local ok, regTbl = pcall(serialization.unserialize, regData)
-            if not ok or type(regTbl) ~= "table" then return end
-
-            if registry.password then
-                local clear = saveZone(screen)
-                local password = gui.input(screen, cx, cy, "enter password", true, nil, nil, disableStartSound)
-                clear()
-
-                if password then
-                    if require("sha256").sha256(password .. (registry.passwordSalt or "")) == registry.password then
-                        return true
-                    else
-                        local clear = saveZone(screen)
-                        gui.warn(screen, cx, cy, "invalid password")
-                        clear()
-                    end
+            if password then
+                if require("sha256").sha256(password .. (regData.passwordSalt or "")) == regData.password then
+                    return true
                 else
-                    return false --false означает что пользователь отказался от ввода пароля
+                    local clear = saveZone(screen)
+                    gui.warn(screen, cx, cy, "invalid password")
+                    clear()
                 end
             else
-                return true
+                return false --false означает что пользователь отказался от ввода пароля
             end
+        else
+            return true
         end
-    else
-        fs.umount(mountpoint)
     end
 end
 

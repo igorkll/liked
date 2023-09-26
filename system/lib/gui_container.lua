@@ -2,6 +2,9 @@ local fs = require("filesystem")
 local calls = require("calls")
 local unicode = require("unicode")
 local paths = require("paths")
+local component = require("component")
+local liked = require("liked")
+local gui = require("gui")
 local gui_container = {}
 
 --------------------------------------------
@@ -24,6 +27,7 @@ gui_container.defaultUserRoot = "/data/userdata/"
 gui_container.userRoot = {} --{screen = path, ...}
 gui_container.viewFileExps = {} --если адрес экрана сдесь равен true то разширения имен файлов не будут скрыты
 gui_container.devModeStates = {} --легаси, и почти негде не используеться, dev-mode был удален из системы
+gui_container.unlockedDisks = {}
 
 gui_container.chars = {
     threeDots = "…",
@@ -130,6 +134,26 @@ function gui_container.checkPath(screen, path) --проверяет не выш�
         end
     end
     return path
+end
+
+----------------------------
+
+function gui_container.isDiskLocked(address)
+    local regData = liked.getRegistry(address)
+    return not not (regData and regData.password)
+end
+
+function gui_container.isDiskAccess(address)
+    if not gui_container.isDiskLocked(address) then return true end
+    return not not gui_container.unlockedDisks[address]
+end
+
+function gui_container.getDiskAccess(screen, address)
+    if gui_container.isDiskLocked(address) then
+        if gui.checkPassword(screen, nil, nil, nil, address) then
+            gui_container.unlockedDisks[address] = true
+        end
+    end
 end
 
 return gui_container
