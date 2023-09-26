@@ -766,6 +766,17 @@ function gui.checkPassword(screen, cx, cy, disableStartSound, diskAddress)
         else
             return true
         end
+    else
+        return true
+    end
+end
+
+function gui.checkPasswordLoop(...)
+    while true do
+        local ret = gui.checkPassword(...)
+        if ret ~= nil then
+            return ret
+        end
     end
 end
 

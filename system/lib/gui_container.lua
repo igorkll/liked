@@ -120,7 +120,7 @@ function gui_container.checkPath(screen, path) --проверяет не выш�
     local diskUserDataPath = paths.concat(mountPoint, "data/userdata")
     local extdatPath = paths.concat(mountPoint, "external-data")
 
-    if false and disk.address ~= fs.get("/").address and not isUserPathRoot and --disable
+    if false and disk.address ~= fs.get("/").address and not isUserPathRoot and --отправленно на дороботку
     fs.exists(diskUserDataPath) and fs.isDirectory(diskUserDataPath) and
     fs.exists(extdatPath) and fs.isDirectory(extdatPath) then
         if paths.equals(diskPath, "/") then
@@ -138,7 +138,9 @@ end
 
 ----------------------------
 
-function gui_container.isDiskLocked(address)
+function gui_container.isDiskLocked(address) --отправленно на дороботку
+    do return false end
+
     local regData = liked.getRegistry(address)
     return not not (regData and regData.password)
 end
@@ -150,7 +152,7 @@ end
 
 function gui_container.getDiskAccess(screen, address)
     if gui_container.isDiskLocked(address) then
-        if gui.checkPassword(screen, nil, nil, nil, address) then
+        if gui.checkPasswordLoop(screen, nil, nil, nil, address) then
             gui_container.unlockedDisks[address] = true
         end
     end
