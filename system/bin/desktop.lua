@@ -374,7 +374,16 @@ local function draw(old, check) --вызывает все перерисовки
             end
         end
         
-        if exp == "t2p" then
+        
+        
+        if fs.isDirectory(path) then
+            local iconpath = paths.concat(path, "icon.t2p")
+            if fs.exists(iconpath) and not fs.isDirectory(iconpath) then
+                icon = iconpath
+            else
+                icon = findIcon("folder")
+            end
+        elseif exp == "t2p" then
             icon = findIcon("t2p")
             local iconPath = path
 
@@ -386,20 +395,14 @@ local function draw(old, check) --вызывает все перерисовки
             end
         elseif exp and #exp > 0 then
             icon = findIcon(exp)
-        elseif fs.isDirectory(path) then
-            local iconpath = paths.concat(path, "icon.t2p")
-            if fs.exists(iconpath) then
-                icon = iconpath
-            else
-                icon = findIcon("folder")
-            end
         else
-            icon = findIcon("file")
-        end
-
-        if not icon or not fs.exists(icon) then
+            --icon = findIcon("file")
             icon = findIcon("unkownfile")
         end
+
+        --if not icon or not fs.exists(icon) then
+        --    icon = findIcon("unkownfile")
+        --end
 
         do --check icon
             local ok, sx, sy = pcall(gui_readimagesize, icon)
@@ -408,7 +411,7 @@ local function draw(old, check) --вызывает все перерисовки
             end
         end
 
-        if not icon or not fs.exists(icon) then
+        if not icon or not fs.exists(icon) or fs.isDirectory(icon) then
             icon = findIcon("badicon")
         end
 
