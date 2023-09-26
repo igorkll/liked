@@ -4,6 +4,7 @@ local event = require("event")
 local component = require("component")
 local computer = require("computer")
 local registry = require("registry")
+local bootloader = require("bootloader")
 
 local invoke = component.invoke
 local externalPath = "/external-data/devicetype.dat"
@@ -30,11 +31,13 @@ if not registry.doNotMoundDisks then
 
     event.listen("component_added", function(_, uuid, name)
         if name == "filesystem" and allowMount(uuid) then
-            if registry.soundEnable then
-                computer.beep(2000, 0.1)
+            if bootloader.runlevel ~= "init" then
+                if registry.soundEnable then
+                    computer.beep(2000, 0.1)
+                end
+                event.push("redrawDesktop")
             end
             assert(fs.mount(uuid, fs.genName(uuid)))
-            event.push("redrawDesktop")
         end
     end)
 
@@ -42,20 +45,16 @@ if not registry.doNotMoundDisks then
         if name == "filesystem" and allowMount(uuid) then
             for _, tbl in ipairs(fs.mountList) do
                 if tbl[1].address == uuid then
-                    if registry.soundEnable then
-                        computer.beep(1000, 0.1)
+                    if bootloader.runlevel ~= "init" then
+                        if registry.soundEnable then
+                            computer.beep(1000, 0.1)
+                        end
+                        event.push("redrawDesktop")
                     end
                     assert(fs.umount(tbl[2]))
-                    event.push("redrawDesktop")
                     break
                 end
             end
         end
     end)
-    
-    for address in component.list("filesystem") do
-        if allowMount(address) then
-            assert(fs.mount(address, fs.genName(address)))
-        end
-    end
 end
