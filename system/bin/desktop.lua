@@ -814,7 +814,7 @@ local function doIcon(windowEventData)
                     
                     iconCliked = true
                     if windowEventData[5] == 0 then
-                        if gui_container.isDiskLocked(v.fs.address) and not gui_container.isDiskAccess(v.fs.address) then
+                        if v.isFs and gui_container.isDiskLocked(v.fs.address) and not gui_container.isDiskAccess(v.fs.address) then
                             gui_container.getDiskAccess(screen, v.fs.address)
                         else
                             fileDescriptor(v, nil, windowEventData[6])
