@@ -333,6 +333,7 @@ local function draw(old, check) --вызывает все перерисовки
         local labelReadonly
         local isFs
         local fsd
+        local devtype
 
         for _, tbl in ipairs(fs.mountList) do
             if paths.canonical(path) .. "/" == tbl[2] then
@@ -358,6 +359,7 @@ local function draw(old, check) --вызывает все перерисовки
                     icon = findIcon("raid")
                 elseif fs.exists(devtypepath) then --если это жесткий диск пренадлежащий устройству то отображаем иконку
                     local data = fs.readFile(devtypepath)
+                    devtype = data
                     if data then
                         icon = findIcon(data)
                     end
@@ -375,12 +377,11 @@ local function draw(old, check) --вызывает все перерисовки
         end
         
         
-        
         if fs.isDirectory(path) then
             local iconpath = paths.concat(path, "icon.t2p")
             if fs.exists(iconpath) and not fs.isDirectory(iconpath) then
                 icon = iconpath
-            else
+            elseif not isFs then
                 icon = findIcon("folder")
             end
         elseif exp == "t2p" then
@@ -442,7 +443,8 @@ local function draw(old, check) --вызывает все перерисовки
             index = i,
             name = name,
             isAlias = not not customPath,
-            isDir = fs.isDirectory(path)
+            isDir = fs.isDirectory(path),
+            devtype = devtype
         })
     end
 
@@ -779,6 +781,8 @@ local function loadLicense(icon)
     if not fs.exists(licensePath) then licensePath = paths.concat(icon.path, "license") end
     if not fs.exists(licensePath) then licensePath = paths.concat(icon.path, "LICENSE.txt") end
     if not fs.exists(licensePath) then licensePath = paths.concat(icon.path, "license.txt") end
+    if not fs.exists(licensePath) then licensePath = paths.concat(icon.path, "LICENSE.md") end
+    if not fs.exists(licensePath) then licensePath = paths.concat(icon.path, "license.md") end
     if not fs.exists(licensePath) then licensePath = nil end
     return licensePath
 end
@@ -813,7 +817,6 @@ local function doIcon(windowEventData)
                         fileDescriptor(v, nil, windowEventData[6])
                     else
                         if v.isFs then
-                            local screenshotY = 7
                             local strs, active =
                             {"  open", "  flash os", "  flash archive", true, "  set label", "  clear label"},
                             {true, not v.readonly, not v.readonly, false, not v.labelReadonly, not v.labelReadonly}
@@ -828,16 +831,26 @@ local function doIcon(windowEventData)
                             end
                             ]]
 
-                            do
-                                screenshotY = screenshotY + 1
+                            --[[
+                            if v.devtype then
+                                table.insert(strs, "  erase firmware")
+                                table.insert(active, not v.readonly)
 
-                                table.insert(strs, 5, "  format")
-                                table.insert(active, 5, not v.readonly)
+                                table.insert(strs, "  erase data")
+                                table.insert(active, not v.readonly)
+
+                                table.insert(strs, "  make a disk")
+                                table.insert(active, not v.readonly)
+                            else
+                                table.insert(strs, "  format")
+                                table.insert(active, not v.readonly)
                             end
+                            ]]
+
+                            table.insert(strs, 5, "  format")
+                            table.insert(active, 5, not v.readonly)
 
                             if v.fs.exists("/init.lua") then
-                                screenshotY = screenshotY + 2
-
                                 table.insert(strs, true)
                                 table.insert(active, false)
 
@@ -894,8 +907,8 @@ local function doIcon(windowEventData)
                                 else
                                     clear2()
                                 end
-                                --[[
-                            elseif str == "  wipe data" then
+                            --[[
+                            elseif str == "  make a disk" then
                                 local clear2 = saveZone(screen)
                                 local state = gui_yesno(screen, nil, nil, "wipe data?")
                                 
@@ -906,7 +919,18 @@ local function doIcon(windowEventData)
                                 else
                                     clear2()
                                 end
-                                ]]
+                            elseif str == "  erase data" then
+                                local clear2 = saveZone(screen)
+                                local state = gui_yesno(screen, nil, nil, "wipe data?")
+                                
+                                if state then
+                                    gui_status(screen, nil, nil, "wiping...")
+                                    v.fs.remove("/data")
+                                    draw()
+                                else
+                                    clear2()
+                                end
+                            ]]
                             elseif str == "  set label" then
                                 local label = ""
                                 local result = {pcall(v.fs.getLabel)}
