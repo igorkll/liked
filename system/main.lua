@@ -1,7 +1,8 @@
 --liked
 _G._OSVERSION = "liked-v" .. tostring(getOSversion())
 
-local gui_container = require("gui_container")
+require("gui", true)
+local gui_container = require("gui_container", true)
 local programs = require("programs")
 local fs = require("filesystem")
 local registry = require("registry")
