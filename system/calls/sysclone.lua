@@ -83,7 +83,6 @@ if gui_yesno(screen, nil, nil, "install \"" .. label .. "\" to \"" .. name .. "\
         success, err = install_core()
     elseif num2 == 4 then
         fs.remove(paths.concat(target, "system")) --удаляет старую систему чтобы не было канфликтов версий и не оставалось лишних файлов
-        
         success, err = fs.copy(selfsys, target)
     end
 
