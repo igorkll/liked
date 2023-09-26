@@ -120,7 +120,7 @@ function gui_container.checkPath(screen, path) --проверяет не выш�
     local diskUserDataPath = paths.concat(mountPoint, "data/userdata")
     local extdatPath = paths.concat(mountPoint, "external-data")
 
-    if disk.address ~= fs.get("/").address and not isUserPathRoot and
+    if false and disk.address ~= fs.get("/").address and not isUserPathRoot and --disable
     fs.exists(diskUserDataPath) and fs.isDirectory(diskUserDataPath) and
     fs.exists(extdatPath) and fs.isDirectory(extdatPath) then
         if paths.equals(diskPath, "/") then
