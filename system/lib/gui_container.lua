@@ -110,18 +110,19 @@ end
 
 function gui_container.checkPath(screen, path) --проверяет не вышел ли пользователь из своий папки
     local disk, diskPath = fs.get(path)
+    local mountPoint = fs.mounts()[disk.address][2]
     local userPath = gui_container.getUserRoot(screen)
     local isUserPathRoot = paths.equals(userPath, "/")
+    local diskUserDataPath = paths.concat(mountPoint, "data/userdata")
 
-    if disk.address == fs.get("/").address then
-        if unicode.sub(path, 1, unicode.len(userPath)) ~= userPath then
-            return userPath
-        end
-    elseif not isUserPathRoot then
-        local mountPoint = fs.mounts()[disk.address][2]
+    if disk.address ~= fs.get("/").address and not isUserPathRoot and fs.exists(diskUserDataPath) and fs.isDirectory(diskUserDataPath) then
         if paths.equals(diskPath, "/") then
             return paths.concat(mountPoint, userPath)
         elseif paths.equals(diskPath, paths.path(userPath)) then
+            return userPath
+        end
+    else
+        if unicode.sub(path, 1, unicode.len(userPath)) ~= userPath then
             return userPath
         end
     end
