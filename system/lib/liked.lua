@@ -99,7 +99,7 @@ function liked.raw_drawUpBarTask(method, screen, withoutFill, bgcolor)
     local th = method(function ()
         while true do
             redraw()
-            os.sleep(3)
+            os.sleep(10)
         end
     end)
     th:resume()

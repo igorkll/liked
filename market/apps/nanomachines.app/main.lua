@@ -169,14 +169,14 @@ function getProfile(nickname)
         return tbl
     end
     local file = assert(fs.open(path, "rb"))
-    local tbl = serialization.unserialization(file.readAll())
+    local tbl = serialization.unserialize(file.readAll())
     file.close()
     return tbl
 end
 
 function saveProfile(nickname, profile)
     local file = assert(fs.open(paths.concat(path, "profiles", nickname), "wb"))
-    file.write(serialization.serialization(profile))
+    file.write(serialization.serialize(profile))
     file.close()
     return true
 end

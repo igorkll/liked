@@ -1,4 +1,5 @@
 local gui_container = require("gui_container")
+local fs = require("filesystem")
 local registry = require("registry")
 local colorslib = require("colors")
 local colors = gui_container.colors
@@ -11,6 +12,7 @@ local component = require("component")
 local thread = require("thread")
 local paths = require("paths")
 local system = require("system")
+local serialization = require("serialization")
 local gui = {}
 
 local smartShadowsColors = {
@@ -741,10 +743,48 @@ function gui.selectcomponent(screen, cx, cy, types, allowAutoConfirm, control) -
     end
 end
 
+function gui.checkPassword(screen, cx, cy, disableStartSound, diskAddress)
+    local mountpoint = os.tmpname()
+    fs.mount(diskAddress or fs.get("/"), mountpoint)
+    local regPath = paths.concat(mountpoint, "data/registry.dat")
+
+    if fs.exists(regPath) or not fs.isDirectory(regPath) then
+        local regData = fs.readFile(regPath)
+        fs.umount(mountpoint)
+        if regData then
+            local ok, regTbl = pcall(serialization.unserialize, regData)
+            if not ok or type(regTbl) ~= "table" then return end
+
+            if registry.password then
+                local clear = saveZone(screen)
+                local password = gui.input(screen, cx, cy, "enter password", true, nil, nil, disableStartSound)
+                clear()
+
+                if password then
+                    if require("sha256").sha256(password .. (registry.passwordSalt or "")) == registry.password then
+                        return true
+                    else
+                        local clear = saveZone(screen)
+                        gui.warn(screen, cx, cy, "invalid password")
+                        clear()
+                    end
+                else
+                    return false --false означает что пользователь отказался от ввода пароля
+                end
+            else
+                return true
+            end
+        end
+    else
+        fs.umount(mountpoint)
+    end
+end
+
 calls.loaded.gui_warn = gui.warn
 calls.loaded.gui_drawtext = gui.drawtext
 calls.loaded.gui_context = gui.context
 calls.loaded.gui_input = gui.input
 calls.loaded.gui_select = gui.select
 calls.loaded.gui_selectcomponent = gui.selectcomponent
+calls.loaded.gui_checkPassword = gui.checkPassword
 return gui

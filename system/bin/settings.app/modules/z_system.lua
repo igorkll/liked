@@ -30,7 +30,7 @@ local function updateSystem()
 
         local installdata = {branch = registry.branch}
         local updateinitPath = paths.concat(system.getSelfScriptPath(), "../update_init.lua")
-        assert(fs.writeFile("/init.lua", "local installdata = " .. serialization.serialization(installdata) .. "\n" .. assert(fs.readFile(updateinitPath))))
+        assert(fs.writeFile("/init.lua", "local installdata = " .. serialization.serialize(installdata) .. "\n" .. assert(fs.readFile(updateinitPath))))
         computer.shutdown("fast")
     end
     redraw()

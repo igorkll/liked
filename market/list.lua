@@ -183,7 +183,7 @@ local list = {
     ]]
     {
         name = "lua",
-        version = "2",
+        version = "3",
         vendor = "logic",
         icon = selfurlpart .. "/apps/lua.app/icon.t2p",
         description = "lua code interpreter",
@@ -198,7 +198,7 @@ local list = {
     },
     {
         name = "events",
-        version = "1",
+        version = "2",
         vendor = "logic",
         icon = selfurlpart .. "/apps/events.app/icon.t2p",
         description = "allows you to view computer events",

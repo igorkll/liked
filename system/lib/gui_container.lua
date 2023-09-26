@@ -109,8 +109,14 @@ function gui_container.toUserPath(screen, path) --конвертирует ру�
 end
 
 function gui_container.checkPath(screen, path) --проверяет не вышел ли пользователь из своий папки
-    if unicode.sub(path, 1, unicode.len(gui_container.getUserRoot(screen))) ~= gui_container.getUserRoot(screen) then
-        return gui_container.getUserRoot(screen)
+    local targetDisk = fs.get(path)
+    local userPath = gui_container.getUserRoot(screen)
+    if targetDisk.address == fs.get("/").address then
+        if unicode.sub(path, 1, unicode.len(userPath)) ~= userPath then
+            return userPath
+        end
+    else
+        
     end
     return path
 end
