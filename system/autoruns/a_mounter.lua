@@ -46,7 +46,9 @@ if not registry.doNotMoundDisks then
     end)
 
     event.listen("component_removed", function(_, uuid, name)
+        local gui_container = require("gui_container")
         if name == "filesystem" and allowMount(uuid) then
+            gui_container.unlockedDisks[uuid] = nil
             if mountlist[uuid] then
                 if bootloader.runlevel ~= "init" then
                     if registry.soundEnable then

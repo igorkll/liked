@@ -1,25 +1,18 @@
 --liked
 _G._OSVERSION = "liked-v" .. tostring(getOSversion())
 
-require("gui", true)
-local gui_container = require("gui_container", true)
+local bootloader = require("bootloader")
+bootloader.runlevel = "user"
+
+local gui_container = require("gui_container")
 local programs = require("programs")
 local fs = require("filesystem")
 local registry = require("registry")
 local event = require("event")
-local bootloader = require("bootloader")
 local computer = require("computer")
-
-bootloader.runlevel = "user"
 
 table.insert(programs.paths, "/data/userdata")
 table.insert(programs.paths, "/data/userdata/apps")
-
-bootloader.unittests("/vendor/unittests")
-bootloader.unittests("/data/unittests")
-
-bootloader.autorunsIn("/vendor/autoruns")
-bootloader.autorunsIn("/data/autoruns")
 
 ------------------------------------
 
@@ -76,6 +69,14 @@ if not registry.shadowType and maxDepth ~= 0 then
         registry.shadowType = "advanced"
     end
 end
+
+------------------------------------
+
+bootloader.unittests("/vendor/unittests")
+bootloader.unittests("/data/unittests")
+
+bootloader.autorunsIn("/vendor/autoruns")
+bootloader.autorunsIn("/data/autoruns")
 
 ------------------------------------
 

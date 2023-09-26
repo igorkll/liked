@@ -858,6 +858,15 @@ local function doIcon(windowEventData)
                                 table.insert(active, not registry.disableExternalBoot)
                             end
 
+                            if gui_container.isDiskLocked(v.fs.address) and not gui_container.isDiskAccess(v.fs.address) then
+                                for index, value in ipairs(active) do
+                                    active[index] = false
+                                end
+
+                                table.insert(strs, 1, "  unlock")
+                                table.insert(active, 1, true)
+                            end
+
                             local posX, posY = window:toRealPos(windowEventData[3], windowEventData[4])
 
                             --posX, posY = findPos(posX, posY, 23, screenshotY, rx, ry)
@@ -867,7 +876,7 @@ local function doIcon(windowEventData)
                             strs, active)
                             clear()
 
-                            if num == 1 then
+                            if str == "  open" then
                                 fileDescriptor(v, nil, windowEventData[6])
                             elseif str == "  flash os" then
                                 local success, err = sysclone(screen, posX, posY, v.fs, v.name)
@@ -880,6 +889,8 @@ local function doIcon(windowEventData)
                                     end
                                     draw()
                                 end
+                            elseif str == "  unlock" then
+                                gui_container.getDiskAccess(screen, v.fs.address)
                             elseif str == "  flash archive" then
                                 local archiver = require("archiver")
                                 local clear = saveBigZone(screen)
