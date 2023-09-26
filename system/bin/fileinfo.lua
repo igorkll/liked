@@ -32,19 +32,28 @@ local addr = fs.get(path).address
 window:set(2, 3, colors.white, colors.black, "type     : " .. ctype)
 window:set(2, 4, colors.white, colors.black, "path     : " .. gui_container.shortPath(path, #addr))
 window:set(2, 5, colors.white, colors.black, "disk     : " .. addr)
-window:set(2, 6, colors.white, colors.black, "size     : " .. tostring(math.roundTo(fs.size(path) / 1024, 1)) .. "KB")
-window:set(2, 7, colors.white, colors.black, "real size: " .. tostring(math.roundTo(fs.size(path, true) / 1024, 1)) .. "KB")
+window:set(2, 6, colors.white, colors.black, "real size: please wait...")
+window:set(2, 7, colors.white, colors.black, "disk size: please wait...")
+window:set(2, 8, colors.white, colors.black, "sha256   : please wait...")
+graphic.forceUpdate()
+
+window:fill(2, 6, 49, 1, colors.white, 0, " ")
+window:fill(2, 7, 49, 1, colors.white, 0, " ")
+window:set(2, 6, colors.white, colors.black, "real size: " .. tostring(math.roundTo(fs.size(path) / 1024, 1)) .. "KB")
+window:set(2, 7, colors.white, colors.black, "disk size: " .. tostring(math.roundTo(fs.size(path, true) / 1024, 1)) .. "KB")
+graphic.forceUpdate()
 
 local sum = "-"
 if not fs.isDirectory(path) and fs.size(path) <= (16 * 1024) then
     local content = fs.readFile(path)
     if content then
-        window:set(2, 8, colors.white, colors.black, "sha256   : please wait...")
         sum = require("sha256").sha256hex(content)
         sum = sum:sub(1, #addr) .. gui_container.chars.threeDots
     end
 end
+window:fill(2, 8, 49, 1, colors.white, 0, " ")
 window:set(2, 8, colors.white, colors.black, "sha256   : " .. sum)
+graphic.forceUpdate()
 
 while true do
     local eventData = {event.pull()}
