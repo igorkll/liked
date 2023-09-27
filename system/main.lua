@@ -24,7 +24,7 @@ for address in require("component").list("screen") do
     if gpu then
         if gpu.setActiveBuffer and gpu.getActiveBuffer() ~= 0 then gpu.setActiveBuffer(0) end
         local depth = gpu.maxDepth()
-        if gpu and depth > 1 then
+        if gpu then
             table.insert(screens, address)
             maxDepth = math.max(maxDepth, depth)
         end
@@ -65,8 +65,10 @@ if not registry.shadowType and maxDepth ~= 0 then
     registry.shadowMode = "full"
     if maxDepth == 4 then
         registry.shadowType = "smart"
-    else
+    elseif maxDepth == 8 then
         registry.shadowType = "advanced"
+    else
+        registry.shadowType = "none"
     end
 end
 

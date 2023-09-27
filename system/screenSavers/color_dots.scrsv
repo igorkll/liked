@@ -11,7 +11,7 @@ current.kill = function (self)
     self:raw_kill()
 end
 
-graphic.setPaletteColor(screen, 0, 0x000000)
+pcall(graphic.setPaletteColor, screen, 0, 0x000000)
 window:clear(0)
 
 local color = 0
@@ -24,9 +24,9 @@ while true do
     local pos = sin * 255
     local neg = 255 - pos
 
-    graphic.setPaletteColor(screen, 1, colors.blend(pos, neg, neg))
-    graphic.setPaletteColor(screen, 2, colors.blend(pos, pos, neg))
-    graphic.setPaletteColor(screen, 3, colors.blend(neg, pos, neg))
+    pcall(graphic.setPaletteColor, screen, 1, colors.blend(pos, neg, neg))
+    pcall(graphic.setPaletteColor, screen, 2, colors.blend(pos, pos, neg))
+    pcall(graphic.setPaletteColor, screen, 3, colors.blend(neg, pos, neg))
 
     color = (color + 1) % 3
     for i = 1, 2 do

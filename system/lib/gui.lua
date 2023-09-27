@@ -49,6 +49,8 @@ end
 ------------------------------------
 
 function gui.shadow(gpu, x, y, sx, sy, mul, full)
+    local depth = gpu.getDepth()
+
     local function getPoses()
         local shadowPosesX = {}
         local shadowPosesY = {}
@@ -94,14 +96,16 @@ function gui.shadow(gpu, x, y, sx, sy, mul, full)
 
         local palcache = {}
         local function getPalCol(source)
-            for i = 0, 15 do
-                local col = palcache[i]
-                if not col then
-                    col = gpu.getPaletteColor(i)
-                    palcache[i] = col
-                end
-                if col == source then
-                    return i
+            if depth > 1 then
+                for i = 0, 15 do
+                    local col = palcache[i]
+                    if not col then
+                        col = gpu.getPaletteColor(i)
+                        palcache[i] = col
+                    end
+                    if col == source then
+                        return i
+                    end
                 end
             end
             return 0
@@ -111,9 +115,9 @@ function gui.shadow(gpu, x, y, sx, sy, mul, full)
             local ok, char, fore, back, forePal, backPal = pcall(gpu.get, shadowPosesX[i], shadowPosesY[i])
             if ok and char and fore and back then
                 if not forePal then forePal = getPalCol(fore) end
-                gpu.setForeground(smartShadowsColors[forePal + 1], true)
+                gpu.setForeground(smartShadowsColors[forePal + 1], depth > 1)
                 if not backPal then backPal = getPalCol(back) end
-                gpu.setBackground(smartShadowsColors[backPal + 1], true)
+                gpu.setBackground(smartShadowsColors[backPal + 1], depth > 1)
                 
                 gpu.set(shadowPosesX[i], shadowPosesY[i], char)
             end

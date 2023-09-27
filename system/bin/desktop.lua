@@ -486,6 +486,9 @@ local function draw(old, check) --вызывает все перерисовки
             count = count + 1
             local centerIconX = math.floor(((window.sizeX / 2) + (cx * 16) + 1) + 0.5)
             local centerIconY = math.floor(((window.sizeY / (iconsY + 1)) * cy) + 0.5) - 1
+            if ry <= 16 and centerIconY >= 5 then
+                centerIconY = centerIconY + 1
+            end
             local iconX = math.floor((centerIconX - (iconSizeX / 2)) + 0.5)
             local iconY = math.floor((centerIconY - (iconSizeY / 2)) + 0.5)
             local icon = icons[count]

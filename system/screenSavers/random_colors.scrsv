@@ -14,12 +14,12 @@ local newcolor = {math.random(0, 255), math.random(0, 255), math.random(0, 255)}
 
 local mx, my = graphic.getResolution(screen)
 local window = graphic.createWindow(screen, 1, 1, mx, my, true, true)
-graphic.setPaletteColor(screen, 0, colors.blend(color[1], color[2], color[3]))
+pcall(graphic.setPaletteColor, screen, 0, colors.blend(color[1], color[2], color[3]))
 window:fill(1, 1, mx, my, 0, 0, " ")
 
 while true do
     local gpu = graphic.findGpu(screen)
-    graphic.setPaletteColor(screen, 0, colors.blend(color[1], color[2], color[3]))
+    pcall(graphic.setPaletteColor, screen, 0, colors.blend(color[1], color[2], color[3]))
     local err = 0
     for i = 1, 3 do
         color[i] = color[i] + ((newcolor[i] - color[i]) * 0.1)
