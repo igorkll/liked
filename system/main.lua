@@ -3,6 +3,7 @@ _G._OSVERSION = "liked-v" .. tostring(getOSversion())
 local bootloader = require("bootloader")
 bootloader.runlevel = "user"
 
+local fs = require("filesystem")
 local graphic = require("graphic")
 local programs = require("programs")
 local component = require("component")
@@ -29,16 +30,19 @@ end
 ------------------------------------
 
 function _G.initPal()
-    if maxDepth == 1 then
-        system_setTheme("/system/themes/original.plt")
+    if fs.exists("/data/theme.plt") then
+        system_applyTheme("/data/theme.plt")
     else
-        system_setTheme("/system/themes/classic.plt")
+        if maxDepth == 1 then
+            system_setTheme("/system/themes/original.plt")
+        else
+            system_setTheme("/system/themes/classic.plt")
+        end
     end
 end
 local gui_container = require("gui_container")
 _G.initPal = nil
 
-local fs = require("filesystem")
 local registry = require("registry")
 local event = require("event")
 local computer = require("computer")
