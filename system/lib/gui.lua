@@ -362,7 +362,8 @@ function gui.input(screen, cx, cy, str, hidden, backgroundColor, default, disabl
     end
 
     while true do
-        local eventData = {computer.pullSignal()}
+        local eventData = {event.pull()}
+        local windowEventData = window:uploadEvent(eventData)
         local out = reader.uploadEvent(eventData)
         if out then
             if out == true then
@@ -372,7 +373,6 @@ function gui.input(screen, cx, cy, str, hidden, backgroundColor, default, disabl
             drawOk()
             return out
         end
-        local windowEventData = window:uploadEvent(eventData)
         if windowEventData[1] == "touch" and windowEventData[5] == 0 then
             if windowEventData[4] == 7 and windowEventData[3] > (32 - 5 - 3) and windowEventData[3] <= ((32 - 5) + 4) then
                 drawOk()

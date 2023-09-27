@@ -53,7 +53,11 @@ end
 require("liked").applyBufferType()
 
 if not fs.exists("/data/theme.plt") then
-    pcall(fs.copy, "/system/themes/classic.plt", "/data/theme.plt")
+    if maxDepth == 1 then
+        pcall(fs.copy, "/system/themes/classic.plt", "/data/original.plt")
+    else
+        pcall(fs.copy, "/system/themes/classic.plt", "/data/theme.plt")
+    end
 end
 
 if not fs.exists(gui_container.screenSaverPath) and not registry.screenSaverDefaultSetted then
