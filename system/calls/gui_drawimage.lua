@@ -6,6 +6,7 @@ local calls = require("calls")
 local gui_container = require("gui_container")
 local cache = require("cache")
 local paths = require("paths")
+local unicode = require("unicode")
 
 local screen, path, x, y = ...
 local gpu = graphic.findGpu(screen)
@@ -67,9 +68,14 @@ for cy = 1, sy do
 
         if foreground ~= oldFore or background ~= oldBack or oldY ~= cy then
             if oldBack ~= 0 or oldFore ~= 0 then --прозрачность, в реальной картинке такого не будет потому что если paint замечает оба нуля то он меняет одной значения чтобы пиксель не мог просто так стать прозрачным
-                gpu.setBackground(colors[oldBack + 1])
-                gpu.setForeground(colors[oldFore + 1])
-                gpu.set(oldX + (x - 1), oldY + (y - 1), buff)
+                if oldBack == oldFore then
+                    gpu.setBackground(colors[oldBack + 1])
+                    gpu.set(oldX + (x - 1), oldY + (y - 1), string.rep(" ", unicode.len(buff)))
+                else
+                    gpu.setBackground(colors[oldBack + 1])
+                    gpu.setForeground(colors[oldFore + 1])
+                    gpu.set(oldX + (x - 1), oldY + (y - 1), buff)
+                end
             end
 
             oldFore = foreground
@@ -84,7 +90,12 @@ for cy = 1, sy do
 end
 
 if oldBack ~= 0 or oldFore ~= 0 then
-    gpu.setBackground(colors[oldBack + 1])
-    gpu.setForeground(colors[oldFore + 1])
-    gpu.set(oldX + (x - 1), oldY + (y - 1), buff)
+    if oldBack == oldFore then
+        gpu.setBackground(colors[oldBack + 1])
+        gpu.set(oldX + (x - 1), oldY + (y - 1), string.rep(" ", unicode.len(buff)))
+    else
+        gpu.setBackground(colors[oldBack + 1])
+        gpu.setForeground(colors[oldFore + 1])
+        gpu.set(oldX + (x - 1), oldY + (y - 1), buff)
+    end
 end
