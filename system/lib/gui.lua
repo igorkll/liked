@@ -1,5 +1,4 @@
 local gui_container = require("gui_container")
-local fs = require("filesystem")
 local registry = require("registry")
 local colorslib = require("colors")
 local colors = gui_container.colors
@@ -12,7 +11,6 @@ local component = require("component")
 local thread = require("thread")
 local paths = require("paths")
 local system = require("system")
-local serialization = require("serialization")
 local liked = require("liked")
 local gui = {}
 

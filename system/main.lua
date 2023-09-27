@@ -50,15 +50,8 @@ if not registry.bufferType then
         registry.bufferType = "none"
     end
 end
-require("liked").applyBufferType()
 
-if not fs.exists("/data/theme.plt") then
-    if maxDepth == 1 then
-        pcall(fs.copy, "/system/themes/classic.plt", "/data/original.plt")
-    else
-        pcall(fs.copy, "/system/themes/classic.plt", "/data/theme.plt")
-    end
-end
+require("liked").applyBufferType()
 
 if not fs.exists(gui_container.screenSaverPath) and not registry.screenSaverDefaultSetted then
     pcall(fs.copy, "/system/screenSavers/black_screen.scrsv", gui_container.screenSaverPath)

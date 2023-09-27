@@ -7,9 +7,9 @@ local paths = require("paths")
 local registry = require("registry")
 local graphic = require("graphic")
 local time = require("time")
-local gui_container = require("gui_container")
 local system = require("system")
 local serialization = require("serialization")
+local gui_container = require("gui_container")
 local liked = {}
 
 function liked.lastVersion()
@@ -119,7 +119,7 @@ function liked.drawUpBar(screen, withoutFill, bgcolor)
     local rtc = "RTC-" .. time.formatTime(time.addTimeZone(time.getRealTime(), registry.timeZone))
     local gtc = "GTC-" .. time.formatTime(time.getGameTime())
     local charge = system.getCharge()
-
+    
     local gpu = graphic.findGpu(screen)
     local rx, ry = gpu.getResolution()
     gpu.setBackground(bgcolor or gui_container.colors.gray)

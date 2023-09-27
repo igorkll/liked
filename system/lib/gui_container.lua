@@ -1,3 +1,15 @@
+local gui_container = {}
+gui_container.colors = {}
+gui_container.indexsColors = {}
+
+if maxDepth == 1 then
+    system_setTheme("/system/themes/original.plt")
+else
+    system_setTheme("/system/themes/classic.plt")
+end
+
+--------------------------------------------
+
 local fs = require("filesystem")
 local calls = require("calls")
 local unicode = require("unicode")
@@ -5,20 +17,6 @@ local paths = require("paths")
 local component = require("component")
 local liked = require("liked")
 local gui = require("gui")
-local gui_container = {}
-
---------------------------------------------
-
-gui_container.colors = {}
-gui_container.indexsColors = {}
-
-_G.gui_container = gui_container
-if fs.exists("/data/theme.plt") then
-    calls.call("system_applyTheme", "/data/theme.plt")
-else
-    calls.call("system_setTheme", "/system/themes/classic.plt")
-end
-_G.gui_container = nil
 
 --------------------------------------------
 
