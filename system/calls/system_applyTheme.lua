@@ -2,7 +2,7 @@ local fs = require("filesystem")
 local calls = require("calls")
 local component  = require("component")
 local graphic = require("graphic")
-local gui_container = require("gui_container")
+local gui_container = _G.gui_container or require("gui_container")
 local path, screen = ...
 
 local file = assert(fs.open(path, "rb"))

@@ -1,15 +1,11 @@
 --liked
 _G._OSVERSION = "liked-v" .. tostring(getOSversion())
-
 local bootloader = require("bootloader")
 bootloader.runlevel = "user"
 
-local gui_container = require("gui_container")
+local graphic = require("graphic")
 local programs = require("programs")
-local fs = require("filesystem")
-local registry = require("registry")
-local event = require("event")
-local computer = require("computer")
+local component = require("component")
 
 table.insert(programs.paths, "/data/userdata")
 table.insert(programs.paths, "/data/userdata/apps")
@@ -18,8 +14,7 @@ table.insert(programs.paths, "/data/userdata/apps")
 
 local screens = {}
 local maxDepth = 0
-for address in require("component").list("screen") do
-    local graphic = require("graphic")
+for address in component.list("screen") do
     local gpu = graphic.findGpu(address)
     if gpu then
         if gpu.setActiveBuffer and gpu.getActiveBuffer() ~= 0 then gpu.setActiveBuffer(0) end
@@ -31,6 +26,22 @@ for address in require("component").list("screen") do
     end
 end
 
+------------------------------------
+
+function _G.initPal()
+    if maxDepth == 1 then
+        system_setTheme("/system/themes/original.plt")
+    else
+        system_setTheme("/system/themes/classic.plt")
+    end
+end
+local gui_container = require("gui_container")
+_G.initPal = nil
+
+local fs = require("filesystem")
+local registry = require("registry")
+local event = require("event")
+local computer = require("computer")
 local desktop = assert(programs.load("desktop")) --подгружаю один раз для экономии ОЗУ, таблица _ENV обшая, так что там нельзя юзать глобалки
 
 ------------------------------------

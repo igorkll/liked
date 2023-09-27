@@ -2,11 +2,9 @@ local gui_container = {}
 gui_container.colors = {}
 gui_container.indexsColors = {}
 
-if maxDepth == 1 then
-    system_setTheme("/system/themes/original.plt")
-else
-    system_setTheme("/system/themes/classic.plt")
-end
+_G.gui_container = gui_container
+initPal()
+_G.gui_container = nil
 
 --------------------------------------------
 
