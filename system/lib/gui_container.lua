@@ -9,12 +9,8 @@ _G.gui_container = nil
 --------------------------------------------
 
 local fs = require("filesystem")
-local calls = require("calls")
 local unicode = require("unicode")
 local paths = require("paths")
-local component = require("component")
-local liked = require("liked")
-local gui = require("gui")
 
 --------------------------------------------
 
@@ -137,7 +133,7 @@ end
 function gui_container.isDiskLocked(address) --отправленно на дороботку
     do return false end
 
-    local regData = liked.getRegistry(address)
+    local regData = require("liked").getRegistry(address)
     return not not (regData and regData.password)
 end
 
@@ -148,7 +144,7 @@ end
 
 function gui_container.getDiskAccess(screen, address)
     if gui_container.isDiskLocked(address) then
-        if gui.checkPasswordLoop(screen, nil, nil, nil, address) then
+        if require("gui").checkPasswordLoop(screen, nil, nil, nil, address) then
             gui_container.unlockedDisks[address] = true
         end
     end

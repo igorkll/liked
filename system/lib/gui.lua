@@ -11,7 +11,6 @@ local component = require("component")
 local thread = require("thread")
 local paths = require("paths")
 local system = require("system")
-local liked = require("liked")
 local gui = {}
 
 local smartShadowsColors = {
@@ -747,7 +746,7 @@ function gui.selectcomponent(screen, cx, cy, types, allowAutoConfirm, control) -
 end
 
 function gui.checkPassword(screen, cx, cy, disableStartSound, diskAddress)
-    local regData = liked.getRegistry(diskAddress)
+    local regData = require("liked").getRegistry(diskAddress)
     if regData then
         if regData.password then
             local clear = saveZone(screen)

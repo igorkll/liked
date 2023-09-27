@@ -43,6 +43,8 @@ end
 local gui_container = require("gui_container")
 _G.initPal = nil
 
+local gui = require("gui") --нужно подключить заранию чтобы функции записались в calls.loaded
+local liked = require("liked")
 local registry = require("registry")
 local event = require("event")
 local computer = require("computer")
@@ -59,14 +61,14 @@ if not registry.branch then
 end
 
 if not registry.bufferType then
-    if computer.totalMemory() / 1024 > 400 then
+    if computer.totalMemory() >= (512 * 1024) then
         registry.bufferType = "software"
     else
         registry.bufferType = "none"
     end
 end
 
-require("liked").applyBufferType()
+liked.applyBufferType()
 
 if not fs.exists(gui_container.screenSaverPath) and not registry.screenSaverDefaultSetted then
     pcall(fs.copy, "/system/screenSavers/black_screen.scrsv", gui_container.screenSaverPath)
@@ -95,7 +97,6 @@ bootloader.autorunsIn("/data/autoruns")
 ------------------------------------
 
 if #screens > 0 then
-    local gui = require("gui") --нужно подключить заранию чтобы функции записались в calls.loaded
     local thread = require("thread") --подгружаю thread опционально, для экономии энергии и ОЗУ
 
     local recreate = {}
