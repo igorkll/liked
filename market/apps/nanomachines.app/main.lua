@@ -74,11 +74,9 @@ function connectToNano()
         local out = {nanoCall("setResponsePort", port)}
         if #out == 0 then
             if not yesno_reconnect() then
-                upBar()
                 return true
             end
         else
-            upBar()
             break
         end
     end
@@ -139,11 +137,9 @@ function pushAll(tbl, inputs)
         status("pushing input: " .. tostring(i) .. "/" .. tostring(math.floor(inputs)))
         local _, err = nanoCall("setInput", i, tbl[i])
         if err == "exit" then
-            upBar()
             return nil, "exit"
         end
     end
-    upBar()
 end
 
 function pullAll(tbl, inputs)
@@ -152,12 +148,10 @@ function pullAll(tbl, inputs)
         status("checking input: " .. tostring(i) .. "/" .. tostring(math.floor(inputs)))
         local _, err, state = nanoCall("getInput", i)
         if err == "exit" then
-            upBar()
             return nil, "exit"
         end
         tbl[i] = state
     end
-    upBar()
 end
 
 function createProfile()
@@ -321,6 +315,7 @@ local function draw()
     
     window:fill(1, 1, rx, 1, colors.lightGray, 0, " ")
     window:set(2, 1, colors.lightGray, colors.white, title)
+    upBar()
 
     window:set(rx, 1, colors.red, colors.white, "X")
     window:set(1, 2, colors.red, colors.white, "delete profile")
