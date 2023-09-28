@@ -139,7 +139,7 @@ function liked.drawUpBar(screen, withoutFill, bgcolor)
     end
     gpu.set(rx - #rtc - 7, 1, rtc)
     gpu.set(rx - #gtc - 18, 1, gtc)
-    if charge <= 20 then
+    if charge <= 30 then
         gpu.setForeground(gui_container.colors.red)
     end
     charge = tostring(charge)

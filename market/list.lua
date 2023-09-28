@@ -32,7 +32,7 @@ end
 local list = {
     {
         name = "nanomachines",
-        version = "2",
+        version = "2.1",
         vendor = "logic",
         icon = selfurlpart .. "/apps/nanomachines.app/icon.t2p",
         description = "allows you to control nanobots using a wireless modem",
