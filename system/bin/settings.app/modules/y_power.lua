@@ -20,7 +20,7 @@ local rx, ry = gpu.getResolution()
 
 local selectWindow = graphic.createWindow(screen, posX, posY, 32, ry - (posY - 1))
 local selected = 1
-local modes = {"power", "energy saving", "ultra energy saving"}
+local modes = {"ultra power", "power", "energy saving", "ultra energy saving"}
 for index, value in ipairs(modes) do
     if value == registry.powerMode then
         selected = index

@@ -95,9 +95,10 @@ end
 
 function liked.applyPowerMode()
     local powerModes = {
-        ["power"] = 0.01,
-        ["energy saving"] = 1,
-        ["ultra energy saving"] = 5,
+        ["ultra power"] = 0,
+        ["power"] = 0.05,
+        ["energy saving"] = 0.5,
+        ["ultra energy saving"] = 2,
     }
     event.minTime = powerModes[registry.powerMode]
 end
