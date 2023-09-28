@@ -14,6 +14,7 @@ table.insert(programs.paths, "/data/userdata/apps")
 ------------------------------------
 
 local screens = {}
+local minDepth = math.huge
 local maxDepth = 0
 for address in component.list("screen") do
     local gpu = graphic.findGpu(address)
@@ -23,9 +24,12 @@ for address in component.list("screen") do
         if gpu then
             table.insert(screens, address)
             maxDepth = math.max(maxDepth, depth)
+            minDepth = math.min(minDepth, depth)
         end
     end
 end
+minDepth = math.round(minDepth)
+maxDepth = math.round(maxDepth)
 
 ------------------------------------
 
@@ -33,7 +37,7 @@ function _G.initPal()
     if fs.exists("/data/theme.plt") then
         system_applyTheme("/data/theme.plt")
     else
-        if maxDepth == 1 then
+        if minDepth == 1 then
             system_setTheme("/system/themes/original.plt")
         else
             system_setTheme("/system/themes/classic.plt")
@@ -51,6 +55,14 @@ local computer = require("computer")
 local desktop = assert(programs.load("desktop")) --подгружаю один раз для экономии ОЗУ, таблица _ENV обшая, так что там нельзя юзать глобалки
 
 ------------------------------------
+
+if not registry.wallpaperBaseColor then
+    if minDepth == 1 then
+        registry.wallpaperBaseColor = "black"
+    else
+        registry.wallpaperBaseColor = "lightBlue"
+    end
+end
 
 if not registry.timeZone then
     registry.timeZone = 0
@@ -75,11 +87,11 @@ if not fs.exists(gui_container.screenSaverPath) and not registry.screenSaverDefa
     registry.screenSaverDefaultSetted = true
 end
 
-if not registry.shadowType and maxDepth ~= 0 then
+if not registry.shadowType then
     registry.shadowMode = "full"
-    if maxDepth == 4 then
+    if minDepth == 4 then
         registry.shadowType = "smart"
-    elseif maxDepth == 8 then
+    elseif minDepth == 8 then
         registry.shadowType = "advanced"
     else
         registry.shadowType = "none"
