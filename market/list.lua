@@ -287,6 +287,7 @@ local list = {
         icon = selfurlpart .. "/apps/camera.app/icon.t2p",
         description = "allows you to take pictures on the camera from the computronix addon.\n* allows you to select a camera from several\n* allows you to save a photo for loading on another computer",
         minDiskSpace = 64,
+        minColorDepth = 4,
 
         path = "/data/bin/camera.app",
         install = function(self)
