@@ -343,8 +343,8 @@ local function draw(old, check) --вызывает все перерисовки
                 labelReadonly = not pcall(fsd.setLabel, fsd.getLabel() or nil) --getLabel может вернуть "no value", который отличаеться от nil в данном случаи
                 
                 local info = lastinfo.deviceinfo[fsd.address]
-                local clock = info and info.clock
-                local devtypepath = paths.concat(path, "external-data/devicetype.dat")
+                --local clock = info and info.clock
+                --local devtypepath = paths.concat(path, "external-data/devicetype.dat")
                 local disklevel = system.getDiskLevel(fsd.address)
 
                 if disklevel == "tmp" then
@@ -357,12 +357,14 @@ local function draw(old, check) --вызывает все перерисовки
                     end
                 elseif disklevel == "raid" then
                     icon = findIcon("raid")
+                    --[[
                 elseif fs.exists(devtypepath) then --если это жесткий диск пренадлежащий устройству то отображаем иконку
                     local data = fs.readFile(devtypepath)
                     devtype = data
                     if data then
                         icon = findIcon(data)
                     end
+                    ]]
                 elseif disklevel == "tier1" then
                     icon = findIcon("hdd1")
                 elseif disklevel == "tier2" then
@@ -817,11 +819,11 @@ local function doIcon(windowEventData)
                     
                     iconCliked = true
                     if windowEventData[5] == 0 then
-                        if v.isFs and gui_container.isDiskLocked(v.fs.address) and not gui_container.isDiskAccess(v.fs.address) then
-                            gui_container.getDiskAccess(screen, v.fs.address)
-                        else
-                            fileDescriptor(v, nil, windowEventData[6])
-                        end
+                        --if v.isFs and gui_container.isDiskLocked(v.fs.address) and not gui_container.isDiskAccess(v.fs.address) then
+                        --    gui_container.getDiskAccess(screen, v.fs.address)
+                        --else
+                        fileDescriptor(v, nil, windowEventData[6])
+                        --end
                     else
                         if v.isFs then
                             local strs, active =
@@ -865,6 +867,7 @@ local function doIcon(windowEventData)
                                 table.insert(active, not registry.disableExternalBoot)
                             end
 
+                            --[[
                             if gui_container.isDiskLocked(v.fs.address) and not gui_container.isDiskAccess(v.fs.address) then
                                 for index, value in ipairs(active) do
                                     active[index] = false
@@ -873,6 +876,7 @@ local function doIcon(windowEventData)
                                 table.insert(strs, 1, "  unlock")
                                 table.insert(active, 1, true)
                             end
+                            ]]
 
                             local posX, posY = window:toRealPos(windowEventData[3], windowEventData[4])
 
@@ -896,8 +900,8 @@ local function doIcon(windowEventData)
                                     end
                                     draw()
                                 end
-                            elseif str == "  unlock" then
-                                gui_container.getDiskAccess(screen, v.fs.address)
+                            --elseif str == "  unlock" then
+                            --    gui_container.getDiskAccess(screen, v.fs.address)
                             elseif str == "  flash archive" then
                                 local archiver = require("archiver")
                                 local clear = saveBigZone(screen)

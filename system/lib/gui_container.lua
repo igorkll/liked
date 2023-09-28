@@ -105,6 +105,15 @@ function gui_container.toUserPath(screen, path) --конвертирует ру�
 end
 
 function gui_container.checkPath(screen, path) --проверяет не вышел ли пользователь из своий папки
+    local userPath = gui_container.getUserRoot(screen)
+    if unicode.sub(path, 1, unicode.len(userPath)) ~= userPath then
+        return userPath
+    end
+    return path
+end
+
+--[[
+function gui_container.checkPath(screen, path) --проверяет не вышел ли пользователь из своий папки
     local disk, diskPath = fs.get(path)
     local mountPoint = fs.mounts()[disk.address][2]
     local userPath = gui_container.getUserRoot(screen)
@@ -128,8 +137,6 @@ function gui_container.checkPath(screen, path) --проверяет не выш�
     return path
 end
 
-----------------------------
-
 function gui_container.isDiskLocked(address) --отправленно на дороботку
     do return false end
 
@@ -149,5 +156,6 @@ function gui_container.getDiskAccess(screen, address)
         end
     end
 end
+]]
 
 return gui_container

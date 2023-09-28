@@ -109,7 +109,7 @@ bootloader.autorunsIn("/data/autoruns")
 ------------------------------------
 
 if #screens > 0 then
-    local thread = require("thread") --подгружаю thread опционально, для экономии энергии и ОЗУ
+    local thread = require("thread")
 
     local recreate = {}
     local threads = {}
