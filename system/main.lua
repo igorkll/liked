@@ -52,6 +52,7 @@ local liked = require("liked")
 local registry = require("registry")
 local event = require("event")
 local computer = require("computer")
+local system = require("system")
 local desktop = assert(programs.load("desktop")) --подгружаю один раз для экономии ОЗУ, таблица _ENV обшая, так что там нельзя юзать глобалки
 
 ------------------------------------
@@ -68,18 +69,27 @@ if not registry.timeZone then
     registry.timeZone = 0
 end
 
+if not registry.powerMode then
+    local devicetype = system.getDeviceType()
+    if devicetype == "tablet" then
+        registry.powerMode = "energy saving"
+    else
+        registry.powerMode = "power"
+    end
+end
+liked.applyPowerMode()
+
 if not registry.branch then
     registry.branch = "main"
 end
 
 if not registry.bufferType then
-    if computer.totalMemory() >= (512 * 1024) then
+    if computer.totalMemory() >= (gui_container.minRamForDBuff * 1024) then
         registry.bufferType = "software"
     else
         registry.bufferType = "none"
     end
 end
-
 liked.applyBufferType()
 
 if not fs.exists(gui_container.screenSaverPath) and not registry.screenSaverDefaultSetted then

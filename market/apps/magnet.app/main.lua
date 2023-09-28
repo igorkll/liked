@@ -4,6 +4,7 @@ local event = require("event")
 local gui_container = require("gui_container")
 local gui = require("gui")
 local unicode = require("unicode")
+local liked = require("liked")
 local colors = gui_container.colors
 
 local screen = ...
@@ -17,6 +18,8 @@ local window = graphic.createWindow(screen, 1, 1, rx, ry, true)
 local title = "Magnet"
 
 local placeAt = (rx // 2) - 4
+
+liked.drawUpBarTask(screen, true, colors.gray)
 
 local function updateAll()
     window:clear(colors.black)

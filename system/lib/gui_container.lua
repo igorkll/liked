@@ -1,4 +1,5 @@
 local gui_container = {}
+gui_container.minRamForDBuff = 768
 gui_container.colors = {}
 gui_container.indexsColors = {}
 

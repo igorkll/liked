@@ -10,6 +10,7 @@ local time = require("time")
 local system = require("system")
 local serialization = require("serialization")
 local gui_container = require("gui_container")
+local event = require("event")
 local liked = {}
 
 function liked.lastVersion()
@@ -92,6 +93,15 @@ function liked.applyBufferType()
     graphic.screensBuffers = {}
 end
 
+function liked.applyPowerMode()
+    local powerModes = {
+        ["power"] = 0.01,
+        ["energy saving"] = 1,
+        ["ultra energy saving"] = 5,
+    }
+    event.minTime = powerModes[registry.powerMode]
+end
+
 function liked.raw_drawUpBarTask(method, screen, withoutFill, bgcolor)
     local function redraw()
         liked.drawUpBar(screen, withoutFill, bgcolor)
@@ -133,6 +143,7 @@ function liked.drawUpBar(screen, withoutFill, bgcolor)
         gpu.setForeground(gui_container.colors.red)
     end
     charge = tostring(charge)
+    gpu.set(rx - 5, 1, "   ")
     gpu.set(rx - #charge - 2, 1, tostring(charge) .. "%")
 end
 

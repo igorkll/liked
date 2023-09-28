@@ -18,11 +18,11 @@ local rx, ry = gpu.getResolution()
 
 ------------------------------------
 
-local selectWindow = graphic.createWindow(screen, posX, posY, 16, ry - (posY - 1))
+local selectWindow = graphic.createWindow(screen, posX, posY, 32, ry - (posY - 1))
 local selected = 1
-local modes = {"none", "software", "hardware"}
+local modes = {"power", "energy saving", "ultra energy saving"}
 for index, value in ipairs(modes) do
-    if value == registry.bufferType then
+    if value == registry.powerMode then
         selected = index
         break
     end
@@ -30,7 +30,6 @@ end
 
 ------------------------------------
 
-local oldselected
 local function draw(set)
     selectWindow:clear(colors.black)
     selectWindow:setCursor(1, 1)
@@ -51,29 +50,9 @@ local function draw(set)
     end
 
     if set then
-        if selected ~= 2 or computer.totalMemory() >= (gui_container.minRamForDBuff * 1024) then
-            local inits = {}
-            for address in component.list("screen") do
-                table.insert(inits, {address, graphic.screenshot(address)})
-            end
-
-            registry.bufferType = modes[selected] or "none"
-            liked.applyBufferType()
-
-            for _, init in ipairs(inits) do
-                system_applyTheme("/data/theme.plt", init[1])
-                init[2]()
-            end
-        else
-            local clear = graphic.screenshot(screen)
-            gui.warn(screen, nil, nil, "A minimum of 512kb of RAM is required to activate software buffering")
-            selected = oldselected
-            clear()
-            draw()
-        end
+        registry.powerMode = modes[selected] or "none"
+        liked.applyPowerMode()
     end
-
-    oldselected = selected
 end
 draw()
 
