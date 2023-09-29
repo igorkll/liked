@@ -6,6 +6,8 @@ local chat_lib = require("chat_lib")
 local gui_container = require("gui_container")
 local colorsApi = require("colors")
 local unicode = require("unicode")
+local liked = require("liked")
+local computer = require("computer")
 
 local colors = gui_container.colors
 local indexsColors = gui_container.indexsColors
@@ -109,6 +111,13 @@ local function getHistorySize()
 end
 ]]
 
+local function drawStatus()
+    window:fill(1, 1, rx, 1, colors.gray, 0, " ")
+    window:set(2, 1, colors.gray, colors.white, "Chat")
+    window:set(window.sizeX, 1, colors.red, colors.white, "X")
+    liked.drawUpBar(screen, true, colors.gray)
+end
+
 local isRedrawed
 local exportButtons = {}
 local function draw()
@@ -119,6 +128,7 @@ local function draw()
 
     exportButtons = {}
     window:clear(colors.white)
+    drawStatus()
 
     local historySize = #history
     for i, v in ipairs(history) do
@@ -183,7 +193,6 @@ local function draw()
         end
     end
 
-    window:set(window.sizeX, 1, colors.red, colors.white, "X")
     input.redraw()
 
     window:fill(rx, 2, 1, ry - 2, colors.lightGray, 0, " ")
@@ -212,6 +221,7 @@ if path then
     send(nickname, isSendImage and "image" or "file", isSendImage and data or (paths.name(path) .. ":" .. data))
 end
 
+local oldStatusTime = computer.uptime()
 while true do
     local eventData = {event.pull(1)}
     if eventData[1] == "chat_message" then
@@ -228,6 +238,11 @@ while true do
     end
 
     if not gui_container.isScreenSaver[screen] then
+        if computer.uptime() - oldStatusTime > 5 then
+            drawStatus()
+            oldStatusTime = computer.uptime()
+        end
+
         if isRedrawed then
             isRedrawed = nil
             draw()

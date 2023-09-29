@@ -62,7 +62,7 @@ local list = {
     },
     {
         name = "chat",
-        version = "1.9",
+        version = "2",
         vendor = "logic",
         icon = selfurlpart .. "/apps/chat.app/icon.t2p",
         description = "allows you to exchange messages, pictures and files between computers via a network card",
