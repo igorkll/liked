@@ -224,10 +224,12 @@ local function applicationLabel(data, x, y)
     local img
 
     local function draw(custImg)
+        data.version = data.version or "unknown"
+
         applabel:clear(colors.black)
         applabel:fill(1, 1, 10, 6, colors.gray, colors.lightGray, "▒")
         applabel:set(12, 2, colors.black, colors.white, "name  : " .. (data.name or "unknown"))
-        applabel:set(12, 3, colors.black, colors.white, "verion: " .. (data.version or "unknown"))
+        applabel:set(12, 3, colors.black, colors.white, "verion: " .. data.version)
         applabel:set(12, 4, colors.black, colors.white, "vendor: " .. (data.vendor or "unknown"))
 
         if data.license then
@@ -251,10 +253,18 @@ local function applicationLabel(data, x, y)
     end
     
     if data.icon then
-        img = "/tmp/market/" .. (data.name or "unknown") .. ".t2p"
+        img = paths.concat("/data/cache/market", (data.name or "unknown") .. ".t2p")
         if not downloaded[img] then
-            draw("/system/icons/app.t2p")
-            fs.writeFile(img, getInternetFile(data.icon))
+            local img_ver_path = paths.hideExtension(img) .. ".cfg"
+            local img_ver
+            if fs.exists(img_ver_path) then
+                img_ver = fs.readFile(img_ver_path)
+            end
+            if not fs.exists(img) or img_ver ~= data.version then
+                draw("/system/icons/app.t2p")
+                fs.writeFile(img, getInternetFile(data.icon))
+                fs.writeFile(img_ver_path, data.version)
+            end
             downloaded[img] = true
         end
     else
