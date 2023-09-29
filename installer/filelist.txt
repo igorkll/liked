@@ -1,7 +1,8 @@
 /system/LICENSE
 /system/logo.lua
 /system/main.lua
-/system/market_urls.txt
+/system/market_urls_dev.txt
+/system/market_urls_main.txt
 /system/registry.dat
 /system/version.cfg
 /system/autoruns/a_mounter.lua
@@ -12,6 +13,8 @@
 /system/bin/about.app/componentlist.lua
 /system/bin/about.app/icon.t2p
 /system/bin/about.app/main.lua
+/system/bin/market.app/actions.cfg
+/system/bin/market.app/clearCustom.lua
 /system/bin/market.app/icon.t2p
 /system/bin/market.app/main.lua
 /system/bin/settings.app/icon.t2p
@@ -28,6 +31,7 @@
 /system/bin/settings.app/modules/g_components.lua
 /system/bin/settings.app/modules/h_screen_saver.lua
 /system/bin/settings.app/modules/k_libraries.lua
+/system/bin/settings.app/modules/y_buffer.lua
 /system/bin/settings.app/modules/z_system.lua
 /system/calls/findPos.lua
 /system/calls/getOSversion.lua
@@ -40,6 +44,8 @@
 /system/calls/gui_status.lua
 /system/calls/gui_yesno.lua
 /system/calls/isLikedDisk.lua
+/system/calls/movetable.lua
+/system/calls/restrs.lua
 /system/calls/saveBigZone.lua
 /system/calls/saveZone.lua
 /system/calls/sysclone.lua
@@ -76,6 +82,8 @@
 /system/lib/gui.lua
 /system/lib/gui_container.lua
 /system/lib/liked.lua
+/system/lib/likenet.lua
+/system/lib/shareComponent.lua
 /system/screenSavers/black_screen.scrsv
 /system/screenSavers/color_dots.scrsv
 /system/screenSavers/random_colors.scrsv
@@ -84,7 +92,7 @@
 /system/themes/original.plt
 /system/wallpapers/box.t2p
 /system/wallpapers/car.t2p
-/system/wallpapers/cirtis_board.t2p
+/system/wallpapers/circuit_board.t2p
 /system/wallpapers/drone.t2p
 /system/wallpapers/flower.t2p
 /system/wallpapers/robot.t2p

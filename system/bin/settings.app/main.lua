@@ -1,12 +1,11 @@
 local graphic = require("graphic")
 local event = require("event")
-local programs = require("programs")
+local liked = require("liked")
 local fs = require("filesystem")
 local calls = require("calls")
 local gui_container = require("gui_container")
 local paths = require("paths")
-local unicode = require("unicode")
-local computer = require("computer")
+local bootloader = require("bootloader")
 
 local colors = gui_container.colors
 
@@ -17,6 +16,8 @@ local gpu = graphic.findGpu(screen)
 local rx, ry = gpu.getResolution()
 local path = paths.path(calls.call("getPath"))
 local modulesPath = paths.concat(path, "modules")
+
+liked.drawUpBarTask(screen, true, colors.gray)
 
 ------------------------------------
 
@@ -33,14 +34,15 @@ for i, file in ipairs(fs.list(modulesPath) or {}) do
     table.insert(modules, file)
 end
 
+statusWindow:clear(colors.gray)
+statusWindow:set(statusWindow.sizeX, 1, colors.red, colors.white, "X")
+statusWindow:set(2, 1, colors.gray, colors.white, "Settings")
+
 local currentModule, moduleEnd
 local function draw()
     selectWindow:clear(colors.lightGray)
     modulWindow:clear(colors.gray)
-    statusWindow:clear(colors.gray)
     lineWindows:clear(colors.brown)
-    statusWindow:set(statusWindow.sizeX, 1, colors.red, colors.white, "X")
-    statusWindow:set((statusWindow.sizeX / 2) - 4, 1, colors.gray, colors.white, "Settings")
 
     for i, file in ipairs(modules) do
         file = file:sub(3, #file)
@@ -58,22 +60,17 @@ local function draw()
         --selectWindow:write("╚" .. string.rep("═", unicode.len(str)) .. "╝", background, foreground)
     end
 
-    local currentFile = paths.concat(modulesPath, modules[selected])
-    local file = assert(fs.open(currentFile, "rb"))
-    local data = file.readAll()
-    file.close()
-
     if moduleEnd then
         moduleEnd()
     end
-    local code = assert(load(data, "=" .. currentFile, nil, calls.call("createEnv")))
+    local code = loadfile(paths.concat(modulesPath, modules[selected]), nil, bootloader.createEnv())
     modulWindow:clear(colors.black)
     currentModule, moduleEnd = code(screen, modulWindow.x, modulWindow.y)
 end
 draw()
 
 while true do
-    local eventData = {computer.pullSignal()}
+    local eventData = {event.pull()}
     local selectWindowEventData = selectWindow:uploadEvent(eventData)
     local statusWindowEventData = statusWindow:uploadEvent(eventData)
 

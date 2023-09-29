@@ -1,14 +1,18 @@
 local fs = require("filesystem")
+local registry = require("registry")
+local gui = require("gui")
 local paths = require("paths")
 local screen, posX, posY, vfs, name = ...
 
-local clear = screenshot(screen, posX, posY, 31, 5)
-local str2, num2 = gui_context(screen, posX, posY, {
+local strs = {
     "  likeOS installer",
     "  liked",
     "  likeOS (core only)",
     "  full cloning of the system  "
-}, {true, true, true, not vendor.banSystemCloning})
+}
+local posX, posY, sizeX, sizeY = gui.contentPos(screen, posX, posY, strs)
+local clear = screenshot(screen, posX, posY, sizeX + 2, sizeY + 1)
+local str2, num2 = gui.context(screen, posX, posY, strs, {true, true, true, not registry.banSystemCloning})
 clear()
 
 if not str2 then
@@ -27,47 +31,59 @@ local clear2 = saveZone(screen)
 if gui_yesno(screen, nil, nil, "install \"" .. label .. "\" to \"" .. name .. "\"?") then
     gui_status(screen, nil, nil, "installing \"" .. label .. "\" to \"" .. name .. "\"...")
 
+    local target = "/mnt/tmpmount"
+    local selfsys = "/mnt/selfsys"
+
     local rootfs = fs.get("/")
-    do
-        fs.umount("/tmp/tmpmount")
-        local success, err = fs.mount(vfs, "/tmp/tmpmount")
+
+    ---------------------------------------------
+
+    fs.umount(target)
+    fs.umount(selfsys)
+
+    local success, err = fs.mount(vfs, target)
+    if not success then return nil, err end
+
+    local success, err = fs.mount(rootfs, selfsys)
+    if not success then return nil, err end
+
+    ---------------------------------------------
+
+    local function install_core()
+        local success, err = fs.copy(paths.concat(selfsys, "init.lua"), paths.concat(target, "init.lua"))
         if not success then return nil, err end
+
+        fs.remove(paths.concat(target, "system/core")) --удаляет старое ядра чтобы не было канфликтов версий и не оставалось лишних файлов
+        return fs.copy(paths.concat(selfsys, "system/core"), paths.concat(target, "system/core"))
     end
 
-    local function selfclone(liked)
-        local success, err = fs.copy("/init.lua", "/tmp/tmpmount/init.lua")
+    local function install_liked()
+        local success, err = fs.copy(paths.concat(selfsys, "init.lua"), paths.concat(target, "init.lua"))
         if not success then return nil, err end
-    
-        if liked then --да сначала установиться liked, но и что, они всеравно не заменяют файлы друг-друга
-            fs.remove("/tmp/tmpmount/system") --удаляет старую систему чтобы не было канфликтов версий и не оставалось лишних файлов
-            local success, err = fs.copy("/system", "/tmp/tmpmount/system")
-            if not success then return nil, err end
-        end
 
-        fs.remove("/tmp/tmpmount/system/core") --удаляет старую систему чтобы не было канфликтов версий и не оставалось лишних файлов
-        local success, err = fs.copy("/system/core", "/tmp/tmpmount/system/core")
-        if not success then return nil, err end
-    
-        return true
+        fs.remove(paths.concat(target, "system")) --удаляет старую систему чтобы не было канфликтов версий и не оставалось лишних файлов
+        return fs.copy(paths.concat(selfsys, "system"), paths.concat(target, "system"))
     end
+
+    local function install_installer()
+        fs.remove(paths.concat(target, "system")) --удаляет старую систему чтобы не было канфликтов версий и не оставалось лишних файлов
+        local success, err = install_core()
+        if not success then return nil, err end
+        return fs.copy(paths.concat(selfsys, "system/installer"), paths.concat(target, "system"))
+    end
+
+    ---------------------------------------------
 
     local success, err
     if num2 == 1 then
-        success, err = selfclone()
-        if success then
-            success, err = fs.copy("/system/installer", "/tmp/tmpmount/system")
-        end
+        success, err = install_installer()
     elseif num2 == 2 then
-        success, err = selfclone(true)
+        success, err = install_liked()
     elseif num2 == 3 then
-        success, err = selfclone()
+        success, err = install_core()
     elseif num2 == 4 then
-        fs.remove("/tmp/tmpmount/system") --удаляет старую систему чтобы не было канфликтов версий и не оставалось лишних файлов
-
-        success, err = fs.copy("/", "/tmp/tmpmount", function (from)
-            if from == "/external-data" then return false end
-            return fs.get(from).address == rootfs.address
-        end)
+        fs.remove(paths.concat(target, "system")) --удаляет старую систему чтобы не было канфликтов версий и не оставалось лишних файлов
+        success, err = fs.copy(selfsys, target)
     end
 
     if not success and not err then
@@ -84,6 +100,10 @@ if gui_yesno(screen, nil, nil, "install \"" .. label .. "\" to \"" .. name .. "\
         --в данном случаи если получиться изменить label то хорошо, а если не получиться то пофиг
     end
 
+    ---------------------------------------------
+
+    fs.umount(target)
+    fs.umount(selfsys)
     return success, err
 else
     clear2()

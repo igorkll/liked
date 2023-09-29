@@ -8,9 +8,6 @@ local colors = gui_container.colors
 
 local screen = ...
 
-local oldAllowBuffer = graphic.getBufferStateOnScreen(screen)
-graphic.setBufferStateOnScreen(screen, false)
-
 local sizeX, sizeY = graphic.getResolution(screen)
 local window = graphic.createWindow(screen, 1, 1, sizeX, sizeY)
 
@@ -43,7 +40,6 @@ while true do
 
     if windowEventData[1] == "touch" then
         if windowEventData[3] == sizeX and windowEventData[4] == 1 then
-            graphic.setBufferStateOnScreen(screen, oldAllowBuffer)
             break
         end
     end

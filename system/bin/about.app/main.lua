@@ -6,6 +6,7 @@ local unicode = require("unicode")
 local fs = require("filesystem")
 local paths = require("paths")
 local programs = require("programs")
+local liked = require("liked")
 
 local colors = gui_container.colors
 local screen, nickname = ...
@@ -13,6 +14,8 @@ local gpu = graphic.findGpu(screen)
 local rx, ry = gpu.getResolution()
 
 local title = "About"
+
+local barTh, barRedraw = liked.drawUpBarTask(screen, true, colors.gray)
 
 --------------------------------------------
 
@@ -32,7 +35,7 @@ end
 
 local function draw()
     statusWindow:clear(colors.gray)
-    statusWindow:set((statusWindow.sizeX / 2) - (unicode.len(title) / 2), 1, colors.gray, colors.white, title)
+    statusWindow:set(2, 1, colors.gray, colors.white, title)
     statusWindow:set(rx, 1, colors.red, colors.white, "X")
 
     --[[
@@ -103,6 +106,7 @@ while true do
 
     local windowEventData = window:uploadEvent(eventData)
     if windowEventData[1] == "touch" and windowEventData[3] >= 2 and windowEventData[3] <= 19 then
+        barTh:suspend()
         if windowEventData[4] == 7 then
             local result = {programs.execute(paths.concat(paths.path(system.getSelfScriptPath()), "componentlist.lua"), screen)}
             assert(table.unpack(result))
@@ -114,8 +118,10 @@ while true do
         elseif windowEventData[4] == 11 then
             programs.execute("edit", screen, nickname, "/system/core/LICENSE", true)
         end
+        barTh:resume()
         draw()
         update()
+        barRedraw()
     end
 
     if computer.uptime() - oldtime > 0.2 then

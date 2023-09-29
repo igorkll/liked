@@ -1,14 +1,15 @@
 local graphic = require("graphic")
 local fs = require("filesystem")
 local calls = require("calls")
-local eventData = require("event")
 local gui_container = require("gui_container")
-local component = require("component")
+local registry = require("registry")
 local computer = require("computer")
 local paths = require("paths")
 local unicode = require("unicode")
 local programs = require("programs")
 local internet = require("internet")
+local liked = require("liked")
+local gui = require("gui")
 
 local colors = gui_container.colors
 
@@ -26,17 +27,26 @@ end
 local rootfs = fs.get("/")
 local maxDepth = graphic.findGpu(screen).maxDepth()
 
+local barTh, barRedraw = liked.drawUpBarTask(screen, true, colors.gray)
+
+local function exec(...)
+    barTh:suspend()
+    local result = {programs.execute(...)}
+    barTh:resume()
+    return table.unpack(result)
+end
+
 ------------------------------------
 
-local netver = getInternetFile("https://raw.githubusercontent.com/igorkll/liked/main/system/version.cfg")
+local netver = liked.lastVersion()
 
 if not netver then
-    gui_warn(screen, nil, nil, "connection error")
+    gui.warn(screen, nil, nil, "connection error")
     return
 end
 
-if tonumber(netver) > getOSversion() then
-    gui_warn(screen, nil, nil, "please update the system, until the system is updated, the market will not work")
+if netver > liked.version() then
+    gui.warn(screen, nil, nil, "please update the system, until the system is updated, the market will not work")
     return
 end
 
@@ -88,7 +98,7 @@ local function modifyList(lst)
             function v.uninstall(self)
                 local uninstallPath = paths.concat(self.path, "uninstall.lua")
                 if fs.exists(uninstallPath) then
-                    assert(programs.execute(uninstallPath, screen, nickname))
+                    assert(exec(uninstallPath, screen, nickname))
                 else
                     fs.remove(self.path)
                 end
@@ -131,13 +141,13 @@ local function doList(path)
                         end
                     end
                 else
-                    gui_warn(screen, nil, nil, "list-type-err: " .. (type(result[2]) or "unknown"))
+                    gui.warn(screen, nil, nil, "list-type-err: " .. (type(result[2]) or "unknown"))
                 end
             else
-                gui_warn(screen, nil, nil, "fail to parse list: " .. (result[2] or "unknown"))
+                gui.warn(screen, nil, nil, "fail to parse list: " .. (result[2] or "unknown"))
             end
         else
-            gui_warn(screen, nil, nil, "fail to read list: " .. (result[2] or "unknown"))
+            gui.warn(screen, nil, nil, "fail to read list: " .. (result[2] or "unknown"))
         end
     end
 end
@@ -146,11 +156,11 @@ local customPath = "/data/market_urls.txt"
 
 local function reList()
     urls = {}
-    if not vendor.disableSystemMarketUrls then
-        doList("/system/market_urls.txt")
+    if not registry.disableSystemMarketUrls then
+        doList("/system/market_urls_" .. registry.branch .. ".txt")
     end
     doList("/vendor/market_urls.txt")
-    if not vendor.disableCustomMarketUrls then
+    if not registry.disableCustomMarketUrls then
         doList(customPath)
     end
 
@@ -162,7 +172,7 @@ local function reList()
         if data then
             local code, err = load(data, "=list" .. index, "t", _ENV)
             if code then
-                local result = {pcall(code, screen, nickname)}
+                local result = {pcall(code, screen, nickname, url)}
                 if result[1] then
                     if type(result[2]) == "table" then
                         modifyList(result[2])
@@ -170,16 +180,16 @@ local function reList()
                             table.insert(list, app)
                         end
                     else
-                        gui_warn(screen, nil, nil, id .. "list-type-err: " .. (type(result[2]) or "unknown"))
+                        gui.warn(screen, nil, nil, id .. "list-type-err: " .. (type(result[2]) or "unknown"))
                     end
                 else
-                    gui_warn(screen, nil, nil, id .. "list-err: " .. (result[2] or "unknown"))
+                    gui.warn(screen, nil, nil, id .. "list-err: " .. (result[2] or "unknown"))
                 end
             else
-                gui_warn(screen, nil, nil, id .. "list-err: " .. (err or "unknown"))
+                gui.warn(screen, nil, nil, id .. "list-err: " .. (err or "unknown"))
             end
         else
-            gui_warn(screen, nil, nil, id .. "list-err: " .. (err or "unknown"))
+            gui.warn(screen, nil, nil, id .. "list-err: " .. (err or "unknown"))
         end
     end
 end
@@ -214,10 +224,12 @@ local function applicationLabel(data, x, y)
     local img
 
     local function draw(custImg)
+        data.version = data.version or "unknown"
+
         applabel:clear(colors.black)
         applabel:fill(1, 1, 10, 6, colors.gray, colors.lightGray, "▒")
         applabel:set(12, 2, colors.black, colors.white, "name  : " .. (data.name or "unknown"))
-        applabel:set(12, 3, colors.black, colors.white, "verion: " .. (data.version or "unknown"))
+        applabel:set(12, 3, colors.black, colors.white, "verion: " .. data.version)
         applabel:set(12, 4, colors.black, colors.white, "vendor: " .. (data.vendor or "unknown"))
 
         if data.license then
@@ -241,10 +253,18 @@ local function applicationLabel(data, x, y)
     end
     
     if data.icon then
-        img = "/tmp/market/" .. (data.name or "unknown") .. ".t2p"
+        img = paths.concat("/data/cache/market", (data.name or "unknown") .. ".t2p")
         if not downloaded[img] then
-            draw("/system/icons/app.t2p")
-            fs.writeFile(img, getInternetFile(data.icon))
+            local img_ver_path = paths.hideExtension(img) .. ".cfg"
+            local img_ver
+            if fs.exists(img_ver_path) then
+                img_ver = fs.readFile(img_ver_path)
+            end
+            if not fs.exists(img) or img_ver ~= data.version then
+                draw("/system/icons/app.t2p")
+                fs.writeFile(img, getInternetFile(data.icon))
+                fs.writeFile(img_ver_path, data.version)
+            end
             downloaded[img] = true
         end
     else
@@ -268,7 +288,7 @@ local function applicationLabel(data, x, y)
 
                 gui_status(screen, nil, nil, "license loading...")
                 assert(saveFile(license, assert(getInternetFile(data.license))))
-                programs.execute("edit", screen, nickname, license, true)
+                exec("edit", screen, nickname, license, true)
                 fs.remove(license)
 
                 return true
@@ -277,7 +297,7 @@ local function applicationLabel(data, x, y)
                 local formattedName2 = " \"" .. (data.name or "unknown") .. "\"..."
                 if instCache[data] and verCache[data] ~= data.version then
                     if supportErr then
-                        gui_warn(screen, nil, nil, supportErr)
+                        gui.warn(screen, nil, nil, supportErr)
                     elseif gui_yesno(screen, nil, nil, "update" .. formattedName) then
                         gui_status(screen, nil, nil, "updating" .. formattedName2)
                         data:install()
@@ -289,7 +309,7 @@ local function applicationLabel(data, x, y)
                     end
                 else
                     if supportErr then
-                        gui_warn(screen, nil, nil, supportErr)
+                        gui.warn(screen, nil, nil, supportErr)
                     elseif gui_yesno(screen, nil, nil, "install" .. formattedName) then
                         gui_status(screen, nil, nil, "installation" .. formattedName2)
                         data:install()
@@ -318,9 +338,10 @@ local function appInfo(data)
     local appLabel
     local function ldraw()
         statusWindow:clear(colors.gray)
-        statusWindow:set((statusWindow.sizeX / 2) - (unicode.len(title) / 2), 1, colors.gray, colors.white, title)
+        statusWindow:set(3, 1, colors.gray, colors.white, title)
         statusWindow:set(statusWindow.sizeX, statusWindow.sizeY, colors.red, colors.white, "X")
         statusWindow:set(1, statusWindow.sizeY, colors.red, colors.white, "<")
+        barRedraw()
 
         window:clear(colors.white)
 
@@ -380,11 +401,12 @@ local appLabels = {}
 
 local function drawStatus()
     statusWindow:clear(colors.gray)
-    statusWindow:set((statusWindow.sizeX / 2) - (unicode.len(title) / 2), 1, colors.gray, colors.white, title)
+    statusWindow:set(8, 1, colors.gray, colors.white, title)
     statusWindow:set(statusWindow.sizeX, statusWindow.sizeY, colors.red, colors.white, "X")
-    if not vendor.disableCustomMarketUrls then
+    if not registry.disableCustomMarketUrls then
         statusWindow:set(1, statusWindow.sizeY, colors.orange, colors.white, "CUSTOM")
     end
+    barRedraw()
 end
 
 local function imitateLine(y)
@@ -445,8 +467,8 @@ while true do
     if statusWindowEventData[1] == "touch" then
         if statusWindowEventData[3] == statusWindow.sizeX and statusWindowEventData[4] == statusWindow.sizeY then
             break
-        elseif statusWindowEventData[3] <= 6 and statusWindowEventData[4] == statusWindow.sizeY and not vendor.disableCustomMarketUrls then
-            programs.execute("edit", screen, nickname, customPath)
+        elseif statusWindowEventData[3] <= 6 and statusWindowEventData[4] == statusWindow.sizeY and not registry.disableCustomMarketUrls then
+            exec("edit", screen, nickname, customPath)
             gui_status(screen, nil, nil, "list updating...")
             reList()
             instCache = {}

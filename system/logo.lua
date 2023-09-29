@@ -1,6 +1,6 @@
-local rx, ry = gpu.getResolution()
+local rx, ry = 50, 16
+bootloader.initScreen(gpu, screen, rx, ry)
 gpu.fill(1, 1, rx, ry, " ")
-
 gpu.set(1, 1 , [[                                                  ]])
 gpu.set(1, 2 , [[--------------------------------------------------]])
 gpu.set(1, 3 , [[ █     █ █   █ ████ ███  |                        ]])

@@ -1,0 +1,2 @@
+https://raw.githubusercontent.com/igorkll/liked/dev/market/list.lua
+https://raw.githubusercontent.com/igorkll/likedCommunityApps/main/list.lua

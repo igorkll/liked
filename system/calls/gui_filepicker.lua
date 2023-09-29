@@ -9,7 +9,7 @@ local colors = gui_container.colors
 
 --------------------------------------------
 
-local screen, cx, cy, dir, exp, save, dirmode, dircombine = ...
+local screen, cx, cy, dir, exp, save, dirmode, dircombine, defname = ...
 
 local gpu = graphic.findGpu(screen)
 local rx, ry = gpu.getResolution()
@@ -34,6 +34,9 @@ end
 
 local window = graphic.createWindow(screen, cx, cy, 50, 16, true)
 local reader = window:read(3, window.sizeY, 16, colors.black, colors.white)
+if defname then
+    reader.setBuffer(defname)
+end
 
 --------------------------------------------
 
@@ -42,10 +45,13 @@ local maxScroll
 
 local strs
 local function draw()
+    local fexp = exp and (exp .. " ") or ""
+    local fname = gui_container.typenames[fexp] or fexp
+
     window:clear(colors.gray)
     window:fill(1, 1, window.sizeX, 1, colors.lightGray, 0, " ")
     window:fill(1, window.sizeY, window.sizeX, 1, colors.lightGray, 0, " ")
-    window:set(1, 1, colors.lightGray, colors.white, (save and "save " or "select ") .. (exp and (exp .. " ") or "") .. (dirmode and "directory" or "file"))
+    window:set(1, 1, colors.lightGray, colors.white, (save and "save " or "select ") .. fname .. (dirmode and "directory" or "file"))
 
     window:set(window.sizeX, 1, colors.red, colors.white, "X")
     window:set(1, window.sizeY, colors.red, colors.white, "<")
@@ -152,7 +158,7 @@ while true do
             else
                 local lpath = paths.concat(userPath, strs[pos])
                 if fs.isDirectory(lpath) then
-                    userPath = lpath
+                    userPath = gui_container.checkPath(screen, lpath)
                     scroll = 0
                     draw()
                 end                

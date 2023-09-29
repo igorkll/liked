@@ -1,21 +1,17 @@
-local fs = require("filesystem")
-local calls = require("calls")
-local unicode = require("unicode")
-local paths = require("paths")
 local gui_container = {}
-
---------------------------------------------
-
+gui_container.minRamForDBuff = 768
 gui_container.colors = {}
 gui_container.indexsColors = {}
 
 _G.gui_container = gui_container
-if fs.exists("/data/theme.plt") then
-    calls.call("system_applyTheme", "/data/theme.plt")
-else
-    calls.call("system_setTheme", "/system/themes/classic.plt")
-end
+initPal()
 _G.gui_container = nil
+
+--------------------------------------------
+
+local fs = require("filesystem")
+local unicode = require("unicode")
+local paths = require("paths")
 
 --------------------------------------------
 
@@ -24,6 +20,7 @@ gui_container.defaultUserRoot = "/data/userdata/"
 gui_container.userRoot = {} --{screen = path, ...}
 gui_container.viewFileExps = {} --если адрес экрана сдесь равен true то разширения имен файлов не будут скрыты
 gui_container.devModeStates = {} --легаси, и почти негде не используеться, dev-mode был удален из системы
+gui_container.unlockedDisks = {}
 
 gui_container.chars = {
     threeDots = "…",
@@ -109,10 +106,57 @@ function gui_container.toUserPath(screen, path) --конвертирует ру�
 end
 
 function gui_container.checkPath(screen, path) --проверяет не вышел ли пользователь из своий папки
-    if unicode.sub(path, 1, unicode.len(gui_container.getUserRoot(screen))) ~= gui_container.getUserRoot(screen) then
-        return gui_container.getUserRoot(screen)
+    local userPath = gui_container.getUserRoot(screen)
+    if unicode.sub(path, 1, unicode.len(userPath)) ~= userPath then
+        return userPath
     end
     return path
 end
+
+--[[
+function gui_container.checkPath(screen, path) --проверяет не вышел ли пользователь из своий папки
+    local disk, diskPath = fs.get(path)
+    local mountPoint = fs.mounts()[disk.address][2]
+    local userPath = gui_container.getUserRoot(screen)
+    local isUserPathRoot = paths.equals(userPath, "/")
+    local diskUserDataPath = paths.concat(mountPoint, "data/userdata")
+    local extdatPath = paths.concat(mountPoint, "external-data")
+
+    if false and disk.address ~= fs.get("/").address and not isUserPathRoot and --отправленно на дороботку
+    fs.exists(diskUserDataPath) and fs.isDirectory(diskUserDataPath) and
+    fs.exists(extdatPath) and fs.isDirectory(extdatPath) then
+        if paths.equals(diskPath, "/") then
+            return paths.concat(mountPoint, userPath)
+        elseif paths.equals(diskPath, paths.path(userPath)) then
+            return userPath
+        end
+    else
+        if unicode.sub(path, 1, unicode.len(userPath)) ~= userPath then
+            return userPath
+        end
+    end
+    return path
+end
+
+function gui_container.isDiskLocked(address) --отправленно на дороботку
+    do return false end
+
+    local regData = require("liked").getRegistry(address)
+    return not not (regData and regData.password)
+end
+
+function gui_container.isDiskAccess(address)
+    if not gui_container.isDiskLocked(address) then return true end
+    return not not gui_container.unlockedDisks[address]
+end
+
+function gui_container.getDiskAccess(screen, address)
+    if gui_container.isDiskLocked(address) then
+        if require("gui").checkPasswordLoop(screen, nil, nil, nil, address) then
+            gui_container.unlockedDisks[address] = true
+        end
+    end
+end
+]]
 
 return gui_container

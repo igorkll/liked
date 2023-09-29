@@ -4,6 +4,8 @@ local computer = require("computer")
 local fs = require("filesystem")
 local system = require("system")
 local paths = require("paths")
+local serialization = require("serialization")
+local registry = require("registry")
 local liked = require("liked")
 local gui = require("gui")
 
@@ -23,8 +25,12 @@ local lastVersion
 local function updateSystem()
     if not lastVersion then
         gui_warn(screen, nil, nil, "connection problems\ntry again later")
-    elseif gui_checkPassword(screen) and gui_yesno(screen, nil, nil, currentVersion ~= lastVersion and "start updating now?" or "you have the latest version installed. do you still want to start updating?") then
-        assert(fs.copy(paths.concat(system.getSelfScriptPath(), "../update_init.lua"), "/init.lua"))
+    elseif gui.pleaseCharge(screen, 80, "update") and gui_checkPassword(screen) and gui_yesno(screen, nil, nil, currentVersion ~= lastVersion and "start updating now?" or "you have the latest version installed. do you still want to start updating?") then
+        --assert(fs.copy(paths.concat(system.getSelfScriptPath(), "../update_init.lua"), "/init.lua"))
+
+        local installdata = {branch = registry.branch}
+        local updateinitPath = paths.concat(system.getSelfScriptPath(), "../update_init.lua")
+        assert(fs.writeFile("/init.lua", "local installdata = " .. serialization.serialize(installdata) .. "\n" .. assert(fs.readFile(updateinitPath))))
         computer.shutdown("fast")
     end
     redraw()
@@ -33,8 +39,9 @@ end
 local function wipeUserData()
     if gui_checkPassword(screen) then
         if gui.pleaseType(screen, "WIPE") then
-            fs.remove("/data")
-            computer.shutdown("fast")
+            if liked.assert(screen, fs.remove("/data")) then
+                computer.shutdown("fast")
+            end
         end
     end
     redraw()
@@ -49,6 +56,7 @@ function redraw()
 
     window:set(21, 2, colors.black, colors.white, "current version: " .. currentVersion)
     window:set(21, 3, colors.black, colors.white, "last    version: loading...")
+    graphic.forceUpdate()
 
     local function getLast()
         local lv, err = liked.lastVersion()
@@ -63,6 +71,7 @@ function redraw()
     local str = "last    version: " .. (lastVersion or getLast() or "unknown")
     window:set(21, 3, colors.black, colors.white, "last    version:                     ")
     window:set(21, 3, colors.black, colors.white, str)
+    graphic.forceUpdate()
 end
 redraw()
 

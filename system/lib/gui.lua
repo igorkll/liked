@@ -10,13 +10,14 @@ local unicode = require("unicode")
 local component = require("component")
 local thread = require("thread")
 local paths = require("paths")
+local system = require("system")
 local gui = {}
 
 local smartShadowsColors = {
     colorslib.lightGray, --1)  white
     colorslib.brown,     --2)  orange
     colorslib.purple,    --3)  magenta
-    colorslib.blue,      --4)  lightBlue
+    colorslib.cyan,      --4)  lightBlue
     colorslib.orange,    --5)  yellow
     colorslib.green,     --6)  lime
     colorslib.magenta,   --7)  pink
@@ -44,21 +45,33 @@ end
 
 ------------------------------------
 
-function gui.shadow(gpu, x, y, sx, sy, mul)
+function gui.shadow(gpu, x, y, sx, sy, mul, full)
+    local depth = gpu.getDepth()
+
     local function getPoses()
         local shadowPosesX = {}
         local shadowPosesY = {}
-        for i = x + 1, (x + sx) - 1 do
-            table.insert(shadowPosesX, i)
-            table.insert(shadowPosesY, y + sy)
-        end
-        for i = y + 1, y + sy do
-            table.insert(shadowPosesX, x + sx)
-            if registry.shadowMode == "full" then
-                table.insert(shadowPosesX, x + sx + 1)
+
+        if full then
+            for cx = x, x + (sx - 1) do
+                for cy = y, y + (sy - 1) do
+                    table.insert(shadowPosesX, cx)
+                    table.insert(shadowPosesY, cy)
+                end
+            end
+        else
+            for i = x + 1, (x + sx) - 1 do
+                table.insert(shadowPosesX, i)
+                table.insert(shadowPosesY, y + sy)
+            end
+            for i = y + 1, y + sy do
+                table.insert(shadowPosesX, x + sx)
+                if registry.shadowMode == "full" then
+                    table.insert(shadowPosesX, x + sx + 1)
+                    table.insert(shadowPosesY, i)
+                end
                 table.insert(shadowPosesY, i)
             end
-            table.insert(shadowPosesY, i)
         end
 
         return shadowPosesX, shadowPosesY
@@ -78,20 +91,30 @@ function gui.shadow(gpu, x, y, sx, sy, mul)
     elseif registry.shadowType == "smart" then
         local shadowPosesX, shadowPosesY = getPoses()
 
+        local palcache = {}
+        local function getPalCol(source)
+            if depth > 1 then
+                for i = 0, 15 do
+                    local col = palcache[i]
+                    if not col then
+                        col = gpu.getPaletteColor(i)
+                        palcache[i] = col
+                    end
+                    if col == source then
+                        return i
+                    end
+                end
+            end
+            return 0
+        end
+
         for i = 1, #shadowPosesX do
             local ok, char, fore, back, forePal, backPal = pcall(gpu.get, shadowPosesX[i], shadowPosesY[i])
             if ok and char and fore and back then
-                if forePal then
-                    gpu.setForeground(smartShadowsColors[forePal + 1], true)
-                else
-                    gpu.setForeground(colorslib.colorMul(fore, mul or 0.6))
-                end
-
-                if backPal then
-                    gpu.setBackground(smartShadowsColors[backPal + 1], true)
-                else
-                    gpu.setBackground(colorslib.colorMul(back, mul or 0.6))
-                end
+                if not forePal then forePal = getPalCol(fore) end
+                gpu.setForeground(smartShadowsColors[forePal + 1], depth > 1)
+                if not backPal then backPal = getPalCol(back) end
+                gpu.setBackground(smartShadowsColors[backPal + 1], depth > 1)
                 
                 gpu.set(shadowPosesX[i], shadowPosesY[i], char)
             end
@@ -116,7 +139,7 @@ function gui.pleaseType(screen, str, tostr)
     return false
 end
 
-function gui.warn(screen, cx, cy, str, backgroundColor)
+function gui.smallWindow(screen, cx, cy, str, backgroundColor, icon)
     --◢▲◣▲▴▴
     local gpu = graphic.findGpu(screen)
 
@@ -138,30 +161,40 @@ function gui.warn(screen, cx, cy, str, backgroundColor)
     gui.shadow(gpu, window.x, window.y, window.sizeX, window.sizeY)
     window:clear(color)
 
-    for i, v in ipairs(restrs(str, 22)) do
+    for i, v in ipairs(restrs(str, 24)) do
         local textColor = colors.white
         if color == textColor then
             textColor = colors.black
         end
-        window:set(10, i + 1, color, textColor, v)
+        window:set(8, i + 1, color, textColor, v)
     end
 
-    window:set(2, 2, color, colors.yellow, "  " .. unicode.char(0x2800+192) ..  "  ")
-    window:set(2, 3, color, colors.yellow, " ◢█◣ ")
-    window:set(2, 4, color, colors.yellow, "◢███◣")
-    window:set(4, 3, colors.yellow, colors.white, "!")
+    if icon then
+        icon(window, color)
+    end
+
+    return window
+end
+
+function gui.warn(screen, cx, cy, str, backgroundColor)
+    local window = gui.smallWindow(screen, cx, cy, str, backgroundColor, function (window, color)
+        window:set(2, 2, color, colors.yellow, "  " .. unicode.char(0x2800+192) ..  "  ")
+        window:set(2, 3, color, colors.yellow, " ◢█◣ ")
+        window:set(2, 4, color, colors.yellow, "◢███◣")
+        window:set(4, 3, colors.yellow, colors.white, "!")
+    end)
+
     window:set(32 - 4, 7, colors.lightBlue, colors.white, " ok ")
+    local function drawYes()
+        window:set(32 - 4, 7, colors.blue, colors.white, " ok ")
+        graphic.forceUpdate()
+        event.sleep(0.1)
+    end
 
     graphic.forceUpdate()
     if registry.soundEnable then
         computer.beep(100)
         computer.beep(100)
-    end
-
-    local function drawYes()
-        window:set(32 - 4, 7, colors.blue, colors.white, " ok ")
-        graphic.forceUpdate()
-        event.sleep(0.1)
     end
 
     while true do
@@ -175,6 +208,106 @@ function gui.warn(screen, cx, cy, str, backgroundColor)
         elseif windowEventData[1] == "key_down" and windowEventData[4] == 28 then
             drawYes()
             break
+        end
+    end
+end
+
+function gui.pleaseCharge(screen, minCharge, str)
+    minCharge = minCharge or 40
+    str = str or "this action"
+
+    if system.getCharge() >= minCharge then return true end
+
+    local clear = saveZone(screen)
+
+    local window = gui.smallWindow(screen, nil, nil, "in order to make " .. str .. ",\nthe charge level of the device must be at least " .. tostring(math.floor(minCharge)) .. "%", nil, function (window, color)
+        window:set(3, 2, color,         colors.gray, unicode.char(0x2800+192) .. "█" .. unicode.char(0x2800+192))
+        window:set(3, 3, color,         colors.gray, "█ █")
+        window:set(3, 4, colors.yellow, colors.gray, "█ █")
+        window:set(3, 5, color,         colors.gray, "███")
+    end)
+
+    window:set(32 - 4, 7, colors.lightBlue, colors.white, " ok ")
+    local function drawYes()
+        window:set(32 - 4, 7, colors.blue, colors.white, " ok ")
+        graphic.forceUpdate()
+        event.sleep(0.1)
+    end
+
+    graphic.forceUpdate()
+    if registry.soundEnable then
+        computer.beep(300)
+        computer.beep(300)
+        computer.beep(600)
+    end
+
+    while true do
+        local eventData = {computer.pullSignal()}
+        local windowEventData = window:uploadEvent(eventData)
+        if windowEventData[1] == "touch" and windowEventData[5] == 0 then
+            if windowEventData[4] == 7 and windowEventData[3] > (32 - 5) and windowEventData[3] <= ((32 - 5) + 4) then
+                drawYes()
+                clear()
+                return false
+            end
+        elseif windowEventData[1] == "key_down" and windowEventData[4] == 28 then
+            drawYes()
+            clear()
+            return false
+        end
+    end
+end
+
+function gui.selectcolor(screen, cx, cy, str)
+    --◢▲◣▲▴▴
+    local gpu = graphic.findGpu(screen)
+
+    if not cx or not cy then
+        cx, cy = gpu.getResolution()
+        cx = cx / 2
+        cy = cy / 2
+        cx = cx - 12
+        cy = cy - 6
+        cx = math.floor(cx) + 1
+        cy = math.floor(cy) + 1
+    end
+
+    local window = graphic.createWindow(screen, cx, cy, 24, 12, true)
+    gui.shadow(gpu, window.x, window.y, window.sizeX, window.sizeY)
+    window:clear(colors.gray)
+    window:fill(3, 2, 20, 10, colors.brown, colors.white, "▒")
+    window:set(2, 1, colors.gray, colors.white, str or "select color")
+    window:set(window.sizeX, 1, colors.red, colors.white, "X")
+
+    local cols = {}
+    for i = 1, 12 do
+        cols[i] = {}
+    end
+    for x = 0, 3 do
+        for y = 0, 3 do
+            local colNum = x + (y * 4)
+            local col = colors[colorslib[colNum]]
+            local setX, setY = 5 + (x * 4), 3 + (y * 2)
+            window:set(setX, setY, col, 0, "    ")
+            window:set(setX, setY + 1, col, 0, "    ")
+            for addY = 0, 1 do
+                for addX = 0, 3 do
+                    cols[setY + addY][setX + addX] = colNum
+                end
+            end
+        end
+    end
+    graphic.forceUpdate()
+
+    while true do
+        local eventData = {computer.pullSignal()}
+        local windowEventData = window:uploadEvent(eventData)
+        if windowEventData[1] == "touch" then
+            if windowEventData[3] == window.sizeX and windowEventData[4] == 1 then
+                return
+            elseif cols[windowEventData[4]] and cols[windowEventData[4]][windowEventData[3]] then
+                return cols[windowEventData[4]][windowEventData[3]]
+            end
         end
     end
 end
@@ -226,7 +359,8 @@ function gui.input(screen, cx, cy, str, hidden, backgroundColor, default, disabl
     end
 
     while true do
-        local eventData = {computer.pullSignal()}
+        local eventData = {event.pull()}
+        local windowEventData = window:uploadEvent(eventData)
         local out = reader.uploadEvent(eventData)
         if out then
             if out == true then
@@ -236,7 +370,6 @@ function gui.input(screen, cx, cy, str, hidden, backgroundColor, default, disabl
             drawOk()
             return out
         end
-        local windowEventData = window:uploadEvent(eventData)
         if windowEventData[1] == "touch" and windowEventData[5] == 0 then
             if windowEventData[4] == 7 and windowEventData[3] > (32 - 5 - 3) and windowEventData[3] <= ((32 - 5) + 4) then
                 drawOk()
@@ -300,6 +433,7 @@ function gui.context(screen, posX, posY, strs, active)
                 window:set(1, i, color, colors.lightGray, str .. (string.rep(" ", sizeX - unicode.wlen(str))))
             end
         end
+        graphic.forceUpdate()
     end
     redrawStrs()
 
@@ -528,7 +662,7 @@ function gui.selectcomponent(screen, cx, cy, types, allowAutoConfirm, control) -
     local allTypesFlag
     local typesstr = "select "
     if types then
-        typesstr = typesstr .. table.concat(types, " or ")
+        typesstr = typesstr .. table.concat(types, "/")
     else
         typesstr = typesstr .. "component"
         allTypesFlag = true
@@ -611,10 +745,47 @@ function gui.selectcomponent(screen, cx, cy, types, allowAutoConfirm, control) -
     end
 end
 
+function gui.checkPassword(screen, cx, cy, disableStartSound, diskAddress)
+    local regData = require("liked").getRegistry(diskAddress)
+    if regData then
+        if regData.password then
+            local clear = saveZone(screen)
+            local password = gui.input(screen, cx, cy, "enter password", true, nil, nil, disableStartSound)
+            clear()
+
+            if password then
+                if require("sha256").sha256(password .. (regData.passwordSalt or "")) == regData.password then
+                    return true
+                else
+                    local clear = saveZone(screen)
+                    gui.warn(screen, cx, cy, "invalid password")
+                    clear()
+                end
+            else
+                return false --false означает что пользователь отказался от ввода пароля
+            end
+        else
+            return true
+        end
+    else
+        return true
+    end
+end
+
+function gui.checkPasswordLoop(...)
+    while true do
+        local ret = gui.checkPassword(...)
+        if ret ~= nil then
+            return ret
+        end
+    end
+end
+
 calls.loaded.gui_warn = gui.warn
 calls.loaded.gui_drawtext = gui.drawtext
 calls.loaded.gui_context = gui.context
 calls.loaded.gui_input = gui.input
 calls.loaded.gui_select = gui.select
 calls.loaded.gui_selectcomponent = gui.selectcomponent
+calls.loaded.gui_checkPassword = gui.checkPassword
 return gui

@@ -8,6 +8,7 @@ local event = require("event")
 local unicode = require("unicode")
 local thread = require("thread")
 local serialization = require("serialization")
+local liked = require("liked")
 
 local path = paths.path(getPath())
 fs.makeDirectory(paths.concat(path, "profiles"))
@@ -24,6 +25,18 @@ local rx, ry
 do
     local gpu = graphic.findGpu(screen)
     rx, ry = gpu.getResolution()
+end
+
+local upth, upRedraw = liked.drawUpBarTask(screen, true, colors.lightGray)
+upth:suspend()
+
+local function noUpBar()
+    upth:suspend()
+end
+
+local function upBar()
+    upth:resume()
+    upRedraw()
 end
 
 local function status(str)
@@ -55,6 +68,7 @@ function yesno_reconnect()
 end
 
 function connectToNano()
+    noUpBar()
     while true do
         status("connecting to nanomachines...")
         local out = {nanoCall("setResponsePort", port)}
@@ -118,6 +132,7 @@ function raw_nanoCall(func, ...)
 end
 
 function pushAll(tbl, inputs)
+    noUpBar()
     for i = 1, inputs do
         status("pushing input: " .. tostring(i) .. "/" .. tostring(math.floor(inputs)))
         local _, err = nanoCall("setInput", i, tbl[i])
@@ -128,6 +143,7 @@ function pushAll(tbl, inputs)
 end
 
 function pullAll(tbl, inputs)
+    noUpBar()
     for i = 1, inputs do
         status("checking input: " .. tostring(i) .. "/" .. tostring(math.floor(inputs)))
         local _, err, state = nanoCall("getInput", i)
@@ -169,14 +185,14 @@ function getProfile(nickname)
         return tbl
     end
     local file = assert(fs.open(path, "rb"))
-    local tbl = serialization.unserialization(file.readAll())
+    local tbl = serialization.unserialize(file.readAll())
     file.close()
     return tbl
 end
 
 function saveProfile(nickname, profile)
     local file = assert(fs.open(paths.concat(path, "profiles", nickname), "wb"))
-    file.write(serialization.serialization(profile))
+    file.write(serialization.serialize(profile))
     file.close()
     return true
 end
@@ -298,7 +314,8 @@ local function draw()
     window:clear(colors.black)
     
     window:fill(1, 1, rx, 1, colors.lightGray, 0, " ")
-    window:set((window.sizeX / 2) - (unicode.len(title) / 2), 1, colors.lightGray, colors.white, title)
+    window:set(2, 1, colors.lightGray, colors.white, title)
+    upBar()
 
     window:set(rx, 1, colors.red, colors.white, "X")
     window:set(1, 2, colors.red, colors.white, "delete profile")

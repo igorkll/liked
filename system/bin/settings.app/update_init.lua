@@ -1,3 +1,4 @@
+--local installdata = {branch = "main"} --пристыковываеться к скрипту на этапе обновления
 
 local function initScreen(gpu, screen)
     if gpu.getScreen() ~= screen then
@@ -118,11 +119,11 @@ local function fs_path(path)
     end
 end
 
-local function installUrl(url, state2)
-    local filelist = split(assert(getInternetFile(url .. "/installer/filelist.txt")), "\n")
+local function installUrl(urlPart, state2)
+    local filelist = split(assert(getInternetFile(urlPart .. "/installer/filelist.txt")), "\n")
     for i, v in ipairs(filelist) do
         if v ~= "" then
-            local filedata = assert(getInternetFile(url .. v))
+            local filedata = assert(getInternetFile(urlPart .. v))
 
             if i % 10 == 0 then
                 printState((((i - 1) / (#filelist - 1)) / 2) + (state2 and 0.5 or 0))
@@ -137,6 +138,6 @@ local function installUrl(url, state2)
 end
 
 proxy.remove("/system") --удаляем старую систему во избежании конфликта версий
-installUrl("https://raw.githubusercontent.com/igorkll/liked/main") --сначала ставим liked а только потом ядро, чтобы не перезаписывать init.lua раньше времени. чтобы если обновления оборветься то система не окирпичилась
-installUrl("https://raw.githubusercontent.com/igorkll/likeOS/main", true)
+installUrl("https://raw.githubusercontent.com/igorkll/liked/" .. installdata.branch) --сначала ставим liked а только потом ядро, чтобы не перезаписывать init.lua раньше времени. чтобы если обновления оборветься то система не окирпичилась
+installUrl("https://raw.githubusercontent.com/igorkll/likeOS/" .. installdata.branch, true)
 computer.shutdown("fast")

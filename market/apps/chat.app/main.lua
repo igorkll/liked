@@ -6,13 +6,17 @@ local chat_lib = require("chat_lib")
 local gui_container = require("gui_container")
 local colorsApi = require("colors")
 local unicode = require("unicode")
+local liked = require("liked")
+local computer = require("computer")
 
 local colors = gui_container.colors
 local indexsColors = gui_container.indexsColors
+local screen, nickname, path = ...
+
+gui_container.noBlockOnScreenSaver[screen] = true
 
 ------------------------------------
 
-local screen, nikname, path = ...
 local isSendImage
 if path and path:find("%:") then
     path = split(path, ":")[1]
@@ -93,7 +97,7 @@ end
 local input
 local scroll = 0
 local function reinput()
-    input = window:read(1, window.sizeY, window.sizeX - 2, colors.gray, colors.white)
+    input = window:read(1, window.sizeY, window.sizeX, colors.gray, colors.white)
 end
 reinput()
 
@@ -107,21 +111,32 @@ local function getHistorySize()
 end
 ]]
 
-local exportButtons = {}
-local function draw()
-    exportButtons = {}
+local function drawStatus()
+    window:fill(1, 1, rx, 1, colors.gray, 0, " ")
+    window:set(2, 1, colors.gray, colors.white, "Chat")
+    window:set(window.sizeX, 1, colors.red, colors.white, "X")
+    liked.drawUpBar(screen, true, colors.gray)
+end
 
-    window:clear(colors.white)
+local isRedrawed
+local exportButtons = {}
+local existsCache = {}
+local function draw()
+    if gui_container.isScreenSaver[screen] then
+        isRedrawed = true
+        return
+    end
+
+    exportButtons = {}
+    --window:clear(colors.white)
+    window:fill(1, 2, window.sizeX - 1, window.sizeY - 2, colors.white, 0, " ")
 
     local historySize = #history
     for i, v in ipairs(history) do
         --(window.sizeY - ((#history - i) + 1)) + scroll
         if v then
             local posY = (window.sizeY - ((historySize - i) + 1)) + scroll
-            if posY > (window.sizeY - 1) then
-                break
-            end
-            if posY >= (2 - getMessageSize(v)) then
+            if posY < window.sizeY and posY >= (3 - getMessageSize(v)) then
                 window:setCursor(1, posY)
                 window:write(v[1], colors.white, indexsColors[v[2] + 1])
                 window.sizeX = window.sizeX - 1
@@ -143,13 +158,15 @@ local function draw()
                     fs.remove(path)
                 elseif v[3] == "file" then
                     local name = splitFile(v[4])
-
                     window:write("file: " .. name .. "  ", colors.white, colors.lime, true)
 
                     local cx, cy = window:getCursor()
                     local iconPath = paths.concat("/system/icons", (paths.extension(name) or "") .. ".t2p")
 
-                    if not fs.exists(iconPath) then
+                    if existsCache[iconPath] == nil then
+                        existsCache[iconPath] = fs.exists(iconPath)
+                    end
+                    if not existsCache[iconPath] then
                         iconPath = "/system/icons/unkownfile.t2p"
                     end
 
@@ -158,7 +175,8 @@ local function draw()
 
                     window:set(cx - 7, cy + 2, colors.green, colors.yellow, "EXPORT")
                     table.insert(exportButtons, {cx - 7, cy + 2, function()
-                        local savepath = gui_selectfile(screen, nil, nil, 2, paths.extension(name), "file", {"this_type"}, paths.hideExtension(name))
+                        local savepath = gui_filepicker(screen, nil, nil, nil, paths.extension(name), true, false, nil, paths.hideExtension(name))
+                        --local savepath = gui_selectfile(screen, nil, nil, 2, paths.extension(name), "file", {"this_type"}, paths.hideExtension(name))
                         if savepath then
                             local file, err = fs.open(savepath, "wb")
                             if file then
@@ -176,17 +194,17 @@ local function draw()
         end
     end
 
-    window:set(window.sizeX, 1, colors.red, colors.white, "X")
     input.redraw()
+    drawStatus()
 
     window:fill(rx, 2, 1, ry - 2, colors.lightGray, 0, " ")
-    local pos = map(scroll, 0, (historySize - window.sizeY) + 1, window.sizeY - 1, 2)
+    local pos = math.map(scroll, 0, (historySize - window.sizeY) + 1, window.sizeY - 1, 2)
     window:set(rx, pos, colors.green, 0, " ")
 end
 draw()
 
-local function send(nikname, messageType, message)
-    local packet = {nikname, colorsApi.red, messageType, message, 0}
+local function send(nickname, messageType, message)
+    local packet = {nickname, colorsApi.red, messageType, message, 0}
     chat_lib.send(table.unpack(packet))
     table.insert(history, packet)
     addNullStrs(packet)
@@ -202,23 +220,12 @@ if path then
     local data = file.readAll()
     file.close()
 
-    send(nikname, isSendImage and "image" or "file", isSendImage and data or (paths.name(path) .. ":" .. data))
+    send(nickname, isSendImage and "image" or "file", isSendImage and data or (paths.name(path) .. ":" .. data))
 end
 
+local oldStatusTime = computer.uptime()
 while true do
-    local eventData = {event.pull()}
-    local windowEventData = window:uploadEvent(eventData)
-    local inputData = input.uploadEvent(eventData)
-    if inputData then
-        if inputData ~= true then
-            if inputData ~= "" then
-                local nikname = eventData[5]
-                send(nikname, "text", inputData)
-            end
-        else
-            break
-        end
-    end
+    local eventData = {event.pull(1)}
     if eventData[1] == "chat_message" then
         local tbl = {table.unpack(eventData, 2)}
         tbl[5] = math.floor(tbl[5])
@@ -231,39 +238,65 @@ while true do
             draw()
         end
     end
-    if windowEventData[1] == "touch" then
-        if windowEventData[3] == window.sizeX and windowEventData[4] == 1 then
-            break
-        else
-            for i, v in ipairs(exportButtons) do
-                if v then
-                    if windowEventData[4] == v[2] and windowEventData[3] >= v[1] and windowEventData[3] < (v[1] + 6) then
-                        v[3]()
+
+    if not gui_container.isScreenSaver[screen] then
+        if computer.uptime() - oldStatusTime > 5 then
+            drawStatus()
+            oldStatusTime = computer.uptime()
+        end
+
+        if isRedrawed then
+            isRedrawed = nil
+            draw()
+        end
+
+        local windowEventData = window:uploadEvent(eventData)
+        local inputData = input.uploadEvent(eventData)
+        if inputData then
+            if inputData ~= true then
+                if inputData ~= "" then
+                    local nickname = eventData[5]
+                    send(nickname, "text", inputData)
+                end
+            else
+                break
+            end
+        end
+        
+        if windowEventData[1] == "touch" then
+            if windowEventData[3] == window.sizeX and windowEventData[4] == 1 then
+                break
+            else
+                for i, v in ipairs(exportButtons) do
+                    if v then
+                        if windowEventData[4] == v[2] and windowEventData[3] >= v[1] and windowEventData[3] < (v[1] + 6) then
+                            v[3]()
+                        end
                     end
                 end
             end
-        end
-    elseif windowEventData[1] == "scroll" then
-        if windowEventData[5] > 0 then
-            if scroll <= (#history - window.sizeY) then
-                scroll = scroll + 1
-                draw()
-            end
-        else
-            if scroll > 0 then
-                scroll = scroll - 1
-                draw()
-            end
-        end
-    end
-
-    if windowEventData[1] == "touch" or windowEventData[1] == "drag" then
-        if windowEventData[3] == window.sizeX and windowEventData[4] > 1 and windowEventData[4] < window.sizeY then
-            local newscroll = math.floor(map(windowEventData[4], 2, window.sizeY - 1, #history - window.sizeY, 0) + 0.5)
-            if newscroll <= (#history - window.sizeY) and newscroll > 0 then
-                if newscroll ~= scroll then
-                    scroll = newscroll
+        elseif windowEventData[1] == "scroll" then
+            if windowEventData[5] > 0 then
+                if scroll <= (#history - window.sizeY) then
+                    scroll = scroll + 1
                     draw()
+                end
+            else
+                if scroll > 0 then
+                    scroll = scroll - 1
+                    draw()
+                end
+            end
+        end
+
+        if windowEventData[1] == "touch" or windowEventData[1] == "drag" then
+            if windowEventData[3] == window.sizeX and windowEventData[4] > 1 and windowEventData[4] < window.sizeY then
+                local newscroll = math.floor(map(windowEventData[4], 2, window.sizeY - 1, #history - window.sizeY, 0) + 0.5)
+                if newscroll <= (#history - window.sizeY) and newscroll > 0 then
+                    if newscroll ~= scroll then
+                        scroll = newscroll
+                        draw()
+                    end
                 end
             end
         end

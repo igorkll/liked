@@ -18,28 +18,29 @@ do
 end
 
 local function printMainScreen(err)
-    graphic.setResolution(screen, 20, 8)
     window:clear(colors.black)
-    window:set(7, 1, colors.black, colors.gray, "Archiver")
-    window:set(3, 3, colors.red, colors.white, "     close      ")
-    window:set(3, 5, colors.green, colors.white, "     unpack     ")
-    window:set(3, 7, colors.blue, colors.white, "      pack      ")
+    window:set(2, 1, colors.black, colors.gray, "Archiver")
+    window:set(2, 3, colors.red, colors.white, "     close      ")
+    window:set(2, 5, colors.green, colors.white, "     unpack     ")
+    window:set(2, 7, colors.blue, colors.white, "      pack      ")
 
     if err then
-        event.errLog(err)
-        window:set(1, 8, colors.black, colors.gray, err)
+        event.errLog("archiver error: " .. tostring(err))
+        window:set(2, osizeY, colors.black, colors.gray, err)
     end
 end
 
+--[[
 local function printBigScreen()
-    graphic.setResolution(screen, osizeX, osizeY)
     window:clear(colors.black)
-    window:set(1, 1, colors.black, colors.gray, "Archiver")
+    window:set(2, 1, colors.black, colors.gray, "Archiver")
 end
+]]
 
 --------------------------------------------
 
 local function unpack(path, unpackFolder)
+    gui_status(screen, nil, nil, "unpacking \"" .. gui_container.toUserPath(screen, path) .. "\" to \"" .. gui_container.toUserPath(screen, unpackFolder) .. "\"")
     --fs.remove(unpackFolder)
     fs.makeDirectory(unpackFolder)
 
@@ -52,6 +53,7 @@ local function unpack(path, unpackFolder)
 end
 
 local function pack(packFolder, path)
+    gui_status(screen, nil, nil, "packaging \"" .. gui_container.toUserPath(screen, packFolder) .. "\" to \"" .. gui_container.toUserPath(screen, path) .. "\"")
     local ok, err = archiver.pack(packFolder, path)
     if ok then
         printMainScreen()
@@ -65,9 +67,9 @@ end
 printMainScreen()
 
 while true do
-
     if path then
-        printBigScreen()
+        --printBigScreen()
+        printMainScreen()
 
         local unpackFolder = gui_filepicker(screen, nil, nil, nil, nil, true, true, true)
         if unpackFolder then
@@ -88,7 +90,9 @@ while true do
                 graphic.setResolution(screen, osizeX, osizeY)
                 break
             elseif windowEventData[4] == 5 then
-                printBigScreen()
+                --printBigScreen()
+                printMainScreen()
+
                 local archivePath = gui_filepicker(screen, nil, nil, nil, "afpx")
                 local unpackFolder
                 if archivePath then
@@ -100,7 +104,9 @@ while true do
                     printMainScreen()
                 end
             elseif windowEventData[4] == 7 then
-                printBigScreen()
+                --printBigScreen()
+                printMainScreen()
+
                 local packFolder = gui_filepicker(screen, nil, nil, nil, nil, nil, true)
                 local archivePath
                 if packFolder then

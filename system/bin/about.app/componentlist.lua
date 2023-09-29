@@ -1,11 +1,10 @@
 local graphic = require("graphic")
 local event = require("event")
 local gui_container = require("gui_container")
-local computer = require("computer")
 local calls = require("calls")
 local unicode = require("unicode")
 local fs = require("filesystem")
-local programs = require("programs")
+local liked = require("liked")
 local component = require("component")
 
 local colors = gui_container.colors
@@ -13,11 +12,9 @@ local screen = ...
 local gpu = graphic.findGpu(screen)
 local rx, ry = gpu.getResolution()
 
---------------------------------------------
+liked.drawUpBarTask(screen, true, colors.gray)
 
-local version = calls.call("getOSversion")
-local hddTotalSpace = fs.get("/").spaceTotal()
-local hddUsedSpace = fs.get("/").spaceUsed()
+--------------------------------------------
 
 local statusWindow = graphic.createWindow(screen, 1, 1, rx, 1, true)
 local window = graphic.createWindow(screen, 1, 2, rx, ry - 1, true)
@@ -28,8 +25,7 @@ local function update()
     statusWindow:set(rx, 1, colors.red, colors.white, "X")
     statusWindow:set(1, 1, colors.red, colors.white, "<")
     
-    local title = "List Of Components"
-    statusWindow:set((statusWindow.sizeX / 2) - (unicode.len(title) / 2), 1, colors.gray, colors.white, title)
+    statusWindow:set(3, 1, colors.gray, colors.white, "List Of Components")
 
     local types = {}
     local added = {}

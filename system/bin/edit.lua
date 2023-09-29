@@ -1008,11 +1008,12 @@ local screen, nickname, filename, readonly = ...
 local file_parentpath = paths.path(filename)
 
 local gpu = graphic.findGpu(screen)
-gpu.setBackground(colors.gray)
+if gpu.getDepth() == 1 then
+  gpu.setBackground(0)
+else
+  gpu.setBackground(colors.gray)
+end
 gpu.setForeground(colors.white)
-
-local oldAllowBuffer = graphic.getBufferStateOnScreen(screen)
-graphic.setBufferStateOnScreen(screen, false)
 
 local keyaddr = component.invoke(screen, "getKeyboards")[1]
 
@@ -1748,5 +1749,3 @@ while running do
         end
     end
 end
-
-graphic.setBufferStateOnScreen(screen, oldAllowBuffer)

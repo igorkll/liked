@@ -18,24 +18,13 @@ local window = graphic.createWindow(screen, posX, posY, rx - (posX - 1), ry - (p
 
 ------------------------------------
 
-local maxCount = system.getCpuLevel()
-if maxCount == 3 then
-    maxCount = 16
-elseif maxCount == 2 then
-    maxCount = 12
-elseif maxCount == 1 then
-    maxCount = 8
-end
-
-------------------------------------
-
 local function drawInfo()
     local currentCount = 0
     for addr in component.list() do
         currentCount = currentCount + 1
     end
     currentCount = currentCount - 3
-    window:set(2, 2, colors.brown, colors.white, "component count: " .. currentCount .. "/" .. maxCount)
+    window:set(2, 2, colors.brown, colors.white, "component count: " .. math.floor(system.getCurrentComponentCount()) .. "/" .. system.getMaxComponentCount() .. "    ")
 end
 
 local componentSelector = thread.create(function ()
