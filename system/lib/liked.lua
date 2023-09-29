@@ -68,9 +68,25 @@ function liked.loadApp(name, screen, nickname)
         if not exitCode then return nil, err end
     end
 
+    local function log(tbl)
+        if not tbl[1] then
+            event.errLog("application error: " .. tostring(tbl[2]))
+        end
+        return tbl
+    end
+
     return function (...)
-        local result = {xpcall(mainCode, debug.traceback, screen, nickname, ...)}
-        pcall(exitCode, screen, nickname) --в exit.lua нет обработки ошибок
+        local result = log{xpcall(mainCode, debug.traceback, screen, nickname, ...)}
+        if exitCode then
+            local result2 = log{xpcall(exitCode, debug.traceback, screen, nickname, ...)}
+            if not result2[1] then
+                if result[1] then
+                    result[1] = false
+                    result[2] = ""
+                end
+                result[2] = result[2] .. "; exit.lua err: " .. tostring(result2[2] or "unknown error")
+            end
+        end
         return table.unpack(result)
     end
 end
