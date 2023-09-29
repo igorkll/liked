@@ -9,7 +9,7 @@ local colors = gui_container.colors
 
 --------------------------------------------
 
-local screen, cx, cy, dir, exp, save, dirmode, dircombine = ...
+local screen, cx, cy, dir, exp, save, dirmode, dircombine, defname = ...
 
 local gpu = graphic.findGpu(screen)
 local rx, ry = gpu.getResolution()
@@ -34,6 +34,9 @@ end
 
 local window = graphic.createWindow(screen, cx, cy, 50, 16, true)
 local reader = window:read(3, window.sizeY, 16, colors.black, colors.white)
+if defname then
+    reader.setBuffer(defname)
+end
 
 --------------------------------------------
 

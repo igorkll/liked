@@ -135,10 +135,7 @@ local function draw()
         --(window.sizeY - ((#history - i) + 1)) + scroll
         if v then
             local posY = (window.sizeY - ((historySize - i) + 1)) + scroll
-            if posY > (window.sizeY - 1) or posY < 2 then
-                break
-            end
-            if posY >= (2 - getMessageSize(v)) then
+            if posY >= 2 and posY <= (window.sizeY - 1) and posY >= (2 - getMessageSize(v)) then
                 window:setCursor(1, posY)
                 window:write(v[1], colors.white, indexsColors[v[2] + 1])
                 window.sizeX = window.sizeX - 1
@@ -175,7 +172,8 @@ local function draw()
 
                     window:set(cx - 7, cy + 2, colors.green, colors.yellow, "EXPORT")
                     table.insert(exportButtons, {cx - 7, cy + 2, function()
-                        local savepath = gui_selectfile(screen, nil, nil, 2, paths.extension(name), "file", {"this_type"}, paths.hideExtension(name))
+                        local savepath = gui_filepicker(screen, nil, nil, nil, paths.extension(name), true, false, nil, paths.hideExtension(name))
+                        --local savepath = gui_selectfile(screen, nil, nil, 2, paths.extension(name), "file", {"this_type"}, paths.hideExtension(name))
                         if savepath then
                             local file, err = fs.open(savepath, "wb")
                             if file then
