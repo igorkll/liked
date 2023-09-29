@@ -32,10 +32,10 @@
 /system/bin/settings.app/modules/h_screen_saver.lua
 /system/bin/settings.app/modules/k_libraries.lua
 /system/bin/settings.app/modules/y_buffer.lua
+/system/bin/settings.app/modules/y_power.lua
 /system/bin/settings.app/modules/z_system.lua
 /system/calls/findPos.lua
 /system/calls/getOSversion.lua
-/system/calls/gui_checkPassword.lua
 /system/calls/gui_drawimage.lua
 /system/calls/gui_filepicker.lua
 /system/calls/gui_initScreen.lua
@@ -59,6 +59,7 @@
 /system/icons/dat.t2p
 /system/icons/eeprom.t2p
 /system/icons/fdd.t2p
+/system/icons/file.t2p
 /system/icons/folder.t2p
 /system/icons/hdd.t2p
 /system/icons/hdd1.t2p
