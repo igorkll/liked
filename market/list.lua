@@ -113,7 +113,7 @@ local list = {
     },
     {
         name = "archiver",
-        version = "2",
+        version = "3",
         vendor = "logic",
         icon = selfurlpart .. "/apps/archiver.app/icon.t2p",
         description = "allows you to unpack and package archives",

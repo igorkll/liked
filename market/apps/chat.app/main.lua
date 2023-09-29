@@ -135,7 +135,7 @@ local function draw()
         --(window.sizeY - ((#history - i) + 1)) + scroll
         if v then
             local posY = (window.sizeY - ((historySize - i) + 1)) + scroll
-            if posY > (window.sizeY - 1) then
+            if posY > (window.sizeY - 1) or posY < 2 then
                 break
             end
             if posY >= (2 - getMessageSize(v)) then
