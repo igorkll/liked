@@ -97,7 +97,7 @@ end
 local input
 local scroll = 0
 local function reinput()
-    input = window:read(1, window.sizeY, window.sizeX - 2, colors.gray, colors.white)
+    input = window:read(1, window.sizeY, window.sizeX, colors.gray, colors.white)
 end
 reinput()
 
@@ -120,6 +120,7 @@ end
 
 local isRedrawed
 local exportButtons = {}
+local existsCache = {}
 local function draw()
     if gui_container.isScreenSaver[screen] then
         isRedrawed = true
@@ -127,15 +128,15 @@ local function draw()
     end
 
     exportButtons = {}
-    window:clear(colors.white)
-    drawStatus()
+    --window:clear(colors.white)
+    window:fill(1, 2, window.sizeX - 1, window.sizeY - 2, colors.white, 0, " ")
 
     local historySize = #history
     for i, v in ipairs(history) do
         --(window.sizeY - ((#history - i) + 1)) + scroll
         if v then
             local posY = (window.sizeY - ((historySize - i) + 1)) + scroll
-            if posY >= 2 and posY <= (window.sizeY - 1) and posY >= (2 - getMessageSize(v)) then
+            if posY < window.sizeY and posY >= (3 - getMessageSize(v)) then
                 window:setCursor(1, posY)
                 window:write(v[1], colors.white, indexsColors[v[2] + 1])
                 window.sizeX = window.sizeX - 1
@@ -157,13 +158,15 @@ local function draw()
                     fs.remove(path)
                 elseif v[3] == "file" then
                     local name = splitFile(v[4])
-
                     window:write("file: " .. name .. "  ", colors.white, colors.lime, true)
 
                     local cx, cy = window:getCursor()
                     local iconPath = paths.concat("/system/icons", (paths.extension(name) or "") .. ".t2p")
 
-                    if not fs.exists(iconPath) then
+                    if existsCache[iconPath] == nil then
+                        existsCache[iconPath] = fs.exists(iconPath)
+                    end
+                    if not existsCache[iconPath] then
                         iconPath = "/system/icons/unkownfile.t2p"
                     end
 
@@ -192,6 +195,7 @@ local function draw()
     end
 
     input.redraw()
+    drawStatus()
 
     window:fill(rx, 2, 1, ry - 2, colors.lightGray, 0, " ")
     local pos = math.map(scroll, 0, (historySize - window.sizeY) + 1, window.sizeY - 1, 2)
