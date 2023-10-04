@@ -1,1 +1,0 @@
-require("filesystem").remove("/data/market_urls.txt")

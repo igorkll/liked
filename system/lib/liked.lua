@@ -183,5 +183,9 @@ function liked.getRegistry(address)
     end
 end
 
+function liked.getIcon(application) --в разработке
+    
+end
+
 liked.unloadable = true
 return liked

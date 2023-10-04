@@ -11,6 +11,8 @@ local internet = require("internet")
 local liked = require("liked")
 local gui = require("gui")
 
+local cacheReg = registry.new("/data/cache/market/versions.dat")
+
 local colors = gui_container.colors
 
 ------------------------------------
@@ -255,15 +257,10 @@ local function applicationLabel(data, x, y)
     if data.icon then
         img = paths.concat("/data/cache/market", (data.name or "unknown") .. ".t2p")
         if not downloaded[img] then
-            local img_ver_path = paths.hideExtension(img) .. ".cfg"
-            local img_ver
-            if fs.exists(img_ver_path) then
-                img_ver = fs.readFile(img_ver_path)
-            end
-            if not fs.exists(img) or img_ver ~= data.version then
+            if not fs.exists(img) or cacheReg[data.name or "unknown"] ~= data.version then
                 draw("/system/icons/app.t2p")
                 fs.writeFile(img, getInternetFile(data.icon))
-                fs.writeFile(img_ver_path, data.version)
+                cacheReg[data.name or "unknown"] = data.version
             end
             downloaded[img] = true
         end
