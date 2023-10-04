@@ -336,7 +336,7 @@ local list = {
     },
     {
         name = "magnet",
-        version = "2",
+        version = "3",
         vendor = "logic",
         description = "a program for controlling a magnet that attracts resources(tractor_beam-upgrade)",
         minDiskSpace = 64,

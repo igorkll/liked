@@ -543,7 +543,7 @@ local function folderBack()
 end
 
 local timerEnable = true
-event.timer(10, function()
+event.timer(5, function()
     if not timerEnable or screenSaver then return end
     drawStatus()
 end, math.huge)

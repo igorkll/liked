@@ -19,13 +19,14 @@ local title = "Magnet"
 
 local placeAt = (rx // 2) - 4
 
-liked.drawUpBarTask(screen, true, colors.gray)
+local _, upbarRedraw = liked.drawUpBarTask(screen, true, colors.gray)
 
 local function updateAll()
     window:clear(colors.black)
     window:fill(1, 1, rx, 1, colors.gray, 0, " ")
     window:set((window.sizeX / 2) - (unicode.len(title) / 2), 1, colors.gray, colors.white, title)
     window:set(rx, 1, colors.red, colors.white, "X")
+    upbarRedraw()
 
     window:set(placeAt, 3, colors.red, colors.white, "           ")
     window:set(placeAt, 4, colors.red, colors.white, "   SUCK    ")
