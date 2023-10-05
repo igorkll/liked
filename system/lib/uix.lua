@@ -45,10 +45,10 @@ function objclass:uploadEvent(eventData)
         self.read.uploadEvent(eventData)
         local text = self.read.getBuffer()
         if text ~= self.oldText then
+            self.oldText = text
             if self.onTextChanged then
                 self:onTextChanged(text)
             end
-            self.oldText = text
         end
     end
 end
