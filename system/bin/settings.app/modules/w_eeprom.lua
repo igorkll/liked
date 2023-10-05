@@ -28,20 +28,22 @@ function flashButton:onClick()
     self:draw()
     graphic.forceUpdate()
     
-    local path = gui_filepicker(screen, nil, nil, nil, "lua", false, false)
-    if path then
-        local maxSize = math.round(component.eeprom.getSize())
-        local data = fs.readFile(path)
-        local fsize = #data
-        if fsize > maxSize then
-            gui.warn(screen, nil, nil, "it is not possible to write a " .. fsize .. " bytes file to an EEPROM with a capacity of " .. maxSize .. " bytes")
-        elseif gui.pleaseCharge(screen, 20, "flash") and gui.pleaseType(screen, "FLASH", "flash eeprom") then
-            gui_status(screen, nil, nil, "flashing...")
-            local result = {pcall(component.eeprom.set, data)}
-            if not result[1] then
-                gui.warn(screen, nil, nil, tostring(result[2] or "unknown error"))
-            elseif result[3] then
-                gui.warn(screen, nil, nil, tostring(result[3] or "unknown error"))
+    if gui.pleaseCharge(screen, 20, "flash") then
+        local path = gui_filepicker(screen, nil, nil, nil, "lua", false, false)
+        if path then
+            local maxSize = math.round(component.eeprom.getSize())
+            local data = fs.readFile(path)
+            local fsize = #data
+            if fsize > maxSize then
+                gui.warn(screen, nil, nil, "it is not possible to write a " .. fsize .. " bytes file to an EEPROM with a capacity of " .. maxSize .. " bytes")
+            elseif gui.pleaseType(screen, "FLASH", "flash eeprom") then
+                gui_status(screen, nil, nil, "flashing...")
+                local result = {pcall(component.eeprom.set, data)}
+                if not result[1] then
+                    gui.warn(screen, nil, nil, tostring(result[2] or "unknown error"))
+                elseif result[3] then
+                    gui.warn(screen, nil, nil, tostring(result[3] or "unknown error"))
+                end
             end
         end
     end
@@ -72,7 +74,7 @@ function makeReadOnlyButton:onClick()
     self:draw()
     graphic.forceUpdate()
 
-    if gui.pleaseCharge(screen, 20, "make readonly") and gui.pleaseType(screen, "READONLY", "make readonly") then
+    if gui.pleaseCharge(screen, 20, "readonly") and gui.pleaseType(screen, "READONLY", "make readonly") then
         pcall(component.eeprom.makeReadonly, component.eeprom.getChecksum())
     end
 
