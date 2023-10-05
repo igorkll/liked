@@ -31,6 +31,8 @@ local dumpButton = layout:createButton(2, 12, 16, 1, colors.white, colors.gray, 
 local makeReadOnlyButton = layout:createButton(20, 10, 16, 1, colors.white, colors.gray, "Make R/O")
 
 local eepromMissingString = "EEPROM IS MISSING"
+local storageRo = "storage is readonly"
+local storageRoState = false
 
 function labelInput:onTextChanged(newlabel)
     if component.eeprom then
@@ -66,7 +68,9 @@ function flashButton:onClick()
         self:draw()
         graphic.forceUpdate()
         
-        if gui.pleaseCharge(screen, 20, "flash") then
+        if storageRoState then
+            gui.warn(screen, nil, nil, storageRo)
+        elseif gui.pleaseCharge(screen, 20, "flash") then
             local path = gui_filepicker(screen, nil, nil, nil, "lua", false, false)
             if path then
                 local maxSize = math.round(component.eeprom.getSize())
@@ -116,7 +120,9 @@ function makeReadOnlyButton:onClick()
         self:draw()
         graphic.forceUpdate()
 
-        if gui.pleaseCharge(screen, 20, "readonly") and gui.pleaseType(screen, "READONLY", "make readonly") then
+        if storageRoState then
+            gui.warn(screen, nil, nil, storageRo)
+        elseif gui.pleaseCharge(screen, 20, "readonly") and gui.pleaseType(screen, "READONLY", "make readonly") then
             pcall(component.eeprom.makeReadonly, component.eeprom.getChecksum())
         end
 
@@ -138,6 +144,7 @@ function redraw()
         addrLabel.text     = "address  : " .. component.eeprom.address
         
         local writeble = not not component.eeprom.setLabel(component.eeprom.getLabel())
+        storageRoState = not writeble
         writeLabel.text    = "storage  : " .. (writeble and "R/W" or "R/O")
 
         local label = component.eeprom.getLabel()
@@ -150,6 +157,7 @@ function redraw()
         maxDataSizeLabel.text = "/ none"
         checksumLabel.text = "checksum : none"
         addrLabel.text     = "address  : none"
+        writeLabel.text     = "storage  : none"
         labelInput.read.setBuffer(eepromMissingString)
         labelInput.oldText = eepromMissingString
     end
