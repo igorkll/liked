@@ -1,4 +1,6 @@
 local unicode = require("unicode")
+local gui_container = require("gui_container")
+local colors = gui_container.colors
 local uix = {}
 
 ---------------------------------- obj class
@@ -30,6 +32,15 @@ function objclass:uploadEvent(eventData)
                 self:onDrop(eventData[5], eventData[6])
             end
         end
+    elseif self.type == "switch" then
+        if eventData[1] == "touch" and eventData[3] >= self.x and eventData[4] == self.y and eventData[3] < self.x + 4 then
+            self.state = not self.state
+            self:draw()
+
+            if self.onSwitch then
+                self:onSwitch(eventData[5], eventData[6])
+            end
+        end
     end
 end
 
@@ -48,6 +59,9 @@ function objclass:draw()
         if self.text then
             self.gui.window:set(tx, ty, back, fore, self.text)
         end
+    elseif self.type == "switch" then
+        self.gui.window:fill(self.x, self.y, 4, 1, self.state and self.enableColor or self.disableColor, 0, " ")
+        self.gui.window:set(self.x + (self.state and 2 or 0), self.y, self.pointerColor, 0, "  ")
     end
 end
 
@@ -67,8 +81,8 @@ function uix:createLabel(x, y, sx, sy, back, fore, text)
     obj.y = y
     obj.sx = sx
     obj.sy = sy
-    obj.back = back
-    obj.fore = fore
+    obj.back = back or colors.white
+    obj.fore = fore or colors.gray
     obj.text = text
 
     table.insert(self.objs, obj)
@@ -81,11 +95,25 @@ function uix:createButton(x, y, sx, sy, back, fore, text)
     obj.y = y
     obj.sx = sx
     obj.sy = sy
-    obj.back = back
-    obj.fore = fore
+    obj.back = back or colors.white
+    obj.fore = fore or colors.gray
     obj.back2 = fore
     obj.fore2 = back
     obj.text = text
+    obj.state = false
+
+    table.insert(self.objs, obj)
+    return obj
+end
+
+function uix:createSwitch(x, y, state, enableColor, disableColor, pointerColor)
+    local obj = setmetatable({gui = self, type = "switch"}, {__index = objclass})
+    obj.x = x
+    obj.y = y
+    obj.state = not not state
+    obj.enableColor = enableColor or colors.lime
+    obj.disableColor = disableColor or colors.gray
+    obj.pointerColor = pointerColor or colors.white
 
     table.insert(self.objs, obj)
     return obj

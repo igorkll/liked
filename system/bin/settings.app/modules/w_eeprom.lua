@@ -15,15 +15,16 @@ local window = graphic.createWindow(screen, posX, posY, rx - (posX - 1), ry - (p
 
 local layout = uix.create(window)
 local flashButton = layout:createButton(2, 4, 16, 1, colors.white, colors.gray, "flash")
-layout:draw()
+local test = layout:createSwitch(2, 6, true)
 
 function flashButton:onClick()
+    os.sleep(0.1)
     self.state = false
     self:draw()
     graphic.forceUpdate()
-    os.sleep(0.1)
-
     
+
+
 end
 
 ------------------------------------
@@ -35,6 +36,7 @@ local function redraw()
     window:clear(colors.black)
     window:set(2, 2, colors.lightGray, colors.black, "label")
     labelReader.redraw()
+    layout:draw()
 end
 redraw()
 
