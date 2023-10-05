@@ -4,7 +4,7 @@ local uix = require("uix")
 local fs = require("filesystem")
 local gui = require("gui")
 local component = require("component")
-local event = require("event")
+local liked = require("liked")
 
 local colors = gui_container.colors
 
@@ -28,14 +28,14 @@ function flashButton:onClick()
     self:draw()
     graphic.forceUpdate()
     
-    local path = gui_filepicker(screen, wx, wy, nil, "lua", false, false)
+    local path = gui_filepicker(screen, nil, nil, nil, "lua", false, false)
     if path then
         local maxSize = math.round(component.eeprom.getSize())
         local data = fs.readFile(path)
         local fsize = #data
         if fsize > maxSize then
             gui.warn(screen, nil, nil, "it is not possible to write a " .. fsize .. " bytes file to an EEPROM with a capacity of " .. maxSize .. " bytes")
-        else
+        elseif gui.pleaseType(screen, "FLASH", "flash eeprom") then
             gui_status(screen, nil, nil, "flashing...")
             local result = {pcall(component.eeprom.set, data)}
             if not result[1] then
@@ -44,6 +44,36 @@ function flashButton:onClick()
                 gui.warn(screen, nil, nil, tostring(result[3] or "unknown error"))
             end
         end
+    end
+
+    gRedraw()
+    redraw()
+end
+
+function dumpButton:onClick()
+    os.sleep(0.1)
+    self.state = false
+    self:draw()
+    graphic.forceUpdate()
+
+    local path = gui_filepicker(screen, nil, nil, nil, "lua", true, false)
+    if path then
+        local data = component.eeprom.get()
+        liked.assert(screen, fs.writeFile(path, data))
+    end
+
+    gRedraw()
+    redraw()
+end
+
+function makeReadOnlyButton:onClick()
+    os.sleep(0.1)
+    self.state = false
+    self:draw()
+    graphic.forceUpdate()
+
+    if gui.pleaseType(screen, "READONLY", "make eeprom readonly") then
+        component.eeprom.makeReadonly(component.eeprom.getChecksum())
     end
 
     gRedraw()
