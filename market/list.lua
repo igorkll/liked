@@ -111,6 +111,7 @@ local list = {
             save("/data/bin/irc.app/icon.t2p", download(self.icon))
         end
     },
+    --[[
     {
         name = "archiver",
         version = "3",
@@ -131,6 +132,7 @@ local list = {
             assert(programs.execute("/data/autoruns/archiver.lua"))
         end
     },
+    ]]
     {
         name = "brainfuck",
         version = "1",

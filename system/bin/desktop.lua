@@ -1076,6 +1076,11 @@ local function doIcon(windowEventData)
                             table.insert(strs, "  info")
                             table.insert(active, true)
 
+                            if v.isDir then
+                                table.insert(strs, "  pack to archive")
+                                table.insert(active, true)
+                            end
+
                             local isLine
                             local function addLine()
                                 if not isLine then
@@ -1157,6 +1162,18 @@ local function doIcon(windowEventData)
                                 fileDescriptor(v, nil, windowEventData[6])
                             elseif str == "  info" then
                                 execute("fileinfo", windowEventData[6], v.path)
+                            elseif str == "  pack to archive" then
+                                local packFolder = v.path
+                                local clear = saveBigZone(screen)
+                                local outPath = gui_filepicker(screen, nil, nil, nil, "afpx", true)
+                                clear()
+
+                                if outPath then
+                                    local archiver = require("archiver")
+                                    gui_status(screen, nil, nil, "packaging \"" .. gui_container.toUserPath(screen, packFolder) .. "\" to \"" .. gui_container.toUserPath(screen, outPath) .. "\"")
+                                    liked.assertNoClear(screen, archiver.pack(packFolder, outPath))
+                                    draw()
+                                end
                             elseif str == "  remove" then
                                 local clear2 = saveZone(screen)
                                 local state = gui_yesno(screen, nil, nil, "remove \"" .. v.name .. "\"?")

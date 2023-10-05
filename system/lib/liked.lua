@@ -101,6 +101,14 @@ function liked.assert(screen, successful, err)
     end
 end
 
+function liked.assertNoClear(screen, successful, err)
+    if not successful then
+        gui.warn(screen, nil, nil, err or "unknown error")
+    else
+        return true
+    end
+end
+
 function liked.applyBufferType()
     graphic.allowSoftwareBuffer = registry.bufferType == "software"
     graphic.allowHardwareBuffer = registry.bufferType == "hardware"
