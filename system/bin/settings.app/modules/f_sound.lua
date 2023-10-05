@@ -1,6 +1,7 @@
 local graphic = require("graphic")
 local gui_container = require("gui_container")
 local registry = require("registry")
+local uix = require("uix")
 
 local colors = gui_container.colors
 
@@ -13,30 +14,27 @@ local rx, ry = gpu.getResolution()
 ------------------------------------
 
 local selectWindow = graphic.createWindow(screen, posX, posY, rx - (posX - 1), ry - (posY - 1))
+local layout = uix.create(selectWindow, colors.black)
 
-------------------------------------
-
-local function draw()
-    selectWindow:clear(colors.black)
-    selectWindow:set(3, 1, colors.green, colors.white, "ENABLE")
-    selectWindow:set(3, 2, colors.red, colors.white, "DISABLE")
-
-    selectWindow:set(1, registry.soundEnable and 1 or 2, colors.black, colors.white, "> ")
+layout:createSwitch(2, 2, registry.soundEnable).onSwitch = function (self)
+    registry.soundEnable = self.state
 end
+layout:createText(9, 2, colors.white, "System Sounds")
 
-draw()
+layout:createSwitch(2, 4, registry.diskSound).onSwitch = function (self)
+    registry.diskSound = self.state
+end
+layout:createText(9, 4, colors.white, "Disk Attach/Detach Sounds")
+
+layout:createSwitch(2, 6, registry.lowPowerSound).onSwitch = function (self)
+    registry.lowPowerSound = self.state
+end
+layout:createText(9, 6, colors.white, "Low-Power Sound")
+
+layout:draw()
 
 ------------------------------------
 
 return function(eventData)
-    local selectWindowEventData = selectWindow:uploadEvent(eventData)
-
-    if selectWindowEventData[1] == "touch" then
-        if selectWindowEventData[4] == 1 then
-            registry.soundEnable = true
-        elseif selectWindowEventData[4] == 2 then
-            registry.soundEnable = false
-        end
-        draw()
-    end
+    layout:uploadEvent(eventData)
 end

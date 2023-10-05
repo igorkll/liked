@@ -55,11 +55,13 @@ function objclass:draw()
 
         local x, y, sx, sy = self.x, self.y, self.sx, self.sy
         local tx, ty = (x + math.round(sx / 2)) - math.round(unicode.len(self.text) / 2), y + (math.round(sy / 2) - 1)
+        
         local _, _, bg = self.gui.window:get(x, y)
         self.gui.window:fill(x, y, sx, sy, back, 0, " ")
-        self.gui.window:set(x, y, bg, back, "◖")
-        self.gui.window:set(x + (sx - 1), y, bg, back, "◗")
-        
+        if self.sy == 1 then
+            self.gui.window:set(x, y, bg, back, "◖")
+            self.gui.window:set(x + (sx - 1), y, bg, back, "◗")
+        end
 
         if self.text then
             self.gui.window:set(tx, ty, back, fore, self.text)

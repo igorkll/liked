@@ -20,7 +20,7 @@ if not registry.doNotMoundDisks then
     event.listen("component_added", function(_, uuid, name)
         if name == "filesystem" and allowMount(uuid) then
             if bootloader.runlevel ~= "init" then
-                if registry.soundEnable then
+                if registry.diskSound then
                     computer.beep(2000, 0.1)
                 end
                 event.push("redrawDesktop")
@@ -35,7 +35,7 @@ if not registry.doNotMoundDisks then
         if name == "filesystem" and allowMount(uuid) then
             if mountlist[uuid] then
                 if bootloader.runlevel ~= "init" then
-                    if registry.soundEnable then
+                    if registry.diskSound then
                         computer.beep(1000, 0.1)
                     end
                     event.push("redrawDesktop")
