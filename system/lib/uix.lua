@@ -24,7 +24,7 @@ function objclass:uploadEvent(eventData)
             if self.onClick then
                 self:onClick(eventData[5], eventData[6])
             end
-        elseif eventData[1] == "drop" then
+        elseif eventData[1] == "drop" and self.state then
             self.state = false
             self:draw()
 
@@ -33,7 +33,7 @@ function objclass:uploadEvent(eventData)
             end
         end
     elseif self.type == "switch" then
-        if eventData[1] == "touch" and eventData[3] >= self.x and eventData[4] == self.y and eventData[3] < self.x + 6 then
+        if eventData[1] == "touch" and eventData[3] >= self.x and eventData[3] < self.x + 6 and eventData[4] == self.y then
             self.state = not self.state
             self:draw()
 
@@ -55,7 +55,12 @@ function objclass:draw()
 
         local x, y, sx, sy = self.x, self.y, self.sx, self.sy
         local tx, ty = (x + math.round(sx / 2)) - math.round(unicode.len(self.text) / 2), y + (math.round(sy / 2) - 1)
+        local _, _, bg = self.gui.window:get(x, y)
         self.gui.window:fill(x, y, sx, sy, back, 0, " ")
+        self.gui.window:set(x, y, bg, back, "◖")
+        self.gui.window:set(x + (sx - 1), y, bg, back, "◗")
+        
+
         if self.text then
             self.gui.window:set(tx, ty, back, fore, self.text)
         end
@@ -70,6 +75,11 @@ function objclass:draw()
         else
             self.gui.window:set(self.x, self.y, fg, self.pointerColor, "◖")
             self.gui.window:set(self.x + 1, self.y, bg, self.pointerColor, "◗")
+        end
+    elseif self.type == "text" then
+        if self.text then
+            local _, _, bg = self.gui.window:get(self.x, self.y)
+            self.gui.window:set(self.x, self.y, bg, self.color, self.text)
         end
     end
 end
@@ -123,6 +133,17 @@ function uix:createSwitch(x, y, state, enableColor, disableColor, pointerColor)
     obj.enableColor = enableColor or colors.lime
     obj.disableColor = disableColor or colors.gray
     obj.pointerColor = pointerColor or colors.white
+
+    table.insert(self.objs, obj)
+    return obj
+end
+
+function uix:createText(x, y, color, text)
+    local obj = setmetatable({gui = self, type = "text"}, {__index = objclass})
+    obj.x = x
+    obj.y = y
+    obj.color = color
+    obj.text = text
 
     table.insert(self.objs, obj)
     return obj

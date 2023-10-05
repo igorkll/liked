@@ -39,7 +39,7 @@ statusWindow:set(statusWindow.sizeX, 1, colors.red, colors.white, "X")
 statusWindow:set(2, 1, colors.gray, colors.white, "Settings")
 
 local currentModule, moduleEnd
-local function draw()
+local function draw(noReload)
     selectWindow:clear(colors.lightGray)
     modulWindow:clear(colors.gray)
     lineWindows:clear(colors.brown)
@@ -63,7 +63,12 @@ local function draw()
     if moduleEnd then
         moduleEnd()
     end
-    local code = loadfile(paths.concat(modulesPath, modules[selected]), nil, bootloader.createEnv())
+
+    local env = bootloader.createEnv()
+    env.gRedraw = function ()
+        draw(true)
+    end
+    local code = loadfile(paths.concat(modulesPath, modules[selected]), nil, env)
     modulWindow:clear(colors.black)
     currentModule, moduleEnd = code(screen, modulWindow.x, modulWindow.y)
 end

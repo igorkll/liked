@@ -1,6 +1,7 @@
 local graphic = require("graphic")
 local gui_container = require("gui_container")
 local uix = require("uix")
+local fs = require("filesystem")
 local gui = require("gui")
 local component = require("component")
 local event = require("event")
@@ -14,8 +15,12 @@ local rx, ry = graphic.getResolution(screen)
 local window = graphic.createWindow(screen, posX, posY, rx - (posX - 1), ry - (posY - 1))
 
 local layout = uix.create(window)
-local flashButton = layout:createButton(2, 4, 16, 1, colors.white, colors.gray, "flash")
-local test = layout:createSwitch(2, 6, true)
+
+local checksumLabel = layout:createText(2, 2, colors.white)
+
+local flashButton = layout:createButton(2, 4, 16, 1, colors.white, colors.gray, "Flash")
+local dumpButton = layout:createButton(2, 6, 16, 1, colors.white, colors.gray, "Dump")
+local makeReadOnlyButton = layout:createButton(20, 4, 16, 1, colors.white, colors.gray, "Make R/O")
 
 function flashButton:onClick()
     os.sleep(0.1)
@@ -23,35 +28,39 @@ function flashButton:onClick()
     self:draw()
     graphic.forceUpdate()
     
+    local path = gui_filepicker(screen, wx, wy, nil, "lua", false, false)
+    if path then
+        local maxSize = math.round(component.eeprom.getSize())
+        local data = fs.readFile(path)
+        local fsize = #data
+        if fsize > maxSize then
+            gui.warn(screen, nil, nil, "it is not possible to write a " .. fsize .. " bytes file to an EEPROM with a capacity of " .. maxSize .. " bytes")
+        else
+            gui_status(screen, nil, nil, "flashing...")
+            local result = {pcall(component.eeprom.set, data)}
+            if not result[1] then
+                gui.warn(screen, nil, nil, tostring(result[2] or "unknown error"))
+            elseif result[3] then
+                gui.warn(screen, nil, nil, tostring(result[3] or "unknown error"))
+            end
+        end
+    end
 
-
+    gRedraw()
+    redraw()
 end
 
 ------------------------------------
 
-local labelReader = window:read(8, 2, 32, colors.lightGray, colors.black, nil, false, component.eeprom.getLabel() or "EEPROM", true)
-labelReader.setMaxStringLen(24)
-
-local function redraw()
+function redraw()
     window:clear(colors.black)
-    window:set(2, 2, colors.lightGray, colors.black, "label")
-    labelReader.redraw()
+    checksumLabel.text = "checksum: " .. tostring(component.eeprom.getChecksum())
     layout:draw()
 end
 redraw()
 
-local oldLabel = labelReader.getBuffer()
-local timerID = event.timer(1, function ()
-    local lbl = labelReader.getBuffer()
-    if oldLabel ~= lbl then
-        component.eeprom.setLabel(lbl)
-        oldLabel = lbl
-    end
-end, math.huge)
-
 return function(eventData)
     local windowEventData = window:uploadEvent(eventData)
-    labelReader.uploadEvent(windowEventData)
     layout:uploadEvent(windowEventData)
 
     if windowEventData[1] == "touch" then
@@ -63,7 +72,4 @@ return function(eventData)
             end
         end
     end
-end, function ()
-    component.eeprom.setLabel(labelReader.getBuffer())
-    event.cancel(timerID)
 end
