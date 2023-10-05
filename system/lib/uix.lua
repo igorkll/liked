@@ -33,7 +33,7 @@ function objclass:uploadEvent(eventData)
             end
         end
     elseif self.type == "switch" then
-        if eventData[1] == "touch" and eventData[3] >= self.x and eventData[4] == self.y and eventData[3] < self.x + 4 then
+        if eventData[1] == "touch" and eventData[3] >= self.x and eventData[4] == self.y and eventData[3] < self.x + 6 then
             self.state = not self.state
             self:draw()
 
@@ -60,8 +60,17 @@ function objclass:draw()
             self.gui.window:set(tx, ty, back, fore, self.text)
         end
     elseif self.type == "switch" then
-        self.gui.window:fill(self.x, self.y, 4, 1, self.state and self.enableColor or self.disableColor, 0, " ")
-        self.gui.window:set(self.x + (self.state and 2 or 0), self.y, self.pointerColor, 0, "  ")
+        local bg = self.state and self.enableColor or self.disableColor
+        local _, _, fg = self.gui.window:get(self.x, self.y)
+
+        self.gui.window:set(self.x, self.y, fg, bg, "◖████◗")
+        if self.state then
+            self.gui.window:set(self.x + 4, self.y, bg, self.pointerColor, "◖")
+            self.gui.window:set(self.x + 5, self.y, fg, self.pointerColor, "◗")
+        else
+            self.gui.window:set(self.x, self.y, fg, self.pointerColor, "◖")
+            self.gui.window:set(self.x + 1, self.y, bg, self.pointerColor, "◗")
+        end
     end
 end
 
