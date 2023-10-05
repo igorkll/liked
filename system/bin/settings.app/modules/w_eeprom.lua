@@ -16,27 +16,46 @@ local window = graphic.createWindow(screen, posX, posY, rx - (posX - 1), ry - (p
 
 local layout = uix.create(window)
 
-local labelInput = layout:createInput(2, 2, 26, colors.white, colors.gray, false, nil, nil, 24)
+local labelInput = layout:createInput(2, 2, 30, colors.white, colors.gray, false, nil, nil, 24)
 
-local codeSizeLabel = layout:createText(2, 2, colors.white)
-local dataSizeLabel = layout:createText(2, 3, colors.white)
-local maxCodeSizeLabel = layout:createText(18, 2, colors.white)
-local maxDataSizeLabel = layout:createText(18, 3, colors.white)
-local checksumLabel = layout:createText(2, 4, colors.white)
-local addrLabel = layout:createText(2, 5, colors.white)
+local codeSizeLabel = layout:createText(2, 4, colors.white)
+local dataSizeLabel = layout:createText(2, 5, colors.white)
+local maxCodeSizeLabel = layout:createText(18, 4, colors.white)
+local maxDataSizeLabel = layout:createText(18, 5, colors.white)
+local checksumLabel = layout:createText(2, 6, colors.white)
+local addrLabel = layout:createText(2, 7, colors.white)
+local writeLabel = layout:createText(2, 8, colors.white)
 
-local flashButton = layout:createButton(2, 7, 16, 1, colors.white, colors.gray, "Flash")
-local dumpButton = layout:createButton(2, 9, 16, 1, colors.white, colors.gray, "Dump")
-local makeReadOnlyButton = layout:createButton(20, 7, 16, 1, colors.white, colors.gray, "Make R/O")
+local flashButton = layout:createButton(2, 10, 16, 1, colors.white, colors.gray, "Flash")
+local dumpButton = layout:createButton(2, 12, 16, 1, colors.white, colors.gray, "Dump")
+local makeReadOnlyButton = layout:createButton(20, 10, 16, 1, colors.white, colors.gray, "Make R/O")
 
 local eepromMissingString = "EEPROM IS MISSING"
 
 function labelInput:onTextChanged(newlabel)
     if component.eeprom then
-        component.eeprom.setLabel(newlabel)
+        local result = {component.eeprom.setLabel(newlabel)}
+        if result[1] then
+            if labelInput.read.getBuffer() ~= result[1] then
+                labelInput.read.setBuffer(result[1])
+                labelInput.oldText = result[1]
+                self:draw()
+            end
+        else
+            local label = component.eeprom.getLabel()
+            labelInput.read.setBuffer(label)
+            labelInput.oldText = label
+            self:draw()
+
+            gui.warn(screen, nil, nil, tostring(result[2]))
+            redraw()
+        end
     else
-        labelInput.read.setBuffer(eepromMissingString)
-        labelInput.oldText = eepromMissingString
+        if labelInput.read.getBuffer() ~= eepromMissingString then
+            labelInput.read.setBuffer(eepromMissingString)
+            labelInput.oldText = eepromMissingString
+            self:draw()
+        end
     end
 end
 
@@ -117,7 +136,13 @@ function redraw()
         maxDataSizeLabel.text = "/ " .. math.round(tonumber(component.eeprom.getDataSize()) or 0)
         checksumLabel.text = "checksum : " .. tostring(component.eeprom.getChecksum())
         addrLabel.text     = "address  : " .. component.eeprom.address
-        labelInput.read.setBuffer(component.eeprom.getLabel())
+        
+        local writeble = not not component.eeprom.setLabel(component.eeprom.getLabel())
+        writeLabel.text    = "storage  : " .. (writeble and "R/W" or "R/O")
+
+        local label = component.eeprom.getLabel()
+        labelInput.read.setBuffer(label)
+        labelInput.oldText = label
     else
         codeSizeLabel.text = "code size: none"
         dataSizeLabel.text = "data size: none"
@@ -126,6 +151,7 @@ function redraw()
         checksumLabel.text = "checksum : none"
         addrLabel.text     = "address  : none"
         labelInput.read.setBuffer(eepromMissingString)
+        labelInput.oldText = eepromMissingString
     end
     layout:draw()
 end

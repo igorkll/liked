@@ -42,6 +42,7 @@ function objclass:uploadEvent(eventData)
             end
         end
     elseif self.type == "input" then
+        self.read.uploadEvent(eventData)
         local text = self.read.getBuffer()
         if text ~= self.oldText then
             if self.onTextChanged then
@@ -171,10 +172,10 @@ function uix:createInput(x, y, sx, back, fore, hidden, default, syntax, maxlen)
     obj.hidden = hidden
     obj.default = default
     obj.syntax = syntax
-    obj.read = self.window:readNoDraw(x, y, sx, back, fore, fore, nil, hidden, default, true, syntax)
+    obj.read = self.window:readNoDraw(x, y, sx, back, fore, nil, hidden, default, true, syntax)
     obj.oldText = obj.read.getBuffer()
     if maxlen then
-        obj.read:setMaxStringLen(maxlen)
+        obj.read.setMaxStringLen(maxlen)
     end
 
     table.insert(self.objs, obj)
