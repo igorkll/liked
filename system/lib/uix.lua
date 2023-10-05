@@ -18,9 +18,17 @@ function objclass:uploadEvent(eventData)
         if eventData[1] == "touch" and eventData[3] >= self.x and eventData[4] >= self.y and eventData[3] < self.x + self.sx and eventData[4] < self.y + self.sy then
             self.state = true
             self:draw()
+            
+            if self.onClick then
+                self:onClick(eventData[5], eventData[6])
+            end
         elseif eventData[1] == "drop" then
             self.state = false
             self:draw()
+
+            if self.onDrop then
+                self:onDrop(eventData[5], eventData[6])
+            end
         end
     end
 end
@@ -35,7 +43,7 @@ function objclass:draw()
         end
 
         local x, y, sx, sy = self.x, self.y, self.sx, self.sy
-        local tx, ty = (x + math.round(sx / 2)) - math.round(unicode.len(self.text) / 2), y + math.round(sy / 2)
+        local tx, ty = (x + math.round(sx / 2)) - math.round(unicode.len(self.text) / 2), y + (math.round(sy / 2) - 1)
         self.gui.window:fill(x, y, sx, sy, back, 0, " ")
         if self.text then
             self.gui.window:set(tx, ty, back, fore, self.text)
@@ -83,6 +91,8 @@ function uix:createButton(x, y, sx, sy, back, fore, text)
     return obj
 end
 
+
+
 function uix:uploadEvent(eventData)
     if not eventData.windowEventData then
         eventData = self.window:uploadEvent(eventData)
@@ -98,7 +108,6 @@ function uix:draw()
         obj:draw()
     end
 end
-
 
 function uix.create(window, bgcolor)
     local guiobj = setmetatable({}, {__index = uix})

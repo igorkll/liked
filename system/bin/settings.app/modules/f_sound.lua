@@ -1,11 +1,5 @@
 local graphic = require("graphic")
-local fs = require("filesystem")
 local gui_container = require("gui_container")
-local paths = require("paths")
-local unicode = require("unicode")
-local event = require("event")
-local calls = require("calls")
-local computer = require("computer")
 local registry = require("registry")
 
 local colors = gui_container.colors
@@ -22,11 +16,7 @@ local selectWindow = graphic.createWindow(screen, posX, posY, rx - (posX - 1), r
 
 ------------------------------------
 
-local users = {}
-
 local function draw()
-    users = {}
-
     selectWindow:clear(colors.black)
     selectWindow:set(3, 1, colors.green, colors.white, "ENABLE")
     selectWindow:set(3, 2, colors.red, colors.white, "DISABLE")

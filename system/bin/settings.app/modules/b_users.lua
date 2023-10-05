@@ -1,10 +1,5 @@
 local graphic = require("graphic")
-local fs = require("filesystem")
 local gui_container = require("gui_container")
-local paths = require("paths")
-local unicode = require("unicode")
-local event = require("event")
-local calls = require("calls")
 local computer = require("computer")
 
 local colors = gui_container.colors
@@ -15,12 +10,9 @@ local screen, posX, posY = ...
 local gpu = graphic.findGpu(screen)
 local rx, ry = gpu.getResolution()
 
-local wallpapersPath = "/system/wallpapers"
-
 ------------------------------------
 
 local selectWindow = graphic.createWindow(screen, posX, posY, rx - (posX - 1), ry - (posY - 1))
-local selected = 1
 
 ------------------------------------
 

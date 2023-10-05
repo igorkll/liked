@@ -4,9 +4,6 @@ local paths = require("paths")
 local unicode = require("unicode")
 local liked = require("liked")
 local registry = require("registry")
-local component = require("component")
-local computer = require("computer")
-local gui = require("gui")
 
 local colors = gui_container.colors
 

@@ -1,12 +1,6 @@
 local graphic = require("graphic")
 local gui_container = require("gui_container")
-local computer = require("computer")
-local fs = require("filesystem")
-local system = require("system")
-local paths = require("paths")
-local serialization = require("serialization")
-local registry = require("registry")
-local liked = require("liked")
+local uix = require("uix")
 local gui = require("gui")
 local component = require("component")
 local event = require("event")
@@ -18,6 +12,19 @@ local colors = gui_container.colors
 local screen, posX, posY = ...
 local rx, ry = graphic.getResolution(screen)
 local window = graphic.createWindow(screen, posX, posY, rx - (posX - 1), ry - (posY - 1))
+
+local layout = uix.create(window)
+local flashButton = layout:createButton(2, 4, 16, 1, colors.white, colors.gray, "flash")
+layout:draw()
+
+function flashButton:onClick()
+    self.state = false
+    self:draw()
+    graphic.forceUpdate()
+    os.sleep(0.1)
+
+    
+end
 
 ------------------------------------
 
@@ -43,6 +50,7 @@ end, math.huge)
 return function(eventData)
     local windowEventData = window:uploadEvent(eventData)
     labelReader.uploadEvent(windowEventData)
+    layout:uploadEvent(windowEventData)
 
     if windowEventData[1] == "touch" then
         if windowEventData[3] >= 2 and windowEventData[3] <= 19 then

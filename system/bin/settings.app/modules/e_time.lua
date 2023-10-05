@@ -1,9 +1,5 @@
 local graphic = require("graphic")
-local fs = require("filesystem")
 local gui_container = require("gui_container")
-local paths = require("paths")
-local unicode = require("unicode")
-local event = require("event")
 local registry = require("registry")
 local calls = require("calls")
 
