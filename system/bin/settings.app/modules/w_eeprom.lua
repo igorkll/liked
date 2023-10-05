@@ -35,7 +35,7 @@ function flashButton:onClick()
         local fsize = #data
         if fsize > maxSize then
             gui.warn(screen, nil, nil, "it is not possible to write a " .. fsize .. " bytes file to an EEPROM with a capacity of " .. maxSize .. " bytes")
-        elseif gui.pleaseType(screen, "FLASH", "flash eeprom") then
+        elseif gui.pleaseCharge(screen, 20, "flash") and gui.pleaseType(screen, "FLASH", "flash eeprom") then
             gui_status(screen, nil, nil, "flashing...")
             local result = {pcall(component.eeprom.set, data)}
             if not result[1] then
@@ -72,8 +72,8 @@ function makeReadOnlyButton:onClick()
     self:draw()
     graphic.forceUpdate()
 
-    if gui.pleaseType(screen, "READONLY", "make eeprom readonly") then
-        component.eeprom.makeReadonly(component.eeprom.getChecksum())
+    if gui.pleaseCharge(screen, 20, "make readonly") and gui.pleaseType(screen, "READONLY", "make readonly") then
+        pcall(component.eeprom.makeReadonly, component.eeprom.getChecksum())
     end
 
     gRedraw()

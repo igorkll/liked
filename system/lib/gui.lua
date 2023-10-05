@@ -331,7 +331,7 @@ function gui.input(screen, cx, cy, str, hidden, backgroundColor, default, disabl
     gui.shadow(gpu, window.x, window.y, window.sizeX, window.sizeY)
     window:clear(backgroundColor or colors.lightGray)
 
-    local pos = math.floor(((window.sizeX / 2) - (unicode.wlen(str) / 2)) + 0.5)
+    local pos = math.round((window.sizeX / 2) - (unicode.wlen(str) / 2)) + 1
     window:fill(1, 1, window.sizeX, 1, colors.gray, 0, " ")
     window:set(pos, 1, colors.gray, colors.white, str)
 
