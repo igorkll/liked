@@ -16,6 +16,8 @@ local window = graphic.createWindow(screen, posX, posY, rx - (posX - 1), ry - (p
 
 local layout = uix.create(window)
 
+local labelInput = layout:createInput(2, 2, 26, colors.white, colors.gray, false, nil, nil, 24)
+
 local codeSizeLabel = layout:createText(2, 2, colors.white)
 local dataSizeLabel = layout:createText(2, 3, colors.white)
 local maxCodeSizeLabel = layout:createText(18, 2, colors.white)
@@ -26,6 +28,17 @@ local addrLabel = layout:createText(2, 5, colors.white)
 local flashButton = layout:createButton(2, 7, 16, 1, colors.white, colors.gray, "Flash")
 local dumpButton = layout:createButton(2, 9, 16, 1, colors.white, colors.gray, "Dump")
 local makeReadOnlyButton = layout:createButton(20, 7, 16, 1, colors.white, colors.gray, "Make R/O")
+
+local eepromMissingString = "EEPROM IS MISSING"
+
+function labelInput:onTextChanged(newlabel)
+    if component.eeprom then
+        component.eeprom.setLabel(newlabel)
+    else
+        labelInput.read.setBuffer(eepromMissingString)
+        labelInput.oldText = eepromMissingString
+    end
+end
 
 function flashButton:onClick()
     if component.eeprom then
@@ -97,12 +110,23 @@ end
 
 function redraw()
     window:clear(colors.black)
-    codeSizeLabel.text = "code size: " .. math.round(#component.eeprom.get())
-    dataSizeLabel.text = "data size: " .. math.round(#component.eeprom.getData())
-    maxCodeSizeLabel.text = "/ " .. math.round(tonumber(component.eeprom.getSize()) or 0)
-    maxDataSizeLabel.text = "/ " .. math.round(tonumber(component.eeprom.getDataSize()) or 0)
-    checksumLabel.text = "checksum : " .. tostring(component.eeprom.getChecksum())
-    addrLabel.text     = "address  : " .. component.eeprom.address
+    if component.eeprom then
+        codeSizeLabel.text = "code size: " .. math.round(#component.eeprom.get())
+        dataSizeLabel.text = "data size: " .. math.round(#component.eeprom.getData())
+        maxCodeSizeLabel.text = "/ " .. math.round(tonumber(component.eeprom.getSize()) or 0)
+        maxDataSizeLabel.text = "/ " .. math.round(tonumber(component.eeprom.getDataSize()) or 0)
+        checksumLabel.text = "checksum : " .. tostring(component.eeprom.getChecksum())
+        addrLabel.text     = "address  : " .. component.eeprom.address
+        labelInput.read.setBuffer(component.eeprom.getLabel())
+    else
+        codeSizeLabel.text = "code size: none"
+        dataSizeLabel.text = "data size: none"
+        maxCodeSizeLabel.text = "/ none"
+        maxDataSizeLabel.text = "/ none"
+        checksumLabel.text = "checksum : none"
+        addrLabel.text     = "address  : none"
+        labelInput.read.setBuffer(eepromMissingString)
+    end
     layout:draw()
 end
 redraw()

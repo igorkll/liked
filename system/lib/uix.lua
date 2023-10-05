@@ -41,6 +41,14 @@ function objclass:uploadEvent(eventData)
                 self:onSwitch(eventData[5], eventData[6])
             end
         end
+    elseif self.type == "input" then
+        local text = self.read.getBuffer()
+        if text ~= self.oldText then
+            if self.onTextChanged then
+                self:onTextChanged(text)
+            end
+            self.oldText = text
+        end
     end
 end
 
@@ -83,6 +91,8 @@ function objclass:draw()
             local _, _, bg = self.gui.window:get(self.x, self.y)
             self.gui.window:set(self.x, self.y, bg, self.color, self.text)
         end
+    elseif self.type == "input" then
+        self.read.redraw()
     end
 end
 
@@ -146,6 +156,26 @@ function uix:createText(x, y, color, text)
     obj.y = y
     obj.color = color
     obj.text = text
+
+    table.insert(self.objs, obj)
+    return obj
+end
+
+function uix:createInput(x, y, sx, back, fore, hidden, default, syntax, maxlen)
+    local obj = setmetatable({gui = self, type = "input"}, {__index = objclass})
+    obj.x = x
+    obj.y = y
+    obj.sx = sx
+    obj.back = back
+    obj.fore = fore
+    obj.hidden = hidden
+    obj.default = default
+    obj.syntax = syntax
+    obj.read = self.window:readNoDraw(x, y, sx, back, fore, fore, nil, hidden, default, true, syntax)
+    obj.oldText = obj.read.getBuffer()
+    if maxlen then
+        obj.read:setMaxStringLen(maxlen)
+    end
 
     table.insert(self.objs, obj)
     return obj
