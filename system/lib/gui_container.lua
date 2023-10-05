@@ -46,7 +46,7 @@ gui_container.newCreate = { --структура {name, exp, allowCheck(), creat
             return true
         end,
         function (path)
-            return require("archiver").pack("/", path)
+            return require("archiver").pack("/mnt/root", path)
         end
     }
 }
@@ -56,17 +56,19 @@ gui_container.filesExps = { --дополнительные действия к �
 }
 
 gui_container.openVia = {
-
+    ["afpx"] = "unpackArchive"
 }
 
 gui_container.typecolors = {
     ["app"] = gui_container.colors.red,
+    ["afpx"] = gui_container.colors.orange,
     ["lua"] = gui_container.colors.lime
 }
 
 gui_container.typenames = {
     ["t2p"] = "image",
     ["txt"] = "text",
+    ["afpx"] = "archive",
     ["scrsv"] = "screensaver"
 }
 
@@ -79,6 +81,7 @@ gui_container.knownExps = { --данные файлы не будет предл
     ["dat"] = true,
     ["cfg"] = true,
     ["log"] = true,
+    ["afpx"] = true,
     ["txt"] = true --текстовому документу не нужно отдельная кнопка, он по умалчанию открываеться через редактор
 }
 

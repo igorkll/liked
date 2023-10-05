@@ -21,11 +21,12 @@ local window = graphic.createWindow(screen, posX, posY, rx - (posX - 1), ry - (p
 
 ------------------------------------
 
-local labelReader = window:read(2, 2, 24, colors.lightGray, colors.black, "label: ", false, component.eeprom.getLabel() or "eeprom", true)
+local labelReader = window:read(8, 2, 32, colors.lightGray, colors.black, nil, false, component.eeprom.getLabel() or "EEPROM", true)
 labelReader.setMaxStringLen(24)
 
 local function redraw()
     window:clear(colors.black)
+    window:set(2, 2, colors.lightGray, colors.black, "label")
     labelReader.redraw()
 end
 redraw()

@@ -76,17 +76,25 @@ end
 local function update()
     local totalMemory = computer.totalMemory()
     local freeMemory = computer.freeMemory()
+
+    local totalEnergy = computer.energy()
+    local maxEnergy = computer.maxEnergy()
     
     local hddUsedValue = hddUsedSpace / hddTotalSpace
     local ramUsedValue = 1 - (freeMemory / totalMemory)
+    local energyVal = totalEnergy / maxEnergy
 
-    window:set(2, window.sizeY - 2, colors.white, colors.black, "ROM")
-    progressBar(window.sizeY - 2, hddUsedValue, colors.lime, colors.green)
-    gui_drawtext(screen, 8, ry - 2, colors.white, math.round(hddUsedSpace / 1024) .. "kb / " .. math.round(hddTotalSpace / 1024) .. "kb")
+    window:set(2, window.sizeY - 3, colors.white, colors.black, "ROM")
+    progressBar(window.sizeY - 3, hddUsedValue, colors.lime, colors.green)
+    gui_drawtext(screen, 8, ry - 3, colors.white, math.round(hddUsedSpace / 1024) .. "kb / " .. math.round(hddTotalSpace / 1024) .. "kb")
 
-    window:set(2, window.sizeY - 1, colors.white, colors.black, "RAM")
-    progressBar(window.sizeY - 1, ramUsedValue, colors.lightBlue, colors.blue)
-    gui_drawtext(screen, 8, ry - 1, colors.white, math.round((totalMemory - freeMemory) / 1024) .. "kb / " .. math.round(totalMemory / 1024) .. "kb")
+    window:set(2, window.sizeY - 2, colors.white, colors.black, "RAM")
+    progressBar(window.sizeY - 2, ramUsedValue, colors.lightBlue, colors.blue)
+    gui_drawtext(screen, 8, ry - 2, colors.white, math.round((totalMemory - freeMemory) / 1024) .. "kb / " .. math.round(totalMemory / 1024) .. "kb")
+
+    window:set(2, window.sizeY - 1, colors.white, colors.black, "PWR")
+    progressBar(window.sizeY - 1, energyVal, colors.orange, colors.red)
+    gui_drawtext(screen, 8, ry - 1, colors.white, math.round(totalEnergy) .. " / " .. math.round(maxEnergy))
 end
 
 draw()
