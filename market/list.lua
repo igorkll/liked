@@ -244,7 +244,7 @@ local list = {
         vendor = "IgorTimofeev",
         icon = selfurlpart .. "/apps/mineOS.app/icon.t2p",
         license = selfurlpart .. "/apps/mineOS.app/LICENSE",
-        description = "configures dualboot between mineOS and liked",
+        description = "configures dualboot between mineOS and liked\nATTENTION. if you have \"MineOS EFI\" installed, then you will not be able to use liked after installing MineOS. in order to boot into liked, delete the /OS.lua file in the MineOS explorer",
         minDiskSpace = 1024 + 512,
         minColorDepth = 8,
 

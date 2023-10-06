@@ -77,12 +77,15 @@ function gui.shadow(gpu, x, y, sx, sy, mul, full)
         return shadowPosesX, shadowPosesY
     end
 
+    local origs = {}
     if registry.shadowType == "advanced" then
         local shadowPosesX, shadowPosesY = getPoses()
 
         for i = 1, #shadowPosesX do
             local ok, char, fore, back = pcall(gpu.get, shadowPosesX[i], shadowPosesY[i])
             if ok and char and fore and back then
+                table.insert(origs, {shadowPosesX[i], shadowPosesY[i], char, fore, back})
+
                 gpu.setForeground(colorslib.colorMul(fore, mul or 0.6))
                 gpu.setBackground(colorslib.colorMul(back, mul or 0.6))
                 gpu.set(shadowPosesX[i], shadowPosesY[i], char)
@@ -111,6 +114,8 @@ function gui.shadow(gpu, x, y, sx, sy, mul, full)
         for i = 1, #shadowPosesX do
             local ok, char, fore, back, forePal, backPal = pcall(gpu.get, shadowPosesX[i], shadowPosesY[i])
             if ok and char and fore and back then
+                table.insert(origs, {shadowPosesX[i], shadowPosesY[i], char, fore, back})
+
                 if not forePal then forePal = getPalCol(fore) end
                 gpu.setForeground(smartShadowsColors[forePal + 1], depth > 1)
                 if not backPal then backPal = getPalCol(back) end
@@ -120,8 +125,28 @@ function gui.shadow(gpu, x, y, sx, sy, mul, full)
             end
         end
     elseif registry.shadowType == "simple" then
+        local shadowPosesX, shadowPosesY = getPoses()
+        for i = 1, #shadowPosesX do
+            local ok, char, fore, back, forePal, backPal = pcall(gpu.get, shadowPosesX[i], shadowPosesY[i])
+            if ok and char and fore and back then
+                table.insert(origs, {shadowPosesX[i], shadowPosesY[i], char, fore, back})
+            end
+        end
+
         gpu.setBackground(colors.gray)
-        gpu.fill(x + 1, y + 1, (sx + 1) + (registry.shadowMode == "compact" and -1 or 0), sy, " ")
+        if full then
+            gpu.fill(x, y, sx, sy, " ")
+        else
+            gpu.fill(x + 1, y + 1, (sx + 1) + (registry.shadowMode == "compact" and -1 or 0), sy, " ")
+        end
+    end
+
+    return function ()
+        for _, obj in ipairs(origs) do
+            gpu.setForeground(obj[4])
+            gpu.setBackground(obj[5])
+            gpu.set(obj[1], obj[2], obj[3])
+        end
     end
 end
 
@@ -158,7 +183,7 @@ function gui.smallWindow(screen, cx, cy, str, backgroundColor, icon)
     local color = backgroundColor or colors.lightGray
 
     --window:fill(2, 2, window.sizeX, window.sizeY, colors.gray, 0, " ")
-    gui.shadow(gpu, window.x, window.y, window.sizeX, window.sizeY)
+    local noShadow = gui.shadow(gpu, window.x, window.y, window.sizeX, window.sizeY)
     window:clear(color)
 
     for i, v in ipairs(restrs(str, 24)) do
@@ -173,6 +198,7 @@ function gui.smallWindow(screen, cx, cy, str, backgroundColor, icon)
         icon(window, color)
     end
 
+    noShadow()
     return window
 end
 
@@ -273,7 +299,7 @@ function gui.selectcolor(screen, cx, cy, str)
     end
 
     local window = graphic.createWindow(screen, cx, cy, 24, 12, true)
-    gui.shadow(gpu, window.x, window.y, window.sizeX, window.sizeY)
+    local noShadow = gui.shadow(gpu, window.x, window.y, window.sizeX, window.sizeY)
     window:clear(colors.gray)
     window:fill(3, 2, 20, 10, colors.brown, colors.white, "▒")
     window:set(2, 1, colors.gray, colors.white, str or "select color")
@@ -304,8 +330,10 @@ function gui.selectcolor(screen, cx, cy, str)
         local windowEventData = window:uploadEvent(eventData)
         if windowEventData[1] == "touch" then
             if windowEventData[3] == window.sizeX and windowEventData[4] == 1 then
+                noShadow()
                 return
             elseif cols[windowEventData[4]] and cols[windowEventData[4]][windowEventData[3]] then
+                noShadow()
                 return cols[windowEventData[4]][windowEventData[3]]
             end
         end
@@ -328,7 +356,7 @@ function gui.input(screen, cx, cy, str, hidden, backgroundColor, default, disabl
     local window = graphic.createWindow(screen, cx, cy, 32, 8, true)
 
     --window:fill(2, 2, window.sizeX, window.sizeY, colors.gray, 0, " ")
-    gui.shadow(gpu, window.x, window.y, window.sizeX, window.sizeY)
+    local noShadow = gui.shadow(gpu, window.x, window.y, window.sizeX, window.sizeY)
     window:clear(backgroundColor or colors.lightGray)
 
     local pos = math.round((window.sizeX / 2) - (unicode.wlen(str) / 2)) + 1
@@ -365,17 +393,21 @@ function gui.input(screen, cx, cy, str, hidden, backgroundColor, default, disabl
         if out then
             if out == true then
                 drawCancel()
+                noShadow()
                 return false
             end
             drawOk()
+            noShadow()
             return out
         end
         if windowEventData[1] == "touch" and windowEventData[5] == 0 then
             if windowEventData[4] == 7 and windowEventData[3] > (32 - 5 - 3) and windowEventData[3] <= ((32 - 5) + 4) then
                 drawOk()
+                noShadow()
                 return reader.getBuffer()
             elseif windowEventData[4] == 7 and windowEventData[3] >= 2 and windowEventData[3] <= (2 + 7) then
                 drawCancel()
+                noShadow()
                 return false
             end
         end
@@ -411,7 +443,7 @@ function gui.context(screen, posX, posY, strs, active)
 
     local window = graphic.createWindow(screen, posX, posY, sizeX, sizeY)
     --window:fill(2, 2, window.sizeX, window.sizeY, colors.gray, 0, " ")
-    gui.shadow(gpu, window.x, window.y, window.sizeX, window.sizeY)
+    local noShadow = gui.shadow(gpu, window.x, window.y, window.sizeX, window.sizeY)
 
     local function redrawStrs(selected)
         for i, str in ipairs(strs) do
@@ -446,12 +478,14 @@ function gui.context(screen, posX, posY, strs, active)
                 local num = windowEventData[4]
                 if not active or active[num] then
                     event.sleep(0.05)
+                    noShadow()
                     return strs[num], num
                 end
             elseif (windowEventData[1] == "touch" or windowEventData[1] == "drag") and windowEventData[5] == 0 then
                 if windowEventData[1] == "touch" and selectedNum and selectedNum == windowEventData[4] then
                     if not active or active[selectedNum] then
                         event.sleep(0.05)
+                        noShadow()
                         return strs[selectedNum], selectedNum
                     end
                 end
@@ -462,6 +496,7 @@ function gui.context(screen, posX, posY, strs, active)
                 redrawStrs()
             elseif eventData[1] == "touch" or eventData[1] == "scroll" then
                 event.push(table.unpack(eventData))
+                noShadow()
                 return nil, nil
             end
         end
