@@ -26,7 +26,7 @@ local window = graphic.createWindow(screen, cx, cy, 32, 8, true)
 local color = backgroundColor or colors.lightGray
 
 --window:fill(2, 2, window.sizeX, window.sizeY, colors.gray, 0, " ")
-require("gui").shadow(gpu, window.x, window.y, window.sizeX, window.sizeY)
+local noShadow = require("gui").shadow(gpu, window.x, window.y, window.sizeX, window.sizeY)
 window:clear(color)
 
 for i, v in ipairs(calls.call("restrs", str, 22)) do
@@ -66,15 +66,18 @@ while true do
     if windowEventData[1] == "touch" and windowEventData[5] == 0 then
         if windowEventData[4] == 7 and windowEventData[3] > (32 - 6) and windowEventData[3] <= ((32 - 5) + 4) then
             drawYes()
+            noShadow()
             return true
         elseif windowEventData[4] == 7 and windowEventData[3] >= 2 and windowEventData[3] <= (2 + 3) then
             window:set(2, 7, colors.orange, colors.white, " no ")
             graphic.forceUpdate()
             event.sleep(0.1)
+            noShadow()
             return false
         end
     elseif windowEventData[1] == "key_down" and windowEventData[4] == 28 then
         drawYes()
+        noShadow()
         return true
     end
 end
