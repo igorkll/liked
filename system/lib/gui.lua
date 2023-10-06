@@ -443,7 +443,7 @@ function gui.context(screen, posX, posY, strs, active)
 
     local window = graphic.createWindow(screen, posX, posY, sizeX, sizeY)
     --window:fill(2, 2, window.sizeX, window.sizeY, colors.gray, 0, " ")
-    local noShadow = gui.shadow(gpu, window.x, window.y, window.sizeX, window.sizeY)
+    gui.shadow(gpu, window.x, window.y, window.sizeX, window.sizeY)
 
     local function redrawStrs(selected)
         for i, str in ipairs(strs) do
@@ -478,14 +478,12 @@ function gui.context(screen, posX, posY, strs, active)
                 local num = windowEventData[4]
                 if not active or active[num] then
                     event.sleep(0.05)
-                    noShadow()
                     return strs[num], num
                 end
             elseif (windowEventData[1] == "touch" or windowEventData[1] == "drag") and windowEventData[5] == 0 then
                 if windowEventData[1] == "touch" and selectedNum and selectedNum == windowEventData[4] then
                     if not active or active[selectedNum] then
                         event.sleep(0.05)
-                        noShadow()
                         return strs[selectedNum], selectedNum
                     end
                 end
@@ -496,7 +494,6 @@ function gui.context(screen, posX, posY, strs, active)
                 redrawStrs()
             elseif eventData[1] == "touch" or eventData[1] == "scroll" then
                 event.push(table.unpack(eventData))
-                noShadow()
                 return nil, nil
             end
         end
