@@ -24,14 +24,9 @@ function liked.version()
 end
 
 function liked.umountAll()
-    local newtbl = {}
-    for index, value in ipairs(fs.mountList) do
-        newtbl[index] = value
-    end
-
-    for _, mountpoint in ipairs(newtbl) do
-        if mountpoint[1].address ~= computer.tmpAddress() and mountpoint[1].address ~= fs.bootaddress then
-            assert(fs.umount(mountpoint[2]))
+    for address in component.list("filesystem") do
+        if address ~= computer.tmpAddress() and address ~= fs.bootaddress then
+            fs.umount(fs.genName(address))
         end
     end
 end

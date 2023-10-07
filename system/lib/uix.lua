@@ -2,6 +2,10 @@ local unicode = require("unicode")
 local gui_container = require("gui_container")
 local colors = gui_container.colors
 local uix = {}
+uix.styles = {
+    "round",
+    "square"
+}
 
 ---------------------------------- obj class
 
@@ -65,11 +69,13 @@ function objclass:draw()
         local x, y, sx, sy = self.x, self.y, self.sx, self.sy
         local tx, ty = (x + math.round(sx / 2)) - math.round(unicode.len(self.text) / 2), y + (math.round(sy / 2) - 1)
         
-        local _, _, bg = self.gui.window:get(x, y)
-        self.gui.window:fill(x, y, sx, sy, back, 0, " ")
-        if self.sy == 1 then
+        if self.sy == 1 and self.gui.style == "round" then
+            local _, _, bg = self.gui.window:get(x, y)
+            self.gui.window:fill(x + 1, y, sx - 2, sy, back, 0, " ")
             self.gui.window:set(x, y, bg, back, "◖")
             self.gui.window:set(x + (sx - 1), y, bg, back, "◗")
+        else
+            self.gui.window:fill(x, y, sx, sy, back, 0, " ")
         end
 
         if self.text then
@@ -79,13 +85,22 @@ function objclass:draw()
         local bg = self.state and self.enableColor or self.disableColor
         local _, _, fg = self.gui.window:get(self.x, self.y)
 
-        self.gui.window:set(self.x, self.y, fg, bg, "◖████◗")
-        if self.state then
-            self.gui.window:set(self.x + 4, self.y, bg, self.pointerColor, "◖")
-            self.gui.window:set(self.x + 5, self.y, fg, self.pointerColor, "◗")
+        if self.gui.style == "round" then
+            self.gui.window:set(self.x, self.y, fg, bg, "◖████◗")
+            if self.state then
+                self.gui.window:set(self.x + 3, self.y, bg, self.pointerColor, "◖█")
+                self.gui.window:set(self.x + 5, self.y, fg, self.pointerColor, "◗")
+            else
+                self.gui.window:set(self.x, self.y, fg, self.pointerColor, "◖")
+                self.gui.window:set(self.x + 1, self.y, bg, self.pointerColor, "█◗")
+            end
         else
-            self.gui.window:set(self.x, self.y, fg, self.pointerColor, "◖")
-            self.gui.window:set(self.x + 1, self.y, bg, self.pointerColor, "◗")
+            self.gui.window:set(self.x, self.y, fg, bg, "██████")
+            if self.state then
+                self.gui.window:set(self.x + 3, self.y, bg, self.pointerColor, "███")
+            else
+                self.gui.window:set(self.x, self.y, fg, self.pointerColor, "███")
+            end
         end
     elseif self.type == "text" then
         if self.text then
@@ -93,6 +108,11 @@ function objclass:draw()
             self.gui.window:set(self.x, self.y, bg, self.color, self.text)
         end
     elseif self.type == "input" then
+        if self.gui.style == "round" then
+            local _, _, bg = self.gui.window:get(self.x, self.y)
+            self.gui.window:set(self.x, self.y, bg, self.back, "◖")
+            self.gui.window:set(self.x + (self.sx - 1), self.y, bg, self.back, "◗")
+        end
         self.read.redraw()
     end
 end
@@ -162,7 +182,7 @@ function uix:createText(x, y, color, text)
     return obj
 end
 
-function uix:createInput(x, y, sx, back, fore, hidden, default, syntax, maxlen)
+function uix:createInput(x, y, sx, back, fore, hidden, default, syntax, maxlen, preStr)
     local obj = setmetatable({gui = self, type = "input"}, {__index = objclass})
     obj.x = x
     obj.y = y
@@ -172,7 +192,11 @@ function uix:createInput(x, y, sx, back, fore, hidden, default, syntax, maxlen)
     obj.hidden = hidden
     obj.default = default
     obj.syntax = syntax
-    obj.read = self.window:readNoDraw(x, y, sx, back, fore, nil, hidden, default, true, syntax)
+    if self.style == "round" then
+        obj.read = self.window:readNoDraw(x + 1, y, sx - 2, back, fore, preStr, hidden, default, true, syntax)
+    else
+        obj.read = self.window:readNoDraw(x, y, sx, back, fore, preStr, hidden, default, true, syntax)
+    end
     obj.oldText = obj.read.getBuffer()
     if maxlen then
         obj.read.setMaxStringLen(maxlen)
@@ -200,9 +224,10 @@ function uix:draw()
     end
 end
 
-function uix.create(window, bgcolor)
+function uix.create(window, bgcolor, style)
     local guiobj = setmetatable({}, {__index = uix})
     guiobj.window = window
+    guiobj.style = style or "round"
     guiobj.objs = {}
 
     if bgcolor then

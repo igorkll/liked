@@ -45,13 +45,12 @@ local maxScroll
 
 local strs
 local function draw()
-    local fexp = exp and (exp .. " ") or ""
-    local fname = gui_container.typenames[fexp] or fexp
+    local fexp = exp or ""
 
     window:clear(colors.gray)
     window:fill(1, 1, window.sizeX, 1, colors.lightGray, 0, " ")
     window:fill(1, window.sizeY, window.sizeX, 1, colors.lightGray, 0, " ")
-    window:set(1, 1, colors.lightGray, colors.white, (save and "save " or "select ") .. fname .. (dirmode and "directory" or "file"))
+    window:set(1, 1, colors.lightGray, colors.white, (save and "save " or "select ") .. (gui_container.typenames[fexp] or fexp) .. (dirmode and " directory" or " file"))
 
     window:set(window.sizeX, 1, colors.red, colors.white, "X")
     window:set(1, window.sizeY, colors.red, colors.white, "<")
