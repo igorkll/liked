@@ -152,16 +152,18 @@ end
 
 function gui.pleaseType(screen, str, tostr)
     tostr = tostr or "confirm"
-
-    local input = gui.input(screen, nil, nil, "TYPE '" .. str .. "' TO " .. tostr:upper())
-    if input then
-        if input == str then
-            return true
+    while true do
+        local input = gui.input(screen, nil, nil, "TYPE '" .. str .. "' TO " .. tostr:upper())
+        if input then
+            if input == str then
+                return true
+            else
+                gui.warn(screen, nil, nil, "to " .. tostr .. ", you need to type '" .. str .. "'")
+            end
         else
-            gui.warn(screen, nil, nil, "to " .. tostr .. ", you need to type '" .. str .. "'")
+            return false
         end
     end
-    return false
 end
 
 function gui.smallWindow(screen, cx, cy, str, backgroundColor, icon)

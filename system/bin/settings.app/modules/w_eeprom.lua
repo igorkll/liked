@@ -107,7 +107,7 @@ function makeReadOnlyButton:onClick()
     if component.eeprom then
         if storageRoState then
             gui.warn(screen, nil, nil, storageRo)
-        elseif gui.pleaseCharge(screen, 20, "readonly") and gui.pleaseType(screen, "READONLY", "make readonly") then
+        elseif gui.pleaseCharge(screen, 20, "readonly") and gui.pleaseType(screen, "WLOCK", "make readonly") then
             pcall(component.eeprom.makeReadonly, component.eeprom.getChecksum())
         end
 
