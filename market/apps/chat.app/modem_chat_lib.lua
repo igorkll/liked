@@ -1,6 +1,5 @@
 local component = require("component")
 local event = require("event")
-local computer = require("computer")
 
 local port = 898
 for address in component.list("modem") do

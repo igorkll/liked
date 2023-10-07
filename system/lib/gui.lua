@@ -200,12 +200,11 @@ function gui.smallWindow(screen, cx, cy, str, backgroundColor, icon)
         icon(window, color)
     end
 
-    noShadow()
-    return window
+    return window, noShadow
 end
 
 function gui.warn(screen, cx, cy, str, backgroundColor)
-    local window = gui.smallWindow(screen, cx, cy, str, backgroundColor, function (window, color)
+    local window, noShadow = gui.smallWindow(screen, cx, cy, str, backgroundColor, function (window, color)
         window:set(2, 2, color, colors.yellow, "  " .. unicode.char(0x2800+192) ..  "  ")
         window:set(2, 3, color, colors.yellow, " ◢█◣ ")
         window:set(2, 4, color, colors.yellow, "◢███◣")
@@ -238,6 +237,7 @@ function gui.warn(screen, cx, cy, str, backgroundColor)
             break
         end
     end
+    noShadow()
 end
 
 function gui.pleaseCharge(screen, minCharge, str)

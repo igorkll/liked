@@ -1,6 +1,5 @@
 local graphic = require("graphic")
 local fs = require("filesystem")
-local paths = require("paths")
 local archiver = require("archiver")
 local event = require("event")
 local gui_container = require("gui_container")
