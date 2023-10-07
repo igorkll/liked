@@ -66,7 +66,7 @@ local function draw(set)
             end
         else
             local clear = graphic.screenshot(screen)
-            gui.warn(screen, nil, nil, "A minimum of 512kb of RAM is required to activate software buffering")
+            gui.warn(screen, nil, nil, "A minimum of " .. math.round(gui_container.minRamForDBuff) .. "kb of RAM is required to activate software buffering")
             selected = oldselected
             clear()
             draw()

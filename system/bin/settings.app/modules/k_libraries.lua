@@ -21,16 +21,25 @@ local selector = thread.create(function ()
     local scroll
     while true do
         window:clear(colors.brown)
-        local x, y = window:toRealPos((window.sizeX // 2) - 24, (window.sizeY // 2) - 7)
+        local x, y = window:toRealPos((window.sizeX // 2) - 27, (window.sizeY // 2) - 6)
 
         local loadedLibraries = {}
+        local constCount = 0
+        local unloadableCount = 0
         for name, data in pairs(package.loaded) do
             table.insert(loadedLibraries, gui_container.shortPath(name, 47))
+            constCount = constCount + 1
         end
         for name, data in pairs(package.cache) do
             table.insert(loadedLibraries, gui_container.shortPath(name .. " (unloadable)", 47))
+            unloadableCount = unloadableCount + 1
         end
         table.sort(loadedLibraries)
+
+        window:set(2, 2, colors.brown, colors.white, "total      count: " .. math.round(constCount + unloadableCount))
+        window:set(2, 3, colors.brown, colors.white, "static     count: " .. math.round(constCount))
+        window:set(2, 4, colors.brown, colors.white, "unloadable count: " .. math.round(unloadableCount))
+
         local _, lscroll = gui_select(screen, x, y, "loaded libraries", loadedLibraries, scroll, true)
         scroll = lscroll
     end
