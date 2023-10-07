@@ -225,7 +225,7 @@ end
 
 local oldStatusTime = computer.uptime()
 while true do
-    local eventData = {event.pull(1)}
+    local eventData = {event.pull(0.1)}
     if eventData[1] == "chat_message" then
         local tbl = {table.unpack(eventData, 2)}
         tbl[5] = math.floor(tbl[5])
