@@ -8,6 +8,7 @@ local serialization = require("serialization")
 local registry = require("registry")
 local liked = require("liked")
 local gui = require("gui")
+local uix = require("uix")
 
 local colors = gui_container.colors
 
@@ -16,13 +17,23 @@ local colors = gui_container.colors
 local screen, posX, posY = ...
 local rx, ry = graphic.getResolution(screen)
 local window = graphic.createWindow(screen, posX, posY, rx - (posX - 1), ry - (posY - 1))
+local layout = uix.create(window, colors.black)
 
 local currentVersion = liked.version()
-local lastVersion
+local lastVersion, lastVersionErr
 
 ------------------------------------
 
-local function updateSystem()
+layout:createButton(2, 6, 16, 1, nil, nil, "WIPE USER DATA", true).onClick = function ()
+    if gui_checkPassword(screen) and gui.pleaseType(screen, "WIPE") then
+        if liked.assert(screen, fs.remove("/data")) then
+            computer.shutdown("fast")
+        end
+    end
+    layout:draw()
+end
+
+layout:createButton(19, 6, 16, 1, nil, nil, "UPDATE SYSTEM", true).onClick = function ()
     if not lastVersion then
         gui_warn(screen, nil, nil, "connection problems\ntry again later")
     elseif gui.pleaseCharge(screen, 80, "update") and gui_checkPassword(screen) and gui_yesno(screen, nil, nil, currentVersion ~= lastVersion and "start updating now?" or "you have the latest version installed. do you still want to start updating?") then
@@ -33,58 +44,24 @@ local function updateSystem()
         assert(fs.writeFile("/init.lua", "local installdata = " .. serialization.serialize(installdata) .. "\n" .. assert(fs.readFile(updateinitPath))))
         computer.shutdown("fast")
     end
-    redraw()
+    layout:draw()
 end
 
-local function wipeUserData()
-    if gui_checkPassword(screen) then
-        if gui.pleaseType(screen, "WIPE") then
-            if liked.assert(screen, fs.remove("/data")) then
-                computer.shutdown("fast")
-            end
-        end
-    end
-    redraw()
+layout:createText(2, 2, colors.white, "current version: " .. currentVersion)
+local lastVersionText = layout:createText(2, 3, colors.white, "last    version: loading...")
+layout:draw()
+graphic.forceUpdate()
+
+lastVersion, lastVersionErr = liked.lastVersion()
+if lastVersion then
+    lastVersionText.text = "last    version: " .. lastVersion
+else
+    lastVersionText.text = "last    version: " .. lastVersionErr
 end
 
-------------------------------------
-
-function redraw()
-    window:clear(colors.black)
-    window:set(2, 2, colors.lightGray, colors.black, "  WIPE USER DATA  ")
-    window:set(2, 4, colors.lightGray, colors.black, "  UPDATE SYSTEM   ")
-
-    window:set(21, 2, colors.black, colors.white, "current version: " .. currentVersion)
-    window:set(21, 3, colors.black, colors.white, "last    version: loading...")
-    graphic.forceUpdate()
-
-    local function getLast()
-        local lv, err = liked.lastVersion()
-        if not lv then
-            lv = err
-        else
-            lastVersion = lv
-        end
-        return lv
-    end
-    
-    local str = "last    version: " .. (lastVersion or getLast() or "unknown")
-    window:set(21, 3, colors.black, colors.white, "last    version:                     ")
-    window:set(21, 3, colors.black, colors.white, str)
-    graphic.forceUpdate()
-end
-redraw()
+layout:draw()
 
 return function(eventData)
     local windowEventData = window:uploadEvent(eventData)
-
-    if windowEventData[1] == "touch" then
-        if windowEventData[3] >= 2 and windowEventData[3] <= 19 then
-            if windowEventData[4] == 2 then
-                wipeUserData()
-            elseif windowEventData[4] == 4 then
-                updateSystem()
-            end
-        end
-    end
+    layout:uploadEvent(windowEventData)
 end

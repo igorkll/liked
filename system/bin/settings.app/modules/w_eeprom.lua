@@ -16,19 +16,19 @@ local window = graphic.createWindow(screen, posX, posY, rx - (posX - 1), ry - (p
 
 local layout = uix.create(window)
 
-local labelInput = layout:createInput(2, 2, 30, colors.white, colors.gray, false, nil, nil, 24)
+local labelInput = layout:createInput(2, 2, 30, nil, nil, false, nil, nil, 24)
 
-local codeSizeLabel = layout:createText(2, 4, colors.white)
-local dataSizeLabel = layout:createText(2, 5, colors.white)
-local maxCodeSizeLabel = layout:createText(18, 4, colors.white)
-local maxDataSizeLabel = layout:createText(18, 5, colors.white)
-local checksumLabel = layout:createText(2, 6, colors.white)
-local addrLabel = layout:createText(2, 7, colors.white)
-local writeLabel = layout:createText(2, 8, colors.white)
+local codeSizeLabel = layout:createText(2, 4)
+local dataSizeLabel = layout:createText(2, 5)
+local maxCodeSizeLabel = layout:createText(18, 4)
+local maxDataSizeLabel = layout:createText(18, 5)
+local checksumLabel = layout:createText(2, 6)
+local addrLabel = layout:createText(2, 7)
+local writeLabel = layout:createText(2, 8)
 
-local flashButton = layout:createButton(2, 10, 16, 1, colors.white, colors.gray, "Flash")
-local dumpButton = layout:createButton(2, 12, 16, 1, colors.white, colors.gray, "Dump")
-local makeReadOnlyButton = layout:createButton(20, 10, 16, 1, colors.white, colors.gray, "Make R/O")
+local flashButton = layout:createButton(2, 10, 16, 1, nil, nil, "Flash", true)
+local dumpButton = layout:createButton(2, 12, 16, 1, nil, nil, "Dump", true)
+local makeReadOnlyButton = layout:createButton(20, 10, 16, 1, nil, nil, "Make R/O", true)
 
 local eepromMissingString = "EEPROM IS MISSING"
 local storageRo = "storage is readonly"
@@ -63,11 +63,6 @@ end
 
 function flashButton:onClick()
     if component.eeprom then
-        os.sleep(0.1)
-        self.state = false
-        self:draw()
-        graphic.forceUpdate()
-        
         if storageRoState then
             gui.warn(screen, nil, nil, storageRo)
         elseif gui.pleaseCharge(screen, 20, "flash") then
@@ -97,11 +92,6 @@ end
 
 function dumpButton:onClick()
     if component.eeprom then
-        os.sleep(0.1)
-        self.state = false
-        self:draw()
-        graphic.forceUpdate()
-
         local path = gui_filepicker(screen, nil, nil, nil, "lua", true, false)
         if path then
             local data = component.eeprom.get()
@@ -115,11 +105,6 @@ end
 
 function makeReadOnlyButton:onClick()
     if component.eeprom then
-        os.sleep(0.1)
-        self.state = false
-        self:draw()
-        graphic.forceUpdate()
-
         if storageRoState then
             gui.warn(screen, nil, nil, storageRo)
         elseif gui.pleaseCharge(screen, 20, "readonly") and gui.pleaseType(screen, "READONLY", "make readonly") then

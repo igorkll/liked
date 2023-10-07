@@ -1,5 +1,6 @@
 local unicode = require("unicode")
 local gui_container = require("gui_container")
+local graphic = require("graphic")
 local colors = gui_container.colors
 local uix = {}
 uix.styles = {
@@ -24,6 +25,12 @@ function objclass:uploadEvent(eventData)
         if eventData[1] == "touch" and eventData[3] >= self.x and eventData[4] >= self.y and eventData[3] < self.x + self.sx and eventData[4] < self.y + self.sy then
             self.state = true
             self:draw()
+            if self.autoRelease then
+                os.sleep(0.1)
+                self.state = false
+                self:draw()
+                graphic.forceUpdate()
+            end
             
             if self.onClick then
                 self:onClick(eventData[5], eventData[6])
@@ -141,7 +148,7 @@ function uix:createLabel(x, y, sx, sy, back, fore, text)
     return obj
 end
 
-function uix:createButton(x, y, sx, sy, back, fore, text)
+function uix:createButton(x, y, sx, sy, back, fore, text, autoRelease)
     local obj = setmetatable({gui = self, type = "button"}, {__index = objclass})
     obj.x = x
     obj.y = y
@@ -149,10 +156,11 @@ function uix:createButton(x, y, sx, sy, back, fore, text)
     obj.sy = sy
     obj.back = back or colors.white
     obj.fore = fore or colors.gray
-    obj.back2 = fore
-    obj.fore2 = back
+    obj.back2 = obj.fore
+    obj.fore2 = obj.back
     obj.text = text
     obj.state = false
+    obj.autoRelease = not not autoRelease
 
     table.insert(self.objs, obj)
     return obj
@@ -175,7 +183,7 @@ function uix:createText(x, y, color, text)
     local obj = setmetatable({gui = self, type = "text"}, {__index = objclass})
     obj.x = x
     obj.y = y
-    obj.color = color
+    obj.color = color or colors.white
     obj.text = text
 
     table.insert(self.objs, obj)
@@ -187,15 +195,15 @@ function uix:createInput(x, y, sx, back, fore, hidden, default, syntax, maxlen, 
     obj.x = x
     obj.y = y
     obj.sx = sx
-    obj.back = back
-    obj.fore = fore
+    obj.back = back or colors.white
+    obj.fore = fore or colors.gray
     obj.hidden = hidden
     obj.default = default
     obj.syntax = syntax
     if self.style == "round" then
-        obj.read = self.window:readNoDraw(x + 1, y, sx - 2, back, fore, preStr, hidden, default, true, syntax)
+        obj.read = self.window:readNoDraw(x + 1, y, sx - 2, obj.back, obj.fore, preStr, hidden, default, true, syntax)
     else
-        obj.read = self.window:readNoDraw(x, y, sx, back, fore, preStr, hidden, default, true, syntax)
+        obj.read = self.window:readNoDraw(x, y, sx, obj.back, obj.fore, preStr, hidden, default, true, syntax)
     end
     obj.oldText = obj.read.getBuffer()
     if maxlen then
