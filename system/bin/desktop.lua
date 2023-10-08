@@ -792,9 +792,7 @@ local function doIcon(windowEventData)
                                 local success, err = sysclone(screen, posX, posY, v.fs, v.name)
 
                                 if success ~= "cancel" then
-                                    if success then
-                                        liked.remountAll()
-                                    elseif err then
+                                    if not success and err then
                                         gui_warn(screen, nil, nil, err)
                                     end
                                     draw()

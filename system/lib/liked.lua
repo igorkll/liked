@@ -40,11 +40,6 @@ function liked.mountAll()
     end
 end
 
-function liked.remountAll()
-    liked.umountAll()
-    liked.mountAll()
-end
-
 function liked.loadApp(name, screen, nickname)
     local path = programs.find(name)
     if not path then

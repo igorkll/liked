@@ -2,6 +2,7 @@ local fs = require("filesystem")
 local registry = require("registry")
 local gui = require("gui")
 local paths = require("paths")
+local liked = require("liked")
 local screen, posX, posY, vfs, name = ...
 
 local strs = {
@@ -74,6 +75,8 @@ if gui_yesno(screen, nil, nil, "install \"" .. label .. "\" to \"" .. name .. "\
 
     ---------------------------------------------
 
+    liked.umountAll()
+    
     local success, err
     if num2 == 1 then
         success, err = install_installer()
@@ -85,6 +88,7 @@ if gui_yesno(screen, nil, nil, "install \"" .. label .. "\" to \"" .. name .. "\
         fs.remove(paths.concat(target, "system")) --удаляет старую систему чтобы не было канфликтов версий и не оставалось лишних файлов
         success, err = fs.copy(selfsys, target)
     end
+    
 
     if not success and not err then
         err = "unknown error"
@@ -99,6 +103,8 @@ if gui_yesno(screen, nil, nil, "install \"" .. label .. "\" to \"" .. name .. "\
         --единсвенный кастыльный способ проверить являеться ли label readonly - это попытаться изменить его на точно такой же
         --в данном случаи если получиться изменить label то хорошо, а если не получиться то пофиг
     end
+
+    liked.mountAll()
 
     ---------------------------------------------
 
