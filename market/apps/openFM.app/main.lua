@@ -21,6 +21,8 @@ local cx, cy = math.round(rx / 2), math.round(ry / 2)
 local window = graphic.createWindow(screen, 1, 1, rx, ry)
 local layout = uix.create(window, colors.black)
 
+local _, upRedraw = liked.drawFullUpBarTask(screen, "OpenFM")
+
 local selectColor = layout:createButton(cx + 8, 3, 16, 1, colors.green, colors.gray, "Screen Color", true)
 selectColor.fore = fm.getScreenColor()
 if selectColor.fore == selectColor.back then
@@ -91,7 +93,7 @@ end
 
 function redraw()
     layout:draw()
-    liked.drawFullUpBar(screen, "OpenFM")
+    upRedraw()
 end
 redraw()
 

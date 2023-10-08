@@ -357,6 +357,27 @@ local list = {
         path = "/data/bin/piston.app",
         urlPrimaryPart = selfurlpart .. "/apps/piston.app/", --часть url к которой будут присираться разные имена файлов для скачивания(обязателен / на конце)
         files = {"main.lua", "icon.t2p", "uninstall.lua"}
+    },
+    {
+        name = "commandBlock",
+        version = "1",
+        vendor = "logic",
+        description = "allows you to control the command block from the computer\nto work, you need to activate \"enableCommandBlockDriver\" in the mod config, then re-enter the game\nthe command block must be connected to the computer by means of an adapter",
+        minDiskSpace = 64,
+
+        path = "/data/bin/commandBlock.app",
+        urlPrimaryPart = selfurlpart .. "/apps/commandBlock.app/"
+    },
+    {
+        name = "openFM",
+        version = "1",
+        vendor = "logic",
+        description = "the program for the radio from the OpenFM addon",
+        minDiskSpace = 64,
+
+        path = "/data/bin/openFM.app",
+        urlPrimaryPart = selfurlpart .. "/apps/openFM.app/",
+        files = {"main.lua", "icon.t2p", "list.txt"}
     }
     --[[
     openbox = {

@@ -168,9 +168,10 @@ end
 
 --------------------------------------------------------
 
-function liked.raw_drawFullUpBarTask(method, screen, withoutFill, bgcolor)
+function liked.raw_drawFullUpBarTask(method, screen, ...)
+    local args = {...}
     local function redraw()
-        liked.drawFullUpBar(screen, withoutFill, bgcolor)
+        liked.drawFullUpBar(screen, table.unpack(args))
         graphic.update(screen)
     end
     local th = method(function ()
@@ -183,12 +184,12 @@ function liked.raw_drawFullUpBarTask(method, screen, withoutFill, bgcolor)
     return th, redraw
 end
 
-function liked.drawFullUpBarTask(screen, withoutFill, bgcolor)
-    return liked.raw_drawFullUpBarTask(require("thread").create, screen, withoutFill, bgcolor)
+function liked.drawFullUpBarTask(...)
+    return liked.raw_drawFullUpBarTask(require("thread").create, ...)
 end
 
-function liked.drawFullUpBarTaskBg(screen, withoutFill, bgcolor)
-    return liked.raw_drawFullUpBarTask(require("thread").createBackground, screen, withoutFill, bgcolor)
+function liked.drawFullUpBarTaskBg(...)
+    return liked.raw_drawFullUpBarTask(require("thread").createBackground, ...)
 end
 
 function liked.drawFullUpBar(screen, title, withoutFill, bgcolor)
