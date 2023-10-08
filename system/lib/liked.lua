@@ -281,9 +281,11 @@ function liked.getIcon(screen, path)
             end
         elseif exp and #exp > 0 then
             icon = liked.findIcon(exp)
+            if not icon then
+                icon = liked.findIcon("unknown")
+            end
         else
-            --icon = liked.findIcon("file")
-            icon = liked.findIcon("unknown")
+            icon = liked.findIcon("file")
         end
     end
 
