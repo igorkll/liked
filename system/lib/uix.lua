@@ -74,7 +74,6 @@ function objclass:draw()
         end
 
         local x, y, sx, sy = self.x, self.y, self.sx, self.sy
-        local tx, ty = (x + math.round(sx / 2)) - math.round(unicode.len(self.text) / 2), y + (math.round(sy / 2) - 1)
         
         if self.sy == 1 and self.gui.style == "round" then
             local _, _, bg = self.gui.window:get(x, y)
@@ -86,6 +85,7 @@ function objclass:draw()
         end
 
         if self.text then
+            local tx, ty = (x + math.round(sx / 2)) - math.round(unicode.len(self.text) / 2), y + (math.round(sy / 2) - 1)
             self.gui.window:set(tx, ty, back, fore, self.text)
         end
     elseif self.type == "switch" then

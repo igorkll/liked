@@ -27,7 +27,7 @@ if not fm then
     return
 else
     if not settings[fm] then
-        settings[fm] = {url = stations[1][1], label = stations[1][2]}
+        settings[fm] = {url = stations[1][1], label = stations[1][2], index = 1}
     end
     fm = component.proxy(fm)
 end
@@ -53,14 +53,70 @@ local volDown = layout:createButton(cx - 4, 3, 3, 1, nil, nil, "<")
 local currentVol = layout:createLabel(cx - 1, 3, 3, 1, nil, nil, tostring(math.round(fm.getVol() * 10)))
 local volUp = layout:createButton(cx + 2, 3, 3, 1, nil, nil, ">")
 
+local statOld = layout:createButton(cx - 28, 7, 3, 1, nil, nil, "<")
+local statNext = layout:createButton(cx + 25, 7, 3, 1, nil, nil, ">")
+
 local fmLabel = layout:createInput(cx - 24, 5, 48, nil, nil, false, settings[fm.address].label, nil, 32, "label: ")
 local urlLabel = layout:createInput(cx - 24, 7, 48, nil, nil, false, settings[fm.address].url, nil, 256, "url: ")
 
 fm.setScreenText(settings[fm.address].label)
 fm.setURL(settings[fm.address].url)
 
+local isPlayingLed = layout:createLabel(cx - 1, 9, 3, 1)
 local startButton = layout:createButton(cx - 8, 9, 7, 1, nil, nil, "start")
 local stopButton = layout:createButton(cx + 2, 9, 7, 1, nil, nil, "stop")
+
+function statOld:onClick()
+    local index = settings[fm.address].index - 1
+    if index < 1 then
+        index = #stations
+    end
+
+    settings[fm.address].index = index
+    settings[fm.address].label = stations[index][2]
+    settings[fm.address].url = stations[index][1]
+    settings.save()
+
+    local isPlaying = fm.isPlaying()
+    if isPlaying then fm.stop() end
+    fm.setScreenText(settings[fm.address].label)
+    fm.setURL(settings[fm.address].url)
+    if isPlaying then fm.start() end
+
+    fmLabel.read.setBuffer(settings[fm.address].label)
+    urlLabel.read.setBuffer(settings[fm.address].url)
+    fmLabel.read.setOffset(0, 0)
+    urlLabel.read.setOffset(0, 0)
+
+    fmLabel:draw()
+    urlLabel:draw()
+end
+
+function statNext:onClick()
+    local index = settings[fm.address].index + 1
+    if index > #stations then
+        index = 1
+    end
+
+    settings[fm.address].index = index
+    settings[fm.address].label = stations[index][2]
+    settings[fm.address].url = stations[index][1]
+    settings.save()
+
+    local isPlaying = fm.isPlaying()
+    if isPlaying then fm.stop() end
+    fm.setScreenText(settings[fm.address].label)
+    fm.setURL(settings[fm.address].url)
+    if isPlaying then fm.start() end
+
+    fmLabel.read.setBuffer(settings[fm.address].label)
+    urlLabel.read.setBuffer(settings[fm.address].url)
+    fmLabel.read.setOffset(0, 0)
+    urlLabel.read.setOffset(0, 0)
+
+    fmLabel:draw()
+    urlLabel:draw()
+end
 
 function selectColor:onClick()
     local color = gui.selectcolor(screen, nil, nil, "Screen Color")
@@ -82,18 +138,26 @@ end
 
 function startButton:onClick()
     fm.start()
+    isPlayingLed.back = fm.isPlaying() and colors.yellow or colors.gray
+    isPlayingLed:draw()
 end
 
 function stopButton:onClick()
     fm.stop()
+    isPlayingLed.back = fm.isPlaying() and colors.yellow or colors.gray
+    isPlayingLed:draw()
 end
 
 function fmLabel:onTextChanged(text)
     fm.setScreenText(text)
+    settings[fm.address].label = text
+    settings.save()
 end
 
 function urlLabel:onTextChanged(text)
     fm.setURL(text)
+    settings[fm.address].url = text
+    settings.save()
 end
 
 function volDown:onClick()
@@ -111,6 +175,7 @@ end
 --------------------------------------------------------
 
 function redraw()
+    isPlayingLed.back = fm.isPlaying() and colors.yellow or colors.gray
     layout:draw()
     upRedraw()
 end
