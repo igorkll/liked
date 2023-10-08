@@ -404,6 +404,7 @@ local list = {
             if not registry.icons then registry.icons = {} end
             registry.icons["dfpwm"] = paths.concat(self.path, "icon.t2p")
             liked.reg("openVia", "dfpwm", paths.concat(self.path, "main.lua"))
+            liked.reg("knownExps", "dfpwm", true)
         end
     }
     --[[

@@ -6,5 +6,6 @@ local fs = require("filesystem")
 
 registry.icons["dfpwm"] = nil
 liked.reg("openVia", "dfpwm", nil)
+liked.reg("knownExps", "dfpwm", nil)
 
 fs.remove(paths.path(system.getSelfScriptPath()))
