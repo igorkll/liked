@@ -5,6 +5,7 @@ local fs = require("filesystem")
 local gui = require("gui")
 local component = require("component")
 local liked = require("liked")
+local bootloader = require("bootloader")
 
 local colors = gui_container.colors
 
@@ -25,10 +26,11 @@ local maxDataSizeLabel = layout:createText(18, 5)
 local checksumLabel = layout:createText(2, 6)
 local addrLabel = layout:createText(2, 7)
 local writeLabel = layout:createText(2, 8)
+local bootLabel = layout:createText(2, 9)
 
-local flashButton = layout:createButton(2, 10, 16, 1, nil, nil, "Flash", true)
-local dumpButton = layout:createButton(2, 12, 16, 1, nil, nil, "Dump", true)
-local makeReadOnlyButton = layout:createButton(20, 10, 16, 1, nil, nil, "Make R/O", true)
+local flashButton = layout:createButton(2, 11, 16, 1, nil, nil, "Flash", true)
+local dumpButton = layout:createButton(2, 13, 16, 1, nil, nil, "Dump", true)
+local makeReadOnlyButton = layout:createButton(20, 11, 16, 1, nil, nil, "Make R/O", true)
 
 local eepromMissingString = "EEPROM IS MISSING"
 local storageRo = "storage is readonly"
@@ -127,6 +129,12 @@ function redraw()
         maxDataSizeLabel.text = "/ " .. math.round(tonumber(component.eeprom.getDataSize()) or 0)
         checksumLabel.text = "checksum : " .. tostring(component.eeprom.getChecksum())
         addrLabel.text     = "address  : " .. component.eeprom.address
+        local isBootable = component.eeprom.address == bootloader.firstEeprom
+        if isBootable then
+            bootLabel.text     = "bootable : true"
+        else
+            bootLabel.text     = "bootable : " .. bootloader.firstEeprom
+        end
         
         local writeble = not not component.eeprom.setLabel(component.eeprom.getLabel())
         storageRoState = not writeble
@@ -143,6 +151,7 @@ function redraw()
         checksumLabel.text = "checksum : none"
         addrLabel.text     = "address  : none"
         writeLabel.text     = "storage  : none"
+        bootLabel.text     = "bootable : " .. bootloader.firstEeprom
         labelInput.read.setBuffer(eepromMissingString)
         labelInput.oldText = eepromMissingString
     end

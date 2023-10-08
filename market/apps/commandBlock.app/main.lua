@@ -16,10 +16,11 @@ else
     cb = component.proxy(cb)
 end
 
-liked.drawFullUpBarTask(screen, "CommandBlock")
+local _, drawUp = liked.drawFullUpBarTask(screen, "CommandBlock")
 local rx, ry = graphic.getResolution(screen)
 local term = require("term").create(screen, 1, 2, rx, ry - 1, true)
 term:clear()
+drawUp()
 
 local baseTh = thread.current()
 thread.create(function ()
@@ -57,4 +58,5 @@ while true do
         term:write(ret)
     end
     term:newLine()
+    graphic.forceUpdate()
 end

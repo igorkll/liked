@@ -6,13 +6,29 @@ local gui = require("gui")
 local component = require("component")
 local colors = require("gui_container").colors
 local colorlib = require("colors")
+local system = require("system")
+local paths = require("paths")
+local fs = require("filesystem")
+local parser = require("parser")
+local unicode = require("unicode")
 
+local selffolder = paths.path(system.getSelfScriptPath())
+local stationsStrs = parser.split(unicode, assert(fs.readFile(paths.concat(selffolder, "list.txt"))), "\n")
+local stations = {}
+for index, str in ipairs(stationsStrs) do
+    stations[index] = parser.split(unicode, str, ";")
+end
+
+local settings = require("registry").new(paths.concat(selffolder, "settings.dat"))
 local screen = ...
 
 local fm = gui.selectcomponent(screen, nil, nil, {"openfm_radio"}, true)
 if not fm then
     return
 else
+    if not settings[fm] then
+        settings[fm] = {url = stations[1][1], label = stations[1][2]}
+    end
     fm = component.proxy(fm)
 end
 
@@ -37,8 +53,11 @@ local volDown = layout:createButton(cx - 4, 3, 3, 1, nil, nil, "<")
 local currentVol = layout:createLabel(cx - 1, 3, 3, 1, nil, nil, tostring(math.round(fm.getVol() * 10)))
 local volUp = layout:createButton(cx + 2, 3, 3, 1, nil, nil, ">")
 
-local fmLabel = layout:createInput(cx - 24, 5, 48, nil, nil, false, nil, nil, 32, "label: ")
-local urlLabel = layout:createInput(cx - 24, 7, 48, nil, nil, false, nil, nil, 256, "url: ")
+local fmLabel = layout:createInput(cx - 24, 5, 48, nil, nil, false, settings[fm.address].label, nil, 32, "label: ")
+local urlLabel = layout:createInput(cx - 24, 7, 48, nil, nil, false, settings[fm.address].url, nil, 256, "url: ")
+
+fm.setScreenText(settings[fm.address].label)
+fm.setURL(settings[fm.address].url)
 
 local startButton = layout:createButton(cx - 8, 9, 7, 1, nil, nil, "start")
 local stopButton = layout:createButton(cx + 2, 9, 7, 1, nil, nil, "stop")

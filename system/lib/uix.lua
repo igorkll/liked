@@ -22,7 +22,14 @@ end
 
 function objclass:uploadEvent(eventData)
     if self.type == "button" then
-        if eventData[1] == "touch" and eventData[3] >= self.x and eventData[4] >= self.y and eventData[3] < self.x + self.sx and eventData[4] < self.y + self.sy then
+        if self.state and (eventData[1] == "touch" or eventData[1] == "drop") then
+            self.state = false
+            self:draw()
+
+            if self.onDrop then
+                self:onDrop(eventData[5], eventData[6])
+            end
+        elseif not self.state and eventData[1] == "touch" and eventData[3] >= self.x and eventData[4] >= self.y and eventData[3] < self.x + self.sx and eventData[4] < self.y + self.sy then
             self.state = true
             self:draw()
             if self.autoRelease then
@@ -34,13 +41,6 @@ function objclass:uploadEvent(eventData)
             
             if self.onClick then
                 self:onClick(eventData[5], eventData[6])
-            end
-        elseif eventData[1] == "drop" and self.state then
-            self.state = false
-            self:draw()
-
-            if self.onDrop then
-                self:onDrop(eventData[5], eventData[6])
             end
         end
     elseif self.type == "switch" then
