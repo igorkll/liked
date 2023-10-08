@@ -362,7 +362,7 @@ local list = {
     },
     {
         name = "commandBlock",
-        version = "3",
+        version = "4",
         vendor = "logic",
         description = "allows you to control the command block from the computer\nto work, you need to activate \"enableCommandBlockDriver\" in the mod config, then re-enter the game\nthe command block must be connected to the computer by means of an adapter\nit also allows you to run cbs scripts (text files with a queue of commands)",
         minDiskSpace = 64,

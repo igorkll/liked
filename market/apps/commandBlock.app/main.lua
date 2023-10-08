@@ -4,14 +4,18 @@ local component = require("component")
 local liked = require("liked")
 local thread = require("thread")
 local event = require("event")
+local fs = require("filesystem")
+local parser = require("parser")
+local unicode = require("unicode")
 
-local screen = ...
+local screen, nickname, path = ...
 local cb = gui.selectcomponent(screen, nil, nil, {"command_block"}, true)
 if not cb then
     return
 else
     cb = component.proxy(cb)
 end
+
 liked.drawFullUpBarTask(screen, "CommandBlock")
 local rx, ry = graphic.getResolution(screen)
 local term = require("term").create(screen, 1, 2, rx, ry - 1, true)
@@ -29,9 +33,23 @@ thread.create(function ()
     end
 end):resume()
 
+local queue = {}
+if path then
+    local content = assert(fs.readFile(path))
+    for _, command in ipairs(parser.split(unicode, content, "\n")) do
+        table.insert(queue, content)
+    end
+end
+
 while true do
     term:write("> ")
-    local command = term:readLn()
+    local command
+    if #queue > 0 then
+        command = table.remove(queue, #queue)
+        term:writeLn(command)
+    else
+        command = term:readLn()
+    end
     if not command then break end
     cb.setCommand(command)
     local _, ret = cb.executeCommand()
