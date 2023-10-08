@@ -234,6 +234,10 @@ function liked.labelReadonly(proxy)
 end
 
 function liked.findIcon(name)
+    if registry.icons and registry.icons[name] then
+        return registry.icons[name]
+    end
+
     local path = paths.concat("/data/icons", name .. ".t2p")
     if fs.exists(path) then
         return path
@@ -346,6 +350,14 @@ function liked.getIcon(screen, path)
     end
 
     return icon
+end
+
+function liked.reg(str, key, value)
+    gui_container[str][key] = value
+    if not registry.gui_container then registry.gui_container = {} end
+    if not registry.gui_container[str] then registry.gui_container[str] = {} end
+    registry.gui_container[str][key] = value
+    registry.save()
 end
 
 liked.unloadable = true

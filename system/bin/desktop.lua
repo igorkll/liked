@@ -211,17 +211,6 @@ local function isUninstallAvailable(icon)
     return false
 end
 
-local function findIcon(name)
-    local path = paths.concat("/data/icons", name .. ".t2p")
-    if fs.exists(path) then
-        return path
-    end
-    path = paths.concat("/system/icons", name .. ".t2p")
-    if fs.exists(path) then
-        return path
-    end
-end
-
 local function drawBar(lUserPath, iconsCount)
     local curentPath = gui_container.toUserPath(screen, userPath)
 

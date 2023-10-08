@@ -109,6 +109,10 @@ if not registry.shadowType then
     end
 end
 
+for key, value in pairs(registry.gui_container or {}) do
+    gui_container[key] = value
+end
+
 ------------------------------------
 
 bootloader.unittests("/vendor/unittests")

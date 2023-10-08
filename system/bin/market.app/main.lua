@@ -121,6 +121,9 @@ local function modifyList(lst)
         end
         function v.install(self)
             _install(self)
+            if v.postInstall then
+                v:postInstall()
+            end
             save(versionpath, self.version)
         end
     

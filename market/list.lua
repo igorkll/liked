@@ -10,6 +10,8 @@ local paths = require("paths")
 local programs = require("programs")
 local internet = require("internet")
 local unicode = require("unicode")
+local registry = require("registry")
+local liked = require("liked")
 
 local function download(url)
     return assert(internet.getInternetFile(url))
@@ -360,13 +362,20 @@ local list = {
     },
     {
         name = "commandBlock",
-        version = "1",
+        version = "2",
         vendor = "logic",
-        description = "allows you to control the command block from the computer\nto work, you need to activate \"enableCommandBlockDriver\" in the mod config, then re-enter the game\nthe command block must be connected to the computer by means of an adapter",
+        description = "allows you to control the command block from the computer\nto work, you need to activate \"enableCommandBlockDriver\" in the mod config, then re-enter the game\nthe command block must be connected to the computer by means of an adapter\nit also allows you to run cbs scripts (text files with a queue of commands)",
         minDiskSpace = 64,
 
         path = "/data/bin/commandBlock.app",
-        urlPrimaryPart = selfurlpart .. "/apps/commandBlock.app/"
+        urlPrimaryPart = selfurlpart .. "/apps/commandBlock.app/",
+        files = {"main.lua", "icon.t2p", "uninstall.lua"},
+
+        postInstall = function (self)
+            if not registry.icons then registry.icons = {} end
+            registry.icons["cbs"] = paths.concat(self.path, "icon.t2p")
+            liked.reg("openVia", "cbs", paths.concat(self.path, "main.lua"))
+        end
     },
     {
         name = "openFM",
