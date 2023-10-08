@@ -85,6 +85,12 @@ gui_container.knownExps = { --данные файлы не будет предл
     ["txt"] = true --текстовому документу не нужно отдельная кнопка, он по умалчанию открываеться через редактор
 }
 
+gui_container.editable = { --вместо "open is text editor" будет писаться "edit"
+    ["lua"] = true,
+    ["scrsv"] = true,
+    ["plt"] = true
+}
+
 ----------------------------
 
 function gui_container.getUserRoot(screen)

@@ -1006,7 +1006,7 @@ local function doIcon(windowEventData)
                                 end
                             end
                             
-                            if (v.exp == "lua" or v.exp == "plt" or v.exp == "scrsv") and not v.isDir then
+                            if gui_container.editable[v.exp] and not v.isDir then
                                 addLine()
 
                                 table.insert(strs, "  edit")

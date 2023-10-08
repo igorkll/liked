@@ -362,7 +362,7 @@ local list = {
     },
     {
         name = "commandBlock",
-        version = "2",
+        version = "3",
         vendor = "logic",
         description = "allows you to control the command block from the computer\nto work, you need to activate \"enableCommandBlockDriver\" in the mod config, then re-enter the game\nthe command block must be connected to the computer by means of an adapter\nit also allows you to run cbs scripts (text files with a queue of commands)",
         minDiskSpace = 64,
@@ -375,6 +375,7 @@ local list = {
             if not registry.icons then registry.icons = {} end
             registry.icons["cbs"] = paths.concat(self.path, "icon.t2p")
             liked.reg("openVia", "cbs", paths.concat(self.path, "main.lua"))
+            liked.reg("editable", "cbs", true)
         end
     },
     {
