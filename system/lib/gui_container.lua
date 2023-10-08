@@ -97,9 +97,9 @@ function gui_container.getUserRoot(screen)
 end
 
 function gui_container.shortPath(path, max)
-    max = max - 1 --поправка на символ троиточия перед путом
-    if #path > max then
-        return gui_container.chars.threeDots .. path:sub((#path - max) + 1, #path)
+    local pathLen = unicode.len(path)
+    if pathLen > max then
+        return gui_container.chars.threeDots .. unicode.sub(path, (pathLen - max) + 2, pathLen)
     end
     return path
 end
