@@ -118,6 +118,8 @@ function liked.applyPowerMode()
     event.minTime = powerModes[registry.powerMode]
 end
 
+--------------------------------------------------------
+
 function liked.raw_drawUpBarTask(method, screen, withoutFill, bgcolor)
     local function redraw()
         liked.drawUpBar(screen, withoutFill, bgcolor)
@@ -141,6 +143,7 @@ function liked.drawUpBarTaskBg(screen, withoutFill, bgcolor)
     return liked.raw_drawUpBarTask(require("thread").createBackground, screen, withoutFill, bgcolor)
 end
 
+
 function liked.drawUpBar(screen, withoutFill, bgcolor)
     local rtc = "RTC-" .. time.formatTime(time.addTimeZone(time.getRealTime(), registry.timeZone))
     local gtc = "GTC-" .. time.formatTime(time.getGameTime())
@@ -162,6 +165,46 @@ function liked.drawUpBar(screen, withoutFill, bgcolor)
     gpu.set(rx - 5, 1, "   ")
     gpu.set(rx - #charge - 2, 1, tostring(charge) .. "%")
 end
+
+--------------------------------------------------------
+
+function liked.raw_drawFullUpBarTask(method, screen, withoutFill, bgcolor)
+    local function redraw()
+        liked.drawFullUpBar(screen, withoutFill, bgcolor)
+        graphic.update(screen)
+    end
+    local th = method(function ()
+        while true do
+            redraw()
+            os.sleep(5)
+        end
+    end)
+    th:resume()
+    return th, redraw
+end
+
+function liked.drawFullUpBarTask(screen, withoutFill, bgcolor)
+    return liked.raw_drawFullUpBarTask(require("thread").create, screen, withoutFill, bgcolor)
+end
+
+function liked.drawFullUpBarTaskBg(screen, withoutFill, bgcolor)
+    return liked.raw_drawFullUpBarTask(require("thread").createBackground, screen, withoutFill, bgcolor)
+end
+
+function liked.drawFullUpBar(screen, title, withoutFill, bgcolor)
+    liked.drawUpBar(screen, withoutFill, bgcolor)
+    local gpu = graphic.findGpu(screen)
+    local rx, ry = gpu.getResolution()
+
+    gpu.setForeground(gui_container.colors.white)
+    if title then
+        gpu.set(2, 1, title)
+    end
+    gpu.setBackground(gui_container.colors.red)
+    gpu.set(rx, 1, "X")
+end
+
+--------------------------------------------------------
 
 function liked.getRegistry(address)
     local mountpoint = os.tmpname()
