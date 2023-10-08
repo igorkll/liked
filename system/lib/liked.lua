@@ -11,6 +11,7 @@ local system = require("system")
 local serialization = require("serialization")
 local gui_container = require("gui_container")
 local event = require("event")
+local unicode = require("unicode")
 local liked = {}
 
 function liked.lastVersion()
@@ -58,7 +59,7 @@ function liked.loadApp(name, screen, nickname)
     local mainCode, err = programs.load(path)
     if not mainCode then return nil, err end
     local exitCode
-    if exitFile then
+    if exitFile and paths.name(path) == "main.lua" then
         exitCode, err = programs.load(exitFile)
         if not exitCode then return nil, err end
     end
@@ -186,8 +187,124 @@ function liked.getRegistry(address)
     end
 end
 
-function liked.getIcon(application) --в разработке
+function liked.labelReadonly(proxy)
+    if type(proxy) == "string" then
+        proxy = component.proxy(proxy)
+    end
+    return not pcall(proxy.setLabel, proxy.getLabel() or nil)
+end
+
+function liked.findIcon(name)
+    local path = paths.concat("/data/icons", name .. ".t2p")
+    if fs.exists(path) then
+        return path
+    end
+    path = paths.concat("/system/icons", name .. ".t2p")
+    if fs.exists(path) then
+        return path
+    end
+end
+
+function liked.getName(screen, path)
+    local name
+    if gui_container.viewFileExps[screen] then
+        name = paths.name(path)
+    else
+        name = paths.name(paths.hideExtension(path))
+    end
     
+    if unicode.len(name) > 12 then
+        return unicode.sub(name, 1, 12) .. gui_container.chars.threeDots, name
+    end
+    return name, name
+end
+
+function liked.getIcon(screen, path)
+    local exp = paths.extension(path)
+    local isDir = fs.isDirectory(path)
+    local icon
+    local fsProxy
+
+    for _, tbl in ipairs(fs.mountList) do
+        if paths.canonical(path) .. "/" == tbl[2] then
+            fsProxy = tbl[1]
+
+            local disklevel = system.getDiskLevel(fsProxy.address)
+            if disklevel == "tmp" then
+                icon = liked.findIcon("tmp")
+            elseif disklevel == "fdd" then
+                if fsProxy.exists("/init.lua") then
+                    icon = liked.findIcon("bootdevice")
+                else
+                    icon = liked.findIcon("fdd")
+                end
+            elseif disklevel == "raid" then
+                icon = liked.findIcon("raid")
+            elseif disklevel == "tier1" then
+                icon = liked.findIcon("hdd1")
+            elseif disklevel == "tier2" then
+                icon = liked.findIcon("hdd2")
+            elseif disklevel == "tier3" then
+                icon = liked.findIcon("hdd3")
+            else
+                icon = liked.findIcon("hdd")
+            end
+            break
+        end
+    end
+    
+    
+    if isDir then
+        local iconpath = paths.concat(path, "icon.t2p")
+        if fs.exists(iconpath) and not fs.isDirectory(iconpath) then
+            icon = iconpath
+        elseif not fsProxy then
+            if exp == "app" then
+                icon = liked.findIcon("app")
+            else
+                icon = liked.findIcon("folder")
+            end
+        end
+    end
+
+    if not fsProxy and not isDir then
+        if exp == "t2p" then
+            if path then
+                local ok, sx, sy = pcall(gui_readimagesize, path)
+                if ok and sx == 8 and sy == 4 then
+                    icon = path
+                else
+                    icon = liked.findIcon("t2p")
+                end
+            else
+                icon = liked.findIcon("t2p")
+            end
+        elseif exp and #exp > 0 then
+            icon = liked.findIcon(exp)
+        else
+            --icon = liked.findIcon("file")
+            icon = liked.findIcon("unknown")
+        end
+    end
+
+    --if not icon or not fs.exists(icon) then
+    --    icon = liked.findIcon("unknown")
+    --end
+
+    --[[
+    do --check icon
+        local ok, sx, sy = pcall(gui_readimagesize, icon)
+        if not ok or sx ~= 8 or sy ~= 4 then
+            icon = nil
+        end
+    end
+    ]]
+
+    if not icon or not fs.exists(icon) or fs.isDirectory(icon) then
+        icon = liked.findIcon("badicon")
+    end
+
+    return icon
 end
 
 liked.unloadable = true

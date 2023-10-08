@@ -33,7 +33,7 @@ layout:createButton(2, 5, 16, 1, nil, nil, "WIPE USER DATA", true).onClick = fun
     layout:draw()
 end
 
-layout:createButton(19, 5, 16, 1, nil, nil, "UPDATE SYSTEM", true).onClick = function ()
+layout:createButton(20, 5, 16, 1, nil, nil, "UPDATE SYSTEM", true).onClick = function ()
     if not lastVersion then
         gui_warn(screen, nil, nil, "connection problems\ntry again later")
     elseif gui.pleaseCharge(screen, 80, "update") and gui_checkPassword(screen) and gui_yesno(screen, nil, nil, currentVersion ~= lastVersion and "start updating now?" or "you have the latest version installed. do you still want to start updating?") then

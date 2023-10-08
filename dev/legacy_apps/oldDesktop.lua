@@ -312,13 +312,15 @@ local function draw(old, check) --вызывает все перерисовки
     icons = {}
     local count = 0
 
+    local gui_readimagesize = calls.load("gui_readimagesize")
+
     local function addIcon(i, v, customPath)
         count = count + 1
         if count > (iconsX * iconsY) then
             return true
         end
 
-        local path
+        local path, preName
         if customPath then
             path = customPath
         else
@@ -326,26 +328,129 @@ local function draw(old, check) --вызывает все перерисовки
         end
 
         local exp = paths.extension(path)
-        local fsProxy, localFsPath = fs.get(path)
-        local readonly = fsProxy.isReadOnly()
-        local labelReadonly = liked.labelReadonly(fsProxy)
+        local icon
+        local readonly = fs.get(path).isReadOnly()
+        local labelReadonly
+        local isFs
+        local fsd
+        local devtype
 
-        local shortName, fullName = liked.getName(screen, path)
-        local icon = liked.getIcon(screen, path)
+        for _, tbl in ipairs(fs.mountList) do
+            if paths.canonical(path) .. "/" == tbl[2] then
+                isFs = true
+                fsd = tbl[1]
+                readonly = fsd.isReadOnly() --realonly диска и readonly на лейбели ПОЛНОСТЬЮ НЕЗАВИСИМЫЕ
+                labelReadonly = not pcall(fsd.setLabel, fsd.getLabel() or nil) --getLabel может вернуть "no value", который отличаеться от nil в данном случаи
+                
+                local info = lastinfo.deviceinfo[fsd.address]
+                --local clock = info and info.clock
+                --local devtypepath = paths.concat(path, "external-data/devicetype.dat")
+                local disklevel = system.getDiskLevel(fsd.address)
 
+                if disklevel == "tmp" then
+                    icon = findIcon("tmp")
+                elseif disklevel == "fdd" then
+                    if fsd.exists("/init.lua") then
+                        icon = findIcon("bootdevice")
+                    else
+                        icon = findIcon("fdd")
+                    end
+                elseif disklevel == "raid" then
+                    icon = findIcon("raid")
+                    --[[
+                elseif fs.exists(devtypepath) then --если это жесткий диск пренадлежащий устройству то отображаем иконку
+                    local data = fs.readFile(devtypepath)
+                    devtype = data
+                    if data then
+                        icon = findIcon(data)
+                    end
+                    ]]
+                elseif disklevel == "tier1" then
+                    icon = findIcon("hdd1")
+                elseif disklevel == "tier2" then
+                    icon = findIcon("hdd2")
+                elseif disklevel == "tier3" then
+                    icon = findIcon("hdd3")
+                else
+                    icon = findIcon("hdd")
+                end
+                break
+            end
+        end
+        
+        
+        if fs.isDirectory(path) then
+            local iconpath = paths.concat(path, "icon.t2p")
+            if fs.exists(iconpath) and not fs.isDirectory(iconpath) then
+                icon = iconpath
+            elseif not isFs then
+                if exp == "app" then
+                    icon = findIcon("app")
+                else
+                    icon = findIcon("folder")
+                end
+            end
+        elseif exp == "t2p" then
+            icon = findIcon("t2p")
+            local iconPath = path
+
+            if iconPath then
+                local ok, sx, sy = pcall(gui_readimagesize, iconPath)
+                if ok and sx == 8 and sy == 4 then
+                    icon = iconPath
+                end
+            end
+        elseif exp and #exp > 0 then
+            icon = findIcon(exp)
+        else
+            --icon = findIcon("file")
+            icon = findIcon("unkownfile")
+        end
+
+        --if not icon or not fs.exists(icon) then
+        --    icon = findIcon("unkownfile")
+        --end
+
+        do --check icon
+            local ok, sx, sy = pcall(gui_readimagesize, icon)
+            if not ok or sx ~= 8 or sy ~= 4 then
+                icon = nil
+            end
+        end
+
+        if not icon or not fs.exists(icon) or fs.isDirectory(icon) then
+            icon = findIcon("badicon")
+        end
+
+        -----------------------
+
+        local name = preName
+        if not name then
+            if not customPath and isFileExps() then
+                name = paths.name(path)
+            else
+                name = paths.name(paths.hideExtension(path))
+            end
+        end
+
+        local shortName = name
+        if #shortName > 12 then
+            shortName = shortName:sub(1, 12) .. gui_container.chars.threeDots
+        end
         table.insert(icons, {
             shortName = shortName,
-            fs = fsProxy,
+            fs = fsd,
             readonly = readonly,
-            isFs = paths.equals(localFsPath, "/"),
+            isFs = isFs,
             labelReadonly = labelReadonly,
             icon = icon,
             path = path,
             exp = exp,
             index = i,
-            name = fullName,
+            name = name,
             isAlias = not not customPath,
-            isDir = fs.isDirectory(path)
+            isDir = fs.isDirectory(path),
+            devtype = devtype
         })
     end
 
