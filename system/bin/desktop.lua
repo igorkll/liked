@@ -62,6 +62,8 @@ local redrawFlag = true
 local desktopTh
 local programTh
 
+local listens = {}
+
 local screenSaverDemo
 local screenSaverScreenShot
 local screenSaver
@@ -442,10 +444,10 @@ local function folderBack()
 end
 
 local timerEnable = true
-event.timer(5, function()
+table.insert(listens, event.timer(5, function()
     if not timerEnable or screenSaver then return end
     drawStatus()
-end, math.huge)
+end, math.huge))
 
 local function warn(str)
     local clear = saveZone(screen)
@@ -1451,13 +1453,13 @@ local function updateScreenSaver()
     screenSaverClosed = true
 end
 
-event.listen(nil, function (eventName, uuid)
+table.insert(listens, event.listen(nil, function (eventName, uuid)
     if uuid == screen and (eventName == "touch" or eventName == "drag" or eventName == "scroll") then
         updateScreenSaver()
     end
-end)
+end))
 
-event.listen("key_down", function(_, uuid, char, code)
+table.insert(listens, event.listen("key_down", function(_, uuid, char, code)
     local ok
     for i, v in ipairs(lastinfo.keyboards[screen]) do
         if v == uuid then
@@ -1472,7 +1474,7 @@ event.listen("key_down", function(_, uuid, char, code)
 
         updateScreenSaver()
     end
-end)
+end))
 
 local function checkScreenSaver()
     if gui_container.noScreenSaver[screen] then
@@ -1489,14 +1491,14 @@ local function checkScreenSaver()
     screenSaverDemo = nil
 end
 
-event.timer(1, function ()
+table.insert(listens, event.timer(1, function ()
     checkScreenSaver()
-end, math.huge)
+end, math.huge))
 
-event.listen("screenSaverDemo", function(_, screen)
+table.insert(listens, event.listen("screenSaverDemo", function(_, screen)
     screenSaverDemo = screen
     checkScreenSaver()
-end)
+end))
 
 thread.create(function ()
     while true do
@@ -1522,9 +1524,9 @@ end):resume()
 
 ------------------------------------------------------------------------ desktop
 
-event.listen("redrawDesktop", function()
+table.insert(listens, event.listen("redrawDesktop", function()
     redrawFlag = true
-end)
+end))
 
 desktopTh = thread.create(function ()
     local warnPrinted
@@ -1667,6 +1669,17 @@ if not lock(true) then
     desktopTh:resume()
 end
 
-while true do
-    event.yield()
+local selfTh = thread.current()
+function selfTh:kill()
+    if desktopTh then
+        desktopTh:kill()
+    end
+    if programTh then
+        programTh:kill()
+    end
+    for _, listen in ipairs(listens) do
+        event.cancel(listen)
+    end
+    selfTh:raw_kill()
 end
+event.wait()

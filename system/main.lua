@@ -48,6 +48,7 @@ local gui_container = require("gui_container")
 _G.initPal = nil
 
 local gui = require("gui") --нужно подключить заранию чтобы функции записались в calls.loaded
+local thread = require("thread")
 local liked = require("liked")
 local registry = require("registry")
 local event = require("event")
@@ -118,42 +119,38 @@ bootloader.autorunsIn("/data/autoruns")
 
 ------------------------------------
 
-if #screens > 0 then
-    local thread = require("thread")
+local screenThreads = {}
 
-    local recreate = {}
-    local threads = {}
-    for index, address in ipairs(screens) do
-        recreate[index] = function ()
-            gui_initScreen(address)
-            
-            local t = thread.create(desktop, address, index == 1)
-            t.parentData.screen = address --для того чтобы можно было убивать дальнейшие патокаи через адрес экрана(информация от экране передаеться от патока к потоку ядром)
-            t:resume() --поток по умалчанию спит
+local first = true
+local function runDesktop(screen)
+    gui_initScreen(screen)
+        
+    local t = thread.create(desktop, screen, first)
+    t.parentData.screen = screen --для того чтобы можно было убивать дальнейшие патокаи через адрес экрана(информация от экране передаеться от патока к потоку ядром)
+    t:resume() --поток по умалчанию спит
 
-            threads[index] = t
-        end
-        recreate[index]()
-    end
+    first = false
 
-    event.wait()
+    screenThreads[screen] = t
+end
 
-    --[[
-    while true do
-        for i, v in ipairs(threads) do
-            if v:status() == "dead" then
-                event.errLog("crash in monitor \"" .. v.screen:sub(1, 4) .. "\" \"" .. (v.out[2] or "unknown error") .. "\" \"" .. (v.out[3] or "no traceback") .. "\"", 0)
-                recreate[i]()
+for index, address in ipairs(screens) do
+    runDesktop(address)
+end
+
+event.hyperListen(function (eventType, cuuid, ctype)
+    if ctype == "screen" then
+        if eventType == "component_added" then
+            if not screenThreads[cuuid] then
+                runDesktop(cuuid)
+            end
+        elseif eventType == "component_removed" then
+            if screenThreads[cuuid] then
+                screenThreads[cuuid]:kill()
+                screenThreads[cuuid] = nil
             end
         end
-        event.sleep(1)
     end
-    ]]
---elseif #screens == 1 then
---    local screen = screens[1]
---    gui_initScreen(screen)
---    desktop(screen, true)
-else
-    bootloader.bootSplash("no supported screens/GPUs found")
-    event.wait()
-end
+end)
+
+event.wait()
