@@ -46,7 +46,6 @@
 /system/calls/gui_initScreen.lua
 /system/calls/gui_readimagesize.lua
 /system/calls/gui_selectfile.lua
-/system/calls/gui_status.lua
 /system/calls/gui_yesno.lua
 /system/calls/isLikedDisk.lua
 /system/calls/movetable.lua
@@ -82,7 +81,7 @@
 /system/icons/tablet.t2p
 /system/icons/tmp.t2p
 /system/icons/txt.t2p
-/system/icons/unkownfile.t2p
+/system/icons/unknown.t2p
 /system/installer/logo.lua
 /system/installer/main.lua
 /system/lib/advLabeling.lua

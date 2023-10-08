@@ -109,8 +109,10 @@ if not registry.shadowType then
     end
 end
 
-for key, value in pairs(registry.gui_container or {}) do
-    gui_container[key] = value
+for str, tbl in pairs(registry.gui_container or {}) do
+    for key, value in pairs(tbl) do
+        gui_container[str][key] = value
+    end
 end
 
 ------------------------------------
