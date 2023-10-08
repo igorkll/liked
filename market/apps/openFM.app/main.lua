@@ -23,6 +23,13 @@ local layout = uix.create(window, colors.black)
 
 local selectColor = layout:createButton(cx + 8, 3, 16, 1, colors.green, colors.gray, "Screen Color", true)
 selectColor.fore = fm.getScreenColor()
+if selectColor.fore == selectColor.back then
+    if selectColor.back == colors.lime then
+        selectColor.back = colors.green
+    else
+        selectColor.back = colors.lime
+    end
+end
 
 local volDown = layout:createButton(cx - 4, 3, 3, 1, nil, nil, "<")
 local currentVol = layout:createLabel(cx - 1, 3, 3, 1, nil, nil, tostring(math.round(fm.getVol() * 10)))
@@ -39,6 +46,13 @@ function selectColor:onClick()
     if color then
         if colorlib[color] and colors[colorlib[color]] then
             selectColor.fore = colors[colorlib[color]]
+            if selectColor.fore == selectColor.back then
+                if selectColor.back == colors.lime then
+                    selectColor.back = colors.green
+                else
+                    selectColor.back = colors.lime
+                end
+            end
             fm.setScreenColor(selectColor.fore + 0.0)
         end
     end
