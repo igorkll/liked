@@ -382,12 +382,29 @@ local list = {
         name = "openFM",
         version = "1",
         vendor = "logic",
-        description = "the program for the radio from the OpenFM addon",
+        description = "the program for the radio from the OpenFM addon\nit has a number of built-in radio stations",
         minDiskSpace = 64,
 
         path = "/data/bin/openFM.app",
         urlPrimaryPart = selfurlpart .. "/apps/openFM.app/",
         files = {"main.lua", "icon.t2p", "list.txt"}
+    },
+    {
+        name = "tape",
+        version = "1",
+        vendor = "logic",
+        description = "allows you to record music in dfpwm format to tapes from computronics\nallows you to dump the tape to dfpwm file\nyou can also record music directly over the Internet",
+        minDiskSpace = 64,
+
+        path = "/data/bin/tape.app",
+        urlPrimaryPart = selfurlpart .. "/apps/tape.app/",
+        files = {"main.lua", "icon.t2p", "uninstall.lua"},
+
+        postInstall = function (self)
+            if not registry.icons then registry.icons = {} end
+            registry.icons["dfpwm"] = paths.concat(self.path, "icon.t2p")
+            liked.reg("openVia", "dfpwm", paths.concat(self.path, "main.lua"))
+        end
     }
     --[[
     openbox = {
