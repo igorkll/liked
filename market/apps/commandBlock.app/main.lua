@@ -37,7 +37,7 @@ local queue = {}
 if path then
     local content = assert(fs.readFile(path))
     for _, command in ipairs(parser.split(unicode, content, "\n")) do
-        table.insert(queue, content)
+        table.insert(queue, command)
     end
 end
 
