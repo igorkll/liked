@@ -21,7 +21,8 @@ local cx, cy = math.round(rx / 2), math.round(ry / 2)
 local window = graphic.createWindow(screen, 1, 1, rx, ry)
 local layout = uix.create(window, colors.black)
 
-local selectColor = layout:createButton(cx + 8, 3, 16, 1, colors.green, fm.getScreenColor(), "Screen Color", true)
+local selectColor = layout:createButton(cx + 8, 3, 16, 1, colors.green, colors.gray, "Screen Color", true)
+selectColor.fore = fm.getScreenColor()
 
 local volDown = layout:createButton(cx - 4, 3, 3, 1, nil, nil, "<")
 local currentVol = layout:createLabel(cx - 1, 3, 3, 1, nil, nil, tostring(math.round(fm.getVol() * 10)))
@@ -38,7 +39,7 @@ function selectColor:onClick()
     if color then
         if colorlib[color] and colors[colorlib[color]] then
             selectColor.fore = colors[colorlib[color]]
-            fm.setScreenColor(selectColor.fore)
+            fm.setScreenColor(selectColor.fore + 0.0)
         end
     end
     redraw()
