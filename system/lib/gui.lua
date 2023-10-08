@@ -188,11 +188,11 @@ function gui.smallWindow(screen, cx, cy, str, backgroundColor, icon)
     local noShadow = gui.shadow(gpu, window.x, window.y, window.sizeX, window.sizeY)
     window:clear(color)
 
+    local textColor = colors.white
+    if color == textColor then
+        textColor = colors.black
+    end
     for i, v in ipairs(restrs(str, 24)) do
-        local textColor = colors.white
-        if color == textColor then
-            textColor = colors.black
-        end
         window:set(8, i + 1, color, textColor, v)
     end
 
@@ -201,6 +201,16 @@ function gui.smallWindow(screen, cx, cy, str, backgroundColor, icon)
     end
 
     return window, noShadow
+end
+
+function gui.status(screen, cx, cy, str, backgroundColor)
+    gui.smallWindow(screen, cx, cy, str, backgroundColor or colors.lightGray, function (window, color)
+        window:set(2, 2, color, colors.blue, "  " .. unicode.char(0x2800+192) ..  "  ")
+        window:set(2, 3, color, colors.blue, " ◢█◣ ")
+        window:set(2, 4, color, colors.blue, "◢███◣")
+        window:set(4, 3, colors.blue, colors.white, "P")
+    end)
+    graphic.forceUpdate()
 end
 
 function gui.warn(screen, cx, cy, str, backgroundColor)
@@ -822,4 +832,5 @@ calls.loaded.gui_input = gui.input
 calls.loaded.gui_select = gui.select
 calls.loaded.gui_selectcomponent = gui.selectcomponent
 calls.loaded.gui_checkPassword = gui.checkPassword
+calls.loaded.gui_status = gui.status
 return gui
