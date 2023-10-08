@@ -5,6 +5,7 @@ local liked = require("liked")
 local gui = require("gui")
 local component = require("component")
 local colors = require("gui_container").colors
+local colorlib = require("colors")
 
 local screen = ...
 
@@ -20,8 +21,10 @@ local cx, cy = math.round(rx / 2), math.round(ry / 2)
 local window = graphic.createWindow(screen, 1, 1, rx, ry)
 local layout = uix.create(window, colors.black)
 
+local selectColor = layout:createButton(cx + 8, 3, 16, 1, colors.green, fm.getScreenColor(), "Screen Color", true)
+
 local volDown = layout:createButton(cx - 4, 3, 3, 1, nil, nil, "<")
-local currentVol = layout:createLabel(cx - 1, 3, 3, 1)
+local currentVol = layout:createLabel(cx - 1, 3, 3, 1, nil, nil, tostring(math.round(fm.getVol() * 10)))
 local volUp = layout:createButton(cx + 2, 3, 3, 1, nil, nil, ">")
 
 local fmLabel = layout:createInput(cx - 24, 5, 48, nil, nil, false, nil, nil, 32, "label: ")
@@ -29,6 +32,17 @@ local urlLabel = layout:createInput(cx - 24, 7, 48, nil, nil, false, nil, nil, 2
 
 local startButton = layout:createButton(cx - 8, 9, 7, 1, nil, nil, "start")
 local stopButton = layout:createButton(cx + 2, 9, 7, 1, nil, nil, "stop")
+
+function selectColor:onClick()
+    local color = gui.selectcolor(screen, nil, nil, "Screen Color")
+    if color then
+        if colorlib[color] and colors[colorlib[color]] then
+            selectColor.fore = colors[colorlib[color]]
+            fm.setScreenColor(selectColor.fore)
+        end
+    end
+    redraw()
+end
 
 function startButton:onClick()
     fm.start()
@@ -60,10 +74,11 @@ end
 
 --------------------------------------------------------
 
-currentVol.text = tostring(math.round(fm.getVol() * 10))
-
-layout:draw()
-liked.drawFullUpBar(screen, "OpenFM")
+function redraw()
+    layout:draw()
+    liked.drawFullUpBar(screen, "OpenFM")
+end
+redraw()
 
 while true do
     local eventData = {event.pull()}
