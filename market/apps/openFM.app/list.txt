@@ -3,3 +3,5 @@ http://icecast.vgtrk.cdnvideo.ru/rrzonam_mp3_64kbps;RADIO_OF_RUSSIAN
 http://icecast.vgtrk.cdnvideo.ru/kulturafm_mp3_64kbps;KULTURA_FM
 http://icecast.vgtrk.cdnvideo.ru/vestifm_mp3_64kbps;VESTI_FM
 http://lr4mp1.latvijasradio.lv:8020;LATVIJAS_RADIO
+http://stream3.polskieradio.pl:8914;POLSLIE_RADIO
+http://kommersant77.hostingradio.ru:8016/kommersant32.mp3;KOMMERSANT_FM
