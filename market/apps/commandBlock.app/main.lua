@@ -45,7 +45,7 @@ while true do
     term:write("> ")
     local command
     if #queue > 0 then
-        command = table.remove(queue, #queue)
+        command = table.remove(queue, 1)
         term:writeLn(command)
     else
         command = term:readLn()
