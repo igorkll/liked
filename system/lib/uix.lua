@@ -223,11 +223,13 @@ function uix:createInput(x, y, sx, back, fore, hidden, default, syntax, maxlen, 
     obj.hidden = hidden
     obj.default = default
     obj.syntax = syntax
+    
     if self.style == "round" then
         obj.read = self.window:readNoDraw(x + 1, y, sx - 2, obj.back, obj.fore, preStr, hidden, default, true, syntax)
     else
         obj.read = self.window:readNoDraw(x, y, sx, obj.back, obj.fore, preStr, hidden, default, true, syntax)
     end
+
     obj.oldText = obj.read.getBuffer()
     if maxlen then
         obj.read.setMaxStringLen(maxlen)

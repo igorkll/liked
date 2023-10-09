@@ -12,6 +12,7 @@ local serialization = require("serialization")
 local gui_container = require("gui_container")
 local event = require("event")
 local unicode = require("unicode")
+local thread = require("thread")
 local liked = {}
 
 function liked.lastVersion()
@@ -174,22 +175,37 @@ function liked.raw_drawFullUpBarTask(method, screen, ...)
         liked.drawFullUpBar(screen, table.unpack(args))
         graphic.update(screen)
     end
+    local callbacks = {}
     local th = method(function ()
+        thread.create(function ()
+            local rx, ry = graphic.getResolution(screen)
+            local window = graphic.createWindow(screen, 1, 1, rx, 1)
+            while true do
+                local eventData = {event.pull()}
+                local windowEventData = window:uploadEvent(eventData)
+                if windowEventData[1] == "touch" then
+                    if windowEventData[3] == rx and callbacks.exit then
+                        callbacks.exit()
+                    end
+                end
+            end
+        end):resume()
+
         while true do
             redraw()
             os.sleep(5)
         end
     end)
     th:resume()
-    return th, redraw
+    return th, redraw, callbacks
 end
 
 function liked.drawFullUpBarTask(...)
-    return liked.raw_drawFullUpBarTask(require("thread").create, ...)
+    return liked.raw_drawFullUpBarTask(thread.create, ...)
 end
 
 function liked.drawFullUpBarTaskBg(...)
-    return liked.raw_drawFullUpBarTask(require("thread").createBackground, ...)
+    return liked.raw_drawFullUpBarTask(thread.createBackground, ...)
 end
 
 function liked.drawFullUpBar(screen, title, withoutFill, bgcolor)
