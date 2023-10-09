@@ -71,6 +71,9 @@ function objclass:uploadEvent(eventData)
             self.value = (eventData[3] - self.x) / (self.sx - 1)
             if self.value < 0 then self.value = 0 end
             if self.value > 1 then self.value = 1 end
+            if self.onSeek then
+                self:onSeek(self.value)
+            end
             self:draw()
         end
     end

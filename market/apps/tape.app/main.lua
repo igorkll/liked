@@ -44,8 +44,12 @@ local stopButton = layout:createButton(2, 5, 16, 1, nil, nil, "STOP")
 local playLed = layout:createLabel(15, 7, 3, 1)
 local seekBar = layout:createSeek(2, ry - 1, rx - 2)
 
-local writeButton = layout:createButton(19, 5, 16, 1, nil, nil, "WRITE FILE")
-local writeUrlButton = layout:createButton(19 + 17, 5, 16, 1, nil, nil, "WRITE URL")
+function seekBar:onSeek(value)
+    tape.seek((value * tape.getSize()) - tape.getPosition())
+end
+
+local writeButton = layout:createButton(19, 5, 16, 1, nil, nil, "WRITE FILE", true)
+local writeUrlButton = layout:createButton(19 + 17, 5, 16, 1, nil, nil, "WRITE URL", true)
 
 function writeButton:onClick()
     local clear = saveBigZone(screen)
@@ -53,14 +57,14 @@ function writeButton:onClick()
     clear()
 
     if path then
-        local rewind = false
         if gui_yesno(screen, nil, nil, "rewind the tape?") then
             tape.stop()
             tape.seek(-tape.getSize())
-            rewind = true
         else
             tape.stop()
         end
+
+        gui.status(screen, nil, nil, "Writing The Tape...")
 
         local file = fs.open(path, "rb")
         while true do
@@ -71,10 +75,6 @@ function writeButton:onClick()
             tape.write(data)
         end
         file.close()
-
-        if rewind then
-            tape.seek(-tape.getSize())
-        end
     end
 
     redraw()
@@ -142,9 +142,7 @@ local function doTape()
     local state = tape.getState()
     local playing = state == "PLAYING"
 
-    if seekBar.focus then
-        tape.seek((seekBar.value * size) - tape.getPosition())
-    else
+    if not seekBar.focus then
         seekBar.value = tape.getPosition() / size
         seekBar:draw()
     end

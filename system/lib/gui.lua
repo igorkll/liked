@@ -45,8 +45,14 @@ end
 
 ------------------------------------
 
-function gui.shadow(gpu, x, y, sx, sy, mul, full)
-    local depth = gpu.getDepth()
+function gui.shadow(lgpu, x, y, sx, sy, mul, full)
+    local screen
+    if type(lgpu) == "string" then
+        screen = lgpu
+    else
+        screen = lgpu.address
+    end
+    local gpu = graphic.findGpu(screen)
 
     local function getPoses()
         local shadowPosesX = {}
@@ -142,6 +148,7 @@ function gui.shadow(gpu, x, y, sx, sy, mul, full)
     end
 
     return function ()
+        local gpu = graphic.findGpu(screen)
         for _, obj in ipairs(origs) do
             gpu.setForeground(obj[4])
             gpu.setBackground(obj[5])
