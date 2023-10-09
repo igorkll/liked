@@ -19,7 +19,7 @@ local rx, ry = graphic.getResolution(screen)
 local window = graphic.createWindow(screen, 1, 1, rx, ry)
 local layout = uix.create(window, colors.black)
 
-local upTh, upRedraw, upCallbacks = liked.drawFullUpBarTask(screen)
+local upTh, upRedraw, upCallbacks = liked.drawFullUpBarTask(screen, "Tape")
 
 local baseTh = thread.current()
 upCallbacks.exit = function ()
@@ -41,6 +41,15 @@ end
 
 local playButton = layout:createButton(2, 3, 16, 1, nil, nil, "PLAY")
 local stopButton = layout:createButton(2, 5, 16, 1, nil, nil, "STOP")
+function playButton:onClick()
+    tape.play()
+end
+
+function stopButton:onClick()
+    tape.stop()
+end
+
+
 local playLed = layout:createLabel(15, 7, 3, 1)
 local seekBar = layout:createSeek(2, ry - 1, rx - 2)
 
@@ -111,18 +120,22 @@ layout:createText(2, ry - 3, nil, "speed : ")
 local volBar = layout:createSeek(10, ry - 5, rx - 10, nil, nil, nil, 0.5)
 local speedBar = layout:createSeek(10, ry - 3, rx - 10, nil, nil, nil, 0.5)
 
-function playButton:onClick()
-    tape.play()
+tape.setVolume(0.5)
+tape.setSpeed(1)
+
+function volBar:onSeek(value)
+    tape.setVolume(value)
 end
 
-function stopButton:onClick()
-    tape.stop()
+function speedBar:onSeek(value)
+    tape.setSpeed(value * 2)
 end
 
 ------------------------------
 
 local oldReady
 local oldPlay
+local oldSeek
 
 local function doTape()
     local ready = tape.isReady()
@@ -140,13 +153,16 @@ local function doTape()
 
     local size = tape.getSize()
     local state = tape.getState()
-    local playing = state == "PLAYING"
-
+    
     if not seekBar.focus then
-        seekBar.value = tape.getPosition() / size
-        seekBar:draw()
+        seekBar.value = math.round((tape.getPosition() / size) * 80) / 80
+        if seekBar.value ~= oldSeek then
+            seekBar:draw()
+            oldSeek = seekBar.value
+        end
     end
 
+    local playing = state == "PLAYING"
     if playing ~= oldPlay then
         if playing then
             playLed.back = colors.yellow
@@ -165,15 +181,12 @@ local function doTape()
         seekBar.value = 0
         seekBar:draw()
     end
-
-    tape.setVolume(volBar.value)
-    tape.setSpeed(speedBar.value * 2)
 end
 
 thread.create(function ()
     while true do
         doTape()
-        os.sleep(0.1)
+        os.sleep(0.25)
     end
 end):resume()
 
