@@ -1,1 +1,1 @@
-{soundEnable=false,diskSound=false,lowPowerSound=false,timeZone=0}
+{soundEnable=false,diskSound=false,lowPowerSound=false,timeZone=0,disableRecovery=true}

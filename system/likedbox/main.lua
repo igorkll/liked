@@ -34,7 +34,9 @@ maxDepth = math.round(maxDepth)
 ------------------------------------
 
 function _G.initPal()
-    system_applyTheme("/system/palette.plt")
+    if not fs.exists("/data/theme.plt") then
+        system_setTheme("/system/palette.plt")
+    end
 end
 local gui_container = require("gui_container")
 _G.initPal = nil
@@ -87,16 +89,13 @@ bootloader.autorunsIn("/data/autoruns")
 ------------------------------------
 
 local screenThreads = {}
-
-local first = true
 local function runDesktop(screen)
     gui_initScreen(screen)
     
-    local t = thread.create(assert(programs.load("shell")), screen, first)
+    local t = thread.create(assert(programs.load("shell")), screen)
     t.parentData.screen = screen --для того чтобы можно было убивать дальнейшие патокаи через адрес экрана(информация от экране передаеться от патока к потоку ядром)
     t:resume() --поток по умалчанию спит
 
-    first = false
     screenThreads[screen] = t
 end
 
