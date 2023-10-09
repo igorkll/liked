@@ -45,6 +45,7 @@ local playLed = layout:createLabel(15, 7, 3, 1)
 local seekBar = layout:createSeek(2, ry - 1, rx - 2)
 
 local writeButton = layout:createButton(19, 5, 16, 1, nil, nil, "WRITE FILE")
+local writeUrlButton = layout:createButton(19 + 17, 5, 16, 1, nil, nil, "WRITE URL")
 
 layout:createText(2, ry - 5, nil, "volume: ")
 layout:createText(2, ry - 3, nil, "speed : ")
