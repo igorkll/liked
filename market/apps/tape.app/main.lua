@@ -32,9 +32,30 @@ function tapeLabel:onTextChanged(text)
     tape.setLabel(text)
 end
 
+layout:createText(2, 7, nil, "loop: ")
+local loopMode = layout:createSwitch(8, 7, false)
+
+function loopMode:onSwitch()
+    
+end
+
 local playButton = layout:createButton(2, 3, 16, 1, nil, nil, "PLAY")
 local stopButton = layout:createButton(2, 5, 16, 1, nil, nil, "STOP")
-local seekBar = layout:createSeek(2, ry - 5, rx - 2)
+local seekBar = layout:createSeek(2, ry - 1, rx - 2)
+
+layout:createText(2, ry - 5, nil, "volume: ")
+layout:createText(2, ry - 3, nil, "speed : ")
+
+local volBar = layout:createSeek(10, ry - 5, rx - 10, nil, nil, nil, 0.5)
+local speedBar = layout:createSeek(10, ry - 3, rx - 10, nil, nil, nil, 0.5)
+
+function playButton:onClick()
+    tape.play()
+end
+
+function stopButton:onClick()
+    tape.stop()
+end
 
 ------------------------------
 
@@ -53,7 +74,29 @@ thread.create(function ()
             tapeLabel:draw()
             oldReady = ready
         end
-        os.sleep(1)
+
+        local size = tape.getSize()
+        local state = tape.getState()
+
+        if state == "PLAYING" then
+            if seekBar.focus then
+                tape.seek((seekBar.value * size) - tape.getPosition())
+            else
+                seekBar.value = tape.getPosition() / size
+                seekBar:draw()
+            end
+        end
+
+        if loopMode.state and tape.isEnd() then
+            tape.seek(-size)
+            seekBar.value = 0
+            seekBar:draw()
+        end
+
+        tape.setVolume(volBar.value)
+        tape.setSpeed(speedBar.value * 2)
+
+        os.sleep(0.05)
     end
 end):resume()
 
