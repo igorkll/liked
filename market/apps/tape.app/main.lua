@@ -47,6 +47,64 @@ local seekBar = layout:createSeek(2, ry - 1, rx - 2)
 local writeButton = layout:createButton(19, 5, 16, 1, nil, nil, "WRITE FILE")
 local writeUrlButton = layout:createButton(19 + 17, 5, 16, 1, nil, nil, "WRITE URL")
 
+function writeButton:onClick()
+    local clear = saveBigZone(screen)
+    local path = gui_filepicker(screen, nil, nil, nil, "dfpwm", false, false)
+    clear()
+
+    if path then
+        local rewind = false
+        if gui_yesno(screen, nil, nil, "rewind the tape?") then
+            tape.stop()
+            tape.seek(-tape.getSize())
+            rewind = true
+        else
+            tape.stop()
+        end
+
+        local file = fs.open(path, "rb")
+        while true do
+            local data = file.readMax()
+            if not data then
+                break
+            end
+            tape.write(data)
+        end
+        file.close()
+
+        if rewind then
+            tape.seek(-tape.getSize())
+        end
+    end
+
+    redraw()
+end
+
+local rewindButton = layout:createButton(2, 9, 16, 1, nil, nil, "REWIND")
+local wipeButton = layout:createButton(2 + 17, 9, 16, 1, nil, nil, "WIPE", true)
+
+function rewindButton:onClick()
+    tape.seek(-tape.getSize())
+end
+
+function wipeButton:onClick()
+    if gui_yesno(screen, nil, nil, "Are you sure you want to wipe this tape?") then
+        gui.status(screen, nil, nil, "Cleaning The Tape...")
+        local k = tape.getSize()
+        tape.stop()
+        tape.seek(-k)
+        tape.stop() --Just making sure
+        tape.seek(-90000)
+        local s = string.rep("\xAA", 8192)
+        for i = 1, k + 8191, 8192 do
+            tape.write(s)
+        end
+        tape.seek(-k)
+        tape.seek(-90000)
+    end
+    redraw()
+end
+
 layout:createText(2, ry - 5, nil, "volume: ")
 layout:createText(2, ry - 3, nil, "speed : ")
 
@@ -84,13 +142,11 @@ local function doTape()
     local state = tape.getState()
     local playing = state == "PLAYING"
 
-    if playing then
-        if seekBar.focus then
-            tape.seek((seekBar.value * size) - tape.getPosition())
-        else
-            seekBar.value = tape.getPosition() / size
-            seekBar:draw()
-        end
+    if seekBar.focus then
+        tape.seek((seekBar.value * size) - tape.getPosition())
+    else
+        seekBar.value = tape.getPosition() / size
+        seekBar:draw()
     end
 
     if playing ~= oldPlay then
@@ -123,7 +179,7 @@ thread.create(function ()
     end
 end):resume()
 
-local function redraw()
+function redraw()
     doTape()
     if tape.isReady() then
         tapeLabel.read.setBuffer(tape.getLabel() or "none")
