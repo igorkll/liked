@@ -288,7 +288,7 @@ local function draw(old, check) --вызывает все перерисовки
         end
     end
     local lUserPath = paths.canonical(userPath)
-    if startIconsPoss[lUserPath] > iconsCount then
+    if not startIconsPoss[lUserPath] or startIconsPoss[lUserPath] > iconsCount then
         startIconsPoss[lUserPath] = old or 1
     end
     if check and startIconsPoss[lUserPath] == (old or 1) then

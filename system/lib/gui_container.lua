@@ -24,7 +24,8 @@ gui_container.unlockedDisks = {}
 
 gui_container.chars = {
     threeDots = "…",
-    splitLine = "⎯"
+    splitLine = "⎯",
+    dot = "●"
 }
 
 gui_container.screenSaverPath = "/data/screenSaver.scrsv"

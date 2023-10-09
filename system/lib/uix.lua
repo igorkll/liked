@@ -61,6 +61,18 @@ function objclass:uploadEvent(eventData)
                 self:onTextChanged(text)
             end
         end
+    elseif self.type == "seek" then
+        if eventData[1] == "touch" and eventData[4] == self.y and eventData[3] >= self.x and eventData[3] < self.x + self.sx then
+            self.focus = true
+        elseif eventData[1] == "drop" or eventData[1] == "touch" then
+            self.focus = false
+        end
+        if (eventData[1] == "touch" or eventData[1] == "drag") and self.focus then
+            self.value = (eventData[3] - self.x) / (self.sx - 1)
+            if self.value < 0 then self.value = 0 end
+            if self.value > 1 then self.value = 1 end
+            self:draw()
+        end
     end
 end
 
@@ -121,6 +133,10 @@ function objclass:draw()
             self.gui.window:set(self.x + (self.sx - 1), self.y, bg, self.back, "◗")
         end
         self.read.redraw()
+    elseif self.type == "seek" then
+        local _, _, bg = self.gui.window:get(self.x, self.y)
+        self.gui.window:fill(self.x, self.y, self.sx, 1, bg, self.color, gui_container.chars.splitLine)
+        self.gui.window:set(self.x + math.round((self.sx - 1) * self.value), self.y, bg, self.dotcolor, gui_container.chars.dot)
     end
 end
 
@@ -209,6 +225,19 @@ function uix:createInput(x, y, sx, back, fore, hidden, default, syntax, maxlen, 
     if maxlen then
         obj.read.setMaxStringLen(maxlen)
     end
+
+    table.insert(self.objs, obj)
+    return obj
+end
+
+function uix:createSeek(x, y, sx, color, dotcolor, value)
+    local obj = setmetatable({gui = self, type = "seek"}, {__index = objclass})
+    obj.x = x
+    obj.y = y
+    obj.sx = sx
+    obj.color = color or colors.lightGray
+    obj.dotcolor = dotcolor or colors.white
+    obj.value = value or 0
 
     table.insert(self.objs, obj)
     return obj
