@@ -135,8 +135,10 @@ function objclass:draw()
         self.read.redraw()
     elseif self.type == "seek" then
         local _, _, bg = self.gui.window:get(self.x, self.y)
-        self.gui.window:fill(self.x, self.y, self.sx, 1, bg, self.color, gui_container.chars.splitLine)
-        self.gui.window:set(self.x + math.round((self.sx - 1) * self.value), self.y, bg, self.dotcolor, gui_container.chars.dot)
+        local dotpos = math.round((self.sx - 1) * self.value)
+        self.gui.window:fill(self.x, self.y, dotpos, 1, bg, self.fillColor, gui_container.chars.wideSplitLine)
+        self.gui.window:fill(self.x + dotpos, self.y, self.sx - dotpos, 1, bg, self.color, gui_container.chars.wideSplitLine)
+        self.gui.window:set(self.x + dotpos, self.y, bg, self.dotcolor, gui_container.chars.dot)
     end
 end
 
@@ -230,12 +232,13 @@ function uix:createInput(x, y, sx, back, fore, hidden, default, syntax, maxlen, 
     return obj
 end
 
-function uix:createSeek(x, y, sx, color, dotcolor, value)
+function uix:createSeek(x, y, sx, color, fillColor, dotcolor, value)
     local obj = setmetatable({gui = self, type = "seek"}, {__index = objclass})
     obj.x = x
     obj.y = y
     obj.sx = sx
     obj.color = color or colors.lightGray
+    obj.fillColor = fillColor or colors.lime
     obj.dotcolor = dotcolor or colors.white
     obj.value = value or 0
 

@@ -25,6 +25,7 @@ gui_container.unlockedDisks = {}
 gui_container.chars = {
     threeDots = "…",
     splitLine = "⎯",
+    wideSplitLine = "⠶",
     dot = "●"
 }
 
