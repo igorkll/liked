@@ -8,6 +8,7 @@ local screen, posX, posY, vfs, name = ...
 local strs = {
     "  likeOS installer",
     "  liked",
+    "  likedbox",
     "  likeOS (core only)",
     "  full cloning of the system  "
 }
@@ -22,9 +23,9 @@ end
 
 str2 = str2:sub(3, #str2)
 local label = str2
-if num2 == 3 then
+if num2 == 4 then
     label = "likeOS"
-elseif num2 == 4 then
+elseif num2 == 5 then
     label = "self-system"
 end
 
@@ -58,12 +59,39 @@ if gui_yesno(screen, nil, nil, "install \"" .. label .. "\" to \"" .. name .. "\
         return fs.copy(paths.concat(selfsys, "system/core"), paths.concat(target, "system/core"))
     end
 
-    local function install_liked()
+    local function install_liked(box)
         local success, err = fs.copy(paths.concat(selfsys, "init.lua"), paths.concat(target, "init.lua"))
         if not success then return nil, err end
 
         fs.remove(paths.concat(target, "system")) --удаляет старую систему чтобы не было канфликтов версий и не оставалось лишних файлов
-        return fs.copy(paths.concat(selfsys, "system"), paths.concat(target, "system"))
+        if box then
+            local selfsys = paths.concat(selfsys, "system")
+            local bl = {
+                "installer",
+                "likedbox",
+                "screenSavers",
+                "themes",
+                "wallpapers",
+                "icons",
+                "bin",
+                "autoruns",
+                "recoveryScript.lua",
+                "registry.dat",
+                "market_urls_dev.txt",
+                "market_urls_main.txt"
+            }
+            return fs.copy(selfsys, paths.concat(target, "system"), function (from)
+                for _, lpath in ipairs(bl) do
+                    if paths.equals(paths.concat(selfsys, lpath), from) then
+                        return false
+                    end
+                end
+                
+                return true
+            end)
+        else
+            return fs.copy(paths.concat(selfsys, "system"), paths.concat(target, "system"))
+        end
     end
 
     local function install_installer()
@@ -83,10 +111,13 @@ if gui_yesno(screen, nil, nil, "install \"" .. label .. "\" to \"" .. name .. "\
     elseif num2 == 2 then
         success, err = install_liked()
     elseif num2 == 3 then
-        success, err = install_core()
+        success, err = install_liked(true)
     elseif num2 == 4 then
+        success, err = install_core()
+    elseif num2 == 5 then
         fs.remove(paths.concat(target, "system")) --удаляет старую систему чтобы не было канфликтов версий и не оставалось лишних файлов
         success, err = fs.copy(selfsys, target)
+        label = rootfs.getLabel() or "liked"
     end
     
 
@@ -95,9 +126,6 @@ if gui_yesno(screen, nil, nil, "install \"" .. label .. "\" to \"" .. name .. "\
     end
 
     if success then
-        if num2 == 4 then
-            label = rootfs.getLabel() or "liked"
-        end
         pcall(vfs.setLabel, label) --label может быть readonly(состояния label readonly полностью независимо от readonly на диске)
         --у loot дискет можно менять label хотя они readonly, а tmpfs не readonly но label менять нельзя(окозалось багом ocelot ну да ладно)
         --единсвенный кастыльный способ проверить являеться ли label readonly - это попытаться изменить его на точно такой же
