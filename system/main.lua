@@ -16,10 +16,16 @@ table.insert(programs.paths, "/data/userdata/apps")
 local screens = {}
 local minDepth = math.huge
 local maxDepth = 0
+local hardwareBufferAvailable = false
 for address in component.list("screen") do
     local gpu = graphic.findGpu(address)
     if gpu then
-        if gpu.setActiveBuffer and gpu.getActiveBuffer() ~= 0 then gpu.setActiveBuffer(0) end
+        if gpu.setActiveBuffer then
+            hardwareBufferAvailable = true
+            if gpu.getActiveBuffer() ~= 0 then
+                gpu.setActiveBuffer(0)
+            end
+        end
         local depth = gpu.maxDepth()
         if gpu then
             table.insert(screens, address)
@@ -83,8 +89,15 @@ if not registry.branch then
 end
 
 if not registry.bufferType then
+    --[[
     if computer.totalMemory() >= (gui_container.minRamForDBuff * 1024) then
         registry.bufferType = "software"
+    else
+        registry.bufferType = "none"
+    end
+    ]]
+    if hardwareBufferAvailable then
+        registry.bufferType = "hardware"
     else
         registry.bufferType = "none"
     end
