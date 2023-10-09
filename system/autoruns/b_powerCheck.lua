@@ -4,7 +4,7 @@ local registry = require("registry")
 local computer = require("computer")
 
 local oldLowPower
-event.timer(5, function ()
+event.timer(1, function ()
     local lowPower = system.getCharge() <= 30
     if lowPower ~= oldLowPower then
         if lowPower and registry.lowPowerSound then
