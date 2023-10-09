@@ -35,13 +35,16 @@ end
 layout:createText(2, 7, nil, "loop: ")
 local loopMode = layout:createSwitch(8, 7, false)
 
-function loopMode:onSwitch()
+function loopMode:onSwitch() --сделай фоновый режим для loopmode
     
 end
 
 local playButton = layout:createButton(2, 3, 16, 1, nil, nil, "PLAY")
 local stopButton = layout:createButton(2, 5, 16, 1, nil, nil, "STOP")
+local playLed = layout:createLabel(15, 7, 3, 1)
 local seekBar = layout:createSeek(2, ry - 1, rx - 2)
+
+local writeButton = layout:createButton(19, 5, 16, 1, nil, nil, "WRITE FILE")
 
 layout:createText(2, ry - 5, nil, "volume: ")
 layout:createText(2, ry - 3, nil, "speed : ")
@@ -59,48 +62,68 @@ end
 
 ------------------------------
 
-thread.create(function ()
-    local oldReady
-    while true do
-        local ready = tape.isReady()
-        if ready ~= oldReady then
-            if ready then
-                tapeLabel.read.setBuffer(tape.getLabel() or "none")
-                tapeLabel.read.setLock(false)
-            else
-                tapeLabel.read.setBuffer("TAPE IS MISSING")
-                tapeLabel.read.setLock(true)
-            end
-            tapeLabel:draw()
-            oldReady = ready
+local oldReady
+local oldPlay
+
+local function doTape()
+    local ready = tape.isReady()
+    if ready ~= oldReady then
+        if ready then
+            tapeLabel.read.setBuffer(tape.getLabel() or "none")
+            tapeLabel.read.setLock(false)
+        else
+            tapeLabel.read.setBuffer("TAPE IS MISSING")
+            tapeLabel.read.setLock(true)
         end
+        tapeLabel:draw()
+        oldReady = ready
+    end
 
-        local size = tape.getSize()
-        local state = tape.getState()
+    local size = tape.getSize()
+    local state = tape.getState()
+    local playing = state == "PLAYING"
 
-        if state == "PLAYING" then
-            if seekBar.focus then
-                tape.seek((seekBar.value * size) - tape.getPosition())
-            else
-                seekBar.value = tape.getPosition() / size
-                seekBar:draw()
-            end
-        end
-
-        if loopMode.state and tape.isEnd() then
-            tape.seek(-size)
-            seekBar.value = 0
+    if playing then
+        if seekBar.focus then
+            tape.seek((seekBar.value * size) - tape.getPosition())
+        else
+            seekBar.value = tape.getPosition() / size
             seekBar:draw()
         end
+    end
 
-        tape.setVolume(volBar.value)
-        tape.setSpeed(speedBar.value * 2)
+    if playing ~= oldPlay then
+        if playing then
+            playLed.back = colors.yellow
+            playLed:draw()
+        else
+            playLed.back = colors.gray
+            playLed:draw()
+        end
 
-        os.sleep(0.05)
+        oldPlay = playing
+    end
+
+    if loopMode.state and tape.isEnd() then
+        tape.seek(-size)
+        tape.play()
+        seekBar.value = 0
+        seekBar:draw()
+    end
+
+    tape.setVolume(volBar.value)
+    tape.setSpeed(speedBar.value * 2)
+end
+
+thread.create(function ()
+    while true do
+        doTape()
+        os.sleep(0.1)
     end
 end):resume()
 
 local function redraw()
+    doTape()
     if tape.isReady() then
         tapeLabel.read.setBuffer(tape.getLabel() or "none")
         tapeLabel.read.setLock(false)
