@@ -118,4 +118,12 @@ event.hyperListen(function (eventType, cuuid, ctype)
     end
 end)
 
-event.wait()
+while true do
+    for screen, th in pairs(screenThreads) do
+        if th:status() == "dead" then
+            th:kill()
+            runDesktop(screen)
+        end
+    end
+    os.sleep(1)    
+end
