@@ -14,7 +14,7 @@ local strs = {
 }
 local posX, posY, sizeX, sizeY = gui.contentPos(screen, posX, posY, strs)
 local clear = screenshot(screen, posX, posY, sizeX + 2, sizeY + 1)
-local str2, num2 = gui.context(screen, posX, posY, strs, {true, true, true, not registry.banSystemCloning})
+local str2, num2 = gui.context(screen, posX, posY, strs, {true, true, true, true, not registry.banSystemCloning})
 clear()
 
 if not str2 then
@@ -65,7 +65,7 @@ if gui_yesno(screen, nil, nil, "install \"" .. label .. "\" to \"" .. name .. "\
 
         fs.remove(paths.concat(target, "system")) --удаляет старую систему чтобы не было канфликтов версий и не оставалось лишних файлов
         if box then
-            local selfsys = paths.concat(selfsys, "system")
+            local systemFolder = paths.concat(selfsys, "system")
             local bl = {
                 "installer",
                 "likedbox",
@@ -78,17 +78,23 @@ if gui_yesno(screen, nil, nil, "install \"" .. label .. "\" to \"" .. name .. "\
                 "recoveryScript.lua",
                 "registry.dat",
                 "market_urls_dev.txt",
-                "market_urls_main.txt"
+                "market_urls_main.txt",
+                "logo.lua",
+                "main.lua"
             }
-            return fs.copy(selfsys, paths.concat(target, "system"), function (from)
+            
+            local success, err =  fs.copy(systemFolder, paths.concat(target, "system"), function (from)
                 for _, lpath in ipairs(bl) do
-                    if paths.equals(paths.concat(selfsys, lpath), from) then
+                    if paths.equals(paths.concat(systemFolder, lpath), from) then
                         return false
                     end
                 end
                 
                 return true
             end)
+            if not success then return nil, err end
+
+            return fs.copy(paths.concat(systemFolder, "likedbox"), paths.concat(target, "system"))
         else
             return fs.copy(paths.concat(selfsys, "system"), paths.concat(target, "system"))
         end
