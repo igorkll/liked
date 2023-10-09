@@ -138,7 +138,12 @@ function objclass:draw()
         local dotpos = math.round((self.sx - 1) * self.value)
         self.gui.window:fill(self.x, self.y, dotpos, 1, bg, self.fillColor, gui_container.chars.wideSplitLine)
         self.gui.window:fill(self.x + dotpos, self.y, self.sx - dotpos, 1, bg, self.color, gui_container.chars.wideSplitLine)
-        self.gui.window:set(self.x + dotpos, self.y, bg, self.dotcolor, gui_container.chars.dot)
+        if self.gui.style == "round" then
+            if dotpos >= self.sx - 1 then dotpos = dotpos - 1 end
+            self.gui.window:set(self.x + dotpos, self.y, bg, self.dotcolor, "◖◗")
+        else
+            self.gui.window:set(self.x + dotpos, self.y, bg, self.dotcolor, "█")
+        end
     end
 end
 

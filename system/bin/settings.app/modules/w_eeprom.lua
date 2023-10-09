@@ -32,8 +32,6 @@ local flashButton = layout:createButton(2, 11, 16, 1, nil, nil, "Flash", true)
 local dumpButton = layout:createButton(2, 13, 16, 1, nil, nil, "Dump", true)
 local makeReadOnlyButton = layout:createButton(20, 11, 16, 1, nil, nil, "Make R/O", true)
 
-local seek = layout:createSeek(5, 15, 32, nil, nil, nil, 1)
-
 local eepromMissingString = "EEPROM IS MISSING"
 local storageRo = "storage is readonly"
 local storageRoState = false
