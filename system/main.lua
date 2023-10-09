@@ -136,7 +136,6 @@ local function runDesktop(screen)
     t:resume() --поток по умалчанию спит
 
     first = false
-
     screenThreads[screen] = t
 end
 
