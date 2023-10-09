@@ -53,6 +53,7 @@ function gui.shadow(lgpu, x, y, sx, sy, mul, full)
         screen = lgpu.address
     end
     local gpu = graphic.findGpu(screen)
+    local depth = gpu.getDepth()
 
     local function getPoses()
         local shadowPosesX = {}
@@ -218,6 +219,7 @@ function gui.status(screen, cx, cy, str, backgroundColor)
         window:set(4, 3, colors.blue, colors.white, "P")
     end)
     graphic.forceUpdate()
+    event.yield()
 end
 
 function gui.warn(screen, cx, cy, str, backgroundColor)
