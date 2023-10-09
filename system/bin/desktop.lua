@@ -30,6 +30,7 @@ local window = graphic.createWindow(screen, 1, 2, rx, ry - 1)
 
 ------------------------------------------------------------------------ paths
 
+local defaultUserPath = "/data/userdata/"
 local wallpaperPath = "/data/wallpaper.t2p"
 local userPath = gui_container.getUserRoot(screen)
 local iconsPath = userPath
@@ -263,7 +264,7 @@ end
 local function draw(old, check) --вызывает все перерисовки
     checkData()
     if not fs.exists(userPath) or not fs.isDirectory(userPath) then
-        userPath = gui_container.getUserRoot(screen)
+        userPath = defaultUserPath
     end
 
     local iconsCount = 0
@@ -701,8 +702,8 @@ local function doIcon(windowEventData)
                 draw()
                 return
             elseif windowEventData[3] >= 11 and windowEventData[3] <= 14 then
-                if userPath ~= "/data/userdata/" then
-                    userPath = "/data/userdata/"
+                if userPath ~= defaultUserPath then
+                    userPath = defaultUserPath
                     draw()
                 end
                 return
