@@ -228,7 +228,7 @@ local function drawBar(lUserPath, iconsCount)
     ]]
 
     window:fill(1, window.sizeY, rx, 1, colors.gray, 0, " ")
-    window:set(6, window.sizeY, colors.gray, colors.white, "path: " .. gui_container.shortPath(curentPath, window.sizeX - 25))
+    window:set(16, window.sizeY, colors.gray, colors.white, "path: " .. gui_container.shortPath(curentPath, window.sizeX - 35))
     window:set(window.sizeX - 10, window.sizeY, colors.gray, colors.white, tostring(currentPage))
     window:set(window.sizeX - 8, window.sizeY, colors.gray, colors.white, "/")
     window:set(window.sizeX - 6, window.sizeY, colors.gray, colors.white, tostring(pageCount))
@@ -242,13 +242,14 @@ local function drawBar(lUserPath, iconsCount)
     --window:set(3, window.sizeY - 2, colors.red, colors.white, "/ ")
     --window:set(3, window.sizeY - 1, colors.red, colors.white, "\\ ")
     --window:set(3, window.sizeY - 0, colors.red, colors.white, " \\")
-    window:set(1, window.sizeY, colors.red, colors.white, "<<")
+    window:set(1, window.sizeY, colors.red, colors.white, " << ")
 
     --window:set(window.sizeX - 3, window.sizeY - 3, colors.blue, colors.white, "RE")
     --window:set(window.sizeX - 3, window.sizeY - 2, colors.blue, colors.white, "FR")
     --window:set(window.sizeX - 3, window.sizeY - 1, colors.blue, colors.white, "ES")
     --window:set(window.sizeX - 3, window.sizeY - 0, colors.blue, colors.white, "H ")
-    window:set(3, window.sizeY, colors.blue, colors.white, "@@")
+    window:set(6, window.sizeY, colors.blue, colors.white, " @@ ")
+    window:set(11, window.sizeY, colors.green, colors.white, "HOME")
 
     --window:set(window.sizeX - 1, window.sizeY - 3, colors.lightGray, colors.white, "\\ ")
     --window:set(window.sizeX - 1, window.sizeY - 2, colors.lightGray, colors.white, " \\")
@@ -687,7 +688,7 @@ end
 local function doIcon(windowEventData)
     if windowEventData[1] == "touch" then
         if windowEventData[4] >= window.sizeY then
-            if windowEventData[3] >= 1 and windowEventData[3] <= 2 then
+            if windowEventData[3] >= 1 and windowEventData[3] <= 4 then
                 folderBack()
                 return
             elseif windowEventData[3] <= window.sizeX and windowEventData[3] >= window.sizeX - 1 then
@@ -696,8 +697,14 @@ local function doIcon(windowEventData)
             elseif windowEventData[3] <= window.sizeX - 2 and windowEventData[3] >= window.sizeX - 3 then
                 listBack()
                 return
-            elseif windowEventData[3] >= 3 and windowEventData[3] <= 4 then
+            elseif windowEventData[3] >= 6 and windowEventData[3] <= 9 then
                 draw()
+                return
+            elseif windowEventData[3] >= 11 and windowEventData[3] <= 14 then
+                if userPath ~= "/data/userdata/" then
+                    userPath = "/data/userdata/"
+                    draw()
+                end
                 return
             end
         end
@@ -1217,7 +1224,7 @@ local function doIcon(windowEventData)
                         if #name == 0 or name:find("%/") or name:find("%\\") then
                             warn("invalid name")
                         else
-                            fs.makeDirectory(path)
+                            liked.assertNoClear(screen, fs.makeDirectory(path))
                             draw()
                         end
                     else
