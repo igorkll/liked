@@ -84,11 +84,25 @@ local writeButton = layout:createButton(19, 5, 16, 1, nil, nil, "WRITE FILE", tr
 local writeUrlButton = layout:createButton(19 + 17, 5, 16, 1, nil, nil, "WRITE URL", true)
 local resetSpeedButton = layout:createButton(2, 11, 16, 1, nil, nil, "RESET SPEED", true)
 
-local function writeFile(path)
+local function tapeCheck()
     if not tape.isReady() then
-        gui.warn(screen, nil, nil, "the tape is not installed")
+        gui.warn(screen, nil, nil, "tape is missing")
         redraw()
-        return
+        return true
+    end
+end
+
+local function writeFile(path)
+    if tapeCheck() then return end
+
+    if not path then
+        local clear = saveBigZone(screen)
+        path = gui_filepicker(screen, nil, nil, nil, "dfpwm", false, false)
+        if not path then
+            redraw()
+            return
+        end
+        clear()
     end
 
     local label = tape.getLabel()
@@ -96,7 +110,7 @@ local function writeFile(path)
         label = "unknown"
     end
 
-    if gui_yesno(screen, nil, nil, "are you sure you want to write \'" .. paths.name(path) .. "\' to \'" .. label .. "\' tape?") then
+    if gui_yesno(screen, nil, nil, "are you sure you want to write \'" .. paths.hideExtension(paths.name(path)) .. "\' to \'" .. label .. "\' tape?") then
         if gui_yesno(screen, nil, nil, "rewind the tape?") then
             tape.stop()
             tape.seek(-tape.getSize())
@@ -121,13 +135,7 @@ local function writeFile(path)
 end
 
 function writeButton:onClick()
-    local clear = saveBigZone(screen)
-    local path = gui_filepicker(screen, nil, nil, nil, "dfpwm", false, false)
-    clear()
-
-    if path then
-        writeFile(path)
-    end
+    writeFile()
 end
 
 local rewindButton = layout:createButton(2, 9, 16, 1, nil, nil, "REWIND")
@@ -138,6 +146,8 @@ function rewindButton:onClick()
 end
 
 function wipeButton:onClick()
+    if tapeCheck() then return end
+
     if gui_yesno(screen, nil, nil, "Are you sure you want to wipe this tape?") then
         gui.status(screen, nil, nil, "Cleaning The Tape...")
         local k = tape.getSize()
@@ -152,6 +162,7 @@ function wipeButton:onClick()
         tape.seek(-k)
         tape.seek(-90000)
     end
+
     redraw()
 end
 
@@ -205,7 +216,10 @@ local function doTape()
     local state = tape.getState()
     
     if not seekBar.focus then
-        seekBar.value = math.round((tape.getPosition() / size) * 80) / 80
+        local val = math.round((tape.getPosition() / size) * 80) / 80
+        if val < 0 or val ~= val then val = 0 end
+        if val > 1 then val = 1 end
+        seekBar.value = val
         if seekBar.value ~= oldSeek then
             seekBar:draw()
             oldSeek = seekBar.value
