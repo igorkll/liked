@@ -595,7 +595,7 @@ function gui.select(screen, cx, cy, label, actions, scroll, noCloseButton)
         for index, action in ipairs(actions) do
             local y = (index + 1) - scroll
             if y >= 2 and y <= window.sizeY then
-                window:fill(1, y, window.sizeX, 1, colors.black, colors.white, " ")
+                window:fill(1, y, window.sizeX - 1, 1, colors.black, colors.white, " ")
                 window:set(2, y, colors.black, colors.white, action)
 
                 addrs[y] = action
@@ -616,7 +616,7 @@ function gui.select(screen, cx, cy, label, actions, scroll, noCloseButton)
             local y = (index + 1) - scroll
             if y >= 2 and y <= window.sizeY then
                 if y == 2 then
-                    window:fill(1, y, window.sizeX, 1, colors.black, colors.white, " ")
+                    window:fill(1, y, window.sizeX - 1, 1, colors.black, colors.white, " ")
                     window:set(2, y, colors.black, colors.white, action)
                 end
 
