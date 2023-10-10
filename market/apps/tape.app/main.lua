@@ -7,6 +7,7 @@ local liked = require("liked")
 local component = require("component")
 local event = require("event")
 local thread = require("thread")
+local paths = require("paths")
 
 local screen, nickname, path = ...
 local tape = gui.selectcomponent(screen, nil, nil, {"tape_drive"}, true)
@@ -83,12 +84,19 @@ local writeButton = layout:createButton(19, 5, 16, 1, nil, nil, "WRITE FILE", tr
 local writeUrlButton = layout:createButton(19 + 17, 5, 16, 1, nil, nil, "WRITE URL", true)
 local resetSpeedButton = layout:createButton(2, 11, 16, 1, nil, nil, "RESET SPEED", true)
 
-function writeButton:onClick()
-    local clear = saveBigZone(screen)
-    local path = gui_filepicker(screen, nil, nil, nil, "dfpwm", false, false)
-    clear()
+local function writeFile(path)
+    if not tape.isReady() then
+        gui.warn(screen, nil, nil, "the tape is not installed")
+        redraw()
+        return
+    end
 
-    if path then
+    local label = tape.getLabel()
+    if not label or label == "" then
+        label = "unknown"
+    end
+
+    if gui_yesno(screen, nil, nil, "are you sure you want to write \'" .. paths.name(path) .. "\' to \'" .. label .. "\' tape?") then
         if gui_yesno(screen, nil, nil, "rewind the tape?") then
             tape.stop()
             tape.seek(-tape.getSize())
@@ -110,6 +118,16 @@ function writeButton:onClick()
     end
 
     redraw()
+end
+
+function writeButton:onClick()
+    local clear = saveBigZone(screen)
+    local path = gui_filepicker(screen, nil, nil, nil, "dfpwm", false, false)
+    clear()
+
+    if path then
+        writeFile(path)
+    end
 end
 
 local rewindButton = layout:createButton(2, 9, 16, 1, nil, nil, "REWIND")
@@ -228,6 +246,10 @@ function redraw()
     upRedraw()
 end
 redraw()
+
+if path then
+    writeFile(path)
+end
 
 while true do
     local eventData = {event.pull()}
