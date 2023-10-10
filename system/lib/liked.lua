@@ -109,14 +109,39 @@ function liked.applyBufferType()
     graphic.screensBuffers = {}
 end
 
+local energyTh
+local wakeupEvents = {
+    touch = true,
+    drop = true,
+    drag = true,
+    scroll = true,
+    key_down = true,
+    key_up = true
+}
 function liked.applyPowerMode()
-    local powerModes = {
-        ["ultra power"] = 0,
-        ["power"] = 0.05,
-        ["energy saving"] = 0.5,
-        ["ultra energy saving"] = 2,
-    }
-    event.minTime = powerModes[registry.powerMode]
+    if registry.powerMode == "power" then
+        event.minTime = 0
+        if energyTh then
+            energyTh:kill()
+            energyTh = nil
+        end
+    else
+        if not energyTh then
+            energyTh = thread.createBackground(function ()
+                local oldWakeTIme = computer.uptime()
+                while true do
+                    local eventData = {event.pull(1)}
+                    if eventData[1] and wakeupEvents[eventData[1]] then
+                        event.minTime = 0
+                        oldWakeTIme = computer.uptime()
+                    elseif computer.uptime() - oldWakeTIme > 2 then
+                        event.minTime = 5
+                    end
+                end
+            end)
+            energyTh:resume()
+        end
+    end
 end
 
 --------------------------------------------------------
