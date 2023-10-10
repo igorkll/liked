@@ -15,6 +15,30 @@ if tape then
 else
     return
 end
+
+if not _G.tape_agent then
+    _G.tape_agent = {}
+end
+
+local agent = _G.tape_agent[tape.address]
+if not agent then
+    agent = {}
+    agent.volume = 0.5
+    agent.speed = 1
+    agent.loop = false
+    agent.timer = event.timer(1, function ()
+        if not component.isConnected(tape) then
+            _G.tape_agent[tape.address] = nil
+            return false
+        end
+        if agent.loop and tape.isEnd() then
+            tape.seek(-tape.getSize())
+            tape.play()
+        end
+    end, math.huge)
+    _G.tape_agent[tape.address] = agent
+end
+
 local rx, ry = graphic.getResolution(screen)
 local window = graphic.createWindow(screen, 1, 1, rx, ry)
 local layout = uix.create(window, colors.black)
@@ -26,17 +50,15 @@ upCallbacks.exit = function ()
     baseTh:kill()
 end
 
-
 local tapeLabel = layout:createInput(19, 3, rx - 19, nil, nil, false, nil, nil, 32, "label: ")
 function tapeLabel:onTextChanged(text)
     tape.setLabel(text)
 end
 
 layout:createText(2, 7, nil, "loop: ")
-local loopMode = layout:createSwitch(8, 7, false)
-
-function loopMode:onSwitch() --сделай фоновый режим для loopmode
-    
+local loopMode = layout:createSwitch(8, 7, agent.loop)
+function loopMode:onSwitch()
+    agent.loop = self.state
 end
 
 local playButton = layout:createButton(2, 3, 16, 1, nil, nil, "PLAY")
@@ -59,6 +81,7 @@ end
 
 local writeButton = layout:createButton(19, 5, 16, 1, nil, nil, "WRITE FILE", true)
 local writeUrlButton = layout:createButton(19 + 17, 5, 16, 1, nil, nil, "WRITE URL", true)
+local resetSpeedButton = layout:createButton(2, 11, 16, 1, nil, nil, "RESET SPEED", true)
 
 function writeButton:onClick()
     local clear = saveBigZone(screen)
@@ -117,18 +140,27 @@ end
 layout:createText(2, ry - 5, nil, "volume: ")
 layout:createText(2, ry - 3, nil, "speed : ")
 
-local volBar = layout:createSeek(10, ry - 5, rx - 10, nil, nil, nil, 0.5)
-local speedBar = layout:createSeek(10, ry - 3, rx - 10, nil, nil, nil, 0.5)
+local volBar = layout:createSeek(10, ry - 5, rx - 10, nil, nil, nil, agent.volume)
+local speedBar = layout:createSeek(10, ry - 3, rx - 10, nil, nil, nil, agent.speed / 2)
 
-tape.setVolume(0.5)
-tape.setSpeed(1)
+tape.setVolume(agent.volume)
+tape.setSpeed(agent.speed)
 
 function volBar:onSeek(value)
     tape.setVolume(value)
+    agent.volume = value
 end
 
 function speedBar:onSeek(value)
     tape.setSpeed(value * 2)
+    agent.speed = value * 2
+end
+
+function resetSpeedButton:onClick()
+    tape.setSpeed(1)
+    agent.speed = 1
+    speedBar.value = 0.5
+    speedBar:draw()
 end
 
 ------------------------------
@@ -173,13 +205,6 @@ local function doTape()
         end
 
         oldPlay = playing
-    end
-
-    if loopMode.state and tape.isEnd() then
-        tape.seek(-size)
-        tape.play()
-        seekBar.value = 0
-        seekBar:draw()
     end
 end
 
