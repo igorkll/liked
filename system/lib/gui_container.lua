@@ -104,12 +104,12 @@ function gui_container.getUserRoot(screen)
     return path
 end
 
-function gui_container.shortPath(path, max)
-    local pathLen = unicode.len(path)
-    if pathLen > max then
-        return gui_container.chars.threeDots .. unicode.sub(path, (pathLen - max) + 2, pathLen)
+function gui_container.short(str, max)
+    local len = unicode.len(str)
+    if len > max then
+        return gui_container.chars.threeDots .. unicode.sub(str, (len - max) + 2, len)
     end
-    return path
+    return str
 end
 
 function gui_container.toUserPath(screen, path) --конвертирует рутовый путь в путь пользователя

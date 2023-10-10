@@ -27,11 +27,11 @@ local selector = thread.create(function ()
         local constCount = 0
         local unloadableCount = 0
         for name, data in pairs(package.loaded) do
-            table.insert(loadedLibraries, gui_container.shortPath(name, 47))
+            table.insert(loadedLibraries, gui_container.short(name, 47))
             constCount = constCount + 1
         end
         for name, data in pairs(package.cache) do
-            table.insert(loadedLibraries, gui_container.shortPath(name .. " (unloadable)", 47))
+            table.insert(loadedLibraries, gui_container.short(name .. " (unloadable)", 47))
             unloadableCount = unloadableCount + 1
         end
         table.sort(loadedLibraries)

@@ -224,12 +224,12 @@ local function drawBar(lUserPath, iconsCount)
     --[[
     window:fill(1, window.sizeY - 1, rx, 1, colors.gray, 0, " ")
     if copyObject then
-        window:set(2, window.sizeY - 1, colors.gray, colors.white, (isCut and "cutted: " or "copied: ") .. gui_container.shortPath(copyObject, window.sizeX - 2))
+        window:set(2, window.sizeY - 1, colors.gray, colors.white, (isCut and "cutted: " or "copied: ") .. gui_container.short(copyObject, window.sizeX - 2))
     end
     ]]
 
     window:fill(1, window.sizeY, rx, 1, colors.gray, 0, " ")
-    window:set(16, window.sizeY, colors.gray, colors.white, "path: " .. gui_container.shortPath(curentPath, window.sizeX - 35))
+    window:set(16, window.sizeY, colors.gray, colors.white, "path: " .. gui_container.short(curentPath, window.sizeX - 35))
     window:set(window.sizeX - 10, window.sizeY, colors.gray, colors.white, tostring(currentPage))
     window:set(window.sizeX - 8, window.sizeY, colors.gray, colors.white, "/")
     window:set(window.sizeX - 6, window.sizeY, colors.gray, colors.white, tostring(pageCount))

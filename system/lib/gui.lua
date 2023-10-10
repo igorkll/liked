@@ -745,6 +745,7 @@ function gui.selectcomponent(screen, cx, cy, types, allowAutoConfirm, control) -
 
                     local ctype = component.type(addr)
                     local clabel = advLabeling.getLabel(addr) or ""
+                    clabel = gui_container.short(clabel, 20)
                     table.insert(strs, ctype .. string.rep(" ", 38 - unicode.wlen(ctype) - unicode.wlen(clabel)) .. clabel .. string.rep(" ", (1 - unicode.wlen(clabel)) + unicode.wlen(clabel)) .. addr:sub(1, 8))
                 end
             end

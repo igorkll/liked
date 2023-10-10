@@ -30,7 +30,7 @@ end
 local addr = fs.get(path).address
 
 window:set(2, 3, colors.white, colors.black, "type     : " .. ctype)
-window:set(2, 4, colors.white, colors.black, "path     : " .. gui_container.shortPath(path, #addr))
+window:set(2, 4, colors.white, colors.black, "path     : " .. gui_container.short(path, #addr))
 window:set(2, 5, colors.white, colors.black, "disk     : " .. addr)
 window:set(2, 6, colors.white, colors.black, "real size: please wait...")
 window:set(2, 7, colors.white, colors.black, "disk size: please wait...")

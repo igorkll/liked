@@ -57,7 +57,7 @@ local function draw()
     window:set(2, window.sizeY, colors.red, colors.white, "+")
     window:set(window.sizeX, window.sizeY, colors.green, colors.white, ">")
 
-    window:set(20, window.sizeY, colors.lightGray, colors.white, gui_container.shortPath(gui_container.toUserPath(screen, userPath), window.sizeX - 8 - 13))
+    window:set(20, window.sizeY, colors.lightGray, colors.white, gui_container.short(gui_container.toUserPath(screen, userPath), window.sizeX - 8 - 13))
 
     reader.redraw()
 
