@@ -702,8 +702,12 @@ local function doIcon(windowEventData)
                 draw()
                 return
             elseif windowEventData[3] >= 11 and windowEventData[3] <= 14 then
-                if userPath ~= defaultUserPath then
-                    userPath = defaultUserPath
+                local root = defaultUserPath
+                if windowEventData[5] == 1 then
+                    root = gui_container.getUserRoot(screen)
+                end
+                if not paths.equals(userPath, root) then
+                    userPath = root
                     draw()
                 end
                 return
