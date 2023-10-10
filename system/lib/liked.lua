@@ -101,12 +101,26 @@ function liked.assertNoClear(screen, successful, err)
     end
 end
 
+local bufferTimerId
 function liked.applyBufferType()
     graphic.allowSoftwareBuffer = registry.bufferType == "software"
     graphic.allowHardwareBuffer = registry.bufferType == "hardware"
     graphic.vgpus = {}
     graphic.bindCache = {}
     graphic.screensBuffers = {}
+
+    if graphic.allowHardwareBuffer or graphic.allowSoftwareBuffer then
+        if not bufferTimerId then
+            bufferTimerId = event.timer(0.1, function ()
+                graphic.forceUpdate()
+            end, math.huge)
+        end
+    else
+        if bufferTimerId then
+            event.cancel(bufferTimerId)
+            bufferTimerId = nil
+        end
+    end
 end
 
 local energyTh
