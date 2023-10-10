@@ -1024,7 +1024,7 @@ term = {clear = function()
     local rx, ry = gpu.getResolution()
     gpu.fill(1, 1, rx, ry, " ")
 end, pull = function(...)
-      graphic.update(screen)
+      graphic.updateFlag(screen)
 
     if blinkingTerm then
         local gpu = graphic.findGpu(screen)
@@ -1045,7 +1045,7 @@ end, pull = function(...)
       gpu.set(cx, cy, char)
     end
 
-      graphic.update(screen)
+      graphic.updateFlag(screen)
 
     return table.unpack(eventData)
 end, setCursor = function(x, y)

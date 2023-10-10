@@ -111,9 +111,7 @@ function liked.applyBufferType()
 
     if graphic.allowHardwareBuffer or graphic.allowSoftwareBuffer then
         if not bufferTimerId then
-            bufferTimerId = event.timer(0.1, function ()
-                graphic.forceUpdate()
-            end, math.huge)
+            bufferTimerId = event.timer(0.1, graphic.forceUpdate, math.huge)
         end
     else
         if bufferTimerId then
@@ -163,7 +161,7 @@ end
 function liked.raw_drawUpBarTask(method, screen, withoutFill, bgcolor)
     local function redraw()
         liked.drawUpBar(screen, withoutFill, bgcolor)
-        graphic.update(screen)
+        graphic.updateFlag(screen)
     end
     local th = method(function ()
         while true do
@@ -212,7 +210,7 @@ function liked.raw_drawFullUpBarTask(method, screen, ...)
     local args = {...}
     local function redraw()
         liked.drawFullUpBar(screen, table.unpack(args))
-        graphic.update(screen)
+        graphic.updateFlag(screen)
     end
     local callbacks = {}
     local th = method(function ()

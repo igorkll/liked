@@ -1007,7 +1007,7 @@ local function print(message, overwrite)
     gpu.fill(1, h - 1, w, 1, " ")
     gpu.set(1, h - 1, line)
   until not message or message == ""
-  graphic.update(screen)
+  graphic.updateFlag(screen)
 end
 
 -- utility method for reply tracking tables.

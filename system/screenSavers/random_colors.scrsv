@@ -29,6 +29,6 @@ while true do
         newcolor = {math.random(0, 255), math.random(0, 255), math.random(0, 255)}
     end
 
-    graphic.update(screen)
+    graphic.updateFlag(screen)
     event.yield()
 end
