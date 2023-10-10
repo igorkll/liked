@@ -113,28 +113,6 @@ local list = {
             save("/data/bin/irc.app/icon.t2p", download(self.icon))
         end
     },
-    --[[
-    {
-        name = "archiver",
-        version = "3",
-        vendor = "logic",
-        icon = selfurlpart .. "/apps/archiver.app/icon.t2p",
-        description = "allows you to unpack and package archives",
-        minDiskSpace = 64,
-
-        path = "/data/bin/archiver.app",
-        install = function(self)
-            fs.makeDirectory("/data/bin/archiver.app")
-            save("/data/bin/archiver.app/main.lua", download(selfurlpart .. "/apps/archiver.app/main.lua"))
-            save("/data/bin/archiver.app/icon.t2p", download(self.icon))
-            save("/data/bin/archiver.app/uninstall.lua", download(selfurlpart .. "/apps/archiver.app/uninstall.lua"))
-            save("/data/autoruns/archiver.lua", download(selfurlpart .. "/apps/archiver.app/autorun.lua"))
-            save("/data/icons/afpx.t2p", download(selfurlpart .. "/apps/archiver.app/afpx.t2p"))
-        
-            assert(programs.execute("/data/autoruns/archiver.lua"))
-        end
-    },
-    ]]
     {
         name = "brainfuck",
         version = "1",
@@ -153,38 +131,6 @@ local list = {
             save("/data/lib/brainfuck.lua", download(selfurlpart .. "/apps/brainfuck.app/lib.lua"))
         end
     },
-    --[[
-    eeprom = {
-        path = "/data/bin/eeprom.app",
-        install = function()
-            fs.makeDirectory("/data/bin/eeprom.app")
-            save("/data/bin/eeprom.app/main.lua", download(selfurlpart .. "/apps/eeprom.app/main.lua")))
-            save("/data/bin/eeprom.app/icon.t2p", download(selfurlpart .. "/apps/eeprom.app/icon.t2p")))
-        end
-    },
-    ]]
-    --[[
-    {
-        name = "legacy render",
-        version = "1",
-        vendor = "logic",
-        icon = selfurlpart .. "/apps/legacyRender.app/icon.t2p",
-        description = "allows you to switch between rendering options",
-
-        path = "/data/bin/legacyRender.app",
-        install = function(self)
-            fs.makeDirectory("/data/autoruns")
-            fs.makeDirectory("/data/bin/legacyRender.app")
-
-            save("/data/bin/legacyRender.app/main.lua", download(selfurlpart .. "/apps/legacyRender.app/main.lua")))
-            save("/data/bin/legacyRender.app/icon.t2p", download(self.icon)))
-            save("/data/bin/legacyRender.app/uninstall.lua", download(selfurlpart .. "/apps/legacyRender.app/uninstall.lua")))
-            save("/data/autoruns/legacyRender.lua", download(selfurlpart .. "/apps/legacyRender.app/autorun.lua")))
-            
-            programs.execute("/data/autoruns/legacyRender.lua")
-        end
-    },
-    ]]
     {
         name = "lua",
         version = "3",
@@ -418,6 +364,10 @@ local list = {
         end
     }
     ]]
+}
+
+list.libs = {
+    
 }
 
 return list
