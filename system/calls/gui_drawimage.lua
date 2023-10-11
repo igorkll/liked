@@ -41,6 +41,12 @@ local sx = string.byte(read(1))
 local sy = string.byte(read(1))
 read(8)
 
+local function norm(x, y, text)
+    if x <= 0 then
+        return 1, y, unicode.sub(text, 2 - x, unicode.len(text))
+    end
+    return x, y, text
+end
 
 local colorByte, countCharBytes
 local oldX, oldY = 1, 1
@@ -70,11 +76,11 @@ for cy = 1, sy do
             if oldBack ~= 0 or oldFore ~= 0 then --прозрачность, в реальной картинке такого не будет потому что если paint замечает оба нуля то он меняет одной значения чтобы пиксель не мог просто так стать прозрачным
                 if oldBack == oldFore then
                     gpu.setBackground(colors[oldBack + 1])
-                    gpu.set(oldX + (x - 1), oldY + (y - 1), string.rep(" ", unicode.len(buff)))
+                    gpu.set(norm(oldX + (x - 1), oldY + (y - 1), string.rep(" ", unicode.len(buff))))
                 else
                     gpu.setBackground(colors[oldBack + 1])
                     gpu.setForeground(colors[oldFore + 1])
-                    gpu.set(oldX + (x - 1), oldY + (y - 1), buff)
+                    gpu.set(norm(oldX + (x - 1), oldY + (y - 1), buff))
                 end
             end
 
@@ -92,10 +98,10 @@ end
 if oldBack ~= 0 or oldFore ~= 0 then
     if oldBack == oldFore then
         gpu.setBackground(colors[oldBack + 1])
-        gpu.set(oldX + (x - 1), oldY + (y - 1), string.rep(" ", unicode.len(buff)))
+        gpu.set(norm(oldX + (x - 1), oldY + (y - 1), string.rep(" ", unicode.len(buff))))
     else
         gpu.setBackground(colors[oldBack + 1])
         gpu.setForeground(colors[oldFore + 1])
-        gpu.set(oldX + (x - 1), oldY + (y - 1), buff)
+        gpu.set(norm(oldX + (x - 1), oldY + (y - 1), buff))
     end
 end
