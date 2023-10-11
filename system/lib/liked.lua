@@ -88,17 +88,15 @@ function liked.assert(screen, successful, err)
         local clear = saveZone(screen)
         gui.warn(screen, nil, nil, err or "unknown error")
         clear()
-    else
-        return true
     end
+    return successful, err
 end
 
 function liked.assertNoClear(screen, successful, err)
     if not successful then
         gui.warn(screen, nil, nil, err or "unknown error")
-    else
-        return true
     end
+    return successful, err
 end
 
 local bufferTimerId
