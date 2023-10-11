@@ -23,6 +23,9 @@ local nullWindow2 = graphic.createWindow(screen, rx - 7, 2 + paletteWindow.sizeY
 
 ------------------------------------
 
+local imageOffsetX
+local imageOffsetY
+
 local selectedColor1 = 1
 local selectedColor2 = 1
 local noSaved
@@ -74,6 +77,12 @@ local image =
     },
 }
 
+local function reMathOffset()
+    imageOffsetX = math.round(mainWindow.sizeX / 2) - math.round(image.sizeX / 2)
+    imageOffsetY = math.round(mainWindow.sizeY / 2) - math.round(image.sizeY / 2)
+end
+reMathOffset()
+
 local function drawSelectedColors()
     nullWindow2:fill(1, 1, nullWindow2.sizeX, nullWindow2.sizeY, colors.green, colors.black, "▒")
 
@@ -96,21 +105,32 @@ local function drawColors()
     paletteWindow:fill(4, 1, 2, paletteWindow.sizeY, colors.brown, colors.black, "▒")
 end
 
-local function drawUi()
-    mainWindow:fill(1, 1, mainWindow.sizeX, mainWindow.sizeY, colors.white, colors.black, "▓")
-
+local function drawUp()
     statusWindow:clear(colors.gray)
     statusWindow:set(1, 1, colors.red, colors.white, "X")
     statusWindow:set(rx - 5, 1, colors.gray, colors.white, "paint")
     statusWindow:set(3, 1, colors.white, colors.black, "file")
     statusWindow:set(8, 1, colors.white, colors.black, "edit")
+
+    statusWindow:set(13, 1, colors.white, colors.black, "<")
+    statusWindow:set(15, 1, colors.white, colors.black, ">")
+    statusWindow:set(17, 1, colors.white, colors.black, "^")
+    statusWindow:set(19, 1, colors.white, colors.black, "v")
+end
+
+local function drawUi()
+    mainWindow:fill(1, 1, mainWindow.sizeX, mainWindow.sizeY, colors.black, colors.gray, "░")
+    drawUp()
 end
 
 local function drawPixel(x, y, pixel)
+    x = x + imageOffsetX
+    y = y + imageOffsetY
+    if x < 1 or x > mainWindow.sizeX or y < 1 or y > mainWindow.sizeY then return end
     if pixel[1] ~= 0 or pixel[2] ~= 0 then
         mainWindow:set(x, y, indexsColors[pixel[1] + 1], indexsColors[pixel[2] + 1], pixel[3])
     else
-        mainWindow:set(x, y, colors.white, colors.black, "▒")
+        mainWindow:set(x, y, colors.black, colors.lightGray, "░")
     end
 end
 
@@ -143,7 +163,15 @@ end
 
 local function drawImage()
     if image then
-        mainWindow:fill(1, 1, image.sizeX, image.sizeY, colors.white, colors.black, "▒")
+        local sx = image.sizeX
+        local sy = image.sizeY
+        while sx + imageOffsetX > mainWindow.sizeX do
+            sx = sx - 1
+        end
+        while sy + imageOffsetY > mainWindow.sizeY do
+            sy = sy - 1
+        end
+        mainWindow:fill(1 + imageOffsetX, 1 + imageOffsetY, sx, sy, colors.black, colors.lightGray, "░")
         --[[
         for y, tbl in ipairs(image) do
             for x, pixel in ipairs(tbl) do
@@ -153,8 +181,10 @@ local function drawImage()
         ]]
         local tmp = os.tmpname()
         raw_save(tmp)
-        gui_drawimage(screen, tmp, mainWindow:toRealPos(1, 1))
+        gui_drawimage(screen, tmp, mainWindow:toRealPos(1 + imageOffsetX, 1 + imageOffsetY))
         fs.remove(tmp)
+
+        drawUp()
     end
 end
 
@@ -214,6 +244,8 @@ local function load()
             image[cy][cx] = {background, foreground, char}
         end
     end
+
+    reMathOffset()
 end
 
 local function save()
@@ -240,7 +272,7 @@ local function resize(newx, newy)
     newy = math.floor(newy + 0.5)
     if newx <= 0 or newy <= 0 then
         local clear = saveZone(screen)
-        calls.call("gui_warn", screen, nil, nil, "uncorrent input", colors.white)
+        calls.call("gui_warn", screen, nil, nil, "incorrent input", colors.white)
         clear()
         return
     end
@@ -278,6 +310,7 @@ local function resize(newx, newy)
     image.sizeX = newx
     image.sizeY = newy
 
+    reMathOffset()
     draw()
 end
 
@@ -304,9 +337,7 @@ while true do
             elseif num == 3 then
                 save()
             end
-        end
-
-        if statusWindowEventData[3] >= 8 and statusWindowEventData[3] <= 11 then
+        elseif statusWindowEventData[3] >= 8 and statusWindowEventData[3] <= 11 then
             local gclear = calls.call("screenshot", screen, 4, 2, 20, 4)
             local str, num = gui.context(screen, 4, 2, {"  resize", "  color change", "  bg / fg invert"},
             {true, true, true})
@@ -371,6 +402,18 @@ while true do
             else
                 gclear()
             end
+        elseif statusWindowEventData[3] == 13 then
+            imageOffsetX = imageOffsetX - 1
+            draw()
+        elseif statusWindowEventData[3] == 15 then
+            imageOffsetX = imageOffsetX + 1
+            draw()
+        elseif statusWindowEventData[3] == 17 then
+            imageOffsetY = imageOffsetY - 1
+            draw()
+        elseif statusWindowEventData[3] == 19 then
+            imageOffsetY = imageOffsetY + 1
+            draw()
         end
     end
 
@@ -427,9 +470,11 @@ while true do
     end
 
     if (mainWindowEventData[1] == "touch" or mainWindowEventData[1] == "drag") and image then
-        if mainWindowEventData[3] <= image.sizeX and
-        mainWindowEventData[4] <= image.sizeY then
-            local pixel = image[mainWindowEventData[4]][mainWindowEventData[3]]
+        local px = mainWindowEventData[3] - imageOffsetX
+        local py = mainWindowEventData[4] - imageOffsetY
+        if px >= 1 and py >= 1 and px <= image.sizeX and
+        py <= image.sizeY then
+            local pixel = image[py][px]
             if mainWindowEventData[5] == 0 then
                 pixel[1] = selectedColor1 - 1
                 pixel[2] = selectedColor2 - 1
@@ -443,7 +488,7 @@ while true do
                 pixel[2] = 0
                 pixel[3] = " "
             end
-            drawPixel(mainWindowEventData[3], mainWindowEventData[4], pixel)
+            drawPixel(px, py, pixel)
             noSaved = true
         end
     end
