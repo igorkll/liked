@@ -105,7 +105,7 @@ local function drawColors()
     paletteWindow:fill(4, 1, 2, paletteWindow.sizeY, colors.brown, colors.black, "▒")
 end
 
-local function drawUp()
+local function drawUi()
     statusWindow:clear(colors.gray)
     statusWindow:set(1, 1, colors.red, colors.white, "X")
     statusWindow:set(rx - 5, 1, colors.gray, colors.white, "paint")
@@ -116,11 +116,6 @@ local function drawUp()
     statusWindow:set(15, 1, colors.white, colors.black, ">")
     statusWindow:set(17, 1, colors.white, colors.black, "^")
     statusWindow:set(19, 1, colors.white, colors.black, "v")
-end
-
-local function drawUi()
-    mainWindow:fill(1, 1, mainWindow.sizeX, mainWindow.sizeY, colors.black, colors.gray, "░")
-    drawUp()
 end
 
 local function drawPixel(x, y, pixel)
@@ -183,18 +178,16 @@ local function drawImage()
         raw_save(tmp)
         gui_drawimage(screen, tmp, mainWindow:toRealPos(1 + imageOffsetX, 1 + imageOffsetY))
         fs.remove(tmp)
-
-        drawUp()
     end
 end
 
 local function draw()
+    mainWindow:fill(1, 1, mainWindow.sizeX, mainWindow.sizeY, colors.black, colors.gray, "░")
+    drawImage()
     drawUi()
     drawColors()
     drawSelectedColors()
-    drawImage()
 end
-draw()
 
 local function load()
     image = {}
@@ -256,7 +249,6 @@ end
 
 if fs.exists(filepath) then
     load()
-    drawImage()
 end
 
 local function exitAllow()
@@ -313,6 +305,8 @@ local function resize(newx, newy)
     reMathOffset()
     draw()
 end
+
+draw()
 
 while true do
     local eventData = {computer.pullSignal()}
