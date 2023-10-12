@@ -92,7 +92,7 @@ layout:createButton(2, ry - 9, 21, 1, nil, nil, "reset scale/shift").onClick = f
     offsetX.value = 0.5
     offsetX:draw()
 
-    offsetY.value = 0.5
+    offsetY.value = 0
     offsetY:draw()
 
     offsetZ.value = 0.5
