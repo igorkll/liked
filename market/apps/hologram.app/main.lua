@@ -34,7 +34,7 @@ local function col(index)
 end
 
 if not _G.holo_agent then _G.holo_agent = {} end
-_G.holo_agent[holo.address] = {}
+if not _G.holo_agent[holo.address] then _G.holo_agent[holo.address] = {} end
 local agent = _G.holo_agent[holo.address]
 
 ------------------------------------------------
@@ -75,8 +75,13 @@ for name, path in pairs(hologramsPaths) do
                     lswitch:draw()
                 end
             end
-            agent.current = name
+            
             holo.clear()
+            agent.current = name
+            if agent.th then
+                agent.th:kill()
+                agent.th = nil
+            end
 
             local env = bootloader.createEnv()
             env.hx = hx
@@ -84,11 +89,14 @@ for name, path in pairs(hologramsPaths) do
             env.hz = hz
             env.col = col
             agent.th = thread.createBackground(assert(loadfile(path, nil, env)), holo)
+            agent.th:resume()
         else
-            agent.current = nil
-            agent.th:kill()
-            agent.th = nil
             holo.clear()
+            agent.current = name
+            if agent.th then
+                agent.th:kill()
+                agent.th = nil
+            end
         end
     end
     switchI = switchI + 2
