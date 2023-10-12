@@ -80,7 +80,6 @@ end
 layout:draw()
 
 while true do
-    require("computer").beep()
     local eventData = {event.pull()}
     layout:uploadEvent(eventData)
 end
