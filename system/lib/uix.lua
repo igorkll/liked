@@ -1,6 +1,7 @@
 local unicode = require("unicode")
 local gui_container = require("gui_container")
 local graphic = require("graphic")
+local liked = require("liked")
 local colors = gui_container.colors
 local uix = {}
 uix.styles = {
@@ -80,6 +81,7 @@ function objclass:uploadEvent(eventData)
 end
 
 function objclass:draw()
+    if self.hidden then return end
     if self.type == "bg" then
         self.gui.window:clear(self.color)
     elseif self.type == "label" or self.type == "button" then
@@ -147,6 +149,8 @@ function objclass:draw()
         else
             self.gui.window:set(self.x + dotpos, self.y, bg, self.dotcolor, "█")
         end
+    elseif self.type == "up" then
+        liked.drawFullUpBar(self.gui.window.screen, self.title, self.withoutFill, self.bgcolor)
     end
 end
 
@@ -155,6 +159,19 @@ end
 function uix:createBg(color)
     local obj = setmetatable({gui = self, type = "bg"}, {__index = objclass})
     obj.color = color
+
+    table.insert(self.objs, obj)
+    return obj
+end
+
+function uix:createUpBar(title, withoutFill, bgcolor) --working only in fullscreen ui
+    local obj = setmetatable({gui = self, type = "up"}, {__index = objclass})
+    obj.title = title
+    obj.withoutFill = withoutFill
+    obj.bgcolor = bgcolor
+
+    obj.close = self:createButton(self.window.sizeX, 1, 1, 1)
+    obj.close.hidden = true
 
     table.insert(self.objs, obj)
     return obj
