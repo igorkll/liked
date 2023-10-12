@@ -357,6 +357,13 @@ function gui.selectcolor(screen, cx, cy, str)
     end
 end
 
+function gui.selectfullcolor(screen, cx, cy, str)
+    local col = gui.selectcolor(screen, cx, cy, str)
+    if col and colorslib[col] and colors[colorslib[col]] then
+        return colors[colorslib[col]]
+    end
+end
+
 function gui.input(screen, cx, cy, str, hidden, backgroundColor, default, disableStartSound)
     local gpu = graphic.findGpu(screen)
 

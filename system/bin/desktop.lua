@@ -514,6 +514,7 @@ local function execute(name, nickname, ...)
             end
             event.yield()
         end
+        programTh:kill()
         programTh = nil
 
         --local ok, err = xpcall(code, debug.traceback, screen, nickname, ...)
