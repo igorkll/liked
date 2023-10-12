@@ -53,8 +53,29 @@ layout:createUpBar("Hologram").close.onClick = function ()
     baseTh:kill()
 end
 
-layout:createSeek(10, ry - 12, rx - 12, nil, nil, nil, holo.getScale() / maxScale).onSeek = function (value)
-    holo.setScale(value * maxScale)
+local tx, ty, tz = holo.getTranslation()
+
+layout:createText(2, ry - 7, nil, "shift x:")
+layout:createSeek(11, ry - 7, rx - 11, nil, nil, nil, math.map(tx, -maxTranslation, maxTranslation, 0, 1)).onSeek = function (self, value)
+    local x, y, z = holo.getTranslation()
+    holo.setTranslation(math.map(value, 0, 1, -maxTranslation, maxTranslation), y, z)
+end
+
+layout:createText(2, ry - 5, nil, "shift y:")
+layout:createSeek(11, ry - 5, rx - 11, nil, nil, nil, math.map(ty, -maxTranslation, maxTranslation, 0, 1)).onSeek = function (self, value)
+    local x, y, z = holo.getTranslation()
+    holo.setTranslation(x, math.map(value, 0, 1, -maxTranslation, maxTranslation), z)
+end
+
+layout:createText(2, ry - 3, nil, "shift z:")
+layout:createSeek(11, ry - 3, rx - 11, nil, nil, nil, math.map(tz, -maxTranslation, maxTranslation, 0, 1)).onSeek = function (self, value)
+    local x, y, z = holo.getTranslation()
+    holo.setTranslation(x, y, math.map(value, 0, 1, -maxTranslation, maxTranslation))
+end
+
+layout:createText(2, ry - 1, nil, "scale:")
+layout:createSeek(9, ry - 1, rx - 9, nil, nil, nil, math.map(holo.getScale(), minScale, maxScale, 0, 1)).onSeek = function (self, value)
+    holo.setScale(math.map(value, 0, 1, minScale, maxScale))
 end
 
 for i = 1, colorsCount do
