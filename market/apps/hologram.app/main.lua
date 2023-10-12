@@ -27,6 +27,10 @@ else
 end
 
 local colorsCount = holo.maxDepth() == 2 and 3 or 1
+local maxScale = colorsCount == 3 and 4 or 3
+local maxTranslation = colorsCount == 3 and 0.25 or 5
+local minScale = 0.33
+
 local function col(index)
     if index > colorsCount then
         return 1
@@ -47,6 +51,10 @@ end
 local baseTh = thread.current()
 layout:createUpBar("Hologram").close.onClick = function ()
     baseTh:kill()
+end
+
+layout:createSeek(10, ry - 12, rx - 12, nil, nil, nil, holo.getScale() / maxScale).onSeek = function (value)
+    holo.setScale(value * maxScale)
 end
 
 for i = 1, colorsCount do
