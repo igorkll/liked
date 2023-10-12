@@ -570,6 +570,7 @@ function gui.select(screen, cx, cy, label, actions, scroll)
     scroll = scroll or 0
     local addrs
     local addrsIdx
+    local sel
 
     local function drawScrollBar()
         window:fill(50, 2, 1, 14, colors.blue, 0, " ")
@@ -587,7 +588,6 @@ function gui.select(screen, cx, cy, label, actions, scroll)
         window:set(window.sizeX - 9, window.sizeY, sel and colors.lime or colors.green, colors.white, " CONFIRM ")
     end
 
-    local sel
     local function getCol(idx)
         return sel == idx and colors.blue or colors.black
     end
@@ -666,6 +666,16 @@ function gui.select(screen, cx, cy, label, actions, scroll)
         local eventData = {computer.pullSignal()}
         local windowEventData = window:uploadEvent(eventData)
 
+        if windowEventData[1] == "touch" then
+            if windowEventData[3] == window.sizeX and windowEventData[4] == 1 then
+                return nil, scroll, windowEventData[5]
+            elseif windowEventData[3] >= window.sizeX - 9 and windowEventData[3] < window.sizeX and windowEventData[4] == window.sizeY then
+                if sel then
+                    return sel, scroll, windowEventData[5]
+                end
+            end
+        end
+
         if windowEventData[1] == "touch" or windowEventData[1] == "drag" then
             if addrsIdx[windowEventData[4]] and windowEventData[3] < window.sizeX and windowEventData[4] < window.sizeY then
                 if windowEventData[1] == "touch" and sel and sel == addrsIdx[windowEventData[4]] then
@@ -676,18 +686,13 @@ function gui.select(screen, cx, cy, label, actions, scroll)
                 if sel ~= oldsel then
                     draw()
                 end
+            elseif sel then
+                sel = nil
+                draw()
             end
         end
 
-        if windowEventData[1] == "touch" then
-            if windowEventData[3] == window.sizeX and windowEventData[4] == 1 then
-                return nil, scroll, windowEventData[5]
-            elseif windowEventData[3] >= window.sizeX - 9 and windowEventData[3] < window.sizeX and windowEventData[4] == window.sizeY then
-                if sel then
-                    return sel, scroll, windowEventData[5]
-                end
-            end
-        elseif windowEventData[1] == "scroll" then
+        if windowEventData[1] == "scroll" then
             if windowEventData[5] > 0 then
                 if scroll > 0 then
                     drawUp()
