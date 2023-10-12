@@ -504,7 +504,7 @@ local function execute(name, nickname, ...)
         while true do
             if programTh:status() == "dead" then
                 if not programTh.out[1] then --если ошибка произошла в функции которую возврашяет liked.loadApp (чего быть не должно)
-                    ok, err = false, "osError: " .. (programTh.out[2] or "")
+                    ok, err = false, "osError: " .. (programTh.out[2] or "unknown error")
                 elseif not programTh.out[2] then --если ошибка произошла в целевой программе
                     if programTh.out[3] then
                         ok, err = false, programTh.out[3]
