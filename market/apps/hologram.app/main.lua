@@ -56,26 +56,47 @@ end
 local tx, ty, tz = holo.getTranslation()
 
 layout:createText(2, ry - 7, nil, "shift x:")
-layout:createSeek(11, ry - 7, rx - 11, nil, nil, nil, math.map(tx, -maxTranslation, maxTranslation, 0, 1)).onSeek = function (self, value)
+local offsetX = layout:createSeek(11, ry - 7, rx - 11, nil, nil, nil, math.map(tx, -maxTranslation, maxTranslation, 0, 1))
+function offsetX:onSeek(value)
     local x, y, z = holo.getTranslation()
     holo.setTranslation(math.map(value, 0, 1, -maxTranslation, maxTranslation), y, z)
 end
 
 layout:createText(2, ry - 5, nil, "shift y:")
-layout:createSeek(11, ry - 5, rx - 11, nil, nil, nil, math.map(ty, -maxTranslation, maxTranslation, 0, 1)).onSeek = function (self, value)
+local offsetY = layout:createSeek(11, ry - 5, rx - 11, nil, nil, nil, math.map(ty, -maxTranslation, maxTranslation, 0, 1))
+function offsetY:onSeek(value)
     local x, y, z = holo.getTranslation()
     holo.setTranslation(x, math.map(value, 0, 1, -maxTranslation, maxTranslation), z)
 end
 
 layout:createText(2, ry - 3, nil, "shift z:")
-layout:createSeek(11, ry - 3, rx - 11, nil, nil, nil, math.map(tz, -maxTranslation, maxTranslation, 0, 1)).onSeek = function (self, value)
+local offsetZ = layout:createSeek(11, ry - 3, rx - 11, nil, nil, nil, math.map(tz, -maxTranslation, maxTranslation, 0, 1))
+function offsetZ:onSeek(value)
     local x, y, z = holo.getTranslation()
     holo.setTranslation(x, y, math.map(value, 0, 1, -maxTranslation, maxTranslation))
 end
 
 layout:createText(2, ry - 1, nil, "scale:")
-layout:createSeek(9, ry - 1, rx - 9, nil, nil, nil, math.map(holo.getScale(), minScale, maxScale, 0, 1)).onSeek = function (self, value)
+local scaleS = layout:createSeek(9, ry - 1, rx - 9, nil, nil, nil, math.map(holo.getScale(), minScale, maxScale, 0, 1))
+function scaleS:onSeek(value)
     holo.setScale(math.map(value, 0, 1, minScale, maxScale))
+end
+
+layout:createButton(2, ry - 9, 21, 1, nil, nil, "reset scale/shift").onClick = function ()
+    holo.setScale(1)
+    holo.setTranslation(0, 0, 0)
+
+    scaleS.value = math.map(holo.getScale(), minScale, maxScale, 0, 1)
+    scaleS:draw()
+
+    offsetX.value = 0.5
+    offsetX:draw()
+
+    offsetY.value = 0.5
+    offsetY:draw()
+
+    offsetZ.value = 0.5
+    offsetZ:draw()
 end
 
 for i = 1, colorsCount do
