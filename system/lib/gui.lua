@@ -549,7 +549,7 @@ function gui.drawtext(screen, posX, posY, foreground, text)
     end
 end
 
-function gui.select(screen, cx, cy, label, actions, scroll, noCloseButton)
+function gui.select(screen, cx, cy, label, actions, scroll)
     --=gui_select(screen, nil, nil, "LOLZ", {"test 1", "test 2", "test 3"})
 
     local gpu = graphic.findGpu(screen)
@@ -572,8 +572,8 @@ function gui.select(screen, cx, cy, label, actions, scroll, noCloseButton)
     local addrsIdx
 
     local function drawScrollBar()
-        window:fill(50, 2, 1, 15, colors.blue, 0, " ")
-        window:set(50, math.round(math.map(scroll, 0, #actions - 1, 2, 16)), colors.lime, 0, " ")
+        window:fill(50, 2, 1, 14, colors.blue, 0, " ")
+        window:set(50, math.round(math.map(scroll, 0, #actions - 1, 2, 15)), colors.lime, 0, " ")
     end
 
     local function drawBase()
@@ -582,9 +582,14 @@ function gui.select(screen, cx, cy, label, actions, scroll, noCloseButton)
         if label then
             window:set(2, 1, colors.lightGray, colors.white, label)
         end
-        if not noCloseButton then
-            window:set(window.sizeX, 1, colors.red, colors.white, "X")
-        end
+        window:set(window.sizeX, 1, colors.red, colors.white, "X")
+        window:fill(1, window.sizeY, window.sizeX, 1, colors.lightGray, 0, " ")
+        window:set(window.sizeX - 9, window.sizeY, sel and colors.lime or colors.green, colors.white, " CONFIRM ")
+    end
+
+    local sel
+    local function getCol(idx)
+        return sel == idx and colors.blue or colors.black
     end
 
     local function draw()
@@ -594,9 +599,9 @@ function gui.select(screen, cx, cy, label, actions, scroll, noCloseButton)
         addrsIdx = {}
         for index, action in ipairs(actions) do
             local y = (index + 1) - scroll
-            if y >= 2 and y <= window.sizeY then
-                window:fill(1, y, window.sizeX - 1, 1, colors.black, colors.white, " ")
-                window:set(2, y, colors.black, colors.white, action)
+            if y >= 2 and y < window.sizeY then
+                window:fill(1, y, window.sizeX - 1, 1, getCol(index), colors.white, " ")
+                window:set(2, y, getCol(index), colors.white, action)
 
                 addrs[y] = action
                 addrsIdx[y] = index
@@ -608,16 +613,16 @@ function gui.select(screen, cx, cy, label, actions, scroll, noCloseButton)
 
     local function drawUp()
         scroll = scroll - 1
-        window:copy(1, 2, window.sizeX - 1, 14, 0, 1)
+        window:copy(1, 2, window.sizeX - 1, 13, 0, 1)
         
         addrs = {}
         addrsIdx = {}
         for index, action in ipairs(actions) do
             local y = (index + 1) - scroll
-            if y >= 2 and y <= window.sizeY then
+            if y >= 2 and y < window.sizeY then
                 if y == 2 then
-                    window:fill(1, y, window.sizeX - 1, 1, colors.black, colors.white, " ")
-                    window:set(2, y, colors.black, colors.white, action)
+                    window:fill(1, y, window.sizeX - 1, 1, getCol(index), colors.white, " ")
+                    window:set(2, y, getCol(index), colors.white, action)
                 end
 
                 addrs[y] = action
@@ -630,17 +635,17 @@ function gui.select(screen, cx, cy, label, actions, scroll, noCloseButton)
 
     local function drawDown()
         scroll = scroll + 1
-        window:copy(1, 3, window.sizeX - 1, 14, 0, -1)
+        window:copy(1, 3, window.sizeX - 1, 13, 0, -1)
         
         local noDraw
-        window:fill(1, window.sizeY, window.sizeX, 1, colors.black, colors.white, " ")
         addrs = {}
         addrsIdx = {}
         for index, action in ipairs(actions) do
             local y = (index + 1) - scroll
-            if y >= 2 and y <= window.sizeY then
-                if y == window.sizeY then
-                    window:set(2, y, colors.black, colors.white, action)
+            if y >= 2 and y < window.sizeY then
+                if y == window.sizeY - 1 then
+                    window:fill(1, y, window.sizeX, 1, getCol(index), 0, " ")
+                    window:set(2, y, getCol(index), colors.white, action)
                     noDraw = true
                 end
 
@@ -649,7 +654,7 @@ function gui.select(screen, cx, cy, label, actions, scroll, noCloseButton)
             end
         end
         if not noDraw then
-            window:fill(1, window.sizeY, window.sizeX - 1, 1, colors.gray, 0, " ")
+            window:fill(1, window.sizeY - 1, window.sizeX - 1, 1, colors.gray, 0, " ")
         end
 
         drawScrollBar()
@@ -661,13 +666,26 @@ function gui.select(screen, cx, cy, label, actions, scroll, noCloseButton)
         local eventData = {computer.pullSignal()}
         local windowEventData = window:uploadEvent(eventData)
 
+        if windowEventData[1] == "touch" or windowEventData[1] == "drag" then
+            if addrsIdx[windowEventData[4]] and windowEventData[3] < window.sizeX and windowEventData[4] < window.sizeY then
+                if windowEventData[1] == "touch" and sel and sel == addrsIdx[windowEventData[4]] then
+                    return sel, scroll, windowEventData[5]
+                end
+                local oldsel = sel
+                sel = addrsIdx[windowEventData[4]]
+                if sel ~= oldsel then
+                    draw()
+                end
+            end
+        end
+
         if windowEventData[1] == "touch" then
             if windowEventData[3] == window.sizeX and windowEventData[4] == 1 then
-                if not noCloseButton then
-                    return nil, scroll
+                return nil, scroll, windowEventData[5]
+            elseif windowEventData[3] >= window.sizeX - 9 and windowEventData[3] < window.sizeX and windowEventData[4] == window.sizeY then
+                if sel then
+                    return sel, scroll, windowEventData[5]
                 end
-            elseif addrsIdx[windowEventData[4]] and windowEventData[3] < window.sizeX then
-                return addrsIdx[windowEventData[4]], scroll, windowEventData[5]
             end
         elseif windowEventData[1] == "scroll" then
             if windowEventData[5] > 0 then
