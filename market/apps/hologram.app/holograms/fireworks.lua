@@ -17,14 +17,14 @@ while true do
         firework.pos = firework.pos + (firework.vec * deltatime)
         if firework.pos.y >= firework.maxPos then
             table.remove(fireworks, i)
-            for i = 1, 15 do
+            for i = 1, math.random(15, 30) do
                 table.insert(debrises, {
                     pos = firework.pos,
                     vec = vec.vec3((math.random() - 0.5) * 64, (math.random() - 0.5) * 64, (math.random() - 0.5) * 64),
-                    maxtime = os.clock() + 0.1
+                    maxtime = os.clock() + (math.random(1, 4) / 100),
+                    color = math.random(1, colorsCount)
                 })
             end
-            dot(firework, 2)
         else
             dot(firework, 1)
         end
@@ -36,14 +36,14 @@ while true do
         if os.clock() >= debris.maxtime then
             table.remove(debrises, i)
         else
-            dot(debris, 2)
+            dot(debris, debris.color)
         end
     end
     if math.random(0, 10) == 0 then
         table.insert(fireworks, {
             pos = vec.vec3(math.random(1, hx), 1, math.random(1, hz)),
-            vec = vec.vec3((math.random() - 0.5) * 4, math.random(20, 80), (math.random() - 0.5) * 4),
-            maxPos = math.random(hy / 2, hy - 5)
+            vec = vec.vec3((math.random() - 0.5) * 4, math.random(40, 70), (math.random() - 0.5) * 4),
+            maxPos = math.random(hy / 3, hy - 2)
         })
     end
     deltatime = math.max(0.1, os.clock() - startTime)

@@ -88,6 +88,7 @@ for name, path in pairs(hologramsPaths) do
             env.hy = hy
             env.hz = hz
             env.col = col
+            env.colorsCount = colorsCount
             agent.th = thread.createBackground(assert(loadfile(path, nil, env)), holo)
             agent.th:resume()
         else
