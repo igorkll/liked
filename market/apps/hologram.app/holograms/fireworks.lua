@@ -21,7 +21,7 @@ while true do
                 table.insert(debrises, {
                     pos = firework.pos,
                     vec = vec.vec3((math.random() - 0.5) * 64, (math.random() - 0.5) * 64, (math.random() - 0.5) * 64),
-                    maxtime = os.clock() + (math.random(1, 4) / 100),
+                    maxtime = os.clock() + (math.random(1, 9) / 100),
                     color = math.random(1, colorsCount)
                 })
             end
@@ -39,7 +39,7 @@ while true do
             dot(debris, debris.color)
         end
     end
-    if math.random(0, 10) == 0 then
+    if math.random(0, 5) == 0 then
         table.insert(fireworks, {
             pos = vec.vec3(math.random(1, hx), 1, math.random(1, hz)),
             vec = vec.vec3((math.random() - 0.5) * 4, math.random(40, 70), (math.random() - 0.5) * 4),
@@ -47,5 +47,5 @@ while true do
         })
     end
     deltatime = math.max(0.1, os.clock() - startTime)
-    os.sleep(0.1)
+    os.sleep(0.05)
 end
