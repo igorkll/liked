@@ -1,4 +1,5 @@
 local component = require("component")
+local bootloader = require("bootloader")
 local gui_container = require("gui_container")
 local colors = gui_container.colors
 local graphic = require("graphic")
@@ -10,6 +11,7 @@ local gui = require("gui")
 local uix = require("uix")
 local fs = require("filesystem")
 
+local hx, hy, hz = 48, 32, 48
 local hologramsPath = paths.concat(paths.path(system.getSelfScriptPath()), "holograms")
 
 local screen = ...
@@ -22,6 +24,13 @@ if holo then
     holo = component.proxy(holo)
 else
     return
+end
+
+local colorsCount = holo.maxDepth() == 2 and 3 or 1
+local function col(index)
+    if index > colorsCount then
+        return 1
+    end
 end
 
 if not _G.holo_agent then _G.holo_agent = {} end
@@ -40,7 +49,7 @@ layout:createUpBar("Hologram").close.onClick = function ()
     baseTh:kill()
 end
 
-for i = 1, holo.maxDepth() == 2 and 3 or 1 do
+for i = 1, colorsCount do
     layout:createButton(rx - 16, (i * 2) + 1, 16, 1, holo.getPaletteColor(i), colors.gray, "color" .. i, true).onClick = function (self)
         local color = gui.selectfullcolor(screen)
         if color then
@@ -67,11 +76,19 @@ for name, path in pairs(hologramsPaths) do
                 end
             end
             agent.current = name
-            agent.th = thread.createBackground(assert(loadfile(path, nil, _ENV)))
+            holo.clear()
+
+            local env = bootloader.createEnv()
+            env.hx = hx
+            env.hy = hy
+            env.hz = hz
+            env.col = col
+            agent.th = thread.createBackground(assert(loadfile(path, nil, env)), holo)
         else
             agent.current = nil
             agent.th:kill()
             agent.th = nil
+            holo.clear()
         end
     end
     switchI = switchI + 2
