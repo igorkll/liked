@@ -63,10 +63,10 @@ function offsetX:onSeek(value)
 end
 
 layout:createText(2, ry - 5, nil, "shift y:")
-local offsetY = layout:createSeek(11, ry - 5, rx - 11, nil, nil, nil, math.map(ty, -maxTranslation, maxTranslation, 0, 1))
+local offsetY = layout:createSeek(11, ry - 5, rx - 11, nil, nil, nil, math.map(ty, 0, maxTranslation * 2, 0, 1))
 function offsetY:onSeek(value)
     local x, y, z = holo.getTranslation()
-    holo.setTranslation(x, math.map(value, 0, 1, -maxTranslation, maxTranslation), z)
+    holo.setTranslation(x, math.map(value, 0, 1, 0, maxTranslation * 2), z)
 end
 
 layout:createText(2, ry - 3, nil, "shift z:")
