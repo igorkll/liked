@@ -41,22 +41,20 @@ end
 if not _G.holo_agent then _G.holo_agent = {} end
 if not _G.holo_agent[holo.address] then _G.holo_agent[holo.address] = {} end
 local agent = _G.holo_agent[holo.address]
-if not agent.rotation then
-    agent.rotation = 0
-    agent.rotationSpeed = 0
-    agent.useSpeed = false
-    pcall(holo.setRotation, 0, 0, 0, 0)
-    pcall(holo.setRotationSpeed, 0, 0, 0, 0)
-end
 
 local function updateRotation()
     if agent.useSpeed then
-        pcall(holo.setRotationSpeed, agent.rotationSpeed, 0, 1, 0)
+        pcall(holo.setRotationSpeed, agent.rotation, 0, 1, 0)
+        pcall(holo.setRotation, 0, 0, 0, 0)
     else
+        pcall(holo.setRotationSpeed, 0, 0, 0, 0)
         pcall(holo.setRotation, agent.rotation, 0, 1, 0)
     end
-    
-    
+end
+
+if not agent.rotation then
+    agent.rotation = 0
+    agent.useSpeed = false
 end
 
 ------------------------------------------------
@@ -134,9 +132,10 @@ function useSpeedSwitch:onSwitch()
 end
 
 layout:createText(crx + 2, ry - 5, nil, "rotation:")
-local rotationSeek = layout:createSeek(crx + 12, ry - 5, crx - 12)
+local rotationSeek = layout:createSeek(crx + 12, ry - 5, crx - 12, nil, nil, nil, math.map(agent.rotation, -180, 180, 0, 1))
 function rotationSeek:onSeek(value)
-    
+    agent.rotation = math.map(value, 0, 1, -180, 180)
+    updateRotation()
 end
 
 layout:createButton(crx + 2, ry - 9, 21, 1, nil, nil, "reset rotation").onClick = function ()
