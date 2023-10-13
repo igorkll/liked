@@ -42,6 +42,7 @@ if not _G.holo_agent then _G.holo_agent = {} end
 if not _G.holo_agent[holo.address] then _G.holo_agent[holo.address] = {} end
 local agent = _G.holo_agent[holo.address]
 
+local oldUseSpeed
 local function updateRotation()
     if agent.useSpeed then
         pcall(holo.setRotationSpeed, agent.rotation, 0, 1, 0)
