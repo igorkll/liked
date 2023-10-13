@@ -2,6 +2,7 @@ local unicode = require("unicode")
 local gui_container = require("gui_container")
 local graphic = require("graphic")
 local liked = require("liked")
+local thread = require("thread")
 local colors = gui_container.colors
 local uix = {}
 uix.styles = {
@@ -172,6 +173,21 @@ function uix:createUpBar(title, withoutFill, bgcolor) --working only in fullscre
 
     obj.close = self:createButton(self.window.sizeX, 1, 1, 1)
     obj.close.hidden = true
+
+    --тут некоректно использовать таймер, так как он продолжит тика даже если система приостановит программу для работы screensaver
+    obj.thread = thread.create(function ()
+        while true do
+            obj:draw()
+            os.sleep(10)
+        end
+    end)
+    obj.thread:resume()
+
+    local destroy = obj.destroy
+    function obj:destroy()
+        destroy(obj)
+        obj.close:destroy()
+    end
 
     table.insert(self.objs, obj)
     return obj
