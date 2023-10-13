@@ -45,15 +45,15 @@ if not agent.rotation then
     agent.rotation = 0
     agent.rotationSpeed = 0
     agent.useSpeed = false
-    pcall(hologram.setRotation, 0, 0, 0, 0)
-    pcall(hologram.setRotationSpeed, 0, 0, 0, 0)
+    pcall(holo.setRotation, 0, 0, 0, 0)
+    pcall(holo.setRotationSpeed, 0, 0, 0, 0)
 end
 
 local function updateRotation()
     if agent.useSpeed then
-        pcall(hologram.setRotationSpeed, agent.rotationSpeed, 0, 1, 0)
+        pcall(holo.setRotationSpeed, agent.rotationSpeed, 0, 1, 0)
     else
-        pcall(hologram.setRotation, agent.rotation, 0, 1, 0)
+        pcall(holo.setRotation, agent.rotation, 0, 1, 0)
     end
     
     
@@ -115,6 +115,42 @@ layout:createButton(2, ry - 9, 21, 1, nil, nil, "reset scale/shift").onClick = f
 
     offsetZ.value = 0.5
     offsetZ:draw()
+end
+
+
+
+
+
+
+
+
+
+
+layout:createText(crx + 9, ry - 7, nil, "auto rotation")
+local useSpeedSwitch = layout:createSwitch(crx + 2, ry - 7, agent.useSpeed)
+function useSpeedSwitch:onSwitch()
+    agent.useSpeed = self.state
+    updateRotation()
+end
+
+layout:createText(crx + 2, ry - 5, nil, "rotation:")
+local rotationSeek = layout:createSeek(crx + 12, ry - 5, crx - 12)
+function rotationSeek:onSeek(value)
+    
+end
+
+layout:createButton(crx + 2, ry - 9, 21, 1, nil, nil, "reset rotation").onClick = function ()
+    agent.rotation = 0
+    agent.rotationSpeed = 0
+    agent.useSpeed = false
+
+    useSpeedSwitch.state = false
+    useSpeedSwitch:draw()
+
+    rotationSeek.value = 0.5
+    rotationSeek:draw()
+
+    updateRotation()
 end
 
 for i = 1, colorsCount do
