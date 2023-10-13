@@ -16,6 +16,7 @@ local hologramsPath = paths.concat(paths.path(system.getSelfScriptPath()), "holo
 
 local screen = ...
 local rx, ry = graphic.getResolution(screen)
+local crx, cry = rx / 2, ry / 2
 local window = graphic.createWindow(screen, 1, 1, rx, ry)
 local layout = uix.create(window, colors.black)
 
@@ -40,6 +41,23 @@ end
 if not _G.holo_agent then _G.holo_agent = {} end
 if not _G.holo_agent[holo.address] then _G.holo_agent[holo.address] = {} end
 local agent = _G.holo_agent[holo.address]
+if not agent.rotation then
+    agent.rotation = 0
+    agent.rotationSpeed = 0
+    agent.useSpeed = false
+    pcall(hologram.setRotation, 0, 0, 0, 0)
+    pcall(hologram.setRotationSpeed, 0, 0, 0, 0)
+end
+
+local function updateRotation()
+    if agent.useSpeed then
+        pcall(hologram.setRotationSpeed, agent.rotationSpeed, 0, 1, 0)
+    else
+        pcall(hologram.setRotation, agent.rotation, 0, 1, 0)
+    end
+    
+    
+end
 
 ------------------------------------------------
 
@@ -56,28 +74,28 @@ end
 local tx, ty, tz = holo.getTranslation()
 
 layout:createText(2, ry - 7, nil, "shift x:")
-local offsetX = layout:createSeek(11, ry - 7, rx - 11, nil, nil, nil, math.map(tx, -maxTranslation, maxTranslation, 0, 1))
+local offsetX = layout:createSeek(11, ry - 7, crx - 11, nil, nil, nil, math.map(tx, -maxTranslation, maxTranslation, 0, 1))
 function offsetX:onSeek(value)
     local x, y, z = holo.getTranslation()
     holo.setTranslation(math.map(value, 0, 1, -maxTranslation, maxTranslation), y, z)
 end
 
 layout:createText(2, ry - 5, nil, "shift y:")
-local offsetY = layout:createSeek(11, ry - 5, rx - 11, nil, nil, nil, math.map(ty, 0, maxTranslation * 2, 0, 1))
+local offsetY = layout:createSeek(11, ry - 5, crx - 11, nil, nil, nil, math.map(ty, 0, maxTranslation * 2, 0, 1))
 function offsetY:onSeek(value)
     local x, y, z = holo.getTranslation()
     holo.setTranslation(x, math.map(value, 0, 1, 0, maxTranslation * 2), z)
 end
 
 layout:createText(2, ry - 3, nil, "shift z:")
-local offsetZ = layout:createSeek(11, ry - 3, rx - 11, nil, nil, nil, math.map(tz, -maxTranslation, maxTranslation, 0, 1))
+local offsetZ = layout:createSeek(11, ry - 3, crx - 11, nil, nil, nil, math.map(tz, -maxTranslation, maxTranslation, 0, 1))
 function offsetZ:onSeek(value)
     local x, y, z = holo.getTranslation()
     holo.setTranslation(x, y, math.map(value, 0, 1, -maxTranslation, maxTranslation))
 end
 
 layout:createText(2, ry - 1, nil, "scale:")
-local scaleS = layout:createSeek(9, ry - 1, rx - 9, nil, nil, nil, math.map(holo.getScale(), minScale, maxScale, 0, 1))
+local scaleS = layout:createSeek(9, ry - 1, crx - 9, nil, nil, nil, math.map(holo.getScale(), minScale, maxScale, 0, 1))
 function scaleS:onSeek(value)
     holo.setScale(math.map(value, 0, 1, minScale, maxScale))
 end
