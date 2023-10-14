@@ -22,7 +22,7 @@ gpu.fill(1, 1, mx, my, " ")
 local current = thread.current()
 current.kill = function (self)
     if oldPaletteColor then
-        gpu.setPaletteColor(0, oldPaletteColor)
+        graphic.findGpu(screen).setPaletteColor(0, oldPaletteColor)
     end
     component.invoke(screen, "turnOn")
     self:raw_kill()
