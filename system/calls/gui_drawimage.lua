@@ -55,6 +55,7 @@ local colorByte, countCharBytes
 local oldX, oldY = 1, 1
 local oldFore, oldBack
 local buff = ""
+local isEmptyBuff = true
 for cy = 1, sy do
     for cx = 1, sx do
         colorByte      = string.byte(read(1))
@@ -77,17 +78,8 @@ for cy = 1, sy do
 
         if foreground ~= oldFore or background ~= oldBack or oldY ~= cy then
             if oldBack ~= 0 or oldFore ~= 0 then --прозрачность, в реальной картинке такого не будет потому что если paint замечает оба нуля то он меняет одной значения чтобы пиксель не мог просто так стать прозрачным
-                if oldBack == oldFore then --по избежании визуальных артефактов при отображении unicode символов от лица сматряшего на монитор со стороны
-                    local col
-                    if wallpaperMode and oldBack == colorslib.lightBlue then
-                        local _, c, f, b = pcall(gpu.get, oldX + (x - 1), oldY + (y - 1))
-                        col = b
-                    end
-                    if col then
-                        gpu.setBackground(col)
-                    else
-                        gpu.setBackground(colors[oldBack + 1])
-                    end
+                if oldBack == oldFore or isEmptyBuff then --по избежании визуальных артефактов при отображении unicode символов от лица сматряшего на монитор со стороны
+                    gpu.setBackground(colors[oldBack + 1])
                     gpu.set(norm(oldX + (x - 1), oldY + (y - 1), string.rep(" ", unicode.len(buff))))
                 else
                     local col, col2
@@ -115,24 +107,19 @@ for cy = 1, sy do
             oldX = cx
             oldY = cy
             buff = char
+            isEmptyBuff = char == " "
         else
             buff = buff .. char
+            if char ~= " " then
+                isEmptyBuff = false
+            end
         end
     end
 end
 
 if oldBack ~= 0 or oldFore ~= 0 then --прозрачность, в реальной картинке такого не будет потому что если paint замечает оба нуля то он меняет одной значения чтобы пиксель не мог просто так стать прозрачным
-    if oldBack == oldFore then --по избежании визуальных артефактов при отображении unicode символов от лица сматряшего на монитор со стороны
-        local col
-        if wallpaperMode and oldBack == colorslib.lightBlue then
-            local _, c, f, b = pcall(gpu.get, oldX + (x - 1), oldY + (y - 1))
-            col = b
-        end
-        if col then
-            gpu.setBackground(col)
-        else
-            gpu.setBackground(colors[oldBack + 1])
-        end
+    if oldBack == oldFore or isEmptyBuff then --по избежании визуальных артефактов при отображении unicode символов от лица сматряшего на монитор со стороны
+        gpu.setBackground(colors[oldBack + 1])
         gpu.set(norm(oldX + (x - 1), oldY + (y - 1), string.rep(" ", unicode.len(buff))))
     else
         local col, col2
