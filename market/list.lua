@@ -362,7 +362,8 @@ local list = {
         libs = {"vec"},
 
         path = "/data/bin/hologram.app",
-        urlPrimaryPart = selfurlpart .. "/apps/hologram.app/"
+        urlPrimaryPart = selfurlpart .. "/apps/hologram.app/",
+        files = {"main.lua", "icon.t2p", "holograms/fireworks.lua", "holograms/fullbox.lua", "holograms/tree.lua"}
     },
     {
         name = "printer3d",
