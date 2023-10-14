@@ -30,7 +30,10 @@ local bootLabel = layout:createText(2, 9)
 
 local flashButton = layout:createButton(2, 11, 16, 1, nil, nil, "Flash", true)
 local dumpButton = layout:createButton(2, 13, 16, 1, nil, nil, "Dump", true)
-local makeReadOnlyButton = layout:createButton(20, 11, 16, 1, nil, nil, "Make R/O", true)
+local flashDataButton = layout:createButton(20, 11, 16, 1, nil, nil, "Flash Data", true)
+local dumpDataButton = layout:createButton(20, 13, 16, 1, nil, nil, "Dump Data", true)
+local wipeDataButton = layout:createButton(20 + 18, 13, 16, 1, nil, nil, "Wipe Data", true)
+local makeReadOnlyButton = layout:createButton(20 + 18, 11, 16, 1, nil, nil, "Make R/O", true)
 
 local eepromMissingString = "EEPROM IS MISSING"
 local storageRo = "storage is readonly"
@@ -97,6 +100,65 @@ function dumpButton:onClick()
         local path = gui_filepicker(screen, nil, nil, nil, "lua", true, false)
         if path then
             local data = component.eeprom.get()
+            liked.assert(screen, fs.writeFile(path, data))
+        end
+
+        gRedraw()
+        redraw()
+    end
+end
+
+function flashDataButton:onClick()
+    if component.eeprom then
+        if gui.pleaseCharge(screen, 20, "flash data") then
+            local path = gui_filepicker(screen, nil, nil, nil, "dat", false, false)
+            if path then
+                local maxSize = math.round(component.eeprom.getDataSize())
+                local data = fs.readFile(path)
+                local fsize = #data
+                if fsize > maxSize then
+                    gui.warn(screen, nil, nil, "it is not possible to write a " .. fsize .. " bytes file to an EEPROM-Data with a capacity of " .. maxSize .. " bytes")
+                elseif gui.pleaseType(screen, "FDATA", "flash data") then
+                    gui_status(screen, nil, nil, "flashing data...")
+                    local result = {pcall(component.eeprom.setData, data)}
+                    if not result[1] then
+                        gui.warn(screen, nil, nil, tostring(result[2] or "unknown error"))
+                    elseif result[3] then
+                        gui.warn(screen, nil, nil, tostring(result[3] or "unknown error"))
+                    end
+                end
+            end
+        end
+
+        gRedraw()
+        redraw()
+    end
+end
+
+function wipeDataButton:onClick()
+    if component.eeprom then
+        if gui.pleaseCharge(screen, 20, "wipe data") then
+            if gui.pleaseType(screen, "WDATA", "wipe data") then
+                gui_status(screen, nil, nil, "wiping data...")
+                local result = {pcall(component.eeprom.setData, "")}
+                if not result[1] then
+                    gui.warn(screen, nil, nil, tostring(result[2] or "unknown error"))
+                elseif result[3] then
+                    gui.warn(screen, nil, nil, tostring(result[3] or "unknown error"))
+                end
+            end
+        end
+
+        gRedraw()
+        redraw()
+    end
+end
+
+function dumpDataButton:onClick()
+    if component.eeprom then
+        local path = gui_filepicker(screen, nil, nil, nil, "dat", true, false)
+        if path then
+            local data = component.eeprom.getData()
             liked.assert(screen, fs.writeFile(path, data))
         end
 
