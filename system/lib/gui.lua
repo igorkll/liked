@@ -599,23 +599,29 @@ function gui.select(screen, cx, cy, label, actions, scroll)
         return sel == idx and colors.blue or colors.black
     end
 
-    local function draw()
-        drawBase()
+    local function draw(pos)
+        if not pos then
+            drawBase()
+        end
         
         addrs = {}
         addrsIdx = {}
         for index, action in ipairs(actions) do
             local y = (index + 1) - scroll
             if y >= 2 and y < window.sizeY then
-                window:fill(1, y, window.sizeX - 1, 1, getCol(index), colors.white, " ")
-                window:set(2, y, getCol(index), colors.white, action)
+                if not pos or pos == index then
+                    window:fill(1, y, window.sizeX - 1, 1, getCol(index), colors.white, " ")
+                    window:set(2, y, getCol(index), colors.white, action)
+                end
 
                 addrs[y] = action
                 addrsIdx[y] = index
             end
         end
 
-        drawScrollBar()
+        if not pos then
+            drawScrollBar()
+        end
     end
 
     local function drawUp()
@@ -686,16 +692,22 @@ function gui.select(screen, cx, cy, label, actions, scroll)
         if windowEventData[1] == "touch" or windowEventData[1] == "drag" then
             if addrsIdx[windowEventData[4]] and windowEventData[3] < window.sizeX and windowEventData[4] < window.sizeY then
                 if windowEventData[1] == "touch" and sel and sel == addrsIdx[windowEventData[4]] then
+                    draw(sel)
                     return sel, scroll, windowEventData[5]
                 end
                 local oldsel = sel
                 sel = addrsIdx[windowEventData[4]]
                 if sel ~= oldsel then
-                    draw()
+                    if oldsel then
+                        draw(oldsel)
+                    end
+                    if sel then
+                        draw(sel)
+                    end
                 end
             elseif sel then
+                draw(sel)
                 sel = nil
-                draw()
             end
         end
 
