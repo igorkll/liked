@@ -733,8 +733,8 @@ local function doIcon(windowEventData)
                     else
                         if v.isFs then
                             local strs, active =
-                            {"  open", "  flash os", "  flash archive", true, "  set label", "  clear label"},
-                            {true, not v.readonly, not v.readonly, false, not v.labelReadonly, not v.labelReadonly}
+                            {"  open", "  create dump", "  flash os", "  flash archive", true, "  format", "  set label", "  clear label"},
+                            {true, true, not v.readonly, not v.readonly, false, not v.readonly, not v.labelReadonly, not v.labelReadonly}
 
                             --[[
                             local likeDisk = isLikeOsDisk(v.fs.address)
@@ -761,9 +761,6 @@ local function doIcon(windowEventData)
                                 table.insert(active, not v.readonly)
                             end
                             ]]
-
-                            table.insert(strs, 5, "  format")
-                            table.insert(active, 5, not v.readonly)
 
                             if v.fs.exists("/init.lua") then
                                 table.insert(strs, true)
@@ -795,6 +792,20 @@ local function doIcon(windowEventData)
 
                             if str == "  open" then
                                 fileDescriptor(v, nil, windowEventData[6])
+                            elseif str == "  create dump" then
+                                local archiver = require("archiver")
+                                local clear = saveBigZone(screen)
+                                local targetPath = gui_filepicker(screen, nil, nil, nil, archiver.supported[1], true)
+                                
+                                if targetPath then
+                                    clear()
+                                    gui_status(screen, nil, nil, "creating dump...")
+                                    local ok, err = archiver.pack(v.path, targetPath)
+                                    if not ok then
+                                        warn(err)
+                                    end
+                                end
+                                draw()
                             elseif str == "  flash os" then
                                 local success, err = sysclone(screen, posX, posY, v.fs, v.name)
 
