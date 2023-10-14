@@ -706,8 +706,9 @@ function gui.select(screen, cx, cy, label, actions, scroll)
                     end
                 end
             elseif sel then
-                draw(sel)
+                local lsel = sel
                 sel = nil
+                draw(lsel)
             end
         end
 
