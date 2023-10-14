@@ -232,7 +232,7 @@ local list = {
     },
     {
         name = "camera",
-        version = "1",
+        version = "1.2",
         vendor = "logic",
         icon = selfurlpart .. "/apps/camera.app/icon.t2p",
         description = "allows you to take pictures on the camera from the computronix addon.\n* allows you to select a camera from several\n* allows you to save a photo for loading on another computer",
@@ -352,6 +352,27 @@ local list = {
             liked.reg("openVia", "dfpwm", paths.concat(self.path, "main.lua"))
             liked.reg("knownExps", "dfpwm", true)
         end
+    },
+    {
+        name = "hologram",
+        version = "1",
+        vendor = "logic",
+        description = "this program allows you to display various effects on a holographic projector\nLevel 1 and 2 holographic projectors are supported\neffects can work in the background and on multiple projectors at the same time",
+        minDiskSpace = 64,
+        libs = {"vec"},
+
+        path = "/data/bin/hologram.app",
+        urlPrimaryPart = selfurlpart .. "/apps/hologram.app/"
+    },
+    {
+        name = "printer3d",
+        version = "1",
+        vendor = "logic",
+        description = "allows you to open/edit/save and print 3D models in 3dm format.\nThe model format is fully compatible with the \"3D Print\" program in MineOS.\nalso, models in this format can be found on the Internet without any problems.\nvisualization on a holographic projector is supported",
+        minDiskSpace = 64,
+
+        path = "/data/bin/printer3d.app",
+        urlPrimaryPart = selfurlpart .. "/apps/printer3d.app/"
     }
     --[[
     openbox = {
@@ -367,7 +388,11 @@ local list = {
 }
 
 list.libs = {
-    
+    ["vec"] = {
+        url = selfurlpart .. "/libs/vec.lua",
+        vendor = "logic",
+        version = "1"
+    }
 }
 
 return list
