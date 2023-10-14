@@ -125,21 +125,21 @@ end
 
 
 
-layout:createText(crx + 9, ry - 7, nil, "auto rotation")
-local useSpeedSwitch = layout:createSwitch(crx + 2, ry - 7, agent.useSpeed)
+layout:createText(crx + 8, ry - 7, nil, "auto rotation")
+local useSpeedSwitch = layout:createSwitch(crx + 1, ry - 7, agent.useSpeed)
 function useSpeedSwitch:onSwitch()
     agent.useSpeed = self.state
     updateRotation()
 end
 
-layout:createText(crx + 2, ry - 5, nil, "rotation:")
-local rotationSeek = layout:createSeek(crx + 12, ry - 5, crx - 12, nil, nil, nil, math.map(agent.rotation, -180, 180, 0, 1))
+layout:createText(crx + 1, ry - 5, nil, "rotation:")
+local rotationSeek = layout:createSeek(crx + 11, ry - 5, crx - 11, nil, nil, nil, math.map(agent.rotation, -180, 180, 0, 1))
 function rotationSeek:onSeek(value)
     agent.rotation = math.map(value, 0, 1, -180, 180)
     updateRotation()
 end
 
-layout:createButton(crx + 2, ry - 9, 21, 1, nil, nil, "reset rotation").onClick = function ()
+layout:createButton(crx + 1, ry - 9, 21, 1, nil, nil, "reset rotation").onClick = function ()
     agent.rotation = 0
     agent.rotationSpeed = 0
     agent.useSpeed = false
