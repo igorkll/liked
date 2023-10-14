@@ -722,8 +722,8 @@ function gui.selectcomponent(screen, cx, cy, types, allowAutoConfirm, control) -
         cy = cy / 2
         cx = cx - 25
         cy = cy - 8
-        cx = math.floor(cx + 0.5)
-        cy = math.floor(cy + 0.5)
+        cx = math.round(cx) + 1
+        cy = math.round(cy) + 1
     end
 
     local function allTypes()

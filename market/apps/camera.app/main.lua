@@ -8,6 +8,7 @@ local component = require("component")
 local paths = require("paths")
 local advLabeling = require("advLabeling")
 local gui_container = require("gui_container")
+local uix = require("uix")
 
 gui_container.noScreenSaver[screen] = true
 
@@ -18,11 +19,21 @@ local photoFov = 90
 local photoDist = 60
 local photo
 
-local window = graphic.createWindow(screen, 1, 1, 160, 50, nil, true)
+local window = graphic.createWindow(screen, 1, 1, 160, 50)
+local layout = uix.create(window)
+
+local autoupdateSwitch = layout:createSwitch(rx - 7, 8, false)
+local textAutoUpdate = layout:createText(rx - 20, 8, nil, "auto update:")
 
 local function setSmall()
     rx, ry = 80, 25
     graphic.setResolution(screen, rx, ry)
+
+    autoupdateSwitch.x = rx - 7
+    autoupdateSwitch.y = 8
+
+    textAutoUpdate.x = rx - 20
+    textAutoUpdate.y = 8
 
     photoResolution = ry * 2
     photo = nil
@@ -36,6 +47,12 @@ local function setBig()
     if mx >= 160 then
         rx, ry = 160, 50
         graphic.setResolution(screen, rx, ry)
+
+        autoupdateSwitch.x = rx - 7
+        autoupdateSwitch.y = 8
+
+        textAutoUpdate.x = rx - 20
+        textAutoUpdate.y = 8
 
         photoResolution = ry * 2
         photo = nil
@@ -72,11 +89,14 @@ function warn(str)
     clear()
 end
 
-local function makePhoto()
+local function makePhoto(withoutStatus)
     if camera then
-        local clear = saveZone(screen)
-        gui_status(screen, nil, nil, "generating a photo...")
-        
+        local clear
+        if not withoutStatus then
+            clear = saveZone(screen)
+            gui_status(screen, nil, nil, "generating a photo...")
+        end
+
         photo = {}
         local max = photoResolution - 1
         for cx = 0, max do
@@ -95,8 +115,10 @@ local function makePhoto()
             end
         end
 
-        clear()
-    else
+        if not withoutStatus then
+            clear()
+        end
+    elseif not withoutStatus then
         warn("first select the camera")
     end
 end
@@ -313,8 +335,10 @@ function redrawAll()
     gpu.setBackground(0, true)
     gpu.setForeground(15, true)
 
-    readDist = window:read(rx - 14 - 12, 2, 11, 15, 0, "dist: ", nil, tostring(photoDist), true)
-    readFov =  window:read(rx - 14 - 12, 3, 11, 15, 0, "fov : ", nil, tostring(photoFov), true)
+    readDist = window:read(rx - 14 - 12, 2, 11, 0xffffff, 0, "dist: ", nil, tostring(photoDist), true)
+    readFov =  window:read(rx - 14 - 12, 3, 11, 0xffffff, 0, "fov : ", nil, tostring(photoFov), true)
+
+    layout:draw()
 end
 redrawAll()
 
@@ -323,8 +347,9 @@ if path then
 end
 
 while true do
-    local eventData = {computer.pullSignal()}
+    local eventData = {computer.pullSignal(1)}
     local windowEventData = window:uploadEvent(eventData)
+    layout:uploadEvent(windowEventData)
 
     do
         local customDist = readDist.uploadEvent(windowEventData)
@@ -403,6 +428,11 @@ while true do
                 printCam()
             end
         end
+    end
+
+    if autoupdateSwitch.state then
+        makePhoto(true)
+        drawPhoto()
     end
 end
 
