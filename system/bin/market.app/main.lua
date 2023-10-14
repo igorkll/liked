@@ -12,6 +12,9 @@ local liked = require("liked")
 local gui = require("gui")
 
 local cacheReg = registry.new("/data/cache/market/versions.dat")
+if not registry.libVersions then
+    registry.libVersions = {}
+end
 
 local colors = gui_container.colors
 
@@ -73,8 +76,15 @@ reFreeSpace()
 
 local urls = {}
 local list = {}
+local glibs = {}
 
 local function modifyList(lst)
+    if lst.libs then
+        for name, info in pairs(lst.libs) do
+            glibs[name] = info
+        end
+    end
+
     local function download(url)
         return assert(internet.getInternetFile(url))
     end
@@ -123,6 +133,16 @@ local function modifyList(lst)
             _install(self)
             if v.postInstall then
                 v:postInstall()
+            end
+            if v.libs then
+                for _, name in ipairs(v.libs) do
+                    local info = glibs[name]
+                    local path = paths.concat("/data/lib", name .. ".lua")
+                    if not fs.exists(path) or registry.libVersions[name] ~= info.version then
+                        save(path, download(info.url))
+                        registry.libVersions[name] = info.version
+                    end
+                end
             end
             save(versionpath, self.version)
         end
