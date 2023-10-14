@@ -398,7 +398,8 @@ local function draw(old, check) --вызывает все перерисовки
                 gui_drawtext(screen, x, y, colors.white, icon.shortName)
                 --window:set(iconX - (unicode.len(icon.name) // 2), iconY + iconY - 2, colors.lightBlue, colors.white, icon.name)
                 if icon.icon then
-                    pcall(gui_drawimage, screen, icon.icon, window:toRealPos(iconX, iconY))
+                    local sx, sy = window:toRealPos(iconX, iconY)
+                    pcall(gui_drawimage, screen, icon.icon, sx, sy, true)
                 end
             end
         end

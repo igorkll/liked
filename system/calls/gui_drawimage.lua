@@ -7,9 +7,12 @@ local gui_container = require("gui_container")
 local cache = require("cache")
 local paths = require("paths")
 local unicode = require("unicode")
+local colorslib = require("colors")
 
-local screen, path, x, y = ...
+local screen, path, x, y, wallpaperMode = ...
 local gpu = graphic.findGpu(screen)
+
+--wallpaperMode заставляет считать цвет lightBlue как прозрачность
 
 local readbit = calls.load("readbit")
 local colors = gui_container.indexsColors
@@ -74,12 +77,35 @@ for cy = 1, sy do
 
         if foreground ~= oldFore or background ~= oldBack or oldY ~= cy then
             if oldBack ~= 0 or oldFore ~= 0 then --прозрачность, в реальной картинке такого не будет потому что если paint замечает оба нуля то он меняет одной значения чтобы пиксель не мог просто так стать прозрачным
-                if oldBack == oldFore then
-                    gpu.setBackground(colors[oldBack + 1])
+                if oldBack == oldFore then --по избежании визуальных артефактов при отображении unicode символов от лица сматряшего на монитор со стороны
+                    local col
+                    if wallpaperMode and oldBack == colorslib.lightBlue then
+                        local _, c, f, b = pcall(gpu.get, oldX + (x - 1), oldY + (y - 1))
+                        col = b
+                    end
+                    if col then
+                        gpu.setBackground(col)
+                    else
+                        gpu.setBackground(colors[oldBack + 1])
+                    end
                     gpu.set(norm(oldX + (x - 1), oldY + (y - 1), string.rep(" ", unicode.len(buff))))
                 else
-                    gpu.setBackground(colors[oldBack + 1])
-                    gpu.setForeground(colors[oldFore + 1])
+                    local col, col2
+                    if wallpaperMode then
+                        local _, c, f, b = pcall(gpu.get, oldX + (x - 1), oldY + (y - 1))
+                        if oldBack == colorslib.lightBlue then col = b end
+                        if oldFore == colorslib.lightBlue then col2 = b end
+                    end
+                    if col then
+                        gpu.setBackground(col)
+                    else
+                        gpu.setBackground(colors[oldBack + 1])
+                    end
+                    if col2 then
+                        gpu.setForeground(col2)
+                    else
+                        gpu.setForeground(colors[oldFore + 1])
+                    end
                     gpu.set(norm(oldX + (x - 1), oldY + (y - 1), buff))
                 end
             end
@@ -95,13 +121,36 @@ for cy = 1, sy do
     end
 end
 
-if oldBack ~= 0 or oldFore ~= 0 then
-    if oldBack == oldFore then
-        gpu.setBackground(colors[oldBack + 1])
+if oldBack ~= 0 or oldFore ~= 0 then --прозрачность, в реальной картинке такого не будет потому что если paint замечает оба нуля то он меняет одной значения чтобы пиксель не мог просто так стать прозрачным
+    if oldBack == oldFore then --по избежании визуальных артефактов при отображении unicode символов от лица сматряшего на монитор со стороны
+        local col
+        if wallpaperMode and oldBack == colorslib.lightBlue then
+            local _, c, f, b = pcall(gpu.get, oldX + (x - 1), oldY + (y - 1))
+            col = b
+        end
+        if col then
+            gpu.setBackground(col)
+        else
+            gpu.setBackground(colors[oldBack + 1])
+        end
         gpu.set(norm(oldX + (x - 1), oldY + (y - 1), string.rep(" ", unicode.len(buff))))
     else
-        gpu.setBackground(colors[oldBack + 1])
-        gpu.setForeground(colors[oldFore + 1])
+        local col, col2
+        if wallpaperMode then
+            local _, c, f, b = pcall(gpu.get, oldX + (x - 1), oldY + (y - 1))
+            if oldBack == colorslib.lightBlue then col = b end
+            if oldFore == colorslib.lightBlue then col2 = b end
+        end
+        if col then
+            gpu.setBackground(col)
+        else
+            gpu.setBackground(colors[oldBack + 1])
+        end
+        if col2 then
+            gpu.setForeground(col2)
+        else
+            gpu.setForeground(colors[oldFore + 1])
+        end
         gpu.set(norm(oldX + (x - 1), oldY + (y - 1), buff))
     end
 end
