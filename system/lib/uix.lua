@@ -1,5 +1,6 @@
 local unicode = require("unicode")
 local gui_container = require("gui_container")
+local gui = require("gui")
 local graphic = require("graphic")
 local liked = require("liked")
 local thread = require("thread")
@@ -23,7 +24,7 @@ function objclass:destroy()
 end
 
 function objclass:uploadEvent(eventData)
-    if self.type == "button" then
+    if self.type == "button" or self.type == "context" then
         if self.state and (eventData[1] == "touch" or eventData[1] == "drop") then
             self.state = false
             self:draw()
@@ -32,17 +33,30 @@ function objclass:uploadEvent(eventData)
                 self:onDrop(eventData[5], eventData[6])
             end
         elseif not self.state and eventData[1] == "touch" and eventData[3] >= self.x and eventData[4] >= self.y and eventData[3] < self.x + self.sx and eventData[4] < self.y + self.sy then
-            self.state = true
-            self:draw()
-            if self.autoRelease then
-                os.sleep(0.1)
+            if self.type == "context" then
+                self.state = true
+                self:draw()
+
+                local _, num = gui.context(self.gui.window.screen, self.x + 1, self.y + 1, self.strs, self.actives)
+                if num and self.funcs[num] then
+                    self.funcs[num]()
+                end
+
                 self.state = false
                 self:draw()
-                graphic.forceUpdate()
-            end
-            
-            if self.onClick then
-                self:onClick(eventData[5], eventData[6])
+            else
+                self.state = true
+                self:draw()
+                if self.autoRelease then
+                    os.sleep(0.1)
+                    self.state = false
+                    self:draw()
+                    graphic.forceUpdate()
+                end
+                
+                if self.onClick then
+                    self:onClick(eventData[5], eventData[6])
+                end
             end
         end
     elseif self.type == "switch" then
@@ -85,7 +99,7 @@ function objclass:draw()
     if self.hidden then return end
     if self.type == "bg" then
         self.gui.window:clear(self.color)
-    elseif self.type == "label" or self.type == "button" then
+    elseif self.type == "label" or self.type == "button" or self.type == "context" then
         local back, fore = self.back, self.fore
         if self.state then
             back, fore = self.back2 or back, self.fore2 or fore
@@ -152,6 +166,8 @@ function objclass:draw()
         end
     elseif self.type == "up" then
         liked.drawFullUpBar(self.gui.window.screen, self.title, self.withoutFill, self.bgcolor)
+    elseif self.type == "plane" then
+        self.gui.window:fill(self.x, self.y, self.sx, self.sy, self.color, 0, " ")
     end
 end
 
@@ -174,7 +190,7 @@ function uix:createUpBar(title, withoutFill, bgcolor) --working only in fullscre
     obj.close = self:createButton(self.window.sizeX, 1, 1, 1)
     obj.close.hidden = true
 
-    --тут некоректно использовать таймер, так как он продолжит тика даже если система приостановит программу для работы screensaver
+    --тут некоректно использовать таймер, так как он продолжит тикать даже если система приостановит программу для работы screensaver
     obj.thread = thread.create(function ()
         while true do
             obj:draw()
@@ -284,6 +300,46 @@ function uix:createSeek(x, y, sx, color, fillColor, dotcolor, value)
     obj.fillColor = fillColor or colors.lime
     obj.dotcolor = dotcolor or colors.white
     obj.value = value or 0
+
+    table.insert(self.objs, obj)
+    return obj
+end
+
+function uix:createPlane(x, y, sx, sy, color)
+    local obj = setmetatable({gui = self, type = "plane"}, {__index = objclass})
+    obj.x = x
+    obj.y = y
+    obj.sx = sx
+    obj.sy = sy
+    obj.color = color or colors.gray
+
+    table.insert(self.objs, obj)
+    return obj
+end
+
+function uix:createContext(x, y, sx, sy, back, fore, text, strs, funcs, actives)
+    local obj = setmetatable({gui = self, type = "context"}, {__index = objclass})
+    obj.x = x
+    obj.y = y
+    obj.sx = sx
+    obj.sy = sy
+    obj.back = back or colors.white
+    obj.fore = fore or colors.gray
+    obj.back2 = obj.fore
+    obj.fore2 = obj.back
+    obj.text = text
+    obj.state = false
+
+    obj.strs = strs or {}
+    obj.funcs = funcs or {}
+    obj.actives = actives
+
+    if not obj.actives then
+        obj.actives = {}
+        for i in ipairs(obj.strs) do
+            obj.actives[i] = true
+        end
+    end
 
     table.insert(self.objs, obj)
     return obj
