@@ -22,7 +22,7 @@ local colors = gui_container.colors
 
 local title = "Market"
 
-local screen, nickname = ...
+local screen, nickname, _, forceMode = ...
 local rx, ry
 do
     local gpu = graphic.findGpu(screen)
@@ -136,8 +136,8 @@ local function modifyList(lst)
                 end
             end
 
+            save(versionpath, self.version)
             _install(self)
-
             if v.postInstall then
                 v:postInstall()
             end
@@ -146,8 +146,6 @@ local function modifyList(lst)
             if fs.exists(regPath) and not fs.isDirectory(regPath) then
                 liked.assert(screen, programs.execute("applyReg", screen, nickname, regPath, true))
             end
-
-            save(versionpath, self.version)
         end
     
         if not v.icon and v.urlPrimaryPart then
@@ -232,21 +230,26 @@ local function applicationLabel(data, x, y)
     local applabel = graphic.createWindow(screen, x, y, rx - 2, 6)
 
     local supportErr
-    if data.minDiskSpace then
-        if freeSpace < data.minDiskSpace then
-            supportErr = "not enough space to install. need: " .. tostring(data.minDiskSpace) .. "KB"
+    if not forceMode then
+        if data.minDiskSpace then
+            if freeSpace < data.minDiskSpace then
+                supportErr = "not enough space to install. need: " .. tostring(data.minDiskSpace) .. "KB"
+            end
         end
-    end
-    if data.minColorDepth and maxDepth < data.minColorDepth then
-        local level = -1
-        if data.minColorDepth == 1 then
-            level = 1
-        elseif data.minColorDepth == 4 then
-            level = 2
-        elseif data.minColorDepth == 8 then
-            level = 3
+        if data.minColorDepth and maxDepth < data.minColorDepth then
+            local level = -1
+            if data.minColorDepth == 1 then
+                level = 1
+            elseif data.minColorDepth == 4 then
+                level = 2
+            elseif data.minColorDepth == 8 then
+                level = 3
+            end
+            supportErr = "the graphics system level is too low. need: " .. tostring(level)
         end
-        supportErr = "the graphics system level is too low. need: " .. tostring(level)
+        if data.minRam and computer.totalMemory() < data.minRam * 1024 then
+            supportErr = "too little RAM, on you " .. math.round(computer.totalMemory() / 1024) .. "KB need " .. math.round(data.minRam) .. "KB"
+        end
     end
 
     local img

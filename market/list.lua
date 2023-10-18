@@ -195,6 +195,7 @@ local list = {
         description = "configures dualboot between mineOS and liked\nATTENTION. if you have \"MineOS EFI\" installed, then you will not be able to use liked after installing MineOS. in order to boot into liked, delete the /OS.lua file in the MineOS explorer",
         minDiskSpace = 1024 + 512,
         minColorDepth = 8,
+        minRam = 768 * 2, --минимальный обьем ОЗУ для установки
 
         path = "/vendor/bin/mineOS.app",
         install = function(self)

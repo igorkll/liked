@@ -24,7 +24,7 @@ local lastVersion, lastVersionErr
 
 ------------------------------------
 
-layout:createButton(2, 5, 16, 1, nil, nil, "WIPE USER DATA", true).onClick = function ()
+layout:createButton(2, 6, 16, 1, nil, nil, "WIPE USER DATA", true).onClick = function ()
     if gui_checkPassword(screen) and gui.pleaseType(screen, "WIPE") then
         if liked.assert(screen, fs.remove("/data")) then
             computer.shutdown("fast")
@@ -33,7 +33,7 @@ layout:createButton(2, 5, 16, 1, nil, nil, "WIPE USER DATA", true).onClick = fun
     layout:draw()
 end
 
-layout:createButton(20, 5, 16, 1, nil, nil, "UPDATE SYSTEM", true).onClick = function ()
+layout:createButton(20, 6, 16, 1, nil, nil, "UPDATE SYSTEM", true).onClick = function ()
     if not lastVersion then
         gui_warn(screen, nil, nil, "connection problems\ntry again later")
     elseif gui.pleaseCharge(screen, 80, "update") and gui.pleaseSpace(screen, 512, "update") and gui_checkPassword(screen) and gui_yesno(screen, nil, nil, currentVersion ~= lastVersion and "start updating now?" or "you have the latest version installed. do you still want to start updating?") then
@@ -47,7 +47,7 @@ layout:createButton(20, 5, 16, 1, nil, nil, "UPDATE SYSTEM", true).onClick = fun
     layout:draw()
 end
 
-layout:createText(2, 3, colors.white, "current branch: " .. registry.branch)
+layout:createText(2, 4, colors.white, "current branch : " .. registry.branch)
 
 layout:createText(2, 2, colors.white, "current version: " .. currentVersion)
 local lastVersionText = layout:createText(2, 3, colors.white, "last    version: loading...")
