@@ -8,6 +8,7 @@
 /system/version.cfg
 /system/autoruns/a_mounter.lua
 /system/autoruns/b_powerCheck.lua
+/system/bin/applyReg.lua
 /system/bin/desktop.lua
 /system/bin/edit.lua
 /system/bin/fileinfo.lua
@@ -74,6 +75,7 @@
 /system/icons/lua.t2p
 /system/icons/plt.t2p
 /system/icons/raid.t2p
+/system/icons/reg.t2p
 /system/icons/robot.t2p
 /system/icons/scrsv.t2p
 /system/icons/server.t2p
@@ -90,7 +92,13 @@
 /system/lib/liked.lua
 /system/lib/likenet.lua
 /system/lib/shareComponent.lua
+/system/lib/sound.lua
 /system/lib/uix.lua
+/system/likedbox/logo.lua
+/system/likedbox/main.lua
+/system/likedbox/palette.plt
+/system/likedbox/registry.dat
+/system/likedbox/bin/shell.lua
 /system/screenSavers/black_screen.scrsv
 /system/screenSavers/color_dots.scrsv
 /system/screenSavers/random_colors.scrsv
