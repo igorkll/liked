@@ -383,18 +383,14 @@ function liked.getIcon(screen, path)
         end
     end
 
-    --if not icon or not fs.exists(icon) then
-    --    icon = liked.findIcon("unknown")
-    --end
-
-    --[[
-    do --check icon
-        local ok, sx, sy = pcall(gui_readimagesize, icon)
-        if not ok or sx ~= 8 or sy ~= 4 then
-            icon = nil
-        end
+    if not icon or not fs.exists(icon) or fs.isDirectory(icon) then
+        icon = liked.findIcon("unknown")
     end
-    ]]
+
+    local ok, sx, sy = pcall(gui_readimagesize, icon)
+    if not ok or sx ~= 8 or sy ~= 4 then
+        icon = nil
+    end
 
     if not icon or not fs.exists(icon) or fs.isDirectory(icon) then
         icon = liked.findIcon("badicon")

@@ -5,7 +5,7 @@ local graphic = require("graphic")
 local liked = require("liked")
 local thread = require("thread")
 local colors = gui_container.colors
-local uix = {}
+local uix = {selects = {}}
 uix.styles = {
     "round",
     "square"
@@ -96,7 +96,7 @@ function objclass:uploadEvent(eventData)
 end
 
 function objclass:draw()
-    if self.hidden then return end
+    if self.hidden or not self.gui.selected then return end
     if self.type == "bg" then
         self.gui.window:clear(self.color)
     elseif self.type == "label" or self.type == "button" or self.type == "context" then
@@ -168,6 +168,8 @@ function objclass:draw()
         liked.drawFullUpBar(self.gui.window.screen, self.title, self.withoutFill, self.bgcolor)
     elseif self.type == "plane" then
         self.gui.window:fill(self.x, self.y, self.sx, self.sy, self.color, 0, " ")
+    elseif self.type == "image" then
+        gui_drawimage(self.gui.window.screen, self.path, self.x, self.y)
     end
 end
 
@@ -345,32 +347,64 @@ function uix:createContext(x, y, sx, sy, back, fore, text, strs, funcs, actives)
     return obj
 end
 
+function uix:createImage(x, y, path)
+    local obj = setmetatable({gui = self, type = "image"}, {__index = objclass})
+    obj.x = x
+    obj.y = y
+    obj.path = path
+
+    table.insert(self.objs, obj)
+    return obj
+end
+
 
 
 function uix:uploadEvent(eventData)
-    if not eventData.windowEventData then
-        eventData = self.window:uploadEvent(eventData)
-    end
+    if self.selected then
+        if not eventData.windowEventData then
+            eventData = self.window:uploadEvent(eventData)
+        end
 
-    for _, obj in ipairs(self.objs) do
-        obj:uploadEvent(eventData)
+        for _, obj in ipairs(self.objs) do
+            obj:uploadEvent(eventData)
+        end
     end
 end
 
 function uix:draw()
-    for _, obj in ipairs(self.objs) do
-        obj:draw()
+    if self.selected then
+        for _, obj in ipairs(self.objs) do
+            obj:draw()
+        end
     end
 end
 
-function uix.create(window, bgcolor, style)
+function uix:select(noRedraw)
+    if not self.selected then
+        if uix.selects[self.window.screen] then
+            uix.selects[self.window.screen].selected = false
+        end
+        uix.selects[self.window.screen] = self
+        self.selected = true
+        if not noRedraw then
+            self:draw()
+        end
+    end
+end
+
+function uix.create(window, bgcolor, style, selected)
     local guiobj = setmetatable({}, {__index = uix})
     guiobj.window = window
     guiobj.style = style or "round"
     guiobj.objs = {}
-
+    guiobj.selected = false
+    
     if bgcolor then
         guiobj:createBg(bgcolor)
+    end
+
+    if selected == nil or selected == true then
+        guiobj:select(true)
     end
 
     return guiobj

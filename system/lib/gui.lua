@@ -628,6 +628,10 @@ function gui.select(screen, cx, cy, label, actions, scroll)
         window:set(50, math.round(math.map(scroll, 0, #actions - 1, 2, 15)), colors.lime, 0, " ")
     end
 
+    local function redrawButton()
+        window:set(window.sizeX - 9, window.sizeY, sel and colors.lime or colors.green, colors.white, " CONFIRM ")
+    end
+
     local function drawBase()
         window:clear(colors.gray)
         window:fill(1, 1, window.sizeX, 1, colors.lightGray, 0, " ")
@@ -636,7 +640,7 @@ function gui.select(screen, cx, cy, label, actions, scroll)
         end
         window:set(window.sizeX, 1, colors.red, colors.white, "X")
         window:fill(1, window.sizeY, window.sizeX, 1, colors.lightGray, 0, " ")
-        window:set(window.sizeX - 9, window.sizeY, sel and colors.lime or colors.green, colors.white, " CONFIRM ")
+        redrawButton()
     end
 
     local function getCol(idx)
@@ -737,6 +741,7 @@ function gui.select(screen, cx, cy, label, actions, scroll)
             if addrsIdx[windowEventData[4]] and windowEventData[3] < window.sizeX and windowEventData[4] < window.sizeY then
                 if windowEventData[1] == "touch" and sel and sel == addrsIdx[windowEventData[4]] then
                     draw(sel)
+                    redrawButton()
                     return sel, scroll, windowEventData[5]
                 end
                 local oldsel = sel
@@ -748,11 +753,13 @@ function gui.select(screen, cx, cy, label, actions, scroll)
                     if sel then
                         draw(sel)
                     end
+                    redrawButton()
                 end
             elseif sel then
                 local lsel = sel
                 sel = nil
                 draw(lsel)
+                redrawButton()
             end
         end
 
