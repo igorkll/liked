@@ -15,6 +15,20 @@ local unicode = require("unicode")
 local thread = require("thread")
 local liked = {}
 
+function liked.uninstall(screen, nickname, path)
+    local unregPath = paths.concat(path, "unreg.reg")
+    if fs.exists(unregPath) and not fs.isDirectory(unregPath) then
+        liked.assert(screen, programs.execute("applyReg", screen, nickname, unregPath, true))
+    end
+
+    local uninstallPath = paths.concat(path, "uninstall.lua")
+    if fs.exists(uninstallPath) and not fs.isDirectory(uninstallPath) then
+        liked.assert(screen, programs.execute(uninstallPath, screen, nickname))
+    else
+        liked.assert(screen, fs.remove(path))
+    end
+end
+
 function liked.lastVersion()
     local lastVersion, err = require("internet").getInternetFile("https://raw.githubusercontent.com/igorkll/liked/" .. registry.branch .. "/system/version.cfg")
     if not lastVersion then return nil, err end

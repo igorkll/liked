@@ -535,13 +535,7 @@ local function execute(name, nickname, ...)
 end
 
 local function uninstallApp(path, nickname)
-    local uninstallPath = paths.concat(path, "uninstall.lua")
-    if fs.exists(uninstallPath) then
-        execute(uninstallPath, nickname)
-        return true
-    else
-        liked.assert(screen, fs.remove(path))
-    end
+    liked.uninstall(screen, nickname, path)
 end
 
 local function fileDescriptor(icon, alternative, nickname) --открывает файл, сам решает через какую программу это сделать

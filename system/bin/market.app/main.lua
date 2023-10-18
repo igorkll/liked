@@ -108,12 +108,7 @@ local function modifyList(lst)
     
         if not v.uninstall then
             function v.uninstall(self)
-                local uninstallPath = paths.concat(self.path, "uninstall.lua")
-                if fs.exists(uninstallPath) then
-                    assert(exec(uninstallPath, screen, nickname))
-                else
-                    fs.remove(self.path)
-                end
+                liked.uninstall(screen, nickname, self.path)
             end
         end
     
@@ -130,10 +125,6 @@ local function modifyList(lst)
             end
         end
         function v.install(self)
-            _install(self)
-            if v.postInstall then
-                v:postInstall()
-            end
             if v.libs then
                 for _, name in ipairs(v.libs) do
                     local info = glibs[name]
@@ -144,6 +135,18 @@ local function modifyList(lst)
                     end
                 end
             end
+
+            _install(self)
+
+            if v.postInstall then
+                v:postInstall()
+            end
+
+            local regPath = paths.concat(self.path, "reg.reg")
+            if fs.exists(regPath) and not fs.isDirectory(regPath) then
+                liked.assert(screen, programs.execute("applyReg", screen, nickname, regPath, true))
+            end
+
             save(versionpath, self.version)
         end
     

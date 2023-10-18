@@ -47,6 +47,8 @@ layout:createButton(20, 5, 16, 1, nil, nil, "UPDATE SYSTEM", true).onClick = fun
     layout:draw()
 end
 
+layout:createText(2, 3, colors.white, "current branch: " .. registry.branch)
+
 layout:createText(2, 2, colors.white, "current version: " .. currentVersion)
 local lastVersionText = layout:createText(2, 3, colors.white, "last    version: loading...")
 layout:draw()
