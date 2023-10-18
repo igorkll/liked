@@ -20,6 +20,7 @@
 /system/bin/market.app/actions.cfg
 /system/bin/market.app/clearCache.lua
 /system/bin/market.app/custom.lua
+/system/bin/market.app/forceMode.lua
 /system/bin/market.app/icon.t2p
 /system/bin/market.app/main.lua
 /system/bin/settings.app/icon.t2p
