@@ -37,7 +37,8 @@ function objclass:uploadEvent(eventData)
                 self.state = true
                 self:draw()
 
-                local _, num = gui.context(self.gui.window.screen, self.x + 1, self.y + 1, self.strs, self.actives)
+                local x, y = self.gui.window:toRealPos(self.x, self.y)
+                local _, num = gui.context(self.gui.window.screen, x + 1, y + 1, self.strs, self.actives)
                 if num and self.funcs[num] then
                     self.funcs[num]()
                 end
@@ -169,7 +170,10 @@ function objclass:draw()
     elseif self.type == "plane" then
         self.gui.window:fill(self.x, self.y, self.sx, self.sy, self.color, 0, " ")
     elseif self.type == "image" then
-        gui_drawimage(self.gui.window.screen, self.path, self.x, self.y, self.wallpaperMode)
+        local x, y = self.gui.window:toRealPos(self.x, self.y)
+        gui_drawimage(self.gui.window.screen, self.path, x, y, self.wallpaperMode)
+    elseif self.type == "drawer" then
+        self:func(self.gui.window:toRealPos(self.x, self.y))
     end
 end
 
@@ -353,6 +357,16 @@ function uix:createImage(x, y, path, wallpaperMode)
     obj.y = y
     obj.path = path
     obj.wallpaperMode = not not wallpaperMode
+
+    table.insert(self.objs, obj)
+    return obj
+end
+
+function uix:createDrawer(x, y, func)
+    local obj = setmetatable({gui = self, type = "drawer"}, {__index = objclass})
+    obj.x = x
+    obj.y = y
+    obj.func = func
 
     table.insert(self.objs, obj)
     return obj
