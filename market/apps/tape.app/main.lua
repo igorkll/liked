@@ -139,7 +139,7 @@ function writeButton:onClick()
 end
 
 local function setupConnection(url)
-    local file, reason = internet.request(url)
+    local file, reason = component.internet.request(url)
     local connected
 
     if not file then
