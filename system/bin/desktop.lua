@@ -958,21 +958,11 @@ local function doIcon(windowEventData)
                             if v.exp == "app" then
                                 table.insert(strs, "  uninstall")
                                 table.insert(active, isUninstallAvailable(v))
-
-                                --[[
-                                if isDev() then
-                                    table.insert(strs, "  remove")
-                                    table.insert(active, not v.readonly)
-
-                                    table.insert(strs, "  rename")
-                                    table.insert(active, not v.readonly)
-                                end
-                                ]]
-                            else
-                                table.insert(strs, "  remove")
-                                table.insert(active, not v.readonly)
                             end
                             
+                            table.insert(strs, "  remove")
+                            table.insert(active, not v.readonly)
+
                             table.insert(strs, "  rename")
                             table.insert(active, not v.readonly)
 
