@@ -116,6 +116,11 @@ local function drawUi()
     statusWindow:set(15, 1, colors.white, colors.black, ">")
     statusWindow:set(17, 1, colors.white, colors.black, "^")
     statusWindow:set(19, 1, colors.white, colors.black, "v")
+
+    statusWindow:set(22, 1, colors.white, colors.red, "<")
+    statusWindow:set(24, 1, colors.white, colors.red, ">")
+    statusWindow:set(26, 1, colors.white, colors.red, "^")
+    statusWindow:set(28, 1, colors.white, colors.red, "v")
 end
 
 local function drawPixel(x, y, pixel)
@@ -239,6 +244,27 @@ local function load()
     end
 
     reMathOffset()
+end
+
+local function offsetImage(x, y)
+    local img = table.deepclone(image)
+    for cy = 1, img.sizeY do
+        for cx = 1, img.sizeX do
+            local line = img[cy + y]
+            if line then
+                local pixel = line[cx + x]
+                if pixel then
+                    image[cy][cx] = pixel
+                else
+                    image[cy][cx] = {0, 0, " "}
+                end
+            else
+                image[cy][cx] = {0, 0, " "}
+            end
+        end
+    end
+
+    noSaved = true
 end
 
 local function save()
@@ -407,6 +433,19 @@ while true do
             draw()
         elseif statusWindowEventData[3] == 19 then
             imageOffsetY = imageOffsetY + 1
+            draw()
+
+        elseif statusWindowEventData[3] == 22 then
+            offsetImage(1, 0)
+            draw()
+        elseif statusWindowEventData[3] == 24 then
+            offsetImage(-1, 0)
+            draw()
+        elseif statusWindowEventData[3] == 26 then
+            offsetImage(0, 1)
+            draw()
+        elseif statusWindowEventData[3] == 28 then
+            offsetImage(0, -1)
             draw()
         end
     end
