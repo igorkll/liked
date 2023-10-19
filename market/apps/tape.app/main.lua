@@ -195,13 +195,6 @@ function writeUrlButton:onClick()
     end
 
     if gui_yesno(screen, nil, nil, "are you sure you want to write \'" .. url .. "\' to \'" .. label .. "\' tape?") then
-        local success, file = setupConnection(url)
-        if not success or not file then
-            gui.warn(screen, nil, nil, tostring(file or "unknown error"))
-            redraw()
-            return
-        end
-
         if gui_yesno(screen, nil, nil, "rewind the tape?") then
             tape.stop()
             tape.seek(-tape.getSize())
@@ -210,6 +203,13 @@ function writeUrlButton:onClick()
         end
 
         gui.status(screen, nil, nil, "Writing The Tape...")
+
+        local success, file = setupConnection(url)
+        if not success or not file then
+            gui.warn(screen, nil, nil, tostring(file or "unknown error"))
+            redraw()
+            return
+        end
 
         while true do
             local data = file.read(math.huge)
