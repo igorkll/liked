@@ -138,6 +138,92 @@ function writeButton:onClick()
     writeFile()
 end
 
+local function setupConnection(url)
+    local file, reason = internet.request(url)
+    local connected
+
+    if not file then
+        gui.warn(screen, nil, nil, "error requesting data from URL: " .. reason .. "\n")
+        return false
+    end
+
+    for i = 1, 10 do
+        connected, reason = file.finishConnect()
+        os.sleep(0.1)
+        if connected or connected == nil then
+            break
+        end
+    end
+  
+    if connected == nil then
+        gui.warn(screen, nil, nil, "Could not connect to server: " .. reason)
+        return false
+    end
+
+    local status, message, header = file.response()
+
+    if status then
+        status = string.format("%d", status)
+        if status:sub(1,1) == "2" then
+            return true, file
+        end
+        return false
+    end
+    gui.warn(screen, nil, nil, "no valid HTTP response - no response")
+    return false
+end
+
+function writeUrlButton:onClick()
+    if tapeCheck() then return end
+
+    local internet = component.internet
+    if not internet then
+        gui.warn(screen, nil, nil, "an internet map component is required")
+        redraw()
+        return
+    end
+
+    local url = gui.input(screen, nil, nil, "dfpwm url")
+    if not url then
+        redraw()
+        return
+    end
+
+    local success, file = setupConnection(url)
+    if not success or not file then
+        gui.warn(screen, nil, nil, tostring(file or "unknown error"))
+        redraw()
+        return
+    end
+
+    local label = tape.getLabel()
+    if not label or label == "" then
+        label = "unknown"
+    end
+
+    if gui_yesno(screen, nil, nil, "are you sure you want to write \'" .. url .. "\' to \'" .. label .. "\' tape?") then
+        if gui_yesno(screen, nil, nil, "rewind the tape?") then
+            tape.stop()
+            tape.seek(-tape.getSize())
+        else
+            tape.stop()
+        end
+
+        gui.status(screen, nil, nil, "Writing The Tape...")
+
+        while true do
+            local data = file.read(math.huge)
+            if not data then
+                break
+            end
+            tape.write(data)
+        end
+        file:close()
+    end
+
+    redraw()
+end
+
 local rewindButton = layout:createButton(2, 9, 16, 1, nil, nil, "REWIND")
 local wipeButton = layout:createButton(2 + 17, 9, 16, 1, nil, nil, "WIPE", true)
 
