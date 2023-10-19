@@ -94,7 +94,7 @@ local function drawSelectedColors()
     nullWindow2:fill(nullWindow2.sizeX - 2, 2, 2, nullWindow2.sizeY - 2, indexsColors[selectedColor2], 0, " ")
 
     nullWindow2:set(nullWindow2.sizeX - 4, nullWindow2.sizeY - 1, colors.green, colors.lime, ">")
-    nullWindow2:set(nullWindow2.sizeX - 3, nullWindow2.sizeY - 1, indexsColors[selectedColor1], indexsColors[selectedColor2], selectedChar)
+    nullWindow2:set(nullWindow2.sizeX - 3, nullWindow2.sizeY - 1, indexsColors[selectedColor1], indexsColors[selectedColor2], unicode.sub(selectedChar, 1, 1))
 end
 
 local function drawColors()
@@ -445,20 +445,12 @@ while true do
 
     if nullWindowEventData[1] == "touch" then
         if nullWindowEventData[3] >= 4 and nullWindowEventData[3] <= 5 and nullWindowEventData[4] == nullWindow2.sizeY - 1 then
-            ::tonew::
             local clear = saveZone(screen)
-            local entered = calls.call("gui_input", screen, nil, nil, "char", nil, colors.white)
+            local entered = gui.input(screen, nil, nil, "char", nil, colors.white, selectedChar)
             clear()
             if entered then
-                if unicode.len(entered) ~= 1 then
-                    local clear = saveZone(screen)
-                    calls.call("gui_warn", screen, nil, nil, "enter one char\nor cancel menu", colors.white)
-                    clear()
-                    goto tonew
-                else
-                    selectedChar = entered
-                    drawSelectedColors()
-                end
+                selectedChar = entered
+                drawSelectedColors()
             end
         end
     end
@@ -468,21 +460,27 @@ while true do
         local py = mainWindowEventData[4] - imageOffsetY
         if px >= 1 and py >= 1 and px <= image.sizeX and
         py <= image.sizeY then
-            local pixel = image[py][px]
             if mainWindowEventData[5] == 0 then
-                pixel[1] = selectedColor1 - 1
-                pixel[2] = selectedColor2 - 1
-                pixel[3] = selectedChar
-                if pixel[1] == pixel[2] and pixel[1] == 0 then
-                    pixel[2] = 15
-                    pixel[3] = " "
+                for i = 1, unicode.len(selectedChar) do
+                    local pixel = image[py][px + (i - 1)]
+                    if pixel then
+                        pixel[1] = selectedColor1 - 1
+                        pixel[2] = selectedColor2 - 1
+                        pixel[3] = unicode.sub(selectedChar, i, i)
+                        if pixel[1] == pixel[2] and pixel[1] == 0 then
+                            pixel[2] = 15
+                            pixel[3] = " "
+                        end
+                        drawPixel(px + (i - 1), py, pixel)
+                    end
                 end
             else
+                local pixel = image[py][px]
                 pixel[1] = 0
                 pixel[2] = 0
                 pixel[3] = " "
+                drawPixel(px, py, pixel)
             end
-            drawPixel(px, py, pixel)
             noSaved = true
         end
     end

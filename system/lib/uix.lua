@@ -169,7 +169,7 @@ function objclass:draw()
     elseif self.type == "plane" then
         self.gui.window:fill(self.x, self.y, self.sx, self.sy, self.color, 0, " ")
     elseif self.type == "image" then
-        gui_drawimage(self.gui.window.screen, self.path, self.x, self.y)
+        gui_drawimage(self.gui.window.screen, self.path, self.x, self.y, self.wallpaperMode)
     end
 end
 
@@ -347,11 +347,12 @@ function uix:createContext(x, y, sx, sy, back, fore, text, strs, funcs, actives)
     return obj
 end
 
-function uix:createImage(x, y, path)
+function uix:createImage(x, y, path, wallpaperMode)
     local obj = setmetatable({gui = self, type = "image"}, {__index = objclass})
     obj.x = x
     obj.y = y
     obj.path = path
+    obj.wallpaperMode = not not wallpaperMode
 
     table.insert(self.objs, obj)
     return obj
@@ -389,4 +390,5 @@ function uix.create(window, bgcolor, style)
     return guiobj
 end
 
+uix.unloadable = true
 return uix
