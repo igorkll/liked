@@ -62,7 +62,7 @@ gui_container.openVia = {
     ["reg"] = "applyReg"
 }
 
-gui_container.typecolors = {
+gui_container.typecolors = { --тут косяк, политра может быть изменена а тут не измениться, и могут быть сбои при присвоения цвета
     ["app"] = gui_container.colors.red,
     ["afpx"] = gui_container.colors.orange,
     ["lua"] = gui_container.colors.lime
