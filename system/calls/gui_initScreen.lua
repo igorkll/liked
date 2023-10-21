@@ -27,6 +27,6 @@ graphic.setDepth(screen, graphic.maxDepth(screen))
 
 clr()
 
-system_applyTheme("/data/theme.plt", screen)
+system_applyTheme(_G.initPalPath, screen)
 
 clr()

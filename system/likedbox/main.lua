@@ -33,12 +33,9 @@ maxDepth = math.round(maxDepth)
 
 ------------------------------------
 
+_G.initPalPath = "/system/palette.plt"
 function _G.initPal()
-    if fs.exists("/data/theme.plt") then
-        system_applyTheme("/data/theme.plt")
-    else
-        system_setTheme("/system/palette.plt")
-    end
+    system_applyTheme("/system/palette.plt")
 end
 local gui_container = require("gui_container")
 _G.initPal = nil

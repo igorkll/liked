@@ -61,7 +61,7 @@ local function draw(set)
             liked.applyBufferType()
 
             for _, init in ipairs(inits) do
-                system_applyTheme("/data/theme.plt", init[1])
+                system_applyTheme(_G.initPalPath, init[1])
                 init[2]()
             end
         else
