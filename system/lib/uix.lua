@@ -79,31 +79,50 @@ function objclass:uploadEvent(eventData)
             end
         end
     elseif self.type == "seek" then
-        if self.vertical then
-            if eventData[1] == "touch" and eventData[3] == self.x and eventData[4] >= self.y and eventData[4] < self.y + self.size then
-                self.focus = true
-            elseif eventData[1] == "drop" or eventData[1] == "touch" then
-                self.focus = false
-            end
-        else
-            if eventData[1] == "touch" and eventData[4] == self.y and eventData[3] >= self.x and eventData[3] < self.x + self.size then
-                self.focus = true
-            elseif eventData[1] == "drop" or eventData[1] == "touch" then
-                self.focus = false
-            end
-        end
-        if (eventData[1] == "touch" or eventData[1] == "drag") and self.focus then
-            if self.vertical then
-                self.value = (eventData[4] - self.y) / (self.size - 1)
-            else
-                self.value = (eventData[3] - self.x) / (self.size - 1)
-            end
+        local function doSeek()
             if self.value < 0 then self.value = 0 end
             if self.value > 1 then self.value = 1 end
             if self.onSeek then
                 self:onSeek(self.value)
             end
             self:draw()
+        end
+
+        if eventData[1] == "scroll" then
+            if self.vertical then
+                if eventData[3] == self.x and eventData[4] >= self.y and eventData[4] < self.y + self.size then
+                    self.value = self.value - (eventData[5] / self.size)
+                end
+            else
+                if eventData[4] == self.y and eventData[3] >= self.x and eventData[3] < self.x + self.size then
+                    self.value = self.value + (eventData[5] / self.size)
+                end
+            end
+            
+            doSeek()
+        else
+            if self.vertical then
+                if eventData[1] == "touch" and eventData[3] == self.x and eventData[4] >= self.y and eventData[4] < self.y + self.size then
+                    self.focus = true
+                elseif eventData[1] == "drop" or eventData[1] == "touch" then
+                    self.focus = false
+                end
+            else
+                if eventData[1] == "touch" and eventData[4] == self.y and eventData[3] >= self.x and eventData[3] < self.x + self.size then
+                    self.focus = true
+                elseif eventData[1] == "drop" or eventData[1] == "touch" then
+                    self.focus = false
+                end
+            end
+            if (eventData[1] == "touch" or eventData[1] == "drag") and self.focus then
+                if self.vertical then
+                    self.value = (eventData[4] - self.y) / (self.size - 1)
+                else
+                    self.value = (eventData[3] - self.x) / (self.size - 1)
+                end
+                
+                doSeek()
+            end
         end
     end
 end
@@ -176,7 +195,6 @@ function objclass:draw()
             if self.gui.style == "round" then
                 self.gui.window:set(self.x, self.y + dotpos, bg, self.dotcolor, "●")
             else
-                if dotpos >= self.size - 1 then dotpos = dotpos - 1 end
                 self.gui.window:set(self.x, self.y + dotpos, bg, self.dotcolor, "█")
             end
         else
@@ -410,6 +428,9 @@ function uix:uploadEvent(eventData)
 end
 
 function uix:draw()
+    if self.onRedraw then
+        self:onRedraw()
+    end
     for _, obj in ipairs(self.objs) do
         obj:draw()
     end
