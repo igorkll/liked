@@ -503,10 +503,26 @@ function gui.contentPos(screen, posX, posY, strs)
     return posX, posY, sizeX, sizeY
 end
 
+function gui.contextStrs(strs)
+    local drawStrs = {}
+    for index, value in ipairs(strs) do
+        if type(value) == "string" then
+            if value:sub(1, 2) ~= "  " then
+                drawStrs[index] = "  " .. value
+            else
+                drawStrs[index] = value
+            end
+        else
+            drawStrs[index] = value
+        end
+    end
+    return drawStrs
+end
+
 function gui.context(screen, posX, posY, strs, active)
     local gpu = graphic.findGpu(screen)
-    local posX, posY, sizeX, sizeY = gui.contentPos(screen, posX, posY, strs)
-
+    local drawStrs = gui.contextStrs(strs)
+    local posX, posY, sizeX, sizeY = gui.contentPos(screen, posX, posY, drawStrs)
     local sep = string.rep(gui_container.chars.splitLine, sizeX)
 
     local window = graphic.createWindow(screen, posX, posY, sizeX, sizeY)
@@ -514,7 +530,7 @@ function gui.context(screen, posX, posY, strs, active)
     gui.shadow(gpu, window.x, window.y, window.sizeX, window.sizeY)
 
     local function redrawStrs(selected)
-        for i, str in ipairs(strs) do
+        for i, str in ipairs(drawStrs) do
             local isSep
             if str == true then
                 isSep = true

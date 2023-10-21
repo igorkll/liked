@@ -37,8 +37,11 @@ function objclass:uploadEvent(eventData)
                 self.state = true
                 self:draw()
 
-                local x, y = self.gui.window:toRealPos(self.x, self.y)
-                local _, num = gui.context(self.gui.window.screen, x + 1, y + 1, self.strs, self.actives)
+                local x, y = self.gui.window:toRealPos(self.x + 1, self.y + 1)
+                local px, py, sx, sy = gui.contentPos(self.gui.window.screen, x, y, gui.contextStrs(self.strs))
+                local clear = graphic.screenshot(self.gui.window.screen, px, py, sx + 2, sy + 1)
+                local _, num = gui.context(self.gui.window.screen, px, py, self.strs, self.actives)
+                clear()
                 if num and self.funcs[num] then
                     self.funcs[num]()
                 end
@@ -79,27 +82,29 @@ function objclass:uploadEvent(eventData)
             end
         end
     elseif self.type == "seek" then
-        local function doSeek()
+        local function doSeek(oldValue)
             if self.value < 0 then self.value = 0 end
             if self.value > 1 then self.value = 1 end
             if self.onSeek then
-                self:onSeek(self.value)
+                self:onSeek(self.value, oldValue)
             end
             self:draw()
         end
 
         if eventData[1] == "scroll" then
             if self.vertical then
-                if eventData[3] == self.x and eventData[4] >= self.y and eventData[4] < self.y + self.size then
+                if self.globalScroll or (eventData[3] == self.x and eventData[4] >= self.y and eventData[4] < self.y + self.size) then
+                    local oldValue = self.value
                     self.value = self.value - (eventData[5] / self.size)
+                    doSeek(oldValue)
                 end
             else
-                if eventData[4] == self.y and eventData[3] >= self.x and eventData[3] < self.x + self.size then
+                if self.globalScroll or (eventData[4] == self.y and eventData[3] >= self.x and eventData[3] < self.x + self.size) then
+                    local oldValue = self.value
                     self.value = self.value + (eventData[5] / self.size)
+                    doSeek(oldValue)
                 end
             end
-            
-            doSeek()
         else
             if self.vertical then
                 if eventData[1] == "touch" and eventData[3] == self.x and eventData[4] >= self.y and eventData[4] < self.y + self.size then
@@ -115,13 +120,13 @@ function objclass:uploadEvent(eventData)
                 end
             end
             if (eventData[1] == "touch" or eventData[1] == "drag") and self.focus then
+                local oldValue = self.value
                 if self.vertical then
                     self.value = (eventData[4] - self.y) / (self.size - 1)
                 else
                     self.value = (eventData[3] - self.x) / (self.size - 1)
                 end
-                
-                doSeek()
+                doSeek(oldValue)
             end
         end
     end
@@ -339,7 +344,7 @@ function uix:createInput(x, y, sx, back, fore, hidden, default, syntax, maxlen, 
     return obj
 end
 
-function uix:createSeek(x, y, size, color, fillColor, dotcolor, value, vertical)
+function uix:createSeek(x, y, size, color, fillColor, dotcolor, value, vertical, globalScroll)
     local obj = setmetatable({gui = self, type = "seek"}, {__index = objclass})
     obj.x = x
     obj.y = y
@@ -349,6 +354,7 @@ function uix:createSeek(x, y, size, color, fillColor, dotcolor, value, vertical)
     obj.dotcolor = dotcolor or colors.white
     obj.value = value or 0
     obj.vertical = not not vertical
+    obj.globalScroll = not not globalScroll
 
     table.insert(self.objs, obj)
     return obj
