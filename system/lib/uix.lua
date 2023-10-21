@@ -79,13 +79,25 @@ function objclass:uploadEvent(eventData)
             end
         end
     elseif self.type == "seek" then
-        if eventData[1] == "touch" and eventData[4] == self.y and eventData[3] >= self.x and eventData[3] < self.x + self.sx then
-            self.focus = true
-        elseif eventData[1] == "drop" or eventData[1] == "touch" then
-            self.focus = false
+        if self.vertical then
+            if eventData[1] == "touch" and eventData[3] == self.x and eventData[4] >= self.y and eventData[4] < self.y + self.size then
+                self.focus = true
+            elseif eventData[1] == "drop" or eventData[1] == "touch" then
+                self.focus = false
+            end
+        else
+            if eventData[1] == "touch" and eventData[4] == self.y and eventData[3] >= self.x and eventData[3] < self.x + self.size then
+                self.focus = true
+            elseif eventData[1] == "drop" or eventData[1] == "touch" then
+                self.focus = false
+            end
         end
         if (eventData[1] == "touch" or eventData[1] == "drag") and self.focus then
-            self.value = (eventData[3] - self.x) / (self.sx - 1)
+            if self.vertical then
+                self.value = (eventData[3] - self.x) / (self.size - 1)
+            else
+                self.value = (eventData[3] - self.y) / (self.size - 1)
+            end
             if self.value < 0 then self.value = 0 end
             if self.value > 1 then self.value = 1 end
             if self.onSeek then
@@ -156,14 +168,26 @@ function objclass:draw()
         self.read.redraw()
     elseif self.type == "seek" then
         local _, _, bg = self.gui.window:get(self.x, self.y)
-        local dotpos = math.round((self.sx - 1) * self.value)
-        self.gui.window:fill(self.x, self.y, dotpos, 1, bg, self.fillColor, gui_container.chars.wideSplitLine)
-        self.gui.window:fill(self.x + dotpos, self.y, self.sx - dotpos, 1, bg, self.color, gui_container.chars.wideSplitLine)
-        if self.gui.style == "round" then
-            if dotpos >= self.sx - 1 then dotpos = dotpos - 1 end
-            self.gui.window:set(self.x + dotpos, self.y, bg, self.dotcolor, "◖◗")
+        local dotpos = math.round((self.size - 1) * self.value)
+
+        if self.vertical then
+            self.gui.window:fill(self.x, self.y, 1, dotpos, bg, self.fillColor, gui_container.chars.wideSplitLine)
+            self.gui.window:fill(self.x, self.y + dotpos, 1, self.size - dotpos, bg, self.color, gui_container.chars.wideSplitLine)
+            if self.gui.style == "round" then
+                self.gui.window:set(self.x + dotpos, self.y, bg, self.dotcolor, "●")
+            else
+                if dotpos >= self.size - 1 then dotpos = dotpos - 1 end
+                self.gui.window:set(self.x, self.y + dotpos, bg, self.dotcolor, "█")
+            end
         else
-            self.gui.window:set(self.x + dotpos, self.y, bg, self.dotcolor, "█")
+            self.gui.window:fill(self.x, self.y, dotpos, 1, bg, self.fillColor, gui_container.chars.wideSplitLine)
+            self.gui.window:fill(self.x + dotpos, self.y, self.size - dotpos, 1, bg, self.color, gui_container.chars.wideSplitLine)
+            if self.gui.style == "round" then
+                if dotpos >= self.size - 1 then dotpos = dotpos - 1 end
+                self.gui.window:set(self.x + dotpos, self.y, bg, self.dotcolor, "◖◗")
+            else
+                self.gui.window:set(self.x + dotpos, self.y, bg, self.dotcolor, "█")
+            end
         end
     elseif self.type == "up" then
         liked.drawFullUpBar(self.gui.window.screen, self.title, self.withoutFill, self.bgcolor)
@@ -297,15 +321,16 @@ function uix:createInput(x, y, sx, back, fore, hidden, default, syntax, maxlen, 
     return obj
 end
 
-function uix:createSeek(x, y, sx, color, fillColor, dotcolor, value)
+function uix:createSeek(x, y, size, color, fillColor, dotcolor, value, vertical)
     local obj = setmetatable({gui = self, type = "seek"}, {__index = objclass})
     obj.x = x
     obj.y = y
-    obj.sx = sx
+    obj.size = size
     obj.color = color or colors.lightGray
     obj.fillColor = fillColor or colors.lime
     obj.dotcolor = dotcolor or colors.white
     obj.value = value or 0
+    obj.vertical = not not vertical
 
     table.insert(self.objs, obj)
     return obj
