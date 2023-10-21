@@ -184,12 +184,18 @@ function objclass:draw()
             self.gui.window:set(self.x, self.y, bg, self.color, self.text)
         end
     elseif self.type == "input" then
+        local _, _, bg = self.gui.window:get(self.x, self.y)
+        local add = 0
         if self.gui.style == "round" then
-            local _, _, bg = self.gui.window:get(self.x, self.y)
             self.gui.window:set(self.x, self.y, bg, self.back, "◖")
             self.gui.window:set(self.x + (self.sx - 1), self.y, bg, self.back, "◗")
+            add = add + 1
         end
+        
         self.read.redraw()
+        if #self.read.getBuffer() == 0 and self.title then
+            self.gui.window:set(self.x + add, self.y, bg, self.titleColor, self.title)
+        end
     elseif self.type == "seek" then
         local _, _, bg = self.gui.window:get(self.x, self.y)
         local dotpos = math.round((self.size - 1) * self.value)
@@ -318,7 +324,7 @@ function uix:createText(x, y, color, text)
     return obj
 end
 
-function uix:createInput(x, y, sx, back, fore, hidden, default, syntax, maxlen, preStr)
+function uix:createInput(x, y, sx, back, fore, hidden, default, syntax, maxlen, preStr, titleColor, title)
     local obj = setmetatable({gui = self, type = "input"}, {__index = objclass})
     obj.x = x
     obj.y = y
@@ -328,6 +334,8 @@ function uix:createInput(x, y, sx, back, fore, hidden, default, syntax, maxlen, 
     obj.hidden = hidden
     obj.default = default
     obj.syntax = syntax
+    obj.titleColor = titleColor or colors.lightGray
+    obj.title = title
     
     if self.style == "round" then
         obj.read = self.window:readNoDraw(x + 1, y, sx - 2, obj.back, obj.fore, preStr, hidden, default, true, syntax)
