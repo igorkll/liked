@@ -4,6 +4,7 @@ local paths = require("paths")
 local fs = require("filesystem")
 local unicode = require("unicode")
 local computer = require("computer")
+local gui = require("gui")
 
 local colors = gui_container.colors
 
@@ -77,26 +78,26 @@ local function draw()
                 file = file:sub(1, #file - 1)
             end
             local lexp = paths.extension(file)
-            name = paths.hideExtension(name)
+            name = gui.hideExtension(screen, name)
 
             --if (not dir or not lexp) or isDev() then
-                local lname = (lexp and gui_container.typenames[lexp]) or lexp
-                local ctype = (lname and ((dir and "DIR-" or "") .. lname) or (dir and "DIR" or "FILE")):upper()
-                
-                local objcolor = dir and colors.black or colors.lightGray
-                if gui_container.typecolors[lexp] then
-                    objcolor = gui_container.typecolors[lexp]
-                end
+            local lname = (lexp and gui_container.typenames[lexp]) or lexp
+            local ctype = (lname and ((dir and "DIR-" or "") .. lname) or (dir and "DIR" or "FILE")):upper()
+            
+            local objcolor = dir and colors.black or colors.lightGray
+            if gui_container.typecolors[lexp] then
+                objcolor = gui_container.typecolors[lexp]
+            end
 
-                count = count + 1
-                local pos = (count + 1) - scroll
+            count = count + 1
+            local pos = (count + 1) - scroll
 
-                if pos > 1 and pos < window.sizeY then
-                    window:fill(1, pos, window.sizeX, 1, objcolor, 0, " ")
-                    window:set(1, pos, objcolor, colors.white, name)
-                    window:set(window.sizeX - #ctype, pos, objcolor, colors.white, ctype)
-                    strs[pos - 1] = file
-                end
+            if pos > 1 and pos < window.sizeY then
+                window:fill(1, pos, window.sizeX, 1, objcolor, 0, " ")
+                window:set(1, pos, objcolor, colors.white, name)
+                window:set(window.sizeX - #ctype, pos, objcolor, colors.white, ctype)
+                strs[pos - 1] = file
+            end
             --end
         end
     end
