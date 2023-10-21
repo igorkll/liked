@@ -34,7 +34,9 @@ maxDepth = math.round(maxDepth)
 ------------------------------------
 
 function _G.initPal()
-    if not fs.exists("/data/theme.plt") then
+    if fs.exists("/data/theme.plt") then
+        system_applyTheme("/data/theme.plt")
+    else
         system_setTheme("/system/palette.plt")
     end
 end
