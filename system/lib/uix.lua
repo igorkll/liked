@@ -94,9 +94,9 @@ function objclass:uploadEvent(eventData)
         end
         if (eventData[1] == "touch" or eventData[1] == "drag") and self.focus then
             if self.vertical then
-                self.value = (eventData[3] - self.x) / (self.size - 1)
+                self.value = (eventData[4] - self.y) / (self.size - 1)
             else
-                self.value = (eventData[3] - self.y) / (self.size - 1)
+                self.value = (eventData[3] - self.x) / (self.size - 1)
             end
             if self.value < 0 then self.value = 0 end
             if self.value > 1 then self.value = 1 end
@@ -171,10 +171,10 @@ function objclass:draw()
         local dotpos = math.round((self.size - 1) * self.value)
 
         if self.vertical then
-            self.gui.window:fill(self.x, self.y, 1, dotpos, bg, self.fillColor, gui_container.chars.wideSplitLine)
-            self.gui.window:fill(self.x, self.y + dotpos, 1, self.size - dotpos, bg, self.color, gui_container.chars.wideSplitLine)
+            self.gui.window:fill(self.x, self.y, 1, dotpos, bg, self.fillColor, "┃")
+            self.gui.window:fill(self.x, self.y + dotpos, 1, self.size - dotpos, bg, self.color, "┃")
             if self.gui.style == "round" then
-                self.gui.window:set(self.x + dotpos, self.y, bg, self.dotcolor, "●")
+                self.gui.window:set(self.x, self.y + dotpos, bg, self.dotcolor, "●")
             else
                 if dotpos >= self.size - 1 then dotpos = dotpos - 1 end
                 self.gui.window:set(self.x, self.y + dotpos, bg, self.dotcolor, "█")
