@@ -97,6 +97,42 @@ function liked.loadApp(name, screen, nickname)
     end
 end
 
+function liked.execute(name, screen, nickname, ...)
+    local code, err = liked.loadApp(name, screen, nickname)
+    if code then
+        local programTh = thread.createBackground(code, ...) --запуск программы в потоке чтобы созданые в ней потоки закрылись вместе с ней
+        programTh:resume()
+        local ok = true
+        local err, out
+        while true do
+            if programTh:status() == "dead" then
+                if not programTh.out[1] then --если ошибка произошла в функции которую возврашяет liked.loadApp (чего быть не должно)
+                    ok, err = false, "osError: " .. (programTh.out[2] or "unknown error")
+                elseif not programTh.out[2] then --если ошибка произошла в целевой программе
+                    if programTh.out[3] then
+                        ok, err = false, programTh.out[3]
+                    end
+                end
+                out = {table.unpack(programTh.out, 2)}
+                break
+            end
+            event.yield()
+        end
+        programTh:kill()
+        programTh = nil
+
+        if not ok then
+            return ok, tostring(err or "unknown error")
+        elseif out then
+            return table.unpack(out)
+        else
+            return true
+        end
+    else
+        return nil, tostring(err or "unknown error")
+    end
+end
+
 function liked.assert(screen, successful, err)
     if not successful then
         local clear = saveZone(screen)
