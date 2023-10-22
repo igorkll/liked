@@ -161,8 +161,7 @@ function liked.execute(name, screen, nickname, ...)
             end
 
             if not pcall(event.yield) then
-                ok, err = false, "interrupted"
-                break
+                event.interruptFlag = programTh
             end
         end
         programTh:kill()
