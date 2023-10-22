@@ -123,11 +123,7 @@ if not registry.shadowType then
     end
 end
 
-for str, tbl in pairs(registry.gui_container or {}) do
-    for key, value in pairs(tbl) do
-        gui_container[str][key] = value
-    end
-end
+gui_container.refresh()
 
 ------------------------------------
 

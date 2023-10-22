@@ -82,11 +82,11 @@ function objclass:uploadEvent(eventData)
             end
         end
     elseif self.type == "seek" then
-        local function doSeek(oldValue)
+        local function doSeek(oldValue, isTouch)
             if self.value < 0 then self.value = 0 end
             if self.value > 1 then self.value = 1 end
             if self.onSeek then
-                self:onSeek(self.value, oldValue)
+                self:onSeek(self.value, oldValue, isTouch)
             end
             self:draw()
         end
@@ -126,7 +126,7 @@ function objclass:uploadEvent(eventData)
                 else
                     self.value = (eventData[3] - self.x) / (self.size - 1)
                 end
-                doSeek(oldValue)
+                doSeek(oldValue, true)
             end
         end
     end

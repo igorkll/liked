@@ -173,4 +173,13 @@ function gui_container.getDiskAccess(screen, address)
 end
 ]]
 
+function gui_container.refresh()
+    local registry = require("registry")
+    for str, tbl in pairs(registry.gui_container or {}) do
+        for key, value in pairs(tbl) do
+            gui_container[str][key] = value
+        end
+    end
+end
+
 return gui_container

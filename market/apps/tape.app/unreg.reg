@@ -1,1 +1,13 @@
-{icons={reg_rm_list={"dfpwm"}},knownExps={reg_rm_list={"dfpwm"}},openVia={reg_rm_list={"dfpwm"}}}
+{
+    icons = {
+        reg_rm_list={"dfpwm"}
+    },
+    gui_container = {
+        knownExps = {
+            reg_rm_list={"dfpwm"}
+        },
+        openVia={
+            reg_rm_list={"dfpwm"}
+        }
+    }
+}

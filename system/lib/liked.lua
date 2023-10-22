@@ -29,6 +29,8 @@ function liked.uninstall(screen, nickname, path)
     end
 end
 
+--------------------------------------------------------
+
 function liked.lastVersion()
     local lastVersion, err = require("internet").getInternetFile("https://raw.githubusercontent.com/igorkll/liked/" .. registry.branch .. "/system/version.cfg")
     if not lastVersion then return nil, err end
@@ -55,7 +57,13 @@ function liked.mountAll()
     end
 end
 
+--------------------------------------------------------
+
 function liked.loadApp(name, screen, nickname)
+    checkArg(1, name, "string")
+    checkArg(2, screen, "string")
+    checkArg(3, nickname, "string", "nil")
+
     local path = programs.find(name)
     if not path then
         return nil, "failed to launch application"
@@ -152,6 +160,8 @@ function liked.execute(name, screen, nickname, ...)
     end
 end
 
+--------------------------------------------------------
+
 function liked.assert(screen, successful, err)
     if not successful then
         local clear = saveZone(screen)
@@ -167,6 +177,8 @@ function liked.assertNoClear(screen, successful, err)
     end
     return successful, err
 end
+
+--------------------------------------------------------
 
 local bufferTimerId
 function liked.applyBufferType()
@@ -353,6 +365,30 @@ function liked.labelReadonly(proxy)
     return not pcall(proxy.setLabel, proxy.getLabel() or nil)
 end
 
+function liked.getName(screen, path)
+    local name
+    if gui_container.viewFileExps[screen] then
+        name = paths.name(path)
+    else
+        name = paths.name(paths.hideExtension(path))
+    end
+    
+    if unicode.len(name) > 12 then
+        return unicode.sub(name, 1, 12) .. gui_container.chars.threeDots, name
+    end
+    return name, name
+end
+
+function liked.reg(str, key, value)
+    gui_container[str][key] = value
+    if not registry.gui_container then registry.gui_container = {} end
+    if not registry.gui_container[str] then registry.gui_container[str] = {} end
+    registry.gui_container[str][key] = value
+    registry.save()
+end
+
+--------------------------------------------------------
+
 function liked.findIcon(name)
     if registry.icons and registry.icons[name] then
         return registry.icons[name]
@@ -366,20 +402,6 @@ function liked.findIcon(name)
     if fs.exists(path) then
         return path
     end
-end
-
-function liked.getName(screen, path)
-    local name
-    if gui_container.viewFileExps[screen] then
-        name = paths.name(path)
-    else
-        name = paths.name(paths.hideExtension(path))
-    end
-    
-    if unicode.len(name) > 12 then
-        return unicode.sub(name, 1, 12) .. gui_container.chars.threeDots, name
-    end
-    return name, name
 end
 
 function liked.getIcon(screen, path)
@@ -466,14 +488,6 @@ function liked.getIcon(screen, path)
     end
 
     return icon
-end
-
-function liked.reg(str, key, value)
-    gui_container[str][key] = value
-    if not registry.gui_container then registry.gui_container = {} end
-    if not registry.gui_container[str] then registry.gui_container[str] = {} end
-    registry.gui_container[str][key] = value
-    registry.save()
 end
 
 liked.unloadable = true
