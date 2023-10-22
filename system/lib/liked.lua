@@ -72,23 +72,36 @@ function liked.loadApp(name, screen, nickname)
         return nil, "failed to launch application"
     end
 
+    local isMain = paths.name(path) == "main.lua"
+
+    --------------------------------
+
     local exitFile = paths.concat(paths.path(path), "exit.lua")
-    if not fs.exists(exitFile) or fs.isDirectory(exitFile) then
+    if not isMain or not fs.exists(exitFile) or fs.isDirectory(exitFile) then
         exitFile = nil
     end
 
+    --------------------------------
+
     local paletteFile = paths.concat(paths.path(path), "palette.plt")
-    if not fs.exists(paletteFile) or fs.isDirectory(paletteFile) then
+    if not isMain or not fs.exists(paletteFile) or fs.isDirectory(paletteFile) then
         paletteFile = nil
     end
 
+    --------------------------------
+
     local mainCode, err = programs.load(path)
     if not mainCode then return nil, err end
+
+    --------------------------------
+
     local exitCode
-    if exitFile and paths.name(path) == "main.lua" then
+    if exitFile then
         exitCode, err = programs.load(exitFile)
         if not exitCode then return nil, err end
     end
+
+    --------------------------------
 
     local function log(tbl)
         if not tbl[1] then
