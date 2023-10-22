@@ -320,18 +320,15 @@ local function draw(old, check) --вызывает все перерисовки
 
         local exp = paths.extension(path)
         local fsProxy, localFsPath = fs.get(path)
-        local readonly = fs.isReadOnly(path)
-        local labelReadonly = liked.labelReadonly(fsProxy)
+        local isFs = paths.equals(localFsPath, "/")
 
         local shortName, fullName = liked.getName(screen, path)
         local icon = liked.getIcon(screen, path)
 
-        table.insert(icons, {
+        local icondata = {
             shortName = shortName,
             fs = fsProxy,
-            readonly = readonly,
-            isFs = paths.equals(localFsPath, "/"),
-            labelReadonly = labelReadonly,
+            readonly = fs.isReadOnly(path),
             icon = icon,
             path = path,
             exp = exp,
@@ -339,7 +336,14 @@ local function draw(old, check) --вызывает все перерисовки
             name = fullName,
             isAlias = not not customPath,
             isDir = fs.isDirectory(path)
-        })
+        }
+
+        if isFs then
+            icondata.isFs = isFs
+            icondata.labelReadonly = fs.isLabelReadOnly(path)
+        end
+
+        table.insert(icons, icondata)
     end
 
     local tbl = {}
