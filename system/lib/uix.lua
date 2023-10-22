@@ -134,9 +134,7 @@ end
 
 function objclass:draw()
     if self.hidden then return end
-    if self.type == "bg" then
-        self.gui.window:clear(self.color)
-    elseif self.type == "label" or self.type == "button" or self.type == "context" then
+    if self.type == "label" or self.type == "button" or self.type == "context" then
         local back, fore = self.back, self.fore
         if self.state then
             back, fore = self.back2 or back, self.fore2 or fore
@@ -226,14 +224,6 @@ function objclass:draw()
 end
 
 ----------------------------------
-
-function uix:createBg(color)
-    local obj = setmetatable({gui = self, type = "bg"}, {__index = objclass})
-    obj.color = color
-
-    table.insert(self.objs, obj)
-    return obj
-end
 
 function uix:createUpBar(title, withoutFill, bgcolor) --working only in fullscreen ui
     local obj = setmetatable({gui = self, type = "up"}, {__index = objclass})
@@ -441,6 +431,9 @@ function uix:uploadEvent(eventData)
 end
 
 function uix:draw()
+    if self.bgcolor then
+        self.window:clear(self.bgcolor)
+    end
     if self.onRedraw then
         self:onRedraw()
     end
@@ -455,10 +448,7 @@ function uix.create(window, bgcolor, style)
     guiobj.style = style or "round"
     guiobj.objs = {}
     guiobj.selected = false
-    
-    if bgcolor then
-        guiobj:createBg(bgcolor)
-    end
+    guiobj.bgcolor = bgcolor
 
     return guiobj
 end
