@@ -88,18 +88,20 @@ function liked.loadApp(name, screen, nickname)
 
     local function appStart()
         if paletteFile then
-            system_applyTheme(paletteFile, screen)
+            log{pcall(system_applyTheme, paletteFile, screen)}
         end
     end
 
     local function appEnd()
         if paletteFile then
-            system_applyTheme(paletteFile, screen)
+            log{pcall(system_applyTheme, _G.initPalPath, screen)}
         end
     end
 
     return function (...)
+        appStart()
         local result = log{xpcall(mainCode, debug.traceback, screen, nickname, ...)}
+        appEnd()
         if exitCode then
             local result2 = log{xpcall(exitCode, debug.traceback, screen, nickname, ...)}
             if not result2[1] then
