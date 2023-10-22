@@ -23,31 +23,57 @@ function objclass:destroy()
     end
 end
 
+function objclass:stop()
+    if self.type == "context" then
+        if self.th then
+            self.th:kill()
+            self.th = nil
+        end
+    end
+end
+
 function objclass:uploadEvent(eventData)
     if self.type == "button" or self.type == "context" then
         if self.state and (eventData[1] == "touch" or eventData[1] == "drop") then
-            self.state = false
-            self:draw()
+            if self.type ~= "context" then
+                self.state = false
+                self:draw()
 
-            if self.onDrop then
-                self:onDrop(eventData[5], eventData[6])
+                if self.onDrop then
+                    self:onDrop(eventData[5], eventData[6])
+                end
             end
         elseif not self.state and eventData[1] == "touch" and eventData[3] >= self.x and eventData[4] >= self.y and eventData[3] < self.x + self.sx and eventData[4] < self.y + self.sy then
-            if self.type == "context" then
+            if self.state and (eventData[1] == "touch" or eventData[1] == "drop") then
+                self.state = false
+                self:draw()
+    
+                if self.onDrop then
+                    self:onDrop(eventData[5], eventData[6])
+                end
+            elseif self.type == "context" then
                 self.state = true
                 self:draw()
 
-                local x, y = self.gui.window:toRealPos(self.x + 1, self.y + 1)
-                local px, py, sx, sy = gui.contentPos(self.gui.window.screen, x, y, gui.contextStrs(self.strs))
-                local clear = graphic.screenshot(self.gui.window.screen, px, py, sx + 2, sy + 1)
-                local _, num = gui.context(self.gui.window.screen, px, py, self.strs, self.actives)
-                clear()
-                if num and self.funcs[num] then
-                    self.funcs[num]()
-                end
+                if not self.th then
+                    self.th = thread.create(function ()
+                        local x, y = self.gui.window:toRealPos(self.x + 1, self.y + 1)
+                        local px, py, sx, sy = gui.contentPos(self.gui.window.screen, x, y, gui.contextStrs(self.strs))
+                        local clear = graphic.screenshot(self.gui.window.screen, px, py, sx + 2, sy + 1)
+                        local _, num = gui.context(self.gui.window.screen, px, py, self.strs, self.actives)
+                        clear()
+                        if num and self.funcs[num] then
+                            self.funcs[num]()
+                        end
 
-                self.state = false
-                self:draw()
+                        self.state = false
+                        self:draw()
+
+                        self.th:suspend()
+                        self.th = nil
+                    end)
+                    self.th:resume()
+                end
             else
                 self.state = true
                 self:draw()
@@ -439,6 +465,12 @@ function uix:draw()
     end
     for _, obj in ipairs(self.objs) do
         obj:draw()
+    end
+end
+
+function uix:stop()
+    for _, obj in ipairs(self.objs) do
+        obj:stop()
     end
 end
 
