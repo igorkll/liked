@@ -146,10 +146,13 @@ function liked.execute(name, screen, nickname, ...)
                 out = {table.unpack(programTh.out, 2)}
                 break
             end
-            event.yield()
+
+            if not pcall(event.yield) then
+                ok, err = false, "interrupted"
+                break
+            end
         end
         programTh:kill()
-        programTh = nil
 
         if not ok then
             return ok, tostring(err or "unknown error")

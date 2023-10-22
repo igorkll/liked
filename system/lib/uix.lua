@@ -25,6 +25,7 @@ end
 
 function objclass:stop()
     if self.type == "context" then
+        self.state = false
         if self.th then
             self.th:kill()
             self.th = nil
@@ -44,14 +45,7 @@ function objclass:uploadEvent(eventData)
                 end
             end
         elseif not self.state and eventData[1] == "touch" and eventData[3] >= self.x and eventData[4] >= self.y and eventData[3] < self.x + self.sx and eventData[4] < self.y + self.sy then
-            if self.state and (eventData[1] == "touch" or eventData[1] == "drop") then
-                self.state = false
-                self:draw()
-    
-                if self.onDrop then
-                    self:onDrop(eventData[5], eventData[6])
-                end
-            elseif self.type == "context" then
+            if self.type == "context" then
                 self.state = true
                 self:draw()
 
