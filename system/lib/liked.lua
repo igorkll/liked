@@ -66,6 +66,11 @@ function liked.loadApp(name, screen, nickname)
         exitFile = nil
     end
 
+    local paletteFile = paths.concat(paths.path(path), "palette.plt")
+    if not fs.exists(paletteFile) or fs.isDirectory(paletteFile) then
+        paletteFile = nil
+    end
+
     local mainCode, err = programs.load(path)
     if not mainCode then return nil, err end
     local exitCode
@@ -76,9 +81,21 @@ function liked.loadApp(name, screen, nickname)
 
     local function log(tbl)
         if not tbl[1] then
-            event.errLog("application error: " .. tostring(tbl[2]))
+            event.errLog("application error: " .. tostring(tbl[2] or "unknown error"))
         end
         return tbl
+    end
+
+    local function appStart()
+        if paletteFile then
+            system_applyTheme(paletteFile, screen)
+        end
+    end
+
+    local function appEnd()
+        if paletteFile then
+            system_applyTheme(paletteFile, screen)
+        end
     end
 
     return function (...)

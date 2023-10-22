@@ -185,17 +185,12 @@ function objclass:draw()
         end
     elseif self.type == "input" then
         local _, _, bg = self.gui.window:get(self.x, self.y)
-        local add = 0
         if self.gui.style == "round" then
             self.gui.window:set(self.x, self.y, bg, self.back, "◖")
             self.gui.window:set(self.x + (self.sx - 1), self.y, bg, self.back, "◗")
-            add = add + 1
         end
         
         self.read.redraw()
-        if #self.read.getBuffer() == 0 and self.title then
-            self.gui.window:set(self.x + add, self.y, bg, self.titleColor, self.title)
-        end
     elseif self.type == "seek" then
         local _, _, bg = self.gui.window:get(self.x, self.y)
         local dotpos = math.round((self.size - 1) * self.value)
@@ -336,16 +331,20 @@ function uix:createInput(x, y, sx, back, fore, hidden, default, syntax, maxlen, 
     obj.syntax = syntax
     obj.titleColor = titleColor or colors.lightGray
     obj.title = title
-    
+
     if self.style == "round" then
         obj.read = self.window:readNoDraw(x + 1, y, sx - 2, obj.back, obj.fore, preStr, hidden, default, true, syntax)
     else
         obj.read = self.window:readNoDraw(x, y, sx, obj.back, obj.fore, preStr, hidden, default, true, syntax)
     end
-
+    
     obj.oldText = obj.read.getBuffer()
     if maxlen then
         obj.read.setMaxStringLen(maxlen)
+    end
+
+    if obj.title then
+        obj.read.setTitle(obj.title, obj.titleColor)
     end
 
     table.insert(self.objs, obj)

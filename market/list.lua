@@ -345,14 +345,7 @@ local list = {
 
         path = "/data/bin/tape.app",
         urlPrimaryPart = selfurlpart .. "/apps/tape.app/",
-        files = {"main.lua", "icon.t2p", "uninstall.lua"},
-
-        postInstall = function (self)
-            if not registry.icons then registry.icons = {} end
-            registry.icons["dfpwm"] = paths.concat(self.path, "icon.t2p")
-            liked.reg("openVia", "dfpwm", paths.concat(self.path, "main.lua"))
-            liked.reg("knownExps", "dfpwm", true)
-        end
+        files = {"main.lua", "icon.t2p", "uninstall.lua", "reg.reg", "unreg.reg"}
     },
     {
         name = "hologram",
