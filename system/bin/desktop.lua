@@ -320,7 +320,7 @@ local function draw(old, check) --вызывает все перерисовки
 
         local exp = paths.extension(path)
         local fsProxy, localFsPath = fs.get(path)
-        local readonly = fsProxy.isReadOnly()
+        local readonly = fs.isReadOnly(path)
         local labelReadonly = liked.labelReadonly(fsProxy)
 
         local shortName, fullName = liked.getName(screen, path)
@@ -1374,15 +1374,6 @@ local function doIcon(windowEventData)
     end
 end
 
---[[
-local function setDev(state)
-    if state == isDev() then return end
-    gui_container.devModeStates[screen] = state
-    userPath = gui_container.checkPath(screen, userPath)
-    draw()
-end
-]]
-
 ------------------------------------------------------------------------ lock screen
 
 local function isMultiscreen()
@@ -1640,28 +1631,6 @@ desktopTh = thread.create(function ()
                 end
             end
         end
-
-        --[[
-        if computer.uptime() - devModeResetTime > 1 then
-            devModeResetTime = computer.uptime()
-            if devModeCount > 15 then
-                if not registry.disableDevShortcut then
-                    if registry.soundEnable then
-                        if not isDev() then
-                            computer.beep(2000)
-                        else
-                            computer.beep(1000)
-                        end
-                    end
-                    setDev(not isDev())
-                    event.sleep(1)
-                else
-                    warn("dev-mode shortcut disabled by vendor")
-                end
-            end
-            devModeCount = 0
-        end
-        ]]
     end
 end)
 

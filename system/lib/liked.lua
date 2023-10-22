@@ -13,7 +13,10 @@ local gui_container = require("gui_container")
 local event = require("event")
 local unicode = require("unicode")
 local thread = require("thread")
+local cache = require("cache")
 local liked = {}
+
+--------------------------------------------------------
 
 function liked.uninstall(screen, nickname, path)
     local unregPath = paths.concat(path, "unreg.reg")
@@ -390,21 +393,37 @@ end
 --------------------------------------------------------
 
 function liked.findIcon(name)
+    cache.cache.findIcon = cache.cache.findIcon or {}
+    if cache.cache.findIcon[name] then
+        return cache.cache.findIcon[name]
+    end
+
     if registry.icons and registry.icons[name] then
         return registry.icons[name]
     end
 
     local path = paths.concat("/data/icons", name .. ".t2p")
     if fs.exists(path) then
+        cache.cache.findIcon[name] = path
         return path
     end
     path = paths.concat("/system/icons", name .. ".t2p")
     if fs.exists(path) then
+        cache.cache.findIcon[name] = path
         return path
     end
 end
 
 function liked.getIcon(screen, path)
+    cache.cache.getIcon = cache.cache.getIcon or {}
+    if cache.cache.getIcon[path] then
+        if not fs.exists(path) or fs.isDirectory(path) then
+            cache.cache.getIcon[path] = nil
+            return liked.findIcon("badicon")
+        end
+        return cache.cache.getIcon[path]
+    end
+
     local exp = paths.extension(path)
     local isDir = fs.isDirectory(path)
     local icon

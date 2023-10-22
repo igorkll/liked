@@ -146,6 +146,7 @@ local function modifyList(lst)
             if fs.exists(regPath) and not fs.isDirectory(regPath) then
                 liked.assert(screen, programs.execute("applyReg", screen, nickname, regPath, true))
             end
+            registry.save()
         end
     
         if not v.icon and v.urlPrimaryPart then
