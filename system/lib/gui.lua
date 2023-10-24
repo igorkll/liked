@@ -13,6 +13,7 @@ local paths = require("paths")
 local system = require("system")
 local sound = require("sound")
 local fs = require("filesystem")
+local programs = require("programs")
 local gui = {}
 
 local smartShadowsColors = {
@@ -486,7 +487,7 @@ function gui.contentPos(screen, posX, posY, strs)
     local gpu = graphic.findGpu(screen)
     local rx, ry = gpu.getResolution()
     local drawStrs = gui.contextStrs(strs)
-    
+
     local sizeX, sizeY = 0, #drawStrs
     for i, v in ipairs(drawStrs) do
         if type(v) == "string" and unicode.wlen(v) > sizeX then
@@ -911,7 +912,28 @@ function gui.selectcomponent(screen, cx, cy, types, allowAutoConfirm, control) -
                             advLabeling.setLabel(addr, nil)
                         end
                     elseif action == 3 then
-                        
+                        local format = require("format")
+
+                        local tempfile = os.tmpname()
+                        local file = fs.open(tempfile, "wb")
+                        local methods = component.methods(addr)
+                        local maxMethodLen = 0
+                        for name in pairs(methods) do
+                            if unicode.len(name) > maxMethodLen then
+                                maxMethodLen = unicode.len(name)
+                            end
+                        end
+                        for name, direct in pairs(methods) do
+                            local smart = format.smartConcat()
+                            smart.add(1, name)
+                            smart.add(maxMethodLen + 1, " - " .. component.doc(addr, name) .. "\n")
+                            file.write(smart.get())
+                        end
+                        file.close()
+                        local clear = graphic.screenshot(screen)
+                        programs.execute("edit", screen, nil, tempfile, true)
+                        clear()
+                        fs.remove(tempfile)
                     end
                 end
             else
