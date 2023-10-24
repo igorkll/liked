@@ -1,4 +1,5 @@
 local unicode = require("unicode")
+local graphic = require("graphic")
 local format = {}
 
 function format.smartConcat()
@@ -33,6 +34,17 @@ function format.smartConcat()
     end
 
     return smart
+end
+
+function format.raw_objectPos(rx, ry, sx, sy, offsetX, offsetY)
+    local cx, cy = math.round(rx / 2), math.round(ry / 2)
+    local px, py = cx - math.round(sx / 2), cy - math.round(sy / 2)
+    return math.round(px - offsetX) + 1, math.round(py + offsetY) + 1
+end
+
+function format.objectPos(screen, sx, sy, offsetX, offsetY)
+    local rx, ry = graphic.getResolution(screen)
+    return format.raw_objectPos(rx, ry, sx, sy, offsetX, offsetY)
 end
 
 format.unloadable = true
