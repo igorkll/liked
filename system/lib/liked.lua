@@ -13,7 +13,7 @@ local gui_container = require("gui_container")
 local event = require("event")
 local unicode = require("unicode")
 local thread = require("thread")
-local cache = require("cache")
+local cache = require("cache").cache
 local liked = {}
 
 --------------------------------------------------------
@@ -408,9 +408,9 @@ end
 --------------------------------------------------------
 
 function liked.findIcon(name)
-    cache.cache.findIcon = cache.cache.findIcon or {}
-    if cache.cache.findIcon[name] then
-        return cache.cache.findIcon[name]
+    cache.findIcon = cache.findIcon or {}
+    if cache.findIcon[name] then
+        return cache.findIcon[name]
     end
 
     if registry.icons and registry.icons[name] then
@@ -419,24 +419,24 @@ function liked.findIcon(name)
 
     local path = paths.concat("/data/icons", name .. ".t2p")
     if fs.exists(path) then
-        cache.cache.findIcon[name] = path
+        cache.findIcon[name] = path
         return path
     end
     path = paths.concat("/system/icons", name .. ".t2p")
     if fs.exists(path) then
-        cache.cache.findIcon[name] = path
+        cache.findIcon[name] = path
         return path
     end
 end
 
 function liked.getIcon(screen, path)
-    cache.cache.getIcon = cache.cache.getIcon or {}
-    if cache.cache.getIcon[path] then
+    cache.getIcon = cache.getIcon or {}
+    if cache.getIcon[path] then
         if not fs.exists(path) or fs.isDirectory(path) then
-            cache.cache.getIcon[path] = nil
+            cache.getIcon[path] = nil
             return liked.findIcon("badicon")
         end
-        return cache.cache.getIcon[path]
+        return cache.getIcon[path]
     end
 
     local exp = paths.extension(path)
