@@ -446,7 +446,7 @@ function uix:uploadEvent(eventData)
     end
 
     for _, obj in ipairs(self.objs) do
-        if obj:uploadEvent(eventData) then return end
+        obj:uploadEvent(eventData)
     end
 end
 
@@ -458,13 +458,13 @@ function uix:draw()
         self:onRedraw()
     end
     for _, obj in ipairs(self.objs) do
-        if obj:draw() then return end
+        obj:draw()
     end
 end
 
 function uix:stop()
     for _, obj in ipairs(self.objs) do
-        if obj:stop() then return end
+        obj:stop()
     end
 end
 

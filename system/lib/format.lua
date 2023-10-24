@@ -39,7 +39,7 @@ end
 function format.raw_objectPos(rx, ry, sx, sy, offsetX, offsetY)
     local cx, cy = math.round(rx / 2), math.round(ry / 2)
     local px, py = cx - math.round(sx / 2), cy - math.round(sy / 2)
-    return math.round(px - offsetX) + 1, math.round(py + offsetY) + 1
+    return math.round(px + offsetX) + 1, math.round(py + offsetY) + 1
 end
 
 function format.objectPos(screen, sx, sy, offsetX, offsetY)
