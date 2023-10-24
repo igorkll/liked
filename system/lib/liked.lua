@@ -432,7 +432,7 @@ end
 function liked.getIcon(screen, path)
     cache.getIcon = cache.getIcon or {}
     if cache.getIcon[path] then
-        if not fs.exists(path) or fs.isDirectory(path) then
+        if not fs.exists(path) then
             cache.getIcon[path] = nil
             return liked.findIcon("badicon")
         end
@@ -442,12 +442,13 @@ function liked.getIcon(screen, path)
     local exp = paths.extension(path)
     local isDir = fs.isDirectory(path)
     local icon
-    local fsProxy
-
-    for _, tbl in ipairs(fs.mountList) do
-        if paths.canonical(path) .. "/" == tbl[2] then
-            fsProxy = tbl[1]
-
+    
+    if isDir then
+        local fsProxy, fsLocalPath = fs.get(path)
+        if fsLocalPath ~= "/" then
+            fsProxy = nil
+        end
+        if fsProxy then
             local disklevel = system.getDiskLevel(fsProxy.address)
             if disklevel == "tmp" then
                 icon = liked.findIcon("tmp")
@@ -468,12 +469,8 @@ function liked.getIcon(screen, path)
             else
                 icon = liked.findIcon("hdd")
             end
-            break
         end
-    end
-    
-    
-    if isDir then
+
         local iconpath = paths.concat(path, "icon.t2p")
         if fs.exists(iconpath) and not fs.isDirectory(iconpath) then
             icon = iconpath
@@ -484,9 +481,7 @@ function liked.getIcon(screen, path)
                 icon = liked.findIcon("folder")
             end
         end
-    end
-
-    if not fsProxy and not isDir then
+    else
         if exp == "t2p" then
             if path then
                 local ok, sx, sy = pcall(gui_readimagesize, path)
@@ -508,7 +503,7 @@ function liked.getIcon(screen, path)
         end
     end
 
-    if not icon or not fs.exists(icon) or fs.isDirectory(icon) then
+    if not icon or not fs.exists(icon) then
         icon = liked.findIcon("unknown")
     end
 
@@ -517,7 +512,7 @@ function liked.getIcon(screen, path)
         icon = nil
     end
 
-    if not icon or not fs.exists(icon) or fs.isDirectory(icon) then
+    if not icon or not fs.exists(icon) then
         icon = liked.findIcon("badicon")
     end
 
