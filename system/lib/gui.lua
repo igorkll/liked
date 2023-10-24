@@ -485,9 +485,10 @@ end
 function gui.contentPos(screen, posX, posY, strs)
     local gpu = graphic.findGpu(screen)
     local rx, ry = gpu.getResolution()
-
-    local sizeX, sizeY = 0, #strs
-    for i, v in ipairs(strs) do
+    local drawStrs = gui.contextStrs(strs)
+    
+    local sizeX, sizeY = 0, #drawStrs
+    for i, v in ipairs(drawStrs) do
         if type(v) == "string" and unicode.wlen(v) > sizeX then
             sizeX = unicode.wlen(v)
         end
@@ -745,20 +746,33 @@ function gui.select(screen, cx, cy, label, actions, scroll)
 
         if windowEventData[1] == "touch" then
             if windowEventData[3] == window.sizeX and windowEventData[4] == 1 then
-                return nil, scroll, windowEventData[5]
+                return nil, scroll, windowEventData[5], windowEventData
             elseif windowEventData[3] >= window.sizeX - 9 and windowEventData[3] < window.sizeX and windowEventData[4] == window.sizeY then
                 if sel then
-                    return sel, scroll, windowEventData[5]
+                    return sel, scroll, windowEventData[5], windowEventData
                 end
             end
         end
 
         if windowEventData[1] == "touch" or windowEventData[1] == "drag" then
             if addrsIdx[windowEventData[4]] and windowEventData[3] < window.sizeX and windowEventData[4] < window.sizeY then
+                if windowEventData[5] == 1 and (not sel or sel ~= addrsIdx[windowEventData[4]]) then
+                    local oldsel = sel
+                    sel = addrsIdx[windowEventData[4]]
+                    if sel ~= oldsel then
+                        if oldsel then
+                            draw(oldsel)
+                        end
+                        if sel then
+                            draw(sel)
+                        end
+                        redrawButton()
+                    end
+                end
                 if windowEventData[1] == "touch" and sel and sel == addrsIdx[windowEventData[4]] then
                     draw(sel)
                     redrawButton()
-                    return sel, scroll, windowEventData[5]
+                    return sel, scroll, windowEventData[5], windowEventData
                 end
                 local oldsel = sel
                 sel = addrsIdx[windowEventData[4]]
@@ -805,6 +819,7 @@ function gui.selectcomponent(screen, cx, cy, types, allowAutoConfirm, control) -
         cx = math.round(cx) + 1
         cy = math.round(cy) + 1
     end
+    local checkWindow = graphic.createWindow(screen, cx, cy, 50, 16)
 
     local function allTypes()
         types = {}
@@ -866,7 +881,7 @@ function gui.selectcomponent(screen, cx, cy, types, allowAutoConfirm, control) -
                 return
             end
 
-            local idx, lscroll, button = gui.select(screen, cx, cy, typesstr, strs, scroll, control)
+            local idx, lscroll, button, eventData = gui.select(screen, cx, cy, typesstr, strs, scroll, control)
             scroll = lscroll
 
             if idx then
@@ -876,9 +891,27 @@ function gui.selectcomponent(screen, cx, cy, types, allowAutoConfirm, control) -
                     th:kill()
                     return
                 else
-                    local str = gui.input(screen, (cx + 25) - 16, cy + 4, "new name", nil, nil, advLabeling.getLabel(addr))
-                    if type(str) == "string" then
-                        advLabeling.setLabel(addr, str)
+                    local strs = {
+                        "set label",
+                        "clear label",
+                        "view api"
+                    }
+                    local px, py = checkWindow:toRealPos(eventData[3], eventData[4])
+                    local x, y, sx, sy = gui.contentPos(screen, px, py, strs)
+                    local clear = graphic.screenshot(screen, x, y, sx + 2, sy + 1)
+                    local _, action = gui.context(screen, x, y, strs)
+                    clear()
+                    if action == 1 then
+                        local str = gui.input(screen, (cx + 25) - 16, cy + 4, "new name", nil, nil, advLabeling.getLabel(addr))
+                        if type(str) == "string" then
+                            advLabeling.setLabel(addr, str)
+                        end
+                    elseif action == 2 then
+                        if gui.yesno(screen, (cx + 25) - 16, cy + 4, "clear label on \"" .. (advLabeling.getLabel(addr) or component.type(addr)) .. "\"?") then
+                            advLabeling.setLabel(addr, nil)
+                        end
+                    elseif action == 3 then
+                        
                     end
                 end
             else
@@ -941,6 +974,52 @@ function gui.checkPasswordLoop(...)
     end
 end
 
+function gui.yesno(screen, cx, cy, str, backgroundColor)
+    local window, noShadow = gui.smallWindow(screen, cx, cy, str, backgroundColor, function (window, color)
+        window:set(2, 2, color, colors.green, "  " .. unicode.char(0x2800+192) ..  "  ")
+        window:set(2, 3, color, colors.green, " ◢█◣ ")
+        window:set(2, 4, color, colors.green, "◢███◣")
+        window:set(4, 3, colors.green, colors.white, "?")
+    end)
+
+    window:set(32 - 5, 7, colors.lime, colors.white, " yes ")
+    window:set(2, 7, colors.red, colors.white, " no ")
+
+    graphic.forceUpdate()
+    if registry.soundEnable then
+        computer.beep(2000)
+    end
+
+    local function drawYes()
+        window:set(32 - 5, 7, colors.green, colors.white, " yes ")
+        graphic.forceUpdate()
+        event.sleep(0.1)
+    end
+
+    while true do
+        local eventData = {computer.pullSignal()}
+        local windowEventData = window:uploadEvent(eventData)
+        if windowEventData[1] == "touch" and windowEventData[5] == 0 then
+            if windowEventData[4] == 7 and windowEventData[3] > (32 - 6) and windowEventData[3] <= ((32 - 5) + 4) then
+                drawYes()
+                noShadow()
+                return true
+            elseif windowEventData[4] == 7 and windowEventData[3] >= 2 and windowEventData[3] <= (2 + 3) then
+                window:set(2, 7, colors.orange, colors.white, " no ")
+                graphic.forceUpdate()
+                event.sleep(0.1)
+                noShadow()
+                return false
+            end
+        elseif windowEventData[1] == "key_down" and windowEventData[4] == 28 then
+            drawYes()
+            noShadow()
+            return true
+        end
+    end
+end
+
+calls.loaded.gui_yesno = gui.yesno
 calls.loaded.gui_warn = gui.warn
 calls.loaded.gui_drawtext = gui.drawtext
 calls.loaded.gui_context = gui.context
