@@ -73,7 +73,7 @@ function sysinit.init(box)
     
     ------------------------------------
 
-    if not registry.wallpaperBaseColor then
+    if not box and not registry.wallpaperBaseColor then
         if minDepth == 1 then
             registry.wallpaperBaseColor = "black"
         else
