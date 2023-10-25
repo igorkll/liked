@@ -805,7 +805,7 @@ local function doIcon(windowEventData)
                                 end
                                 draw()
                             elseif str == "  flash os" then
-                                local success, err = sysclone(screen, posX, posY, v.fs, v.name)
+                                local success, err = programs.execute("sysclone", screen, posX, posY, v.fs, v.name)
 
                                 if success ~= "cancel" then
                                     if not success and err then

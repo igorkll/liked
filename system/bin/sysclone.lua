@@ -3,6 +3,7 @@ local registry = require("registry")
 local gui = require("gui")
 local paths = require("paths")
 local liked = require("liked")
+local graphic = require("graphic")
 local screen, posX, posY, vfs, name = ...
 
 local strs = {
@@ -13,7 +14,7 @@ local strs = {
     "  full cloning of the system  "
 }
 local posX, posY, sizeX, sizeY = gui.contentPos(screen, posX, posY, strs)
-local clear = screenshot(screen, posX, posY, sizeX + 2, sizeY + 1)
+local clear = graphic.screenshot(screen, posX, posY, sizeX + 2, sizeY + 1)
 local str2, num2 = gui.context(screen, posX, posY, strs, {true, true, true, true, not registry.banSystemCloning})
 clear()
 
@@ -79,8 +80,7 @@ if gui_yesno(screen, nil, nil, "install \"" .. label .. "\" to \"" .. name .. "\
                 "registry.dat",
                 "market_urls_dev.txt",
                 "market_urls_main.txt",
-                "logo.lua",
-                "main.lua"
+                "logo.lua"
             }
             
             local success, err =  fs.copy(systemFolder, paths.concat(target, "system"), function (from)
