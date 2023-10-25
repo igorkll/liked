@@ -34,6 +34,7 @@ function objclass:stop()
 end
 
 function objclass:uploadEvent(eventData)
+    if self.disabled then return end
     if self.type == "button" or self.type == "context" then
         if self.state and (eventData[1] == "touch" or eventData[1] == "drop") then
             if self.type ~= "context" then
