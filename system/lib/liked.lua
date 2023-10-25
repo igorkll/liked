@@ -1,4 +1,5 @@
 local fs = require("filesystem")
+local bootloader = require("bootloader")
 local computer = require("computer")
 local component = require("component")
 local programs = require("programs")
@@ -13,7 +14,7 @@ local gui_container = require("gui_container")
 local event = require("event")
 local unicode = require("unicode")
 local thread = require("thread")
-local cache = require("cache").cache
+local cache = require("cache")
 local liked = {}
 
 --------------------------------------------------------
@@ -280,7 +281,7 @@ end
 
 
 function liked.drawUpBar(screen, withoutFill, bgcolor)
-    local rtc = "RTC-" .. time.formatTime(time.addTimeZone(time.getRealTime(), registry.timeZone))
+    local rtc = "RTC-" .. time.formatTime(time.addTimeZone(time.getRealTime(), registry.timeZone or 0))
     local gtc = "GTC-" .. time.formatTime(time.getGameTime())
     local charge = system.getCharge()
     
@@ -408,35 +409,28 @@ end
 --------------------------------------------------------
 
 function liked.findIcon(name)
-    cache.findIcon = cache.findIcon or {}
-    if cache.findIcon[name] then
-        return cache.findIcon[name]
+    cache.cache.findIcon = cache.cache.findIcon or {}
+    if cache.cache.findIcon[name] then
+        return cache.cache.findIcon[name]
     end
 
     if registry.icons and registry.icons[name] then
         return registry.icons[name]
     end
 
-    local path = paths.concat("/data/icons", name .. ".t2p")
-    if fs.exists(path) then
-        cache.findIcon[name] = path
-        return path
-    end
-    path = paths.concat("/system/icons", name .. ".t2p")
-    if fs.exists(path) then
-        cache.findIcon[name] = path
-        return path
-    end
+    local path = bootloader.find(paths.raw_concat("icons", name .. ".t2p"))
+    cache.cache.findIcon[name] = path
+    return path
 end
 
 function liked.getIcon(screen, path)
-    cache.getIcon = cache.getIcon or {}
-    if cache.getIcon[path] then
+    cache.cache.getIcon = cache.cache.getIcon or {}
+    if cache.cache.getIcon[path] then
         if not fs.exists(path) then
-            cache.getIcon[path] = nil
+            cache.cache.getIcon[path] = nil
             return liked.findIcon("badicon")
         end
-        return cache.getIcon[path]
+        return cache.cache.getIcon[path]
     end
 
     local exp = paths.extension(path)
@@ -516,6 +510,7 @@ function liked.getIcon(screen, path)
         icon = liked.findIcon("badicon")
     end
 
+    cache.cache.getIcon[path] = icon
     return icon
 end
 
