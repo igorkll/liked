@@ -147,6 +147,11 @@ function installer.context(screen, posX, posY, vfs)
         "likeOS (core only)",
         "full cloning of the system"
     })
+
+    if not label then
+        return
+    end
+
     if num == 5 then
         label = "self-sys"
     end
@@ -160,11 +165,14 @@ function installer.context(screen, posX, posY, vfs)
     }
 
     local name = fs.genName(vfs.address)
+    local clear = saveZone(screen)
     if gui.yesno(screen, nil, nil, "install \"" .. label .. "\" to \"" .. name .. "\"?") then
         gui.status(screen, nil, nil, "installing \"" .. label .. "\" to \"" .. name .. "\"...")
-
-
+        local result = {liked.assert(screen, installers[num](vfs))}
+        clear()
+        return table.unpack(result)
     end
+    clear()
 end
 
 installer.unloadable = true
