@@ -1,9 +1,7 @@
 local fs = require("filesystem")
-local registry = require("registry")
 local gui = require("gui")
 local paths = require("paths")
 local liked = require("liked")
-local graphic = require("graphic")
 local installer = {}
 
 local targetsys = "/mnt/tmpmount"
@@ -27,9 +25,11 @@ function installer.init(vfs)
 end
 
 function installer.uinit(vfs, label, ...)
+    liked.umountAll()
     pcall(vfs.setLabel, label)
     fs.umount(targetsys)
     fs.umount(selfsys)
+    liked.mountAll()
     return ...
 end
 
@@ -96,6 +96,7 @@ function installer.install_likedbox(vfs)
         "market_urls_dev.txt",
         "market_urls_main.txt",
         "logo.lua",
+        "main.lua",
         "lib/installer.lua"
     }
     
@@ -164,7 +165,7 @@ function installer.context(screen, posX, posY, vfs)
         installer.install_selfsys,
     }
 
-    local name = fs.genName(vfs.address)
+    local name = paths.name(fs.genName(vfs.address))
     local clear = saveZone(screen)
     if gui.yesno(screen, nil, nil, "install \"" .. label .. "\" to \"" .. name .. "\"?") then
         gui.status(screen, nil, nil, "installing \"" .. label .. "\" to \"" .. name .. "\"...")
