@@ -53,7 +53,6 @@
 /system/calls/restrs.lua
 /system/calls/saveBigZone.lua
 /system/calls/saveZone.lua
-/system/calls/sysclone.lua
 /system/calls/system_applyTheme.lua
 /system/calls/system_setTheme.lua
 /system/icons/afpx.t2p
@@ -90,8 +89,10 @@
 /system/lib/format.lua
 /system/lib/gui.lua
 /system/lib/gui_container.lua
+/system/lib/installer.lua
 /system/lib/liked.lua
 /system/lib/likenet.lua
+/system/lib/rendUtils.lua
 /system/lib/shareComponent.lua
 /system/lib/sound.lua
 /system/lib/sysinit.lua
