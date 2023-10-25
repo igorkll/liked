@@ -9,6 +9,8 @@ local installer = {}
 local targetsys = "/mnt/tmpmount"
 local selfsys = "/mnt/selfsys"
 
+----------------------------------------------------------------------
+
 function installer.init(vfs)
     local rootfs = fs.get("/")
 
@@ -24,7 +26,8 @@ function installer.init(vfs)
     return true
 end
 
-function installer.uinit(...)
+function installer.uinit(vfs, label, ...)
+    pcall(vfs.setLabel, label)
     fs.umount(targetsys)
     fs.umount(selfsys)
     return ...
@@ -46,6 +49,8 @@ function installer.rmTarget(path)
     return fs.remove(installer.targetPath(path))
 end
 
+----------------------------------------------------------------------
+
 function installer.install_core(vfs)
     local success, err = installer.init(vfs)
     if not success then return nil, err end
@@ -54,7 +59,7 @@ function installer.install_core(vfs)
     if not success then return nil, err end
 
     installer.rmTarget("system/core") --удаляю старое ядра чтобы не было канфликтов версий и не оставалось лишних файлов
-    return installer.uinit(installer.toTarget("system/core"))
+    return installer.uinit(vfs, "likeOS", installer.toTarget("system/core"))
 end
 
 function installer.install_liked(vfs)
@@ -65,7 +70,7 @@ function installer.install_liked(vfs)
     if not success then return nil, err end
 
     installer.rmTarget("system") --удаляю старую систему чтобы не было канфликтов версий и не оставалось лишних файлов
-    return installer.uinit(installer.toTarget("system"))
+    return installer.uinit(vfs, "liked", installer.toTarget("system"))
 end
 
 function installer.install_likedbox(vfs)
@@ -90,7 +95,8 @@ function installer.install_likedbox(vfs)
         "registry.dat",
         "market_urls_dev.txt",
         "market_urls_main.txt",
-        "logo.lua"
+        "logo.lua",
+        "lib/installer.lua"
     }
     
     local systemFolder = installer.selfPath("system")
@@ -106,7 +112,22 @@ function installer.install_likedbox(vfs)
     end)
     if not success then return nil, err end
 
-    return installer.uinit(fs.copy(installer.selfPath("system/likedbox"), targetSystemFolder))
+    return installer.uinit(vfs, "likedbox", fs.copy(installer.selfPath("system/likedbox"), targetSystemFolder))
 end
 
+----------------------------------------------------------------------
+
+function installer.context(screen, posX, posY, vfs)
+    gui.contextAuto(screen, posX, posY, {
+        "  likeOS installer",
+        "  liked",
+        "  likedbox",
+        "  likeOS (core only)",
+        "  full cloning of the system  "
+    })
+
+    local name = fs.genName(vfs.address)
+end
+
+installer.unloadable = true
 return installer

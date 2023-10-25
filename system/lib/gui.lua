@@ -586,6 +586,14 @@ function gui.context(screen, posX, posY, strs, active)
     end
 end
 
+function gui.contextAuto(screen, posX, posY, strs, active)
+    local posX, posY, sizeX, sizeY = gui.contentPos(screen, posX, posY, strs)
+    local clear = graphic.screenshot(screen, posX, posY, sizeX + 2, sizeY + 1)
+    local result = {gui.context(screen, posX, posY, strs, active)}
+    clear()
+    return result
+end
+
 function gui.drawtext(screen, posX, posY, foreground, text)
     local gpu = graphic.findGpu(screen)
 
