@@ -298,9 +298,6 @@ local function draw(old, check) --вызывает все перерисовки
     end
 
     gui_status(screen, nil, nil, "loading file-list...")
-    drawWallpaper()
-    drawStatus()
-    drawBar(lUserPath, iconsCount)
 
     icons = {}
     local count = 0
@@ -378,6 +375,9 @@ local function draw(old, check) --вызывает все перерисовки
     local gui_drawtext = calls.load("gui_drawtext")
     local gui_drawimage = calls.load("gui_drawimage")
 
+    drawWallpaper()
+    drawStatus()
+    drawBar(lUserPath, iconsCount)
     local count = 0
     for cy = 1, iconsY do
         for cx = -(iconsX // 2), (iconsX // 2) do
