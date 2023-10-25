@@ -136,21 +136,36 @@ function sysinit.init(box)
 
     ------------------------------------
 
-    local desktop = assert(programs.load("desktop")) --подгружаю один раз для экономии ОЗУ, таблица _ENV обшая, так что там нельзя юзать глобалки
-
     local screenThreads = {}
+    local runShell
+    if box then
+        function runShell(screen)
+            gui_initScreen(screen)
+    
+            local t = thread.create(assert(programs.load("shell")), screen)
+            t.parentData.screen = screen --для того чтобы можно было убивать дальнейшие патокаи через адрес экрана(информация от экране передаеться от патока к потоку ядром)
+            t:resume() --поток по умалчанию спит
 
-    local first = true
-    local function runShell(screen)
-        gui_initScreen(screen)
-            
-        local t = thread.create(desktop, screen, first)
-        t.parentData.screen = screen --для того чтобы можно было убивать дальнейшие патоки через адрес экрана(информация от экране передаеться от патока к потоку ядром)
-        t:resume() --поток по умалчанию спит
+            screenThreads[screen] = t
+        end
+    else
+        local desktop = assert(programs.load("desktop")) --подгружаю один раз для экономии ОЗУ, таблица _ENV обшая, так что там нельзя юзать глобалки
+        local first = true
 
-        first = false
-        screenThreads[screen] = t
+        function runShell(screen)
+            gui_initScreen(screen)
+                
+            local t = thread.create(desktop, screen, first)
+            t.parentData.screen = screen --для того чтобы можно было убивать дальнейшие патоки через адрес экрана(информация от экране передаеться от патока к потоку ядром)
+            t:resume() --поток по умалчанию спит
+    
+            first = false
+            screenThreads[screen] = t
+        end
     end
+    
+
+    ------------------------------------
 
     for index, address in ipairs(screens) do
         runShell(address)
