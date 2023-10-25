@@ -140,7 +140,7 @@ return function(eventData)
                     local addCount = mathAdd(-1)
                     registry.screenSaverTimer = registry.screenSaverTimer - addCount
                     if registry.screenSaverTimer < addCount then
-                        registry.screenSaverTimer = nil
+                        registry.screenSaverTimer = false
                     end
                     draw()
                 end
