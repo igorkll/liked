@@ -48,7 +48,6 @@
 /system/calls/gui_initScreen.lua
 /system/calls/gui_readimagesize.lua
 /system/calls/gui_selectfile.lua
-/system/calls/gui_yesno.lua
 /system/calls/isLikedDisk.lua
 /system/calls/movetable.lua
 /system/calls/restrs.lua
@@ -88,12 +87,14 @@
 /system/installer/logo.lua
 /system/installer/main.lua
 /system/lib/advLabeling.lua
+/system/lib/format.lua
 /system/lib/gui.lua
 /system/lib/gui_container.lua
 /system/lib/liked.lua
 /system/lib/likenet.lua
 /system/lib/shareComponent.lua
 /system/lib/sound.lua
+/system/lib/sysinit.lua
 /system/lib/uix.lua
 /system/likedbox/logo.lua
 /system/likedbox/main.lua
