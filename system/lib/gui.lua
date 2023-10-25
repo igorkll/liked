@@ -591,7 +591,7 @@ function gui.contextAuto(screen, posX, posY, strs, active)
     local clear = graphic.screenshot(screen, posX, posY, sizeX + 2, sizeY + 1)
     local result = {gui.context(screen, posX, posY, strs, active)}
     clear()
-    return result
+    return table.unpack(result)
 end
 
 function gui.drawtext(screen, posX, posY, foreground, text)

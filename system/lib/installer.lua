@@ -9,11 +9,11 @@ local installer = {}
 local targetsys = "/mnt/tmpmount"
 local selfsys = "/mnt/selfsys"
 
+local rootfs = fs.get("/")
+
 ----------------------------------------------------------------------
 
 function installer.init(vfs)
-    local rootfs = fs.get("/")
-
     fs.umount(targetsys)
     fs.umount(selfsys)
 
@@ -80,7 +80,7 @@ function installer.install_likedbox(vfs)
     local success, err = installer.toTarget("init.lua")
     if not success then return nil, err end
 
-    installer.rmTarget("system") --удаляю старую систему чтобы не было канфликтов версий и не оставалось лишних файлов
+    installer.rmTarget("system")
 
     local bl = {
         "installer",
@@ -115,18 +115,56 @@ function installer.install_likedbox(vfs)
     return installer.uinit(vfs, "likedbox", fs.copy(installer.selfPath("system/likedbox"), targetSystemFolder))
 end
 
+function installer.install_installer(vfs)
+    local success, err = installer.init(vfs)
+    if not success then return nil, err end
+
+    local success, err = installer.toTarget("init.lua")
+    if not success then return nil, err end
+
+    installer.rmTarget("system")
+    local success, err = installer.toTarget("system/core")
+    if not success then return nil, err end
+
+    return installer.uinit(vfs, "likeOS installer", fs.copy(installer.selfPath("system/installer"), installer.targetPath("system")))
+end
+
+function installer.install_selfsys(vfs)
+    local success, err = installer.init(vfs)
+    if not success then return nil, err end
+
+    installer.rmTarget("system")
+    return installer.uinit(vfs, rootfs.getLabel() or "self-sys", installer.toTarget("."))
+end
+
 ----------------------------------------------------------------------
 
 function installer.context(screen, posX, posY, vfs)
-    gui.contextAuto(screen, posX, posY, {
-        "  likeOS installer",
-        "  liked",
-        "  likedbox",
-        "  likeOS (core only)",
-        "  full cloning of the system  "
+    local label, num = gui.contextAuto(screen, posX, posY, {
+        "likeOS installer",
+        "liked",
+        "likedbox",
+        "likeOS (core only)",
+        "full cloning of the system"
     })
+    if num == 5 then
+        label = "self-sys"
+    end
+
+    local installers = {
+        installer.install_installer,
+        installer.install_liked,
+        installer.install_likedbox,
+        installer.install_core,
+        installer.install_selfsys,
+    }
 
     local name = fs.genName(vfs.address)
+    if gui.yesno(screen, nil, nil, "install \"" .. label .. "\" to \"" .. name .. "\"?") then
+        gui.status(screen, nil, nil, "installing \"" .. label .. "\" to \"" .. name .. "\"...")
+
+
+    end
 end
 
 installer.unloadable = true
