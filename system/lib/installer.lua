@@ -30,15 +30,83 @@ function installer.uinit(...)
     return ...
 end
 
+function installer.selfPath(path)
+    return paths.concat(selfsys, path)
+end
+
+function installer.targetPath(path)
+    return paths.concat(targetsys, path)
+end
+
+function installer.toTarget(path)
+    return fs.copy(installer.selfPath(path), installer.targetPath(path))
+end
+
+function installer.rmTarget(path)
+    return fs.remove(installer.targetPath(path))
+end
+
 function installer.install_core(vfs)
     local success, err = installer.init(vfs)
     if not success then return nil, err end
 
-    local success, err = fs.copy(paths.concat(selfsys, "init.lua"), paths.concat(targetsys, "init.lua"))
+    local success, err = installer.toTarget("init.lua")
     if not success then return nil, err end
 
-    fs.remove(paths.concat(targetsys, "system/core")) --удаляею старое ядра чтобы не было канфликтов версий и не оставалось лишних файлов
-    return installer.uinit(fs.copy(paths.concat(selfsys, "system/core"), paths.concat(targetsys, "system/core")))
+    installer.rmTarget("system/core") --удаляю старое ядра чтобы не было канфликтов версий и не оставалось лишних файлов
+    return installer.uinit(installer.toTarget("system/core"))
+end
+
+function installer.install_liked(vfs)
+    local success, err = installer.init(vfs)
+    if not success then return nil, err end
+
+    local success, err = installer.toTarget("init.lua")
+    if not success then return nil, err end
+
+    installer.rmTarget("system") --удаляю старую систему чтобы не было канфликтов версий и не оставалось лишних файлов
+    return installer.uinit(installer.toTarget("system"))
+end
+
+function installer.install_likedbox(vfs)
+    local success, err = installer.init(vfs)
+    if not success then return nil, err end
+
+    local success, err = installer.toTarget("init.lua")
+    if not success then return nil, err end
+
+    installer.rmTarget("system") --удаляю старую систему чтобы не было канфликтов версий и не оставалось лишних файлов
+
+    local bl = {
+        "installer",
+        "likedbox",
+        "screenSavers",
+        "themes",
+        "wallpapers",
+        "icons",
+        "bin",
+        "autoruns",
+        "recoveryScript.lua",
+        "registry.dat",
+        "market_urls_dev.txt",
+        "market_urls_main.txt",
+        "logo.lua"
+    }
+    
+    local systemFolder = installer.selfPath("system")
+    local targetSystemFolder = installer.targetPath("system")
+    local success, err = fs.copy(systemFolder, targetSystemFolder, function (from)
+        for _, lpath in ipairs(bl) do
+            if paths.equals(paths.concat(systemFolder, lpath), from) then
+                return false
+            end
+        end
+        
+        return true
+    end)
+    if not success then return nil, err end
+
+    return installer.uinit(fs.copy(installer.selfPath("system/likedbox"), targetSystemFolder))
 end
 
 return installer
