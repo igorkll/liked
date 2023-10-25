@@ -4,7 +4,7 @@ local fs = require("filesystem")
 local unicode = require("unicode")
 local rendUtils = {}
 
-function rendUtils.drawEula(screen, px, py, sy, bg, path)
+function rendUtils.drawEula(screen, px, py, sx, bg, path)
     local content = assert(fs.readFile(path))
     local gpu = graphic.findGpu(screen)
 
@@ -17,10 +17,10 @@ function rendUtils.drawEula(screen, px, py, sy, bg, path)
     end
 
     local lines = {}
-    for _, raw_line in ipairs(parser.toLinesLn(content, sy)) do
+    for _, raw_line in ipairs(parser.toLinesLn(content, sx)) do
         local line = {size = 0}
         local isColor = false
-        for _, part in ipairs(parser.split(unicode, line, "|")) do
+        for _, part in ipairs(parser.split(unicode, raw_line, "|")) do
             if isColor then
                 table.insert(line, tonumber(part))
             else
@@ -40,7 +40,7 @@ function rendUtils.drawEula(screen, px, py, sy, bg, path)
             if type(part) == "number" then
                 gpu.setForeground(part)
             else
-                set(cursorX - math.round(line.size / 2), y, part)
+                set(math.round((sx / 2) - (line.size / 2)) + cursorX, y, part)
                 cursorX = cursorX + unicode.len(part)
             end
         end
