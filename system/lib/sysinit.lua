@@ -70,20 +70,7 @@ function sysinit.init(box)
     local event = require("event")
     local computer = require("computer")
     local system = require("system")
-    local desktop = assert(programs.load("desktop")) --подгружаю один раз для экономии ОЗУ, таблица _ENV обшая, так что там нельзя юзать глобалки
-
-    ------------------------------------
-
-    if not box then
-        if not registry.timeZone then
-            registry.timeZone = 0
-        end
-
-        if not registry.branch then
-            registry.branch = "main"
-        end
-    end
-
+    
     ------------------------------------
 
     if not registry.wallpaperBaseColor then
@@ -98,7 +85,7 @@ function sysinit.init(box)
 
     if not registry.powerMode then
         local devicetype = system.getDeviceType()
-        if devicetype == "tablet" then
+        if devicetype == "tablet" and not box then
             registry.powerMode = "energy saving"
         else
             registry.powerMode = "power"
@@ -109,7 +96,7 @@ function sysinit.init(box)
     ------------------------------------
 
     if not registry.bufferType then
-        if hardwareBufferAvailable then
+        if hardwareBufferAvailable and not box then
             registry.bufferType = "hardware"
         else
             registry.bufferType = "none"
@@ -119,7 +106,7 @@ function sysinit.init(box)
 
     ------------------------------------
 
-    if not fs.exists(gui_container.screenSaverPath) and not registry.screenSaverDefaultSetted then
+    if not box and not fs.exists(gui_container.screenSaverPath) and not registry.screenSaverDefaultSetted then
         pcall(fs.copy, "/system/screenSavers/black_screen.scrsv", gui_container.screenSaverPath)
         registry.screenSaverDefaultSetted = true
     end
@@ -143,19 +130,22 @@ function sysinit.init(box)
 
     bootloader.unittests("/vendor/unittests")
     bootloader.unittests("/data/unittests")
+
     bootloader.autorunsIn("/vendor/autoruns")
     bootloader.autorunsIn("/data/autoruns")
 
     ------------------------------------
 
+    local desktop = assert(programs.load("desktop")) --подгружаю один раз для экономии ОЗУ, таблица _ENV обшая, так что там нельзя юзать глобалки
+
     local screenThreads = {}
 
     local first = true
-    local function runDesktop(screen)
+    local function runShell(screen)
         gui_initScreen(screen)
             
         local t = thread.create(desktop, screen, first)
-        t.parentData.screen = screen --для того чтобы можно было убивать дальнейшие патокаи через адрес экрана(информация от экране передаеться от патока к потоку ядром)
+        t.parentData.screen = screen --для того чтобы можно было убивать дальнейшие патоки через адрес экрана(информация от экране передаеться от патока к потоку ядром)
         t:resume() --поток по умалчанию спит
 
         first = false
@@ -163,14 +153,14 @@ function sysinit.init(box)
     end
 
     for index, address in ipairs(screens) do
-        runDesktop(address)
+        runShell(address)
     end
 
     event.hyperListen(function (eventType, cuuid, ctype)
         if ctype == "screen" then
             if eventType == "component_added" then
                 if not screenThreads[cuuid] then
-                    runDesktop(cuuid)
+                    runShell(cuuid)
                 end
             elseif eventType == "component_removed" then
                 if screenThreads[cuuid] then
@@ -181,15 +171,17 @@ function sysinit.init(box)
         end
     end)
 
-    while true do
-        for screen, th in pairs(screenThreads) do
-            if th:status() == "dead" then
-                th:kill()
-                runDesktop(screen)
+    thread.create(function ()
+        while true do
+            for screen, th in pairs(screenThreads) do
+                if th:status() == "dead" then
+                    th:kill()
+                    runShell(screen)
+                end
             end
+            os.sleep(1)    
         end
-        os.sleep(1)    
-    end
+    end):resume()
 
     sysinit.init = nil
 end
