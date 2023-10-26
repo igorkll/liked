@@ -2,6 +2,7 @@ local graphic = require("graphic")
 local gui_container = require("gui_container")
 local package = require("package")
 local thread = require("thread")
+local gui = require("gui")
 
 local colors = gui_container.colors
 
@@ -20,7 +21,7 @@ local window = graphic.createWindow(screen, posX, posY, rx - (posX - 1), ry - (p
 local selector = thread.create(function ()
     local scroll
     while true do
-        window:clear(colors.brown)
+        window:clear(colors.black)
         local x, y = window:toRealPos((window.sizeX // 2) - 27, (window.sizeY // 2) - 6)
 
         local loadedLibraries = {}
@@ -36,11 +37,11 @@ local selector = thread.create(function ()
         end
         table.sort(loadedLibraries)
 
-        window:set(2, 2, colors.brown, colors.white, "total      count: " .. math.round(constCount + unloadableCount))
-        window:set(2, 3, colors.brown, colors.white, "static     count: " .. math.round(constCount))
-        window:set(2, 4, colors.brown, colors.white, "unloadable count: " .. math.round(unloadableCount))
+        window:set(2, 2, colors.black, colors.white, "total      count: " .. math.round(constCount + unloadableCount))
+        window:set(2, 3, colors.black, colors.white, "static     count: " .. math.round(constCount))
+        window:set(2, 4, colors.black, colors.white, "unloadable count: " .. math.round(unloadableCount))
 
-        local _, lscroll = gui_select(screen, x, y, "loaded libraries", loadedLibraries, scroll, true)
+        local _, lscroll = gui.select(screen, x, y, "loaded libraries", loadedLibraries, scroll, true)
         scroll = lscroll
     end
 end)

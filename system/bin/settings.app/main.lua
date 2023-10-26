@@ -40,7 +40,6 @@ statusWindow:set(2, 1, colors.gray, colors.white, "Settings")
 
 local currentModule, moduleEnd
 local function draw(noReload)
-    selectWindow:clear(colors.lightGray)
     modulWindow:clear(colors.black)
     lineWindows:clear(colors.brown)
 
@@ -59,6 +58,8 @@ local function draw(noReload)
         --selectWindow:write("║" .. "\n", background, foreground)
         --selectWindow:write("╚" .. string.rep("═", unicode.len(str)) .. "╝", background, foreground)
     end
+    local maxLine = #modules
+    selectWindow:fill(1, maxLine + 1, selectWindow.sizeX, selectWindow.sizeY - maxLine, colors.lightGray, 0, " ")
 
     if moduleEnd then
         moduleEnd()

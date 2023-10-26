@@ -650,8 +650,8 @@ function gui.select(screen, cx, cy, label, actions, scroll)
     local sel
 
     local function drawScrollBar()
-        window:fill(50, 2, 1, 14, colors.blue, 0, " ")
-        window:set(50, math.round(math.map(scroll, 0, #actions - 1, 2, 15)), colors.lime, 0, " ")
+        window:fill(50, 2, 1, 14, colors.purple, 0, " ")
+        window:set(50, math.round(math.map(scroll, 0, #actions - 1, 2, 15)), colors.pink, 0, " ")
     end
 
     local function redrawButton()
@@ -659,7 +659,7 @@ function gui.select(screen, cx, cy, label, actions, scroll)
     end
 
     local function drawBase()
-        window:clear(colors.gray)
+        --window:clear(colors.brown)
         window:fill(1, 1, window.sizeX, 1, colors.lightGray, 0, " ")
         if label then
             window:set(2, 1, colors.lightGray, colors.white, label)
@@ -670,7 +670,7 @@ function gui.select(screen, cx, cy, label, actions, scroll)
     end
 
     local function getCol(idx)
-        return sel == idx and colors.blue or colors.black
+        return sel == idx and colors.blue or colors.gray
     end
 
     local function draw(pos)
@@ -692,6 +692,7 @@ function gui.select(screen, cx, cy, label, actions, scroll)
                 addrsIdx[y] = index
             end
         end
+        window:fill(1, window.sizeY - 1, window.sizeX - 1, 1, colors.brown, 0, " ")
 
         if not pos then
             drawScrollBar()
@@ -741,7 +742,7 @@ function gui.select(screen, cx, cy, label, actions, scroll)
             end
         end
         if not noDraw then
-            window:fill(1, window.sizeY - 1, window.sizeX - 1, 1, colors.gray, 0, " ")
+            window:fill(1, window.sizeY - 1, window.sizeX - 1, 1, colors.brown, 0, " ")
         end
 
         drawScrollBar()
