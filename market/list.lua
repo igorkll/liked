@@ -258,22 +258,18 @@ local list = {
         name = "redirection",
         version = "1",
         vendor = "computercraft",
-        icon = selfurlpart .. "/apps/redirection.app/icon.t2p",
         description = "the game was ported from computercraft",
         minDiskSpace = 64,
 
         path = "/data/bin/redirection.app",
-        install = function(self)
-            fs.makeDirectory(self.path)
-            save(self.path .. "/main.lua", download(selfurlpart .. "/apps/redirection.app/main.lua"))
-            save(self.path .. "/icon.t2p", download(self.icon))
-
-            fs.makeDirectory(paths.concat(self.path, "levels"))
+        urlPrimaryPart = selfurlpart .. "/apps/redirection.app/",
+        files = (function ()
+            local files = {"main.lua", "icon.t2p", "select.lua", "actions.cfg"}
             for i = 0, 12 do
-                local name = tostring(i) .. ".dat"
-                save(paths.concat(self.path, "levels", name), download(selfurlpart .. "/apps/redirection.app/levels/" .. name))
+                table.insert(files, "levels/" .. tostring(math.round(i)) .. ".dat")
             end
-        end
+            return files
+        end)()
     },
     {
         name = "adventure",

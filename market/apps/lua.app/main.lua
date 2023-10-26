@@ -3,6 +3,8 @@ local event = require("event")
 local gui_container = require("gui_container")
 local package = require("package")
 local syntax = require("syntax")
+local liked = require("liked")
+local thread = require("thread")
 
 local colors = gui_container.colors
 
@@ -14,12 +16,15 @@ local sizeX, sizeY = graphic.getResolution(screen)
 local window = graphic.createWindow(screen, 1, 1, sizeX, sizeY, true)
 local reader = window:read(1, sizeY, sizeX, colors.gray, colors.white, "lua: ", nil, nil, nil, "lua")
 
+local upTh, upRedraw, upCallbacks = liked.drawFullUpBarTask(screen, "Lua")
+local baseTh = thread.current()
+upCallbacks.exit = function ()
+    baseTh:kill()
+end
+
 do
-    local title = "Lua"
     window:clear(colors.black)
-    window:set(1, 1, colors.gray, colors.white, string.rep(" ", sizeX))
-    window:set(math.floor(((sizeX / 2) - (#title / 2)) + 0.5), 1, colors.gray, colors.white, title)
-    window:set(sizeX, 1, colors.red, colors.white, "X")
+    upRedraw()
     reader.redraw()
 end
 
@@ -84,12 +89,6 @@ while true do
             end
         else
             lprint(colors.red, err or "unknown error")
-        end
-    end
-
-    if windowEventData[1] == "touch" then
-        if windowEventData[3] == sizeX and windowEventData[4] == 1 then
-            break
         end
     end
 end
