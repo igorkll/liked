@@ -680,19 +680,24 @@ function gui.select(screen, cx, cy, label, actions, scroll)
         
         addrs = {}
         addrsIdx = {}
+        local lastLine = 2
         for index, action in ipairs(actions) do
             local y = (index + 1) - scroll
             if y >= 2 and y < window.sizeY then
                 if not pos or pos == index then
                     window:fill(1, y, window.sizeX - 1, 1, getCol(index), colors.white, " ")
                     window:set(2, y, getCol(index), colors.white, action)
+                    lastLine = y
                 end
 
                 addrs[y] = action
                 addrsIdx[y] = index
             end
         end
-        window:fill(1, window.sizeY - 1, window.sizeX - 1, 1, colors.brown, 0, " ")
+        if not pos then
+            lastLine = lastLine + 1
+            window:fill(1, lastLine, window.sizeX - 1, window.sizeY - lastLine, colors.brown, 0, " ")
+        end
 
         if not pos then
             drawScrollBar()
