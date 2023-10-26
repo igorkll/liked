@@ -68,8 +68,9 @@ function sysinit.init(box)
     local liked = require("liked")
     local registry = require("registry")
     local event = require("event")
-    local computer = require("computer")
     local system = require("system")
+
+    require("package").hardAutoUnloading = true
     
     ------------------------------------
 
