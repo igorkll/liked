@@ -47,6 +47,21 @@ layout:createButton(20, 7, 16, 1, nil, nil, "UPDATE SYSTEM", true).onClick = fun
     layout:draw()
 end
 
+
+layout:createText(9, 9, colors.white, "disable system recovery menu")
+layout:createText(9, 11, colors.white, "disable startup logo")
+local disableRecoverySwitch = layout:createSwitch(2, 9, registry.disableRecovery)
+local disableLogoSwitch = layout:createSwitch(2, 11, registry.disableLogo)
+
+function disableRecoverySwitch:onSwitch()
+    registry.disableRecovery = self.state
+end
+
+function disableLogoSwitch:onSwitch()
+    registry.disableLogo = self.state
+end
+
+
 local function systemWeight()
     local _, initOnDisk = fs.size("/init.lua")
     local _, sysOnDisk = fs.size("/system")
