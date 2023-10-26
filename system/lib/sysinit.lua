@@ -126,6 +126,8 @@ function sysinit.init(box)
 
     ------------------------------------
 
+    liked.applyBeepState()
+
     gui_container.refresh()
 
     bootloader.unittests("/vendor/unittests")

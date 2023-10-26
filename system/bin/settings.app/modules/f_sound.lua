@@ -2,6 +2,7 @@ local graphic = require("graphic")
 local gui_container = require("gui_container")
 local registry = require("registry")
 local uix = require("uix")
+local liked = require("liked")
 
 local colors = gui_container.colors
 
@@ -30,6 +31,12 @@ layout:createSwitch(2, 6, registry.lowPowerSound).onSwitch = function (self)
     registry.lowPowerSound = self.state
 end
 layout:createText(9, 6, colors.white, "Low-Power Sound")
+
+layout:createSwitch(2, 8, registry.fullBeepDisable, colors.red).onSwitch = function (self)
+    registry.fullBeepDisable = self.state
+    liked.applyBeepState()
+end
+layout:createText(9, 8, colors.white, "Full PC Speaker Disable")
 
 layout:draw()
 

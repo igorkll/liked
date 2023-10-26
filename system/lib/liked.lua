@@ -15,6 +15,7 @@ local event = require("event")
 local unicode = require("unicode")
 local thread = require("thread")
 local cache = require("cache")
+local natives = require("natives")
 local liked = {}
 
 --------------------------------------------------------
@@ -251,6 +252,14 @@ function liked.applyPowerMode()
             end)
             energyTh:resume()
         end
+    end
+end
+
+function liked.applyBeepState()
+    if registry.fullBeepDisable then
+        computer.beep = system.stub
+    else
+        computer.beep = natives.computer.beep
     end
 end
 
