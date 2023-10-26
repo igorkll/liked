@@ -680,7 +680,7 @@ function gui.select(screen, cx, cy, label, actions, scroll)
         
         addrs = {}
         addrsIdx = {}
-        local lastLine = 2
+        local lastLine = 1
         for index, action in ipairs(actions) do
             local y = (index + 1) - scroll
             if y >= 2 and y < window.sizeY then

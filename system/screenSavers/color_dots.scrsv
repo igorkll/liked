@@ -1,13 +1,16 @@
 local graphic = require("graphic")
 local colors = require("colors")
 local event = require("event")
+local palette = require("palette")
+
 local screen = ...
 local rx, ry = graphic.getResolution(screen)
 local window = graphic.createWindow(screen, 1, 1, rx, ry, false, true)
 
+local oldPal = palette.save(screen)
 local current = require("thread").current()
 current.kill = function (self)
-    gui_initScreen(screen)
+    palette.set(screen, oldPal)
     self:raw_kill()
 end
 

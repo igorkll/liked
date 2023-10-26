@@ -1,11 +1,13 @@
 local graphic = require("graphic")
 local colors = require("colors")
 local event = require("event")
+local palette = require("palette")
 local screen = ...
 
+local oldPal = palette.save(screen)
 local current = require("thread").current()
 current.kill = function (self)
-    gui_initScreen(screen)
+    palette.set(screen, oldPal)
     self:raw_kill()
 end
 
@@ -18,7 +20,6 @@ pcall(graphic.setPaletteColor, screen, 0, colors.blend(color[1], color[2], color
 window:fill(1, 1, mx, my, 0, 0, " ")
 
 while true do
-    local gpu = graphic.findGpu(screen)
     pcall(graphic.setPaletteColor, screen, 0, colors.blend(color[1], color[2], color[3]))
     local err = 0
     for i = 1, 3 do
