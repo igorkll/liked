@@ -256,7 +256,7 @@ local list = {
     },
     {
         name = "redirection",
-        version = "1",
+        version = "2",
         vendor = "computercraft",
         description = "the game was ported from computercraft",
         minDiskSpace = 64,
