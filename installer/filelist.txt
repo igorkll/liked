@@ -106,6 +106,7 @@
 /system/screenSavers/color_dots.scrsv
 /system/screenSavers/random_colors.scrsv
 /system/themes/classic.plt
+/system/themes/light.plt
 /system/themes/neon.plt
 /system/themes/original.plt
 /system/wallpapers/box.t2p
