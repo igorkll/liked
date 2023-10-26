@@ -50,8 +50,10 @@ end
 
 layout:createText(9, 9, colors.white, "disable system recovery menu")
 layout:createText(9, 11, colors.white, "disable startup logo")
+layout:createText(9, 13, colors.white, "disable auto-reboot on system error")
 local disableRecoverySwitch = layout:createSwitch(2, 9, registry.disableRecovery)
 local disableLogoSwitch = layout:createSwitch(2, 11, registry.disableLogo)
+local disableAutoReboot = layout:createSwitch(2, 13, registry.disableAutoReboot)
 
 function disableRecoverySwitch:onSwitch()
     registry.disableRecovery = self.state
@@ -59,6 +61,10 @@ end
 
 function disableLogoSwitch:onSwitch()
     registry.disableLogo = self.state
+end
+
+function disableAutoReboot:onSwitch()
+    registry.disableAutoReboot = self.state
 end
 
 
