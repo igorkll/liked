@@ -34,8 +34,9 @@ thread.create(function ()
     end
 end):resume()
 
-local queue = {}
+local queue
 if path then
+    queue = {}
     local content = assert(fs.readFile(path))
     for _, command in ipairs(parser.split(unicode, content, "\n")) do
         table.insert(queue, command)
@@ -45,16 +46,16 @@ end
 while true do
     term:write("> ")
     local command
-    if #queue > 0 then
+    if queue and #queue > 0 then
         command = table.remove(queue, 1)
         term:writeLn(command)
-        if #queue == 0 then
-            break
-        end
     else
         command = term:readLn()
+        if not command then
+            break
+        end
     end
-    if not command then break end
+
     cb.setCommand(command)
     local _, ret = cb.executeCommand()
     if ret then
@@ -62,4 +63,9 @@ while true do
     end
     term:newLine()
     graphic.forceUpdate()
+
+    if queue and #queue == 0 then
+        os.sleep(1)
+        break
+    end
 end
