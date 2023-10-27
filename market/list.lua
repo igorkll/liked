@@ -36,31 +36,23 @@ local list = {
         name = "nanomachines",
         version = "2.1",
         vendor = "logic",
-        icon = selfurlpart .. "/apps/nanomachines.app/icon.t2p",
         description = "allows you to control nanobots using a wireless modem",
         minDiskSpace = 64,
 
         path = "/data/bin/nanomachines.app",
-        install = function(self)
-            fs.makeDirectory("/data/bin/nanomachines.app")
-            save("/data/bin/nanomachines.app/main.lua", download(selfurlpart .. "/apps/nanomachines.app/main.lua"))
-            save("/data/bin/nanomachines.app/icon.t2p", download(self.icon))
-        end
+        urlPrimaryPart = selfurlpart .. "/apps/nanomachines.app/",
+        files = {"main.lua", "icon.t2p"}
     },
     {
         name = "worm",
         version = "1",
         vendor = "computercraft",
-        icon = selfurlpart .. "/apps/worm.app/icon.t2p",
         description = "classic snake ported from computercraft",
         minDiskSpace = 64,
 
         path = "/data/bin/worm.app",
-        install = function(self)
-            fs.makeDirectory("/data/bin/worm.app")
-            save("/data/bin/worm.app/main.lua", download(selfurlpart .. "/apps/worm.app/main.lua"))
-            save("/data/bin/worm.app/icon.t2p", download(self.icon))
-        end
+        urlPrimaryPart = selfurlpart .. "/apps/worm.app/",
+        files = {"main.lua", "icon.t2p"}
     },
     {
         name = "chat",
@@ -88,30 +80,16 @@ local list = {
             assert(programs.execute("/data/autoruns/chat_demon.lua"))
         end
     },
-    --[[
-    {
-        path = "/data/bin/spaceshot.app",
-        install = function()
-            fs.makeDirectory("/data/bin/spaceshoter.app")
-            save("/data/bin/spaceshoter.app/main.lua", download(selfurlpart .. "/apps/spaceshoter.app/main.lua")))
-            save("/data/bin/spaceshoter.app/icon.t2p", download(selfurlpart .. "/apps/spaceshoter.app/icon.t2p")))
-        end
-    }
-    ]]
     {
         name = "irc",
         version = "1",
         vendor = "Nathan Flynn",
-        icon = selfurlpart .. "/apps/irc.app/icon.t2p",
         description = "allows you to connect to IRC chats via an Internet card.\nprogram ported from openOS",
         minDiskSpace = 64,
 
         path = "/data/bin/irc.app",
-        install = function(self)
-            fs.makeDirectory("/data/bin/irc.app")
-            save("/data/bin/irc.app/main.lua", download(selfurlpart .. "/apps/irc.app/main.lua"))
-            save("/data/bin/irc.app/icon.t2p", download(self.icon))
-        end
+        urlPrimaryPart = selfurlpart .. "/apps/irc.app/",
+        files = {"main.lua", "icon.t2p"}
     },
     {
         name = "brainfuck",
@@ -135,31 +113,23 @@ local list = {
         name = "lua",
         version = "4",
         vendor = "logic",
-        icon = selfurlpart .. "/apps/lua.app/icon.t2p",
         description = "lua code interpreter",
         minDiskSpace = 64,
 
         path = "/data/bin/lua.app",
-        install = function(self)
-            fs.makeDirectory("/data/bin/lua.app")
-            save("/data/bin/lua.app/main.lua", download(selfurlpart .. "/apps/lua.app/main.lua"))
-            save("/data/bin/lua.app/icon.t2p", download(self.icon))
-        end
+        urlPrimaryPart = selfurlpart .. "/apps/lua.app/",
+        files = {"main.lua", "icon.t2p"}
     },
     {
         name = "events",
         version = "3",
         vendor = "logic",
-        icon = selfurlpart .. "/apps/events.app/icon.t2p",
         description = "allows you to view computer events",
         minDiskSpace = 64,
 
         path = "/data/bin/events.app",
-        install = function(self)
-            fs.makeDirectory("/data/bin/events.app")
-            save("/data/bin/events.app/main.lua", download(selfurlpart .. "/apps/events.app/main.lua"))
-            save("/data/bin/events.app/icon.t2p", download(self.icon))
-        end
+        urlPrimaryPart = selfurlpart .. "/apps/events.app/",
+        files = {"main.lua", "icon.t2p"}
     },
     {
         name = "openOS",
@@ -220,39 +190,24 @@ local list = {
         name = "explode",
         version = "2",
         vendor = "logic",
-        icon = selfurlpart .. "/apps/explode.app/icon.t2p",
         description = "blow up your computer!",
         minDiskSpace = 64,
 
         path = "/data/bin/explode.app",
-        install = function(self)
-            fs.makeDirectory(self.path)
-            save(self.path .. "/main.lua", download(selfurlpart .. "/apps/explode.app/main.lua"))
-            save(self.path .. "/icon.t2p", download(self.icon))
-        end
+        urlPrimaryPart = selfurlpart .. "/apps/explode.app/",
+        files = {"main.lua", "icon.t2p"}
     },
     {
         name = "camera",
         version = "1.2",
         vendor = "logic",
-        icon = selfurlpart .. "/apps/camera.app/icon.t2p",
         description = "allows you to take pictures on the camera from the computronix addon.\n* allows you to select a camera from several\n* allows you to save a photo for loading on another computer",
         minDiskSpace = 64,
         minColorDepth = 4,
 
         path = "/data/bin/camera.app",
-        install = function(self)
-            fs.makeDirectory(self.path)
-            save(self.path .. "/uninstall.lua", download(selfurlpart .. "/apps/camera.app/uninstall.lua"))
-            save(self.path .. "/main.lua", download(selfurlpart .. "/apps/camera.app/main.lua"))
-            
-            local icon = download(self.icon)
-            save(self.path .. "/icon.t2p", icon)
-            save("/data/icons/cam.t2p", icon)
-
-            save("/data/autoruns/camera.lua", download(selfurlpart .. "/apps/camera.app/autorun.lua"))
-            assert(programs.execute("/data/autoruns/camera.lua"))
-        end
+        urlPrimaryPart = selfurlpart .. "/apps/camera.app/",
+        files = {"main.lua", "icon.t2p", "reg.reg", "unreg.reg"}
     },
     {
         name = "redirection",

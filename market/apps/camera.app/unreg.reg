@@ -1,0 +1,16 @@
+{
+    icons = {
+        reg_rm_list={"cam"}
+    },
+    gui_container = {
+        knownExps = {
+            reg_rm_list={"cam"}
+        },
+        openVia = {
+            reg_rm_list={"cam"}
+        },
+        typenames = {
+            reg_rm_list={"cam"}
+        }
+    }
+}
