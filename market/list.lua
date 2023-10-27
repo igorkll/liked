@@ -267,14 +267,7 @@ local list = {
 
         path = "/data/bin/commandBlock.app",
         urlPrimaryPart = selfurlpart .. "/apps/commandBlock.app/",
-        files = {"main.lua", "icon.t2p", "uninstall.lua"},
-
-        postInstall = function (self)
-            if not registry.icons then registry.icons = {} end
-            registry.icons["cbs"] = paths.concat(self.path, "icon.t2p")
-            liked.reg("openVia", "cbs", paths.concat(self.path, "main.lua"))
-            liked.reg("editable", "cbs", true)
-        end
+        files = {"main.lua", "icon.t2p", "reg.reg", "unreg.reg"},
     },
     {
         name = "openFM",
@@ -296,7 +289,7 @@ local list = {
 
         path = "/data/bin/tape.app",
         urlPrimaryPart = selfurlpart .. "/apps/tape.app/",
-        files = {"main.lua", "icon.t2p", "uninstall.lua", "reg.reg", "unreg.reg"}
+        files = {"main.lua", "icon.t2p", "reg.reg", "unreg.reg"}
     },
     {
         name = "hologram",

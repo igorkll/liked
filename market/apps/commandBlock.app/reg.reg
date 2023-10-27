@@ -1,0 +1,13 @@
+{
+    icons = {
+        cbs = "/data/bin/commandBlock.app/icon.t2p"
+    },
+    gui_container = {
+        editable = {
+            cbs = true
+        },
+        openVia = {
+            cbs = "/data/bin/commandBlock.app/main.lua"
+        }
+    }
+}

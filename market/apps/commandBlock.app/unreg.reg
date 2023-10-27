@@ -1,0 +1,13 @@
+{
+    icons = {
+        reg_rm_list={"cbs"}
+    },
+    gui_container = {
+        editable = {
+            reg_rm_list={"cbs"}
+        },
+        openVia = {
+            reg_rm_list={"cbs"}
+        }
+    }
+}
