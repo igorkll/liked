@@ -6,7 +6,9 @@ local paths = require("paths")
 local screen, _, path, force = ...
 
 if force or gui_yesno(screen, nil, nil, "do you really want to apply the \"" .. gui.hideExtension(screen, paths.name(path)) .. "\" registry modifier?") then
-    gui.status(screen, nil, nil, "installing reg file \"" .. gui_container.toUserPath(screen, path) .. "\"")
+    if not force then
+        gui.status(screen, nil, nil, "installing reg file \"" .. gui_container.toUserPath(screen, path) .. "\"")
+    end
     if liked.assert(screen, registry.apply(path)) then
         gui_container.refresh()
         registry.save()
