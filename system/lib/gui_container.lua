@@ -180,6 +180,10 @@ function gui_container.refresh()
             gui_container[str][key] = value
         end
     end
+
+    local cache = require("cache")
+    cache.cache.findIcon = nil
+    cache.cache.getIcon = nil
 end
 
 return gui_container
