@@ -238,7 +238,7 @@ local list = {
     },
     {
         name = "magnet",
-        version = "3",
+        version = "4",
         vendor = "logic",
         description = "a program for controlling a magnet that attracts resources(tractor_beam-upgrade)",
         minDiskSpace = 64,
@@ -249,7 +249,7 @@ local list = {
     },
     {
         name = "piston",
-        version = "3",
+        version = "4",
         vendor = "logic",
         description = "a program for controlling a piston(piston-upgrade)",
         minDiskSpace = 64,
