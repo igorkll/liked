@@ -3,9 +3,9 @@ local component = require("component")
 local event = require("event")
 local gui_container = require("gui_container")
 local gui = require("gui")
-local unicode = require("unicode")
 local sides = require("sides")
 local liked = require("liked")
+local thread = require("thread")
 local colors = gui_container.colors
 
 local screen = ...
@@ -16,7 +16,12 @@ end
 piston = component.proxy(piston)
 local rx, ry = graphic.getResolution(screen)
 local window = graphic.createWindow(screen, 1, 1, rx, ry, true)
-local title = "Piston"
+
+local upTh, upRedraw, upCallbacks = liked.drawFullUpBarTask(screen, "Piston")
+local baseTh = thread.current()
+upCallbacks.exit = function ()
+    baseTh:kill()
+end
 
 local placeAt = (rx // 2) - 4
 local placeAt2 = (rx // 2) + 10
@@ -27,13 +32,10 @@ _G.pistonBg2 = _G.pistonBg2 or {}
 
 _G.pistonCurrentSide[piston] = _G.pistonCurrentSide[piston] or sides.front
 
-liked.drawUpBarTask(screen, true, colors.gray)
-
 local function updateAll()
     window:clear(colors.black)
     window:fill(1, 1, rx, 1, colors.gray, 0, " ")
-    window:set((window.sizeX / 2) - (unicode.len(title) / 2), 1, colors.gray, colors.white, title)
-    window:set(rx, 1, colors.red, colors.white, "X")
+    upRedraw()
 
     window:set(placeAt, 3, colors.lime, colors.white, "           ")
     window:set(placeAt, 4, colors.lime, colors.white, "   PUSH    ")
@@ -91,9 +93,7 @@ while true do
     local windowEventData = window:uploadEvent(eventData)
 
     if windowEventData[1] == "touch" then
-        if windowEventData[3] == rx and windowEventData[4] == 1 then
-            break
-        elseif checkButton(windowEventData, 3) then
+        if checkButton(windowEventData, 3) then
             liked.assert(screen, piston.push(_G.pistonCurrentSide[piston]))
         elseif checkButton(windowEventData, 7) then
             if piston.pull then
