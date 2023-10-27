@@ -10,6 +10,7 @@ local programs = require("programs")
 local internet = require("internet")
 local liked = require("liked")
 local gui = require("gui")
+local format = require("format")
 
 local cacheReg = registry.new("/data/cache/market/versions.dat")
 if not registry.libVersions then
@@ -61,6 +62,8 @@ local gui_drawimage = calls.load("gui_drawimage")
 
 local statusWindow = graphic.createWindow(screen, 1, 1, rx, 1)
 local window = graphic.createWindow(screen, 1, 2, rx, ry - 1)
+
+local searchRead = window:readNoDraw(2, 1, window.sizeX - 2, colors.brown, colors.white, "search: ", nil, nil, true)
 
 ------------------------------------
 
@@ -454,8 +457,17 @@ local function draw(clear)
     
     local added = {}
 
-    for i, v in ipairs(list) do
-        if (not v.hided or gui_container.devModeStates[screen]) then
+    for _, v in ipairs(list) do
+        local finding = format.escape_pattern(searchRead.getBuffer())
+        
+        local function isSearch(str)
+            if not str or finding == "" then
+                return true
+            end
+            return str:find(finding)
+        end
+
+        if (not v.hided or gui_container.devModeStates[screen]) and (isSearch(v.name) or isSearch(v.vendor) or isSearch(v.description)) then
             local y = math.floor((4 + ((appCount - listOffSet) * 7)) + 0.5)
             if y > 1 and y < ry then
                 table.insert(appLabels, applicationLabel(v, 2, y))
@@ -475,22 +487,49 @@ local function draw(clear)
 
     if not clear then
         if not added[-3] then
-            window:fill(2, 1, window.sizeX - 2, 1, colors.white, 0, " ")
+            if listOffSet == 1 then
+                searchRead.redraw()
+            else
+                window:fill(2, 1, window.sizeX - 2, 1, colors.white, 0, " ")
+            end
         end
 
         if not added[window.sizeY + 1] then
             window:fill(2, window.sizeY, window.sizeX - 2, 1, colors.white, 0, " ")
         end
+    elseif listOffSet == 1 then
+        searchRead.redraw()
     end
 end
 draw(true)
 
+local function checkListPos()
+    if listOffSet > appCount - 3 then
+        listOffSet = appCount - 3
+        if listOffSet < 1 then
+            listOffSet = 1
+        end
+    elseif listOffSet < 1 then
+        listOffSet = 1
+    else
+        return true
+    end
+end
+
 ------------------------------------
 
+local oldSel
 while true do
     local eventData = {computer.pullSignal()}
     local statusWindowEventData = statusWindow:uploadEvent(eventData)
     local windowEventData = window:uploadEvent(eventData)
+
+    if listOffSet == 1 then
+        if searchRead.uploadEvent(windowEventData) or (not searchRead.getAllowUse() and oldSel) then
+            draw(true)
+        end
+        oldSel = searchRead.getAllowUse()
+    end
 
     if statusWindowEventData[1] == "touch" then
         if statusWindowEventData[3] == statusWindow.sizeX and statusWindowEventData[4] == statusWindow.sizeY then
@@ -529,32 +568,20 @@ while true do
             listOffSet = listOffSet + 1
         end
 
-        if listOffSet > appCount - 3 then
-            listOffSet = appCount - 3
-        elseif listOffSet < 1 then
-            listOffSet = 1
-        else
+        if checkListPos() then
             draw()
         end
     elseif windowEventData[1] == "key_down" then
         if windowEventData[4] == 208 then
             listOffSet = listOffSet + 1
 
-            if listOffSet > appCount - 3 then
-                listOffSet = appCount - 3
-            elseif listOffSet < 1 then
-                listOffSet = 1
-            else
+            if checkListPos() then
                 draw()
             end
         elseif windowEventData[4] == 200 then
             listOffSet = listOffSet - 1
 
-            if listOffSet > appCount - 3 then
-                listOffSet = appCount - 3
-            elseif listOffSet < 1 then
-                listOffSet = 1
-            else
+            if checkListPos() then
                 draw()
             end
         end

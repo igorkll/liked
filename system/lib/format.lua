@@ -2,6 +2,10 @@ local unicode = require("unicode")
 local graphic = require("graphic")
 local format = {}
 
+function format.escape_pattern(text)
+    return text:gsub("([^%w])", "%%%1")
+end
+
 function format.smartConcat()
     local smart = {}
     smart.buff = {}
