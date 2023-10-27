@@ -481,8 +481,8 @@ local function draw(clear)
             end
 
             added[y] = true
+            appCount = appCount + 1
         end
-        appCount = appCount + 1
     end
 
     if not clear then
