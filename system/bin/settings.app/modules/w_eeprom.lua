@@ -6,6 +6,7 @@ local gui = require("gui")
 local component = require("component")
 local liked = require("liked")
 local bootloader = require("bootloader")
+local programs = require("programs")
 
 local colors = gui_container.colors
 
@@ -30,8 +31,10 @@ local bootLabel = layout:createText(2, 9)
 
 local flashButton = layout:createButton(2, 11, 16, 1, nil, nil, "Flash", true)
 local dumpButton = layout:createButton(2, 13, 16, 1, nil, nil, "Dump", true)
+local editButton = layout:createButton(2, 15, 16, 1, nil, nil, "Edit", true)
 local flashDataButton = layout:createButton(20, 11, 16, 1, nil, nil, "Flash Data", true)
 local dumpDataButton = layout:createButton(20, 13, 16, 1, nil, nil, "Dump Data", true)
+local editDataButton = layout:createButton(20, 15, 16, 1, nil, nil, "Edit Data", true)
 local wipeDataButton = layout:createButton(20 + 18, 13, 16, 1, nil, nil, "Wipe Data", true)
 local makeReadOnlyButton = layout:createButton(20 + 18, 11, 16, 1, nil, nil, "Make R/O", true)
 
@@ -66,6 +69,25 @@ function labelInput:onTextChanged(newlabel)
     end
 end
 
+local function flashCode(data)
+    local maxSize = math.round(component.eeprom.getSize())
+    local fsize = #data
+    if fsize > maxSize then
+        gui.warn(screen, nil, nil, "it is not possible to write a " .. fsize .. " bytes file to an EEPROM with a capacity of " .. maxSize .. " bytes")
+        return true
+    elseif gui.pleaseType(screen, "FLASH", "flash eeprom") then
+        gui_status(screen, nil, nil, "flashing...")
+        local result = {pcall(component.eeprom.set, data)}
+        if not result[1] then
+            gui.warn(screen, nil, nil, tostring(result[2] or "unknown error"))
+            return true
+        elseif result[3] then
+            gui.warn(screen, nil, nil, tostring(result[3] or "unknown error"))
+            return true
+        end
+    end
+end
+
 function flashButton:onClick()
     if component.eeprom then
         if storageRoState then
@@ -73,20 +95,7 @@ function flashButton:onClick()
         elseif gui.pleaseCharge(screen, 20, "flash") then
             local path = gui_filepicker(screen, nil, nil, nil, "lua", false, false)
             if path then
-                local maxSize = math.round(component.eeprom.getSize())
-                local data = fs.readFile(path)
-                local fsize = #data
-                if fsize > maxSize then
-                    gui.warn(screen, nil, nil, "it is not possible to write a " .. fsize .. " bytes file to an EEPROM with a capacity of " .. maxSize .. " bytes")
-                elseif gui.pleaseType(screen, "FLASH", "flash eeprom") then
-                    gui_status(screen, nil, nil, "flashing...")
-                    local result = {pcall(component.eeprom.set, data)}
-                    if not result[1] then
-                        gui.warn(screen, nil, nil, tostring(result[2] or "unknown error"))
-                    elseif result[3] then
-                        gui.warn(screen, nil, nil, tostring(result[3] or "unknown error"))
-                    end
-                end
+                flashCode(assert(fs.readFile(path)))
             end
         end
 
@@ -108,25 +117,32 @@ function dumpButton:onClick()
     end
 end
 
+local function flashData(data)
+    local maxSize = math.round(component.eeprom.getDataSize())
+    
+    local fsize = #data
+    if fsize > maxSize then
+        gui.warn(screen, nil, nil, "it is not possible to write a " .. fsize .. " bytes file to an EEPROM-Data with a capacity of " .. maxSize .. " bytes")
+        return true
+    elseif gui.pleaseType(screen, "FDATA", "flash data") then
+        gui_status(screen, nil, nil, "flashing data...")
+        local result = {pcall(component.eeprom.setData, data)}
+        if not result[1] then
+            gui.warn(screen, nil, nil, tostring(result[2] or "unknown error"))
+            return true
+        elseif result[3] then
+            gui.warn(screen, nil, nil, tostring(result[3] or "unknown error"))
+            return true
+        end
+    end
+end
+
 function flashDataButton:onClick()
     if component.eeprom then
         if gui.pleaseCharge(screen, 20, "flash data") then
             local path = gui_filepicker(screen, nil, nil, nil, "dat", false, false)
             if path then
-                local maxSize = math.round(component.eeprom.getDataSize())
-                local data = fs.readFile(path)
-                local fsize = #data
-                if fsize > maxSize then
-                    gui.warn(screen, nil, nil, "it is not possible to write a " .. fsize .. " bytes file to an EEPROM-Data with a capacity of " .. maxSize .. " bytes")
-                elseif gui.pleaseType(screen, "FDATA", "flash data") then
-                    gui_status(screen, nil, nil, "flashing data...")
-                    local result = {pcall(component.eeprom.setData, data)}
-                    if not result[1] then
-                        gui.warn(screen, nil, nil, tostring(result[2] or "unknown error"))
-                    elseif result[3] then
-                        gui.warn(screen, nil, nil, tostring(result[3] or "unknown error"))
-                    end
-                end
+                flashData(assert(fs.readFile(path)))
             end
         end
 
@@ -177,6 +193,60 @@ function makeReadOnlyButton:onClick()
 
         gRedraw()
         redraw()
+    end
+end
+
+function editButton:onClick()
+    if component.eeprom and gui.pleaseCharge(screen, 20, "flash") then
+        local file = os.tmpname()
+        local data = component.eeprom.get()
+        fs.writeFile(file, data)
+
+        while true do
+            upTask:suspend()
+            assert(programs.execute("edit", screen, nil, file, storageRoState))
+            upTask:resume()
+            local newdata = assert(fs.readFile(file))
+            if data == newdata then
+                break
+            end
+            gRedraw()
+            redraw()
+            if not flashCode(newdata) then
+                break
+            end
+        end
+
+        gRedraw()
+        redraw()
+        fs.remove(file)
+    end
+end
+
+function editDataButton:onClick()
+    if component.eeprom and gui.pleaseCharge(screen, 20, "flash data") then
+        local file = os.tmpname()
+        local data = component.eeprom.getData()
+        fs.writeFile(file, data)
+
+        while true do
+            upTask:suspend()
+            assert(programs.execute("edit", screen, nil, file))
+            upTask:resume()
+            local newdata = assert(fs.readFile(file))
+            if data == newdata then
+                break
+            end
+            gRedraw()
+            redraw()
+            if not flashData(newdata) then
+                break
+            end
+        end
+
+        gRedraw()
+        redraw()
+        fs.remove(file)
     end
 end
 

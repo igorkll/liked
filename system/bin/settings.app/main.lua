@@ -17,7 +17,7 @@ local rx, ry = gpu.getResolution()
 local path = paths.path(calls.call("getPath"))
 local modulesPath = paths.concat(path, "modules")
 
-liked.drawUpBarTask(screen, true, colors.gray)
+local upTask, upRedraw = liked.drawUpBarTask(screen, true, colors.gray)
 
 ------------------------------------
 
@@ -34,9 +34,12 @@ for i, file in ipairs(fs.list(modulesPath) or {}) do
     table.insert(modules, file)
 end
 
-statusWindow:clear(colors.gray)
-statusWindow:set(statusWindow.sizeX, 1, colors.red, colors.white, "X")
-statusWindow:set(2, 1, colors.gray, colors.white, "Settings")
+local function redrawStatus()
+    statusWindow:clear(colors.gray)
+    statusWindow:set(statusWindow.sizeX, 1, colors.red, colors.white, "X")
+    statusWindow:set(2, 1, colors.gray, colors.white, "Settings")
+end
+redrawStatus()
 
 local currentModule, moduleEnd
 local function draw(noReload)
@@ -67,11 +70,14 @@ local function draw(noReload)
 
     local env = bootloader.createEnv()
     env.gRedraw = function ()
+        redrawStatus()
+        upRedraw()
         draw(true)
     end
+    env.upTask = upTask
     
     if not noReload then
-        local code = loadfile(paths.concat(modulesPath, modules[selected]), nil, env)    
+        local code = loadfile(paths.concat(modulesPath, modules[selected]), nil, env)
         currentModule, moduleEnd = code(screen, modulWindow.x, modulWindow.y)
     end
 end
