@@ -427,7 +427,7 @@ function liked.findIcon(name)
         return registry.icons[name]
     end
 
-    local path = bootloader.find(paths.raw_concat("icons", name .. ".t2p"))
+    local path = bootloader.find(paths.concat("icons", name .. ".t2p"))
     cache.cache.findIcon[name] = path
     return path
 end
