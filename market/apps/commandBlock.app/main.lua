@@ -48,6 +48,9 @@ while true do
     if #queue > 0 then
         command = table.remove(queue, 1)
         term:writeLn(command)
+        if #queue == 0 then
+            break
+        end
     else
         command = term:readLn()
     end
