@@ -464,7 +464,7 @@ local function draw(clear)
             if not str or finding == "" then
                 return true
             end
-            return str:find(finding)
+            return str:lower():find(finding:lower())
         end
 
         if (not v.hided or gui_container.devModeStates[screen]) and (isSearch(v.name) or isSearch(v.vendor) or isSearch(v.description)) then
