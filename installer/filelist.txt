@@ -9,10 +9,10 @@
 /system/autoruns/a_mounter.lua
 /system/autoruns/b_powerCheck.lua
 /system/bin/applyReg.lua
-/system/bin/desktop.lua
 /system/bin/edit.lua
 /system/bin/fileinfo.lua
 /system/bin/paint.lua
+/system/bin/shell.lua
 /system/bin/unpackArchive.lua
 /system/bin/about.app/componentlist.lua
 /system/bin/about.app/icon.t2p
@@ -92,6 +92,7 @@
 /system/lib/installer.lua
 /system/lib/liked.lua
 /system/lib/likenet.lua
+/system/lib/move.lua
 /system/lib/palette.lua
 /system/lib/rendUtils.lua
 /system/lib/shareComponent.lua
