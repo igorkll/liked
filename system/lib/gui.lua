@@ -885,7 +885,11 @@ function gui.selectcomponent(screen, cx, cy, types, allowAutoConfirm, control) -
 
                     local ctype = component.type(addr)
                     local clabel = advLabeling.getLabel(addr) or ""
+                    if fs.bootaddress == addr then
+                        clabel = clabel .. " (system)"
+                    end
                     clabel = gui_container.short(clabel, 20)
+
                     table.insert(strs, ctype .. string.rep(" ", 38 - unicode.wlen(ctype) - unicode.wlen(clabel)) .. clabel .. string.rep(" ", (1 - unicode.wlen(clabel)) + unicode.wlen(clabel)) .. addr:sub(1, 8))
                 end
             end
@@ -928,7 +932,7 @@ function gui.selectcomponent(screen, cx, cy, types, allowAutoConfirm, control) -
                     elseif action == 3 then
                         local format = require("format")
 
-                        local tempfile = os.tmpname()
+                        local tempfile = component.type(addr) .. "_" .. math.round(math.random(0, 9999)) .. ".txt"
                         local file = fs.open(tempfile, "wb")
                         local methods = component.methods(addr)
                         local maxMethodLen = 0
