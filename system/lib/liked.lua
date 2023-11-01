@@ -436,7 +436,7 @@ function liked.getActions(path)
                                 table.insert(files, paths.xconcat(path, value[3]))
                                 table.insert(strs, action)
                                 table.insert(actives, not not value[2])
-                                if #files > 5 then --защита от приложений с большим количеством доп действий, так как это может использоваться для защиты от удаления
+                                if #files >= 5 then --защита от приложений с большим количеством доп действий, так как это может использоваться для защиты от удаления
                                     break
                                 end
                             end
