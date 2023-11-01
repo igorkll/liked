@@ -55,7 +55,10 @@ function objclass:uploadEvent(eventData)
                         local x, y = self.gui.window:toRealPos(self.x + 1, self.y + 1)
                         local px, py, sx, sy = gui.contentPos(self.gui.window.screen, x, y, gui.contextStrs(self.strs))
                         local clear = graphic.screenshot(self.gui.window.screen, px, py, sx + 2, sy + 1)
+                        local oldControlLock = self.gui.controlLock
+                        self.gui.controlLock = true
                         local _, num = gui.context(self.gui.window.screen, px, py, self.strs, self.actives)
+                        self.gui.controlLock = oldControlLock
                         clear()
                         if num and self.funcs[num] then
                             self.funcs[num]()
@@ -442,8 +445,14 @@ end
 
 
 function uix:uploadEvent(eventData)
+    if self.controlLock then return end
+
     if not eventData.windowEventData then
         eventData = self.window:uploadEvent(eventData)
+    end
+
+    if self.onEvent then
+        self:onEvent(eventData)
     end
 
     for _, obj in ipairs(self.objs) do
@@ -455,9 +464,11 @@ function uix:draw()
     if self.bgcolor then
         self.window:clear(self.bgcolor)
     end
+
     if self.onRedraw then
         self:onRedraw()
     end
+
     for _, obj in ipairs(self.objs) do
         obj:draw()
     end
@@ -476,6 +487,7 @@ function uix.create(window, bgcolor, style)
     guiobj.objs = {}
     guiobj.selected = false
     guiobj.bgcolor = bgcolor
+    guiobj.controlLock = false
 
     return guiobj
 end
