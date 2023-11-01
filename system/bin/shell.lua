@@ -624,9 +624,9 @@ local function runFunc(func, ...)
     end
 end
 
-local function getActions(icon, nickname, strs, active, sep)
+local function getActions(icon, nickname, astrs, aactive, sep)
+    --[[
     local path = icon.path
-
     if fs.exists(path) and fs.isDirectory(path) then
         local actionPath = paths.concat(path, "actions.cfg") --раньше был lua, который выполнялся, но это слишком небезопастно
         if fs.exists(actionPath) and not fs.isDirectory(actionPath) then
@@ -662,6 +662,24 @@ local function getActions(icon, nickname, strs, active, sep)
                 end
             end
         end
+    end
+    ]]
+    
+    local files, strs, actives = liked.getActions(icon.path)
+    if #files > 0 then
+        table.insert(astrs, true)
+        table.insert(aactive, false)
+
+        local funcs, count = {}, 1
+        for i, file in ipairs(files) do
+            table.insert(astrs, "  " .. strs[i])
+            table.insert(aactive, not not actives[i])
+            funcs[#astrs] = function ()
+                execute(paths.xconcat(icon.path, file), nickname)
+            end
+            count = count + 1
+        end
+        return funcs, count
     end
 end
 

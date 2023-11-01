@@ -152,7 +152,7 @@ function sysinit.init(box)
             screenThreads[screen] = t
         end
     else
-        local desktop = assert(programs.load("desktop")) --подгружаю один раз для экономии ОЗУ, таблица _ENV обшая, так что там нельзя юзать глобалки
+        local desktop = assert(programs.load("shell")) --подгружаю один раз для экономии ОЗУ, таблица _ENV обшая, так что там нельзя юзать глобалки
         local first = true
 
         function runShell(screen)
@@ -169,6 +169,13 @@ function sysinit.init(box)
     
 
     ------------------------------------
+
+    if programs.find("preinit") then
+        local ok, err = programs.execute("preinit")
+        if not ok then
+            event.errLog(err)
+        end
+    end
 
     for index, address in ipairs(screens) do
         runShell(address)

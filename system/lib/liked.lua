@@ -417,6 +417,38 @@ end
 
 --------------------------------------------------------
 
+function liked.getActions(path)
+    local files, strs, actives = {}, {}, {}
+    if fs.exists(path) and fs.isDirectory(path) then
+        local actionPath = paths.concat(path, "actions.cfg") --раньше тут был lua файл, который выполнялся, но это слишком небезопастно
+
+        if fs.exists(actionPath) and not fs.isDirectory(actionPath) then
+            local content = fs.readFile(actionPath)
+            if type(content) == "string" then
+                local result = {pcall(serialization.unserialize, content)}
+                event.yield() --предотващения краша при долгой десереализации
+
+                if result and result[1] and type(result[2]) == "table" then
+                    for _, value in ipairs(result[2]) do
+                        if type(value) == "table" and type(value[1]) == "string" and type(value[3]) == "string" then
+                            local action = value[1]
+                            if unicode.len(action) < 24 then
+                                table.insert(files, paths.xconcat(path, value[3]))
+                                table.insert(strs, action)
+                                table.insert(actives, not not value[2])
+                                if #files > 5 then --защита от приложений с большим количеством доп действий, так как это может использоваться для защиты от удаления
+                                    break
+                                end
+                            end
+                        end
+                    end
+                end
+            end
+        end
+    end
+    return files, strs, actives
+end
+
 function liked.findIcon(name)
     cache.cache.findIcon = cache.cache.findIcon or {}
     if cache.cache.findIcon[name] then
