@@ -932,7 +932,7 @@ function gui.selectcomponent(screen, cx, cy, types, allowAutoConfirm, control) -
                     elseif action == 3 then
                         local format = require("format")
 
-                        local tempfile = component.type(addr) .. "_" .. math.round(math.random(0, 9999)) .. ".txt"
+                        local tempfile = paths.concat("/tmp", component.type(addr) .. "_" .. math.round(math.random(0, 9999)) .. ".txt")
                         local file = fs.open(tempfile, "wb")
                         local methods = component.methods(addr)
                         local maxMethodLen = 0
@@ -944,10 +944,11 @@ function gui.selectcomponent(screen, cx, cy, types, allowAutoConfirm, control) -
                         for name, direct in pairs(methods) do
                             local smart = format.smartConcat()
                             smart.add(1, name)
-                            smart.add(maxMethodLen + 1, " - " .. component.doc(addr, name) .. "\n")
+                            smart.add(maxMethodLen + 1, " - " .. (component.doc(addr, name) or "Undocumented") .. "\n")
                             file.write(smart.get())
                         end
                         file.close()
+
                         local clear = graphic.screenshot(screen)
                         programs.execute("edit", screen, nil, tempfile, true)
                         clear()
