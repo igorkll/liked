@@ -46,7 +46,16 @@ end
 local function getMessageSize(tbl)
     local message = tbl[4]
     if tbl[3] == "text" then
-        message = message .. string.rep(" ", unicode.len(tbl[1]) + (tbl[5] == 0 and 7 or (unicode.len(" " .. tostring(math.floor(tbl[5])) .. " blocks from you: "))))
+        message = message .. unicode.len(tbl[1])
+        if not tbl[5] then
+            message = message .. "(you): "
+        else
+            if tbl[5] == 0 then
+                message = message .. ": "
+            else
+                message = message .. " " .. tostring(math.roundTo(tbl[5], 1)) .. " blocks from you: "
+            end
+        end
     end
 
     if tbl[3] == "text" then
@@ -232,7 +241,6 @@ while true do
     local eventData = {event.pull(0.1)}
     if eventData[1] == "chat_message" then
         local tbl = {table.unpack(eventData, 2)}
-        tbl[5] = math.floor(tbl[5])
         table.insert(history, tbl)
         addNullStrs(tbl)
         

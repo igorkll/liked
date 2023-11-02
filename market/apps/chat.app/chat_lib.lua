@@ -21,7 +21,7 @@ local computer = require("computer")
 local component = require("component")
 local event = require("event")
 local fs = require("filesystem")
-local modem_chat_lib = require("modem_chat_lib")
+local modem_chat_lib = require("modem_chat_lib", true)
 
 local function checkHistory()
     local file = fs.open("/data/bin/chat.app/history.dat", "rb")
