@@ -89,10 +89,10 @@
 /system/lib/format.lua
 /system/lib/gui.lua
 /system/lib/gui_container.lua
+/system/lib/hdd.lua
 /system/lib/installer.lua
 /system/lib/liked.lua
 /system/lib/likenet.lua
-/system/lib/move.lua
 /system/lib/palette.lua
 /system/lib/rendUtils.lua
 /system/lib/shareComponent.lua

@@ -64,13 +64,14 @@ function sysinit.init(box)
     _G.initPal = nil
 
     local gui = require("gui") --нужно подключить заранию чтобы функции записались в calls.loaded
+
+    require("package").hardAutoUnloading = true
+
     local thread = require("thread")
     local liked = require("liked")
     local registry = require("registry")
     local event = require("event")
     local system = require("system")
-
-    require("package").hardAutoUnloading = true
     
     ------------------------------------
 
