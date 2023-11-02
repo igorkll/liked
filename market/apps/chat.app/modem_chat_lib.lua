@@ -1,9 +1,16 @@
 local component = require("component")
 local event = require("event")
 
+local function openPort(addr, port)
+    if component.invoke(addr, "open", port) == nil then --если не удалось открыть порт потому что их было дохрена открыто
+        component.invoke(addr, "close")
+        component.invoke(addr, "open", port)
+    end
+end
+
 local port = 898
 for address in component.list("modem") do
-    component.invoke(address, "open", port)
+    openPort(address, port)
 end
 
 --packed == messageUuid, dist, partNumber, maxPartNumber, part
@@ -22,10 +29,12 @@ local function send(messageUuid, dist, ignoreDevice, ...)
 
     local function sendPart(ignoreDevice, partNumber, maxPartNumber, part)
         for address in component.list("modem") do
-            component.invoke(address, "open", port)
-            local strength = component.invoke(address, "setStrength", math.huge)
+            openPort(address, port)
+            local strengthSetted, strength = pcall(component.invoke, address, "setStrength", math.huge)
             component.invoke(address, "broadcast", port, "modem_chat_lib", messageUuid, dist, partNumber, maxPartNumber, part)
-            component.invoke(address, "setStrength", strength)
+            if strengthSetted then
+                component.invoke(address, "setStrength", strength)
+            end
         end
 
         for address in component.list("tunnel") do

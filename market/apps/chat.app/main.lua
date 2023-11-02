@@ -140,10 +140,14 @@ local function draw()
                 window:setCursor(1, posY)
                 window:write(v[1], colors.white, indexsColors[v[2] + 1])
                 window.sizeX = window.sizeX - 1
-                if v[5] == 0 then
+                if not v[5] then
                     window:write("(you): ", colors.white, colors.black, true)
                 else
-                    window:write(" " .. tostring(math.floor(v[5])) .. " blocks from you: ", colors.white, colors.black, true)
+                    if v[5] == 0 then
+                        window:write(": ", colors.white, colors.black, true)
+                    else
+                        window:write(" " .. tostring(math.roundTo(v[5], 1)) .. " blocks from you: ", colors.white, colors.black, true)                    
+                    end
                 end
                 window.sizeX = window.sizeX + 1
                 if v[3] == "text" then
@@ -204,7 +208,7 @@ end
 draw()
 
 local function send(nickname, messageType, message)
-    local packet = {nickname, colorsApi.red, messageType, message, 0}
+    local packet = {nickname, colorsApi.red, messageType, message}
     chat_lib.send(table.unpack(packet))
     table.insert(history, packet)
     addNullStrs(packet)
