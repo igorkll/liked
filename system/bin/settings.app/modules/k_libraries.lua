@@ -52,6 +52,7 @@ local selector = thread.create(function ()
             if name then
                 package.loaded[name] = nil
                 package.cache[name] = nil
+                _G[name] = nil
             end
         end
 
