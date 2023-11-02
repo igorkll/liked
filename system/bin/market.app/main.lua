@@ -88,8 +88,8 @@ local function modifyList(lst)
         end
     end
 
-    local function download(url)
-        return assert(internet.getInternetFile(url))
+    local function download(path, url)
+        assert(internet.download(url, path))
     end
     
     local function save(path, data)
@@ -124,7 +124,7 @@ local function modifyList(lst)
         local _install = v.install or function (self)
             fs.makeDirectory(self.path)
             for _, name in ipairs(self.files or {"icon.t2p", "main.lua"}) do
-                save(paths.concat(self.path, name), download(self.urlPrimaryPart .. name))
+                download(paths.concat(self.path, name), self.urlPrimaryPart .. name)
             end
         end
         function v.install(self)
@@ -133,7 +133,7 @@ local function modifyList(lst)
                     local info = glibs[name]
                     local path = paths.concat("/data/lib", name .. ".lua")
                     if not fs.exists(path) or registry.libVersions[name] ~= info.version then
-                        save(path, download(info.url))
+                        download(path, info.url)
                         registry.libVersions[name] = info.version
                     end
                 end

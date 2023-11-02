@@ -1429,20 +1429,8 @@ local function doIcon(windowEventData)
                         if not fs.exists(path) or replaceAllow then
                             local clear = saveZone(screen)
                             gui_status(screen, nil, nil, "downloading file...")
-                            local data, err = getInternetFile(url)
+                            liked.assertNoClear(require("internet").download(url, path))
                             clear()
-                            if data then
-                                local file, err = fs.open(path, "wb")
-                                if file then
-                                    file.write(data)
-                                    file.close()
-                                    draw()
-                                else
-                                    warn("save error " .. (err or "unknown error"))
-                                end
-                            else
-                                warn("download error " .. (err or "unknown error"))
-                            end
                         end
                     else
                         warn("invalid name")

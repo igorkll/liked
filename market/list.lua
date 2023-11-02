@@ -13,8 +13,8 @@ local unicode = require("unicode")
 local registry = require("registry")
 local liked = require("liked")
 
-local function download(url)
-    return assert(internet.getInternetFile(url))
+local function download(path, url)
+    assert(internet.download(url, path))
 end
 
 local function save(path, data)
@@ -65,17 +65,17 @@ local list = {
         path = "/data/bin/chat.app",
         install = function(self)
             fs.makeDirectory("/data/bin/chat.app")
-            save("/data/bin/chat.app/main.lua", download(selfurlpart .. "/apps/chat.app/main.lua"))
-            save("/data/bin/chat.app/icon.t2p", download(self.icon))
-            save("/data/bin/chat.app/uninstall.lua", download(selfurlpart .. "/apps/chat.app/uninstall.lua"))
-            save("/data/bin/chat.app/exit.lua", download(selfurlpart .. "/apps/chat.app/exit.lua"))
+            download("/data/bin/chat.app/main.lua", selfurlpart .. "/apps/chat.app/main.lua")
+            download("/data/bin/chat.app/icon.t2p", self.icon)
+            download("/data/bin/chat.app/uninstall.lua", selfurlpart .. "/apps/chat.app/uninstall.lua")
+            download("/data/bin/chat.app/exit.lua", selfurlpart .. "/apps/chat.app/exit.lua")
 
             fs.makeDirectory("/data/autoruns")
-            save("/data/autoruns/chat_demon.lua", download(selfurlpart .. "/apps/chat.app/autorun.lua"))
+            download("/data/autoruns/chat_demon.lua", selfurlpart .. "/apps/chat.app/autorun.lua")
 
             fs.makeDirectory("/data/lib")
-            save("/data/lib/chat_lib.lua", download(selfurlpart .. "/apps/chat.app/chat_lib.lua"))
-            save("/data/lib/modem_chat_lib.lua", download(selfurlpart .. "/apps/chat.app/modem_chat_lib.lua"))
+            download("/data/lib/chat_lib.lua", selfurlpart .. "/apps/chat.app/chat_lib.lua")
+            download("/data/lib/modem_chat_lib.lua", selfurlpart .. "/apps/chat.app/modem_chat_lib.lua")
         
             assert(programs.execute("/data/autoruns/chat_demon.lua"))
         end
@@ -103,10 +103,10 @@ local list = {
         install = function(self)
             fs.makeDirectory("/data/bin/brainfuck.app")
             fs.makeDirectory("/data/lib")
-            save("/data/bin/brainfuck.app/main.lua", download(selfurlpart .. "/apps/brainfuck.app/main.lua"))
-            save("/data/bin/brainfuck.app/icon.t2p", download(self.icon))
-            save("/data/bin/brainfuck.app/uninstall.lua", download(selfurlpart .. "/apps/brainfuck.app/uninstall.lua"))
-            save("/data/lib/brainfuck.lua", download(selfurlpart .. "/apps/brainfuck.app/lib.lua"))
+            download("/data/bin/brainfuck.app/main.lua", selfurlpart .. "/apps/brainfuck.app/main.lua")
+            download("/data/bin/brainfuck.app/icon.t2p", self.icon)
+            download("/data/bin/brainfuck.app/uninstall.lua", selfurlpart .. "/apps/brainfuck.app/uninstall.lua")
+            download("/data/lib/brainfuck.lua", selfurlpart .. "/apps/brainfuck.app/lib.lua")
         end
     },
     {
@@ -144,14 +144,15 @@ local list = {
             local afpxPath = self.path .. "/openOS.afpx"
 
             fs.makeDirectory(self.path)
-            save(self.path .. "/main.lua", download(selfurlpart .. "/apps/openOS.app/main.lua"))
-            save(self.path .. "/uninstall.lua", download(selfurlpart .. "/apps/openOS.app/uninstall.lua"))
-            save(self.path .. "/icon.t2p", download(self.icon))
+            download(self.path .. "/main.lua", selfurlpart .. "/apps/openOS.app/main.lua")
+            download(self.path .. "/uninstall.lua", selfurlpart .. "/apps/openOS.app/uninstall.lua")
+            download(self.path .. "/icon.t2p", self.icon)
 
-            save(self.path .. "/lua5_2.lua", download(selfurlpart .. "/apps/openOS.app/lua5_2.lua"))
-            save(self.path .. "/actions.cfg", download(selfurlpart .. "/apps/openOS.app/actions.cfg"))
+            download(self.path .. "/lua5_2.lua", selfurlpart .. "/apps/openOS.app/lua5_2.lua")
+            download(self.path .. "/actions.cfg", selfurlpart .. "/apps/openOS.app/actions.cfg")
             
-            save(afpxPath, download(selfurlpart .. "/apps/openOS.app/openOS.afpx"))
+            download(afpxPath, selfurlpart .. "/apps/openOS.app/openOS.afpx")
+
             require("archiver").unpack(afpxPath, "/")
             fs.remove(afpxPath)
         end
@@ -172,16 +173,17 @@ local list = {
             local afpxPath = self.path .. "/mineOS.afpx"
 
             fs.makeDirectory(self.path)
-            save(self.path .. "/main.lua", download(selfurlpart .. "/apps/mineOS.app/main.lua"))
-            save(self.path .. "/uninstall.lua", download(selfurlpart .. "/apps/mineOS.app/uninstall.lua"))
-            save(self.path .. "/icon.t2p", download(self.icon))
-            save("/mineOS.lua", download(selfurlpart .. "/apps/mineOS.app/mineOS.lua"))
+            download(self.path .. "/main.lua", selfurlpart .. "/apps/mineOS.app/main.lua")
+            download(self.path .. "/uninstall.lua", selfurlpart .. "/apps/mineOS.app/uninstall.lua")
+            download(self.path .. "/icon.t2p", self.icon)
+            download("/mineOS.lua", selfurlpart .. "/apps/mineOS.app/mineOS.lua")
             
-            save(self.path .. "/lua5_2.lua", download(selfurlpart .. "/apps/mineOS.app/lua5_2.lua"))
-            save(self.path .. "/actions.cfg", download(selfurlpart .. "/apps/mineOS.app/actions.cfg"))
-            save(self.path .. "/LICENSE", download(self.license))
+            download(self.path .. "/lua5_2.lua", selfurlpart .. "/apps/mineOS.app/lua5_2.lua")
+            download(self.path .. "/actions.cfg", selfurlpart .. "/apps/mineOS.app/actions.cfg")
+            download(self.path .. "/LICENSE", self.license)
 
-            save(afpxPath, download(selfurlpart .. "/apps/mineOS.app/mineOS.afpx"))
+            download(afpxPath, selfurlpart .. "/apps/mineOS.app/mineOS.afpx")
+
             require("archiver").unpack(afpxPath, "/")
             fs.remove(afpxPath)
         end
@@ -319,8 +321,8 @@ local list = {
         path = "/data/bin/openbox.app",
         install = function()
             fs.makeDirectory("/data/bin/openbox.app")
-            save("/data/bin/openbox.app/main.lua", download(selfurlpart .. "/apps/openbox.app/main.lua")))
-            save("/data/bin/openbox.app/icon.t2p", download(selfurlpart .. "/apps/openbox.app/icon.t2p")))
+            save("/data/bin/openbox.app/main.lua", selfurlpart .. "/apps/openbox.app/main.lua")))
+            save("/data/bin/openbox.app/icon.t2p", selfurlpart .. "/apps/openbox.app/icon.t2p")))
         end
     }
     ]]
