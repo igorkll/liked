@@ -25,7 +25,7 @@ local function drawInfo()
         currentCount = currentCount + 1
     end
     currentCount = currentCount - 3
-    window:set(2, 2, colors.black, colors.white, "component count: " .. math.floor(system.getCurrentComponentCount()) .. "/" .. system.getMaxComponentCount() .. "    ")
+    window:set(2, 2, colors.black, colors.white, "component count: " .. math.roundTo(system.getCurrentComponentCount(), 2) .. "/" .. system.getMaxComponentCount() .. "    ")
 end
 
 local componentSelector = thread.create(function ()

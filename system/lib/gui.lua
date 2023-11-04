@@ -924,9 +924,9 @@ function gui.selectcomponent(screen, cx, cy, types, allowAutoConfirm, control) -
                     local _, action = gui.context(screen, x, y, strs)
                     clear()
                     if action == 1 then 
-                        clipboard.set(eventData[5], component.type(addr))
+                        clipboard.set(eventData[6], component.type(addr))
                     elseif action == 2 then
-                        clipboard.set(eventData[5], addr)
+                        clipboard.set(eventData[6], addr)
                     elseif action == 3 then
                         local str = gui.input(screen, (cx + 25) - 16, cy + 4, "new name", nil, nil, advLabeling.getLabel(addr))
                         if type(str) == "string" then
