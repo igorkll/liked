@@ -14,6 +14,7 @@ local system = require("system")
 local sound = require("sound")
 local fs = require("filesystem")
 local programs = require("programs")
+local clipboard = require("clipboard")
 local gui = {}
 
 local smartShadowsColors = {
@@ -911,6 +912,8 @@ function gui.selectcomponent(screen, cx, cy, types, allowAutoConfirm, control) -
                     return
                 else
                     local strs = {
+                        "copy name",
+                        "copy address",
                         "set label",
                         "clear label",
                         "view api"
@@ -920,16 +923,20 @@ function gui.selectcomponent(screen, cx, cy, types, allowAutoConfirm, control) -
                     local clear = graphic.screenshot(screen, x, y, sx + 2, sy + 1)
                     local _, action = gui.context(screen, x, y, strs)
                     clear()
-                    if action == 1 then
+                    if action == 1 then 
+                        clipboard.set(eventData[5], component.type(addr))
+                    elseif action == 2 then
+                        clipboard.set(eventData[5], addr)
+                    elseif action == 3 then
                         local str = gui.input(screen, (cx + 25) - 16, cy + 4, "new name", nil, nil, advLabeling.getLabel(addr))
                         if type(str) == "string" then
                             advLabeling.setLabel(addr, str)
                         end
-                    elseif action == 2 then
+                    elseif action == 4 then
                         if gui.yesno(screen, (cx + 25) - 16, cy + 4, "clear label on \"" .. (advLabeling.getLabel(addr) or component.type(addr)) .. "\"?") then
                             advLabeling.setLabel(addr, nil)
                         end
-                    elseif action == 3 then
+                    elseif action == 5 then
                         local format = require("format")
 
                         local tempfile = paths.concat("/tmp", component.type(addr) .. "_" .. math.round(math.random(0, 9999)) .. ".txt")
