@@ -83,6 +83,8 @@
 /system/icons/tmp.t2p
 /system/icons/txt.t2p
 /system/icons/unknown.t2p
+/system/images/switch_off.t2p
+/system/images/switch_on.t2p
 /system/installer/logo.lua
 /system/installer/main.lua
 /system/lib/advLabeling.lua
