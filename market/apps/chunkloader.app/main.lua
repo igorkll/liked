@@ -9,11 +9,16 @@ local system = require("system")
 local paths = require("paths")
 local time = require("time")
 local thread = require("thread")
+local gui = require("gui")
 
 local appfolder = paths.path(system.getSelfScriptPath())
 local colors = gui_container.colors
 
 local screen = ...
+
+local chunkloader = gui.selectcomponent(screen, nil, nil, "chunkloader", true)
+if not chunkloader then return end
+
 local rx, ry = graphic.getResolution(screen)
 local window = graphic.createWindow(screen, 1, 1, rx, ry)
 local layout = uix.create(window, colors.black)
@@ -21,10 +26,10 @@ layout:createAutoUpBar("Chunkloader")
 
 ---------------------------------------
 
-local switch = layout:createBigSwitch((rx / 2) - 7, 3, false)
+local switch = layout:createBigSwitch((rx / 2) - 7, 3, chunkloader.isActive())
 
 function switch:onSwitch()
-    require("computer").beep(self.state and 2000 or 1000)
+    chunkloader.setActive(self.state)
 end
 
 layout:draw()
