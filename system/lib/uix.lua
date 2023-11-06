@@ -215,8 +215,9 @@ function objclass:draw()
             end
         end
     elseif self.type == "big_switch" then
+        self.gui.window:fill(self.x, self.y, self.sizeX, self.sizeY, self.color, 0, " ")
         local x, y = self.gui.window:toRealPos(self.x, self.y)
-        gui_drawimage(self.gui.window.screen, self.state and "/system/images/switch_on.t2p" or "/system/images/switch_off.t2p", x, y)
+        gui_drawimage(self.gui.window.screen, self.state and "/system/images/switch_on.t2p" or "/system/images/switch_off.t2p", x, y, true)
     elseif self.type == "text" then
         if self.text then
             local _, _, bg = self.gui.window:get(self.x, self.y)
@@ -350,12 +351,13 @@ function uix:createSwitch(x, y, state, enableColor, disableColor, pointerColor)
     return obj
 end
 
-function uix:createBigSwitch(x, y, state)
+function uix:createBigSwitch(x, y, state, color)
     local obj = setmetatable({gui = self, type = "big_switch"}, {__index = objclass})
     obj.x = x
     obj.y = y
     obj.sizeX = 16
     obj.sizeY = 16
+    obj.color = color or colors.gray
     obj.state = not not state
 
     table.insert(self.objs, obj)

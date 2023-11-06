@@ -141,3 +141,5 @@ if oldBack ~= 0 or oldFore ~= 0 then --прозрачность, в реальн
         gpu.set(norm(oldX + (x - 1), oldY + (y - 1), buff))
     end
 end
+
+graphic.updateFlag(screen)

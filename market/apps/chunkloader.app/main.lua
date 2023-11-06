@@ -21,7 +21,12 @@ layout:createAutoUpBar("Chunkloader")
 
 ---------------------------------------
 
-layout:createBigSwitch((rx / 2) - 7, 3, false)
+local switch = layout:createBigSwitch((rx / 2) - 7, 3, false)
+
+function switch:onSwitch()
+    require("computer").beep(self.state and 2000 or 1000)
+end
+
 layout:draw()
 
 while true do
