@@ -79,6 +79,7 @@ function objclass:uploadEvent(eventData)
             else
                 self.state = true
                 self:draw()
+                graphic.forceUpdate()
                 if self.autoRelease then
                     os.sleep(0.1)
                     self.state = false

@@ -37,10 +37,24 @@ end
 
 --------------------------------------- compass
 
+local compassCls = {}
+
+function compassCls:onCreate()
+    self.image = layout:createImage(self.x, self.y, compassIcon)
+end
+
+function compassCls:onDestroy()
+    self.image:destroy()
+end
+
+function compassCls:draw()
+    
+end
+
 ---------------------------------------
 
-layout:createCustom(2, 3, watchCls)
-layout:createCustom(50, 3, watchCls)
+layout:createCustom(2, 6, watchCls)
+layout:createCustom(55, 6, compassCls)
 layout:draw()
 
 while true do
