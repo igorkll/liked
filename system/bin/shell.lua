@@ -778,13 +778,16 @@ local function doIcon(windowEventData)
                             end
                             ]]
 
-                            if v.fs.exists("/init.lua") then
-                                table.insert(strs, true)
-                                table.insert(active, false)
+                            table.insert(strs, true)
+                            table.insert(active, false)
 
+                            if v.fs.exists("/init.lua") then
                                 table.insert(strs, "  boot from this disk")
                                 table.insert(active, not registry.disableExternalBoot)
                             end
+
+                            table.insert(strs, "  unmount")
+                            table.insert(active, true)
 
                             --[[
                             if gui_container.isDiskLocked(v.fs.address) and not gui_container.isDiskAccess(v.fs.address) then
@@ -808,6 +811,9 @@ local function doIcon(windowEventData)
 
                             if str == "  open" then
                                 fileDescriptor(v, nil, windowEventData[6])
+                            elseif str == "  unmount" then
+                                fs.umount(v.path)
+                                draw()
                             elseif str == "  create dump" then
                                 local archiver = require("archiver")
                                 local clear = saveBigZone(screen)
@@ -1185,7 +1191,7 @@ local function doIcon(windowEventData)
             end
             local readonly = fs.get(userPath).isReadOnly()
             
-            local strs = {"  paste", "  download file", true, "  new directory", "  new text-file", "  new image"}
+            local strs = {"  paste", "  mount", "  download file", true, "  new directory", "  new text-file", "  new image"}
             local actives = {not not copyObject and not readonly,   not not component.list("internet")() and not readonly,   false,   not readonly,   not readonly,   not readonly}
 
             local creaters = {}
@@ -1230,6 +1236,16 @@ local function doIcon(windowEventData)
                         end
                     else
                         warn("this name is occupied")
+                    end
+                end
+            elseif str == "  mount" then
+                local addr = gui.selectcomponent(screen, nil, nil, "filesystem")
+                if addr then
+                    if addr ~= fs.bootaddress or gui.pleaseType(screen, "MOUNTROOT", "mount root") then
+                        local name = gui.input(screen, nil, nil, "mount name")
+                        if name and name ~= "" and not name:find("%\\") and not name:find("%/") then
+                            fs.mount(component.proxy(addr), paths.concat(userPath, name))
+                        end
                     end
                 end
             elseif str == "  new directory" then --new directory

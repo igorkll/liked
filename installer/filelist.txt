@@ -86,6 +86,8 @@
 /system/installer/logo.lua
 /system/installer/main.lua
 /system/lib/advLabeling.lua
+/system/lib/braille.lua
+/system/lib/draw.lua
 /system/lib/format.lua
 /system/lib/gui.lua
 /system/lib/gui_container.lua

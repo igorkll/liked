@@ -826,6 +826,10 @@ end
 function gui.selectcomponent(screen, cx, cy, types, allowAutoConfirm, control) --=gui_selectcomponent(screen, nil, nil, {"computer"}, true)
     local advLabeling = require("advLabeling")
 
+    if type(types) ~= "table" then
+        types = {types}
+    end
+
     if not cx or not cy then
         cx, cy = graphic.getResolution(screen)
         cx = cx / 2
