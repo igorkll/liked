@@ -335,6 +335,16 @@ local list = {
 
         path = "/data/bin/chunkloader.app",
         urlPrimaryPart = selfurlpart .. "/apps/chunkloader.app/"
+    },
+    {
+        name = "assembler",
+        version = "1",
+        vendor = "logic",
+        description = "the program for managing the assembler",
+        minDiskSpace = 64,
+
+        path = "/data/bin/assembler.app",
+        urlPrimaryPart = selfurlpart .. "/apps/assembler.app/"
     }
     --[[
     openbox = {
