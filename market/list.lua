@@ -323,7 +323,18 @@ local list = {
         minDiskSpace = 64,
 
         path = "/data/bin/toolbox.app",
-        urlPrimaryPart = selfurlpart .. "/apps/toolbox.app/"
+        urlPrimaryPart = selfurlpart .. "/apps/toolbox.app/",
+        files = {"compass.t2p", "watch.t2p", "icon.t2p", "icon.lua"}
+    },
+    {
+        name = "chunkloader",
+        version = "1",
+        vendor = "logic",
+        description = "the program for managing the chankloader",
+        minDiskSpace = 64,
+
+        path = "/data/bin/chunkloader.app",
+        urlPrimaryPart = selfurlpart .. "/apps/chunkloader.app/"
     }
     --[[
     openbox = {

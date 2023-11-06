@@ -46,7 +46,7 @@ function objclass:uploadEvent(eventData)
                 self:draw()
 
                 if self.onDrop then
-                    self:onDrop(eventData[5], eventData[6])
+                    self:onDrop(eventData[5], eventData[6], eventData)
                 end
             end
         elseif not self.state and eventData[1] == "touch" and eventData[3] >= self.x and eventData[4] >= self.y and eventData[3] < self.x + self.sx and eventData[4] < self.y + self.sy then
@@ -88,8 +88,17 @@ function objclass:uploadEvent(eventData)
                 end
                 
                 if self.onClick then
-                    self:onClick(eventData[5], eventData[6])
+                    self:onClick(eventData[5], eventData[6], eventData)
                 end
+            end
+        end
+    elseif self.type == "big_switch" then
+        if eventData[1] == "touch" and eventData[3] >= self.x and eventData[3] < self.x + self.sizeX and eventData[4] >= self.y and eventData[4] < self.y + self.sizeY then
+            self.state = not self.state
+            self:draw()
+
+            if self.onSwitch then
+                self:onSwitch(eventData[5], eventData[6], eventData)
             end
         end
     elseif self.type == "switch" then
@@ -98,7 +107,7 @@ function objclass:uploadEvent(eventData)
             self:draw()
 
             if self.onSwitch then
-                self:onSwitch(eventData[5], eventData[6])
+                self:onSwitch(eventData[5], eventData[6], eventData)
             end
         end
     elseif self.type == "input" then
@@ -205,6 +214,9 @@ function objclass:draw()
                 self.gui.window:set(self.x, self.y, fg, self.pointerColor, "███")
             end
         end
+    elseif self.type == "big_switch" then
+        local x, y = self.gui.window:toRealPos(self.x, self.y)
+        gui_drawimage(self.gui.window.screen, self.state and "/system/images/switch_on.t2p" or "/system/images/switch_off.t2p", x, y)
     elseif self.type == "text" then
         if self.text then
             local _, _, bg = self.gui.window:get(self.x, self.y)
@@ -333,6 +345,18 @@ function uix:createSwitch(x, y, state, enableColor, disableColor, pointerColor)
     obj.enableColor = enableColor or colors.lime
     obj.disableColor = disableColor or colors.gray
     obj.pointerColor = pointerColor or colors.white
+
+    table.insert(self.objs, obj)
+    return obj
+end
+
+function uix:createBigSwitch(x, y, state)
+    local obj = setmetatable({gui = self, type = "big_switch"}, {__index = objclass})
+    obj.x = x
+    obj.y = y
+    obj.sizeX = 16
+    obj.sizeY = 16
+    obj.state = not not state
 
     table.insert(self.objs, obj)
     return obj
