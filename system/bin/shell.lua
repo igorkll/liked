@@ -1192,7 +1192,7 @@ local function doIcon(windowEventData)
             local readonly = fs.get(userPath).isReadOnly()
             
             local strs = {"  paste", "  mount", "  download file", true, "  new directory", "  new text-file", "  new image"}
-            local actives = {not not copyObject and not readonly,   not not component.list("internet")() and not readonly,   false,   not readonly,   not readonly,   not readonly}
+            local actives = {not not copyObject and not readonly, true, not not component.list("internet")() and not readonly,   false,   not readonly,   not readonly,   not readonly}
 
             local creaters = {}
             local creatersI = #strs + 1
@@ -1239,7 +1239,10 @@ local function doIcon(windowEventData)
                     end
                 end
             elseif str == "  mount" then
+                local clear = saveBigZone(screen)
                 local addr = gui.selectcomponent(screen, nil, nil, "filesystem")
+                clear()
+                
                 if addr then
                     if addr ~= fs.bootaddress or gui.pleaseType(screen, "MOUNTROOT", "mount root") then
                         local name = gui.input(screen, nil, nil, "mount name")
@@ -1247,6 +1250,7 @@ local function doIcon(windowEventData)
                             fs.mount(component.proxy(addr), paths.concat(userPath, name))
                         end
                     end
+                    draw()
                 end
             elseif str == "  new directory" then --new directory
                 local clear = saveZone(screen)
