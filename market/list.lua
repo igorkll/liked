@@ -314,6 +314,16 @@ local list = {
 
         path = "/data/bin/printer3d.app",
         urlPrimaryPart = selfurlpart .. "/apps/printer3d.app/"
+    },
+    {
+        name = "toolbox",
+        version = "1",
+        vendor = "logic",
+        description = "contains a minecraft-style watch and compass\nthe compass points north and only works on a tablet",
+        minDiskSpace = 64,
+
+        path = "/data/bin/toolbox.app",
+        urlPrimaryPart = selfurlpart .. "/apps/toolbox.app/"
     }
     --[[
     openbox = {

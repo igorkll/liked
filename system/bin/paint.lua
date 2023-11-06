@@ -367,7 +367,7 @@ while true do
 
                 gclear()
                 local clear = saveZone(screen)
-                local str = calls.call("gui_input", screen, nil, nil, "newX newY", nil, colors.white)
+                local str = gui.input(screen, nil, nil, "newX newY", nil, colors.white, math.round(image.sizeX) .. " " .. math.round(image.sizeY))
                 clear()
                 if str then
                     local x, y = table.unpack(calls.call("split", str, " "))

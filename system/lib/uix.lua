@@ -468,12 +468,11 @@ function uix:createCustom(x, y, cls, ...)
     obj.y = y
     obj.args = {...}
 
-    table.insert(self.objs, obj)
-
     if obj.onCreate then
         obj:onCreate()
     end
 
+    table.insert(self.objs, obj)
     return obj
 end
 

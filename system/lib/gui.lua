@@ -826,7 +826,7 @@ end
 function gui.selectcomponent(screen, cx, cy, types, allowAutoConfirm, control) --=gui_selectcomponent(screen, nil, nil, {"computer"}, true)
     local advLabeling = require("advLabeling")
 
-    if type(types) ~= "table" then
+    if types and type(types) ~= "table" then
         types = {types}
     end
 

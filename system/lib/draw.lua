@@ -2,12 +2,20 @@ local graphic = require("graphic")
 local draw = {}
 
 function draw:dot(x, y, color)
+    x = math.round(x)
+    y = math.round(y)
+
     if self.mode == "full" then
         self.window:set(x, y, color, 0, " ")
     end
 end
 
 function draw:line(x0, y0, x1, y1, color)
+    x0 = math.round(x0)
+    y0 = math.round(y0)
+    x1 = math.round(x1)
+    y1 = math.round(y1)
+
     local sx, sy, e2, err;
     local dx = math.abs(x1 - x0);
     local dy = math.abs(y1 - y0);
