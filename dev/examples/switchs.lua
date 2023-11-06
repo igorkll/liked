@@ -13,22 +13,39 @@ local window = graphic.createWindow(screen, 1, 1, rx, ry)
 local layout = uix.create(window, colors.black)
 layout:createAutoUpBar("Switchs Demo")
 
-local switchs = 0
+local switchsCount = 0
 for x = 2, rx - 5, 8 do
     for y = 3, ry - 1, 2 do
-        switchs = switchs + 1
+        switchsCount = switchsCount + 1
     end
 end
 
+local switchs = {}
 local index = 0
 for x = 2, rx - 5, 8 do
-    for y = 3, ry - 1, 2 do
+    for y = 3, ry - 3, 2 do
         index = index + 1
-        local r, g, b = colorslib.hsvToRgb(math.round(math.map(index, 0, switchs, 0, 255)), 255, 255)
+        local r, g, b = colorslib.hsvToRgb(math.round(math.map(index, 0, switchsCount, 0, 255)), 255, 255)
         local color = colorslib.blend(r, g, b)
-        local color2 = colorslib.blend(r * 0.3, g * 0.3, b * 0.3)
-        layout:createSwitch(x, y, math.random() > 0.5, color, color2)
+        local color2 = colorslib.blend(r * 0.5, g * 0.5, b * 0.5)
+        table.insert(switchs, layout:createSwitch(x, y, math.random() > 0.5, color, color2))
     end
+end
+
+local enableAll = layout:createButton(2, ry - 1, 16, 1, nil, nil, "Enable ALL")
+function enableAll:onDrop()
+    for _, switch in ipairs(switchs) do
+        switch.state = true
+    end
+    layout:draw()
+end
+
+local disableAll = layout:createButton(rx - 16, ry - 1, 16, 1, nil, nil, "Disable ALL")
+function disableAll:onDrop()
+    for _, switch in ipairs(switchs) do
+        switch.state = false
+    end
+    layout:draw()
 end
 
 layout:draw()

@@ -16,6 +16,10 @@ uix.styles = {
 local objclass = {}
 
 function objclass:destroy()
+    if self.onDestroy then
+        self:onDestroy()
+    end
+    
     for i = #self.gui.objs, 1, -1 do
         if self.gui.objs[i] == self then
             table.remove(self.gui.objs, i)
@@ -453,6 +457,25 @@ function uix:createDrawer(x, y, func)
     return obj
 end
 
+function uix:createCustom(x, y, cls, ...)
+    if not cls.destroy then
+        cls.destroy = objclass.destroy
+    end
+
+    local obj = setmetatable({gui = self}, {__index = cls})
+    obj.x = x
+    obj.y = y
+    obj.args = {...}
+
+    table.insert(self.objs, obj)
+
+    if obj.onCreate then
+        obj:onCreate()
+    end
+
+    return obj
+end
+
 
 
 function uix:uploadEvent(eventData)
@@ -467,7 +490,9 @@ function uix:uploadEvent(eventData)
     end
 
     for _, obj in ipairs(self.objs) do
-        obj:uploadEvent(eventData)
+        if obj.uploadEvent then
+            obj:uploadEvent(eventData)
+        end
     end
 end
 
@@ -481,13 +506,17 @@ function uix:draw()
     end
 
     for _, obj in ipairs(self.objs) do
-        obj:draw()
+        if obj.draw then
+            obj:draw()
+        end
     end
 end
 
 function uix:stop()
     for _, obj in ipairs(self.objs) do
-        obj:stop()
+        if obj.stop then
+            obj:stop()
+        end
     end
 end
 
