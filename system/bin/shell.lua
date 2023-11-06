@@ -440,7 +440,7 @@ local function folderBack()
 end
 
 local timerEnable = true
-table.insert(listens, event.timer(5, function()
+table.insert(listens, event.timer(10, function()
     if not timerEnable or screenSaver then return end
     drawStatus()
 end, math.huge))

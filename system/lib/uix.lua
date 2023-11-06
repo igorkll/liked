@@ -277,6 +277,17 @@ function uix:createUpBar(title, withoutFill, bgcolor) --working only in fullscre
     return obj
 end
 
+function uix:createAutoUpBar(title, withoutFill, bgcolor)
+    local upbar = self:createUpBar(title, withoutFill, bgcolor)
+
+    local baseTh = thread.current()
+    function upbar.close:onClick()
+        baseTh:kill()
+    end
+
+    return upbar
+end
+
 function uix:createLabel(x, y, sx, sy, back, fore, text)
     local obj = setmetatable({gui = self, type = "label"}, {__index = objclass})
     obj.x = x
