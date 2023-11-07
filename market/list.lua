@@ -139,7 +139,7 @@ local list = {
         description = "configures dualboot between openOS and liked",
         minDiskSpace = 1024,
 
-        path = "/vendor/bin/openOS.app",
+        path = "/vendor/apps/openOS.app",
         install = function(self)
             local afpxPath = self.path .. "/openOS.afpx"
 
@@ -168,7 +168,7 @@ local list = {
         minColorDepth = 8,
         minRam = 768 * 2, --минимальный обьем ОЗУ для установки
 
-        path = "/vendor/bin/mineOS.app",
+        path = "/vendor/apps/mineOS.app",
         install = function(self)
             local afpxPath = self.path .. "/mineOS.afpx"
 
