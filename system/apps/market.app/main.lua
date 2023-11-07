@@ -280,7 +280,8 @@ local function applicationLabel(data, x, y)
             end
         end
         
-        gui_drawimage(screen, custImg or img, applabel:toRealPos(2, 2))
+        local x, y = applabel:toRealPos(2, 2)
+        gui_drawimage(screen, custImg or img, x, y, true)
     end
     
     if data.icon then
