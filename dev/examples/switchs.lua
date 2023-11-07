@@ -33,7 +33,7 @@ for x = 2, rx - 5, 8 do
 end
 
 local enableAll = layout:createButton(2, ry - 1, 16, 1, nil, nil, "Enable ALL")
-function enableAll:onDrop()
+function enableAll:onClick()
     for _, switch in ipairs(switchs) do
         switch.state = true
     end
@@ -41,9 +41,25 @@ function enableAll:onDrop()
 end
 
 local disableAll = layout:createButton(rx - 16, ry - 1, 16, 1, nil, nil, "Disable ALL")
-function disableAll:onDrop()
+function disableAll:onClick()
     for _, switch in ipairs(switchs) do
         switch.state = false
+    end
+    layout:draw()
+end
+
+local randomizeAll = layout:createButton(2 + 20, ry - 1, 16, 1, nil, nil, "Randomize ALL")
+function randomizeAll:onClick()
+    for _, switch in ipairs(switchs) do
+        switch.state = math.random() > 0.5
+    end
+    layout:draw()
+end
+
+local invertAll = layout:createButton((rx - 16) - 20, ry - 1, 16, 1, nil, nil, "invert ALL")
+function invertAll:onClick()
+    for _, switch in ipairs(switchs) do
+        switch.state = not switch.state
     end
     layout:draw()
 end
