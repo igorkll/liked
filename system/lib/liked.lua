@@ -30,51 +30,56 @@ function liked.doFormats(appPath, path, delete)
     if not registry.data.gui_container.editable then registry.data.gui_container.editable = {} end
     if not registry.data.gui_container.openVia then registry.data.gui_container.openVia = {} end
     
+    local function rmData(extension, key)
+        registry.data.gui_container[key][extension] = nil
+        gui_container[key][extension] = nil
+    end
+
     for extension, formatInfo in pairs(data) do
         if delete then
-            registry.data.gui_container.knownExps[extension] = nil
+            rmData(extension, "knownExps")
         else
             registry.data.gui_container.knownExps[extension] = true
         end
 
         if formatInfo.color then
             if delete then
-                registry.data.gui_container.typecolors[extension] = nil
+                rmData(extension, "typecolors")
             else
                 registry.data.gui_container.typecolors[extension] = formatInfo.color
             end
         else
-            registry.data.gui_container.typecolors[extension] = nil
+            rmData(extension, "typecolors")
         end
 
         if formatInfo.name then
             if delete then
-                registry.data.gui_container.typenames[extension] = nil
+                rmData(extension, "typenames")
             else
                 registry.data.gui_container.typenames[extension] = formatInfo.name
             end
         else
-            registry.data.gui_container.typenames[extension] = nil
+            rmData(extension, "typenames")
         end
 
         if formatInfo.editable then
             if delete then
-                registry.data.gui_container.editable[extension] = nil
+                rmData(extension, "editable")
             else
                 registry.data.gui_container.editable[extension] = true
             end
         else
-            registry.data.gui_container.editable[extension] = nil
+            rmData(extension, "editable")
         end
 
         if formatInfo.program then
             if delete then
-                registry.data.gui_container.openVia[extension] = nil
+                rmData(extension, "openVia")
             else
                 registry.data.gui_container.openVia[extension] = paths.xconcat(appPath, formatInfo.program)
             end
         else
-            registry.data.gui_container.openVia[extension] = nil
+            rmData(extension, "openVia")
         end
 
         if formatInfo.icon then
