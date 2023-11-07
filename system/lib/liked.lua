@@ -171,10 +171,10 @@ function liked.loadApp(name, screen, nickname)
 
     return function (...)
         appStart()
-        local result = log{xpcall(mainCode, debug.traceback, screen, nickname, ...)}
+        local result = log{thread.stub(mainCode, screen, nickname, ...)}
         appEnd()
         if exitCode then
-            local result2 = log{xpcall(exitCode, debug.traceback, screen, nickname, ...)}
+            local result2 = log{thread.stub(exitCode, screen, nickname, ...)}
             if not result2[1] then
                 if result[1] then
                     result[1] = false

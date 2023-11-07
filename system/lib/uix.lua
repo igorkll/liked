@@ -303,9 +303,8 @@ end
 function uix:createAutoUpBar(title, withoutFill, bgcolor)
     local upbar = self:createUpBar(title, withoutFill, bgcolor)
 
-    local baseTh = thread.current()
     function upbar.close:onClick()
-        baseTh:kill()
+        os.exit()
     end
 
     return upbar
