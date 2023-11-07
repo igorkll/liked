@@ -20,6 +20,10 @@ local liked = {}
 
 --------------------------------------------------------
 
+function liked.postInstall()
+    
+end
+
 function liked.uninstall(screen, nickname, path)
     local unregPath = paths.concat(path, "unreg.reg")
     if fs.exists(unregPath) and not fs.isDirectory(unregPath) then

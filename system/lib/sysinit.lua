@@ -14,6 +14,7 @@ function sysinit.init(box)
     table.insert(programs.paths, "/data/userdata/apps")
     table.insert(programs.paths, "/data/apps")
     table.insert(programs.paths, "/system/apps")
+    table.insert(programs.paths, "/vendor/apps")
 
     ------------------------------------
 

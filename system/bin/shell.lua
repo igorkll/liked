@@ -34,15 +34,13 @@ local defaultUserPath = "/data/userdata/"
 local wallpaperPath = "/data/wallpaper.t2p"
 local userPath = gui_container.getUserRoot(screen)
 local iconsPath = userPath
+
 local iconAliases = {
-    "/system/bin/about.app",
-    "/system/bin/settings.app",
-    "/system/bin/update.app",
-    "/system/bin/market.app"
 }
 local userPaths = {
-    "/vendor/bin",
-    "/data/bin",
+    "/system/apps",
+    "/vendor/apps",
+    "/data/apps",
 }
 
 fs.makeDirectory(userPath)

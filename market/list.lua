@@ -39,7 +39,7 @@ local list = {
         description = "allows you to control nanobots using a wireless modem",
         minDiskSpace = 64,
 
-        path = "/data/bin/nanomachines.app",
+        path = "/data/apps/nanomachines.app",
         urlPrimaryPart = selfurlpart .. "/apps/nanomachines.app/",
         files = {"main.lua", "icon.t2p"}
     },
@@ -50,7 +50,7 @@ local list = {
         description = "classic snake ported from computercraft",
         minDiskSpace = 64,
 
-        path = "/data/bin/worm.app",
+        path = "/data/apps/worm.app",
         urlPrimaryPart = selfurlpart .. "/apps/worm.app/",
         files = {"main.lua", "icon.t2p"}
     },
@@ -62,13 +62,13 @@ local list = {
         description = "allows you to exchange messages, pictures and files between computers via a network card",
         minDiskSpace = 64,
 
-        path = "/data/bin/chat.app",
+        path = "/data/apps/chat.app",
         install = function(self)
-            fs.makeDirectory("/data/bin/chat.app")
-            download("/data/bin/chat.app/main.lua", selfurlpart .. "/apps/chat.app/main.lua")
-            download("/data/bin/chat.app/icon.t2p", self.icon)
-            download("/data/bin/chat.app/uninstall.lua", selfurlpart .. "/apps/chat.app/uninstall.lua")
-            download("/data/bin/chat.app/exit.lua", selfurlpart .. "/apps/chat.app/exit.lua")
+            fs.makeDirectory("/data/apps/chat.app")
+            download("/data/apps/chat.app/main.lua", selfurlpart .. "/apps/chat.app/main.lua")
+            download("/data/apps/chat.app/icon.t2p", self.icon)
+            download("/data/apps/chat.app/uninstall.lua", selfurlpart .. "/apps/chat.app/uninstall.lua")
+            download("/data/apps/chat.app/exit.lua", selfurlpart .. "/apps/chat.app/exit.lua")
 
             fs.makeDirectory("/data/autoruns")
             download("/data/autoruns/chat_demon.lua", selfurlpart .. "/apps/chat.app/autorun.lua")
@@ -87,7 +87,7 @@ local list = {
         description = "allows you to connect to IRC chats via an Internet card.\nprogram ported from openOS",
         minDiskSpace = 64,
 
-        path = "/data/bin/irc.app",
+        path = "/data/apps/irc.app",
         urlPrimaryPart = selfurlpart .. "/apps/irc.app/",
         files = {"main.lua", "icon.t2p"}
     },
@@ -99,13 +99,13 @@ local list = {
         description = "brainfuck code interpreter",
         minDiskSpace = 64,
 
-        path = "/data/bin/brainfuck.app",
+        path = "/data/apps/brainfuck.app",
         install = function(self)
-            fs.makeDirectory("/data/bin/brainfuck.app")
+            fs.makeDirectory("/data/apps/brainfuck.app")
             fs.makeDirectory("/data/lib")
-            download("/data/bin/brainfuck.app/main.lua", selfurlpart .. "/apps/brainfuck.app/main.lua")
-            download("/data/bin/brainfuck.app/icon.t2p", self.icon)
-            download("/data/bin/brainfuck.app/uninstall.lua", selfurlpart .. "/apps/brainfuck.app/uninstall.lua")
+            download("/data/apps/brainfuck.app/main.lua", selfurlpart .. "/apps/brainfuck.app/main.lua")
+            download("/data/apps/brainfuck.app/icon.t2p", self.icon)
+            download("/data/apps/brainfuck.app/uninstall.lua", selfurlpart .. "/apps/brainfuck.app/uninstall.lua")
             download("/data/lib/brainfuck.lua", selfurlpart .. "/apps/brainfuck.app/lib.lua")
         end
     },
@@ -116,7 +116,7 @@ local list = {
         description = "lua code interpreter",
         minDiskSpace = 64,
 
-        path = "/data/bin/lua.app",
+        path = "/data/apps/lua.app",
         urlPrimaryPart = selfurlpart .. "/apps/lua.app/",
         files = {"main.lua", "icon.t2p"}
     },
@@ -127,7 +127,7 @@ local list = {
         description = "allows you to view computer events",
         minDiskSpace = 64,
 
-        path = "/data/bin/events.app",
+        path = "/data/apps/events.app",
         urlPrimaryPart = selfurlpart .. "/apps/events.app/",
         files = {"main.lua", "icon.t2p"}
     },
@@ -195,7 +195,7 @@ local list = {
         description = "blow up your computer!",
         minDiskSpace = 64,
 
-        path = "/data/bin/explode.app",
+        path = "/data/apps/explode.app",
         urlPrimaryPart = selfurlpart .. "/apps/explode.app/",
         files = {"main.lua", "icon.t2p"}
     },
@@ -207,7 +207,7 @@ local list = {
         minDiskSpace = 64,
         minColorDepth = 4,
 
-        path = "/data/bin/camera.app",
+        path = "/data/apps/camera.app",
         urlPrimaryPart = selfurlpart .. "/apps/camera.app/",
         files = {"main.lua", "icon.t2p", "reg.reg", "unreg.reg"}
     },
@@ -218,7 +218,7 @@ local list = {
         description = "the game was ported from computercraft",
         minDiskSpace = 64,
 
-        path = "/data/bin/redirection.app",
+        path = "/data/apps/redirection.app",
         urlPrimaryPart = selfurlpart .. "/apps/redirection.app/",
         files = (function ()
             local files = {"main.lua", "icon.t2p", "select.lua", "actions.cfg"}
@@ -235,7 +235,7 @@ local list = {
         description = "the game was ported from computercraft",
         minDiskSpace = 64,
 
-        path = "/data/bin/adventure.app",
+        path = "/data/apps/adventure.app",
         urlPrimaryPart = selfurlpart .. "/apps/adventure.app/" --часть url к которой будут присираться разные имена файлов для скачивания(обязателен / на конце)
     },
     {
@@ -245,7 +245,7 @@ local list = {
         description = "a program for controlling a magnet that attracts resources(tractor_beam-upgrade)",
         minDiskSpace = 64,
 
-        path = "/data/bin/magnet.app",
+        path = "/data/apps/magnet.app",
         urlPrimaryPart = selfurlpart .. "/apps/magnet.app/", --часть url к которой будут присираться разные имена файлов для скачивания(обязателен / на конце)
         files = {"main.lua", "icon.t2p", "uninstall.lua"}
     },
@@ -256,7 +256,7 @@ local list = {
         description = "a program for controlling a piston(piston-upgrade)",
         minDiskSpace = 64,
 
-        path = "/data/bin/piston.app",
+        path = "/data/apps/piston.app",
         urlPrimaryPart = selfurlpart .. "/apps/piston.app/", --часть url к которой будут присираться разные имена файлов для скачивания(обязателен / на конце)
         files = {"main.lua", "icon.t2p", "uninstall.lua"}
     },
@@ -267,7 +267,7 @@ local list = {
         description = "allows you to control the command block from the computer\nto work, you need to activate \"enableCommandBlockDriver\" in the mod config, then re-enter the game\nthe command block must be connected to the computer by means of an adapter\nit also allows you to run cbs scripts (text files with a queue of commands)",
         minDiskSpace = 64,
 
-        path = "/data/bin/commandBlock.app",
+        path = "/data/apps/commandBlock.app",
         urlPrimaryPart = selfurlpart .. "/apps/commandBlock.app/",
         files = {"main.lua", "icon.t2p", "reg.reg", "unreg.reg"},
     },
@@ -278,7 +278,7 @@ local list = {
         description = "the program for the radio from the OpenFM addon\nit has a number of built-in radio stations",
         minDiskSpace = 64,
 
-        path = "/data/bin/openFM.app",
+        path = "/data/apps/openFM.app",
         urlPrimaryPart = selfurlpart .. "/apps/openFM.app/",
         files = {"main.lua", "icon.t2p", "list.txt"}
     },
@@ -289,7 +289,7 @@ local list = {
         description = "allows you to record music in dfpwm format to tapes from computronics\nallows you to dump the tape to dfpwm file\nyou can also record music directly over the Internet",
         minDiskSpace = 64,
 
-        path = "/data/bin/tape.app",
+        path = "/data/apps/tape.app",
         urlPrimaryPart = selfurlpart .. "/apps/tape.app/",
         files = {"main.lua", "icon.t2p", "reg.reg", "unreg.reg"}
     },
@@ -301,7 +301,7 @@ local list = {
         minDiskSpace = 64,
         libs = {"vec"},
 
-        path = "/data/bin/hologram.app",
+        path = "/data/apps/hologram.app",
         urlPrimaryPart = selfurlpart .. "/apps/hologram.app/",
         files = {"main.lua", "icon.t2p", "holograms/fireworks.lua", "holograms/fullbox.lua", "holograms/tree.lua"}
     },
@@ -312,7 +312,7 @@ local list = {
         description = "allows you to open/edit/save and print 3D models in 3dm format.\nThe model format is fully compatible with the \"3D Print\" program in MineOS.\nalso, models in this format can be found on the Internet without any problems.\nvisualization on a holographic projector is supported",
         minDiskSpace = 64,
 
-        path = "/data/bin/printer3d.app",
+        path = "/data/apps/printer3d.app",
         urlPrimaryPart = selfurlpart .. "/apps/printer3d.app/"
     },
     {
@@ -322,9 +322,9 @@ local list = {
         description = "contains a minecraft-style watch and compass\nthe compass points north and only works on a tablet",
         minDiskSpace = 64,
 
-        path = "/data/bin/toolbox.app",
+        path = "/data/apps/toolbox.app",
         urlPrimaryPart = selfurlpart .. "/apps/toolbox.app/",
-        files = {"compass.t2p", "watch.t2p", "icon.t2p", "icon.lua"}
+        files = {"compass.t2p", "watch.t2p", "icon.t2p", "main.lua"}
     },
     {
         name = "chunkloader",
@@ -333,7 +333,7 @@ local list = {
         description = "the program for managing the chankloader",
         minDiskSpace = 64,
 
-        path = "/data/bin/chunkloader.app",
+        path = "/data/apps/chunkloader.app",
         urlPrimaryPart = selfurlpart .. "/apps/chunkloader.app/"
     },
     {
@@ -343,17 +343,17 @@ local list = {
         description = "the program for managing the assembler",
         minDiskSpace = 64,
 
-        path = "/data/bin/assembler.app",
+        path = "/data/apps/assembler.app",
         urlPrimaryPart = selfurlpart .. "/apps/assembler.app/"
     }
     --[[
     openbox = {
         hided = true,
-        path = "/data/bin/openbox.app",
+        path = "/data/apps/openbox.app",
         install = function()
-            fs.makeDirectory("/data/bin/openbox.app")
-            save("/data/bin/openbox.app/main.lua", selfurlpart .. "/apps/openbox.app/main.lua")))
-            save("/data/bin/openbox.app/icon.t2p", selfurlpart .. "/apps/openbox.app/icon.t2p")))
+            fs.makeDirectory("/data/apps/openbox.app")
+            save("/data/apps/openbox.app/main.lua", selfurlpart .. "/apps/openbox.app/main.lua")))
+            save("/data/apps/openbox.app/icon.t2p", selfurlpart .. "/apps/openbox.app/icon.t2p")))
         end
     }
     ]]
