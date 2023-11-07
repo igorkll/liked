@@ -145,11 +145,7 @@ local function modifyList(lst)
                 v:postInstall()
             end
 
-            local regPath = paths.concat(self.path, "reg.reg")
-            if fs.exists(regPath) and not fs.isDirectory(regPath) then
-                liked.assert(screen, programs.execute("applyReg", screen, nickname, regPath, true))
-            end
-            registry.save()
+            liked.postInstall(screen, nickname, self.path)
         end
     
         if not v.icon and v.urlPrimaryPart then

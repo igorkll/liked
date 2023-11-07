@@ -20,8 +20,18 @@ local liked = {}
 
 --------------------------------------------------------
 
-function liked.postInstall()
-    
+function liked.postInstall(screen, nickname, path)
+    local regPath = paths.concat(path, "reg.reg")
+    if fs.exists(regPath) and not fs.isDirectory(regPath) then
+        liked.assert(screen, programs.execute("applyReg", screen, nickname, regPath, true))
+    end
+
+    local installPath = paths.concat(path, "install.lua")
+    if fs.exists(installPath) and not fs.isDirectory(installPath) then
+        liked.assert(screen, programs.execute(installPath, screen, nickname))
+    end
+
+    registry.save()
 end
 
 function liked.uninstall(screen, nickname, path)
@@ -36,6 +46,8 @@ function liked.uninstall(screen, nickname, path)
     else
         liked.assert(screen, fs.remove(path))
     end
+
+    registry.save()
 end
 
 --------------------------------------------------------
@@ -87,14 +99,18 @@ function liked.loadApp(name, screen, nickname)
         exitFile = nil
     end
 
-    --------------------------------
 
     local paletteFile = paths.concat(paths.path(path), "palette.plt")
     if not isMain or not fs.exists(paletteFile) or fs.isDirectory(paletteFile) then
         paletteFile = nil
     end
 
-    --------------------------------
+
+    local configFile = paths.concat(paths.path(path), "config.cfg")
+    if not isMain or not fs.exists(configFile) or fs.isDirectory(configFile) then
+        configFile = nil
+    end
+
 
     local mainCode, err = programs.load(path)
     if not mainCode then return nil, err end
@@ -105,6 +121,12 @@ function liked.loadApp(name, screen, nickname)
     if exitFile then
         exitCode, err = programs.load(exitFile)
         if not exitCode then return nil, err end
+    end
+
+    local configTbl
+    if configFile then
+        configTbl, err = serialization.load(configFile)
+        if not configTbl then return nil, err end
     end
 
     --------------------------------
@@ -123,7 +145,9 @@ function liked.loadApp(name, screen, nickname)
     end
 
     local function appEnd()
-        if paletteFile then
+        if configTbl.restoreGraphic then
+            log{pcall(gui_initScreen, screen)}
+        elseif paletteFile or configTbl.restorePalette then
             log{pcall(system_applyTheme, _G.initPalPath, screen)}
         end
     end
