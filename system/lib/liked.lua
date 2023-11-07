@@ -23,10 +23,13 @@ local liked = {}
 function liked.doFormats(appPath, path, delete)
     local data = assert(serialization.load(path))
 
-    if not registry.data.gui_container then
-        registry.data.gui_container = {}
-    end
-
+    if not registry.data.gui_container then registry.data.gui_container = {} end
+    if not registry.data.gui_container.knownExps then registry.data.gui_container.knownExps = {} end
+    if not registry.data.gui_container.typecolors then registry.data.gui_container.typecolors = {} end
+    if not registry.data.gui_container.typenames then registry.data.gui_container.typenames = {} end
+    if not registry.data.gui_container.editable then registry.data.gui_container.editable = {} end
+    if not registry.data.gui_container.openVia then registry.data.gui_container.openVia = {} end
+    
     for extension, formatInfo in pairs(data) do
         if delete then
             registry.data.gui_container.knownExps[extension] = nil
