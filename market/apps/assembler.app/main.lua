@@ -57,7 +57,7 @@ local function reloadStatus()
             local value = allow / 100
             if progressBar.value ~= value then
                 progressBar.value = value
-                progressBar.value:draw()
+                progressBar:draw()
             end
         end
     end
