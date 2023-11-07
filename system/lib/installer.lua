@@ -90,6 +90,7 @@ function installer.install_likedbox(vfs)
         "wallpapers",
         "icons",
         "bin",
+        "apps",
         "autoruns",
         "recoveryScript.lua",
         "registry.dat",
