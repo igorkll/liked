@@ -49,7 +49,7 @@ local function reloadStatus()
         local value = 0
         if progressBar.value ~= value then
             progressBar.value = value
-            progressBar.value:draw()
+            progressBar:draw()
         end
     else
         allowStart = false

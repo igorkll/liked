@@ -266,7 +266,7 @@ function objclass:draw()
         local _, _, bg = self.gui.window:get(self.x, self.y)
         local pos = math.round(math.map(self.value, 0, 1, 0, self.sx))
         self.gui.window:fill(self.x + pos, self.y, self.sx - pos, 1, bg, self.back, gui_container.chars.splitLine)
-        self.gui.window:fill(self.x, self.y, pos, 1, bg, self.fore, gui_container.chars.splitLine) 
+        self.gui.window:fill(self.x, self.y, pos, 1, bg, self.fore, gui_container.chars.wideSplitLine) 
     end
 end
 
