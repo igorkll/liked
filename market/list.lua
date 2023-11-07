@@ -209,7 +209,7 @@ local list = {
 
         path = "/data/apps/camera.app",
         urlPrimaryPart = selfurlpart .. "/apps/camera.app/",
-        files = {"main.lua", "icon.t2p", "reg.reg", "unreg.reg"}
+        files = {"main.lua", "icon.t2p", "formats.cfg"}
     },
     {
         name = "redirection",
@@ -269,7 +269,7 @@ local list = {
 
         path = "/data/apps/commandBlock.app",
         urlPrimaryPart = selfurlpart .. "/apps/commandBlock.app/",
-        files = {"main.lua", "icon.t2p", "reg.reg", "unreg.reg"},
+        files = {"main.lua", "icon.t2p", "formats.cfg"},
     },
     {
         name = "openFM",
@@ -291,7 +291,7 @@ local list = {
 
         path = "/data/apps/tape.app",
         urlPrimaryPart = selfurlpart .. "/apps/tape.app/",
-        files = {"main.lua", "icon.t2p", "reg.reg", "unreg.reg"}
+        files = {"main.lua", "icon.t2p", "formats.cfg"}
     },
     {
         name = "hologram",

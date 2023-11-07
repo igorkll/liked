@@ -20,6 +20,75 @@ local liked = {}
 
 --------------------------------------------------------
 
+function liked.doFormats(appPath, path, delete)
+    local data = assert(serialization.load(path))
+
+    if not registry.data.gui_container then
+        registry.data.gui_container = {}
+    end
+
+    for extension, formatInfo in pairs(data) do
+        if delete then
+            registry.data.gui_container.knownExps[extension] = nil
+        else
+            registry.data.gui_container.knownExps[extension] = true
+        end
+
+        if formatInfo.color then
+            if delete then
+                registry.data.gui_container.typecolors[extension] = nil
+            else
+                registry.data.gui_container.typecolors[extension] = formatInfo.color
+            end
+        else
+            registry.data.gui_container.typecolors[extension] = nil
+        end
+
+        if formatInfo.name then
+            if delete then
+                registry.data.gui_container.typenames[extension] = nil
+            else
+                registry.data.gui_container.typenames[extension] = formatInfo.name
+            end
+        else
+            registry.data.gui_container.typenames[extension] = nil
+        end
+
+        if formatInfo.editable then
+            if delete then
+                registry.data.gui_container.editable[extension] = nil
+            else
+                registry.data.gui_container.editable[extension] = true
+            end
+        else
+            registry.data.gui_container.editable[extension] = nil
+        end
+
+        if formatInfo.program then
+            if delete then
+                registry.data.gui_container.openVia[extension] = nil
+            else
+                registry.data.gui_container.openVia[extension] = paths.xconcat(appPath, formatInfo.program)
+            end
+        else
+            registry.data.gui_container.openVia[extension] = nil
+        end
+
+        if formatInfo.icon then
+            if delete then
+                registry.data.icons[extension] = nil
+            else
+                registry.data.icons[extension] = paths.xconcat(appPath, formatInfo.icon)
+            end
+        end
+    end
+
+    registry.save()
+    gui_container.refresh()
+end
+
+--------------------------------------------------------
+
 function liked.isUninstallScript(path)
     return fs.exists(paths.concat(path, "uninstall.lua"))
 end
@@ -43,18 +112,29 @@ function liked.postInstall(screen, nickname, path)
         liked.assert(screen, programs.execute("applyReg", screen, nickname, regPath, true))
     end
 
+    local formatsPath = paths.concat(path, "formats.cfg")
+    if fs.exists(formatsPath) and not fs.isDirectory(formatsPath) then
+        liked.doFormats(path, formatsPath)
+    end
+
     local installPath = paths.concat(path, "install.lua")
     if fs.exists(installPath) and not fs.isDirectory(installPath) then
         liked.assert(screen, programs.execute(installPath, screen, nickname))
     end
 
     registry.save()
+    return true
 end
 
 function liked.uninstall(screen, nickname, path)
     local unregPath = paths.concat(path, "unreg.reg")
     if fs.exists(unregPath) and not fs.isDirectory(unregPath) then
         liked.assert(screen, programs.execute("applyReg", screen, nickname, unregPath, true))
+    end
+
+    local formatsPath = paths.concat(path, "formats.cfg")
+    if fs.exists(formatsPath) and not fs.isDirectory(formatsPath) then
+        liked.doFormats(path, formatsPath, true)
     end
 
     local uninstallPath = paths.concat(path, "uninstall.lua")
@@ -65,6 +145,7 @@ function liked.uninstall(screen, nickname, path)
     end
 
     registry.save()
+    return true
 end
 
 --------------------------------------------------------
