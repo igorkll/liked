@@ -26,7 +26,7 @@ layout:createAutoUpBar("Chunkloader")
 
 ---------------------------------------
 
-local switch = layout:createBigSwitch((rx / 2) - 7, 3, chunkloader.isActive())
+local switch = layout:createBigSwitch((rx / 2) - 7, 6, chunkloader.isActive())
 
 function switch:onSwitch()
     chunkloader.setActive(self.state)

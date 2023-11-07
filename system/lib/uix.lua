@@ -262,6 +262,10 @@ function objclass:draw()
         gui_drawimage(self.gui.window.screen, self.path, x, y, self.wallpaperMode)
     elseif self.type == "drawer" then
         self:func(self.gui.window:toRealPos(self.x, self.y))
+    elseif self.type == "progress" then
+        local pos = math.round(math.map(self.value, 0, 1, 0, self.sx))
+        self.gui.window:fill(self.x + pos, self.y, self.sx - pos, 1, self.back, 0, gui_container.chars.splitLine)
+        self.gui.window:fill(self.x, self.y, pos, 1, self.fore, 0, gui_container.chars.splitLine) 
     end
 end
 
@@ -479,6 +483,19 @@ function uix:createDrawer(x, y, func)
     obj.x = x
     obj.y = y
     obj.func = func
+
+    table.insert(self.objs, obj)
+    return obj
+end
+
+function uix:createProgress(x, y, sx, fore, back, value)
+    local obj = setmetatable({gui = self, type = "progress"}, {__index = objclass})
+    obj.x = x
+    obj.y = y
+    obj.sx = sx
+    obj.fore = fore or colors.lime
+    obj.back = back or colors.blue
+    obj.value = value or 0
 
     table.insert(self.objs, obj)
     return obj

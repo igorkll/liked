@@ -990,6 +990,13 @@ function gui.selectcomponent(screen, cx, cy, types, allowAutoConfirm, control) -
     end
 end
 
+function gui.selectcomponentProxy(screen, cx, cy, types, allowAutoConfirm)
+    local addr = gui.selectcomponent(screen, cx, cy, types, allowAutoConfirm)
+    if addr then
+        return component.proxy(addr)
+    end
+end
+
 function gui.checkPassword(screen, cx, cy, disableStartSound, diskAddress)
     local regData = require("liked").getRegistry(diskAddress)
     if regData then
