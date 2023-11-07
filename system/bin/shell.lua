@@ -192,24 +192,6 @@ local function drawWallpaper()
     end
 end
 
-local function isUninstallScript(icon)
-    return fs.exists(paths.concat(icon.path, "uninstall.lua"))
-end
-
-local function isUninstallAvailable(icon)
-    if icon.readonly then return false end
-    --if isDev() then return true end
-
-    local data = "/data/"
-    local vendor = "/vendor/"
-    if icon.path:sub(1, #data) == data then --вы всегда можете удалить приложения из data
-        return true
-    elseif icon.path:sub(1, #vendor) == vendor then --вы можете удалить приложения вендора только если в нем есть uninstall.lua
-        return isUninstallScript(icon)
-    end
-    return false
-end
-
 local function drawBar(lUserPath, iconsCount)
     local curentPath = gui_container.toUserPath(screen, userPath)
 
@@ -926,7 +908,7 @@ local function doIcon(windowEventData)
                             local screenshotY = 4
                             local strs, active =
                             {"  open", true, "  uninstall"},
-                            {true, false, isUninstallAvailable(v)}
+                            {true, false, liked.isUninstallAvailable(v.path)}
 
                             local licensePath = loadLicense(v)
                             if licensePath then
@@ -978,7 +960,7 @@ local function doIcon(windowEventData)
 
                             if v.exp == "app" then
                                 table.insert(strs, "  uninstall")
-                                table.insert(active, isUninstallAvailable(v))
+                                table.insert(active, liked.isUninstallAvailable(v.path))
                             end
                             
                             table.insert(strs, "  remove")

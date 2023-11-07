@@ -20,6 +20,23 @@ local liked = {}
 
 --------------------------------------------------------
 
+function liked.isUninstallScript(path)
+    return fs.exists(paths.concat(path, "uninstall.lua"))
+end
+
+function liked.isUninstallAvailable(path)
+    if fs.isReadOnly(path) then return false end
+
+    local data = "/data/"
+    local vendor = "/vendor/"
+    if path:sub(1, #data) == data then --вы всегда можете удалить приложения из data
+        return true
+    elseif path:sub(1, #vendor) == vendor then --вы можете удалить приложения вендора только если в нем есть uninstall.lua
+        return liked.isUninstallScript(path)
+    end
+    return false
+end
+
 function liked.postInstall(screen, nickname, path)
     local regPath = paths.concat(path, "reg.reg")
     if fs.exists(regPath) and not fs.isDirectory(regPath) then
@@ -123,7 +140,7 @@ function liked.loadApp(name, screen, nickname)
         if not exitCode then return nil, err end
     end
 
-    local configTbl
+    local configTbl = {}
     if configFile then
         configTbl, err = serialization.load(configFile)
         if not configTbl then return nil, err end
