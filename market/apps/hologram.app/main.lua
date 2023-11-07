@@ -197,7 +197,7 @@ for name, path in pairs(hologramsPaths) do
             agent.th:resume()
         else
             holo.clear()
-            agent.current = name
+            agent.current = nil
             if agent.th then
                 agent.th:kill()
                 agent.th = nil
