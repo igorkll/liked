@@ -27,7 +27,7 @@ for x = 2, rx - 5, 8 do
         index = index + 1
         local r, g, b = colorslib.hsvToRgb(math.round(math.map(index, 0, switchsCount, 0, 255)), 255, 255)
         local color = colorslib.blend(r, g, b)
-        local color2 = colorslib.blend(r * 0.5, g * 0.5, b * 0.5)
+        local color2 = colorslib.blend(r * 0.3, g * 0.3, b * 0.3)
         table.insert(switchs, layout:createSwitch(x, y, math.random() > 0.5, color, color2))
     end
 end
