@@ -163,6 +163,7 @@ local function drawStatus()
     if not lockFlag then
         statusWindow:set(1, 1, contextMenuOpen == 1 and colors.blue or colors.lightGray, colors.white, " OS ")
         statusWindow:set(6, 1, contextMenuOpen == 2 and colors.blue or colors.lightGray, colors.white, " FILES ")
+        statusWindow:set(14, 1, contextMenuOpen == 3 and colors.blue or colors.lightGray, colors.white, " TYPES ")
     end
 end
 
@@ -247,32 +248,13 @@ local function draw(old, check) --вызывает все перерисовки
         userPath = defaultUserPath
     end
 
-    local iconsCount = 0
     local tbl = fs.list(userPath)
     if not tbl then
         userPath = gui_container.getUserRoot(screen)
         return draw()
     end
-    for i, v in ipairs(tbl) do
-        iconsCount = iconsCount + 1
-    end
 
-    if paths.canonical(userPath) == paths.canonical(iconsPath) then
-        for i, v in ipairs(iconAliases) do
-            if fs.exists(v) then
-                iconsCount = iconsCount + 1
-            end
-        end
-        for i, path in ipairs(userPaths) do
-            for i, file in ipairs(fs.list(path) or {}) do
-                iconsCount = iconsCount + 1
-            end
-        end
-    end
     local lUserPath = paths.canonical(userPath)
-    if not startIconsPoss[lUserPath] or startIconsPoss[lUserPath] > iconsCount then
-        startIconsPoss[lUserPath] = old or 1
-    end
     if check and startIconsPoss[lUserPath] == (old or 1) then
         return
     end
@@ -320,7 +302,21 @@ local function draw(old, check) --вызывает все перерисовки
             icondata.labelReadonly = fs.isLabelReadOnly(path)
         end
 
-        table.insert(icons, icondata)
+        if iconmode == 0 or not paths.equals(userPath, defaultUserPath) then
+            table.insert(icons, icondata)
+        elseif iconmode == 3 then
+            if isFs then
+                table.insert(icons, icondata)
+            end
+        elseif iconmode == 2 then
+            if not customPath and not isFs then
+                table.insert(icons, icondata)
+            end
+        elseif iconmode == 1 then
+            if customPath then
+                table.insert(icons, icondata)
+            end
+        end
     end
 
     local tbl = {}
@@ -338,10 +334,14 @@ local function draw(old, check) --вызывает все перерисовки
         end
     end
 
-    if iconmode == 0 or iconmode == 1 then
-        for i, v in ipairs(fs.list(userPath)) do
-            table.insert(tbl, {v})
-        end
+    for i, v in ipairs(fs.list(userPath)) do
+        table.insert(tbl, {v})
+    end
+
+    local iconsCount = #tbl
+
+    if not startIconsPoss[lUserPath] or startIconsPoss[lUserPath] > iconsCount then
+        startIconsPoss[lUserPath] = old or 1
     end
 
     for i, v in ipairs(tbl) do
@@ -1624,6 +1624,21 @@ desktopTh = thread.create(function ()
                 end
                 
                 drawStatus()
+            elseif statusWindowEventData[4] == 1 and statusWindowEventData[3] >= 14 and statusWindowEventData[3] <= 20 then
+                contextMenuOpen = 3
+                drawStatus()
+                local actives = {true, true, true, true}
+                if iconmode then
+                    actives[iconmode + 1] = false
+                end
+                local str, num = gui.contextAuto(screen, 16, 2, {"All", "Applications", "Files", "Disks"}, actives)
+                contextMenuOpen = nil
+                if num then
+                    iconmode = num - 1
+                    draw()
+                else
+                    drawStatus()
+                end
             end
         end
 
