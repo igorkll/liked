@@ -4,20 +4,43 @@ local uix = require("uix")
 local screen = ...
 local guimanager = {}
 local layout = uix.createAuto(screen, "Card Writer")
-local layout2 = uix.createAuto(screen, "LOLZ")
 
-do
-    local button = layout:createButton(2, 3, 16, 1, nil, nil, "layout 2")
-    function button:onClick()
-        guimanager.select(layout2)
+local score = 1
+local lblScore = layout:createLabel(10, 3, 5, 1)
+function lblScore.update()
+    lblScore.text = tostring(score)
+    lblScore:draw()
+end
+
+local subScore = layout:createButton(6, 3, 3, 1, nil, nil, "-")
+function subScore:onClick()
+    score = score - 1
+    if score < 1 then
+        score = 1
+    else
+        lblScore.update()
     end
 end
 
-do
-    local button = layout2:createButton(2, 3, 16, 1, nil, nil, "layout 1")
-    function button:onClick()
-        guimanager.select(layout)
+local subScore2 = layout:createButton(2, 3, 4, 1, nil, nil, "--")
+function subScore2:onClick()
+    score = score - 10
+    if score < 1 then
+        score = 1
     end
+    lblScore.update()
+end
+
+local addScore = layout:createButton(16, 3, 3, 1, nil, nil, "+")
+function addScore:onClick()
+    score = score + 1
+    lblScore.update()
+end
+
+local addScore2 = layout:createButton(16 + 3, 3, 4, 1, nil, nil, "++")
+function addScore2:onClick()
+    score = score + 10
+    lblScore.update()
 end
 
 uix.loop(guimanager, layout)
