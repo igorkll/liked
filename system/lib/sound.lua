@@ -7,4 +7,5 @@ function sound.warn()
     computer.beep(100)
 end
 
+sound.unloadable = true
 return sound
