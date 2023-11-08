@@ -1,3 +1,4 @@
+/system/branch.cfg
 /system/LICENSE
 /system/logo.lua
 /system/main.lua
@@ -60,9 +61,7 @@
 /system/icons/badicon.t2p
 /system/icons/bootdevice.t2p
 /system/icons/cfg.t2p
-/system/icons/computer.t2p
 /system/icons/dat.t2p
-/system/icons/eeprom.t2p
 /system/icons/fdd.t2p
 /system/icons/file.t2p
 /system/icons/folder.t2p
@@ -75,11 +74,8 @@
 /system/icons/plt.t2p
 /system/icons/raid.t2p
 /system/icons/reg.t2p
-/system/icons/robot.t2p
 /system/icons/scrsv.t2p
-/system/icons/server.t2p
 /system/icons/t2p.t2p
-/system/icons/tablet.t2p
 /system/icons/tmp.t2p
 /system/icons/txt.t2p
 /system/icons/unknown.t2p
