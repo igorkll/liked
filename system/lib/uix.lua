@@ -272,6 +272,24 @@ end
 
 ----------------------------------
 
+function uix.doColor(obj, back, fore)
+    obj.back = back or colors.white
+    obj.fore = fore
+    if not obj.fore then
+        if back then
+            if back == colors.white then
+                obj.fore = colors.black
+            else
+                obj.fore = colors.white
+            end
+        else
+            obj.fore = colors.gray
+        end
+    end
+end
+
+----------------------------------
+
 function uix:createUpBar(title, withoutFill, bgcolor) --working only in fullscreen ui
     local obj = setmetatable({gui = self, type = "up"}, {__index = objclass})
     obj.title = title
@@ -316,9 +334,8 @@ function uix:createLabel(x, y, sx, sy, back, fore, text)
     obj.y = y
     obj.sx = sx
     obj.sy = sy
-    obj.back = back or colors.white
-    obj.fore = fore or colors.gray
     obj.text = text
+    uix.doColor(obj, back, fore)
 
     table.insert(self.objs, obj)
     return obj
@@ -330,13 +347,12 @@ function uix:createButton(x, y, sx, sy, back, fore, text, autoRelease)
     obj.y = y
     obj.sx = sx
     obj.sy = sy
-    obj.back = back or colors.white
-    obj.fore = fore or colors.gray
-    obj.back2 = obj.fore
-    obj.fore2 = obj.back
     obj.text = text
     obj.state = false
     obj.autoRelease = not not autoRelease
+    uix.doColor(obj, back, fore)
+    obj.back2 = obj.fore
+    obj.fore2 = obj.back
 
     table.insert(self.objs, obj)
     return obj
@@ -384,24 +400,12 @@ function uix:createInput(x, y, sx, back, fore, hidden, default, syntax, maxlen, 
     obj.x = x
     obj.y = y
     obj.sx = sx
-    obj.back = back or colors.white
-    obj.fore = fore
-    if not obj.fore then
-        if back then
-            if back == colors.white then
-                obj.fore = colors.black
-            else
-                obj.fore = colors.white
-            end
-        else
-            obj.fore = colors.gray
-        end
-    end
     obj.hidden = hidden
     obj.default = default
     obj.syntax = syntax
     obj.titleColor = titleColor or colors.lightGray
     obj.title = title
+    uix.doColor(obj, back, fore)
 
     if self.style == "round" then
         obj.read = self.window:readNoDraw(x + 1, y, sx - 2, obj.back, obj.fore, preStr, hidden, default, true, syntax)

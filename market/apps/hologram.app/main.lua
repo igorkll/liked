@@ -154,12 +154,13 @@ layout:createButton(crx + 1, ry - 9, 21, 1, nil, nil, "reset rotation").onClick 
 end
 
 for i = 1, colorsCount do
-    layout:createButton(rx - 16, (i * 2) + 1, 16, 1, holo.getPaletteColor(i), colors.gray, "color" .. i, true).onClick = function (self)
+    layout:createButton(rx - 16, (i * 2) + 1, 16, 1, holo.getPaletteColor(i), nil, "color" .. i, true).onClick = function (self)
         local color = gui.selectfullcolor(screen)
         if color then
             holo.setPaletteColor(i, color)
-            self.back = color
-            self.fore2 = color
+            uix.doColor(self, color)
+            self.back2 = self.fore
+            self.fore2 = self.back
         end
         layout:draw()
     end
