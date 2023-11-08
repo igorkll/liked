@@ -158,7 +158,11 @@ while true do
                 end
                 ]]
 
-                reader.setBuffer(paths.hideExtension(strs[pos]))
+                if exp then
+                    reader.setBuffer(paths.hideExtension(strs[pos]))
+                else
+                    reader.setBuffer(strs[pos])
+                end
                 reader.redraw()
             else
                 local lpath = paths.concat(userPath, strs[pos])
