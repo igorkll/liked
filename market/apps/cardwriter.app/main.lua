@@ -54,7 +54,7 @@ layout:createText(2, 7, nil, "make readonly:")
 local readonly = layout:createSwitch(17, 7, false, uix.colors.red)
 
 local color = colorlib.cyan
-local selectColor = layout:createButton(2, 5, 16, 1, uix.colors.cyan, nil, "Select Color")
+local selectColor = layout:createButton(2, 5, 16, 1, uix.colors.cyan, nil, "Select Color", true)
 function selectColor:onClick()
     local newcolor = gui.selectcolor(screen)
     if newcolor then
