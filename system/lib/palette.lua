@@ -22,7 +22,7 @@ function palette.fromFile(screen, path)
 end
 
 function palette.system(screen)
-    pcall(system_applyTheme, _G.initPalPath, screen)
+    palette.fromFile(screen, _G.initPalPath)
 end
 
 function palette.blackWhite(screen)

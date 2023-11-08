@@ -44,8 +44,8 @@ gui_container.newCreate = { --структура {name, exp, allowCheck(), creat
     {
         "system-dump",
         "afpx",
-        function ()
-            return true
+        function (path)
+            return not fs.isReadOnly(path)
         end,
         function (path)
             return require("archiver").pack("/mnt/root", path)

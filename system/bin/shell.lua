@@ -1159,7 +1159,7 @@ local function doIcon(windowEventData)
                     table.insert(strs, "  new " .. obj[1])
                     
                     local allowCreate = false
-                    local result = {pcall(check)}
+                    local result = {pcall(check, userPath)}
                     if not result[1] then
                         warn(result[2])
                     else

@@ -34,7 +34,9 @@ local function applyOnScreen(address)
     if graphic.maxDepth(address) ~= 1 then
         local count = 0
         for i, v in ipairs(colors) do
-            graphic.setPaletteColor(address, count, v)
+            if graphic.getPaletteColor(address, count) ~= v then
+                graphic.setPaletteColor(address, count, v)
+            end
             count = count + 1
         end
     end
