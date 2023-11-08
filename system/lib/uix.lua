@@ -385,7 +385,18 @@ function uix:createInput(x, y, sx, back, fore, hidden, default, syntax, maxlen, 
     obj.y = y
     obj.sx = sx
     obj.back = back or colors.white
-    obj.fore = fore or colors.gray
+    obj.fore = fore
+    if not obj.fore then
+        if back then
+            if back == colors.white then
+                obj.fore = colors.black
+            else
+                obj.fore = colors.white
+            end
+        else
+            obj.fore = colors.gray
+        end
+    end
     obj.hidden = hidden
     obj.default = default
     obj.syntax = syntax

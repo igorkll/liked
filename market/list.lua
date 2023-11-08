@@ -344,18 +344,17 @@ local list = {
 
         path = "/data/apps/assembler.app",
         urlPrimaryPart = selfurlpart .. "/apps/assembler.app/"
+    },
+    {
+        name = "cardwriter",
+        version = "1",
+        vendor = "logic",
+        description = "program for write cards and EEPROM's via card writer",
+        minDiskSpace = 64,
+
+        path = "/data/apps/cardwriter.app",
+        urlPrimaryPart = selfurlpart .. "/apps/cardwriter.app/"
     }
-    --[[
-    openbox = {
-        hided = true,
-        path = "/data/apps/openbox.app",
-        install = function()
-            fs.makeDirectory("/data/apps/openbox.app")
-            save("/data/apps/openbox.app/main.lua", selfurlpart .. "/apps/openbox.app/main.lua")))
-            save("/data/apps/openbox.app/icon.t2p", selfurlpart .. "/apps/openbox.app/icon.t2p")))
-        end
-    }
-    ]]
 }
 
 list.libs = {
