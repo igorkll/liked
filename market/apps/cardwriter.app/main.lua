@@ -86,7 +86,7 @@ local clrDataFile = layout:createButton(25, 5, 6, 1, nil, nil, "clr")
 function clrDataFile:onClick()
     data = nil
     dataLed.back = uix.colors.gray
-    layout:draw()
+    dataLed:draw()
 end
 
 local writeButton = layout:createButton(2, 9, 8, 1, nil, nil, "Write", true)
