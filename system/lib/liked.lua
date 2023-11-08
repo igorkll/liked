@@ -17,6 +17,7 @@ local thread = require("thread")
 local cache = require("cache")
 local natives = require("natives")
 local colorlib = require("colors")
+local palette = require("palette")
 local liked = {}
 
 local colors = gui_container.colors
@@ -265,7 +266,7 @@ function liked.loadApp(name, screen, nickname)
 
     local function appStart()
         if paletteFile then
-            log{pcall(system_applyTheme, paletteFile, screen)}
+            palette.fromFile(screen, paletteFile)
         end
     end
 
@@ -273,7 +274,7 @@ function liked.loadApp(name, screen, nickname)
         if configTbl.restoreGraphic then
             log{pcall(gui_initScreen, screen)}
         elseif paletteFile or configTbl.restorePalette then
-            log{pcall(system_applyTheme, _G.initPalPath, screen)}
+            palette.system(screen)
         end
     end
 

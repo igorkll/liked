@@ -17,5 +17,17 @@ function palette.set(screen, pal)
     end
 end
 
+function palette.fromFile(screen, path)
+    pcall(system_applyTheme, path, screen)
+end
+
+function palette.system(screen)
+    pcall(system_applyTheme, _G.initPalPath, screen)
+end
+
+function palette.blackWhite(screen)
+    palette.fromFile(screen, "/system/t3default.plt")
+end
+
 palette.unloadable = true
 return palette
