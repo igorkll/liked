@@ -70,7 +70,7 @@ local labelInput = layout:createInput(25, 3, 48, nil, nil, false, "key card", ni
 local dataLed = layout:createLabel(32, 5, 3, 1, uix.colors.gray)
 
 local data
-local loadDataFile = layout:createButton(19, 5, 6, 1, nil, nil, "load")
+local loadDataFile = layout:createButton(19, 5, 6, 1, nil, nil, "load", true)
 function loadDataFile:onClick()
     local file = gui_filepicker(screen)
     if file then
@@ -89,11 +89,17 @@ function clrDataFile:onClick()
     layout:draw()
 end
 
-local writeButton = layout:createButton(2, 9, 8, 1, nil, nil, "Write")
+local writeButton = layout:createButton(2, 9, 8, 1, nil, nil, "Write", true)
 function writeButton:onClick()
+    gui.status(screen, nil, nil, "writing...")
     for i = 1, count do
-        cardwriter.write(data or "", labelInput.reader.getBuffer(), not not readonly.state, color)
+        local ok, err = cardwriter.write(data or "", labelInput.read.getBuffer(), not not readonly.state, color)
+        if not ok then
+            gui.warn(screen, nil, nil, err or "unknown error")
+            break
+        end
     end
+    layout:draw()
 end
 
 uix.loop(guimanager, layout)
