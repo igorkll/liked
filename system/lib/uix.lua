@@ -4,8 +4,9 @@ local gui = require("gui")
 local graphic = require("graphic")
 local liked = require("liked")
 local thread = require("thread")
+local event = require("event")
 local colors = gui_container.colors
-local uix = {}
+local uix = {colors = colors}
 uix.styles = {
     "round",
     "square"
@@ -302,8 +303,10 @@ function uix:createUpBar(title, withoutFill, bgcolor) --working only in fullscre
     --тут некоректно использовать таймер, так как он продолжит тикать даже если система приостановит программу для работы screensaver
     obj.thread = thread.create(function ()
         while true do
-            obj:draw()
             os.sleep(10)
+            if not self.gui.active then
+                obj:draw()
+            end
         end
     end)
     obj.thread:resume()
@@ -537,7 +540,7 @@ end
 
 
 function uix:uploadEvent(eventData)
-    if self.controlLock then return end
+    if self.controlLock or not self.active then return end
 
     if not eventData.windowEventData then
         eventData = self.window:uploadEvent(eventData)
@@ -555,6 +558,10 @@ function uix:uploadEvent(eventData)
 end
 
 function uix:draw()
+    if not self.active then
+        return
+    end
+
     if self.bgcolor then
         self.window:clear(self.bgcolor)
     end
@@ -586,8 +593,39 @@ function uix.create(window, bgcolor, style)
     guiobj.selected = false
     guiobj.bgcolor = bgcolor
     guiobj.controlLock = false
+    guiobj.active = true
 
     return guiobj
+end
+
+function uix.createAuto(screen, title, bgcolor, style)
+    local rx, ry = graphic.getResolution(screen)
+    local window = graphic.createWindow(screen, 1, 1, rx, ry)
+    local guiobj = uix.create(window, bgcolor or colors.black, style)
+    guiobj:createAutoUpBar(title)
+    return guiobj
+end
+
+function uix.loop(guimanager, layout, func)
+    function guimanager.select(newLayout)
+        if layout then
+            layout.active = false
+        end
+        layout = newLayout
+        if layout then
+            layout.active = true
+        end
+        layout:draw()
+    end
+
+    layout:draw()
+    while true do
+        local eventData = {event.pull()}
+        layout:uploadEvent(eventData)
+        if func then
+            func(eventData)
+        end
+    end
 end
 
 uix.unloadable = true
