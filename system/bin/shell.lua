@@ -1631,7 +1631,7 @@ desktopTh = thread.create(function ()
                 if iconmode then
                     actives[iconmode + 1] = false
                 end
-                local str, num = gui.contextAuto(screen, 16, 2, {"All", "Applications", "Files", "Disks"}, actives)
+                local str, num = gui.contextAuto(screen, 15, 2, {"All", "Applications", "Files", "Disks"}, actives)
                 contextMenuOpen = nil
                 if num then
                     iconmode = num - 1
