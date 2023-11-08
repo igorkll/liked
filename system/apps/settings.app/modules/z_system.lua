@@ -39,7 +39,7 @@ local altBranch = branch == "main" and "dev" or "main"
 local function update(newBranch)
     if not lastVersion then
         gui_warn(screen, nil, nil, "connection problems\ntry again later")
-    elseif gui.pleaseCharge(screen, 80, "update") and gui.pleaseSpace(screen, 512, "update") and gui_checkPassword(screen) and gui_yesno(screen, nil, nil, newBranch and "ATTENTION, changing the branch can break the system!" or (currentVersion ~= lastVersion and "start updating now?" or "you have the latest version installed. do you still want to start updating?")) then
+    elseif gui.pleaseCharge(screen, 80, "update") and gui.pleaseSpace(screen, 512, "update") and gui_checkPassword(screen) and gui_yesno(screen, nil, nil, newBranch and "ATTENTION, changing the branch can break the system! are you sure?" or (currentVersion ~= lastVersion and "start updating now?" or "you have the latest version installed. do you still want to start updating?")) then
         --assert(fs.copy(paths.concat(system.getSelfScriptPath(), "../update_init.lua"), "/init.lua"))
 
         local installdata = {branch = newBranch or branch}
