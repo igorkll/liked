@@ -451,7 +451,7 @@ function gui.input(screen, cx, cy, str, hidden, backgroundColor, default, disabl
     end
 
     local function drawCancel()
-        window:set(2, 7, colors.orange, colors.white, " cancel ")
+        window:set(2, 7, colors.brown, colors.white, " cancel ")
         graphic.forceUpdate()
         event.sleep(0.1)
     end
@@ -1064,7 +1064,7 @@ function gui.yesno(screen, cx, cy, str, backgroundColor)
                 noShadow()
                 return true
             elseif windowEventData[4] == 7 and windowEventData[3] >= 2 and windowEventData[3] <= (2 + 3) then
-                window:set(2, 7, colors.orange, colors.white, " no ")
+                window:set(2, 7, colors.brown, colors.white, " no ")
                 graphic.forceUpdate()
                 event.sleep(0.1)
                 noShadow()

@@ -188,7 +188,7 @@ function sysinit.init(box)
     event.hyperListen(function (eventType, cuuid, ctype)
         if ctype == "screen" then
             if eventType == "component_added" then
-                if not screenThreads[cuuid] then
+                if not screenThreads[cuuid] and graphic.findGpuAddress(cuuid) then
                     runShell(cuuid)
                 end
             elseif eventType == "component_removed" then

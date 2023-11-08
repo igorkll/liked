@@ -83,6 +83,10 @@ function liked.doFormats(appPath, path, delete)
         end
 
         if formatInfo.icon then
+            if not registry.data.icons then
+                registry.data.icons = {}
+            end
+            
             if delete then
                 registry.data.icons[extension] = nil
             else
