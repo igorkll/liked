@@ -93,7 +93,7 @@ local list = {
     },
     {
         name = "brainfuck",
-        version = "1",
+        version = "2",
         vendor = "logic",
         description = "brainfuck code interpreter",
         minDiskSpace = 64,
