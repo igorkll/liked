@@ -18,6 +18,18 @@ local cache = require("cache")
 local natives = require("natives")
 local liked = {}
 
+function liked.getBranch()
+    if fs.exists("/system/branch.cfg") then
+        return fs.readFile("/system/branch.cfg")
+    else
+        return "main"
+    end
+end
+
+function liked.setBranch(branch)
+    return fs.writeFile("/system/branch.cfg", branch or "main")
+end
+
 --------------------------------------------------------
 
 function liked.doFormats(appPath, path, delete)
@@ -86,7 +98,7 @@ function liked.doFormats(appPath, path, delete)
             if not registry.data.icons then
                 registry.data.icons = {}
             end
-            
+
             if delete then
                 registry.data.icons[extension] = nil
             else
@@ -163,7 +175,7 @@ end
 --------------------------------------------------------
 
 function liked.lastVersion()
-    local lastVersion, err = require("internet").getInternetFile("https://raw.githubusercontent.com/igorkll/liked/" .. registry.branch .. "/system/version.cfg")
+    local lastVersion, err = require("internet").getInternetFile("https://raw.githubusercontent.com/igorkll/liked/" .. liked.getBranch() .. "/system/version.cfg")
     if not lastVersion then return nil, err end
     return tonumber(lastVersion) or -1
 end

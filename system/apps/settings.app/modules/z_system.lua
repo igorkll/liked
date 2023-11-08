@@ -33,13 +33,16 @@ layout:createButton(2, 7, 16, 1, nil, nil, "WIPE USER DATA", true).onClick = fun
     layout:draw()
 end
 
-layout:createButton(20, 7, 16, 1, nil, nil, "UPDATE SYSTEM", true).onClick = function ()
+local branch = liked.getBranch()
+local altBranch = branch == "main" and "dev" or "main"
+
+local function update(newBranch)
     if not lastVersion then
         gui_warn(screen, nil, nil, "connection problems\ntry again later")
     elseif gui.pleaseCharge(screen, 80, "update") and gui.pleaseSpace(screen, 512, "update") and gui_checkPassword(screen) and gui_yesno(screen, nil, nil, currentVersion ~= lastVersion and "start updating now?" or "you have the latest version installed. do you still want to start updating?") then
         --assert(fs.copy(paths.concat(system.getSelfScriptPath(), "../update_init.lua"), "/init.lua"))
 
-        local installdata = {branch = registry.branch}
+        local installdata = {branch = newBranch or branch}
         local updateinitPath = paths.concat(system.getSelfScriptPath(), "../update_init.lua")
         assert(fs.writeFile("/init.lua", "local installdata = " .. serialization.serialize(installdata) .. "\n" .. assert(fs.readFile(updateinitPath))))
         computer.shutdown("fast")
@@ -47,6 +50,13 @@ layout:createButton(20, 7, 16, 1, nil, nil, "UPDATE SYSTEM", true).onClick = fun
     layout:draw()
 end
 
+layout:createButton(20, 7, 16, 1, nil, nil, "UPDATE SYSTEM", true).onClick = function ()
+    update()
+end
+
+layout:createButton(20, 7, 16, 1, nil, nil, "UPDATE TO " .. altBranch:upper(), true).onClick = function ()
+    update(altBranch)
+end
 
 layout:createText(9, 9, colors.white, "disable system recovery menu")
 layout:createText(9, 11, colors.white, "disable startup logo")
@@ -75,7 +85,7 @@ local function systemWeight()
 end
 
 layout:createText(2, 2, colors.white, "current version: " .. currentVersion)
-layout:createText(2, 4, colors.white, "current branch : " .. registry.branch)
+layout:createText(2, 4, colors.white, "current branch : " .. branch)
 
 local lastVersionText = layout:createText(2, 3, colors.white, "last    version: loading...")
 local systemWeightLabel = layout:createText(2, 5, colors.white, "system  weight : calculation...")

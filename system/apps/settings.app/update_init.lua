@@ -12,29 +12,32 @@ local function initScreen(gpu, screen)
     gpu.fill(1, 1, 50, 16, " ")
 end
 
+local screensInited
 local function printState(num)
     local str = "working with updates: " .. tostring(math.floor((num * 100) + 0.5)) .. "%"
     local gpu = component.proxy(component.list("gpu")() or "")
     if gpu then
         for screen in component.list("screen") do
-            initScreen(gpu, screen)
+            if not screensInited then
+                initScreen(gpu, screen)
 
-            if gpu.getDepth() > 1 then
-                gpu.setPaletteColor(0, 0x5bb9f0)
-                gpu.setPaletteColor(1, 0xffffff)
+                if gpu.getDepth() > 1 then
+                    gpu.setPaletteColor(0, 0x5bb9f0)
+                    gpu.setPaletteColor(1, 0xffffff)
 
-                gpu.setBackground(0, true)
-                gpu.setForeground(1, true)
-            else
-                gpu.setBackground(0xFFFFFF)
-                gpu.setForeground(0x000000)
+                    gpu.setBackground(0, true)
+                    gpu.setForeground(1, true)
+                else
+                    gpu.setBackground(0xFFFFFF)
+                    gpu.setForeground(0x000000)
+                end
             end
 
             local rx, ry = gpu.getResolution()
-
             gpu.fill(1, 1, rx, ry, " ")
             gpu.set((math.floor(rx / 2) - (#str / 2)) + 1, math.floor(ry / 2), str)
         end
+        screensInited = true
     end
 end
 
@@ -138,6 +141,12 @@ local function installUrl(urlPart, state2)
 end
 
 proxy.remove("/system") --удаляем старую систему во избежании конфликта версий
+
 installUrl("https://raw.githubusercontent.com/igorkll/liked/" .. installdata.branch) --сначала ставим liked а только потом ядро, чтобы не перезаписывать init.lua раньше времени. чтобы если обновления оборветься то система не окирпичилась
 installUrl("https://raw.githubusercontent.com/igorkll/likeOS/" .. installdata.branch, true)
+
+local file = proxy.open("/system/branch.cfg", "wb")
+proxy.write(file, installdata.branch)
+proxy.close(file)
+
 computer.shutdown("fast")
