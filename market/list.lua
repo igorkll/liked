@@ -95,19 +95,12 @@ local list = {
         name = "brainfuck",
         version = "1",
         vendor = "logic",
-        icon = selfurlpart .. "/apps/brainfuck.app/icon.t2p",
         description = "brainfuck code interpreter",
         minDiskSpace = 64,
+        libs = {"brainfuck"},
 
         path = "/data/apps/brainfuck.app",
-        install = function(self)
-            fs.makeDirectory("/data/apps/brainfuck.app")
-            fs.makeDirectory("/data/lib")
-            download("/data/apps/brainfuck.app/main.lua", selfurlpart .. "/apps/brainfuck.app/main.lua")
-            download("/data/apps/brainfuck.app/icon.t2p", self.icon)
-            download("/data/apps/brainfuck.app/uninstall.lua", selfurlpart .. "/apps/brainfuck.app/uninstall.lua")
-            download("/data/lib/brainfuck.lua", selfurlpart .. "/apps/brainfuck.app/lib.lua")
-        end
+        urlPrimaryPart = selfurlpart .. "/apps/brainfuck.app/"
     },
     {
         name = "lua",
@@ -360,6 +353,11 @@ local list = {
 list.libs = {
     ["vec"] = {
         url = selfurlpart .. "/libs/vec.lua",
+        vendor = "logic",
+        version = "1"
+    },
+    ["brainfuck"] = {
+        url = selfurlpart .. "/libs/brainfuck.lua",
         vendor = "logic",
         version = "1"
     }
