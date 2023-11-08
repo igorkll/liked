@@ -31,7 +31,6 @@ local window = graphic.createWindow(screen, 1, 2, rx, ry - 1)
 ------------------------------------------------------------------------ paths
 
 local defaultUserPath = "/data/userdata/"
-local wallpaperPath = "/data/wallpaper.t2p"
 local userPath = gui_container.getUserRoot(screen)
 local iconsPath = userPath
 
@@ -168,29 +167,7 @@ local function drawStatus()
 end
 
 local function drawWallpaper()
-    local baseColor = colors.lightBlue
-    if registry.wallpaperBaseColor and colors[registry.wallpaperBaseColor] then
-        baseColor = colors[registry.wallpaperBaseColor]
-    end
-
-    local function wdraw(path)
-        local sx, sy = gui_readimagesize(path)
-        if sx ~= rx or sy ~= ry then --на неполноэкранных обоях нужно сначала очистить экран
-            window:clear(baseColor)
-        end
-
-        local ix, iy = math.round((window.sizeX / 2) - (sx / 2)) + 1, math.round((window.sizeY / 2) - (sy / 2)) + 1
-        pcall(calls.call, "gui_drawimage", screen, path, ix, iy)
-    end
-
-    local customPath = paths.concat(userPath, paths.name(wallpaperPath))
-    if fs.exists(customPath) then
-        wdraw(customPath)
-    elseif fs.exists(wallpaperPath) then
-        wdraw(wallpaperPath)
-    else
-        window:clear(baseColor)
-    end
+    liked.drawWallpaper(screen, userPath)
 end
 
 local function drawBar(lUserPath, iconsCount)

@@ -358,13 +358,11 @@ while true do
                 save()
             end
         elseif statusWindowEventData[3] >= 8 and statusWindowEventData[3] <= 11 then
-            local gclear = calls.call("screenshot", screen, 4, 2, 20, 4)
-            local str, num = gui.context(screen, 4, 2, {"  resize", "  color change", "  bg / fg invert"},
+            local gclear = calls.call("screenshot", screen, 9, 2, 20, 4)
+            local str, num = gui.context(screen, 9, 2, {"  resize", "  color change", "  bg / fg invert"},
             {true, true, true})
             
             if num == 1 then
-                noSaved = true
-
                 gclear()
                 local clear = saveZone(screen)
                 local str = gui.input(screen, nil, nil, "newX newY", nil, colors.white, math.round(image.sizeX) .. " " .. math.round(image.sizeY))
@@ -374,6 +372,7 @@ while true do
                     x = tonumber(x)
                     y = tonumber(y)
                     if x and y then
+                        noSaved = true
                         resize(x, y)
                     else
                         local clear = saveZone(screen)
@@ -382,14 +381,14 @@ while true do
                     end
                 end
             elseif num == 2 then
-                noSaved = true
-
-                local str, num = gui.context(screen, 21, 3, {"  background", "  foreground", "  bg / fg"})
+                local str, num = gui.contextAuto(screen, 26, 3, {"  background", "  foreground", "  bg / fg"})
                 if num then
+                    gclear()
                     local from = gui.selectcolor(screen, nil, nil, "choose color to change")
                     if from then
                         local to = gui.selectcolor(screen, nil, nil, "choose new color")
                         if to then
+                            noSaved = true
                             for y, tbl in ipairs(image) do
                                 for x, pixel in ipairs(tbl) do
                                     if pixel[1] ~= pixel[2] or pixel[1] ~= 0 then

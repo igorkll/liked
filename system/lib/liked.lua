@@ -16,7 +16,10 @@ local unicode = require("unicode")
 local thread = require("thread")
 local cache = require("cache")
 local natives = require("natives")
+local colorlib = require("colors")
 local liked = {}
+
+local colors = gui_container.colors
 
 function liked.getBranch()
     if fs.exists("/system/branch.cfg") then
@@ -451,14 +454,51 @@ function liked.drawUpBar(screen, withoutFill, bgcolor)
     if not withoutFill then
         gpu.fill(1, 1, rx, 1, " ")
     end
-    gpu.set(rx - #rtc - 7, 1, rtc)
-    gpu.set(rx - #gtc - 18, 1, gtc)
+
+    local battery = "⣏⣉⣉⡷"
+    local batteryLen = unicode.len(battery)
+    local offset = batteryLen + 1
+
+    gpu.set(rx - #rtc - 7 - offset, 1, rtc)
+    gpu.set(rx - #gtc - 18 - offset, 1, gtc)
     if charge <= 30 then
         gpu.setForeground(gui_container.colors.red)
     end
-    charge = tostring(charge)
-    gpu.set(rx - 5, 1, "   ")
-    gpu.set(rx - #charge - 2, 1, tostring(charge) .. "%")
+    local chargestr = tostring(charge)
+    gpu.set(rx - 5 - offset, 1, "   ")
+    gpu.set(rx - #chargestr - 2 - offset, 1, tostring(chargestr) .. "%")
+
+    gpu.setBackground(bgcolor or gui_container.colors.gray)
+    gpu.setForeground(gui_container.colors.white)
+
+    for i = 1, batteryLen do
+        local char = unicode.sub(battery, i, i)
+        if i == batteryLen then
+            gpu.setBackground(bgcolor or gui_container.colors.gray)
+        else
+            if charge <= 30 then
+                if i == 1 then
+                    gpu.setBackground(gui_container.colors.red)
+                else
+                    gpu.setBackground(bgcolor or gui_container.colors.gray)
+                end
+            else
+                local last = 3
+                if charge <= 50 then
+                    last = 1
+                elseif charge <= 75 then
+                    last = 2
+                end
+
+                if i <= last then
+                    gpu.setBackground(gui_container.colors.lime)
+                else
+                    gpu.setBackground(bgcolor or gui_container.colors.gray)
+                end
+            end
+        end
+        gpu.set((rx - offset) + (i - 1), 1, char)
+    end
 end
 
 --------------------------------------------------------
@@ -703,6 +743,38 @@ function liked.getIcon(screen, path)
 
     cache.cache.getIcon[path] = icon
     return icon
+end
+
+function liked.drawWallpaper(screen, customFolder)
+    local baseColor = colors.lightBlue
+    if registry.wallpaperBaseColor then
+        if type(registry.wallpaperBaseColor) == "string" then
+            baseColor = colors[registry.wallpaperBaseColor]
+        elseif type(registry.wallpaperBaseColor) == "number" then
+            baseColor = registry.wallpaperBaseColor
+        end
+    end
+
+    local gpu = graphic.findGpu(screen)
+    local rx, ry = gpu.getResolution()
+    gpu.setBackground(baseColor)
+    gpu.fill(1, 1, rx, ry, " ")
+
+    local function wdraw(path)
+        local ok, sx, sy = pcall(gui_readimagesize, path)
+        if ok then
+            local ix, iy = math.round((rx / 2) - (sx / 2)) + 1, math.round((ry / 2) - (sy / 2)) + 1
+            pcall(gui_drawimage, screen, path, ix, iy)
+        end
+    end
+
+    local wallpaperPath = "/data/wallpaper.t2p"
+    local customPath = paths.concat(customFolder, paths.name(wallpaperPath))
+    if fs.exists(customPath) then
+        wdraw(customPath)
+    elseif fs.exists(wallpaperPath) then
+        wdraw(wallpaperPath)
+    end
 end
 
 liked.unloadable = true

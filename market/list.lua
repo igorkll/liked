@@ -205,7 +205,6 @@ local list = {
         vendor = "logic",
         description = "allows you to take pictures on the camera from the computronix addon.\n* allows you to select a camera from several\n* allows you to save a photo for loading on another computer",
         minDiskSpace = 64,
-        minColorDepth = 4,
 
         path = "/data/apps/camera.app",
         urlPrimaryPart = selfurlpart .. "/apps/camera.app/",
