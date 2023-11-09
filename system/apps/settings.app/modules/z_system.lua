@@ -90,10 +90,10 @@ layout:createText(2, 4, colors.white, "current branch : " .. branch)
 local lastVersionText = layout:createText(2, 3, colors.white, "last    version: loading...")
 local systemWeightLabel = layout:createText(2, 5, colors.white, "system  weight : calculation...")
 layout:draw()
-graphic.forceUpdate()
+graphic.forceUpdate(screen)
 systemWeightLabel.text = "system  weight : " .. tostring(systemWeight()) .. "KB"
 layout:draw()
-graphic.forceUpdate()
+graphic.forceUpdate(screen)
 
 lastVersion, lastVersionErr = liked.lastVersion()
 if lastVersion then
@@ -103,7 +103,7 @@ else
 end
 
 layout:draw()
-graphic.forceUpdate()
+graphic.forceUpdate(screen)
 
 return function(eventData)
     local windowEventData = window:uploadEvent(eventData)

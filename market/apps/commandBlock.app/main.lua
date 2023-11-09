@@ -62,7 +62,7 @@ while true do
         term:write(ret)
     end
     term:newLine()
-    graphic.forceUpdate()
+    graphic.forceUpdate(screen)
 
     if queue and #queue == 0 then
         os.sleep(1)

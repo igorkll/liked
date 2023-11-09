@@ -80,12 +80,12 @@ function objclass:uploadEvent(eventData)
             else
                 self.state = true
                 self:draw()
-                graphic.forceUpdate()
+                graphic.forceUpdate(self.gui.window.screen)
                 if self.autoRelease then
                     os.sleep(0.1)
                     self.state = false
                     self:draw()
-                    graphic.forceUpdate()
+                    graphic.forceUpdate(self.gui.window.screen)
                 end
                 
                 if self.onClick then

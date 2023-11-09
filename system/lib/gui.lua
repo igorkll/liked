@@ -218,7 +218,7 @@ function gui.status(screen, cx, cy, str, backgroundColor)
         window:set(2, 4, color, colors.blue, "◢███◣")
         window:set(4, 3, colors.blue, colors.white, "P")
     end)
-    graphic.forceUpdate()
+    graphic.forceUpdate(screen)
     event.yield()
 end
 
@@ -233,11 +233,11 @@ function gui.warn(screen, cx, cy, str, backgroundColor)
     window:set(32 - 4, 7, colors.lightBlue, colors.white, " OK ")
     local function drawYes()
         window:set(32 - 4, 7, colors.blue, colors.white, " OK ")
-        graphic.forceUpdate()
+        graphic.forceUpdate(screen)
         event.sleep(0.1)
     end
 
-    graphic.forceUpdate()
+    graphic.forceUpdate(screen)
     if registry.soundEnable then
         sound.warn()
     end
@@ -276,11 +276,11 @@ function gui.pleaseCharge(screen, minCharge, str)
     window:set(32 - 4, 7, colors.lightBlue, colors.white, " OK ")
     local function drawYes()
         window:set(32 - 4, 7, colors.blue, colors.white, " OK ")
-        graphic.forceUpdate()
+        graphic.forceUpdate(screen)
         event.sleep(0.1)
     end
 
-    graphic.forceUpdate()
+    graphic.forceUpdate(screen)
     if registry.soundEnable then
         sound.warn()
     end
@@ -321,11 +321,11 @@ function gui.pleaseSpace(screen, minSpace, str)
     window:set(32 - 4, 7, colors.lightBlue, colors.white, " OK ")
     local function drawYes()
         window:set(32 - 4, 7, colors.blue, colors.white, " OK ")
-        graphic.forceUpdate()
+        graphic.forceUpdate(screen)
         event.sleep(0.1)
     end
 
-    graphic.forceUpdate()
+    graphic.forceUpdate(screen)
     if registry.soundEnable then
         sound.warn()
     end
@@ -386,7 +386,7 @@ function gui.selectcolor(screen, cx, cy, str)
             end
         end
     end
-    graphic.forceUpdate()
+    graphic.forceUpdate(screen)
 
     while true do
         local eventData = {computer.pullSignal()}
@@ -438,7 +438,7 @@ function gui.input(screen, cx, cy, str, hidden, backgroundColor, default, disabl
 
     local reader = window:read(2, 3, window.sizeX - 2, colors.gray, colors.white, nil, hidden, default)
 
-    graphic.forceUpdate()
+    graphic.forceUpdate(screen)
     if registry.soundEnable and not disableStartSound then
         computer.beep(2000)
         computer.beep(1500)
@@ -446,13 +446,13 @@ function gui.input(screen, cx, cy, str, hidden, backgroundColor, default, disabl
 
     local function drawOk()
         window:set(32 - 4 - 3, 7, colors.blue, colors.white, " enter ")
-        graphic.forceUpdate()
+        graphic.forceUpdate(screen)
         event.sleep(0.1)
     end
 
     local function drawCancel()
         window:set(2, 7, colors.brown, colors.white, " cancel ")
-        graphic.forceUpdate()
+        graphic.forceUpdate(screen)
         event.sleep(0.1)
     end
 
@@ -552,7 +552,7 @@ function gui.context(screen, posX, posY, strs, active)
                 window:set(1, i, color, colors.lightGray, str .. (string.rep(" ", sizeX - unicode.wlen(str))))
             end
         end
-        graphic.forceUpdate()
+        graphic.forceUpdate(screen)
     end
     redrawStrs()
 
@@ -1044,14 +1044,14 @@ function gui.yesno(screen, cx, cy, str, backgroundColor)
     window:set(32 - 5, 7, colors.lime, colors.white, " yes ")
     window:set(2, 7, colors.red, colors.white, " no ")
 
-    graphic.forceUpdate()
+    graphic.forceUpdate(screen)
     if registry.soundEnable then
         computer.beep(2000)
     end
 
     local function drawYes()
         window:set(32 - 5, 7, colors.green, colors.white, " yes ")
-        graphic.forceUpdate()
+        graphic.forceUpdate(screen)
         event.sleep(0.1)
     end
 
@@ -1065,7 +1065,7 @@ function gui.yesno(screen, cx, cy, str, backgroundColor)
                 return true
             elseif windowEventData[4] == 7 and windowEventData[3] >= 2 and windowEventData[3] <= (2 + 3) then
                 window:set(2, 7, colors.brown, colors.white, " no ")
-                graphic.forceUpdate()
+                graphic.forceUpdate(screen)
                 event.sleep(0.1)
                 noShadow()
                 return false

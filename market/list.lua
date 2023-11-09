@@ -34,7 +34,7 @@ end
 local list = {
     {
         name = "nanomachines",
-        version = "2.1",
+        version = "2.2",
         vendor = "logic",
         description = "allows you to control nanobots using a wireless modem",
         minDiskSpace = 64,

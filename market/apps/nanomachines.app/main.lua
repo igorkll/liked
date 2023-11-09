@@ -16,8 +16,6 @@ fs.makeDirectory(paths.concat(path, "profiles"))
 local port = math.floor(math.random(1, 65535))
 local range = 3
 
-local title = "Nanomachines"
-
 ------------------------------------ init
 
 local screen, nickname = ...
@@ -27,7 +25,7 @@ do
     rx, ry = gpu.getResolution()
 end
 
-local upth, upRedraw = liked.drawUpBarTask(screen, true, colors.lightGray)
+local upth, upRedraw = liked.drawFullUpBarTask(screen, "Nanomachines")
 upth:suspend()
 
 local function noUpBar()
@@ -45,8 +43,8 @@ local function status(str)
     gpu.setForeground(colors.white)
     gpu.fill(1, 1, rx, ry, " ")
     gpu.set(math.floor(((rx / 2) - (unicode.len(str) / 2)) + 0.5) + 1, math.floor((ry / 2) + 0.5) - 1, str)
-    graphic.forceUpdate()
-    --gui_status(screen, nil, nil, str)
+    graphic.forceUpdate(screen)
+    os.sleep(0.1)
 end
 
 local modem
@@ -312,12 +310,8 @@ local function draw()
     end
 
     window:clear(colors.black)
-    
-    window:fill(1, 1, rx, 1, colors.lightGray, 0, " ")
-    window:set(2, 1, colors.lightGray, colors.white, title)
     upBar()
 
-    window:set(rx, 1, colors.red, colors.white, "X")
     window:set(1, 2, colors.red, colors.white, "delete profile")
     window:set(16, 2, colors.orange, colors.white, "push all")
     window:set(25, 2, colors.green, colors.white, "pull all")
