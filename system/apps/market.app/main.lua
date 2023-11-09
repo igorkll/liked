@@ -327,7 +327,9 @@ local function applicationLabel(data, x, y)
                         gui.warn(screen, nil, nil, supportErr)
                     elseif gui_yesno(screen, nil, nil, "update" .. formattedName) then
                         gui_status(screen, nil, nil, "updating" .. formattedName2)
-                        data:uninstall()
+                        if data.uninstallOnUpdate then
+                            data:uninstall()
+                        end
                         data:install()
                     end
                 elseif instCache[data] then
