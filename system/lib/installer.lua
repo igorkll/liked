@@ -98,7 +98,8 @@ function installer.install_likedbox(vfs)
         "market_urls_main.txt",
         "logo.lua",
         "main.lua",
-        "lib/installer.lua"
+        "lib/installer.lua",
+        "branch.cfg"
     }
     
     local systemFolder = installer.selfPath("system")
