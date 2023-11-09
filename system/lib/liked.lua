@@ -558,6 +558,7 @@ end
 
 --------------------------------------------------------
 
+--[[
 function liked.getRegistry(address)
     local mountpoint = os.tmpname()
     fs.mount(address or fs.get("/"), mountpoint)
@@ -584,6 +585,15 @@ function liked.labelReadonly(proxy)
     return not pcall(proxy.setLabel, proxy.getLabel() or nil)
 end
 
+function liked.reg(str, key, value)
+    gui_container[str][key] = value
+    if not registry.gui_container then registry.gui_container = {} end
+    if not registry.gui_container[str] then registry.gui_container[str] = {} end
+    registry.gui_container[str][key] = value
+    registry.save()
+end
+]]
+
 function liked.getName(screen, path)
     local name
     if gui_container.viewFileExps[screen] then
@@ -596,14 +606,6 @@ function liked.getName(screen, path)
         return unicode.sub(name, 1, 12) .. gui_container.chars.threeDots, name
     end
     return name, name
-end
-
-function liked.reg(str, key, value)
-    gui_container[str][key] = value
-    if not registry.gui_container then registry.gui_container = {} end
-    if not registry.gui_container[str] then registry.gui_container[str] = {} end
-    registry.gui_container[str][key] = value
-    registry.save()
 end
 
 --------------------------------------------------------

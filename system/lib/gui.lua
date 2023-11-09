@@ -997,8 +997,8 @@ function gui.selectcomponentProxy(screen, cx, cy, types, allowAutoConfirm)
     end
 end
 
-function gui.checkPassword(screen, cx, cy, disableStartSound, diskAddress)
-    local regData = require("liked").getRegistry(diskAddress)
+function gui.checkPassword(screen, cx, cy, disableStartSound)
+    local regData = registry.data
     if regData then
         if regData.password then
             local clear = saveZone(screen)
