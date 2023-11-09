@@ -213,6 +213,7 @@ function sysinit.init(box)
     end):resume()
 
     sysinit.init = nil
+    sysinit.inited = true
 end
 
 return sysinit

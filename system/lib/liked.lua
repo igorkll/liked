@@ -462,7 +462,7 @@ function liked.drawUpBar(screen, withoutFill, bgcolor)
 
     gpu.set(rx - #rtc - 7 - offset, 1, rtc)
     gpu.set(rx - #gtc - 18 - offset, 1, gtc)
-    if charge <= 30 then
+    if charge <= gui_container.criticalChargeLevel then
         gpu.setForeground(gui_container.colors.red)
     end
     local chargestr = tostring(charge)
@@ -477,7 +477,7 @@ function liked.drawUpBar(screen, withoutFill, bgcolor)
         if i == batteryLen then
             gpu.setBackground(bgcolor or gui_container.colors.gray)
         else
-            if charge <= 30 then
+            if charge <= gui_container.criticalChargeLevel then
                 if i == 1 then
                     gpu.setBackground(gui_container.colors.red)
                 else
