@@ -6,6 +6,7 @@
 /system/market_urls_main.txt
 /system/recoveryScript.lua
 /system/registry.dat
+/system/t3default.plt
 /system/version.cfg
 /system/apps/about.app/componentlist.lua
 /system/apps/about.app/icon.t2p
@@ -92,10 +93,8 @@
 /system/lib/hdd.lua
 /system/lib/installer.lua
 /system/lib/liked.lua
-/system/lib/likenet.lua
 /system/lib/palette.lua
 /system/lib/rendUtils.lua
-/system/lib/shareComponent.lua
 /system/lib/sound.lua
 /system/lib/sysinit.lua
 /system/lib/uix.lua
