@@ -41,7 +41,7 @@ local function printState(num)
             local rx, ry = gpu.getResolution()
             gpu.fill(1, 1, rx, ry, " ")
             centerPrint(gpu, str, math.floor(ry / 2))
-            centerPrint(gpu, str, ry - 1, "please do not turn off the device!")
+            centerPrint(gpu, "please do not turn off the device!", ry - 1)
         end
         screensInited = true
     end
