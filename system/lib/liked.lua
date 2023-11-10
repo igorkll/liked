@@ -227,10 +227,10 @@ function liked.loadApp(name, screen, nickname)
     end
 
 
+    --------------------------------
+
     local mainCode, err = programs.load(path)
     if not mainCode then return nil, err end
-
-    --------------------------------
 
     local exitCode
     if exitFile then
@@ -242,6 +242,10 @@ function liked.loadApp(name, screen, nickname)
     if configFile then
         configTbl, err = serialization.load(configFile)
         if not configTbl then return nil, err end
+
+        if configTbl.palette then
+            paletteFile = configTbl.palette
+        end
     end
 
     --------------------------------
