@@ -1,4 +1,3 @@
-/system/branch.cfg
 /system/LICENSE
 /system/logo.lua
 /system/main.lua
@@ -97,6 +96,7 @@
 /system/lib/palette.lua
 /system/lib/rendUtils.lua
 /system/lib/sound.lua
+/system/lib/sysdata.lua
 /system/lib/sysinit.lua
 /system/lib/uix.lua
 /system/likedbox/logo.lua

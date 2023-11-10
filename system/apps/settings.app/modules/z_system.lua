@@ -9,6 +9,7 @@ local registry = require("registry")
 local liked = require("liked")
 local gui = require("gui")
 local uix = require("uix")
+local sysdata = require("sysdata")
 
 local colors = gui_container.colors
 
@@ -33,7 +34,8 @@ layout:createButton(2, 7, 16, 1, nil, nil, "WIPE USER DATA", true).onClick = fun
     layout:draw()
 end
 
-local branch = liked.getBranch()
+local branch = sysdata.get("branch")
+local mode = sysdata.get("mode")
 local altBranch = branch == "main" and "dev" or "main"
 
 local function update(newBranch)
@@ -42,7 +44,7 @@ local function update(newBranch)
     elseif gui.pleaseCharge(screen, 80, "update") and gui.pleaseSpace(screen, 512, "update") and gui_checkPassword(screen) and gui_yesno(screen, nil, nil, newBranch and "ATTENTION, changing the branch can break the system! are you sure?" or (currentVersion ~= lastVersion and "start updating now?" or "you have the latest version installed. do you still want to start updating?")) then
         --assert(fs.copy(paths.concat(system.getSelfScriptPath(), "../update_init.lua"), "/init.lua"))
 
-        local installdata = {branch = newBranch or branch}
+        local installdata = {branch = newBranch or branch, mode = mode}
         local updateinitPath = paths.concat(system.getSelfScriptPath(), "../update_init.lua")
         assert(fs.writeFile("/init.lua", "local installdata = " .. serialization.serialize(installdata) .. "\n" .. assert(fs.readFile(updateinitPath))))
         computer.shutdown("fast")

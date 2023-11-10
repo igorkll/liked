@@ -1,4 +1,4 @@
---local installdata = {branch = "main"} --пристыковываеться к скрипту на этапе обновления
+--local installdata = {branch = "main", mode = "full"} --пристыковываеться к скрипту на этапе обновления
 
 local function initScreen(gpu, screen)
     if gpu.getScreen() ~= screen then
@@ -10,6 +10,11 @@ local function initScreen(gpu, screen)
     gpu.setBackground(0)
     gpu.setForeground(0xFFFFFF)
     gpu.fill(1, 1, 50, 16, " ")
+end
+
+local function centerPrint(gpu, text, y)
+    local rx, ry = gpu.getResolution()
+    gpu.set((math.floor(rx / 2) - (#text / 2)) + 1, y, text)
 end
 
 local screensInited
@@ -35,7 +40,8 @@ local function printState(num)
 
             local rx, ry = gpu.getResolution()
             gpu.fill(1, 1, rx, ry, " ")
-            gpu.set((math.floor(rx / 2) - (#str / 2)) + 1, math.floor(ry / 2), str)
+            centerPrint(gpu, str, math.floor(ry / 2))
+            centerPrint(gpu, str, ry - 1, "please do not turn off the device!")
         end
         screensInited = true
     end
@@ -122,6 +128,13 @@ local function fs_path(path)
     end
 end
 
+local function saveFile(path, data)
+    proxy.makeDirectory(fs_path(path))
+    local file = proxy.open(path, "wb")
+    proxy.write(file, data)
+    proxy.close(file)
+end
+
 local function installUrl(urlPart, state2)
     local filelist = split(assert(getInternetFile(urlPart .. "/installer/filelist.txt")), "\n")
     for i, v in ipairs(filelist) do
@@ -132,21 +145,21 @@ local function installUrl(urlPart, state2)
                 printState((((i - 1) / (#filelist - 1)) / 2) + (state2 and 0.5 or 0))
             end
 
-            proxy.makeDirectory(fs_path(v))
-            local file = proxy.open(v, "wb")
-            proxy.write(file, filedata)
-            proxy.close(file)
+            saveFile(v, filedata)
         end
     end
 end
 
-proxy.remove("/system") --удаляем старую систему во избежании конфликта версий
+--удаляем старую систему во избежании конфликта версий
+proxy.remove("/system")
 
-installUrl("https://raw.githubusercontent.com/igorkll/liked/" .. installdata.branch) --сначала ставим liked а только потом ядро, чтобы не перезаписывать init.lua раньше времени. чтобы если обновления оборветься то система не окирпичилась
+--сначала ставим liked а только потом ядро, чтобы не перезаписывать init.lua раньше времени. чтобы если обновления оборветься то система не окирпичилась
+installUrl("https://raw.githubusercontent.com/igorkll/liked/" .. installdata.branch)
 installUrl("https://raw.githubusercontent.com/igorkll/likeOS/" .. installdata.branch, true)
 
-local file = proxy.open("/system/branch.cfg", "wb")
-proxy.write(file, installdata.branch)
-proxy.close(file)
+--востанавливаем содержимое sysdata
+saveFile("/system/sysdata/branch", installdata.branch)
+saveFile("/system/sysdata/mode", installdata.mode)
 
+--перезагружаем устройтсво
 computer.shutdown("fast")

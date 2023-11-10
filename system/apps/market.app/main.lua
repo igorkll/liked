@@ -11,6 +11,7 @@ local internet = require("internet")
 local liked = require("liked")
 local gui = require("gui")
 local format = require("format")
+local sysdata = require("sysdata")
 
 local cacheReg = registry.new("/data/cache/market/versions.dat")
 if not registry.libVersions then
@@ -183,7 +184,7 @@ local customPath = "/data/market_urls.txt"
 local function reList()
     urls = {}
     if not registry.disableSystemMarketUrls then
-        doList("/system/market_urls_" .. liked.getBranch() .. ".txt")
+        doList("/system/market_urls_" .. sysdata.get("branch") .. ".txt")
     end
     doList("/vendor/market_urls.txt")
     if not registry.disableCustomMarketUrls then
