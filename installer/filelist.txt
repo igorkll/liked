@@ -4,6 +4,7 @@
 /system/main.lua
 /system/market_urls_dev.txt
 /system/market_urls_main.txt
+/system/recoveryAccess.lua
 /system/recoveryScript.lua
 /system/registry.dat
 /system/t3default.plt
