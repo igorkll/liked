@@ -93,6 +93,7 @@ function installer.install_likedbox(vfs)
         "apps",
         "autoruns",
         "recoveryScript.lua",
+        "recoveryAccess.lua",
         "registry.dat",
         "market_urls_dev.txt",
         "market_urls_main.txt",
