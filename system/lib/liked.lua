@@ -18,7 +18,7 @@ local cache = require("cache")
 local natives = require("natives")
 local colorlib = require("colors")
 local palette = require("palette")
-local sysdata = require("sysdata")
+local package = require("package")
 local liked = {}
 
 local colors = gui_container.colors
@@ -168,7 +168,11 @@ end
 --------------------------------------------------------
 
 function liked.lastVersion()
-    local lastVersion, err = require("internet").getInternetFile("https://raw.githubusercontent.com/igorkll/liked/" .. sysdata.get("branch") .. "/system/version.cfg")
+    local branch = "main"
+    if package.isInstalled("sysdata") then
+        branch = require("sysdata").get("branch")
+    end
+    local lastVersion, err = require("internet").getInternetFile("https://raw.githubusercontent.com/igorkll/liked/" .. branch .. "/system/version.cfg")
     if not lastVersion then return nil, err end
     return tonumber(lastVersion) or -1
 end
