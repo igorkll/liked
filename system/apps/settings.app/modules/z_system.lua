@@ -56,7 +56,7 @@ layout:createButton(20, 8, 16, 1, nil, nil, "UPDATE SYSTEM", true).onClick = fun
     update()
 end
 
-layout:createButton(30, 4, 16, 1, nil, nil, "UPDATE TO " .. altBranch:upper(), true).onClick = function ()
+layout:createButton(25, 4, 16, 1, nil, nil, "UPDATE TO " .. altBranch:upper(), true).onClick = function ()
     update(altBranch)
 end
 
