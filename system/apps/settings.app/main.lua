@@ -57,7 +57,7 @@ local function draw(noReload)
         --selectWindow:write("║", background, foreground)
         local selColor = selected == i and colors.white or colors.black
         selectWindow:fill(1, i, selectWindow.sizeX, 1, selColor, colors.lightGray, " ")
-        selectWindow:set(3, i, selColor, colors.lightGray, str)
+        selectWindow:set(3, i, selColor, colors.lightGray, str:gsub("_", " "))
         if selected == i then
             selectWindow:set(1, i, selColor, colors.lightGray, ">")
         end

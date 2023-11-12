@@ -5,6 +5,7 @@ local package = require("package")
 local syntax = require("syntax")
 local liked = require("liked")
 local thread = require("thread")
+local registry = require("registry")
 
 local colors = gui_container.colors
 
@@ -45,17 +46,48 @@ lprint(colors.yellow, "Enter a statement and hit enter to evaluate it.")
 lprint(colors.yellow, "Prefix an expression with '=' to show its value.")
 lprint(colors.yellow, "Press Ctrl+W to exit the interpreter.")
 
-local env =  setmetatable({_G = _G, screen = screen, print = function (...)
-    lprint(colors.white, ...)
-end}, {__index = function (self, key)
-    if _G[key] then
-        return _G[key]
-    elseif package.loaded[key] then
-        return package.loaded[key]
-    elseif package.cache[key] then
-        return package.cache[key]
+local env
+
+if registry.interpreterSandbox then
+    env = {print = function (...)
+        lprint(colors.white, ...)
+    end, screen = screen}
+
+    env.math = table.deepclone(math)
+    env.string = table.deepclone(string)
+    env.table = table.deepclone(table)
+    env.bit32 = table.deepclone(bit32)
+
+    env.error = error
+    env.ipairs = ipairs
+    env.pairs = pairs
+    env.load = function(chunk, chunkname, mode, lenv)
+        return load(chunk, chunkname, "t", lenv or env)
     end
-end})
+    env.next = next
+    env.pcall = pcall
+    env.select = select
+    env.tostring = tostring
+    env.tonumber = tonumber
+    env.type = type
+    env.xpcall = xpcall
+    env._VERSION = _VERSION
+    env._OSVERSION = _OSVERSION
+    env._COREVERSION = _COREVERSION
+    env.assert = assert
+else
+    env = setmetatable({_G = _G, screen = screen, print = function (...)
+        lprint(colors.white, ...)
+    end}, {__index = function (self, key)
+        if _G[key] then
+            return _G[key]
+        elseif package.loaded[key] then
+            return package.loaded[key]
+        elseif package.cache[key] then
+            return package.cache[key]
+        end
+    end})
+end
 
 while true do
     local eventData = {event.pull()}
