@@ -432,10 +432,12 @@ local appLabels = {}
 
 local function drawStatus()
     statusWindow:clear(colors.gray)
-    statusWindow:set(8, 1, colors.gray, colors.white, title)
     statusWindow:set(statusWindow.sizeX, statusWindow.sizeY, colors.red, colors.white, "X")
     if not registry.disableCustomMarketUrls then
         statusWindow:set(1, statusWindow.sizeY, colors.orange, colors.white, "CUSTOM")
+        statusWindow:set(8, 1, colors.gray, colors.white, title)
+    else
+        statusWindow:set(2, 1, colors.gray, colors.white, title)
     end
     barRedraw()
 end

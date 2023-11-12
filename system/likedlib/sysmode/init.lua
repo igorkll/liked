@@ -4,6 +4,7 @@ local registry = require("registry")
 local sysmode = {}
 sysmode.modes = {
     full = {
+        reg = resources.get("full.reg")
     },
     classic = {
         reg = resources.get("classic.reg")

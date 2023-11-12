@@ -26,7 +26,7 @@ local lastVersion, lastVersionErr
 ------------------------------------
 
 layout:createButton(2, 8, 16, 1, nil, nil, "WIPE USER DATA", true).onClick = function ()
-    if gui_checkPassword(screen) and gui.pleaseType(screen, "WIPE") then
+    if gui.checkPasswordLoop(screen) and gui.pleaseType(screen, "WIPE") then
         if liked.assert(screen, fs.remove("/data")) then
             computer.shutdown("fast")
         end

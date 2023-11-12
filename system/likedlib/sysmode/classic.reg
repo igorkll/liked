@@ -1,3 +1,5 @@
 {
-    disableCustomMarketUrls = true
+    disableCustomMarketUrls = true,
+    disableRootAccess = true,
+    disableRecovery = true
 }

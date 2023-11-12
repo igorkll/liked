@@ -105,6 +105,7 @@
 /system/likedlib/installer.lua
 /system/likedlib/sysdata.lua
 /system/likedlib/sysmode/classic.reg
+/system/likedlib/sysmode/full.reg
 /system/likedlib/sysmode/init.lua
 /system/likedlib/update/init.lua
 /system/likedlib/update/update.lua
