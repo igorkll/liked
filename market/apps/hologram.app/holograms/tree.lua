@@ -5,7 +5,7 @@ local function box(x, y, z, color)
     for ix = x * size, (x * size) + size do
         for iy = y * size, (y * size) + size do
             for iz = z * size, (z * size) + size do
-                holo.set(ix + 1, iy + 1, iz + 1, color)
+                holo.set(ix + 1, iy + 1, iz + 1, col(color))
             end
         end
     end
