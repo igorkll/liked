@@ -93,6 +93,7 @@
 /system/lib/liked.lua
 /system/lib/palette.lua
 /system/lib/rendUtils.lua
+/system/lib/resources.lua
 /system/lib/sound.lua
 /system/lib/sysinit.lua
 /system/lib/uix.lua
@@ -103,6 +104,8 @@
 /system/likedbox/bin/shell.lua
 /system/likedlib/installer.lua
 /system/likedlib/sysdata.lua
+/system/likedlib/sysmode/classic.reg
+/system/likedlib/sysmode/init.lua
 /system/likedlib/update/init.lua
 /system/likedlib/update/update.lua
 /system/screenSavers/black_screen.scrsv

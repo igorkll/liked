@@ -72,6 +72,7 @@ function sysinit.init(box)
     local gui = require("gui") --нужно подключить заранию чтобы функции записались в calls.loaded
 
     package.hardAutoUnloading = true
+    require("sysmode").init()
 
     local thread = require("thread")
     local liked = require("liked")
