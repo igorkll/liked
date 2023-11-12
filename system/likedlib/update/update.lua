@@ -36,6 +36,8 @@ local function printState(num)
                     gpu.setBackground(0xFFFFFF)
                     gpu.setForeground(0x000000)
                 end
+            elseif gpu.getScreen() ~= screen then
+                gpu.bind(screen, false)
             end
 
             local rx, ry = gpu.getResolution()
