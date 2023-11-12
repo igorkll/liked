@@ -9,6 +9,9 @@ function sysinit.init(box)
     local graphic = require("graphic")
     local programs = require("programs")
     local component = require("component")
+    local package = require("package")
+
+    table.insert(package.paths, "/system/likedlib")
 
     table.insert(programs.paths, "/data/userdata")
     table.insert(programs.paths, "/data/userdata/apps")
@@ -68,7 +71,7 @@ function sysinit.init(box)
 
     local gui = require("gui") --нужно подключить заранию чтобы функции записались в calls.loaded
 
-    require("package").hardAutoUnloading = true
+    package.hardAutoUnloading = true
 
     local thread = require("thread")
     local liked = require("liked")

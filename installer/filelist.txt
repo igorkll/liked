@@ -91,12 +91,10 @@
 /system/lib/gui.lua
 /system/lib/gui_container.lua
 /system/lib/hdd.lua
-/system/lib/installer.lua
 /system/lib/liked.lua
 /system/lib/palette.lua
 /system/lib/rendUtils.lua
 /system/lib/sound.lua
-/system/lib/sysdata.lua
 /system/lib/sysinit.lua
 /system/lib/uix.lua
 /system/likedbox/logo.lua
@@ -104,6 +102,8 @@
 /system/likedbox/palette.plt
 /system/likedbox/registry.dat
 /system/likedbox/bin/shell.lua
+/system/likedlib/installer.lua
+/system/likedlib/sysdata.lua
 /system/screenSavers/black_screen.scrsv
 /system/screenSavers/color_dots.scrsv
 /system/screenSavers/random_colors.scrsv
