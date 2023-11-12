@@ -100,6 +100,16 @@ local function runScreenSaver(path)
     end
 end
 
+local function publicMode()
+    if registry.disableCustomFiles then
+        local clear = saveZone(screen)
+        gui.warn(screen, nil, nil, "this file cannot be used on your liked edition")
+        clear()
+        return false
+    end
+    return true
+end
+
 ------------------------------------------------------------------------ icons
 
 local iconmode = 0
@@ -540,18 +550,22 @@ local function fileDescriptor(icon, alternative, nickname) --открывает 
         execute(icon.path, nickname)
         return true
     elseif icon.exp == "scrsv" then
-        event.timer(0.1, function ()
-            lastScreenSaverTime = computer.uptime()
-            runScreenSaver(icon.path)
-        end, 1)
+        if publicMode() then
+            event.timer(0.1, function ()
+                lastScreenSaverTime = computer.uptime()
+                runScreenSaver(icon.path)
+            end, 1)
+        end
     elseif icon.exp == "plt" then
-        local clear = saveZone(screen)
-        local state = gui_yesno(screen, nil, nil, "apply this palette?")
-        clear()
+        if publicMode() then
+            local clear = saveZone(screen)
+            local state = gui_yesno(screen, nil, nil, "apply this palette?")
+            clear()
 
-        if state then
-            system_setTheme(icon.path)
-            event.push("redrawDesktop")
+            if state then
+                system_setTheme(icon.path)
+                event.push("redrawDesktop")
+            end
         end
     elseif icon.exp == "txt" or icon.exp == "log" or icon.exp == "cfg" or icon.exp == "dat" then
         execute("edit", nickname, icon.path, icon.exp == "log")
@@ -1107,10 +1121,14 @@ local function doIcon(windowEventData)
                                 failCheck(fs.copy(v.path, wallpaperPath))
                                 event.push("redrawDesktop")
                             elseif str == "  set as screensaver" then
-                                failCheck(fs.copy(v.path, gui_container.screenSaverPath))
+                                if publicMode() then
+                                    failCheck(fs.copy(v.path, gui_container.screenSaverPath))
+                                end
                             elseif str == "  set as palette" then
-                                system_setTheme(v.path)
-                                event.push("redrawDesktop")
+                                if publicMode() then
+                                    system_setTheme(v.path)
+                                    event.push("redrawDesktop")
+                                end
                             elseif str == "  inside the package" then
                                 fileDescriptor(v, true)
                             elseif str == "  edit" or str == "  open is text editor" then

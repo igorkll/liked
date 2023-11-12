@@ -123,6 +123,16 @@ function liked.isUninstallAvailable(path)
     return false
 end
 
+function liked.canRun(path)
+    if not registry.disableCustomPrograms then return true end
+
+    local data = "/data/userdata/"
+    if path:sub(1, #data) == data then 
+        return false
+    end
+    return true
+end
+
 function liked.postInstall(screen, nickname, path)
     local regPath = paths.concat(path, "reg.reg")
     if fs.exists(regPath) and not fs.isDirectory(regPath) then
@@ -207,6 +217,10 @@ function liked.loadApp(name, screen, nickname)
     local path = programs.find(name)
     if not path then
         return nil, "failed to launch application"
+    end
+
+    if not liked.canRun(path) then
+        return nil, "application cannot be started"
     end
 
     local isMain = paths.name(path) == "main.lua"

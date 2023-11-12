@@ -9,5 +9,6 @@
     disableDualboot = true,
     disableMarketForceMode = true,
     disableCustomFiles = true,
+    disableCustomPrograms = true,
     settingsBlackList = {"eeprom", "buffer", "power", "libraries"}
 }
