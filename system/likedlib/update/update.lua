@@ -1,4 +1,4 @@
---local installdata = {branch = "main", mode = "full"} --пристыковываеться к скрипту на этапе обновления
+--local installdata = {data={branch="main",mode="full"}} --пристыковываеться к скрипту на этапе обновления
 
 local function initScreen(gpu, screen)
     if gpu.getScreen() ~= screen then
@@ -154,12 +154,16 @@ end
 proxy.remove("/system")
 
 --сначала ставим liked а только потом ядро, чтобы не перезаписывать init.lua раньше времени. чтобы если обновления оборветься то система не окирпичилась
-installUrl("https://raw.githubusercontent.com/igorkll/liked/" .. installdata.branch)
-installUrl("https://raw.githubusercontent.com/igorkll/likeOS/" .. installdata.branch, true)
+installUrl("https://raw.githubusercontent.com/igorkll/liked/" .. installdata.data.branch)
+installUrl("https://raw.githubusercontent.com/igorkll/likeOS/" .. installdata.data.branch, true)
 
 --востанавливаем содержимое sysdata
-saveFile("/system/sysdata/branch", installdata.branch)
-saveFile("/system/sysdata/mode", installdata.mode)
+for name, content in pairs(installdata.data) do
+    saveFile("/system/sysdata/" .. name, content)
+end
+
+--удаляем этот файл
+proxy.remove("/likeOS_startup.lua")
 
 --перезагружаем устройтсво
 computer.shutdown("fast")

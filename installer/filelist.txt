@@ -20,7 +20,6 @@
 /system/apps/settings.app/icon.t2p
 /system/apps/settings.app/main.lua
 /system/apps/settings.app/shadow_demo.t2p
-/system/apps/settings.app/update_init.lua
 /system/apps/settings.app/modules/a_lock.lua
 /system/apps/settings.app/modules/b_users.lua
 /system/apps/settings.app/modules/c_palette.lua
@@ -104,6 +103,8 @@
 /system/likedbox/bin/shell.lua
 /system/likedlib/installer.lua
 /system/likedlib/sysdata.lua
+/system/likedlib/update/init.lua
+/system/likedlib/update/update.lua
 /system/screenSavers/black_screen.scrsv
 /system/screenSavers/color_dots.scrsv
 /system/screenSavers/random_colors.scrsv
