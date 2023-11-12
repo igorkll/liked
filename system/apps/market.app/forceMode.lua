@@ -1,6 +1,13 @@
 local paths = require("paths")
 local system = require("system")
+local registry = require("registry")
+local gui = require("gui")
 
 local screen, nickname = ...
-local selfpath = paths.concat(paths.path(system.getSelfScriptPath()), "main.lua")
-require("programs").execute(selfpath, screen, nickname, nil, true)
+
+if registry.disableMarketForceMode then
+    gui.warn(screen, nil, nil, "market force-mode is not available on your liked edition")
+else
+    local selfpath = paths.concat(paths.path(system.getSelfScriptPath()), "main.lua")
+    require("programs").execute(selfpath, screen, nickname, nil, true)
+end

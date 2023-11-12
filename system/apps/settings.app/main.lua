@@ -6,6 +6,7 @@ local calls = require("calls")
 local gui_container = require("gui_container")
 local paths = require("paths")
 local bootloader = require("bootloader")
+local registry = require("registry")
 
 local colors = gui_container.colors
 
@@ -30,8 +31,10 @@ local selected = 1
 local limit = 0
 local modules = {}
 for i, file in ipairs(fs.list(modulesPath) or {}) do
-    limit = limit + 1
-    table.insert(modules, file)
+    if not registry.settingsBlackList or not table.exists(registry.settingsBlackList, paths.hideExtension(file:sub(3, #file))) then
+        limit = limit + 1
+        table.insert(modules, file)
+    end
 end
 
 local function redrawStatus()

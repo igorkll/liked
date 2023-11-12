@@ -1,5 +1,11 @@
 {
     disableCustomMarketUrls = true,
     disableRootAccess = true,
-    disableRecovery = true
+    disableRecovery = true,
+    disableExternalBoot = true,
+    disableSystemSettings = true,
+    disableChangeBranch = true,
+    disableDualboot = true,
+    disableMarketForceMode = true,
+    settingsBlackList = {"eeprom", "buffer", "power", "libraries"}
 }

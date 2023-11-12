@@ -1201,11 +1201,19 @@ local function doIcon(windowEventData)
                 clear()
                 
                 if addr then
-                    if addr ~= fs.bootaddress or gui.pleaseType(screen, "MOUNTROOT", "mount root") then
+                    local function doMount()
                         local name = gui.input(screen, nil, nil, "mount name")
                         if name and name ~= "" and not name:find("%\\") and not name:find("%/") then
                             fs.mount(component.proxy(addr), paths.concat(userPath, name))
                         end
+                    end
+
+                    if addr ~= fs.bootaddress then
+                        doMount()
+                    elseif registry.disableRootAccess then
+                        gui.warn(screen, nil, nil, "it is not possible to mount the root filesystem")
+                    elseif gui.pleaseType(screen, "MOUNTROOT", "mount root") then
+                        doMount()
                     end
                     draw()
                 end

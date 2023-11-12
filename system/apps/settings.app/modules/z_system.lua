@@ -51,16 +51,29 @@ layout:createButton(20, 8, 16, 1, nil, nil, "UPDATE SYSTEM", true).onClick = fun
     update()
 end
 
-layout:createButton(25, 4, 16, 1, nil, nil, "UPDATE TO " .. altBranch:upper(), true).onClick = function ()
+local changeBranchButton = layout:createButton(25, 4, 16, 1, nil, nil, "UPDATE TO " .. altBranch:upper(), true)
+function changeBranchButton:onClick()
     update(altBranch)
 end
+if registry.disableChangeBranch then
+    changeBranchButton.disabled = true
+    changeBranchButton.hidden = true
+end
 
-layout:createText(9, 10, colors.white, "disable system recovery menu")
-layout:createText(9, 12, colors.white, "disable startup logo")
-layout:createText(9, 14, colors.white, "disable auto-reboot on system error")
 local disableRecoverySwitch = layout:createSwitch(2, 10, registry.disableRecovery)
 local disableLogoSwitch = layout:createSwitch(2, 12, registry.disableLogo)
 local disableAutoReboot = layout:createSwitch(2, 14, registry.disableAutoReboot)
+local sysSettings = {disableRecoverySwitch, disableLogoSwitch, disableAutoReboot}
+table.insert(sysSettings, layout:createText(9, 10, colors.white, "disable system recovery menu"))
+table.insert(sysSettings, layout:createText(9, 12, colors.white, "disable startup logo"))
+table.insert(sysSettings, layout:createText(9, 14, colors.white, "disable auto-reboot on system error"))
+
+if registry.disableSystemSettings then
+    for _, widget in ipairs(sysSettings) do
+        widget.hidden = true
+        widget.disabled = true
+    end
+end
 
 function disableRecoverySwitch:onSwitch()
     registry.disableRecovery = self.state

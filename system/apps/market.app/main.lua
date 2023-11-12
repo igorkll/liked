@@ -231,12 +231,13 @@ local function applicationLabel(data, x, y)
     local applabel = graphic.createWindow(screen, x, y, rx - 2, 6)
 
     local supportErr
-    if not forceMode then
+    if not forceMode or registry.disableMarketForceMode then
         if data.minDiskSpace then
             if freeSpace < data.minDiskSpace then
                 supportErr = "not enough space to install. need: " .. tostring(data.minDiskSpace) .. "KB"
             end
         end
+
         if data.minColorDepth and maxDepth < data.minColorDepth then
             local level = -1
             if data.minColorDepth == 1 then
@@ -248,8 +249,13 @@ local function applicationLabel(data, x, y)
             end
             supportErr = "the graphics system level is too low. need: " .. tostring(level)
         end
+
         if data.minRam and computer.totalMemory() < data.minRam * 1024 then
             supportErr = "too little RAM, on you " .. math.round(computer.totalMemory() / 1024) .. "KB need " .. math.round(data.minRam) .. "KB"
+        end
+
+        if data.dualboot then
+            supportErr = ""
         end
     end
 

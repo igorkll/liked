@@ -131,6 +131,7 @@ local list = {
         icon = selfurlpart .. "/apps/openOS.app/icon.t2p",
         description = "configures dualboot between openOS and liked",
         minDiskSpace = 1024,
+        dualboot = true,
 
         path = "/vendor/apps/openOS.app",
         install = function(self)
@@ -159,7 +160,7 @@ local list = {
         description = "configures dualboot between mineOS and liked\nATTENTION. if you have \"MineOS EFI\" installed, then you will not be able to use liked after installing MineOS. in order to boot into liked, delete the /OS.lua file in the MineOS explorer",
         minDiskSpace = 1024 + 512,
         minColorDepth = 8,
-        minRam = 768 * 2, --минимальный обьем ОЗУ для установки
+        dualboot = true,
 
         path = "/vendor/apps/mineOS.app",
         install = function(self)
