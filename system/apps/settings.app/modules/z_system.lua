@@ -10,7 +10,6 @@ local liked = require("liked")
 local gui = require("gui")
 local uix = require("uix")
 local sysdata = require("sysdata")
-local update = require("update")
 
 local colors = gui_container.colors
 
@@ -43,7 +42,7 @@ local function update(newBranch)
     if not lastVersion then
         gui_warn(screen, nil, nil, "connection problems\ntry again later")
     elseif gui.pleaseCharge(screen, 80, "update") and gui.pleaseSpace(screen, 512, "update") and gui.checkPasswordLoop(screen) and gui.yesno(screen, nil, nil, newBranch and "ATTENTION, changing the branch can break the system! are you sure?" or (currentVersion ~= lastVersion and "start updating now?" or "you have the latest version installed. do you still want to start updating?")) then
-        update.run(newBranch or branch, currentMode)
+        require("update").run(newBranch or branch, currentMode)
     end
     layout:draw()
 end
