@@ -255,7 +255,7 @@ local function applicationLabel(data, x, y)
         end
 
         if data.dualboot then
-            supportErr = ""
+            supportErr = "it is not possible to install dualboot on your liked edition"
         end
     end
 
