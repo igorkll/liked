@@ -1,2 +1,10 @@
+local registry = require("registry")
+local gui = require("gui")
+
 local screen, nickname = ...
-assert(require("liked").loadApp("edit", screen, nickname))("/data/market_urls.txt")
+
+if registry.disableCustomMarketUrls then
+    gui.warn(screen, nil, nil, "custom market urls is not available on your liked edition")
+else
+    assert(require("liked").loadApp("edit", screen, nickname))("/data/market_urls.txt")
+end
