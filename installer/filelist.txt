@@ -93,7 +93,6 @@
 /system/lib/liked.lua
 /system/lib/palette.lua
 /system/lib/rendUtils.lua
-/system/lib/resources.lua
 /system/lib/sound.lua
 /system/lib/sysinit.lua
 /system/lib/uix.lua

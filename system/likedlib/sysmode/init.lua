@@ -1,13 +1,13 @@
 local sysdata = require("sysdata")
-local resources = require("resources")
+local system = require("system")
 local registry = require("registry")
 local sysmode = {}
 sysmode.modes = {
     full = {
-        reg = resources.get("full.reg")
+        reg = system.getResourcePath("full.reg")
     },
     classic = {
-        reg = resources.get("classic.reg")
+        reg = system.getResourcePath("classic.reg")
     }
 }
 
