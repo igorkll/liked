@@ -106,6 +106,13 @@ end
 
 --------------------------------------------------------
 
+function liked.isUserdata(path)
+    local data = "/data/userdata/"
+    return path:sub(1, #data) == data
+end
+    
+--------------------------------------------------------
+
 function liked.isUninstallScript(path)
     return fs.exists(paths.concat(path, "uninstall.lua"))
 end
@@ -125,19 +132,10 @@ end
 
 function liked.isExecuteAvailable(path)
     if not registry.disableCustomPrograms then return true end
-
-    local data = "/data/userdata/"
-    if path:sub(1, #data) == data then 
-        return false
-    end
-    return true
+    return not liked.isUserdata(path)
 end
 
 function liked.postInstall(screen, nickname, path)
-    if not liked.isExecuteAvailable(path) then
-        return nil, "application cannot be started"
-    end
-
     local regPath = paths.concat(path, "reg.reg")
     if fs.exists(regPath) and not fs.isDirectory(regPath) then
         liked.assert(screen, liked.execute("applyReg", screen, nickname, regPath, true))
@@ -158,10 +156,6 @@ function liked.postInstall(screen, nickname, path)
 end
 
 function liked.uninstall(screen, nickname, path)
-    if not liked.isExecuteAvailable(path) then
-        return nil, "application cannot be started"
-    end
-
     local unregPath = paths.concat(path, "unreg.reg")
     if fs.exists(unregPath) and not fs.isDirectory(unregPath) then
         liked.assert(screen, liked.execute("applyReg", screen, nickname, unregPath, true))
@@ -184,6 +178,18 @@ function liked.uninstall(screen, nickname, path)
 end
 
 --------------------------------------------------------
+
+function liked.publicMode(screen, path)
+    if registry.disableCustomFiles then
+        if not path or liked.isUserdata(path) then
+            local clear = saveZone(screen)
+            gui.warn(screen, nil, nil, "this file cannot be used on your liked edition")
+            clear()
+            return false
+        end
+    end
+    return true
+end
 
 function liked.lastVersion()
     local branch = "main"
@@ -251,7 +257,6 @@ function liked.loadApp(name, screen, nickname)
     if not isMain or not fs.exists(configFile) or fs.isDirectory(configFile) then
         configFile = nil
     end
-
 
     --------------------------------
 
@@ -355,20 +360,22 @@ end
 
 --------------------------------------------------------
 
-function liked.assert(screen, successful, err)
+function liked.assert(screen, ...)
+    local successful, err = ...
     if not successful then
         local clear = saveZone(screen)
         gui.warn(screen, nil, nil, err or "unknown error")
         clear()
     end
-    return successful, err
+    return ...
 end
 
-function liked.assertNoClear(screen, successful, err)
+function liked.assertNoClear(screen, ...)
+    local successful, err = ...
     if not successful then
         gui.warn(screen, nil, nil, err or "unknown error")
     end
-    return successful, err
+    return ...
 end
 
 --------------------------------------------------------

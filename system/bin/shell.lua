@@ -74,6 +74,8 @@ local devModeResetTime = 0
 local copyObject
 local isCut = false
 
+local wallpaperPath = "/data/wallpaper.t2p"
+
 local function runScreenSaver(path)
     if not screenSaverScreenShot then
         screenSaverScreenShot = screenshot(screen, 1, 1, rx, ry)
@@ -98,16 +100,6 @@ local function runScreenSaver(path)
     else
         screenSaverClosed = true
     end
-end
-
-local function publicMode()
-    if registry.disableCustomFiles then
-        local clear = saveZone(screen)
-        gui.warn(screen, nil, nil, "this file cannot be used on your liked edition")
-        clear()
-        return false
-    end
-    return true
 end
 
 ------------------------------------------------------------------------ icons
@@ -550,14 +542,14 @@ local function fileDescriptor(icon, alternative, nickname) --открывает 
         execute(icon.path, nickname)
         return true
     elseif icon.exp == "scrsv" then
-        if publicMode() then
+        if liked.publicMode(screen) then
             event.timer(0.1, function ()
                 lastScreenSaverTime = computer.uptime()
                 runScreenSaver(icon.path)
             end, 1)
         end
     elseif icon.exp == "plt" then
-        if publicMode() then
+        if liked.publicMode(screen) then
             local clear = saveZone(screen)
             local state = gui_yesno(screen, nil, nil, "apply this palette?")
             clear()
@@ -1121,11 +1113,11 @@ local function doIcon(windowEventData)
                                 failCheck(fs.copy(v.path, wallpaperPath))
                                 event.push("redrawDesktop")
                             elseif str == "  set as screensaver" then
-                                if publicMode() then
+                                if liked.publicMode(screen) then
                                     failCheck(fs.copy(v.path, gui_container.screenSaverPath))
                                 end
                             elseif str == "  set as palette" then
-                                if publicMode() then
+                                if liked.publicMode(screen) then
                                     system_setTheme(v.path)
                                     event.push("redrawDesktop")
                                 end
