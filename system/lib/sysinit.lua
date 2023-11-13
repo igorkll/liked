@@ -161,7 +161,7 @@ function sysinit.init(box)
         gui_initScreen(screen)
 
         local t = thread.create(assert(liked.loadApp("shell", screen)))
-        t.parentData.screen = screen --для того чтобы можно было убивать дальнейшие патокаи через адрес экрана(информация от экране передаеться от патока к потоку ядром)
+        t.parentData.interruptData = screen --для того чтобы можно было убивать дальнейшие патокаи через адрес экрана(информация от экране передаеться от патока к потоку ядром)
         t:resume() --поток по умалчанию спит
 
         screenThreads[screen] = t

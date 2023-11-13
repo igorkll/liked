@@ -463,6 +463,7 @@ local function execute(name, nickname, ...)
     local code, err = liked.loadApp(name, screen, nickname)
     if code then
         programTh = thread.createBackground(code, ...) --запуск программы в потоке чтобы созданые в ней потоки закрылись вместе с ней
+        programTh.parentData.interruptData = screen
         programTh:resume()
         local ok, err = true
         while true do
@@ -1472,7 +1473,7 @@ table.insert(listens, event.listen("key_down", function(_, uuid, char, code)
 
     if ok then
         if char == 0 and code == 46 and not lockFlag and not screenSaver and not gui_container.noInterrupt[screen] then
-            event.interruptFlag = programTh
+            event.interruptFlag = screen
         end
 
         updateScreenSaver()
