@@ -116,15 +116,15 @@ while true do
     if windowEventData[1] == "touch" and windowEventData[3] >= 2 and windowEventData[3] <= 19 then
         barTh:suspend()
         if windowEventData[4] == 7 then
-            local result = {programs.execute(paths.concat(paths.path(system.getSelfScriptPath()), "componentlist.lua"), screen)}
+            local result = {liked.execute(paths.concat(paths.path(system.getSelfScriptPath()), "componentlist.lua"), screen)}
             assert(table.unpack(result))
             if result[1] and result[2] then
                 break
             end
         elseif windowEventData[4] == 9 then
-            programs.execute("edit", screen, nickname, "/system/LICENSE", true)
+            liked.execute("edit", screen, nickname, "/system/LICENSE", true)
         elseif windowEventData[4] == 11 then
-            programs.execute("edit", screen, nickname, "/system/core/LICENSE", true)
+            liked.execute("edit", screen, nickname, "/system/core/LICENSE", true)
         end
         barTh:resume()
         draw()

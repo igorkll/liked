@@ -1,7 +1,7 @@
 local gui = require("gui")
-local programs = require("programs")
 local paths = require("paths")
 local system = require("system")
+local liked = require("liked")
 
 local screen, nickname = ...
 local folder = paths.path(system.getSelfScriptPath())
@@ -12,5 +12,5 @@ for i = 0, 12 do
 end
 local num = gui.select(screen, nil, nil, "select game level", levels)
 if num then
-    programs.execute(paths.concat(folder, "main.lua"), screen, nickname, num - 1)
+    liked.execute(paths.concat(folder, "main.lua"), screen, nickname, num - 1)
 end

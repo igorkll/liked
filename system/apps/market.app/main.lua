@@ -38,7 +38,7 @@ local barTh, barRedraw = liked.drawUpBarTask(screen, true, colors.gray)
 
 local function exec(...)
     barTh:suspend()
-    local result = {programs.execute(...)}
+    local result = {liked.execute(...)}
     barTh:resume()
     return table.unpack(result)
 end

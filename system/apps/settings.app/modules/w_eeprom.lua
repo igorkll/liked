@@ -204,7 +204,7 @@ function editButton:onClick()
 
         while true do
             upTask:suspend()
-            assert(programs.execute("edit", screen, nil, file, storageRoState))
+            assert(liked.execute("edit", screen, nil, file, storageRoState))
             upTask:resume()
             local newdata = assert(fs.readFile(file))
             if data == newdata then
@@ -231,7 +231,7 @@ function editDataButton:onClick()
 
         while true do
             upTask:suspend()
-            assert(programs.execute("edit", screen, nil, file))
+            assert(liked.execute("edit", screen, nil, file))
             upTask:resume()
             local newdata = assert(fs.readFile(file))
             if data == newdata then

@@ -123,7 +123,7 @@ function liked.isUninstallAvailable(path)
     return false
 end
 
-function liked.canRun(path)
+function liked.isExecuteAvailable(path)
     if not registry.disableCustomPrograms then return true end
 
     local data = "/data/userdata/"
@@ -134,9 +134,13 @@ function liked.canRun(path)
 end
 
 function liked.postInstall(screen, nickname, path)
+    if not liked.isExecuteAvailable(path) then
+        return nil, "application cannot be started"
+    end
+
     local regPath = paths.concat(path, "reg.reg")
     if fs.exists(regPath) and not fs.isDirectory(regPath) then
-        liked.assert(screen, programs.execute("applyReg", screen, nickname, regPath, true))
+        liked.assert(screen, liked.execute("applyReg", screen, nickname, regPath, true))
     end
 
     local formatsPath = paths.concat(path, "formats.cfg")
@@ -146,7 +150,7 @@ function liked.postInstall(screen, nickname, path)
 
     local installPath = paths.concat(path, "install.lua")
     if fs.exists(installPath) and not fs.isDirectory(installPath) then
-        liked.assert(screen, programs.execute(installPath, screen, nickname))
+        liked.assert(screen, liked.execute(installPath, screen, nickname))
     end
 
     registry.save()
@@ -154,9 +158,13 @@ function liked.postInstall(screen, nickname, path)
 end
 
 function liked.uninstall(screen, nickname, path)
+    if not liked.isExecuteAvailable(path) then
+        return nil, "application cannot be started"
+    end
+
     local unregPath = paths.concat(path, "unreg.reg")
     if fs.exists(unregPath) and not fs.isDirectory(unregPath) then
-        liked.assert(screen, programs.execute("applyReg", screen, nickname, unregPath, true))
+        liked.assert(screen, liked.execute("applyReg", screen, nickname, unregPath, true))
     end
 
     local formatsPath = paths.concat(path, "formats.cfg")
@@ -166,7 +174,7 @@ function liked.uninstall(screen, nickname, path)
 
     local uninstallPath = paths.concat(path, "uninstall.lua")
     if fs.exists(uninstallPath) and not fs.isDirectory(uninstallPath) then
-        liked.assert(screen, programs.execute(uninstallPath, screen, nickname))
+        liked.assert(screen, liked.execute(uninstallPath, screen, nickname))
     else
         liked.assert(screen, fs.remove(path))
     end
@@ -219,7 +227,7 @@ function liked.loadApp(name, screen, nickname)
         return nil, "failed to launch application"
     end
 
-    if not liked.canRun(path) then
+    if not liked.isExecuteAvailable(path) then
         return nil, "application cannot be started"
     end
 

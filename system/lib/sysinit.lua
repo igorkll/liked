@@ -13,8 +13,6 @@ function sysinit.init(box)
 
     table.insert(package.paths, "/system/likedlib")
 
-    table.insert(programs.paths, "/data/userdata")
-    table.insert(programs.paths, "/data/userdata/apps")
     table.insert(programs.paths, "/data/apps")
     table.insert(programs.paths, "/system/apps")
     table.insert(programs.paths, "/vendor/apps")
@@ -149,42 +147,24 @@ function sysinit.init(box)
 
     ------------------------------------
 
-    local screenThreads = {}
-    local runShell
-    if box then
-        function runShell(screen)
-            gui_initScreen(screen)
-    
-            local t = thread.create(assert(programs.load("shell")), screen)
-            t.parentData.screen = screen --для того чтобы можно было убивать дальнейшие патокаи через адрес экрана(информация от экране передаеться от патока к потоку ядром)
-            t:resume() --поток по умалчанию спит
-
-            screenThreads[screen] = t
-        end
-    else
-        local desktop = assert(programs.load("shell")) --подгружаю один раз для экономии ОЗУ, таблица _ENV обшая, так что там нельзя юзать глобалки
-        local first = true
-
-        function runShell(screen)
-            gui_initScreen(screen)
-                
-            local t = thread.create(desktop, screen, first)
-            t.parentData.screen = screen --для того чтобы можно было убивать дальнейшие патоки через адрес экрана(информация от экране передаеться от патока к потоку ядром)
-            t:resume() --поток по умалчанию спит
-    
-            first = false
-            screenThreads[screen] = t
-        end
-    end
-    
-
-    ------------------------------------
-
     if programs.find("preinit") then
-        local ok, err = programs.execute("preinit")
+        local ok, err = liked.execute("preinit")
         if not ok then
             event.errLog(err)
         end
+    end
+
+    ------------------------------------
+
+    local screenThreads = {}
+    local function runShell(screen)
+        gui_initScreen(screen)
+
+        local t = thread.create(assert(liked.loadApp("shell", screen)))
+        t.parentData.screen = screen --для того чтобы можно было убивать дальнейшие патокаи через адрес экрана(информация от экране передаеться от патока к потоку ядром)
+        t:resume() --поток по умалчанию спит
+
+        screenThreads[screen] = t
     end
 
     for index, address in ipairs(screens) do

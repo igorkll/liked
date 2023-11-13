@@ -961,7 +961,7 @@ function gui.selectcomponent(screen, cx, cy, types, allowAutoConfirm, control) -
                         file.close()
 
                         local clear = graphic.screenshot(screen)
-                        programs.execute("edit", screen, nil, tempfile, true)
+                        require("liked").execute("edit", screen, nil, tempfile, true)
                         clear()
                         fs.remove(tempfile)
                     end
