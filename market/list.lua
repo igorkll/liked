@@ -341,7 +341,7 @@ local list = {
     },
     {
         name = "cardwriter",
-        version = "1",
+        version = "2",
         vendor = "logic",
         description = "program for write cards and EEPROM's via card writer",
         minDiskSpace = 64,
