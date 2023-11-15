@@ -125,6 +125,13 @@ function objclass:uploadEvent(eventData)
                 self:onTextChanged(text)
             end
         end
+    elseif self.type == "up" then
+        if self.gui.returnLayout then
+            local _, py = self.gui.window:toFakePos(1, 1)
+            if eventData[1] == "touch" and eventData[3] >= 1 and eventData[3] <= 3 and eventData[4] == py then
+                self.gui.returnLayout:select()
+            end
+        end
     elseif self.type == "seek" then
         local function doSeek(oldValue, isTouch)
             if self.value < 0 then self.value = 0 end
@@ -260,7 +267,11 @@ function objclass:draw()
             end
         end
     elseif self.type == "up" then
-        liked.drawFullUpBar(self.gui.window.screen, self.title, self.withoutFill, self.bgcolor, self.wide)
+        liked.drawFullUpBar(self.gui.window.screen, (self.gui.returnLayout and "   " or "") .. self.title, self.withoutFill, self.bgcolor, self.wide)
+        if self.gui.returnLayout then
+            local px, py = self.gui.window:toFakePos(1, 1)
+            self.gui.window:set(px, py, colors.red, colors.white, " < ")
+        end
     elseif self.type == "plane" then
         self.gui.window:fill(self.x, self.y, self.sx, self.sy, self.color, 0, " ")
     elseif self.type == "image" then
@@ -531,6 +542,9 @@ function uix:createCustom(x, y, cls, ...)
     return obj
 end
 
+function uix:setReturnLayout(returnLayout)
+    self.returnLayout = returnLayout
+end
 
 
 
