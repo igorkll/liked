@@ -284,7 +284,8 @@ function uix:createUpBar(title, withoutFill, bgcolor) --working only in fullscre
     obj.withoutFill = withoutFill
     obj.bgcolor = bgcolor
 
-    obj.close = self:createButton(self.window.sizeX, 1, 1, 1)
+    local px, py = self.window:toFakePos(self.window.sizeX, 1)
+    obj.close = self:createButton(px, py, 1, 1)
     obj.close.hidden = true
 
     --тут некоректно использовать таймер, так как он продолжит тикать даже если система приостановит программу для работы screensaver
@@ -312,9 +313,8 @@ function uix:createUp(title, withoutFill, bgcolor)
     local upbar = self:createUpBar(title, withoutFill, bgcolor)
 
     function upbar.close:onClick()
-        require("computer").beep()
         if self.manager and self.manager.onExit then
-            self.manager.onExit()
+            self.manager:onExit()
         else
             os.exit()
         end
@@ -634,13 +634,14 @@ end
 function uix.createLayout(screen, title, bgcolor, style)
     local rx, ry = graphic.getResolution(screen)
     local window = graphic.createWindow(screen, 1, 2, rx, ry - 1)
+    window.outsideEvents = true
 
     local layout = uix.create(window, bgcolor or colors.black, style)
     layout:createUp(title or liked.selfApplicationName())
     return layout
 end
 
-function uix.loop(guimanager, layout, func) --legacy
+function uix.loop(guimanager, layout, func) --legacy manager
     function guimanager.select(newLayout)
         if layout then
             layout.active = false
