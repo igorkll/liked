@@ -312,7 +312,7 @@ end
 function uix:createUp(title, withoutFill, bgcolor)
     local upbar = self:createUpBar(title, withoutFill, bgcolor)
 
-    function upbar.close:onClick()
+    function upbar.close.onClick()
         if self.manager and self.manager.onExit then
             self.manager:onExit()
         else
