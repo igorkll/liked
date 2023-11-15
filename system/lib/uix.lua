@@ -35,6 +35,11 @@ function objclass:stop()
             self.th:kill()
             self.th = nil
         end
+    elseif self.type == "button" then
+        self.state = false
+        if self.onDrop then
+            self:onDrop()
+        end
     end
 end
 
@@ -286,7 +291,7 @@ function uix:createUpBar(title, withoutFill, bgcolor) --working only in fullscre
     obj.thread = thread.create(function ()
         while true do
             os.sleep(10)
-            if not self.gui.active then
+            if self.gui.active then
                 obj:draw()
             end
         end
@@ -675,6 +680,10 @@ function manager:select(layout)
 end
 
 function manager:loop()
+    if self.firstLayout and not self.current then
+        self:select(self.firstLayout)
+    end
+
     while true do
         local eventData = {event.pull()}
         self.current:uploadEvent(eventData)
@@ -688,6 +697,7 @@ end
 function manager:create(...)
     local layout = uix.createLayout(self.screen, ...)
     layout.allowAutoActive = nil
+    if not self.firstLayout then self.firstLayout = layout end
     return layout
 end
 
