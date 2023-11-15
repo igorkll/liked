@@ -291,7 +291,7 @@ function uix:createUpBar(title, withoutFill, bgcolor) --working only in fullscre
     obj.thread = thread.create(function ()
         while true do
             os.sleep(10)
-            if self.gui.active then
+            if self.active then
                 obj:draw()
             end
         end
@@ -312,8 +312,9 @@ function uix:createUp(title, withoutFill, bgcolor)
     local upbar = self:createUpBar(title, withoutFill, bgcolor)
 
     function upbar.close:onClick()
-        if self.gui.manager and self.gui.manager.onExit then
-            self.gui.manager.onExit()
+        require("computer").beep()
+        if self.manager and self.manager.onExit then
+            self.manager.onExit()
         else
             os.exit()
         end
