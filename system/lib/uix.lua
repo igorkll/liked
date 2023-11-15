@@ -271,25 +271,7 @@ function objclass:draw()
     end
 end
 
-----------------------------------
-
-function uix.doColor(obj, back, fore)
-    obj.back = back or colors.white
-    obj.fore = fore
-    if not obj.fore then
-        if back then
-            if back == colors.white then
-                obj.fore = colors.black
-            else
-                obj.fore = colors.white
-            end
-        else
-            obj.fore = colors.gray
-        end
-    end
-end
-
-----------------------------------
+---------------------------------- layout methods
 
 function uix:createUpBar(title, withoutFill, bgcolor) --working only in fullscreen ui
     local obj = setmetatable({gui = self, type = "up"}, {__index = objclass})
@@ -321,15 +303,20 @@ function uix:createUpBar(title, withoutFill, bgcolor) --working only in fullscre
     return obj
 end
 
-function uix:createAutoUpBar(title, withoutFill, bgcolor)
+function uix:createUp(title, withoutFill, bgcolor)
     local upbar = self:createUpBar(title, withoutFill, bgcolor)
 
     function upbar.close:onClick()
-        os.exit()
+        if self.gui.manager and self.gui.manager.onExit then
+            self.gui.manager.onExit()
+        else
+            os.exit()
+        end
     end
 
     return upbar
 end
+uix.createAutoUpBar = uix.createUp --legacy
 
 function uix:createLabel(x, y, sx, sy, back, fore, text)
     local obj = setmetatable({gui = self, type = "label"}, {__index = objclass})
@@ -539,6 +526,7 @@ end
 
 
 
+
 function uix:uploadEvent(eventData)
     if self.controlLock or not self.active then return end
 
@@ -558,6 +546,11 @@ function uix:uploadEvent(eventData)
 end
 
 function uix:draw()
+    if self.allowAutoActive then
+        self.allowAutoActive = nil
+        self.active = true
+    end
+
     if not self.active then
         return
     end
@@ -585,6 +578,24 @@ function uix:stop()
     end
 end
 
+---------------------------------- uix methods
+
+function uix.doColor(obj, back, fore)
+    obj.back = back or colors.white
+    obj.fore = fore
+    if not obj.fore then
+        if back then
+            if back == colors.white then
+                obj.fore = colors.black
+            else
+                obj.fore = colors.white
+            end
+        else
+            obj.fore = colors.gray
+        end
+    end
+end
+
 function uix.create(window, bgcolor, style)
     local guiobj = setmetatable({}, {__index = uix})
     guiobj.window = window
@@ -593,23 +604,35 @@ function uix.create(window, bgcolor, style)
     guiobj.selected = false
     guiobj.bgcolor = bgcolor
     guiobj.controlLock = false
-    guiobj.active = true
+    guiobj.active = false
+    guiobj.allowAutoActive = true
 
     return guiobj
 end
 
-function uix.createAuto(screen, title, bgcolor, style)
+function uix.createAuto(screen, title, bgcolor, style) --legacy
     local rx, ry = graphic.getResolution(screen)
     local window = graphic.createWindow(screen, 1, 1, rx, ry)
-    local guiobj = uix.create(window, bgcolor or colors.black, style)
-    guiobj:createAutoUpBar(title)
-    return guiobj
+
+    local layout = uix.create(window, bgcolor or colors.black, style)
+    layout:createUp(title)
+    return layout
 end
 
-function uix.loop(guimanager, layout, func)
+function uix.createLayout(screen, title, bgcolor, style)
+    local rx, ry = graphic.getResolution(screen)
+    local window = graphic.createWindow(screen, 1, 2, rx, ry - 1)
+
+    local layout = uix.create(window, bgcolor or colors.black, style)
+    layout:createUp(title or liked.selfApplicationName())
+    return layout
+end
+
+function uix.loop(guimanager, layout, func) --legacy
     function guimanager.select(newLayout)
         if layout then
             layout.active = false
+            layout:stop()
         end
         layout = newLayout
         if layout then
@@ -626,6 +649,39 @@ function uix.loop(guimanager, layout, func)
             func(eventData)
         end
     end
+end
+
+function uix.manager()
+    local ui = {}
+    ui.current = nil
+    ui.onEvent = nil
+    ui.onExit = nil
+
+    function ui.select(layout)
+        if ui.current then
+            ui.current.active = false
+            ui.current:stop()
+        end
+
+        ui.current = layout
+        ui.current.manager = ui
+        ui.current.allowAutoActive = nil
+        ui.current.active = true
+        ui.current:draw()
+    end
+
+    function ui.loop()
+        while true do
+            local eventData = {event.pull()}
+            ui.current:uploadEvent(eventData)
+
+            if ui.onEvent then
+                ui.onEvent(eventData)
+            end
+        end
+    end
+
+    return ui
 end
 
 uix.unloadable = true
