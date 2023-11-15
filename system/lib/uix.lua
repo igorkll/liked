@@ -260,7 +260,7 @@ function objclass:draw()
             end
         end
     elseif self.type == "up" then
-        liked.drawFullUpBar(self.gui.window.screen, self.title, self.withoutFill, self.bgcolor)
+        liked.drawFullUpBar(self.gui.window.screen, self.title, self.withoutFill, self.bgcolor, self.wide)
     elseif self.type == "plane" then
         self.gui.window:fill(self.x, self.y, self.sx, self.sy, self.color, 0, " ")
     elseif self.type == "image" then
@@ -283,9 +283,10 @@ function uix:createUpBar(title, withoutFill, bgcolor) --working only in fullscre
     obj.title = title
     obj.withoutFill = withoutFill
     obj.bgcolor = bgcolor
+    obj.wide = true
 
     local px, py = self.window:toFakePos(self.window.sizeX, 1)
-    obj.close = self:createButton(px, py, 1, 1)
+    obj.close = self:createButton(px - 2, py, 3, 1)
     obj.close.hidden = true
 
     --тут некоректно использовать таймер, так как он продолжит тикать даже если система приостановит программу для работы screensaver
@@ -313,8 +314,8 @@ function uix:createUp(title, withoutFill, bgcolor)
     local upbar = self:createUpBar(title, withoutFill, bgcolor)
 
     function upbar.close.onClick()
-        if self.manager and self.manager.onExit then
-            self.manager:onExit()
+        if self.smartGuiManager and self.smartGuiManager.onExit then
+            self.smartGuiManager:onExit()
         else
             os.exit()
         end
@@ -585,8 +586,8 @@ function uix:stop()
 end
 
 function uix:select()
-    if self.manager then
-        self.manager:select(self)
+    if self.smartGuiManager then
+        self.smartGuiManager:select(self)
     end
 end
 
@@ -675,7 +676,7 @@ function manager:select(layout)
     end
 
     self.current = layout
-    self.current.manager = self
+    self.current.smartGuiManager = self
     self.current.allowAutoActive = nil
     self.current.active = true
     self.current:draw()

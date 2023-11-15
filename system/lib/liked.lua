@@ -470,7 +470,7 @@ function liked.drawUpBarTaskBg(screen, withoutFill, bgcolor)
 end
 
 
-function liked.drawUpBar(screen, withoutFill, bgcolor)
+function liked.drawUpBar(screen, withoutFill, bgcolor, guiOffset)
     local rtc = "RTC-" .. time.formatTime(time.addTimeZone(time.getRealTime(), registry.timeZone or 0))
     local gtc = "GTC-" .. time.formatTime(time.getGameTime())
     local charge = system.getCharge()
@@ -485,7 +485,7 @@ function liked.drawUpBar(screen, withoutFill, bgcolor)
 
     local battery = "⣏⣉⣉⡷"
     local batteryLen = unicode.len(battery)
-    local offset = batteryLen + 1
+    local offset = (batteryLen + 1) - (guiOffset or 0)
 
     gpu.set(rx - #rtc - 7 - offset, 1, rtc)
     gpu.set(rx - #gtc - 18 - offset, 1, gtc)
@@ -531,10 +531,10 @@ end
 
 --------------------------------------------------------
 
-function liked.raw_drawFullUpBarTask(method, screen, ...)
-    local args = {...}
+function liked.raw_drawFullUpBarTask(method, screen, title, withoutFill, bgcolor, wideExit)
+    if wideExit == nil then wideExit = true end
     local function redraw()
-        liked.drawFullUpBar(screen, table.unpack(args))
+        liked.drawFullUpBar(screen, title, withoutFill, bgcolor, wideExit)
         graphic.updateFlag(screen)
     end
     local callbacks = {}
@@ -546,8 +546,16 @@ function liked.raw_drawFullUpBarTask(method, screen, ...)
                 local eventData = {event.pull()}
                 local windowEventData = window:uploadEvent(eventData)
                 if windowEventData[1] == "touch" then
-                    if windowEventData[3] == rx and callbacks.exit then
-                        callbacks.exit()
+                    if callbacks.exit then
+                        if wideExit then
+                            if windowEventData[3] >= rx - 2 then
+                                callbacks.exit()
+                            end
+                        else
+                            if windowEventData[3] == rx then
+                                callbacks.exit()
+                            end
+                        end
                     end
                 end
             end
@@ -570,8 +578,8 @@ function liked.drawFullUpBarTaskBg(...)
     return liked.raw_drawFullUpBarTask(thread.createBackground, ...)
 end
 
-function liked.drawFullUpBar(screen, title, withoutFill, bgcolor)
-    liked.drawUpBar(screen, withoutFill, bgcolor)
+function liked.drawFullUpBar(screen, title, withoutFill, bgcolor, wideExit)
+    liked.drawUpBar(screen, withoutFill, bgcolor, wideExit and -2)
     local gpu = graphic.findGpu(screen)
     local rx, ry = gpu.getResolution()
 
@@ -580,7 +588,11 @@ function liked.drawFullUpBar(screen, title, withoutFill, bgcolor)
         gpu.set(2, 1, title)
     end
     gpu.setBackground(gui_container.colors.red)
-    gpu.set(rx, 1, "X")
+    if wideExit then
+        gpu.set(rx - 2, 1, " X ")
+    else
+        gpu.set(rx, 1, "X")
+    end
 end
 
 --------------------------------------------------------
