@@ -578,6 +578,12 @@ function uix:stop()
     end
 end
 
+function uix:select()
+    if self.manager then
+        self.manager:select(self)
+    end
+end
+
 ---------------------------------- uix methods
 
 function uix.doColor(obj, back, fore)
@@ -651,38 +657,45 @@ function uix.loop(guimanager, layout, func) --legacy
     end
 end
 
-function uix.manager()
-    local ui = {}
-    ui.current = nil
-    ui.onEvent = nil
-    ui.onExit = nil
+---------------------------------- manager
 
-    function ui.select(layout)
-        if ui.current then
-            ui.current.active = false
-            ui.current:stop()
-        end
+local manager = {}
 
-        ui.current = layout
-        ui.current.manager = ui
-        ui.current.allowAutoActive = nil
-        ui.current.active = true
-        ui.current:draw()
+function manager:select(layout)
+    if self.current then
+        self.current.active = false
+        self.current:stop()
     end
 
-    function ui.loop()
-        while true do
-            local eventData = {event.pull()}
-            ui.current:uploadEvent(eventData)
-
-            if ui.onEvent then
-                ui.onEvent(eventData)
-            end
-        end
-    end
-
-    return ui
+    self.current = layout
+    self.current.manager = self
+    self.current.allowAutoActive = nil
+    self.current.active = true
+    self.current:draw()
 end
+
+function manager:loop()
+    while true do
+        local eventData = {event.pull()}
+        self.current:uploadEvent(eventData)
+
+        if self.onEvent then
+            self:onEvent(eventData)
+        end
+    end
+end
+
+function manager:create(...)
+    local layout = uix.createLayout(self.screen, ...)
+    layout.allowAutoActive = nil
+    return layout
+end
+
+function uix.manager(screen)
+    return setmetatable({screen = screen}, {__index = manager})
+end
+
+----------------------------------
 
 uix.unloadable = true
 return uix

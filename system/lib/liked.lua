@@ -636,7 +636,12 @@ function liked.getName(screen, path)
 end
 
 function liked.selfApplicationName()
-    return paths.hideExtension(paths.name(paths.path(system.getSelfScriptPath())))
+    local scriptPath = system.getSelfScriptPath()
+    local application = paths.path(scriptPath)
+    if paths.extension(application) == "app" then
+        application = scriptPath
+    end
+    return paths.hideExtension(paths.name(scriptPath))
 end
 
 --------------------------------------------------------
