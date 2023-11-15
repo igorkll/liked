@@ -195,7 +195,7 @@ local list = {
     },
     {
         name = "camera",
-        version = "1.2",
+        version = "1.3",
         vendor = "logic",
         description = "allows you to take pictures on the camera from the computronix addon.\n* allows you to select a camera from several\n* allows you to save a photo for loading on another computer",
         minDiskSpace = 64,

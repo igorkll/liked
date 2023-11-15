@@ -9,6 +9,9 @@ local paths = require("paths")
 local advLabeling = require("advLabeling")
 local gui_container = require("gui_container")
 local uix = require("uix")
+local palette = require("palette")
+
+local oldPalete = palette.save(screen)
 
 gui_container.noScreenSaver[screen] = true
 
@@ -436,5 +439,5 @@ while true do
     end
 end
 
-gui_initScreen(screen)
+palette.set(screen, oldPalete)
 gui_container.noScreenSaver[screen] = nil
