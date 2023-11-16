@@ -348,6 +348,16 @@ local list = {
 
         path = "/data/apps/cardwriter.app",
         urlPrimaryPart = selfurlpart .. "/apps/cardwriter.app/"
+    },
+    {
+        name = "calculator",
+        version = "1",
+        vendor = "logic",
+        description = "this is an engineering calculator that supports a lot of functions",
+        minDiskSpace = 64,
+
+        path = "/data/apps/calculator.app",
+        urlPrimaryPart = selfurlpart .. "/apps/calculator.app/"
     }
 }
 

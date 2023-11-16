@@ -1346,10 +1346,10 @@ local function doIcon(windowEventData)
                                     file.close()
                                     draw()
                                 else
-                                    warn("save error " .. (err or "unknown error"))
+                                    warn("save error: " .. (err or "unknown error"))
                                 end
                             else
-                                warn("download error " .. (err or "unknown error"))
+                                warn("download error: " .. (err or "unknown error"))
                             end
                         end
                     else
