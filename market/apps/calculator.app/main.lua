@@ -1,4 +1,5 @@
 local uix = require("uix")
+local unicode = require("unicode")
 local ui = uix.manager(...)
 
 local backgroundColor = uix.colors.white
@@ -8,13 +9,18 @@ local buttonTextColor = uix.colors.white
 
 local rx, ry = ui:size()
 local layout = ui:create("Calculator", backgroundColor, uix.styles[2])
+layout:createPlane(1, 5, rx, ry - 4, uix.colors.black)
 local mathLabel = layout:createLabel(2, 2, rx - 2, 1, backgroundColor, numTextColor)
 local resultLabel = layout:createLabel(2, 3, rx - 2, 1, backgroundColor, numTextColor)
 
 local current = ""
 
 local function doCurrent()
-    mathLabel.text = current
+    if unicode.len(current) == 0 then
+        mathLabel.text = "0"
+    else
+        mathLabel.text = current
+    end
     mathLabel.alignment = "right"
     mathLabel:draw()
 
@@ -32,14 +38,15 @@ local function doCurrent()
     resultLabel.alignment = "right"
     resultLabel:draw()
 end
+doCurrent()
 
-local function addButton(x, y, color, textcolor, char, func)
-    local button = layout:createButton(x * 16, (y * 5) + 5, 16, 5, color, textcolor, char)
+local function addButton(x, y, color, textcolor, char, func, xoffset)
+    local button = layout:createButton((x * 16) + (xoffset or 0), (y * 5) + 5, 16, 5, color, textcolor, char)
 
     if color == buttonBackgroundColor then
-        button.back = uix.colors.gray
+        button.back2 = uix.colors.gray
     else
-        button.back = uix.colors.black
+        button.back2 = uix.colors.black
     end
 
     if func then
@@ -67,11 +74,23 @@ addButton(2, 2, buttonBackgroundColor, buttonTextColor, "3")
 
 addButton(0, 3, uix.colors.gray, buttonTextColor, "0")
 addButton(1, 3, uix.colors.gray, buttonTextColor, ".")
-addButton(2, 3, uix.colors.gray, buttonTextColor, "")
+addButton(2, 3, uix.colors.gray, buttonTextColor, "=", function ()
+    current = resultLabel.text
+    doCurrent()
+end)
 
-addButton(3, 0, uix.colors.orange, buttonTextColor, "+")
-addButton(3, 0, uix.colors.orange, buttonTextColor, "-")
-addButton(3, 0, uix.colors.orange, buttonTextColor, "*")
-addButton(3, 0, uix.colors.orange, buttonTextColor, "/")
+addButton(3, 0, uix.colors.orange, buttonTextColor, "+", nil, 1)
+addButton(3, 1, uix.colors.orange, buttonTextColor, "-", nil, 1)
+addButton(3, 2, uix.colors.orange, buttonTextColor, "*", nil, 1)
+addButton(3, 3, uix.colors.orange, buttonTextColor, "/", nil, 1)
+
+addButton(4, 0, uix.colors.red, buttonTextColor, "AC", function ()
+    current = ""
+    doCurrent()
+end, 1)
+addButton(4, 1, uix.colors.red, buttonTextColor, "<", function ()
+    current = unicode.sub(current, 1, unicode.len(current) - 1)
+    doCurrent()
+end, 1)
 
 ui:loop()
