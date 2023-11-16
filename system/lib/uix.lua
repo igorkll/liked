@@ -193,7 +193,8 @@ function objclass:draw()
 
         local x, y, sx, sy = self.x, self.y, self.sx, self.sy
         
-        if self.sy == 1 and self.gui.style == "round" then
+        local isRound = self.sy == 1 and self.gui.style == "round"
+        if isRound then
             local _, _, bg = self.gui.window:get(x, y)
             self.gui.window:fill(x + 1, y, sx - 2, sy, back, 0, " ")
             self.gui.window:set(x, y, bg, back, "◖")
@@ -203,7 +204,21 @@ function objclass:draw()
         end
 
         if self.text then
-            local tx, ty = (x + math.round(sx / 2)) - math.round(unicode.len(self.text) / 2), y + (math.round(sy / 2) - 1)
+            local tx
+            local ty = y + (math.round(sy / 2) - 1)
+            if self.alignment == "left" then
+                tx = x
+                if isRound then
+                    tx = tx + 1
+                end
+            elseif self.alignment == "right" then
+                tx = (x + sx) - unicode.len(self.text)
+                if isRound then
+                    tx = tx - 1
+                end
+            else
+                tx = (x + math.round(sx / 2)) - math.round(unicode.len(self.text) / 2)
+            end
             self.gui.window:set(tx, ty, back, fore, self.text)
         end
     elseif self.type == "switch" then
@@ -344,6 +359,7 @@ function uix:createLabel(x, y, sx, sy, back, fore, text)
     obj.sy = sy
     obj.text = text
     uix.doColor(obj, back, fore)
+    obj.alignment = "center"
 
     table.insert(self.objs, obj)
     return obj
@@ -361,6 +377,7 @@ function uix:createButton(x, y, sx, sy, back, fore, text, autoRelease)
     uix.doColor(obj, back, fore)
     obj.back2 = obj.fore
     obj.fore2 = obj.back
+    obj.alignment = "center"
 
     table.insert(self.objs, obj)
     return obj
@@ -474,6 +491,7 @@ function uix:createContext(x, y, sx, sy, back, fore, text, strs, funcs, actives)
     obj.fore2 = obj.back
     obj.text = text
     obj.state = false
+    obj.alignment = "center"
 
     obj.strs = strs or {}
     obj.funcs = funcs or {}
@@ -716,6 +734,10 @@ function manager:create(...)
     layout.allowAutoActive = nil
     if not self.firstLayout then self.firstLayout = layout end
     return layout
+end
+
+function manager:size()
+    return graphic.getResolution(self.screen)
 end
 
 function uix.manager(screen)
