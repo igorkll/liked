@@ -107,14 +107,14 @@ addButton(4, 1, uix.colors.red, buttonTextColor, "<", function ()
     local finded
     for i = 1, #history do
         finded = table.remove(history)
-        if not finded then
-            return
-        elseif finded ~= current then
+        if finded ~= current then
             break
         end
     end
-    current = finded
-    doCurrent(true)
+    if finded then
+        current = finded
+        doCurrent(true)
+    end
 end, 1)
 
 addButton(4, 2, uix.colors.cyan, buttonTextColor, "()", function ()
