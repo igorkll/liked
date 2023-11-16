@@ -17,7 +17,7 @@ local current = ""
 
 local history = {}
 local function doCurrent(noAdd)
-    if not noAdd then
+    if not noAdd and history[#history] ~= current then
         table.insert(history, current)
     end
 
@@ -40,10 +40,11 @@ local function doCurrent(noAdd)
     else
         resultLabel.text = "0"
     end
+    resultLabel.text = tostring(#history)
     resultLabel.alignment = "right"
     resultLabel:draw()
 end
-doCurrent()
+doCurrent(true)
 
 local function addButton(x, y, color, textcolor, char, func, xoffset)
     local button = layout:createButton((x * 16) + (xoffset or 0), (y * 5) + 5, 16, 5, color, textcolor, char)
