@@ -45,6 +45,10 @@ local function addButton(x, y, color, textcolor, char, func, xoffset)
 
     if color == buttonBackgroundColor then
         button.back2 = uix.colors.gray
+    elseif color == uix.colors.orange then
+        button.back2 = uix.colors.brown
+    elseif color == uix.colors.red then
+        button.back2 = uix.colors.brown
     else
         button.back2 = uix.colors.black
     end
