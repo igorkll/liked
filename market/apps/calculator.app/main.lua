@@ -15,7 +15,12 @@ local resultLabel = layout:createLabel(2, 3, rx - 2, 1, backgroundColor, numText
 
 local current = ""
 
-local function doCurrent()
+local history = {}
+local function doCurrent(noAdd)
+    if not noAdd then
+        table.insert(history, current)
+    end
+
     if unicode.len(current) == 0 then
         mathLabel.text = "0"
     else
@@ -24,7 +29,7 @@ local function doCurrent()
     mathLabel.alignment = "right"
     mathLabel:draw()
 
-    local code = load("return (" .. current .. ")", "=math", "t", {})
+    local code = load("return (" .. current .. ")", "=math", "t", {PI = math.pi, round = math.round})
     if code then
         local result = {pcall(code)}
         if result[1] then
@@ -49,6 +54,8 @@ local function addButton(x, y, color, textcolor, char, func, xoffset)
         button.back2 = uix.colors.brown
     elseif color == uix.colors.red then
         button.back2 = uix.colors.brown
+    elseif color == uix.colors.cyan then
+        button.back2 = uix.colors.blue
     else
         button.back2 = uix.colors.black
     end
@@ -57,7 +64,11 @@ local function addButton(x, y, color, textcolor, char, func, xoffset)
         button.onClick = func
     else
         function button:onClick()
-            current = current .. char
+            if tonumber(char) then
+                current = current .. char
+            else
+                current = current .. " " .. char .. " "
+            end
             doCurrent()
         end
     end
@@ -80,7 +91,7 @@ addButton(0, 3, uix.colors.gray, buttonTextColor, "0")
 addButton(1, 3, uix.colors.gray, buttonTextColor, ".")
 addButton(2, 3, uix.colors.gray, buttonTextColor, "=", function ()
     current = resultLabel.text
-    doCurrent()
+    doCurrent(true)
 end)
 
 addButton(3, 0, uix.colors.orange, buttonTextColor, "+", nil, 1)
@@ -93,7 +104,25 @@ addButton(4, 0, uix.colors.red, buttonTextColor, "AC", function ()
     doCurrent()
 end, 1)
 addButton(4, 1, uix.colors.red, buttonTextColor, "<", function ()
-    current = unicode.sub(current, 1, unicode.len(current) - 1)
+    local finded
+    for i = 1, #history do
+        finded = table.remove(history)
+        if not finded then
+            return
+        elseif finded ~= current then
+            break
+        end
+    end
+    current = finded
+    doCurrent(true)
+end, 1)
+
+addButton(4, 2, uix.colors.cyan, buttonTextColor, "()", function ()
+    current = "(" .. current .. ")"
+    doCurrent()
+end, 1)
+addButton(4, 3, uix.colors.cyan, buttonTextColor, "round", function ()
+    current = "round(" .. current .. ")"
     doCurrent()
 end, 1)
 
