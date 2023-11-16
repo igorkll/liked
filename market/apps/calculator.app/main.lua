@@ -16,11 +16,13 @@ local resultLabel = layout:createLabel(2, 3, rx - 2, 1, backgroundColor, numText
 local current = ""
 
 local history = {}
-local function doCurrent(noAdd)
-    if not noAdd and history[#history] ~= current then
+local function saveToHistory()
+    if history[#history] ~= current then
         table.insert(history, current)
     end
+end
 
+local function doCurrent()
     if unicode.len(current) == 0 then
         mathLabel.text = "0"
     else
@@ -40,11 +42,11 @@ local function doCurrent(noAdd)
     else
         resultLabel.text = "0"
     end
-    resultLabel.text = tostring(#history)
     resultLabel.alignment = "right"
     resultLabel:draw()
 end
-doCurrent(true)
+
+doCurrent()
 
 local function addButton(x, y, color, textcolor, char, func, xoffset)
     local button = layout:createButton((x * 16) + (xoffset or 0), (y * 5) + 5, 16, 5, color, textcolor, char)
@@ -65,6 +67,7 @@ local function addButton(x, y, color, textcolor, char, func, xoffset)
         button.onClick = func
     else
         function button:onClick()
+            saveToHistory()
             if tonumber(char) then
                 current = current .. char
             else
@@ -91,8 +94,9 @@ addButton(2, 2, buttonBackgroundColor, buttonTextColor, "3")
 addButton(0, 3, uix.colors.gray, buttonTextColor, "0")
 addButton(1, 3, uix.colors.gray, buttonTextColor, ".")
 addButton(2, 3, uix.colors.gray, buttonTextColor, "=", function ()
+    saveToHistory()
     current = resultLabel.text
-    doCurrent(true)
+    doCurrent()
 end)
 
 addButton(3, 0, uix.colors.orange, buttonTextColor, "+", nil, 1)
@@ -101,6 +105,7 @@ addButton(3, 2, uix.colors.orange, buttonTextColor, "*", nil, 1)
 addButton(3, 3, uix.colors.orange, buttonTextColor, "/", nil, 1)
 
 addButton(4, 0, uix.colors.red, buttonTextColor, "AC", function ()
+    saveToHistory()
     current = ""
     doCurrent()
 end, 1)
@@ -119,10 +124,12 @@ addButton(4, 1, uix.colors.red, buttonTextColor, "<", function ()
 end, 1)
 
 addButton(4, 2, uix.colors.cyan, buttonTextColor, "()", function ()
+    saveToHistory()
     current = "(" .. current .. ")"
     doCurrent()
 end, 1)
 addButton(4, 3, uix.colors.cyan, buttonTextColor, "round", function ()
+    saveToHistory()
     current = "round(" .. current .. ")"
     doCurrent()
 end, 1)
