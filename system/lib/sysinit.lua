@@ -139,14 +139,16 @@ function sysinit.init(box)
 
     gui_container.refresh()
 
+    ------------------------------------
+
     bootloader.unittests("/vendor/unittests")
     bootloader.unittests("/data/unittests")
 
     bootloader.autorunsIn("/vendor/autoruns")
     bootloader.autorunsIn("/data/autoruns")
 
-    ------------------------------------
-
+    require("autorun").autorun()
+    
     if programs.find("preinit") then
         local ok, err = liked.execute("preinit")
         if not ok then
