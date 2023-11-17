@@ -704,7 +704,7 @@ function gui.select(screen, cx, cy, label, actions, scroll, noCloseButton)
         if label then
             window:set(2, 1, colors.lightGray, colors.white, label)
         end
-        if noCloseButton then
+        if not noCloseButton then
             window:set(window.sizeX, 1, colors.red, colors.white, "X")
         end
         window:fill(1, window.sizeY, window.sizeX, 1, colors.lightGray, 0, " ")

@@ -464,7 +464,6 @@ local function execute(name, nickname, ...)
     local code, err = liked.loadApp(name, screen, nickname)
     if code then
         programTh = thread.createBackground(code, ...) --запуск программы в потоке чтобы созданые в ней потоки закрылись вместе с ней
-        programTh.parentData.interruptData = screen
         programTh:resume()
         local ok, err = true
         while true do
@@ -1446,7 +1445,7 @@ local function lock(firstLock)
     lockFlag = false
 end
 
------------------------------------------------------------------------- screensaver & interrupt
+------------------------------------------------------------------------ screensaver
 
 local function updateScreenSaver()
     lastScreenSaverTime = computer.uptime()
@@ -1464,6 +1463,7 @@ table.insert(listens, event.listen(nil, function (eventName, uuid)
     end
 end))
 
+--[[
 table.insert(listens, event.listen("key_down", function(_, uuid, char, code)
     local ok
     for i, v in ipairs(lastinfo.keyboards[screen]) do
@@ -1480,6 +1480,7 @@ table.insert(listens, event.listen("key_down", function(_, uuid, char, code)
         updateScreenSaver()
     end
 end))
+]]
 
 local function checkScreenSaver()
     if gui_container.noScreenSaver[screen] then

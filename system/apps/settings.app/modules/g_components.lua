@@ -28,13 +28,21 @@ local function drawInfo()
     window:set(2, 2, colors.black, colors.white, "component count: " .. math.roundTo(system.getCurrentComponentCount(), 2) .. "/" .. system.getMaxComponentCount() .. "    ")
 end
 
-local componentSelector = thread.create(function ()
+local base = thread.current()
+
+local componentSelector = thread.createBackground(function ()
     while true do
         window:clear(colors.black)
         drawInfo()
 
         local x, y = window:toRealPos((window.sizeX // 2) - 27, (window.sizeY // 2) - 8)
-        gui.selectcomponent(screen, x, y, nil, nil, true)
+        gui.selectcomponent(screen, x, y, nil, nil, true, {onEdit = function()
+            base:suspend()
+            upTask:suspend()
+        end, onCloseEdit = function()
+            base:resume()
+            upTask:resume()
+        end})
     end
 end)
 componentSelector:resume()

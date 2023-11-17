@@ -324,7 +324,6 @@ function liked.execute(name, screen, nickname, ...)
     local code, err = liked.loadApp(name, screen, nickname)
     if code then
         local programTh = thread.create(code, ...) --запуск программы в потоке чтобы созданые в ней потоки закрылись вместе с ней
-        programTh.noInterrupts = true
         programTh:resume()
         local ok = true
         local err, out
@@ -341,9 +340,7 @@ function liked.execute(name, screen, nickname, ...)
                 break
             end
 
-            if not pcall(event.yield) then
-                event.interruptFlag = programTh
-            end
+            event.yield()
         end
         programTh:kill()
 
