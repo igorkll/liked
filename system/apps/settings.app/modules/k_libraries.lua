@@ -44,7 +44,11 @@ local selector = thread.create(function ()
         window:set(2, 3, colors.black, colors.white, "static     count: " .. math.round(constCount))
         window:set(2, 4, colors.black, colors.white, "unloadable count: " .. math.round(unloadableCount))
 
-        local num, lscroll = gui.select(screen, x, y, "loaded libraries", loadedLibraries, scroll, true)
+        local num, lscroll = gui.select(screen, x, y, "loaded libraries", loadedLibraries, scroll, true, {onEdit = function()
+            upTask:suspend()
+        end, onCloseEdit = function()
+            upTask:resume()
+        end})
         scroll = lscroll
 
         if num then

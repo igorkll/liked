@@ -866,7 +866,7 @@ function gui.select(screen, cx, cy, label, actions, scroll, noCloseButton)
     end
 end
 
-function gui.selectcomponent(screen, cx, cy, types, allowAutoConfirm, control) --=gui_selectcomponent(screen, nil, nil, {"computer"}, true)
+function gui.selectcomponent(screen, cx, cy, types, allowAutoConfirm, control, callbacks) --=gui_selectcomponent(screen, nil, nil, {"computer"}, true)
     local advLabeling = require("advLabeling")
 
     if types and type(types) ~= "table" then
@@ -1004,7 +1004,13 @@ function gui.selectcomponent(screen, cx, cy, types, allowAutoConfirm, control) -
                         file.close()
 
                         local clear = graphic.screenshot(screen)
+                        if callbacks and callbacks.onEdit then
+                            callbacks.onEdit()
+                        end
                         require("liked").execute("edit", screen, nil, tempfile, true)
+                        if callbacks and callbacks.onCloseEdit then
+                            callbacks.onCloseEdit()
+                        end
                         clear()
                         fs.remove(tempfile)
                     end
