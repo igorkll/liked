@@ -187,8 +187,8 @@ function gui.smallWindow(screen, cx, cy, str, backgroundColor, icon, sx, sy)
         cy = cy / 2
         cx = cx - math.round(sx / 2)
         cy = cy - math.round(sy / 2)
-        cx = math.floor(cx) + 1
-        cy = math.floor(cy) + 1
+        cx = math.round(cx) + 1
+        cy = math.round(cy) + 1
     end
 
     local window = graphic.createWindow(screen, cx, cy, sx, sy, true)
