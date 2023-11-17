@@ -485,7 +485,7 @@ local function execute(name, nickname, ...)
 
         --local ok, err = xpcall(code, debug.traceback, screen, nickname, ...)
         if not ok then
-            gui.bigWarn(screen, nil, nil, parser.formatTraceback(err or "unknown error"))
+            gui.bigWarn(screen, nil, nil, err or "unknown error")
         end
 
         redrawFlag = nil
