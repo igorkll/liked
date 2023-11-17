@@ -17,6 +17,7 @@ local gui = require("gui")
 local lastinfo = require("lastinfo")
 local system = require("system")
 local liked = require("liked")
+local parser = require("parser")
 
 local colors = gui_container.colors
 
@@ -484,7 +485,7 @@ local function execute(name, nickname, ...)
 
         --local ok, err = xpcall(code, debug.traceback, screen, nickname, ...)
         if not ok then
-            gui_warn(screen, nil, nil, err or "unknown error")
+            gui.bigWarn(screen, nil, nil, parser.formatTraceback(err or "unknown error"))
         end
 
         redrawFlag = nil

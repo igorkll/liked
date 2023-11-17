@@ -84,6 +84,7 @@
 /system/installer/logo.lua
 /system/installer/main.lua
 /system/lib/advLabeling.lua
+/system/lib/autorun.lua
 /system/lib/braille.lua
 /system/lib/draw.lua
 /system/lib/format.lua
@@ -96,6 +97,7 @@
 /system/lib/sound.lua
 /system/lib/sysinit.lua
 /system/lib/uix.lua
+/system/lib/vkeyboard.lua
 /system/likedbox/logo.lua
 /system/likedbox/main.lua
 /system/likedbox/palette.plt

@@ -15,6 +15,7 @@ local sound = require("sound")
 local fs = require("filesystem")
 local programs = require("programs")
 local clipboard = require("clipboard")
+local parser = require("parser")
 local gui = {}
 
 local smartShadowsColors = {
@@ -174,21 +175,23 @@ function gui.pleaseType(screen, str, tostr)
     end
 end
 
-function gui.smallWindow(screen, cx, cy, str, backgroundColor, icon)
-    --◢▲◣▲▴▴
+function gui.smallWindow(screen, cx, cy, str, backgroundColor, icon, sx, sy)
+    sx = sx or 32
+    sy = sy or 8
+
     local gpu = graphic.findGpu(screen)
 
     if not cx or not cy then
         cx, cy = gpu.getResolution()
         cx = cx / 2
         cy = cy / 2
-        cx = cx - 16
-        cy = cy - 4
+        cx = cx - math.round(sx / 2)
+        cy = cy - math.round(sy / 2)
         cx = math.floor(cx) + 1
         cy = math.floor(cy) + 1
     end
 
-    local window = graphic.createWindow(screen, cx, cy, 32, 8, true)
+    local window = graphic.createWindow(screen, cx, cy, sx, sy, true)
 
     local color = backgroundColor or colors.lightGray
 
@@ -200,7 +203,7 @@ function gui.smallWindow(screen, cx, cy, str, backgroundColor, icon)
     if color == textColor then
         textColor = colors.black
     end
-    for i, v in ipairs(restrs(str, 24)) do
+    for i, v in ipairs(parser.toLinesLn(str, sx - 8)) do
         window:set(8, i + 1, color, textColor, v)
     end
 
@@ -247,6 +250,42 @@ function gui.warn(screen, cx, cy, str, backgroundColor)
         local windowEventData = window:uploadEvent(eventData)
         if windowEventData[1] == "touch" and windowEventData[5] == 0 then
             if windowEventData[4] == 7 and windowEventData[3] > (32 - 5) and windowEventData[3] <= ((32 - 5) + 4) then
+                drawYes()
+                break
+            end
+        elseif windowEventData[1] == "key_down" and windowEventData[4] == 28 then
+            drawYes()
+            break
+        end
+    end
+    noShadow()
+end
+
+function gui.bigWarn(screen, cx, cy, str, backgroundColor)
+    local window, noShadow = gui.smallWindow(screen, cx, cy, str, backgroundColor, function (window, color)
+        window:set(2, 2, color, colors.yellow, "  " .. unicode.char(0x2800+192) ..  "  ")
+        window:set(2, 3, color, colors.yellow, " ◢█◣ ")
+        window:set(2, 4, color, colors.yellow, "◢███◣")
+        window:set(4, 3, colors.yellow, colors.white, "!")
+    end, 50, 16)
+
+    window:set(50 - 4, 15, colors.lightBlue, colors.white, " OK ")
+    local function drawYes()
+        window:set(50 - 4, 15, colors.blue, colors.white, " OK ")
+        graphic.forceUpdate(screen)
+        event.sleep(0.1)
+    end
+
+    graphic.forceUpdate(screen)
+    if registry.soundEnable then
+        sound.warn()
+    end
+
+    while true do
+        local eventData = {computer.pullSignal()}
+        local windowEventData = window:uploadEvent(eventData)
+        if windowEventData[1] == "touch" and windowEventData[5] == 0 then
+            if windowEventData[4] == 15 and windowEventData[3] > (50 - 5) and windowEventData[3] <= ((50 - 5) + 4) then
                 drawYes()
                 break
             end
