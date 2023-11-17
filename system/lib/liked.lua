@@ -356,7 +356,7 @@ function liked.execute(name, screen, nickname, ...)
         programTh:kill()
 
         if not ok then
-            return ok, tostring(err or "unknown error")
+            return nil, tostring(err or "unknown error")
         elseif out then
             return table.unpack(out)
         else
