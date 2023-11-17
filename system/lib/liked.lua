@@ -828,7 +828,7 @@ function liked.drawWallpaper(screen, customFolder)
     end
 
     local wallpaperPath = "/data/wallpaper.t2p"
-    local customPath = paths.concat(customFolder, paths.name(wallpaperPath))
+    local customPath = paths.concat(customFolder or paths.path(wallpaperPath), paths.name(wallpaperPath))
     if fs.exists(customPath) then
         wdraw(customPath)
     elseif fs.exists(wallpaperPath) then

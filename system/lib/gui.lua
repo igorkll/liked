@@ -449,7 +449,7 @@ function gui.selectfullcolor(screen, cx, cy, str)
     end
 end
 
-function gui.input(screen, cx, cy, str, hidden, backgroundColor, default, disableStartSound)
+function gui.input(screen, cx, cy, str, hidden, backgroundColor, default, disableStartSound, noCancel)
     local gpu = graphic.findGpu(screen)
 
     if not cx or not cy then
@@ -473,7 +473,9 @@ function gui.input(screen, cx, cy, str, hidden, backgroundColor, default, disabl
     window:set(pos, 1, colors.gray, colors.white, str)
 
     window:set(32 - 4 - 3, 7, colors.lightBlue, colors.white, " enter ")
-    window:set(2, 7, colors.red, colors.white, " cancel ")
+    if not noCancel then
+        window:set(2, 7, colors.red, colors.white, " cancel ")
+    end
 
     local reader = window:read(2, 3, window.sizeX - 2, colors.gray, colors.white, nil, hidden, default)
 
@@ -515,8 +517,10 @@ function gui.input(screen, cx, cy, str, hidden, backgroundColor, default, disabl
                 noShadow()
                 return reader.getBuffer()
             elseif windowEventData[4] == 7 and windowEventData[3] >= 2 and windowEventData[3] <= (2 + 7) then
-                drawCancel()
-                noShadow()
+                if not noCancel then
+                    drawCancel()
+                    noShadow()
+                end
                 return false
             end
         end
@@ -1046,12 +1050,12 @@ function gui.selectcomponentProxy(screen, cx, cy, types, allowAutoConfirm)
     end
 end
 
-function gui.checkPassword(screen, cx, cy, disableStartSound)
+function gui.checkPassword(screen, cx, cy, disableStartSound, noCancel)
     local regData = registry.data
     if regData then
         if regData.password then
             local clear = saveZone(screen)
-            local password = gui.input(screen, cx, cy, "enter password", true, nil, nil, disableStartSound)
+            local password = gui.input(screen, cx, cy, "enter password", true, nil, nil, disableStartSound, noCancel)
             clear()
 
             if password then
