@@ -7,6 +7,10 @@ local fs = require("filesystem")
 
 local screen = ...
 local cardwriter = gui.selectcomponentProxy(screen, nil, nil, {"os_cardwriter"}, true)
+if not cardwriter then
+    return
+end
+
 local guimanager = uix.manager(screen)
 local rx, ry = graphic.getResolution(screen)
 local layout = guimanager:create("Card Writer")
