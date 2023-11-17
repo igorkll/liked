@@ -151,6 +151,12 @@ function liked.postInstall(screen, nickname, path)
         liked.assert(screen, liked.execute(installPath, screen, nickname))
     end
 
+    local autorunPath = paths.concat(path, "autorun.lua")
+    if fs.exists(autorunPath) and not fs.isDirectory(autorunPath) then
+        require("autorun").reg("system", autorunPath)
+        liked.execute(autorunPath, screen, nickname)
+    end
+
     registry.save()
     return true
 end
@@ -171,6 +177,11 @@ function liked.uninstall(screen, nickname, path)
         liked.assert(screen, liked.execute(uninstallPath, screen, nickname))
     else
         liked.assert(screen, fs.remove(path))
+    end
+
+    local autorunPath = paths.concat(path, "autorun.lua")
+    if fs.exists(autorunPath) and not fs.isDirectory(autorunPath) then
+        require("autorun").reg("system", autorunPath, true)
     end
 
     registry.save()
