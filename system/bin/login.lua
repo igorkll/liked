@@ -6,6 +6,6 @@ local screen = ...
 local liked = require("liked")
 local gui = require("gui")
 
-liked.drawFullUpBarTask(screen)
+liked.drawUpBarTask(screen)
 liked.drawWallpaper(screen)
-gui.checkPasswordLoop(screen, nil, nil, true)
+gui.checkPasswordLoop(screen, nil, nil, true, true)

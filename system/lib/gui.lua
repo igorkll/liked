@@ -520,8 +520,8 @@ function gui.input(screen, cx, cy, str, hidden, backgroundColor, default, disabl
                 if not noCancel then
                     drawCancel()
                     noShadow()
+                    return false
                 end
-                return false
             end
         end
     end

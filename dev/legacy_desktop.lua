@@ -1,3 +1,6 @@
+--ВНИМАНИЯ, для кономии оперативной памяти, я загружаю данный файл один раз и создаю на него патоки
+--соответственно таблица _ENV для всех desktop обшая, и тут нельзя использовать глобалы
+
 local graphic = require("graphic")
 local computer = require("computer")
 local event = require("event")
@@ -44,16 +47,61 @@ fs.makeDirectory(userPath)
 
 ------------------------------------------------------------------------ service
 
+--[[
+local function isDev()
+    return not not gui_container.devModeStates[screen]
+end
+]]
+
 local function isFileExps()
     return not not gui_container.viewFileExps[screen]
 end
 
 local redrawFlag = true
+local desktopTh
+local programTh
+
+local listens = {}
+
+local screenSaverDemo
+local screenSaverScreenShot
+local screenSaver
+local screenSaverClosed
+local lastScreenSaverTime = computer.uptime()
+
+local devModeCount = 0
+local devModeResetTime = 0
 
 local copyObject
 local isCut = false
 
 local wallpaperPath = "/data/wallpaper.t2p"
+
+local function runScreenSaver(path)
+    if not screenSaverScreenShot then
+        screenSaverScreenShot = screenshot(screen, 1, 1, rx, ry)
+    end
+
+    gui_container.isScreenSaver[screen] = true
+
+    desktopTh:suspend()
+    if programTh and not gui_container.noBlockOnScreenSaver[screen] then
+        programTh:suspend()
+    end
+
+    if fs.exists(path) then
+        local code, err = programs.load(path)
+        if code then
+            screenSaver = thread.create(code, screen)
+            screenSaver:resume()
+        else
+            event.errLog("failed to load screen-saver: " .. (err or "unkown error"))
+            screenSaverClosed = true
+        end
+    else
+        screenSaverClosed = true
+    end
+end
 
 ------------------------------------------------------------------------ icons
 
@@ -89,6 +137,7 @@ end
 ------------------------------------------------------------------------ draw
 
 local contextMenuOpen = nil
+local lockFlag = false
 
 local function drawStatus()
     --[[
@@ -113,9 +162,11 @@ local function drawStatus()
     ]]
 
     liked.drawUpBar(screen)
-    statusWindow:set(1, 1, contextMenuOpen == 1 and colors.blue or colors.lightGray, colors.white, " OS ")
-    statusWindow:set(6, 1, contextMenuOpen == 2 and colors.blue or colors.lightGray, colors.white, " FILES ")
-    statusWindow:set(14, 1, contextMenuOpen == 3 and colors.blue or colors.lightGray, colors.white, " TYPES ")
+    if not lockFlag then
+        statusWindow:set(1, 1, contextMenuOpen == 1 and colors.blue or colors.lightGray, colors.white, " OS ")
+        statusWindow:set(6, 1, contextMenuOpen == 2 and colors.blue or colors.lightGray, colors.white, " FILES ")
+        statusWindow:set(14, 1, contextMenuOpen == 3 and colors.blue or colors.lightGray, colors.white, " TYPES ")
+    end
 end
 
 local function drawWallpaper()
@@ -349,10 +400,10 @@ local function folderBack()
 end
 
 local timerEnable = true
-event.timer(10, function()
-    if not timerEnable then return end
+table.insert(listens, event.timer(10, function()
+    if not timerEnable or screenSaver then return end
     drawStatus()
-end)
+end, math.huge))
 
 local function warn(str)
     local clear = saveZone(screen)
@@ -364,10 +415,86 @@ local function warnNoClear(str)
     gui_warn(screen, nil, nil, str or "unknown error")
 end
 
+--[[
+local function appLoad(name, nickname)
+    local path = programs.find(name)
+    if not path or not fs.exists(path) or fs.isDirectory(path) then
+        gui_warn(screen, nil, nil, "failed to launch application")
+        draw()
+        return
+    end
+    if fs.exists("/vendor/appChecker.lua") then
+        local out = {programs.execute("/vendor/appChecker.lua", screen, nickname, path)}
+        if not out[1] then
+            gui_warn(screen, nil, nil, out[2])
+            redrawFlag = nil
+            draw()
+            return
+        elseif not out[2] then
+            --gui_warn(screen, nil, nil, "you cannot run this application")
+            redrawFlag = nil
+            draw()
+            return
+        end
+    end
+
+    return programs.load(path)
+end
+
+local function getExecute(name, nickname, ...)
+    local code, err = appLoad(name, nickname)
+
+    if code then
+        local result = {xpcall(code, debug.traceback, screen, nickname, ...)}
+        if not result[1] then
+            warn(result[2])
+        end
+        return result
+    elseif err then
+        warn(err)
+    end
+end
+]]
+
 local function execute(name, nickname, ...)
     timerEnable = false
+
     gui_status(screen, nil, nil, "loading...")
-    liked.execute(name, screen, nickname)
+    
+    local code, err = liked.loadApp(name, screen, nickname)
+    if code then
+        programTh = thread.createBackground(code, ...) --запуск программы в потоке чтобы созданые в ней потоки закрылись вместе с ней
+        programTh:resume()
+        local ok, err = true
+        while true do
+            if programTh:status() == "dead" then
+                if not programTh.out[1] then --если ошибка произошла в функции которую возврашяет liked.loadApp (чего быть не должно)
+                    ok, err = false, "osError: " .. (programTh.out[2] or "unknown error")
+                elseif not programTh.out[2] then --если ошибка произошла в целевой программе
+                    if programTh.out[3] then
+                        ok, err = false, programTh.out[3]
+                    end
+                end
+                break
+            end
+            event.yield()
+        end
+        programTh:kill()
+        programTh = nil
+
+        --local ok, err = xpcall(code, debug.traceback, screen, nickname, ...)
+        if not ok then
+            gui.clearBigRun(gui.bigWarn, screen, nil, nil, err or "unknown error")
+        end
+
+        redrawFlag = nil
+        draw()
+    elseif err then
+        gui_warn(screen, nil, nil, err)
+        redrawFlag = nil
+        draw()
+    end
+    
     timerEnable = true
 end
 
@@ -376,6 +503,15 @@ local function uninstallApp(path, nickname)
 end
 
 local function fileDescriptor(icon, alternative, nickname) --открывает файл, сам решает через какую программу это сделать
+    --[[
+    for i, v in ipairs(gui_container.filesExps) do
+        if not v[1] or v[1] == icon.exp then
+            execute(v[2], nickname, icon.path)
+            return
+        end
+    end
+    ]]
+
     if alternative then
         if fs.isDirectory(icon.path) then
             userPath = icon.path
@@ -409,7 +545,8 @@ local function fileDescriptor(icon, alternative, nickname) --открывает 
     elseif icon.exp == "scrsv" then
         if liked.publicMode(screen) then
             event.timer(0.1, function ()
-                
+                lastScreenSaverTime = computer.uptime()
+                runScreenSaver(icon.path)
             end, 1)
         end
     elseif icon.exp == "plt" then
@@ -430,6 +567,20 @@ local function fileDescriptor(icon, alternative, nickname) --открывает 
     end
 end
 
+--[[
+local function addExp(name, exp)
+    if not isDev() then
+        return name .. "." .. exp
+    else
+        local realexp = paths.extension(name)
+        if not realexp or realexp == "" then
+            name = name .. "." .. exp
+        end
+        return name
+    end
+end
+]]
+
 local function runFunc(func, ...)
     local ok, err = pcall(func, ...)
     if not ok then
@@ -438,6 +589,46 @@ local function runFunc(func, ...)
 end
 
 local function getActions(icon, nickname, astrs, aactive, sep)
+    --[[
+    local path = icon.path
+    if fs.exists(path) and fs.isDirectory(path) then
+        local actionPath = paths.concat(path, "actions.cfg") --раньше был lua, который выполнялся, но это слишком небезопастно
+        if fs.exists(actionPath) and not fs.isDirectory(actionPath) then
+            --local result = getExecute(actionPath, nickname) --unsafe
+
+            local content = getFile(actionPath)
+            if type(content) == "string" then
+                local result = {pcall(unserialization, content)}
+                event.yield() --предотващения краша при долгой десереализации
+
+                if result and result[1] and type(result[2]) == "table" then
+                    table.insert(strs, sep)
+                    table.insert(active, false)
+
+                    local funcs = {}
+                    local count = 1
+                    for _, value in ipairs(result[2]) do
+                        if type(value) == "table" and type(value[1]) == "string" and type(value[3]) == "string" then
+                            table.insert(strs, "  " .. value[1])
+                            table.insert(active, not not value[2])
+                            funcs[#strs] = function ()
+                                execute(paths.xconcat(path, value[3]), nickname)
+                            end
+                            count = count + 1
+                        end
+                    end
+                    if count == 1 then
+                        table.remove(strs, #strs)
+                        table.remove(active, #active)
+                        return
+                    end
+                    return funcs, count
+                end
+            end
+        end
+    end
+    ]]
+    
     local files, strs, actives = liked.getActions(icon.path)
     if #files > 0 then
         table.insert(astrs, true)
@@ -525,6 +716,32 @@ local function doIcon(windowEventData)
                             {"  open", "  create dump", "  flash os", "  flash archive", true, "  format", "  set label", "  clear label"},
                             {true, true, not v.readonly, not v.readonly, false, not v.readonly, not v.labelReadonly, not v.labelReadonly}
 
+                            --[[
+                            local likeDisk = isLikeOsDisk(v.fs.address)
+                            if likeDisk then
+                                screenshotY = screenshotY + 1
+
+                                table.insert(strs, 4, "  wipe data")
+                                table.insert(active, 4, not v.readonly and v.fs.exists("/data"))
+                            end
+                            ]]
+
+                            --[[
+                            if v.devtype then
+                                table.insert(strs, "  erase firmware")
+                                table.insert(active, not v.readonly)
+
+                                table.insert(strs, "  erase data")
+                                table.insert(active, not v.readonly)
+
+                                table.insert(strs, "  make a disk")
+                                table.insert(active, not v.readonly)
+                            else
+                                table.insert(strs, "  format")
+                                table.insert(active, not v.readonly)
+                            end
+                            ]]
+
                             table.insert(strs, true)
                             table.insert(active, false)
 
@@ -535,6 +752,18 @@ local function doIcon(windowEventData)
 
                             table.insert(strs, "  unmount")
                             table.insert(active, true)
+
+                            --[[
+                            if gui_container.isDiskLocked(v.fs.address) and not gui_container.isDiskAccess(v.fs.address) then
+                                for index, value in ipairs(active) do
+                                    active[index] = false
+                                end
+
+                                table.insert(strs, 1, "  unlock")
+                                table.insert(active, 1, true)
+                            end
+                            ]]
+
                             local posX, posY = window:toRealPos(windowEventData[3], windowEventData[4])
 
                             --posX, posY = findPos(posX, posY, 23, screenshotY, rx, ry)
@@ -567,6 +796,8 @@ local function doIcon(windowEventData)
                                 if require("installer").context(screen, posX, posY, v.fs) then
                                     draw()
                                 end
+                            --elseif str == "  unlock" then
+                            --    gui_container.getDiskAccess(screen, v.fs.address)
                             elseif str == "  flash archive" then
                                 local archiver = require("archiver")
                                 local clear = saveBigZone(screen)
@@ -1156,127 +1387,298 @@ local function doIcon(windowEventData)
     end
 end
 
------------------------------------------------------------------------- desktop
+------------------------------------------------------------------------ lock screen
 
-event.listen("redrawDesktop", function()
-    redrawFlag = true
-end)
-
-local warnPrinted
-while true do
-    if redrawFlag then
-        redrawFlag = false
-        draw()
-        if not warnPrinted then
-            local clear = saveZone(screen)
-            if computer.totalMemory() / 1024 < 512 then
-                gui_warn(screen, nil, nil, "small amount of RAM on the device\nthis can lead to problems")
-            end
-            local rootfs = fs.get("/")
-            if (rootfs.spaceTotal() - rootfs.spaceUsed()) / 1024 < 128 then
-                gui_warn(screen, nil, nil, "not enough free disk space\nthis can lead to problems")
-            end
-            clear()
-
-            warnPrinted = true
+local function isMultiscreen()
+    local count = 0
+    for address in component.list("screen") do
+        if count >= 1 then
+            return true
         end
-    end
-
-    local eventData = {computer.pullSignal(0.5)}
-    local windowEventData = window:uploadEvent(eventData)
-    local statusWindowEventData = statusWindow:uploadEvent(eventData)
-    if statusWindowEventData[1] == "touch" then
-        if statusWindowEventData[4] == 1 and statusWindowEventData[3] >= 1 and statusWindowEventData[3] <= 4 then
-            contextMenuOpen = 1
-            drawStatus()
-            local clear = screenshot(screen, 2, 2, 28, 7 + 4)
-            local str, num = gui.context(screen, 2, 2,
-            {"  lock screen", true, "  about", "  settings", "  market", true, "  shutdown", "  reboot"},
-            {not not registry.password, false, true, true, true, false, not not computer.shutdown, not not computer.shutdown})
-            contextMenuOpen = nil
-
-            if str == "  about" then
-                execute("about", statusWindowEventData[6])
-            elseif str == "  settings" then
-                execute("settings", statusWindowEventData[6])
-            elseif str == "  market" then
-                execute("market", statusWindowEventData[6])
-            elseif str == "  lock screen" then
-                clear()
-                drawStatus()
-
-
-
-                event.yield()
-            elseif str == "  shutdown" then
-                computer.shutdown()
-            elseif str == "  reboot" then
-                computer.shutdown(true)
-            else
-                clear()
-            end
-            
-            drawStatus()
-        elseif statusWindowEventData[4] == 1 and statusWindowEventData[3] >= 6 and statusWindowEventData[3] <= 12 then
-            contextMenuOpen = 2
-            drawStatus()
-            local clear = screenshot(screen, 7, 2, 28, 3)
-            local str, num = gui.context(screen, 7, 2,
-            {gui_container.viewFileExps[screen] and "  hide file extensions  " or "  show file extensions  ", gui_container.userRoot[screen] and "  hide root directory" or "  show root directory"},
-            {not registry.disableFileExps, not registry.disableRootAccess})
-            contextMenuOpen = nil
-
-            if num == 1 then
-                gui_container.viewFileExps[screen] = not gui_container.viewFileExps[screen]
-                draw()
-            elseif num == 2 then
-                if gui_container.userRoot[screen] then
-                    gui_container.userRoot[screen] = nil
-                else
-                    gui_container.userRoot[screen] = "/"
-                end
-                userPath = gui_container.checkPath(screen, userPath)
-                draw()
-            else
-                clear()
-            end
-            
-            drawStatus()
-        elseif statusWindowEventData[4] == 1 and statusWindowEventData[3] >= 14 and statusWindowEventData[3] <= 20 then
-            contextMenuOpen = 3
-            drawStatus()
-            local actives = {true, true, true, true}
-            if iconmode then
-                actives[iconmode + 1] = false
-            end
-            local str, num = gui.contextAuto(screen, 15, 2, {"All", "Applications", "Files", "Disks"}, actives)
-            contextMenuOpen = nil
-            if num then
-                iconmode = num - 1
-                draw()
-            else
-                drawStatus()
-            end
-        end
-    end
-
-    doIcon(windowEventData)
-
-    if eventData[1] == "key_down" then
-        local ok
-        for i, v in ipairs(lastinfo.keyboards[screen]) do
-            if eventData[2] == v then
-                ok = true
-            end
-        end
-        if ok then
-            if eventData[4] == 208 then
-                folderBack()
-            elseif eventData[4] == 203 then
-                listBack()
-            elseif eventData[4] == 205 then
-                listForward()
-            end
-        end
+        count = count + 1
     end
 end
+
+local function lock(firstLock)
+    if not registry.password then return end
+
+    lockFlag = true
+    drawWallpaper()
+    drawStatus()
+
+    local th
+    th = thread.create(function ()
+        while true do
+            local successful = gui_checkPassword(screen, nil, nil, not isFirst and firstLock)
+            firstLock = nil
+
+            if successful then
+                th:kill()
+                th = nil
+                break
+            elseif successful == false then
+                if isMultiscreen() then --нельзя выключить мультиманиторное устройтсво с заблокированого экрана, потому что один монитор может стоять на улице(знаю что редкий случай)
+                    local clear = saveZone(screen)
+                    gui_warn(screen, nil, nil, "you cannot turn off a multi-monitor device from a locked screen")
+                    clear()
+                else
+                    local clear = saveZone(screen)
+                    if gui_yesno(screen, nil, nil, "shutdown?") then
+                        computer.shutdown()
+                    end
+                    clear()
+                end
+            end
+        end
+    end)
+    th:resume()
+
+    while th do
+        if screenSaver then --при активации screenSaver lock вылетает, но при деактивации он снова включиться
+            th:kill()
+            lockFlag = false
+            return true
+        end
+        event.yield()
+    end
+
+    lockFlag = false
+end
+
+------------------------------------------------------------------------ screensaver
+
+local function updateScreenSaver()
+    lastScreenSaverTime = computer.uptime()
+
+    if not screenSaver then return end
+    screenSaver:kill()
+    screenSaver = nil
+
+    screenSaverClosed = true
+end
+
+table.insert(listens, event.listen(nil, function (eventName, uuid)
+    if uuid == screen and (eventName == "touch" or eventName == "drag" or eventName == "scroll") then
+        updateScreenSaver()
+    end
+end))
+
+--[[
+table.insert(listens, event.listen("key_down", function(_, uuid, char, code)
+    local ok
+    for i, v in ipairs(lastinfo.keyboards[screen]) do
+        if v == uuid then
+            ok = true
+        end
+    end
+
+    if ok then
+        if char == 0 and code == 46 and not lockFlag and not screenSaver and not gui_container.noInterrupt[screen] then
+            event.interruptFlag = screen
+        end
+
+        updateScreenSaver()
+    end
+end))
+]]
+
+local function checkScreenSaver()
+    if gui_container.noScreenSaver[screen] then
+        lastScreenSaverTime = computer.uptime()
+    end
+
+    if not screenSaver and (screenSaverDemo == screen or screenSaverDemo == true or (registry.screenSaverTimer and computer.uptime() - lastScreenSaverTime > registry.screenSaverTimer)) then
+        lastScreenSaverTime = computer.uptime()
+
+        if not gui_container.noScreenSaver[screen] then
+            runScreenSaver(gui_container.screenSaverPath)
+        end
+    end
+    screenSaverDemo = nil
+end
+
+table.insert(listens, event.timer(1, function ()
+    checkScreenSaver()
+end, math.huge))
+
+table.insert(listens, event.listen("screenSaverDemo", function(_, screen)
+    screenSaverDemo = screen
+    checkScreenSaver()
+end))
+
+thread.create(function ()
+    while true do
+        if screenSaverClosed then
+            if not lock() then
+                screenSaverScreenShot()
+                screenSaverScreenShot = nil
+
+                gui_container.isScreenSaver[screen] = nil
+
+                desktopTh:resume()
+                if programTh and not gui_container.noBlockOnScreenSaver[screen] then
+                    programTh:resume()
+                end
+            end
+
+            screenSaverClosed = nil
+        end
+
+        event.yield()
+    end
+end):resume()
+
+------------------------------------------------------------------------ desktop
+
+table.insert(listens, event.listen("redrawDesktop", function()
+    redrawFlag = true
+end))
+
+desktopTh = thread.create(function ()
+    local warnPrinted
+
+    while true do
+        if redrawFlag then
+            redrawFlag = false
+            draw()
+            if not warnPrinted then
+                local clear = saveZone(screen)
+                if computer.totalMemory() / 1024 < 512 then
+                    gui_warn(screen, nil, nil, "small amount of RAM on the device\nthis can lead to problems")
+                end
+                local rootfs = fs.get("/")
+                if (rootfs.spaceTotal() - rootfs.spaceUsed()) / 1024 < 128 then
+                    gui_warn(screen, nil, nil, "not enough free disk space\nthis can lead to problems")
+                end
+                clear()
+
+                warnPrinted = true
+            end
+        end
+
+        local eventData = {computer.pullSignal(0.5)}
+        local windowEventData = window:uploadEvent(eventData)
+        local statusWindowEventData = statusWindow:uploadEvent(eventData)
+        if statusWindowEventData[1] == "touch" then
+            if statusWindowEventData[4] == 1 and statusWindowEventData[3] >= 1 and statusWindowEventData[3] <= 4 then
+                contextMenuOpen = 1
+                drawStatus()
+                local clear = screenshot(screen, 2, 2, 28, 7 + 4)
+                local str, num = gui.context(screen, 2, 2,
+                {"  lock screen", true, "  about", "  settings", "  market", true, "  shutdown", "  reboot"},
+                {not not registry.password, false, true, true, true, false, not not computer.shutdown, not not computer.shutdown})
+                contextMenuOpen = nil
+
+                if str == "  about" then
+                    execute("about", statusWindowEventData[6])
+                elseif str == "  settings" then
+                    execute("settings", statusWindowEventData[6])
+                elseif str == "  market" then
+                    execute("market", statusWindowEventData[6])
+                elseif str == "  lock screen" then
+                    clear()
+                    drawStatus()
+
+                    gui_container.isScreenSaver[screen] = true --ручная блокировка работает как screenSaver по этому устанавливаем флаг
+
+                    screenSaverScreenShot = screenshot(screen, 1, 1, rx, ry)
+                    screenSaverClosed = true
+                    desktopTh:suspend()
+                    if programTh and not gui_container.noBlockOnScreenSaver[screen] then
+                        programTh:suspend()
+                    end
+                    event.yield()
+                elseif str == "  shutdown" then
+                    computer.shutdown()
+                elseif str == "  reboot" then
+                    computer.shutdown(true)
+                else
+                    clear()
+                end
+                
+                drawStatus()
+            elseif statusWindowEventData[4] == 1 and statusWindowEventData[3] >= 6 and statusWindowEventData[3] <= 12 then
+                contextMenuOpen = 2
+                drawStatus()
+                local clear = screenshot(screen, 7, 2, 28, 3)
+                local str, num = gui.context(screen, 7, 2,
+                {gui_container.viewFileExps[screen] and "  hide file extensions  " or "  show file extensions  ", gui_container.userRoot[screen] and "  hide root directory" or "  show root directory"},
+                {not registry.disableFileExps, not registry.disableRootAccess})
+                contextMenuOpen = nil
+
+                if num == 1 then
+                    gui_container.viewFileExps[screen] = not gui_container.viewFileExps[screen]
+                    draw()
+                elseif num == 2 then
+                    if gui_container.userRoot[screen] then
+                        gui_container.userRoot[screen] = nil
+                    else
+                        gui_container.userRoot[screen] = "/"
+                    end
+                    userPath = gui_container.checkPath(screen, userPath)
+                    draw()
+                else
+                    clear()
+                end
+                
+                drawStatus()
+            elseif statusWindowEventData[4] == 1 and statusWindowEventData[3] >= 14 and statusWindowEventData[3] <= 20 then
+                contextMenuOpen = 3
+                drawStatus()
+                local actives = {true, true, true, true}
+                if iconmode then
+                    actives[iconmode + 1] = false
+                end
+                local str, num = gui.contextAuto(screen, 15, 2, {"All", "Applications", "Files", "Disks"}, actives)
+                contextMenuOpen = nil
+                if num then
+                    iconmode = num - 1
+                    draw()
+                else
+                    drawStatus()
+                end
+            end
+        end
+
+        doIcon(windowEventData)
+
+        if eventData[1] == "key_down" then
+            local ok
+            for i, v in ipairs(lastinfo.keyboards[screen]) do
+                if eventData[2] == v then
+                    ok = true
+                end
+            end
+            if ok then
+                if eventData[4] == 200 then
+                    devModeCount = devModeCount + 1
+                elseif eventData[4] == 208 then
+                    folderBack()
+                elseif eventData[4] == 203 then
+                    listBack()
+                elseif eventData[4] == 205 then
+                    listForward()
+                end
+            end
+        end
+    end
+end)
+
+if not lock(true) then
+    desktopTh:resume()
+end
+
+local selfTh = thread.current()
+function selfTh:kill()
+    if desktopTh then
+        desktopTh:kill()
+    end
+    if programTh then
+        programTh:kill()
+    end
+    for _, listen in ipairs(listens) do
+        event.cancel(listen)
+    end
+    selfTh:raw_kill()
+end
+event.wait()
