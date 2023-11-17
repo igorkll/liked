@@ -161,10 +161,12 @@ function sysinit.init(box)
     local screenThreads = {}
     local function runShell(screen)
         gui_initScreen(screen)
-
-        local t = thread.create(assert(liked.loadApp("shell", screen)))
+        local shellName = "shell"
+        if registry.data.shell and registry.data.shell[screen] then
+            shellName = registry.data.shell[screen]
+        end
+        local t = thread.create(assert(liked.loadApp(shellName, screen)))
         t:resume() --поток по умалчанию спит
-
         screenThreads[screen] = t
     end
 
