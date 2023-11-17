@@ -203,7 +203,7 @@ function gui.smallWindow(screen, cx, cy, str, backgroundColor, icon, sx, sy)
     if color == textColor then
         textColor = colors.black
     end
-    for i, v in ipairs(parser.parseTraceback(str, sx - 8, sy - 3)) do
+    for i, v in ipairs(parser.parseTraceback(str, sx - 9, sy - 3)) do
         window:set(8, i + 1, color, textColor, v)
     end
 
@@ -216,10 +216,10 @@ end
 
 function gui.status(screen, cx, cy, str, backgroundColor)
     gui.smallWindow(screen, cx, cy, str, backgroundColor or colors.lightGray, function (window, color)
-        window:set(2, 2, color, colors.blue, "  " .. unicode.char(0x2800+192) ..  "  ")
-        window:set(2, 3, color, colors.blue, " ◢█◣ ")
-        window:set(2, 4, color, colors.blue, "◢███◣")
-        window:set(4, 3, colors.blue, colors.white, "P")
+        window:set(2, 1, color, colors.blue, "  " .. unicode.char(0x2800+192) ..  "  ")
+        window:set(2, 2, color, colors.blue, " ◢█◣ ")
+        window:set(2, 3, color, colors.blue, "◢███◣")
+        window:set(4, 2, colors.blue, colors.white, "P")
     end)
     graphic.forceUpdate(screen)
     event.yield()
@@ -227,10 +227,10 @@ end
 
 function gui.warn(screen, cx, cy, str, backgroundColor)
     local window, noShadow = gui.smallWindow(screen, cx, cy, str, backgroundColor, function (window, color)
-        window:set(2, 2, color, colors.yellow, "  " .. unicode.char(0x2800+192) ..  "  ")
-        window:set(2, 3, color, colors.yellow, " ◢█◣ ")
-        window:set(2, 4, color, colors.yellow, "◢███◣")
-        window:set(4, 3, colors.yellow, colors.white, "!")
+        window:set(2, 1, color, colors.orange, "  " .. unicode.char(0x2800+192) ..  "  ")
+        window:set(2, 2, color, colors.orange, " ◢█◣ ")
+        window:set(2, 3, color, colors.orange, "◢███◣")
+        window:set(4, 2, colors.orange, colors.white, "!")
     end)
 
     window:set(32 - 4, 7, colors.lightBlue, colors.white, " OK ")
@@ -263,10 +263,10 @@ end
 
 function gui.bigWarn(screen, cx, cy, str, backgroundColor)
     local window, noShadow = gui.smallWindow(screen, cx, cy, str, backgroundColor, function (window, color)
-        window:set(2, 2, color, colors.yellow, "  " .. unicode.char(0x2800+192) ..  "  ")
-        window:set(2, 3, color, colors.yellow, " ◢█◣ ")
-        window:set(2, 4, color, colors.yellow, "◢███◣")
-        window:set(4, 3, colors.yellow, colors.white, "!")
+        window:set(2, 1, color, colors.orange, "  " .. unicode.char(0x2800+192) ..  "  ")
+        window:set(2, 2, color, colors.orange, " ◢█◣ ")
+        window:set(2, 3, color, colors.orange, "◢███◣")
+        window:set(4, 2, colors.orange, colors.white, "!")
     end, 50, 16)
 
     window:set(50 - 4, 15, colors.lightBlue, colors.white, " OK ")
@@ -306,10 +306,10 @@ function gui.pleaseCharge(screen, minCharge, str)
     local clear = saveZone(screen)
 
     local window = gui.smallWindow(screen, nil, nil, "in order to make " .. str .. ",\nthe charge level of the device must be at least " .. tostring(math.floor(minCharge)) .. "%", nil, function (window, color)
-        window:set(2, 2, color, colors.red, "  " .. unicode.char(0x2800+192) ..  "  ")
-        window:set(2, 3, color, colors.red, " ◢█◣ ")
-        window:set(2, 4, color, colors.red, "◢███◣")
-        window:set(4, 3, colors.red, colors.white, "!")
+        window:set(2, 1, color, colors.red, "  " .. unicode.char(0x2800+192) ..  "  ")
+        window:set(2, 2, color, colors.red, " ◢█◣ ")
+        window:set(2, 3, color, colors.red, "◢███◣")
+        window:set(4, 2, colors.red, colors.white, "!")
     end)
 
     window:set(32 - 4, 7, colors.lightBlue, colors.white, " OK ")
@@ -351,10 +351,10 @@ function gui.pleaseSpace(screen, minSpace, str)
     local clear = saveZone(screen)
 
     local window = gui.smallWindow(screen, nil, nil, "in order to make " .. str .. ",\nyou need a minimum " .. tostring(math.floor(minSpace)) .. "KB space", nil, function (window, color)
-        window:set(2, 2, color, colors.red, "  " .. unicode.char(0x2800+192) ..  "  ")
-        window:set(2, 3, color, colors.red, " ◢█◣ ")
-        window:set(2, 4, color, colors.red, "◢███◣")
-        window:set(4, 3, colors.red, colors.white, "!")
+        window:set(2, 1, color, colors.red, "  " .. unicode.char(0x2800+192) ..  "  ")
+        window:set(2, 2, color, colors.red, " ◢█◣ ")
+        window:set(2, 3, color, colors.red, "◢███◣")
+        window:set(4, 2, colors.red, colors.white, "!")
     end)
 
     window:set(32 - 4, 7, colors.lightBlue, colors.white, " OK ")
@@ -1074,10 +1074,10 @@ end
 
 function gui.yesno(screen, cx, cy, str, backgroundColor)
     local window, noShadow = gui.smallWindow(screen, cx, cy, str, backgroundColor, function (window, color)
-        window:set(2, 2, color, colors.green, "  " .. unicode.char(0x2800+192) ..  "  ")
-        window:set(2, 3, color, colors.green, " ◢█◣ ")
-        window:set(2, 4, color, colors.green, "◢███◣")
-        window:set(4, 3, colors.green, colors.white, "?")
+        window:set(2, 1, color, colors.green, "  " .. unicode.char(0x2800+192) ..  "  ")
+        window:set(2, 2, color, colors.green, " ◢█◣ ")
+        window:set(2, 3, color, colors.green, "◢███◣")
+        window:set(4, 2, colors.green, colors.white, "?")
     end)
 
     window:set(32 - 5, 7, colors.lime, colors.white, " yes ")
