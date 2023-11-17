@@ -396,8 +396,8 @@ function gui.selectcolor(screen, cx, cy, str)
         cy = cy / 2
         cx = cx - 12
         cy = cy - 6
-        cx = math.floor(cx) + 1
-        cy = math.floor(cy) + 1
+        cx = math.round(cx) + 1
+        cy = math.round(cy) + 1
     end
 
     local window = graphic.createWindow(screen, cx, cy, 24, 12, true)
@@ -458,8 +458,8 @@ function gui.input(screen, cx, cy, str, hidden, backgroundColor, default, disabl
         cy = cy / 2
         cx = cx - 16
         cy = cy - 4
-        cx = math.floor(cx) + 1
-        cy = math.floor(cy) + 1
+        cx = math.round(cx) + 1
+        cy = math.round(cy) + 1
     end
 
     local window = graphic.createWindow(screen, cx, cy, 32, 8, true)
