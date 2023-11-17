@@ -382,7 +382,7 @@ end
 function liked.bigAssert(screen, ...)
     local successful, err = ...
     if not successful then
-        local clear = saveZone(screen)
+        local clear = saveBigZone(screen)
         gui.bigWarn(screen, nil, nil, err or "unknown error")
         clear()
     end

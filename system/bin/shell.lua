@@ -1,4 +1,7 @@
 local liked = require("liked")
 local screen = ...
-liked.execute("login", screen)
-liked.execute("desktop", screen)
+
+
+
+assert(liked.execute("login", screen))
+assert(liked.execute("desktop", screen))
