@@ -367,7 +367,8 @@ end
 local function execute(name, nickname, ...)
     timerEnable = false
     gui_status(screen, nil, nil, "loading...")
-    liked.execute(name, screen, nickname)
+    liked.bigAssert(screen, liked.execute(name, screen, nickname))
+    draw()
     timerEnable = true
 end
 
@@ -1204,10 +1205,7 @@ while true do
             elseif str == "  lock screen" then
                 clear()
                 drawStatus()
-
-
-
-                event.yield()
+                execute("login")
             elseif str == "  shutdown" then
                 computer.shutdown()
             elseif str == "  reboot" then
