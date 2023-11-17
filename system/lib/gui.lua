@@ -666,7 +666,7 @@ function gui.drawtext(screen, posX, posY, foreground, text)
     end
 end
 
-function gui.select(screen, cx, cy, label, actions, scroll)
+function gui.select(screen, cx, cy, label, actions, scroll, noCloseButton)
     --=gui_select(screen, nil, nil, "LOLZ", {"test 1", "test 2", "test 3"})
 
     local gpu = graphic.findGpu(screen)
@@ -704,7 +704,9 @@ function gui.select(screen, cx, cy, label, actions, scroll)
         if label then
             window:set(2, 1, colors.lightGray, colors.white, label)
         end
-        window:set(window.sizeX, 1, colors.red, colors.white, "X")
+        if noCloseButton then
+            window:set(window.sizeX, 1, colors.red, colors.white, "X")
+        end
         window:fill(1, window.sizeY, window.sizeX, 1, colors.lightGray, 0, " ")
         redrawButton()
     end
@@ -801,7 +803,9 @@ function gui.select(screen, cx, cy, label, actions, scroll)
 
         if windowEventData[1] == "touch" then
             if windowEventData[3] == window.sizeX and windowEventData[4] == 1 then
-                return nil, scroll, windowEventData[5], windowEventData
+                if not noCloseButton then
+                    return nil, scroll, windowEventData[5], windowEventData
+                end
             elseif windowEventData[3] >= window.sizeX - 9 and windowEventData[3] < window.sizeX and windowEventData[4] == window.sizeY then
                 if sel then
                     return sel, scroll, windowEventData[5], windowEventData
@@ -1115,6 +1119,28 @@ function gui.yesno(screen, cx, cy, str, backgroundColor)
             return true
         end
     end
+end
+
+
+function gui.clearRun(func, screen, ...)
+    local clear = saveZone(screen)
+    local result = {func(screen, ...)}
+    clear()
+    return table.unpack(result)
+end
+
+function gui.clearBigRun(func, screen, ...)
+    local clear = saveBigZone(screen)
+    local result = {func(screen, ...)}
+    clear()
+    return table.unpack(result)
+end
+
+function gui.clearScreenRun(func, screen, ...)
+    local clear = graphic.screenshot(screen)
+    local result = {func(screen, ...)}
+    clear()
+    return table.unpack(result)
 end
 
 calls.loaded.gui_yesno = gui.yesno

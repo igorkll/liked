@@ -1,4 +1,10 @@
 local graphic = require("graphic")
 local screen = ...
-local rx, ry = graphic.getResolution(screen)
-return screenshot(screen, rx / 2 - 15, ry / 2 - 3, 34, 9)
+local cx, cy = graphic.getResolution(screen)
+cx = cx / 2
+cy = cy / 2
+cx = cx - 16
+cy = cy - 4
+cx = math.round(cx) + 1
+cy = math.round(cy) + 1
+return graphic.screenshot(screen, cx, cy, 32, 8)
