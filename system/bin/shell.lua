@@ -5,7 +5,10 @@ local screensaver = require("screensaver")
 local computer = require("computer")
 local registry = require("registry")
 local lastinfo = require("lastinfo")
+local vkeyboard = require("vkeyboard")
 local screen = ...
+
+vkeyboard.hook(screen)
 
 local t = thread.create(function ()
     assert(liked.execute("login", screen))

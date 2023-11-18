@@ -202,21 +202,29 @@ function vkeyboard.hook(screen)
                 clicks[tbl[2]] = {tbl[3], tbl[4], computer.uptime(), 1}
             end
         elseif tbl[1] == "vkeyboard" and not opened[tbl[2]] then
-            opened[tbl[2]] = {}
+            opened[tbl[2]] = true
+
+            local threads = thread.all()
+            local suspended = {}
+            for _, t in ipairs(threads) do
+                if t.parentData.screen == tbl[2] then
+                    t:suspend()
+                    table.insert(suspended, t)
+                end
+            end
+            local clear = vkeyboard.save(screen)
+
             local str = vkeyboard.input(tbl[2])
             if str then
                 event.push("clipboard", tbl[2], str, tbl[3])
             end
-            for t in pairs(opened[tbl[2]]) do
+
+            clear()
+            for _, t in ipairs(suspended) do
                 t:resume()
             end
-            opened[tbl[2]] = nil
-        end
 
-        local t = thread.current()
-        if t and t.parentData.screen and opened[t.parentData.screen] then
-            t:suspend()
-            opened[t.parentData.screen][t] = true
+            opened[tbl[2]] = nil
         end
 
         return ...
