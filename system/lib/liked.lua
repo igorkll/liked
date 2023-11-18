@@ -561,6 +561,8 @@ function liked.drawUpBar(screen, withoutFill, bgcolor, guiOffset)
         end
         gpu.set((rx - offset) + (i - 1), 1, char)
     end
+
+    graphic.updateFlag(screen)
 end
 
 --------------------------------------------------------
