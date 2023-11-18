@@ -92,6 +92,8 @@ end
 local contextMenuOpen = nil
 
 local function drawStatus()
+    if screensaver.current(screen) then return end
+
     --[[
     local timeZone = registry.timeZone or 0
     
