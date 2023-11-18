@@ -108,7 +108,8 @@ function objclass:uploadEvent(eventData)
             end
         end
     elseif self.type == "switch" then
-        if eventData[1] == "touch" and eventData[3] >= self.x and eventData[3] < self.x + 6 and eventData[4] == self.y then
+        local size = self.checkbox and 2 or 6
+        if eventData[1] == "touch" and eventData[3] >= self.x and eventData[3] < self.x + size and eventData[4] == self.y then
             self.state = not self.state
             self:draw()
 
@@ -225,21 +226,29 @@ function objclass:draw()
         local bg = self.state and self.enableColor or self.disableColor
         local _, _, fg = self.gui.window:get(self.x, self.y)
 
-        if self.gui.style == "round" then
-            self.gui.window:set(self.x, self.y, fg, bg, "◖████◗")
-            if self.state then
-                self.gui.window:set(self.x + 3, self.y, bg, self.pointerColor, "◖█")
-                self.gui.window:set(self.x + 5, self.y, fg, self.pointerColor, "◗")
+        if self.checkbox then
+            if self.gui.style == "round" then
+                self.gui.window:set(self.x, self.y, fg, self.pointerColor, "◖◗")
             else
-                self.gui.window:set(self.x, self.y, fg, self.pointerColor, "◖")
-                self.gui.window:set(self.x + 1, self.y, bg, self.pointerColor, "█◗")
+                self.gui.window:set(self.x, self.y, fg, self.pointerColor, "⠰⠆")
             end
         else
-            self.gui.window:set(self.x, self.y, fg, bg, "██████")
-            if self.state then
-                self.gui.window:set(self.x + 3, self.y, bg, self.pointerColor, "███")
+            if self.gui.style == "round" then
+                self.gui.window:set(self.x, self.y, fg, bg, "◖████◗")
+                if self.state then
+                    self.gui.window:set(self.x + 3, self.y, bg, self.pointerColor, "◖█")
+                    self.gui.window:set(self.x + 5, self.y, fg, self.pointerColor, "◗")
+                else
+                    self.gui.window:set(self.x, self.y, fg, self.pointerColor, "◖")
+                    self.gui.window:set(self.x + 1, self.y, bg, self.pointerColor, "█◗")
+                end
             else
-                self.gui.window:set(self.x, self.y, fg, self.pointerColor, "███")
+                self.gui.window:set(self.x, self.y, fg, bg, "██████")
+                if self.state then
+                    self.gui.window:set(self.x + 3, self.y, bg, self.pointerColor, "███")
+                else
+                    self.gui.window:set(self.x, self.y, fg, self.pointerColor, "███")
+                end
             end
         end
     elseif self.type == "big_switch" then
@@ -393,6 +402,12 @@ function uix:createSwitch(x, y, state, enableColor, disableColor, pointerColor)
     obj.pointerColor = pointerColor or colors.white
 
     table.insert(self.objs, obj)
+    return obj
+end
+
+function uix:createCheckbox(...)
+    local obj = self:createSwitch(...)
+    obj.checkbox = true
     return obj
 end
 
