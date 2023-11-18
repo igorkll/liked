@@ -190,7 +190,7 @@ local list = {
 
         path = "/data/apps/explode.app",
         urlPrimaryPart = selfurlpart .. "/apps/explode.app/",
-        files = {"main.lua", "icon.t2p"}
+        files = {"main.lua", "icon.t2p", "config.cfg"}
     },
     {
         name = "camera",

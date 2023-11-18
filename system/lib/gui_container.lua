@@ -33,11 +33,6 @@ gui_container.chars = {
 
 gui_container.screenSaverPath = "/data/screenSaver.scrsv"
 
----------------------------- можете изменять из своего софта для конфигурирования поведения desktop (кастяли и легаси)
-
-gui_container.noScreenSaver = {} --на этих экранах не сможет быть защумен screensaver пока ключ с uuid экрана имет значения true
-gui_container.isScreenSaver = {} --значения для ващего экрана сдесь true когда на нем запущен screenSaver(true весит даже на окне ввода пароля после screenSaver)
-
 ---------------------------- необходимо сканфигурировать это все, в своей програме для поддержки свого формата
 
 gui_container.newCreate = { --структура {name, exp, allowCheck(), create(path)}

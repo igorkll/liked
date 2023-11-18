@@ -48,7 +48,6 @@ local function bgTime(destruct, time, tbl)
 end
 
 local function timer(destruct, getTimeTbl)
-    gui_container.noScreenSaver[screen] = true
     rx, ry = 8, 4
     graphic.setResolution(screen, rx, ry)
 
@@ -77,7 +76,6 @@ local function timer(destruct, getTimeTbl)
     end
 
     graphic.setResolution(screen, orx, ory)
-    gui_container.noScreenSaver[screen] = nil
 end
 
 ----------------------------
