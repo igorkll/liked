@@ -1,4 +1,25 @@
 local sysinit = {}
+sysinit.screenThreads = {}
+
+function sysinit.runShell(screen, customShell)
+    local thread = require("thread")
+    local registry = require("registry")
+    local liked = require("liked")
+
+    gui_initScreen(screen)
+    
+    local shellName = "shell"
+    if customShell then
+        shellName = customShell
+    elseif registry.data.shell and registry.data.shell[screen] then
+        shellName = registry.data.shell[screen]
+    end
+
+    if sysinit.screenThreads[screen] then sysinit.screenThreads[screen]:kill() end
+    local t = thread.create(assert(liked.loadApp(shellName, screen)))
+    t:resume() --поток по умалчанию спит
+    sysinit.screenThreads[screen] = t
+end
 
 function sysinit.init(box)
     _G._OSVERSION = "liked-v" .. tostring(getOSversion())
@@ -158,32 +179,20 @@ function sysinit.init(box)
 
     ------------------------------------
 
-    local screenThreads = {}
-    local function runShell(screen)
-        gui_initScreen(screen)
-        local shellName = "shell"
-        if registry.data.shell and registry.data.shell[screen] then
-            shellName = registry.data.shell[screen]
-        end
-        local t = thread.create(assert(liked.loadApp(shellName, screen)))
-        t:resume() --поток по умалчанию спит
-        screenThreads[screen] = t
-    end
-
     for index, address in ipairs(screens) do
-        runShell(address)
+        sysinit.runShell(address)
     end
 
     event.hyperListen(function (eventType, cuuid, ctype)
         if ctype == "screen" then
             if eventType == "component_added" then
-                if not screenThreads[cuuid] and graphic.findGpuAddress(cuuid) then
-                    runShell(cuuid)
+                if not sysinit.screenThreads[cuuid] and graphic.findGpuAddress(cuuid) then
+                    sysinit.runShell(cuuid)
                 end
             elseif eventType == "component_removed" then
-                if screenThreads[cuuid] then
-                    screenThreads[cuuid]:kill()
-                    screenThreads[cuuid] = nil
+                if sysinit.screenThreads[cuuid] then
+                    sysinit.screenThreads[cuuid]:kill()
+                    sysinit.screenThreads[cuuid] = nil
                 end
             end
         end
@@ -191,10 +200,10 @@ function sysinit.init(box)
 
     thread.create(function ()
         while true do
-            for screen, th in pairs(screenThreads) do
+            for screen, th in pairs(sysinit.screenThreads) do
                 if th:status() == "dead" then
                     th:kill()
-                    runShell(screen)
+                    sysinit.runShell(screen)
                 end
             end
             os.sleep(1)    
