@@ -353,7 +353,7 @@ local timerEnable = true
 event.timer(10, function()
     if not timerEnable then return end
     drawStatus()
-end)
+end, math.huge)
 
 local function warn(str)
     local clear = saveZone(screen)
