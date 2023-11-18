@@ -411,10 +411,7 @@ local function fileDescriptor(icon, alternative, nickname) --открывает 
     elseif icon.exp == "scrsv" then
         if liked.publicMode(screen) then
             timerEnable = false
-            screensaver.start(screen, icon.path)
-            while screensaver.current(screen) do
-                event.sleep()
-            end
+            screensaver.waitStart(screen, icon.path)
             timerEnable = true
         end
     elseif icon.exp == "plt" then
@@ -914,7 +911,6 @@ local function doIcon(windowEventData)
                                 end
                             end
                         end
-                        
                     end
                     break
                 end

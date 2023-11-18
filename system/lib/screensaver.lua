@@ -36,6 +36,13 @@ function screensaver.start(screen, path)
     current[screen] = th
 end
 
+function screensaver.waitStart(screen, path)
+    screensaver.start(screen, path)
+    while screensaver.current(screen) do
+        event.sleep()
+    end
+end
+
 
 screensaver.unloadable = true
 return screensaver
