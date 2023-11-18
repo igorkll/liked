@@ -30,7 +30,7 @@ function vkeyboard.input(screen, splash)
         returnVal = true
     end
 
-    local back = layout:createButton(window.sizeX - 5, 4, 5, 3, uix.colors.red, uix.colors.white, "<")
+    local back = layout:createButton(window.sizeX - 5, 4, 5, 3, uix.colors.red, uix.colors.white, "<", true)
     back.postDraw = postDraw
     function back:onClick()
         currentInput = unicode.sub(currentInput, 1, unicode.len(currentInput) - 1)
@@ -43,7 +43,7 @@ function vkeyboard.input(screen, splash)
         returnVal = currentInput
     end
 
-    local space = layout:createButton(3, window.sizeY - 1, window.sizeX / 2, 1, uix.colors.blue, uix.colors.white, "⣇" .. ("⣀"):rep(4) .. "⣸")
+    local space = layout:createButton(3, window.sizeY - 1, window.sizeX / 2, 1, uix.colors.blue, uix.colors.white, "⣇" .. ("⣀"):rep(4) .. "⣸", true)
     function space:onClick()
         currentInput = currentInput .. " "
         doInput()
@@ -53,7 +53,7 @@ function vkeyboard.input(screen, splash)
     layout:createText(43, window.sizeY - 1, nil, "Upper Case")
 
     local function addButton(index, y, char)
-        local button = layout:createButton(8 + ((index - 1) * 4), 4 + (y * 3), 3, 3, uix.colors.blue, uix.colors.white, char)
+        local button = layout:createButton(8 + ((index - 1) * 4), 4 + (y * 3), 3, 3, uix.colors.blue, uix.colors.white, char, true)
         button.postDraw = postDraw
         function button:onClick()
             if upperCase.state then
@@ -132,6 +132,9 @@ function vkeyboard.input(screen, splash)
     addButton(14, 3, "^")
     addButton(15, 3, "&")
     addButton(16, 3, "*")
+
+    addButton(15, 4, ",")
+    addButton(16, 4, ".")
 
     layout:draw()
 
