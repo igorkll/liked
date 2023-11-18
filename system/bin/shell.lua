@@ -18,14 +18,16 @@ t:resume()
 
 local oldScreenSaverTime = computer.uptime()
 
-local function runScreenSaver()
-    if not screensaver.current(screen) then
-        t:suspend()
-        screensaver.waitStart(screen)
-        oldScreenSaverTime = computer.uptime()
-        t:resume()
-    else
-        oldScreenSaverTime = computer.uptime()
+local function runScreenSaver(force)
+    if force or screensaver.isEnabled(screen) then
+        if not screensaver.current(screen) then
+            t:suspend()
+            screensaver.waitStart(screen)
+            oldScreenSaverTime = computer.uptime()
+            t:resume()
+        else
+            oldScreenSaverTime = computer.uptime()
+        end
     end
 end
 
@@ -33,7 +35,7 @@ while true do
     local eventData = {event.pull(0.1)}
 
     if eventData[1] == "screenSaverDemo" and eventData[2] == screen then
-        runScreenSaver()
+        runScreenSaver(true)
     end
 
     if (eventData[1] == "touch" or eventData[1] == "scroll" or eventData[1] == "drag") and eventData[2] == screen then
