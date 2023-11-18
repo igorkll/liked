@@ -4,6 +4,7 @@ local event = require("event")
 local screensaver = require("screensaver")
 local computer = require("computer")
 local registry = require("registry")
+local lastinfo = require("lastinfo")
 local screen = ...
 
 local t = thread.create(function ()
@@ -15,10 +16,14 @@ t:resume()
 local oldScreenSaverTime = computer.uptime()
 
 local function runScreenSaver()
-    t:suspend()
-    screensaver.waitStart(screen)
-    oldScreenSaverTime = computer.uptime()
-    t:resume()
+    if not screensaver.current(screen) then
+        t:suspend()
+        screensaver.waitStart(screen)
+        oldScreenSaverTime = computer.uptime()
+        t:resume()
+    else
+        oldScreenSaverTime = computer.uptime()
+    end
 end
 
 while true do
@@ -29,6 +34,8 @@ while true do
     end
 
     if (eventData[1] == "touch" or eventData[1] == "scroll" or eventData[1] == "drag") and eventData[2] == screen then
+        oldScreenSaverTime = computer.uptime()
+    elseif (eventData[1] == "key_down" or eventData[1] == "key_up") and table.exists(lastinfo.keyboards[screen], eventData[2]) then
         oldScreenSaverTime = computer.uptime()
     end
 
