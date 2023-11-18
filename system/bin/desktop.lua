@@ -15,6 +15,7 @@ local lastinfo = require("lastinfo")
 local system = require("system")
 local liked = require("liked")
 local parser = require("parser")
+local screensaver = require("screensaver")
 
 local colors = gui_container.colors
 
@@ -409,9 +410,12 @@ local function fileDescriptor(icon, alternative, nickname) --открывает 
         return true
     elseif icon.exp == "scrsv" then
         if liked.publicMode(screen) then
-            event.timer(0.1, function ()
-                
-            end, 1)
+            timerEnable = false
+            screensaver.start(screen, icon.path)
+            while screensaver.current(screen) do
+                event.sleep()
+            end
+            timerEnable = true
         end
     elseif icon.exp == "plt" then
         if liked.publicMode(screen) then

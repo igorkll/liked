@@ -1,7 +1,7 @@
 local thread = require("thread")
 local event = require("event")
 local graphic = require("graphic")
-local liked = require("liked")
+local programs = require("programs")
 local screensaver = {}
 
 local enabled = {}
@@ -22,9 +22,9 @@ end
 
 function screensaver.start(screen, path)
     local clear = graphic.screenshot(screen)
-    
-    local th = thread.createBackground(liked.loadApp, path, screen)
-
+    local th = thread.createBackground(programs.load(path or require("gui_container").screenSaverPath), screen)
+    th:resume()
+    event.yield()
     event.listen(nil, function (eventName, uuid)
         if uuid == screen and (eventName == "touch" or eventName == "drag" or eventName == "scroll") then
             current[screen] = nil
@@ -33,7 +33,6 @@ function screensaver.start(screen, path)
             return false
         end
     end)
-
     current[screen] = th
 end
 
