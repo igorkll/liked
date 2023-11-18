@@ -237,7 +237,9 @@ if path then
 end
 
 local oldStatusTime = computer.uptime()
-local t = thread.createBackground(function()
+local baseTh = thread.current()
+local t
+t = thread.createBackground(function()
     while true do
         local eventData = {event.pull(0.1)}
         if eventData[1] == "chat_message" then
@@ -315,7 +317,8 @@ local t = thread.createBackground(function()
             end
         end
     end
+    baseTh:kill()
+    t:kill()
 end)
 t:resume()
-t:kill()
 event.wait()

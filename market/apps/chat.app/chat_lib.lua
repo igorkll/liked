@@ -24,7 +24,7 @@ local fs = require("filesystem")
 local modem_chat_lib = require("modem_chat_lib", true)
 
 local function checkHistory()
-    local file = fs.open("/data/bin/chat.app/history.dat", "rb")
+    local file = fs.open("/data/apps/chat.app/history.dat", "rb")
     local historyDat = file.readAll()
     file.close()
 
@@ -34,7 +34,7 @@ local function checkHistory()
         table.remove(history, 1)
     end
 
-    local file = fs.open("/data/bin/chat.app/history.dat", "wb")
+    local file = fs.open("/data/apps/chat.app/history.dat", "wb")
     file.write(table.concat(history, "\n"))
     file.close()
 end
@@ -42,7 +42,7 @@ end
 local function addToHistory(...)
     local messageToSave = assert(serialization({...}))
 
-    local file = fs.open("/data/bin/chat.app/history.dat", "ab")
+    local file = fs.open("/data/apps/chat.app/history.dat", "ab")
     file.write(messageToSave .. "\n")
     file.close()
     checkHistory()
