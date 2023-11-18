@@ -13,8 +13,6 @@ local palette = require("palette")
 
 local oldPalete = palette.save(screen)
 
-gui_container.noScreenSaver[screen] = true
-
 graphic.setResolution(screen, 80, 25)
 local rx, ry = graphic.getResolution(screen)
 local photoResolution = ry * 2
@@ -440,4 +438,3 @@ while true do
 end
 
 palette.set(screen, oldPalete)
-gui_container.noScreenSaver[screen] = nil

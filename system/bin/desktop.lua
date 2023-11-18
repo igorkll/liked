@@ -367,7 +367,7 @@ end
 local function execute(name, nickname, ...)
     timerEnable = false
     gui_status(screen, nil, nil, "loading...")
-    liked.bigAssert(screen, liked.execute(name, screen, nickname))
+    liked.bigAssert(screen, liked.execute(name, screen, nickname, ...))
     draw()
     timerEnable = true
 end

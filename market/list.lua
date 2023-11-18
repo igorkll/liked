@@ -68,7 +68,6 @@ local list = {
             download("/data/apps/chat.app/main.lua", selfurlpart .. "/apps/chat.app/main.lua")
             download("/data/apps/chat.app/icon.t2p", self.icon)
             download("/data/apps/chat.app/uninstall.lua", selfurlpart .. "/apps/chat.app/uninstall.lua")
-            download("/data/apps/chat.app/exit.lua", selfurlpart .. "/apps/chat.app/exit.lua")
 
             fs.makeDirectory("/data/autoruns")
             download("/data/autoruns/chat_demon.lua", selfurlpart .. "/apps/chat.app/autorun.lua")
@@ -202,7 +201,7 @@ local list = {
 
         path = "/data/apps/camera.app",
         urlPrimaryPart = selfurlpart .. "/apps/camera.app/",
-        files = {"main.lua", "icon.t2p", "formats.cfg"}
+        files = {"main.lua", "icon.t2p", "formats.cfg", "config.cfg"}
     },
     {
         name = "redirection",

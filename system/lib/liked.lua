@@ -19,6 +19,7 @@ local natives = require("natives")
 local colorlib = require("colors")
 local palette = require("palette")
 local package = require("package")
+local screensaver = require("screensaver")
 local liked = {}
 
 local colors = gui_container.colors
@@ -290,6 +291,8 @@ function liked.loadApp(name, screen, nickname)
         end
     end
 
+    local oldScreenSaverState
+
     --------------------------------
 
     local function log(tbl)
@@ -300,16 +303,29 @@ function liked.loadApp(name, screen, nickname)
     end
 
     local function appStart()
-        if paletteFile then
-            palette.fromFile(screen, paletteFile)
+        if screen then
+            if paletteFile then
+                palette.fromFile(screen, paletteFile)
+            end
+
+            if configTbl.noScreenSaver then
+                oldScreenSaverState = screensaver.isEnabled(screen)
+                screensaver.setEnabled(screen, false)
+            end
         end
     end
 
     local function appEnd()
-        if configTbl.restoreGraphic then
-            log{pcall(gui_initScreen, screen)}
-        elseif paletteFile or configTbl.restorePalette then
-            palette.system(screen)
+        if screen then
+            if configTbl.restoreGraphic then
+                log{pcall(gui_initScreen, screen)}
+            elseif paletteFile or configTbl.restorePalette then
+                palette.system(screen)
+            end
+
+            if configTbl.noScreenSaver then
+                screensaver.setEnabled(screen, oldScreenSaverState)
+            end
         end
     end
 

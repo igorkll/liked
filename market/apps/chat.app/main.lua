@@ -8,12 +8,12 @@ local colorsApi = require("colors")
 local unicode = require("unicode")
 local liked = require("liked")
 local computer = require("computer")
+local screensaver = require("screensaver")
+local thread = require("thread")
 
 local colors = gui_container.colors
 local indexsColors = gui_container.indexsColors
 local screen, nickname, path = ...
-
-gui_container.noBlockOnScreenSaver[screen] = true
 
 ------------------------------------
 
@@ -131,7 +131,7 @@ local isRedrawed
 local exportButtons = {}
 local existsCache = {}
 local function draw()
-    if gui_container.isScreenSaver[screen] then
+    if screensaver.current(screen) then
         isRedrawed = true
         return
     end
@@ -237,80 +237,85 @@ if path then
 end
 
 local oldStatusTime = computer.uptime()
-while true do
-    local eventData = {event.pull(0.1)}
-    if eventData[1] == "chat_message" then
-        local tbl = {table.unpack(eventData, 2)}
-        table.insert(history, tbl)
-        addNullStrs(tbl)
-        
-        if scroll ~= 0 then
-            scroll = scroll + 1
-        else
-            draw()
-        end
-    end
-
-    if not gui_container.isScreenSaver[screen] then
-        if computer.uptime() - oldStatusTime > 5 then
-            drawStatus()
-            oldStatusTime = computer.uptime()
-        end
-
-        if isRedrawed then
-            isRedrawed = nil
-            draw()
-        end
-
-        local windowEventData = window:uploadEvent(eventData)
-        local inputData = input.uploadEvent(eventData)
-        if inputData then
-            if inputData ~= true then
-                if inputData ~= "" then
-                    local nickname = eventData[5]
-                    send(nickname, "text", inputData)
-                end
+local t = thread.createBackground(function()
+    while true do
+        local eventData = {event.pull(0.1)}
+        if eventData[1] == "chat_message" then
+            local tbl = {table.unpack(eventData, 2)}
+            table.insert(history, tbl)
+            addNullStrs(tbl)
+            
+            if scroll ~= 0 then
+                scroll = scroll + 1
             else
-                break
+                draw()
             end
         end
-        
-        if windowEventData[1] == "touch" then
-            if windowEventData[3] == window.sizeX and windowEventData[4] == 1 then
-                break
-            else
-                for i, v in ipairs(exportButtons) do
-                    if v then
-                        if windowEventData[4] == v[2] and windowEventData[3] >= v[1] and windowEventData[3] < (v[1] + 6) then
-                            v[3]()
+
+        if not screensaver.current(screen) then
+            if computer.uptime() - oldStatusTime > 5 then
+                drawStatus()
+                oldStatusTime = computer.uptime()
+            end
+
+            if isRedrawed then
+                isRedrawed = nil
+                draw()
+            end
+
+            local windowEventData = window:uploadEvent(eventData)
+            local inputData = input.uploadEvent(eventData)
+            if inputData then
+                if inputData ~= true then
+                    if inputData ~= "" then
+                        local nickname = eventData[5]
+                        send(nickname, "text", inputData)
+                    end
+                else
+                    break
+                end
+            end
+            
+            if windowEventData[1] == "touch" then
+                if windowEventData[3] == window.sizeX and windowEventData[4] == 1 then
+                    break
+                else
+                    for i, v in ipairs(exportButtons) do
+                        if v then
+                            if windowEventData[4] == v[2] and windowEventData[3] >= v[1] and windowEventData[3] < (v[1] + 6) then
+                                v[3]()
+                            end
                         end
                     end
                 end
-            end
-        elseif windowEventData[1] == "scroll" then
-            if windowEventData[5] > 0 then
-                if scroll <= (#history - window.sizeY) then
-                    scroll = scroll + 1
-                    draw()
-                end
-            else
-                if scroll > 0 then
-                    scroll = scroll - 1
-                    draw()
-                end
-            end
-        end
-
-        if windowEventData[1] == "touch" or windowEventData[1] == "drag" then
-            if windowEventData[3] == window.sizeX and windowEventData[4] > 1 and windowEventData[4] < window.sizeY then
-                local newscroll = math.round(map(windowEventData[4], 2, window.sizeY - 1, #history - window.sizeY, 0))
-                if newscroll <= (#history - window.sizeY) and newscroll > 0 then
-                    if newscroll ~= scroll then
-                        scroll = newscroll
+            elseif windowEventData[1] == "scroll" then
+                if windowEventData[5] > 0 then
+                    if scroll <= (#history - window.sizeY) then
+                        scroll = scroll + 1
+                        draw()
+                    end
+                else
+                    if scroll > 0 then
+                        scroll = scroll - 1
                         draw()
                     end
                 end
             end
+
+            if windowEventData[1] == "touch" or windowEventData[1] == "drag" then
+                if windowEventData[3] == window.sizeX and windowEventData[4] > 1 and windowEventData[4] < window.sizeY then
+                    local newscroll = math.round(map(windowEventData[4], 2, window.sizeY - 1, #history - window.sizeY, 0))
+                    if newscroll <= (#history - window.sizeY) and newscroll > 0 then
+                        if newscroll ~= scroll then
+                            scroll = newscroll
+                            draw()
+                        end
+                    end
+                end
+            end
         end
     end
-end
+end)
+t:resume()
+t:kill()
+event.wait()

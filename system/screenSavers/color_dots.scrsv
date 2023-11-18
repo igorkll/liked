@@ -42,5 +42,5 @@ while true do
         end
     end
     
-    event.yield()
+    os.sleep()
 end

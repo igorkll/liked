@@ -37,8 +37,10 @@
 /system/autoruns/a_mounter.lua
 /system/autoruns/b_powerCheck.lua
 /system/bin/applyReg.lua
+/system/bin/desktop.lua
 /system/bin/edit.lua
 /system/bin/fileinfo.lua
+/system/bin/login.lua
 /system/bin/paint.lua
 /system/bin/shell.lua
 /system/bin/unpackArchive.lua
@@ -94,6 +96,7 @@
 /system/lib/liked.lua
 /system/lib/palette.lua
 /system/lib/rendUtils.lua
+/system/lib/screensaver.lua
 /system/lib/sound.lua
 /system/lib/sysinit.lua
 /system/lib/uix.lua

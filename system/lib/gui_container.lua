@@ -37,8 +37,6 @@ gui_container.screenSaverPath = "/data/screenSaver.scrsv"
 
 gui_container.noScreenSaver = {} --на этих экранах не сможет быть защумен screensaver пока ключ с uuid экрана имет значения true
 gui_container.isScreenSaver = {} --значения для ващего экрана сдесь true когда на нем запущен screenSaver(true весит даже на окне ввода пароля после screenSaver)
-gui_container.noBlockOnScreenSaver = {} --если вы сами перестаете ресовать во время screenSaver но при этом хотите не блокировать основной поток ващей программы то поставьте сделесь true для ващего монитора(не забудьте вернуть все наместо после заверщения работы программы)
-gui_container.noInterrupt = {} --не используеться
 
 ---------------------------- необходимо сканфигурировать это все, в своей програме для поддержки свого формата
 
