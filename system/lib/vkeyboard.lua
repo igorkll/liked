@@ -216,7 +216,7 @@ function vkeyboard.hook(screen)
 
             local str = vkeyboard.input(tbl[2])
             if str then
-                event.push("clipboard", tbl[2], str, tbl[3])
+                event.push("softwareInsert", tbl[2], str, tbl[3])
             end
 
             clear()

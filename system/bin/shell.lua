@@ -38,7 +38,7 @@ while true do
 
     if (eventData[1] == "touch" or eventData[1] == "scroll" or eventData[1] == "drag") and eventData[2] == screen then
         oldScreenSaverTime = computer.uptime()
-    elseif (eventData[1] == "key_down" or eventData[1] == "key_up") and table.exists(lastinfo.keyboards[screen], eventData[2]) then
+    elseif (eventData[1] == "key_down" or eventData[1] == "key_up" or eventData[1] == "clipboard" or eventData[1] == "softwareInsert") and table.exists(lastinfo.keyboards[screen], eventData[2]) then
         oldScreenSaverTime = computer.uptime()
     end
 
