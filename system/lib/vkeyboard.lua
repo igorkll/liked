@@ -4,32 +4,41 @@ local event = require("event")
 local unicode = require("unicode")
 local vkeyboard = {}
 
+local function postDraw(self)
+    local bg = self.state and self.back2 or self.back
+    self.gui.window:fill(self.x, self.y, self.sx, 1, uix.colors.lightGray, bg, "⣤")
+    self.gui.window:fill(self.x, self.y + (self.sy - 1), self.sx, 1, bg, uix.colors.lightGray, "⣤")
+end
+
 function vkeyboard.input(screen, splash)
     local rx, ry = graphic.getResolution(screen)
-    local window = graphic.createWindow(screen, 5, ry - 21, rx - 8, 21)
+    local window = graphic.createWindow(screen, 5, ry - 18, rx - 8, 18)
     local layout = uix.create(window, uix.colors.lightGray, "square")
 
     local currentInput, returnVal = ""
     local inputLabel = layout:createLabel(2, 2, window.sizeX - 2, 1, uix.colors.gray, uix.colors.white)
     inputLabel.alignment = "left"
     local function doInput()
-        inputLabel.text = (splash or "") .. "> " .. currentInput
+        inputLabel.text = (splash or "") .. "> " .. currentInput .. "|"
         inputLabel:draw()
     end
     doInput()
 
     local esc = layout:createButton(2, 4, 5, 3, uix.colors.red, uix.colors.white, "ESC", true)
+    esc.postDraw = postDraw
     function esc:onClick()
         returnVal = true
     end
 
     local back = layout:createButton(window.sizeX - 5, 4, 5, 3, uix.colors.red, uix.colors.white, "<")
+    back.postDraw = postDraw
     function back:onClick()
         currentInput = unicode.sub(currentInput, 1, unicode.len(currentInput) - 1)
         doInput()
     end
 
     local enter = layout:createButton(window.sizeX - 16, 4, 10, 3, uix.colors.red, uix.colors.white, "enter", true)
+    enter.postDraw = postDraw
     function enter:onClick()
         returnVal = currentInput
     end
@@ -40,10 +49,12 @@ function vkeyboard.input(screen, splash)
         doInput()
     end
 
-    local upperCase = layout:createCheckbox(50, window.sizeY - 1)
+    local upperCase = layout:createCheckbox(40, window.sizeY - 1)
+    layout:createText(43, window.sizeY - 1, nil, "Upper Case")
 
     local function addButton(index, y, char)
-        local button = layout:createButton(8 + ((index - 1) * 4), 4 + (y * 4), 3, 3, uix.colors.blue, uix.colors.white, char)
+        local button = layout:createButton(8 + ((index - 1) * 4), 4 + (y * 3), 3, 3, uix.colors.blue, uix.colors.white, char)
+        button.postDraw = postDraw
         function button:onClick()
             if upperCase.state then
                 currentInput = currentInput .. char:upper()

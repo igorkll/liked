@@ -228,9 +228,9 @@ function objclass:draw()
 
         if self.checkbox then
             if self.gui.style == "round" then
-                self.gui.window:set(self.x, self.y, fg, self.pointerColor, "◖◗")
+                self.gui.window:set(self.x, self.y, self.pointerColor, bg, "◖◗")
             else
-                self.gui.window:set(self.x, self.y, fg, self.pointerColor, "⠰⠆")
+                self.gui.window:set(self.x, self.y, self.pointerColor, bg, "⠰⠆")
             end
         else
             if self.gui.style == "round" then
@@ -308,6 +308,10 @@ function objclass:draw()
         local pos = math.round(math.map(self.value, 0, 1, 0, self.sx))
         self.gui.window:fill(self.x + pos, self.y, self.sx - pos, 1, bg, self.back, gui_container.chars.splitLine)
         self.gui.window:fill(self.x, self.y, pos, 1, bg, self.fore, gui_container.chars.wideSplitLine) 
+    end
+
+    if self.postDraw then
+        self:postDraw()
     end
 end
 
