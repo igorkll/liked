@@ -2,6 +2,8 @@ local graphic = require("graphic")
 local uix = require("uix")
 local event = require("event")
 local unicode = require("unicode")
+local computer = require("computer")
+local thread = require("thread")
 local vkeyboard = {}
 
 local function postDraw(self)
@@ -153,5 +155,72 @@ function vkeyboard.input(screen, splash)
     end
 end
 
-vkeyboard.unloadable = true
+function vkeyboard.save(screen)
+    local rx, ry = graphic.getResolution(screen)
+    local clear = graphic.screenshot(screen, 5, ry - 18, rx - 8, 18)
+
+    local oldStates = {}
+    for i, window in ipairs(graphic.windows) do
+        if window.screen == screen then
+            oldStates[window] = not not window.selected
+        end
+    end
+
+    return function ()
+        for window, state in pairs(oldStates) do
+            window.selected = state
+        end
+
+        clear()
+    end
+end
+
+local hooked = {}
+local clicks = {}
+local opened = {}
+function vkeyboard.hook(screen)
+    if hooked[screen] then return end
+    hooked[screen] = true
+
+    event.hyperHook(function (...)
+        local tbl = {...}
+
+        if tbl[1] == "touch" then
+            if clicks[tbl[2]] then
+                local clk = clicks[tbl[2]]
+
+                if clk[1] == tbl[3] and clk[2] == tbl[4] and computer.uptime() - clk[3] <= 0.2 then
+                    clk[3] = computer.uptime()
+                    clk[4] = clk[4] + 1
+                    if clk[4] >= 3 then
+                        event.push("vkeyboard", tbl[2], tbl[6])
+                    end
+                else
+                    clicks[tbl[2]] = {tbl[3], tbl[4], computer.uptime(), 1}
+                end
+            else
+                clicks[tbl[2]] = {tbl[3], tbl[4], computer.uptime(), 1}
+            end
+        elseif tbl[1] == "vkeyboard" and not opened[tbl[2]] then
+            opened[tbl[2]] = {}
+            local str = vkeyboard.input(tbl[2])
+            if str then
+                event.push("clipboard", tbl[2], str, tbl[3])
+            end
+            for t in pairs(opened[tbl[2]]) do
+                t:resume()
+            end
+            opened[tbl[2]] = nil
+        end
+
+        local t = thread.current()
+        if t and t.parentData.screen and opened[t.parentData.screen] then
+            t:suspend()
+            opened[t.parentData.screen][t] = true
+        end
+
+        return ...
+    end)
+end
+
 return vkeyboard

@@ -17,6 +17,7 @@ function sysinit.runShell(screen, customShell)
 
     if sysinit.screenThreads[screen] then sysinit.screenThreads[screen]:kill() end
     local t = thread.create(assert(liked.loadApp(shellName, screen)))
+    t.parentData.screen = screen
     t:resume() --поток по умалчанию спит
     sysinit.screenThreads[screen] = t
 end

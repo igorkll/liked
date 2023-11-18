@@ -320,5 +320,6 @@ t = thread.createBackground(function()
     baseTh:kill()
     t:kill()
 end)
+t.parentData.screen = screen
 t:resume()
 event.wait()
