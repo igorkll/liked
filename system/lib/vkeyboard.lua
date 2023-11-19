@@ -189,7 +189,7 @@ function vkeyboard.hook(screen)
             if clicks[tbl[2]] then
                 local clk = clicks[tbl[2]]
 
-                if clk[1] == tbl[3] and clk[2] == tbl[4] and computer.uptime() - clk[3] <= 0.2 then
+                if clk[1] == tbl[3] and clk[2] == tbl[4] and computer.uptime() - clk[3] <= 0.3 then
                     clk[3] = computer.uptime()
                     clk[4] = clk[4] + 1
                     if clk[4] >= 3 then
