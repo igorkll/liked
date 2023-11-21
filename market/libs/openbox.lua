@@ -72,21 +72,27 @@ function openbox:createEnv()
             return self.libs[name]
         end
 
-        local libpath = self:fpath(name)
-        if fs.exists(libpath) then
-            if fs.isDirectory(libpath) then
-                local initfile = paths.concat(libpath, "init.lua")
-                if fs.exists(initfile) and not fs.isDirectory(initfile) then
-                    local lib = loadfile(initfile, nil, self.env)()
+        local function check(libpath)
+            if fs.exists(libpath) then
+                if fs.isDirectory(libpath) then
+                    local initfile = paths.concat(libpath, "init.lua")
+                    if fs.exists(initfile) and not fs.isDirectory(initfile) then
+                        local lib = loadfile(initfile, nil, self.env)()
+                        self.libs[name] = lib
+                        return lib
+                    end
+                else
+                    local lib = assert(loadfile(libpath, nil, self.env))()
                     self.libs[name] = lib
                     return lib
                 end
-            else
-                local lib = loadfile(libpath, nil, self.env)()
-                self.libs[name] = lib
-                return lib
             end
         end
+        
+        local lib = check(self:fpath(name))
+        if lib then return lib end
+        lib = check(self:fpath(name .. ".lua"))
+        if lib then return lib end
 
         if table.exists(openbox.nativeLibsList, name) then
             return require(name)
@@ -241,21 +247,31 @@ function openbox.create(screen)
     box.libs.event.pull = event.pull
     box.libs.event.push = event.push
 
-    function box.libs.timer(...)
+    function box.libs.event.timer(...)
         local id = event.timer(...)
         box.timers[id] = true
         return id
     end
 
-    function box.libs.listen(...)
-        local id = event.listen(...)
-        box.timers[id] = true
+    function box.libs.event.listen(eventType, callback)
+        local id = event.listen(eventType, callback)
+        box.timers[id] = {eventType, callback}
         return id
     end
 
-    function box.libs.cancel(id)
+    function box.libs.event.cancel(id)
         event.cancel(id)
         box.timers[id] = nil
+    end
+
+    function box.libs.event.ignore(eventType, callback)
+        for id, data in pairs(box.timers) do
+            if type(data) == "table" and data[1] == eventType and data[2] == callback then
+                event.cancel(id)
+                return true
+            end
+        end
+        return false
     end
 
     --end
