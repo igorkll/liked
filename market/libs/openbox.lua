@@ -6,10 +6,12 @@ local computer = require("computer")
 local unicode = require("unicode")
 local palette = require("palette")
 local term = require("term")
+local event = require("event")
 
 local openbox = {}
 openbox.nativeLibsList = {
     "computer",
+    "component",
     "unicode",
     "colors",
     "sides",
@@ -19,7 +21,7 @@ openbox.nativeLibsList = {
     "note"
 }
 
-function openbox:path(path)
+function openbox:fpath(path)
     return paths.sconcat(self.path, path) or self.path
 end
 
@@ -61,7 +63,8 @@ function openbox:createEnv()
         data = os.data,
         difftime = os.difftime,
         exit = os.exit,
-        time = os.time
+        time = os.time,
+        sleep = os.sleep
     }
 
     function env.require(name)
@@ -69,7 +72,7 @@ function openbox:createEnv()
             return self.libs[name]
         end
 
-        local libpath = self:path(name)
+        local libpath = self:fpath(name)
         if fs.exists(libpath) then
             if fs.isDirectory(libpath) then
                 local initfile = paths.concat(libpath, "init.lua")
@@ -98,15 +101,15 @@ function openbox:createEnv()
             str = str .. tostring(math.round(math.random(0, 9)))
         end
 
-        return self:path("/tmp/" .. str)
+        return self:fpath("/tmp/" .. str)
     end
 
     function os.remove(path)
-        return fs.remove(self:path(path))
+        return fs.remove(self:fpath(path))
     end
 
     function os.rename(path1, path2)
-        return fs.rename(self:path(path1), self:path(path2))
+        return fs.rename(self:fpath(path1), self:fpath(path2))
     end
 
     local trashEnv = {}
@@ -124,11 +127,11 @@ function openbox:createEnv()
     end
 
     function env.loadfile(path, mode, lenv)
-        return loadfile(self:path(path), mode, lenv or env)
+        return loadfile(self:fpath(path), mode, lenv or env)
     end
 
     function env.dofile(path)
-        return dofile(self:path(path))
+        return dofile(self:fpath(path))
     end
 
     return env
@@ -141,6 +144,10 @@ function openbox:execute(chunk, ...)
     end
 
     local result = {pcall(code, ...)}
+
+    for id in pairs(self.timers) do
+        event.cancel(id)
+    end
 
     if self.screen then
         local gpu = graphic.findGpu(self.screen)
@@ -161,6 +168,7 @@ function openbox.create(screen)
     box.libs = {}
     box.screen = screen
     box.oldPalette = palette.save(screen)
+    box.timers = {}
 
     if screen then
         local gpu = graphic.findGpu(screen)
@@ -211,6 +219,28 @@ function openbox.create(screen)
 
     function box.libs.io.write(str)
         return box.term:write(str)
+    end
+
+    -- event
+    box.libs.event = {}
+    box.libs.event.pull = event.pull
+    box.libs.event.push = event.push
+
+    function box.libs.timer(...)
+        local id = event.timer(...)
+        box.timers[id] = true
+        return id
+    end
+
+    function box.libs.listen(...)
+        local id = event.listen(...)
+        box.timers[id] = true
+        return id
+    end
+
+    function box.libs.cancel(id)
+        event.cancel(id)
+        box.timers[id] = nil
     end
 
     --end
