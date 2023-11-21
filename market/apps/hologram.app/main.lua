@@ -10,6 +10,7 @@ local thread = require("thread")
 local gui = require("gui")
 local uix = require("uix")
 local fs = require("filesystem")
+local registry = require("registry")
 
 local hx, hy, hz = 48, 32, 48
 local hologramsPath = paths.concat(paths.path(system.getSelfScriptPath()), "holograms")
@@ -42,6 +43,7 @@ end
 if not _G.holo_agent then _G.holo_agent = {} end
 if not _G.holo_agent[holo.address] then _G.holo_agent[holo.address] = {} end
 local agent = _G.holo_agent[holo.address]
+agent.colorsCount = colorsCount
 
 local function updateRotation()
     if agent.useSpeed then
@@ -53,9 +55,21 @@ local function updateRotation()
     end
 end
 
+local function saveAgent()
+    if not registry.data.holo then
+        registry.data.holo = {}
+    end
+
+    local data = table.clone(agent)
+    data.th = nil
+    registry.data.holo[holo.address] = data
+    registry.save()
+end
+
 if not agent.rotation then
     agent.rotation = 0
     agent.useSpeed = false
+    saveAgent()
 end
 
 ------------------------------------------------
@@ -129,6 +143,7 @@ layout:createText(crx + 8, ry - 7, nil, "auto rotation")
 local useSpeedSwitch = layout:createSwitch(crx + 1, ry - 7, agent.useSpeed)
 function useSpeedSwitch:onSwitch()
     agent.useSpeed = self.state
+    saveAgent()
     updateRotation()
 end
 
@@ -136,6 +151,7 @@ layout:createText(crx + 1, ry - 5, nil, "rotation:")
 local rotationSeek = layout:createSeek(crx + 11, ry - 5, crx - 11, nil, nil, nil, math.map(agent.rotation, -180, 180, 0, 1))
 function rotationSeek:onSeek(value)
     agent.rotation = math.map(value, 0, 1, -180, 180)
+    saveAgent()
     updateRotation()
 end
 
@@ -143,6 +159,7 @@ layout:createButton(crx + 1, ry - 9, 21, 1, nil, nil, "reset rotation").onClick 
     agent.rotation = 0
     agent.rotationSpeed = 0
     agent.useSpeed = false
+    saveAgent()
 
     useSpeedSwitch.state = false
     useSpeedSwitch:draw()
@@ -183,6 +200,7 @@ for name, path in pairs(hologramsPaths) do
             
             holo.clear()
             agent.current = name
+            saveAgent()
             if agent.th then
                 agent.th:kill()
                 agent.th = nil
@@ -199,6 +217,7 @@ for name, path in pairs(hologramsPaths) do
         else
             holo.clear()
             agent.current = nil
+            saveAgent()
             if agent.th then
                 agent.th:kill()
                 agent.th = nil

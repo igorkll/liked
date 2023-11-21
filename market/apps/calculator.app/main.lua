@@ -91,7 +91,7 @@ addButton(0, 2, buttonBackgroundColor, buttonTextColor, "1")
 addButton(1, 2, buttonBackgroundColor, buttonTextColor, "2")
 addButton(2, 2, buttonBackgroundColor, buttonTextColor, "3")
 
-addButton(0, 3, uix.colors.gray, buttonTextColor, "0")
+addButton(0, 3, buttonBackgroundColor, buttonTextColor, "0")
 addButton(1, 3, uix.colors.gray, buttonTextColor, ".")
 addButton(2, 3, uix.colors.gray, buttonTextColor, "=", function ()
     saveToHistory()

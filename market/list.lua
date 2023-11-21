@@ -287,7 +287,7 @@ local list = {
     },
     {
         name = "hologram",
-        version = "2",
+        version = "3",
         vendor = "logic",
         description = "this program allows you to display various effects on a holographic projector\nLevel 1 and 2 holographic projectors are supported\neffects can work in the background and on multiple projectors at the same time",
         minDiskSpace = 64,
@@ -295,7 +295,7 @@ local list = {
 
         path = "/data/apps/hologram.app",
         urlPrimaryPart = selfurlpart .. "/apps/hologram.app/",
-        files = {"main.lua", "icon.t2p", "holograms/fireworks.lua", "holograms/fullbox.lua", "holograms/tree.lua"}
+        files = {"main.lua", "icon.t2p", "unreg.reg", "autorun.lua", "holograms/fireworks.lua", "holograms/fullbox.lua", "holograms/tree.lua"}
     },
     {
         name = "printer3d",
