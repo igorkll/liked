@@ -134,6 +134,11 @@ function openbox:createEnv()
         return dofile(self:fpath(path))
     end
 
+
+    function env.print(...)
+        self.term:print(...)
+    end
+
     return env
 end
 
