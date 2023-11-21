@@ -33,6 +33,8 @@ if registry.holo then
                 env.hz = hz
                 env.col = col
                 env.colorsCount = agent.colorsCount
+
+                holo.clear()
                 agent.th = thread.createBackground(assert(loadfile(system.getResourcePath(paths.concat("holograms", agent.current .. ".lua")), nil, env)), holo)
                 agent.th:resume()
             end
