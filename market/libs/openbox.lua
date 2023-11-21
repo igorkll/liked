@@ -154,6 +154,10 @@ function openbox:execute(chunk, ...)
         event.cancel(id)
     end
 
+    return table.unpack(result)
+end
+
+function openbox:clear()
     if self.screen then
         local gpu = graphic.findGpu(self.screen)
         palette.set(self.screen, self.oldPalette)
@@ -162,8 +166,6 @@ function openbox:execute(chunk, ...)
         gpu.setForeground(0xffffff)
         gpu.fill(1, 1, self.oldRX, self.oldRY, " ")
     end
-
-    return table.unpack(result)
 end
 
 function openbox.create(screen)

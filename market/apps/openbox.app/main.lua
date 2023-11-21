@@ -19,5 +19,5 @@ if not ok then
     gui.bigWarn(screen, nil, nil, tostring(err))
 end
 box.term:print("press enter key to exit the emulator...")
-
 event.pull("key_down", lastinfo.keyboards[screen][1], 13, 28)
+box:clear()
