@@ -716,7 +716,7 @@ function gui.select(screen, cx, cy, label, actions, scroll, noCloseButton)
     end
 
     local function getCol(idx)
-        return sel == idx and colors.blue or colors.gray
+        return sel == idx and colors.blue or colors.black
     end
 
     local function draw(pos)
@@ -742,7 +742,7 @@ function gui.select(screen, cx, cy, label, actions, scroll, noCloseButton)
         end
         if not pos then
             lastLine = lastLine + 1
-            window:fill(1, lastLine, window.sizeX - 1, window.sizeY - lastLine, colors.brown, 0, " ")
+            window:fill(1, lastLine, window.sizeX - 1, window.sizeY - lastLine, colors.gray, 0, " ")
         end
 
         if not pos then
@@ -793,7 +793,7 @@ function gui.select(screen, cx, cy, label, actions, scroll, noCloseButton)
             end
         end
         if not noDraw then
-            window:fill(1, window.sizeY - 1, window.sizeX - 1, 1, colors.brown, 0, " ")
+            window:fill(1, window.sizeY - 1, window.sizeX - 1, 1, colors.gray, 0, " ")
         end
 
         drawScrollBar()

@@ -186,22 +186,24 @@ function vkeyboard.hook(screen)
         local tbl = {...}
 
         if tbl[1] == "touch" then
-            if clicks[tbl[2]] then
-                local clk = clicks[tbl[2]]
+            if tbl[2] == screen then
+                if clicks[tbl[2]] then
+                    local clk = clicks[tbl[2]]
 
-                if clk[1] == tbl[3] and clk[2] == tbl[4] and computer.uptime() - clk[3] <= 0.3 then
-                    clk[3] = computer.uptime()
-                    clk[4] = clk[4] + 1
-                    if clk[4] >= 3 then
-                        event.push("vkeyboard", tbl[2], tbl[6])
+                    if clk[1] == tbl[3] and clk[2] == tbl[4] and computer.uptime() - clk[3] <= 0.3 then
+                        clk[3] = computer.uptime()
+                        clk[4] = clk[4] + 1
+                        if clk[4] >= 3 then
+                            event.push("vkeyboard", tbl[2], tbl[6])
+                        end
+                    else
+                        clicks[tbl[2]] = {tbl[3], tbl[4], computer.uptime(), 1}
                     end
                 else
                     clicks[tbl[2]] = {tbl[3], tbl[4], computer.uptime(), 1}
                 end
-            else
-                clicks[tbl[2]] = {tbl[3], tbl[4], computer.uptime(), 1}
             end
-        elseif tbl[1] == "vkeyboard" and not opened[tbl[2]] then
+        elseif tbl[1] == "vkeyboard" and tbl[2] == screen and not opened[tbl[2]] then
             opened[tbl[2]] = true
 
             local threads = thread.all()

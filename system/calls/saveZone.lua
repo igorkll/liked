@@ -7,4 +7,4 @@ cx = cx - 16
 cy = cy - 4
 cx = math.round(cx) + 1
 cy = math.round(cy) + 1
-return graphic.screenshot(screen, cx, cy, 32, 8)
+return graphic.screenshot(screen, cx, cy, 34, 9)
