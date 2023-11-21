@@ -148,7 +148,7 @@ function openbox:execute(chunk, ...)
         return nil, err
     end
 
-    local result = {pcall(code, ...)}
+    local result = {xpcall(code, debug.traceback, ...)}
 
     for id in pairs(self.timers) do
         event.cancel(id)
