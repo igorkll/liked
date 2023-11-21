@@ -215,6 +215,14 @@ function openbox.create(screen)
         box.term:write(str)
     end
 
+    function box.libs.term.setCursor(x, y)
+        return box.term:setCursor(x, y)
+    end
+
+    function box.libs.term.getCursor()
+        return box.term:getCursor()
+    end
+
     -- tty
     box.libs.tty = box.libs.term
 
