@@ -694,8 +694,8 @@ function gui.select(screen, cx, cy, label, actions, scroll, noCloseButton)
     local sel
 
     local function drawScrollBar()
-        window:fill(50, 2, 1, 14, colors.purple, 0, " ")
-        window:set(50, math.round(math.map(scroll, 0, #actions - 1, 2, 15)), colors.pink, 0, " ")
+        window:fill(50, 2, 1, 14, colors.gray, 0, " ")
+        window:set(50, math.round(math.map(scroll, 0, #actions - 1, 2, 15)), colors.white, 0, " ")
     end
 
     local function redrawButton()
