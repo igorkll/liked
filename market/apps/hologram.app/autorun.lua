@@ -16,7 +16,7 @@ if registry.holo then
         if registry.holo[addr] then
             local holo = component.proxy(addr)
             
-            _G.holo_agent[holo.address] = registry.holo[addr]
+            _G.holo_agent[holo.address] = table.clone(registry.holo[addr])
             local agent = _G.holo_agent[holo.address]
 
             if agent.current then
