@@ -6,10 +6,6 @@ local computer = require("computer")
 local registry = require("registry")
 local bootloader = require("bootloader")
 
-function fs.genName(uuid)
-    return paths.concat("/data/userdata", (component.invoke(uuid, "getLabel") or "disk"):sub(1, 8) .. "-" .. uuid:sub(1, 5))
-end
-
 if not registry.doNotMoundDisks then
     local function allowMount(address)
         return address ~= computer.tmpAddress() and address ~= fs.bootaddress
@@ -25,7 +21,7 @@ if not registry.doNotMoundDisks then
                 end
                 event.push("redrawDesktop")
             end
-            local mountpoint = fs.genName(uuid)
+            local mountpoint = require("hdd").genName(uuid)
             assert(fs.mount(uuid, mountpoint))
             mountlist[uuid] = mountpoint
         end

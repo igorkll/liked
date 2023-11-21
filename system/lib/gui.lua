@@ -870,7 +870,7 @@ function gui.select(screen, cx, cy, label, actions, scroll, noCloseButton)
     end
 end
 
-function gui.selectcomponent(screen, cx, cy, types, allowAutoConfirm, control, callbacks) --=gui_selectcomponent(screen, nil, nil, {"computer"}, true)
+function gui.selectcomponent(screen, cx, cy, types, allowAutoConfirm, control, callbacks, blacklist) --=gui_selectcomponent(screen, nil, nil, {"computer"}, true)
     local advLabeling = require("advLabeling")
 
     if types and type(types) ~= "table" then
@@ -933,16 +933,18 @@ function gui.selectcomponent(screen, cx, cy, types, allowAutoConfirm, control, c
                 end
                 table.sort(addrs)
                 for _, addr in ipairs(addrs) do
-                    table.insert(addresses, addr)
+                    if not blacklist or not table.exists(blacklist, addr) then
+                        table.insert(addresses, addr)
 
-                    local ctype = component.type(addr)
-                    local clabel = advLabeling.getLabel(addr) or ""
-                    if fs.bootaddress == addr then
-                        clabel = clabel .. " (system)"
+                        local ctype = component.type(addr)
+                        local clabel = advLabeling.getLabel(addr) or ""
+                        if fs.bootaddress == addr then
+                            clabel = clabel .. " (system)"
+                        end
+                        clabel = gui_container.short(clabel, 20)
+
+                        table.insert(strs, ctype .. string.rep(" ", 38 - unicode.wlen(ctype) - unicode.wlen(clabel)) .. clabel .. string.rep(" ", (1 - unicode.wlen(clabel)) + unicode.wlen(clabel)) .. addr:sub(1, 8))
                     end
-                    clabel = gui_container.short(clabel, 20)
-
-                    table.insert(strs, ctype .. string.rep(" ", 38 - unicode.wlen(ctype) - unicode.wlen(clabel)) .. clabel .. string.rep(" ", (1 - unicode.wlen(clabel)) + unicode.wlen(clabel)) .. addr:sub(1, 8))
                 end
             end
 
@@ -1043,8 +1045,8 @@ function gui.selectcomponent(screen, cx, cy, types, allowAutoConfirm, control, c
     end
 end
 
-function gui.selectcomponentProxy(screen, cx, cy, types, allowAutoConfirm)
-    local addr = gui.selectcomponent(screen, cx, cy, types, allowAutoConfirm)
+function gui.selectcomponentProxy(screen, cx, cy, types, allowAutoConfirm, control, callbacks, blacklist)
+    local addr = gui.selectcomponent(screen, cx, cy, types, allowAutoConfirm, control, callbacks, blacklist)
     if addr then
         return component.proxy(addr)
     end

@@ -218,17 +218,21 @@ function liked.version()
 end
 
 function liked.umountAll()
+    local hdd = require("hdd")
+
     for address in component.list("filesystem") do
         if address ~= computer.tmpAddress() and address ~= fs.bootaddress then
-            fs.umount(fs.genName(address))
+            fs.umount(hdd.genName(address))
         end
     end
 end
 
 function liked.mountAll()
+    local hdd = require("hdd")
+
     for address in component.list("filesystem") do
         if address ~= computer.tmpAddress() and address ~= fs.bootaddress then
-            assert(fs.mount(address, fs.genName(address)))
+            assert(fs.mount(address, hdd.genName(address)))
         end
     end
 end
@@ -461,7 +465,7 @@ function liked.applyPowerMode()
                     if eventData[1] and wakeupEvents[eventData[1]] then
                         event.minTime = 0
                         oldWakeTIme = computer.uptime()
-                    elseif computer.uptime() - oldWakeTIme > 2 then
+                    elseif computer.uptime() - oldWakeTIme > 4 then
                         event.minTime = 5
                     end
                 end

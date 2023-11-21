@@ -169,7 +169,7 @@ function installer.context(screen, posX, posY, vfs)
         installer.install_selfsys,
     }
 
-    local name = paths.name(fs.genName(vfs.address))
+    local name = paths.name(require("hdd").genName(vfs.address))
     local clear = saveZone(screen)
     if gui.yesno(screen, nil, nil, "install \"" .. label .. "\" to \"" .. name .. "\"?") then
         gui.status(screen, nil, nil, "installing \"" .. label .. "\" to \"" .. name .. "\"...")

@@ -526,8 +526,8 @@ local function doIcon(windowEventData)
                     else
                         if v.isFs then
                             local strs, active =
-                            {"  open", "  create dump", "  flash os", "  flash archive", true, "  format", "  set label", "  clear label"},
-                            {true, true, not v.readonly, not v.readonly, false, not v.readonly, not v.labelReadonly, not v.labelReadonly}
+                            {"  open", "  create dump", "  flash os", "  flash archive", "  clone to", "  clone from", true, "  format", "  set label", "  clear label"},
+                            {true, true, not v.readonly, not v.readonly, true, not v.readonly, false, not v.readonly, not v.labelReadonly, not v.labelReadonly}
 
                             table.insert(strs, true)
                             table.insert(active, false)
@@ -550,6 +550,12 @@ local function doIcon(windowEventData)
 
                             if str == "  open" then
                                 fileDescriptor(v, nil, windowEventData[6])
+                            elseif str == "  clone to" then
+                                require("hdd").clone(screen, v.fs)
+                                draw()
+                            elseif str == "  clone from" then
+                                require("hdd").clone(screen, v.fs, true)
+                                draw()
                             elseif str == "  unmount" then
                                 fs.umount(v.path)
                                 draw()

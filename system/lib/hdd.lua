@@ -1,12 +1,17 @@
 local fs = require("filesystem")
 local component = require("component")
+local registry = require("registry")
+local paths = require("paths")
 local hdd = {}
 
 function hdd.get(proxy)
     if type(proxy) == "string" then
-        return component.proxy(proxy)
+        proxy = component.proxy(proxy)
     end
-    return proxy
+
+    if proxy.type == "filesystem" then
+        return proxy
+    end
 end
 
 function hdd.move(from, to)
@@ -14,11 +19,59 @@ function hdd.move(from, to)
     to = hdd.get(to)
     fs.umount("/mnt/from")
     fs.umount("/mnt/to")
-    fs.mount("/mnt/from", from)
-    fs.mount("/mnt/to", to)
-    fs.copy("/mnt/from", "/mnt/to")
+    fs.mount(from, "/mnt/from")
+    fs.mount(to, "/mnt/to")
+    local result = {fs.copy("/mnt/from", "/mnt/to")}
     fs.umount("/mnt/from")
     fs.umount("/mnt/to")
+    return table.unpack(result)
+end
+
+function hdd.genName(uuid)
+    return paths.concat("/data/userdata", (component.invoke(uuid, "getLabel") or "disk"):sub(1, 8) .. "-" .. uuid:sub(1, 5))
+end
+
+function hdd.clone(screen, proxy, selectFrom)
+    local gui = require("gui")
+
+    local from, to
+    local blacklist = {proxy.address}
+
+    local clear = saveBigZone(screen)
+
+    if selectFrom then
+        to = proxy
+        from = gui.selectcomponentProxy(screen, nil, nil, {"filesystem"}, false, nil, nil, blacklist)
+    else
+        for addr in component.list("filesystem", true) do
+            if component.invoke(addr, "isReadOnly") then
+                table.insert(blacklist, addr)
+            end
+        end
+
+        to = gui.selectcomponentProxy(screen, nil, nil, {"filesystem"}, false, nil, nil, blacklist)
+        from = proxy
+    end
+
+    if not to or not from then
+        return
+    end
+
+    clear()
+
+    local isRoot = to.address == fs.bootaddress
+    if isRoot and registry.disableRootAccess then
+        gui.warn(screen, nil, nil, "it is not possible to clone a disk to a system disk")
+        return
+    end
+
+    local fromname = paths.name(hdd.genName(from.address))
+    local toname = paths.name(hdd.genName(to.address))
+
+    if (not isRoot or gui.pleaseType(screen, "TOROOT", "clone to root")) and gui.yesno(screen, nil, nil, "are you sure you want to clone an \"" .. fromname .. "\" drive to a \"" .. toname .. "\" drive?") then
+        gui.status(screen, nil, nil, "cloning the \"" .. fromname .. "\" disk to \"" .. toname .. "\"")
+        return require("liked").assertNoClear(screen, hdd.move(from, to))
+    end
 end
 
 hdd.unloadable = true
