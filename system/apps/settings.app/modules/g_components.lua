@@ -45,6 +45,7 @@ local componentSelector = thread.createBackground(function ()
         end})
     end
 end)
+componentSelector.parentData.screen = screen
 componentSelector:resume()
 
 return function(eventData)

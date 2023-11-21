@@ -23,6 +23,7 @@ end
 function screensaver.start(screen, path)
     local clear = graphic.screenshot(screen)
     local th = thread.createBackground(programs.load(path or require("gui_container").screenSaverPath), screen)
+    th.parentData.screen = screen
     th:resume()
     event.yield()
     event.listen(nil, function (eventName, uuid)
