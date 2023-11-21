@@ -70,7 +70,17 @@ function hdd.clone(screen, proxy, selectFrom)
 
     if (not isRoot or gui.pleaseType(screen, "TOROOT", "clone to root")) and gui.yesno(screen, nil, nil, "are you sure you want to clone an \"" .. fromname .. "\" drive to a \"" .. toname .. "\" drive?") then
         gui.status(screen, nil, nil, "cloning the \"" .. fromname .. "\" disk to \"" .. toname .. "\"")
-        return require("liked").assertNoClear(screen, hdd.move(from, to))
+        local liked = require("liked")
+        liked.umountAll()
+        local ok, err = hdd.move(from, to)
+        if ok then
+            local fromlabel = from.getLabel()
+            if fromlabel then
+                to.setLabel(fromlabel)
+            end
+        end
+        liked.mountAll()
+        return liked.assertNoClear(screen, ok, err)
     end
 end
 
