@@ -254,7 +254,7 @@ local function applicationLabel(data, x, y)
             supportErr = "too little RAM, on you " .. math.round(computer.totalMemory() / 1024) .. "KB need " .. math.round(data.minRam) .. "KB"
         end
 
-        if data.dualboot and registry.data.disableDualboot then
+        if (data.dualboot and registry.data.disableDualboot) or (data.executer and registry.data.disableCustomPrograms) then
             supportErr = "it is not possible to install dualboot on your liked edition"
         end
     end

@@ -357,6 +357,18 @@ local list = {
 
         path = "/data/apps/calculator.app",
         urlPrimaryPart = selfurlpart .. "/apps/calculator.app/"
+    },
+    {
+        name = "openbox",
+        version = "1",
+        vendor = "logic",
+        description = "this program allows you to run software from openOS on liked in compatibility mode",
+        minDiskSpace = 64,
+        executer = true,
+        libs = {"openbox"},
+
+        path = "/data/apps/openbox.app",
+        urlPrimaryPart = selfurlpart .. "/apps/openbox.app/"
     }
 }
 
@@ -368,6 +380,11 @@ list.libs = {
     },
     ["brainfuck"] = {
         url = selfurlpart .. "/libs/brainfuck.lua",
+        vendor = "logic",
+        version = "1"
+    },
+    ["openbox"] = {
+        url = selfurlpart .. "/libs/openbox.lua",
         vendor = "logic",
         version = "1"
     }
