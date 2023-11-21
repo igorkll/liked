@@ -4,6 +4,9 @@ local graphic = require("graphic")
 local component = require("component")
 local computer = require("computer")
 local unicode = require("unicode")
+local palette = require("palette")
+local term = require("term")
+
 local openbox = {}
 openbox.nativeLibsList = {
     "computer",
@@ -61,7 +64,7 @@ function openbox:createEnv()
         time = os.time
     }
 
-    function os.require(name)
+    function env.require(name)
         if self.libs[name] then
             return self.libs[name]
         end
@@ -137,7 +140,18 @@ function openbox:execute(chunk, ...)
         return nil, err
     end
 
-    return pcall(code, ...)
+    local result = {pcall(code, ...)}
+
+    if self.screen then
+        local gpu = graphic.findGpu(self.screen)
+        palette.set(self.screen, self.oldPalette)
+        gpu.setResolution(self.oldRX, self.oldRY)
+        gpu.setBackground(0)
+        gpu.setForeground(0xffffff)
+        gpu.fill(1, 1, self.oldRX, self.oldRY, " ")
+    end
+
+    return table.unpack(result)
 end
 
 function openbox.create(screen)
@@ -145,7 +159,62 @@ function openbox.create(screen)
     box.env = box:createEnv()
     box.path = "/data/openbox"
     box.libs = {}
+    box.screen = screen
+    box.oldPalette = palette.save(screen)
 
+    if screen then
+        local gpu = graphic.findGpu(screen)
+        box.oldRX, box.oldRY = gpu.getResolution()
+        box.term = term.create(screen, 1, 1, box.oldRX, box.oldRY, true)
+    end
+
+    -- term
+    box.libs.term = {}
+    function box.libs.term.screen()
+        return screen
+    end
+
+    function box.libs.term.gpu()
+        if screen then
+            return graphic.findGpu(screen)
+        end
+    end
+
+    function box.libs.term.keyboard()
+        if screen then
+            return component.invoke(screen, "getKeyboards")[1]
+        end
+    end
+
+    function box.libs.term.clear()
+        local gpu = graphic.findGpu(screen)
+        local rx, ry = gpu.getResolution()
+        gpu.fill(1, 1, rx, ry, " ")
+    end
+
+    function box.libs.term.read()
+        return box.term:read()
+    end
+
+    function box.libs.term.write(str)
+        box.term:write(str)
+    end
+
+    -- tty
+    box.libs.tty = box.libs.term
+
+    -- io
+    box.libs.io = {}
+    function box.libs.io.read()
+        return box.term:read()
+    end
+
+    function box.libs.io.write(str)
+        return box.term:write(str)
+    end
+
+    --end
+    box.env.io = box.libs.io
     return box
 end
 

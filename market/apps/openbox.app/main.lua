@@ -11,4 +11,4 @@ if not program then
 end
 
 local box = openbox.create(screen)
-box:execute(assert(fs.readFile(program)))
+assert(box:execute(assert(fs.readFile(program))))
