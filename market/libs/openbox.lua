@@ -1,10 +1,19 @@
 local fs = require("filesystem")
 local paths = require("paths")
+local graphic = require("graphic")
+local component = require("component")
+local computer = require("computer")
+local unicode = require("unicode")
 local openbox = {}
 openbox.nativeLibsList = {
     "computer",
     "unicode",
-    ""
+    "colors",
+    "sides",
+    "sha256",
+    "serialization",
+    "uuid",
+    "note"
 }
 
 function openbox:path(path)
@@ -52,6 +61,34 @@ function openbox:createEnv()
         time = os.time
     }
 
+    function os.require(name)
+        if self.libs[name] then
+            return self.libs[name]
+        end
+
+        local libpath = self:path(name)
+        if fs.exists(libpath) then
+            if fs.isDirectory(libpath) then
+                local initfile = paths.concat(libpath, "init.lua")
+                if fs.exists(initfile) and not fs.isDirectory(initfile) then
+                    local lib = loadfile(initfile, nil, self.env)()
+                    self.libs[name] = lib
+                    return lib
+                end
+            else
+                local lib = loadfile(libpath, nil, self.env)()
+                self.libs[name] = lib
+                return lib
+            end
+        end
+
+        if table.exists(openbox.nativeLibsList, name) then
+            return require(name)
+        end
+
+        error("failed to find lib \"" .. name .. "\"", 2)
+    end
+
     function os.tmpname()
         local str = ""
         for i = 1, 9 do
@@ -94,10 +131,20 @@ function openbox:createEnv()
     return env
 end
 
-function openbox.create()
+function openbox:execute(chunk, ...)
+    local code, err = load(chunk, nil, nil, self.env)
+    if not code then
+        return nil, err
+    end
+
+    return pcall(code, ...)
+end
+
+function openbox.create(screen)
     local box = setmetatable({}, {__index = openbox})
     box.env = box:createEnv()
     box.path = "/data/openbox"
+    box.libs = {}
 
     return box
 end

@@ -93,6 +93,7 @@
 /system/lib/gui.lua
 /system/lib/gui_container.lua
 /system/lib/hdd.lua
+/system/lib/iowindows.lua
 /system/lib/liked.lua
 /system/lib/palette.lua
 /system/lib/rendUtils.lua
