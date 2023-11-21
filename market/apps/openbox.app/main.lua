@@ -15,6 +15,10 @@ if not program then
 end
 
 local box = openbox.create(screen)
+if box.term then
+    box.term:clear()
+end
+
 local ok, err = box:execute(assert(fs.readFile(program)))
 
 if box.screen then
