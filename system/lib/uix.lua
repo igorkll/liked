@@ -18,50 +18,28 @@ uix.styles = {
 local canvasClass = {}
 
 function canvasClass:onCreate(sx, sy, back, fore, char)
-    back = back or colors.black
-    fore = fore or colors.white
-    char = char or " "
-
+    self.back = back or colors.black
+    self.fore = fore or colors.white
+    self.char = char or " "
     self.sx = sx
     self.sy = sy
-
-    self.buffer = {bg = {}, fg = {}, char = {}}
-    for iy = 1, sy do
-        self.buffer.bg[iy] = {}
-        self.buffer.fg[iy] = {}
-        self.buffer.char[iy] = {}
-        
-        for ix = 1, sx do
-            self.buffer.bg[iy][ix] = back
-            self.buffer.fg[iy][ix] = fore
-            self.buffer.char[iy][ix] = char
-        end
-    end
 end
 
 function canvasClass:draw()
-    for iy = 1, self.sy do
-        for ix = 1, self.sx do
-            self.gui.window:set(self.x + (ix - 1), self.y + (iy - 1), self.buffer.bg[iy][ix], self.buffer.fg[iy][ix], self.buffer.char[iy][ix])
-        end
+    if self.screenshot then
+        self.screenshot()
+        self.screenshot = nil
+    else
+        self.gui.window:fill(self.x, self.y, self.sx, self.sy, self.back, self.fore, self.char)
     end
 end
 
 function canvasClass:set(x, y, back, fore, text)
     self.gui.window:set(self.x + (x - 1), self.y + (y - 1), back, fore, text)
-    
-    local bg, fg, chars = self.buffer.bg[y], self.buffer.fg[y], self.buffer.char[y]
-    for i = 1, unicode.len(text) do
-        local char = unicode.sub(text, i, i)
-        i = x + (i - 1)
-        if bg[i] then
-            bg[i] = back
-            fg[i] = fore
-            chars[i] = char
-        else
-            break
-        end
-    end
+end
+
+function canvasClass:stop()
+    self.screenshot = graphic.screenshot(self.gui.screen, self.x, self.y, self.sx, self.sy)
 end
 
 ---------------------------------- obj class
@@ -719,6 +697,7 @@ end
 function uix.create(window, bgcolor, style)
     local guiobj = setmetatable({}, {__index = uix})
     guiobj.window = window
+    guiobj.screen = window.screen
     guiobj.style = style or "round"
     guiobj.objs = {}
     guiobj.selected = false
