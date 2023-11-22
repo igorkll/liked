@@ -42,12 +42,14 @@ end
 function canvasClass:draw()
     for iy = 1, self.sy do
         for ix = 1, self.sx do
-            self.gui.window:set(ix, iy, self.buffer.bg[iy][ix], self.buffer.fg[iy][ix], self.buffer.char[iy][ix])
+            self.gui.window:set(self.x + (ix - 1), self.x + (iy - 1), self.buffer.bg[iy][ix], self.buffer.fg[iy][ix], self.buffer.char[iy][ix])
         end
     end
 end
 
 function canvasClass:set(x, y, back, fore, text)
+    self.gui.window:set(self.x + (x - 1), self.x + (y - 1), back, fore, text)
+    
     local bg, fg, chars = self.buffer.bg[y], self.buffer.fg[y], self.buffer.char[y]
     for i = 1, unicode.len(text) do
         local char = unicode.sub(text, i, i)
