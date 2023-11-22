@@ -369,6 +369,16 @@ local list = {
 
         path = "/data/apps/openbox.app",
         urlPrimaryPart = selfurlpart .. "/apps/openbox.app/"
+    },
+    {
+        name = "navigation",
+        version = "1",
+        vendor = "logic",
+        description = "navigation apps. requires upgrade \"navigation\"",
+        minDiskSpace = 64,
+
+        path = "/data/apps/navigation.app",
+        urlPrimaryPart = selfurlpart .. "/apps/navigation.app/"
     }
 }
 

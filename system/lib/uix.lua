@@ -5,12 +5,62 @@ local graphic = require("graphic")
 local liked = require("liked")
 local thread = require("thread")
 local event = require("event")
+
 local colors = gui_container.colors
 local uix = {colors = colors}
 uix.styles = {
     "round",
     "square"
 }
+
+---------------------------------- canvas
+
+local canvasClass = {}
+
+function canvasClass:onCreate(sx, sy, back, fore, char)
+    back = back or colors.black
+    fore = fore or colors.white
+    char = char or ""
+
+    self.sx = sx
+    self.sy = sy
+
+    self.buffer = {bg = {}, fg = {}, char = {}}
+    for iy = 1, sy do
+        self.buffer.bg[iy] = {}
+        self.buffer.fg[iy] = {}
+        self.buffer.char[iy] = {}
+        
+        for ix = 1, sx do
+            self.buffer.bg[iy][ix] = back
+            self.buffer.fg[iy][ix] = fore
+            self.buffer.char[iy][ix] = char
+        end
+    end
+end
+
+function canvasClass:draw()
+    for iy = 1, self.sy do
+        for ix = 1, self.sx do
+            self.gui.window:set(ix, iy, self.buffer.bg[iy][ix], self.buffer.fg[iy][ix], self.buffer.char[iy][ix])
+        end
+    end
+end
+
+function canvasClass:set(x, y, back, fore, text)
+    local bg, fg, chars = self.buffer.bg[y], self.buffer.fg[y], self.buffer.char[y]
+    for i = 1, unicode.len(text) do
+        local char = unicode.sub(text, i, i)
+        i = x + (i - 1)
+        if bg[i] then
+            bg[i] = back
+            fg[i] = fore
+            chars[i] = char
+        else
+            break
+        end
+    end
+end
 
 ---------------------------------- obj class
 
@@ -307,7 +357,7 @@ function objclass:draw()
         local _, _, bg = self.gui.window:get(self.x, self.y)
         local pos = math.round(math.map(self.value, 0, 1, 0, self.sx))
         self.gui.window:fill(self.x + pos, self.y, self.sx - pos, 1, bg, self.back, gui_container.chars.splitLine)
-        self.gui.window:fill(self.x, self.y, pos, 1, bg, self.fore, gui_container.chars.wideSplitLine) 
+        self.gui.window:fill(self.x, self.y, pos, 1, bg, self.fore, gui_container.chars.wideSplitLine)
     end
 
     if self.postDraw then
@@ -572,11 +622,15 @@ function uix:createCustom(x, y, cls, ...)
     obj.args = {...}
 
     if obj.onCreate then
-        obj:onCreate()
+        obj:onCreate(...)
     end
 
     table.insert(self.objs, obj)
     return obj
+end
+
+function uix:createCanvas(x, y, sx, sy, back, fore, char)
+    return self:createCustom(x, y, canvasClass, sx, sy, back, fore, char)
 end
 
 function uix:setReturnLayout(returnLayout)
