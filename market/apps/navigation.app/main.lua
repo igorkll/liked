@@ -16,7 +16,6 @@ local positionLabel = layout:createText(2, 2)
 local canvas = layout:createCanvas(rx - ((canvasSize * 2) - 1), 1, canvasSize * 2, canvasSize, uix.colors.white)
 
 
-
 local function update()
     local px, py, pz = navigation.getPosition()
 
