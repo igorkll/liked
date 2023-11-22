@@ -20,7 +20,7 @@ local canvasClass = {}
 function canvasClass:onCreate(sx, sy, back, fore, char)
     back = back or colors.black
     fore = fore or colors.white
-    char = char or ""
+    char = char or " "
 
     self.sx = sx
     self.sy = sy
@@ -42,13 +42,13 @@ end
 function canvasClass:draw()
     for iy = 1, self.sy do
         for ix = 1, self.sx do
-            self.gui.window:set(self.x + (ix - 1), self.x + (iy - 1), self.buffer.bg[iy][ix], self.buffer.fg[iy][ix], self.buffer.char[iy][ix])
+            self.gui.window:set(self.x + (ix - 1), self.y + (iy - 1), self.buffer.bg[iy][ix], self.buffer.fg[iy][ix], self.buffer.char[iy][ix])
         end
     end
 end
 
 function canvasClass:set(x, y, back, fore, text)
-    self.gui.window:set(self.x + (x - 1), self.x + (y - 1), back, fore, text)
+    self.gui.window:set(self.x + (x - 1), self.y + (y - 1), back, fore, text)
     
     local bg, fg, chars = self.buffer.bg[y], self.buffer.fg[y], self.buffer.char[y]
     for i = 1, unicode.len(text) do
