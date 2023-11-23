@@ -26,6 +26,7 @@ function canvasClass:onCreate(sx, sy, back, fore, char)
 end
 
 function canvasClass:draw()
+    self.drawed = true
     if self.screenshot then
         self.screenshot()
         self.screenshot = nil
@@ -57,7 +58,18 @@ function canvasClass:clear(color)
 end
 
 function canvasClass:stop()
-    self.screenshot = graphic.screenshot(self.gui.screen, self.x, self.y, self.sx, self.sy)
+    if self.drawed then
+        local x, y = self.gui.window:toRealPos(self.x, self.y)
+        self.screenshot = graphic.screenshot(self.gui.screen, x, y, self.sx, self.sy)
+        self.drawed = nil
+    end
+end
+
+function canvasClass:beforeRedraw()
+    if self.drawed then
+        local x, y = self.gui.window:toRealPos(self.x, self.y)
+        self.screenshot = graphic.screenshot(self.gui.screen, x, y, self.sx, self.sy)
+    end
 end
 
 ---------------------------------- obj class
@@ -663,6 +675,12 @@ function uix:draw()
 
     if not self.active then
         return
+    end
+
+    for _, obj in ipairs(self.objs) do
+        if obj.beforeRedraw then
+            obj:beforeRedraw()
+        end
     end
 
     if self.bgcolor then
