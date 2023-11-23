@@ -1004,7 +1004,8 @@ function gui.selectcomponent(screen, cx, cy, types, allowAutoConfirm, control, c
                         for name, direct in pairs(methods) do
                             local smart = format.smartConcat()
                             smart.add(1, name)
-                            smart.add(maxMethodLen + 1, " - " .. (component.doc(addr, name) or "Undocumented") .. "\n")
+                            smart.add(maxMethodLen + 2, direct and "DIRECT" or "INDIRECT")
+                            smart.add(maxMethodLen + 2 + 8, " - " .. (component.doc(addr, name) or "Undocumented") .. "\n")
                             file.write(smart.get())
                         end
                         file.close()

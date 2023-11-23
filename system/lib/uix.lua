@@ -812,6 +812,15 @@ function manager:size()
     return graphic.getResolution(self.screen)
 end
 
+function manager:zoneSize()
+    if self.current then
+        return self.current.window.sizeX, self.current.window.sizeY
+    else
+        local x, y = graphic.getResolution(self.screen)
+        return x, y - 1
+    end
+end
+
 function uix.manager(screen)
     return setmetatable({screen = screen}, {__index = manager})
 end
