@@ -71,6 +71,20 @@ local function drawSelf(x, y, facing)
     canvas:set(x, y, uix.colors.red, uix.colors.white, getRotationChar(facing))
 end
 
+local function toPosInMap(x, z)
+    local px, py, pz = navigation.getPosition()
+    if px then
+        local ox, oz = x - px, z - pz
+        local cx, cz = canvas.sx / 2, canvas.sy / 2
+
+        if fixedMap.state then
+            return math.mapRound(px, -range, range, 1, canvas.sx), math.mapRound(pz, -range, range, 1, canvas.sy)
+        else
+            return math.mapRound(ox, -range, range, 1, canvas.sx), math.mapRound(oz, -range, range, 1, canvas.sy)
+        end
+    end
+end
+
 local function update()
     local px, py, pz = navigation.getPosition()
     local facing = navigation.getFacing()
@@ -80,6 +94,7 @@ local function update()
     else
         positionLabel.text = "local pos: unknown" .. stubStr
     end
+
     facingLabel.text    = "facing   : " .. getFacingStr(facing) .. stubStr
     scaleText.text      = "map scale: " .. math.round(getMapScale()) .. stubStr
     waypointsLabel.text = "waypoints: " .. (waypoints and #waypoints or "unknown") .. stubStr
@@ -94,8 +109,9 @@ local function update()
     canvas:centerText(1, canvas.sy / 2, nil, nil, "WEST", true)
     canvas:centerText(canvas.sx, canvas.sy / 2, nil, nil, "EAST", true)
 
-    if fixedMap.state then
-        drawSelf(canvas.sx / 2, canvas.sy / 2, facing)
+    local dx, dy = toPosInMap(px, pz)
+    if dx then
+        drawSelf(dx, dy, facing)
     end
 end
 
