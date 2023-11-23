@@ -11,8 +11,7 @@ local layout = manager:create("Navigation")
 local rx, ry = manager:zoneSize()
 
 local canvasSize = ry
-local range = navigation.getRange()
-if range > 512 then range = 512 end
+local range = 512
 local crange = range
 local stubStr = string.rep(" ", 16)
 
@@ -105,7 +104,7 @@ local function update()
     end
 
     facingLabel.text    = "facing   : " .. getFacingStr(facing) .. stubStr
-    scaleText.text      = "map scale: " .. crange .. stubStr
+    scaleText.text      = "map scale: " .. crange .. " / " .. math.round(navigation.getRange()) .. stubStr
     waypointsLabel.text = "waypoints: " .. (waypoints and #waypoints or "unknown") .. stubStr
     positionLabel:draw()
     facingLabel:draw()
@@ -157,7 +156,6 @@ end
 
 function scaleSeek:onSeek(value)
     crange = getMapScale()
-    update()
 end
 
 function fixedMap:onSwitch()
