@@ -1,10 +1,5 @@
 local iowindows = require("iowindows")
 local openbox = require("openbox")
-local fs = require("filesystem")
-local gui = require("gui")
-local event = require("event")
-local lastinfo = require("lastinfo")
-local graphic = require("graphic")
 
 --------------------------------
 
