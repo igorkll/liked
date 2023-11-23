@@ -101,7 +101,7 @@ function openbox:createEnv()
         error("failed to find lib \"" .. name .. "\"", 2)
     end
 
-    function os.tmpname()
+    function env.os.tmpname()
         local str = ""
         for i = 1, 9 do
             str = str .. tostring(math.round(math.random(0, 9)))
@@ -110,19 +110,19 @@ function openbox:createEnv()
         return self:fpath("/tmp/" .. str)
     end
 
-    function os.remove(path)
+    function env.os.remove(path)
         return fs.remove(self:fpath(path))
     end
 
-    function os.rename(path1, path2)
+    function env.os.rename(path1, path2)
         return fs.rename(self:fpath(path1), self:fpath(path2))
     end
 
     local trashEnv = {}
-    function os.getenv(var)
+    function env.os.getenv(var)
         return trashEnv[var]
     end
-    function os.setenv(var, new)
+    function env.os.setenv(var, new)
         trashEnv[var] = new
         return new
     end

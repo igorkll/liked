@@ -379,6 +379,18 @@ local list = {
 
         path = "/data/apps/navigation.app",
         urlPrimaryPart = selfurlpart .. "/apps/navigation.app/"
+    },
+    {
+        name = "tquest",
+        version = "1",
+        vendor = "MineCR",
+        description = "quest ported from hipOS.\ndeveloped by MineCR.\nyoutube - Max Play`n",
+        minDiskSpace = 64,
+        libs = {"openbox"},
+
+        path = "/data/apps/tquest.app",
+        urlPrimaryPart = selfurlpart .. "/apps/tquest.app/",
+        files = {"main.lua", "icon.t2p", "program.lua"}
     }
 }
 
