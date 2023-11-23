@@ -34,12 +34,21 @@ function canvasClass:draw()
     end
 end
 
-function canvasClass:set(x, y, back, fore, text)
-    self.gui.window:set(self.x + (x - 1), self.y + (y - 1), back or self.back, fore or self.fore, text)
+function canvasClass:set(x, y, back, fore, text, vertical)
+    self.gui.window:set(self.x + (x - 1), self.y + (y - 1), back or self.back, fore or self.fore, text, vertical)
 end
 
 function canvasClass:fill(x, y, sx, sy, back, fore, text)
     self.gui.window:set(self.x + (x - 1), self.y + (y - 1), sx, sy, back or self.back, fore or self.fore, text)
+end
+
+function canvasClass:centerText(x, y, back, fore, text, vertical)
+    local offset = math.round(unicode.len(text) / 2)
+    local offsetX, offsetY = offset, 0
+    if vertical then
+        offsetX, offsetY = offsetY, offsetX
+    end
+    self:set(x - offsetX, y - offsetY, back, fore, text, vertical)
 end
 
 function canvasClass:clear(color)

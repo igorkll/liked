@@ -24,7 +24,7 @@ local function update()
     positionLabel:draw()
 
     canvas:clear()
-    
+    canvas:centerText(canvas.sx / 2, 1, nil, nil, "north")
 end
 
 thread.timer(0, update)

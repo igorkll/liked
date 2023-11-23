@@ -309,7 +309,7 @@ function liked.loadApp(name, screen, nickname)
     local function appStart()
         if screen then
             if paletteFile then
-                palette.fromFile(screen, paletteFile)
+                palette.fromFile(screen, paletteFile, configTbl.dontRegPalette)
             end
 
             if configTbl.noScreenSaver then

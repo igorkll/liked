@@ -1,4 +1,5 @@
 local graphic = require("graphic")
+local serialization = require("serialization")
 local palette = {}
 
 function palette.save(screen)
@@ -17,16 +18,25 @@ function palette.set(screen, pal)
     end
 end
 
-function palette.fromFile(screen, path)
-    pcall(system_applyTheme, path, screen)
+function palette.fromFile(screen, path, noReg)
+    if noReg then
+        local pal = assert(serialization.load(path))
+        for i = 0, 15 do
+            if graphic.getPaletteColor(screen, i) ~= pal[i + 1] then
+                graphic.setPaletteColor(screen, i, pal[i + 1])
+            end
+        end
+    else
+        pcall(system_applyTheme, path, screen)
+    end
 end
 
-function palette.system(screen)
-    palette.fromFile(screen, _G.initPalPath)
+function palette.system(screen, noReg)
+    palette.fromFile(screen, _G.initPalPath, noReg)
 end
 
-function palette.blackWhite(screen)
-    palette.fromFile(screen, "/system/t3default.plt")
+function palette.blackWhite(screen, noReg)
+    palette.fromFile(screen, "/system/t3default.plt", noReg)
 end
 
 palette.unloadable = true
