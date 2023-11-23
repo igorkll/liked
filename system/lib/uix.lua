@@ -36,6 +36,27 @@ function canvasClass:draw()
 end
 
 function canvasClass:set(x, y, back, fore, text, vertical)
+    if vertical then
+        if x < 1 or x > self.sx then return end
+        while y < 1 do
+            y = y + 1
+            text = unicode.sub(text, 2, unicode.len(text))
+        end
+        while y + (unicode.len(text) - 1) > self.sy do
+            y = y - 1
+            text = unicode.sub(text, 1, unicode.len(text) - 1)
+        end
+    else
+        if y < 1 or y > self.sy then return end
+        while x < 1 do
+            x = x + 1
+            text = unicode.sub(text, 2, unicode.len(text))
+        end
+        while x + (unicode.len(text) - 1) > self.sx do
+            x = x - 1
+            text = unicode.sub(text, 1, unicode.len(text) - 1)
+        end
+    end
     self.gui.window:set(self.x + (x - 1), self.y + (y - 1), back or self.back, fore or self.fore, text, vertical)
 end
 

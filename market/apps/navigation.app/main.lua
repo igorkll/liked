@@ -13,10 +13,12 @@ local rx, ry = manager:zoneSize()
 local canvasSize = ry
 local range = navigation.getRange()
 if range > 512 then range = 512 end
+local crange = range
 local stubStr = string.rep(" ", 16)
 
 ----------------------------------
 
+layout:createText(2, ry - 5, nil, "passive mode: ")
 layout:createText(2, ry - 3, nil, "fixed map: ")
 layout:createText(2, ry - 1, nil, "scale map: ")
 
@@ -27,13 +29,16 @@ local waypointsLabel = layout:createText(2, 5)
 
 local scaleSeek = layout:createSeek(13, ry - 1, rx - (canvasSize * 2) - 13, nil, nil, nil, 1)
 local fixedMap = layout:createSwitch(13, ry - 3, false)
-local updateWaypoints = layout:createButton(2, ry - 5, 19, 1, nil, nil, "refresh waypoints")
-local hideWaypoints = layout:createButton(2, ry - 7, 19, 1, nil, nil, "hide waypoints")
+local passiveMode = layout:createSwitch(16, ry - 5, false)
+local updateWaypoints = layout:createButton(2, ry - 7, 19, 1, nil, nil, "refresh waypoints")
+local hideWaypoints = layout:createButton(2, ry - 9, 19, 1, nil, nil, "hide waypoints")
 local canvas = layout:createCanvas(rx - ((canvasSize * 2) - 1), 1, canvasSize * 2, canvasSize, uix.colors.white, uix.colors.black)
 
 ----------------------------------
 
 local waypoints = navigation.findWaypoints(math.huge)
+local wpx, wpy, wpz = navigation.getPosition()
+local lpx, lpy, lpz
 
 local function getFacingStr(facing)
     if facing == sides.north then
@@ -50,7 +55,7 @@ local function getFacingStr(facing)
 end
 
 local function getMapScale()
-    return math.map(scaleSeek.value, 0, 1, 4, range)
+    return math.mapRound(scaleSeek.value, 0, 1, 4, range)
 end
 
 local function getRotationChar(facing)
@@ -67,8 +72,8 @@ local function getRotationChar(facing)
     end
 end
 
-local function drawSelf(x, y, facing)
-    canvas:set(x, y, uix.colors.red, uix.colors.white, getRotationChar(facing))
+local function drawSelf(x, y, facing, color)
+    canvas:set(x, y, color or uix.colors.red, uix.colors.white, getRotationChar(facing))
 end
 
 local function toPosInMap(x, z)
@@ -78,11 +83,15 @@ local function toPosInMap(x, z)
         local cx, cz = canvas.sx / 2, canvas.sy / 2
 
         if fixedMap.state then
-            return math.mapRound(px, -range, range, 1, canvas.sx), math.mapRound(pz, -range, range, 1, canvas.sy)
+            return math.mapRound(x, -crange, crange, 1, canvas.sx), math.mapRound(z, -crange, crange, 1, canvas.sy)
         else
-            return math.mapRound(ox, -range, range, 1, canvas.sx), math.mapRound(oz, -range, range, 1, canvas.sy)
+            return math.mapRound(ox, -crange, crange, 1, canvas.sx), math.mapRound(oz, -crange, crange, 1, canvas.sy)
         end
     end
+end
+
+local function drawWaypoint(dx, dy, waypoint)
+    canvas:set(dx, dy, waypoint.redstone > 0 and uix.colors.lime or uix.colors.green, uix.colors.white, "#")
 end
 
 local function update()
@@ -96,7 +105,7 @@ local function update()
     end
 
     facingLabel.text    = "facing   : " .. getFacingStr(facing) .. stubStr
-    scaleText.text      = "map scale: " .. math.round(getMapScale()) .. stubStr
+    scaleText.text      = "map scale: " .. crange .. stubStr
     waypointsLabel.text = "waypoints: " .. (waypoints and #waypoints or "unknown") .. stubStr
     positionLabel:draw()
     facingLabel:draw()
@@ -109,27 +118,53 @@ local function update()
     canvas:centerText(1, canvas.sy / 2, nil, nil, "WEST", true)
     canvas:centerText(canvas.sx, canvas.sy / 2, nil, nil, "EAST", true)
 
-    local dx, dy = toPosInMap(px, pz)
-    if dx then
-        drawSelf(dx, dy, facing)
+    if px and not passiveMode.state then
+        local dx, dy = toPosInMap(px, pz)
+        if dx then
+            drawSelf(dx, dy, facing)
+        end
+
+        if waypoints and wpx then
+            for _, waypoint in ipairs(waypoints) do
+                local dx, dy = toPosInMap(wpx + waypoint.position[1], wpz + waypoint.position[3])
+                if dx then
+                    drawWaypoint(dx, dy, waypoint)
+                end
+            end
+        end
+    else
+        drawSelf(canvas.sx / 2, canvas.sy / 2, facing, uix.colors.orange)
+
+        if waypoints then
+            for _, waypoint in ipairs(waypoints) do
+                drawWaypoint((canvas.sx / 2) + waypoint.position[1], (canvas.sy / 2) + waypoint.position[3], waypoint)
+            end
+        end
     end
 end
 
 function updateWaypoints:onClick()
     waypoints = navigation.findWaypoints(math.huge)
+    wpx, wpy, wpz = navigation.getPosition()
     update()
 end
 
 function hideWaypoints:onClick()
     waypoints = nil
+    wpx, wpy, wpz = nil, nil, nil
     update()
 end
 
 function scaleSeek:onSeek(value)
+    crange = getMapScale()
     update()
 end
 
 function fixedMap:onSwitch()
+    update()
+end
+
+function passiveMode:onSwitch()
     update()
 end
 
