@@ -13,7 +13,7 @@ local layout = manager:create("Navigation")
 local canvasSize = ry - 1
 
 local positionLabel = layout:createText(2, 2)
-local canvas = layout:createCanvas(rx - ((canvasSize * 2) - 1), 1, canvasSize * 2, canvasSize, uix.colors.white)
+local canvas = layout:createCanvas(rx - ((canvasSize * 2) - 1), 1, canvasSize * 2, canvasSize, uix.colors.white, uix.colors.black)
 
 
 local function update()
@@ -24,7 +24,10 @@ local function update()
     positionLabel:draw()
 
     canvas:clear()
-    canvas:centerText(canvas.sx / 2, 1, nil, nil, "north")
+    canvas:centerText(canvas.sx / 2, 1, nil, nil, "NORTH")
+    canvas:centerText(canvas.sx / 2, canvas.sy, nil, nil, "SOUTH")
+    canvas:centerText(1, canvas.sy / 2, nil, nil, "WEST", true)
+    canvas:centerText(canvas.sx, canvas.sy / 2, nil, nil, "EAST", true)
 end
 
 thread.timer(0, update)
