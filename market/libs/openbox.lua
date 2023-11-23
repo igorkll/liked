@@ -208,6 +208,7 @@ function openbox.create(screen)
     end
 
     function box.libs.term.clear()
+        box.term:setCursor(1, 1)
         local gpu = graphic.findGpu(screen)
         local rx, ry = gpu.getResolution()
         gpu.fill(1, 1, rx, ry, " ")
