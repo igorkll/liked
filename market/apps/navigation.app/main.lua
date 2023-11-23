@@ -54,7 +54,7 @@ local function getFacingStr(facing)
 end
 
 local function getMapScale()
-    return math.mapRound(scaleSeek.value, 0, 1, 4, range)
+    return math.mapRound(scaleSeek.value, 0, 1, 16, range)
 end
 
 local function getRotationChar(facing)
@@ -136,7 +136,7 @@ local function update()
 
         if waypoints then
             for _, waypoint in ipairs(waypoints) do
-                drawWaypoint((canvas.sx / 2) + waypoint.position[1], (canvas.sy / 2) + waypoint.position[3], waypoint)
+                drawWaypoint(math.mapRound(waypoint.position[1], -crange, crange, 1, canvas.sx), math.mapRound(waypoint.position[3], -crange, crange, 1, canvas.sy), waypoint)
             end
         end
     end
