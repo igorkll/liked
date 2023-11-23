@@ -215,7 +215,7 @@ function openbox.create(screen)
     end
 
     function box.libs.term.read()
-        return box.term:read()
+        return box.term:read() .. "\n"
     end
 
     function box.libs.term.write(str)
@@ -228,6 +228,26 @@ function openbox.create(screen)
 
     function box.libs.term.getCursor()
         return box.term:getCursor()
+    end
+
+    local blick = true
+    function box.libs.term.setCursorBlink(state)
+        blick = not not state
+    end
+
+    function box.libs.term.getCursorBlink()
+        return blick
+    end
+
+    function box.libs.term.pull(...)
+        return event.pull(...)
+    end
+
+    function box.libs.term.scroll(offset)
+        local gpu = graphic.findGpu(screen)
+        local rx, ry = gpu.getResolution()
+        gpu.copy(1, 1, rx, ry, 0, -offset)
+        return offset
     end
 
     -- tty
