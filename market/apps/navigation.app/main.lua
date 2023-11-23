@@ -18,14 +18,15 @@ local canvas = layout:createCanvas(rx - ((canvasSize * 2) - 1), 1, canvasSize * 
 
 local function update()
     local px, py, pz = navigation.getPosition()
+    local waypoints = navigation.findWaypoints(math.huge)
 
     positionLabel.text = "x: " .. math.roundTo(px, 1) .. " y: " .. math.roundTo(py, 1) .. " z: " .. math.roundTo(pz, 1)
     positionLabel:draw()
 
-    canvas:set(2, 2, uix.colors.white, uix.colors.black, "ASDASD")
+    canvas:clear()
+    
 end
 
 thread.timer(0, update)
 thread.timer(1, update, math.huge)
-
 manager:loop()

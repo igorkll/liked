@@ -35,7 +35,15 @@ function canvasClass:draw()
 end
 
 function canvasClass:set(x, y, back, fore, text)
-    self.gui.window:set(self.x + (x - 1), self.y + (y - 1), back, fore, text)
+    self.gui.window:set(self.x + (x - 1), self.y + (y - 1), back or self.back, fore or self.fore, text)
+end
+
+function canvasClass:fill(x, y, sx, sy, back, fore, text)
+    self.gui.window:set(self.x + (x - 1), self.y + (y - 1), sx, sy, back or self.back, fore or self.fore, text)
+end
+
+function canvasClass:clear(color)
+    self:fill(1, 1, self.sx, self.sy, color, 0, " ")
 end
 
 function canvasClass:stop()
