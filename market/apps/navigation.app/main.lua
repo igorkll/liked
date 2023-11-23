@@ -19,12 +19,16 @@ local stubStr = string.rep(" ", 16)
 
 layout:createText(2, ry - 3, nil, "fixed map: ")
 layout:createText(2, ry - 1, nil, "scale map: ")
-local scaleText = layout:createText(2, 4)
-local fixedMap = layout:createSwitch(13, ry - 3, false)
+
 local positionLabel = layout:createText(2, 2)
 local facingLabel = layout:createText(2, 3)
+local scaleText = layout:createText(2, 4)
+local waypointsLabel = layout:createText(2, 5)
+
 local scaleSeek = layout:createSeek(13, ry - 1, rx - (canvasSize * 2) - 13, nil, nil, nil, 1)
+local fixedMap = layout:createSwitch(13, ry - 3, false)
 local updateWaypoints = layout:createButton(2, ry - 5, 19, 1, nil, nil, "refresh waypoints")
+local hideWaypoints = layout:createButton(2, ry - 7, 19, 1, nil, nil, "hide waypoints")
 local canvas = layout:createCanvas(rx - ((canvasSize * 2) - 1), 1, canvasSize * 2, canvasSize, uix.colors.white, uix.colors.black)
 
 ----------------------------------
@@ -49,6 +53,24 @@ local function getMapScale()
     return math.map(scaleSeek.value, 0, 1, 4, range)
 end
 
+local function getRotationChar(facing)
+    if facing == sides.north then
+        return "^"
+    elseif facing == sides.south then
+        return "V"
+    elseif facing == sides.west then
+        return "<"
+    elseif facing == sides.east then
+        return ">"
+    else
+        return "#"
+    end
+end
+
+local function drawSelf(x, y, facing)
+    canvas:set(x, y, uix.colors.red, uix.colors.white, getRotationChar(facing))
+end
+
 local function update()
     local px, py, pz = navigation.getPosition()
     local facing = navigation.getFacing()
@@ -58,17 +80,23 @@ local function update()
     else
         positionLabel.text = "local pos: unknown" .. stubStr
     end
-    facingLabel.text   = "facing   : " .. getFacingStr(facing) .. stubStr
-    scaleText.text     = "map scale: " .. math.round(getMapScale()) .. stubStr
+    facingLabel.text    = "facing   : " .. getFacingStr(facing) .. stubStr
+    scaleText.text      = "map scale: " .. math.round(getMapScale()) .. stubStr
+    waypointsLabel.text = "waypoints: " .. (waypoints and #waypoints or "unknown") .. stubStr
     positionLabel:draw()
     facingLabel:draw()
     scaleText:draw()
+    waypointsLabel:draw()
 
     canvas:clear()
     canvas:centerText(canvas.sx / 2, 1, nil, nil, "NORTH")
     canvas:centerText(canvas.sx / 2, canvas.sy, nil, nil, "SOUTH")
     canvas:centerText(1, canvas.sy / 2, nil, nil, "WEST", true)
     canvas:centerText(canvas.sx, canvas.sy / 2, nil, nil, "EAST", true)
+
+    if fixedMap.state then
+        drawSelf(canvas.sx / 2, canvas.sy / 2, facing)
+    end
 end
 
 function updateWaypoints:onClick()
@@ -76,10 +104,19 @@ function updateWaypoints:onClick()
     update()
 end
 
+function hideWaypoints:onClick()
+    waypoints = nil
+    update()
+end
+
 function scaleSeek:onSeek(value)
     update()
 end
 
+function fixedMap:onSwitch()
+    update()
+end
+
 thread.timer(0, update)
-thread.timer(3, update, math.huge)
+thread.timer(1, update, math.huge)
 manager:loop()
