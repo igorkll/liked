@@ -98,7 +98,9 @@ function openbox:createEnv()
             return require(name)
         end
 
-        error("failed to find lib \"" .. name .. "\"", 2)
+        return setmetatable({}, {__index = function()
+            error("using unsupported library \"" .. name .. "\"", 2)
+        end})
     end
 
     function env.os.tmpname()
@@ -187,6 +189,33 @@ function openbox.create(screen)
         local gpu = graphic.findGpu(screen)
         box.oldRX, box.oldRY = gpu.getResolution()
         box.term = term.create(screen, 1, 1, box.oldRX, box.oldRY, true)
+    end
+
+    -- fs
+    local filemt = {}
+    
+    function filemt:read(...)
+        return self.file.read(...)
+    end
+
+    function filemt:write(...)
+        return self.file.write(...)
+    end
+
+    function filemt:close(...)
+        return self.file.close(...)
+    end
+
+    function filemt:seek(...)
+        return self.file.seek(...)
+    end
+
+
+
+    box.libs.filesystem = table.clone(fs)
+
+    function box.libs.filesystem.open(path, mode)
+        return setmetatable({file = fs.open(path, mode)}, {__index = filemt})
     end
 
     -- term
