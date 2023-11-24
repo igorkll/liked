@@ -1,4 +1,5 @@
 local fs = require("filesystem")
+local graphic = require("graphic")
 local bmp = {}
 
 local function strToArray(str)
@@ -72,13 +73,25 @@ function bmp.parse(path, sizeCallback, callback)
 
     -- parsing
     sizeCallback(width, height)
-    for ix = 1, width + 1 do
-        for iy = height + 1, 1, -1 do
+    for ix = 1, width do
+        for iy = height, 1, -1 do
             callback(ix, iy, getBits(file.read(bitsPerPixel)))
         end
     end
 
-    local currentOffset = dataOffset
+    file.close()
+    return true
+end
+
+function bmp.draw(screen, path)
+    local gpu = graphic.findGpu(screen)
+    local width, height
+    bmp.parse(path, function (w, h)
+        width, height = w, h
+    end, function (x, y, color)
+        gpu.setBackground(color)
+        gpu.set(x, y, " ")
+    end)
 end
 
 return bmp
