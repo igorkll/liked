@@ -373,6 +373,7 @@ local function execute(name, nickname, ...)
     liked.bigAssert(screen, liked.execute(name, screen, nickname, ...))
     draw()
     timerEnable = true
+    redrawFlag = nil
 end
 
 local function uninstallApp(path, nickname)
