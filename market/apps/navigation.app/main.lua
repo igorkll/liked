@@ -75,17 +75,14 @@ local function drawSelf(x, y, facing, color)
     canvas:set(x, y, color or uix.colors.red, uix.colors.white, getRotationChar(facing))
 end
 
-local function toPosInMap(x, z)
-    local px, py, pz = navigation.getPosition()
-    if px then
-        local ox, oz = x - px, z - pz
-        local cx, cz = canvas.sx / 2, canvas.sy / 2
+local function toPosInMap(px, py, pz, x, z)
+    local ox, oz = x - px, z - pz
+    local cx, cz = canvas.sx / 2, canvas.sy / 2
 
-        if fixedMap.state then
-            return math.mapRound(x, -crange, crange, 1, canvas.sx), math.mapRound(z, -crange, crange, 1, canvas.sy)
-        else
-            return math.mapRound(ox, -crange, crange, 1, canvas.sx), math.mapRound(oz, -crange, crange, 1, canvas.sy)
-        end
+    if fixedMap.state then
+        return math.mapRound(x, -crange, crange, 1, canvas.sx), math.mapRound(z, -crange, crange, 1, canvas.sy)
+    else
+        return math.mapRound(ox, -crange, crange, 1, canvas.sx), math.mapRound(oz, -crange, crange, 1, canvas.sy)
     end
 end
 
@@ -118,14 +115,14 @@ local function update()
     canvas:centerText(canvas.sx, canvas.sy / 2, nil, nil, "EAST", true)
 
     if px and not passiveMode.state then
-        local dx, dy = toPosInMap(px, pz)
+        local dx, dy = toPosInMap(px, py, pz, px, pz)
         if dx then
             drawSelf(dx, dy, facing)
         end
 
         if waypoints and wpx then
             for _, waypoint in ipairs(waypoints) do
-                local dx, dy = toPosInMap(wpx + waypoint.position[1], wpz + waypoint.position[3])
+                local dx, dy = toPosInMap(px, py, pz, wpx + waypoint.position[1], wpz + waypoint.position[3])
                 if dx then
                     drawWaypoint(dx, dy, waypoint)
                 end
