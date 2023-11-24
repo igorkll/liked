@@ -409,6 +409,11 @@ list.libs = {
         url = selfurlpart .. "/libs/openbox.lua",
         vendor = "logic",
         version = "3"
+    },
+    ["bmp"] = {
+        url = selfurlpart .. "/libs/bmp.lua",
+        vendor = "logic",
+        version = "1"
     }
 }
 
