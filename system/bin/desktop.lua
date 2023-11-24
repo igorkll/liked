@@ -844,6 +844,7 @@ local function doIcon(windowEventData)
                                 local state = gui_yesno(screen, nil, nil, "remove \"" .. v.name .. "\"?")
                                 clear2()
                                 if state then
+                                    gui.status(screen, nil, nil, "removing...")
                                     liked.assert(screen, fs.remove(v.path))
                                     draw()
                                 end
@@ -876,6 +877,7 @@ local function doIcon(windowEventData)
                                         if fs.exists(path) then
                                             warn("name exists")
                                         else
+                                            gui.status(screen, nil, nil, "renaming...")
                                             fs.rename(v.path, path)
                                             draw()
                                         end

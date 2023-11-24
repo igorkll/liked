@@ -75,7 +75,7 @@ function bmp.parse(path, sizeCallback, callback)
     sizeCallback(width, height)
     for ix = 1, width do
         for iy = height, 1, -1 do
-            callback(ix, iy, getBits(file.read(bitsPerPixel)))
+            callback(ix, iy, getBits(strToArray(file.read(bitsPerPixel))))
         end
     end
 

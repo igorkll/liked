@@ -457,13 +457,14 @@ function liked.applyPowerMode()
             energyTh = nil
         end
     else
+        event.minTime = 0.05
         if not energyTh then
             energyTh = thread.createBackground(function ()
                 local oldWakeTIme = computer.uptime()
                 while true do
                     local eventData = {event.pull(1)}
                     if eventData[1] and wakeupEvents[eventData[1]] then
-                        event.minTime = 0
+                        event.minTime = 0.05
                         oldWakeTIme = computer.uptime()
                     elseif computer.uptime() - oldWakeTIme > 4 then
                         event.minTime = 5
