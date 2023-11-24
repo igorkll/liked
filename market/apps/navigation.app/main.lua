@@ -17,20 +17,20 @@ local stubStr = string.rep(" ", 16)
 
 ----------------------------------
 
-layout:createText(2, ry - 5, nil, "passive mode: ")
-layout:createText(2, ry - 3, nil, "fixed map: ")
-layout:createText(2, ry - 1, nil, "scale map: ")
+layout:createText(2, ry - 6, nil, "passive mode: ")
+layout:createText(2, ry - 4, nil, "fixed map: ")
+layout:createText(2, ry - 2, nil, "scale map: ")
 
 local positionLabel = layout:createText(2, 2)
 local facingLabel = layout:createText(2, 3)
 local scaleText = layout:createText(2, 4)
 local waypointsLabel = layout:createText(2, 5)
 
-local scaleSeek = layout:createSeek(13, ry - 1, rx - (canvasSize * 2) - 13, nil, nil, nil, 1)
-local fixedMap = layout:createSwitch(13, ry - 3, false)
-local passiveMode = layout:createSwitch(16, ry - 5, false)
-local updateWaypoints = layout:createButton(2, ry - 7, 19, 1, nil, nil, "refresh waypoints")
-local hideWaypoints = layout:createButton(2, ry - 9, 19, 1, nil, nil, "hide waypoints")
+local scaleSeek = layout:createSeek(2, ry - 1, rx - (canvasSize * 2) - 2, nil, nil, nil, 1)
+local fixedMap = layout:createSwitch(13, ry - 4, false)
+local passiveMode = layout:createSwitch(16, ry - 6, false)
+local updateWaypoints = layout:createButton(2, ry - 8, 19, 1, nil, nil, "refresh waypoints")
+local hideWaypoints = layout:createButton(2, ry - 10, 19, 1, nil, nil, "hide waypoints")
 local canvas = layout:createCanvas(rx - ((canvasSize * 2) - 1), 1, canvasSize * 2, canvasSize, uix.colors.white, uix.colors.black)
 
 ----------------------------------
