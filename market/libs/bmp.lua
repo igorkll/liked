@@ -13,6 +13,10 @@ local function get32bit(buffer)
     return buffer[1] | buffer[2] << 8 | buffer[3] << 16 | buffer[4] << 24
 end
 
+local function get16bit(buffer)
+    return buffer[1] | buffer[2] << 8
+end
+
 function bmp.parse(path, sizecallback, callback)
     local file = fs.open(path, "rb")
 
@@ -21,10 +25,16 @@ function bmp.parse(path, sizecallback, callback)
     end
 
     local filesize = get32bit(strToArray(file.read(4)))
-
     file.read(4)
-
     local dataOffset = get32bit(strToArray(file.read(4)))
+
+    -- DIB HEADER
+
+    local dibHeaderSize = get32bit(strToArray(file.read(4)))
+    local width = get32bit(strToArray(file.read(4)))
+    local height = get32bit(strToArray(file.read(4)))
+    local colourPlanes = get16bit(strToArray(file.read(2)))
+    local bitsPerPixel = get16bit(strToArray(file.read(2)))
 end
 
 return bmp
