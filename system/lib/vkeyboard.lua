@@ -3,6 +3,7 @@ local uix = require("uix")
 local event = require("event")
 local unicode = require("unicode")
 local computer = require("computer")
+local lastinfo = require("lastinfo")
 local thread = require("thread")
 local vkeyboard = {}
 
@@ -29,7 +30,12 @@ function vkeyboard.input(screen, splash)
     local esc = layout:createButton(2, 4, 5, 3, uix.colors.red, uix.colors.white, "ESC", true)
     esc.postDraw = postDraw
     function esc:onClick()
-        returnVal = true
+        if currentInput == "" then
+            returnVal = true
+        else
+            currentInput = ""
+            doInput()
+        end
     end
 
     local back = layout:createButton(window.sizeX - 5, 4, 5, 3, uix.colors.red, uix.colors.white, "<", true)
@@ -77,9 +83,8 @@ function vkeyboard.input(screen, splash)
         addButton(i, 0, char)
     end
 
-    addButton(10, 0, "-")
-    addButton(11, 0, "+")
-    addButton(12, 0, "~")
+    addButton(11, 0, "-")
+    addButton(12, 0, "+")
 
     addButton(0, 1, "q")
     addButton(1, 1, "w")
@@ -135,6 +140,7 @@ function vkeyboard.input(screen, splash)
     addButton(15, 3, "&")
     addButton(16, 3, "*")
 
+    addButton(14, 4, "~")
     addButton(15, 4, ",")
     addButton(16, 4, ".")
 
@@ -178,7 +184,7 @@ end
 local hooked = {}
 local clicks = {}
 local opened = {}
-function vkeyboard.hook(screen)
+function vkeyboard.hook(screen, exitCallback)
     if hooked[screen] then return end
     hooked[screen] = true
 
@@ -186,7 +192,7 @@ function vkeyboard.hook(screen)
         local tbl = {...}
 
         if tbl[1] == "touch" then
-            if tbl[2] == screen then
+            if tbl[2] == screen and #lastinfo.keyboards[screen] == 0 then
                 if clicks[tbl[2]] then
                     local clk = clicks[tbl[2]]
 
@@ -219,6 +225,9 @@ function vkeyboard.hook(screen)
             local str = vkeyboard.input(tbl[2])
             if str then
                 event.push("softwareInsert", tbl[2], str, tbl[3])
+            end
+            if exitCallback then
+                exitCallback()
             end
 
             clear()

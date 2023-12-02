@@ -350,7 +350,7 @@ local list = {
     },
     {
         name = "calculator",
-        version = "1",
+        version = "2",
         vendor = "logic",
         description = "this is an engineering calculator that supports a lot of functions",
         minDiskSpace = 64,

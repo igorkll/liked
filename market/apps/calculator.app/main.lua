@@ -68,7 +68,7 @@ local function addButton(x, y, color, textcolor, char, func, xoffset)
     else
         function button:onClick()
             saveToHistory()
-            if tonumber(char) then
+            if tonumber(char) or char == "." then
                 current = current .. char
             else
                 current = current .. " " .. char .. " "
