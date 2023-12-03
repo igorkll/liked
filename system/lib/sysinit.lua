@@ -154,16 +154,16 @@ function sysinit.init(box)
         sysinit.initPalPath = "/system/palette.plt"
         sysinit.applyPalette(sysinit.initPalPath)
     else
-        sysinit.initPalPath = "/data/theme.plt"
+        sysinit.initPalPath = "/data/palette.plt"
 
         if fs.exists(sysinit.initPalPath) then
             sysinit.applyPalette(sysinit.initPalPath)
         else
             local palette = require("palette")
             if minDepth == 1 then
-                palette.setSystemPalette("/system/themes/original.plt")
+                palette.setSystemPalette("/system/palettes/original.plt")
             else
-                palette.setSystemPalette("/system/themes/classic.plt")
+                palette.setSystemPalette("/system/palettes/classic.plt")
             end
         end
     end

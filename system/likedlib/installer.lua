@@ -86,7 +86,7 @@ function installer.install_likedbox(vfs)
         "installer",
         "likedbox",
         "screenSavers",
-        "themes",
+        "palettes",
         "wallpapers",
         "icons",
         "bin",

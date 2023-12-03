@@ -45,8 +45,6 @@
 /system/bin/shell.lua
 /system/bin/unpackArchive.lua
 /system/calls/gui_filepicker.lua
-/system/calls/system_applyTheme.lua
-/system/calls/system_setTheme.lua
 /system/icons/afpx.t2p
 /system/icons/app.t2p
 /system/icons/badicon.t2p
@@ -103,13 +101,13 @@
 /system/likedlib/sysmode/init.lua
 /system/likedlib/update/init.lua
 /system/likedlib/update/update.lua
+/system/palettes/classic.plt
+/system/palettes/light.plt
+/system/palettes/neon.plt
+/system/palettes/original.plt
 /system/screenSavers/black_screen.scrsv
 /system/screenSavers/color_dots.scrsv
 /system/screenSavers/random_colors.scrsv
-/system/themes/classic.plt
-/system/themes/light.plt
-/system/themes/neon.plt
-/system/themes/original.plt
 /system/wallpapers/box.t2p
 /system/wallpapers/car.t2p
 /system/wallpapers/circuit_board.t2p

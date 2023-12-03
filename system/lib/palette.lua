@@ -45,8 +45,8 @@ function palette.setSystemPalette(path)
     if pcall(sysinit.applyPalette, path) then
         pcall(fs.copy, path, sysinit.initPalPath)
     else
-        pcall(fs.copy, "/system/themes/classic.plt", sysinit.initPalPath)
-        sysinit.applyPalette("/system/themes/classic.plt")
+        pcall(fs.copy, "/system/palettes/classic.plt", sysinit.initPalPath)
+        sysinit.applyPalette("/system/palettes/classic.plt")
     end
 end
 

@@ -71,7 +71,7 @@ if gui_yesno(screen, nil, nil, "install \"" .. label .. "\" to \"" .. name .. "\
                 "installer",
                 "likedbox",
                 "screenSavers",
-                "themes",
+                "palettes",
                 "wallpapers",
                 "icons",
                 "bin",

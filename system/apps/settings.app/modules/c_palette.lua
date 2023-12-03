@@ -15,13 +15,13 @@ local screen, posX, posY = ...
 local gpu = graphic.findGpu(screen)
 local rx, ry = gpu.getResolution()
 
-local themesPath = "/system/themes"
+local themesPath = "/system/palettes"
 
 ------------------------------------
 
 local currentThemeData
-if fs.exists("/data/theme.plt") then
-    local file = assert(fs.open("/data/theme.plt", "rb"))
+if fs.exists("/data/palette.plt") then
+    local file = assert(fs.open("/data/palette.plt", "rb"))
     currentThemeData = file.readAll()--получаем файл текуший темы для сравнения
     file.close()
 end
