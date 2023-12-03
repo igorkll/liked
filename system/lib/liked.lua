@@ -340,7 +340,7 @@ function liked.loadApp(name, screen, nickname)
         if screen then
             if configTbl.restoreGraphic then
                 log{pcall(sysinit.initScreen, screen)}
-            elseif paletteFile or configTbl.restorePalette then
+            elseif paletteFile or configTbl.restorePalette or configTbl.blackWhite then
                 palette.system(screen)
             end
 
