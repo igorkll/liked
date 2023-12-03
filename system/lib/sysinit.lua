@@ -41,13 +41,7 @@ function sysinit.applyPalette(path, screen)
 
     local function applyOnScreen(address)
         if graphic.maxDepth(address) ~= 1 then
-            local count = 0
-            for i, v in ipairs(colors) do
-                if graphic.getPaletteColor(address, count) ~= v then
-                    graphic.setPaletteColor(address, count, v)
-                end
-                count = count + 1
-            end
+            graphic.setPalette(address, colors)
         end
     end
 
