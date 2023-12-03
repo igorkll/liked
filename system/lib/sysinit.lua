@@ -1,12 +1,95 @@
 local sysinit = {}
 sysinit.screenThreads = {}
 
+function sysinit.applyPalette(path, screen)
+    local fs = require("filesystem")
+    local serialization = require("serialization")
+    local component  = require("component")
+    local graphic = require("graphic")
+    local gui_container = require("gui_container")
+
+    local colors = assert(serialization.load(path))
+
+    local function movetable(maintable, newtable)
+        for k, v in pairs(maintable) do
+            maintable[k] = nil
+        end
+        for k, v in pairs(newtable) do
+            maintable[k] = v
+        end
+    end
+
+    movetable(gui_container.indexsColors, colors)
+    movetable(gui_container.colors, {
+        white     = colors[1],
+        orange    = colors[2],
+        magenta   = colors[3],
+        lightBlue = colors[4],
+        yellow    = colors[5],
+        lime      = colors[6],
+        pink      = colors[7],
+        gray      = colors[8],
+        lightGray = colors[9],
+        cyan      = colors[10],
+        purple    = colors[11],
+        blue      = colors[12],
+        brown     = colors[13],
+        green     = colors[14],
+        red       = colors[15],
+        black     = colors[16]
+    })
+
+    local function applyOnScreen(address)
+        if graphic.maxDepth(address) ~= 1 then
+            local count = 0
+            for i, v in ipairs(colors) do
+                if graphic.getPaletteColor(address, count) ~= v then
+                    graphic.setPaletteColor(address, count, v)
+                end
+                count = count + 1
+            end
+        end
+    end
+
+    if screen then
+        applyOnScreen(screen)
+    else
+        for address in component.list("screen") do
+            applyOnScreen(address)
+        end
+    end
+end
+
+function sysinit.initScreen(screen)
+    local graphic = require("graphic")
+    local component = require("component")
+
+    local gpu = graphic.findGpu(screen)
+    if not gpu then return end
+
+    pcall(component.invoke, screen, "turnOn")
+
+    local mx, my = graphic.maxResolution(screen)
+    if mx > 80 or my > 25 then
+        mx = 80
+        my = 25
+    end
+
+    graphic.setDepth(screen, 1)
+    gpu.setBackground(0x000000)
+    gpu.setForeground(0xffffff)
+    graphic.setResolution(screen, mx, my)
+    gpu.fill(1, 1, mx, my, " ")
+    graphic.setDepth(screen, graphic.maxDepth(screen))
+    sysinit.applyPalette(sysinit.initPalPath, screen)
+end
+
 function sysinit.runShell(screen, customShell)
     local thread = require("thread")
     local registry = require("registry")
     local liked = require("liked")
 
-    gui_initScreen(screen)
+    sysinit.initScreen(screen)
     
     local shellName = "shell"
     if customShell then
@@ -68,27 +151,24 @@ function sysinit.init(box)
     ------------------------------------
 
     if box then
-        _G.initPalPath = "/system/palette.plt"
-        function _G.initPal()
-            system_applyTheme(_G.initPalPath)
-        end
+        sysinit.initPalPath = "/system/palette.plt"
+        sysinit.applyPalette(sysinit.initPalPath)
     else
-        _G.initPalPath = "/data/theme.plt"
-        function _G.initPal()
-            if fs.exists(_G.initPalPath) then
-                system_applyTheme(_G.initPalPath)
+        sysinit.initPalPath = "/data/theme.plt"
+
+        if fs.exists(sysinit.initPalPath) then
+            sysinit.applyPalette(sysinit.initPalPath)
+        else
+            local palette = require("palette")
+            if minDepth == 1 then
+                palette.setSystemPalette("/system/themes/original.plt")
             else
-                if minDepth == 1 then
-                    system_setTheme("/system/themes/original.plt")
-                else
-                    system_setTheme("/system/themes/classic.plt")
-                end
+                palette.setSystemPalette("/system/themes/classic.plt")
             end
         end
     end
-    local gui_container = require("gui_container")
-    _G.initPal = nil
 
+    local gui_container = require("gui_container")
     local gui = require("gui") --нужно подключить заранию чтобы функции записались в calls.loaded
 
     package.hardAutoUnloading = true

@@ -7,6 +7,7 @@ local registry = require("registry")
 local component = require("component")
 local computer = require("computer")
 local gui = require("gui")
+local sysinit = require("sysinit")
 
 local colors = gui_container.colors
 
@@ -61,7 +62,7 @@ local function draw(set)
             liked.applyBufferType()
 
             for _, init in ipairs(inits) do
-                system_applyTheme(_G.initPalPath, init[1])
+                sysinit.applyPalette(sysinit.initPalPath, init[1])
                 init[2]()
             end
         else

@@ -5,6 +5,7 @@ local paths = require("paths")
 local unicode = require("unicode")
 local event = require("event")
 local calls = require("calls")
+local palette = require("palette")
 
 local colors = gui_container.colors
 
@@ -76,7 +77,7 @@ local function draw(set)
     end
 
     if set then
-        calls.call("system_setTheme", paths.concat(themesPath, themes[selected]))
+        palette.setSystemPalette(paths.concat(themesPath, themes[selected]))
         event.push("redrawDesktop")
     end
 end

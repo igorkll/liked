@@ -5,10 +5,6 @@ gui_container.criticalChargeLevel = 20
 gui_container.colors = {}
 gui_container.indexsColors = {}
 
-_G.gui_container = gui_container
-initPal()
-_G.gui_container = nil
-
 --------------------------------------------
 
 local fs = require("filesystem")

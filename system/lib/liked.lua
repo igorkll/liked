@@ -21,6 +21,7 @@ local palette = require("palette")
 local package = require("package")
 local screensaver = require("screensaver")
 local image = require("image")
+local sysinit = require("sysinit")
 local liked = {}
 
 local colors = gui_container.colors
@@ -338,7 +339,7 @@ function liked.loadApp(name, screen, nickname)
     local function appEnd()
         if screen then
             if configTbl.restoreGraphic then
-                log{pcall(gui_initScreen, screen)}
+                log{pcall(sysinit.initScreen, screen)}
             elseif paletteFile or configTbl.restorePalette then
                 palette.system(screen)
             end

@@ -45,7 +45,6 @@
 /system/bin/shell.lua
 /system/bin/unpackArchive.lua
 /system/calls/gui_filepicker.lua
-/system/calls/gui_initScreen.lua
 /system/calls/system_applyTheme.lua
 /system/calls/system_setTheme.lua
 /system/icons/afpx.t2p

@@ -1,5 +1,7 @@
+local fs = require("filesystem")
 local graphic = require("graphic")
 local serialization = require("serialization")
+local sysinit = require("sysinit")
 local palette = {}
 
 function palette.save(screen)
@@ -27,16 +29,25 @@ function palette.fromFile(screen, path, noReg)
             end
         end
     else
-        pcall(system_applyTheme, path, screen)
+        pcall(sysinit.applyPalette, path, screen)
     end
 end
 
 function palette.system(screen, noReg)
-    palette.fromFile(screen, _G.initPalPath, noReg)
+    palette.fromFile(screen, sysinit.initPalPath, noReg)
 end
 
 function palette.blackWhite(screen, noReg)
     palette.fromFile(screen, "/system/t3default.plt", noReg)
+end
+
+function palette.setSystemPalette(path)
+    if pcall(sysinit.applyPalette, path) then
+        pcall(fs.copy, path, sysinit.initPalPath)
+    else
+        pcall(fs.copy, "/system/themes/classic.plt", sysinit.initPalPath)
+        sysinit.applyPalette("/system/themes/classic.plt")
+    end
 end
 
 palette.unloadable = true

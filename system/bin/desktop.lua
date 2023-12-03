@@ -17,6 +17,7 @@ local liked = require("liked")
 local parser = require("parser")
 local screensaver = require("screensaver")
 local image = require("image")
+local palette = require("palette")
 
 local colors = gui_container.colors
 
@@ -424,7 +425,7 @@ local function fileDescriptor(icon, alternative, nickname) --открывает 
             clear()
 
             if state then
-                system_setTheme(icon.path)
+                palette.setSystemPalette(icon.path)
                 event.push("redrawDesktop")
             end
         end
@@ -901,7 +902,7 @@ local function doIcon(windowEventData)
                                 end
                             elseif str == "  set as palette" then
                                 if liked.publicMode(screen) then
-                                    system_setTheme(v.path)
+                                    palette.setSystemPalette(v.path)
                                     event.push("redrawDesktop")
                                 end
                             elseif str == "  inside the package" then
