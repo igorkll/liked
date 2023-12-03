@@ -10,6 +10,7 @@ local liked = require("liked")
 local computer = require("computer")
 local screensaver = require("screensaver")
 local thread = require("thread")
+local image = require("image")
 
 local colors = gui_container.colors
 local indexsColors = gui_container.indexsColors
@@ -64,7 +65,7 @@ local function getMessageSize(tbl)
         return 6
     elseif tbl[3] == "image" then
         local path = pushImage(message)
-        local _, _, sy = pcall(gui_readimagesize, path)
+        local _, _, sy = pcall(image.size, path)
         fs.remove(path)
         return sy or 6
     end
@@ -167,7 +168,7 @@ local function draw()
                     local cx, cy = window:getCursor()
 
                     local path = pushImage(v[4])
-                    gui_drawimage(screen, path, cx, cy)
+                    image.draw(screen, path, cx, cy)
                     fs.remove(path)
                 elseif v[3] == "file" then
                     local name = splitFile(v[4])
@@ -184,7 +185,7 @@ local function draw()
                     end
 
                     window:fill(cx, cy, 10, 6, colors.green, 0, " ")
-                    gui_drawimage(screen, iconPath, cx + 1, cy + 1)
+                    image.draw(screen, iconPath, cx + 1, cy + 1)
 
                     window:set(cx - 7, cy + 2, colors.green, colors.yellow, "EXPORT")
                     table.insert(exportButtons, {cx - 7, cy + 2, function()

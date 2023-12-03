@@ -23,11 +23,11 @@ function sysinit.runShell(screen, customShell)
 end
 
 function sysinit.init(box)
-    _G._OSVERSION = "liked-v" .. tostring(getOSversion())
+    local fs = require("filesystem")
+    _G._OSVERSION = "liked-v" .. assert(fs.readFile("/system/version.cfg"))
     local bootloader = require("bootloader")
     bootloader.runlevel = "user"
 
-    local fs = require("filesystem")
     local graphic = require("graphic")
     local programs = require("programs")
     local component = require("component")

@@ -83,7 +83,7 @@ local function draw(set)
     end
 
     local ix, iy = ((rx // 3) * 2) + 8, (ry // 2) - 4
-    gui_drawimage(screen, paths.concat(paths.path(paths.path(selfpath)), "shadow_demo.t2p"), ix, iy)
+    require("image").draw(screen, paths.concat(paths.path(paths.path(selfpath)), "shadow_demo.t2p"), ix, iy)
     local th = thread.create(gui_context, screen, ix + 1, iy + 1, {"shutdown", "reboot"})
     th:resume()
     event.yield()

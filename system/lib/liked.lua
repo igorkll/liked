@@ -20,11 +20,25 @@ local colorlib = require("colors")
 local palette = require("palette")
 local package = require("package")
 local screensaver = require("screensaver")
+local image = require("image")
 local liked = {}
 
 local colors = gui_container.colors
 
 --------------------------------------------------------
+
+function liked.isLikedDisk(address)
+    local signature = "--liked"
+
+    local file = component.invoke(address, "open", "/system/main.lua", "rb")
+    if file then
+        local data = component.invoke(address, "read", file, #signature)
+        component.invoke(address, "close", file)
+        return signature == data
+    end
+
+    return false
+end
 
 function liked.doFormats(appPath, path, delete)
     local data = assert(serialization.load(path))
@@ -214,7 +228,7 @@ function liked.lastVersion()
 end
 
 function liked.version()
-    return getOSversion()
+    return tonumber(assert(fs.readFile("/system/version.cfg")))
 end
 
 function liked.umountAll()
@@ -310,6 +324,8 @@ function liked.loadApp(name, screen, nickname)
         if screen then
             if paletteFile then
                 palette.fromFile(screen, paletteFile, configTbl.dontRegPalette)
+            elseif configTbl.blackWhite then
+                palette.blackWhite(screen, true)
             end
 
             if configTbl.noScreenSaver then
@@ -802,7 +818,7 @@ function liked.getIcon(screen, path)
     else
         if exp == "t2p" then
             if path then
-                local ok, sx, sy = pcall(gui_readimagesize, path)
+                local ok, sx, sy = pcall(image.size, path)
                 if ok and sx == 8 and sy == 4 then
                     icon = path
                 else
@@ -825,7 +841,7 @@ function liked.getIcon(screen, path)
         icon = liked.findIcon("unknown")
     end
 
-    local ok, sx, sy = pcall(gui_readimagesize, icon)
+    local ok, sx, sy = pcall(image.size, icon)
     if not ok or sx ~= 8 or sy ~= 4 then
         icon = nil
     end
@@ -854,10 +870,10 @@ function liked.drawWallpaper(screen, customFolder)
     gpu.fill(1, 1, rx, ry, " ")
 
     local function wdraw(path)
-        local ok, sx, sy = pcall(gui_readimagesize, path)
+        local ok, sx, sy = pcall(image.size, path)
         if ok then
             local ix, iy = math.round((rx / 2) - (sx / 2)) + 1, math.round((ry / 2) - (sy / 2)) + 1
-            pcall(gui_drawimage, screen, path, ix, iy)
+            pcall(image.draw, screen, path, ix, iy)
         end
     end
 

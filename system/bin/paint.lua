@@ -6,6 +6,7 @@ local unicode = require("unicode")
 local computer = require("computer")
 local lastinfo = require("lastinfo")
 local gui = require("gui")
+local image = require("image")
 
 local colors = gui_container.colors
 local indexsColors = gui_container.indexsColors
@@ -181,7 +182,7 @@ local function drawImage()
         ]]
         local tmp = os.tmpname()
         raw_save(tmp)
-        gui_drawimage(screen, tmp, mainWindow:toRealPos(1 + imageOffsetX, 1 + imageOffsetY))
+        image.draw(screen, tmp, mainWindow:toRealPos(1 + imageOffsetX, 1 + imageOffsetY))
         fs.remove(tmp)
     end
 end

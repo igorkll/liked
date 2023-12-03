@@ -16,6 +16,7 @@ local system = require("system")
 local liked = require("liked")
 local parser = require("parser")
 local screensaver = require("screensaver")
+local image = require("image")
 
 local colors = gui_container.colors
 
@@ -285,7 +286,6 @@ local function draw(old, check) --вызывает все перерисовки
     end
 
     local gui_drawtext = calls.load("gui_drawtext")
-    local gui_drawimage = calls.load("gui_drawimage")
 
     drawWallpaper()
     drawStatus()
@@ -315,7 +315,7 @@ local function draw(old, check) --вызывает все перерисовки
                 --window:set(iconX - (unicode.len(icon.name) // 2), iconY + iconY - 2, colors.lightBlue, colors.white, icon.name)
                 if icon.icon then
                     local sx, sy = window:toRealPos(iconX, iconY)
-                    pcall(gui_drawimage, screen, icon.icon, sx, sy, true)
+                    pcall(image.draw, screen, icon.icon, sx, sy, true)
                 end
             end
         end

@@ -5,6 +5,7 @@ local graphic = require("graphic")
 local liked = require("liked")
 local thread = require("thread")
 local event = require("event")
+local image = require("image")
 
 local colors = gui_container.colors
 local uix = {colors = colors}
@@ -335,7 +336,7 @@ function objclass:draw()
     elseif self.type == "big_switch" then
         self.gui.window:fill(self.x, self.y, self.sizeX, self.sizeY, self.color, 0, " ")
         local x, y = self.gui.window:toRealPos(self.x, self.y)
-        gui_drawimage(self.gui.window.screen, self.state and "/system/images/switch_on.t2p" or "/system/images/switch_off.t2p", x, y, true)
+        image.draw(self.gui.window.screen, self.state and "/system/images/switch_on.t2p" or "/system/images/switch_off.t2p", x, y, true)
     elseif self.type == "text" then
         if self.text then
             local _, _, bg = self.gui.window:get(self.x, self.y)
@@ -381,7 +382,7 @@ function objclass:draw()
         self.gui.window:fill(self.x, self.y, self.sx, self.sy, self.color, 0, " ")
     elseif self.type == "image" then
         local x, y = self.gui.window:toRealPos(self.x, self.y)
-        gui_drawimage(self.gui.window.screen, self.path, x, y, self.wallpaperMode)
+        image.draw(self.gui.window.screen, self.path, x, y, self.wallpaperMode)
     elseif self.type == "drawer" then
         self:func(self.gui.window:toRealPos(self.x, self.y))
     elseif self.type == "progress" then

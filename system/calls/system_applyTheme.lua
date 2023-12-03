@@ -1,15 +1,21 @@
 local fs = require("filesystem")
-local calls = require("calls")
+local serialization = require("serialization")
 local component  = require("component")
 local graphic = require("graphic")
 local gui_container = _G.gui_container or require("gui_container")
 local path, screen = ...
 
-local file = assert(fs.open(path, "rb"))
-local themeData = file.readAll()
-file.close()
+local colors = assert(serialization.load(path))
 
-local colors = calls.call("unserialization", themeData)
+local function movetable(maintable, newtable)
+    for k, v in pairs(maintable) do
+        maintable[k] = nil
+    end
+    for k, v in pairs(newtable) do
+        maintable[k] = v
+    end
+end
+
 movetable(gui_container.indexsColors, colors)
 movetable(gui_container.colors, {
     white     = colors[1],

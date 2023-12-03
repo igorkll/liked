@@ -50,6 +50,49 @@ end
 
 ------------------------------------
 
+function gui.getCustomZone(screen, x, y)
+    local cx, cy = graphic.getResolution(screen)
+    cx = cx / 2
+    cy = cy / 2
+    cx = cx - (x / 2)
+    cy = cy - (y / 2)
+    cx = math.round(cx) + 1
+    cy = math.round(cy) + 1
+    return cx, cy
+end
+
+function gui.getZone(screen)
+    local cx, cy = graphic.getResolution(screen)
+    cx = cx / 2
+    cy = cy / 2
+    cx = cx - 16
+    cy = cy - 4
+    cx = math.round(cx) + 1
+    cy = math.round(cy) + 1
+    return cx, cy, 34, 9
+end
+
+function gui.getBigZone(screen)
+    local cx, cy = graphic.getResolution(screen)
+    cx = cx / 2
+    cy = cy / 2
+    cx = cx - 25
+    cy = cy - 8
+    cx = math.round(cx) + 1
+    cy = math.round(cy) + 1
+    return cx, cy, 52, 17
+end
+
+function gui.saveZone(screen)
+    return graphic.screenshot(screen, gui.getZone(screen))
+end
+
+function gui.saveBigZone(screen)
+    return graphic.screenshot(screen, gui.getBigZone(screen))
+end
+
+------------------------------------
+
 function gui.shadow(gpu, x, y, sx, sy, mul, full)
     local screen = gpu.getScreen()
     local depth = gpu.getDepth()
@@ -182,13 +225,7 @@ function gui.smallWindow(screen, cx, cy, str, backgroundColor, icon, sx, sy)
     local gpu = graphic.findGpu(screen)
 
     if not cx or not cy then
-        cx, cy = gpu.getResolution()
-        cx = cx / 2
-        cy = cy / 2
-        cx = cx - math.round(sx / 2)
-        cy = cy - math.round(sy / 2)
-        cx = math.round(cx) + 1
-        cy = math.round(cy) + 1
+        cx, cy = gui.getCustomZone(screen, sx, sy)
     end
 
     local window = graphic.createWindow(screen, cx, cy, sx, sy, true)
@@ -453,13 +490,7 @@ function gui.input(screen, cx, cy, str, hidden, backgroundColor, default, disabl
     local gpu = graphic.findGpu(screen)
 
     if not cx or not cy then
-        cx, cy = gpu.getResolution()
-        cx = cx / 2
-        cy = cy / 2
-        cx = cx - 16
-        cy = cy - 4
-        cx = math.round(cx) + 1
-        cy = math.round(cy) + 1
+        cx, cy = gui.getZone(screen)
     end
 
     local window = graphic.createWindow(screen, cx, cy, 32, 8, true)
@@ -675,13 +706,7 @@ function gui.select(screen, cx, cy, label, actions, scroll, noCloseButton)
 
     local gpu = graphic.findGpu(screen)
     if not cx or not cy then
-        cx, cy = gpu.getResolution()
-        cx = cx / 2
-        cy = cy / 2
-        cx = cx - 25
-        cy = cy - 8
-        cx = math.round(cx) + 1
-        cy = math.round(cy) + 1
+        cx, cy = gui.getBigZone(screen)
     end
 
     local window = graphic.createWindow(screen, cx, cy, 50, 16, true)
@@ -878,13 +903,7 @@ function gui.selectcomponent(screen, cx, cy, types, allowAutoConfirm, control, c
     end
 
     if not cx or not cy then
-        cx, cy = graphic.getResolution(screen)
-        cx = cx / 2
-        cy = cy / 2
-        cx = cx - 25
-        cy = cy - 8
-        cx = math.round(cx) + 1
-        cy = math.round(cy) + 1
+        cx, cy = gui.getBigZone(screen)
     end
     local checkWindow = graphic.createWindow(screen, cx, cy, 50, 16)
 
@@ -1165,4 +1184,6 @@ calls.loaded.gui_select = gui.select
 calls.loaded.gui_selectcomponent = gui.selectcomponent
 calls.loaded.gui_checkPassword = gui.checkPassword
 calls.loaded.gui_status = gui.status
+calls.loaded.saveZone = gui.saveZone
+calls.loaded.saveBigZone = gui.saveBigZone
 return gui

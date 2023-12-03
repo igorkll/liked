@@ -1,6 +1,6 @@
 local graphic = require("graphic")
 local fs = require("filesystem")
-local calls = require("calls")
+local image = require("image")
 local gui_container = require("gui_container")
 local registry = require("registry")
 local computer = require("computer")
@@ -58,8 +58,6 @@ if netver > liked.version() then
 end
 
 ------------------------------------
-
-local gui_drawimage = calls.load("gui_drawimage")
 
 local statusWindow = graphic.createWindow(screen, 1, 1, rx, 1)
 local window = graphic.createWindow(screen, 1, 2, rx, ry - 1)
@@ -288,7 +286,7 @@ local function applicationLabel(data, x, y)
         end
         
         local x, y = applabel:toRealPos(2, 2)
-        gui_drawimage(screen, custImg or img, x, y, true)
+        image.draw(screen, custImg or img, x, y, true)
     end
     
     if data.icon then
