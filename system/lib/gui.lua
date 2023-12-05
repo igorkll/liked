@@ -88,7 +88,7 @@ function gui.saveZone(screen)
 end
 
 function gui.saveBigZone(screen)
-    return graphic.screenshot(screen, gui.getBigZone(screen))
+    return graphic.screenshot(screen, gui.getCustomZone(screen, 60, 18))
 end
 
 ------------------------------------
