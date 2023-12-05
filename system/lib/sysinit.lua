@@ -39,17 +39,19 @@ function sysinit.applyPalette(path, screen)
         black     = colors[16]
     })
 
-    local function applyOnScreen(address)
-        if graphic.maxDepth(address) ~= 1 then
-            graphic.setPalette(address, colors)
+    if screen ~= true then
+        local function applyOnScreen(address)
+            if graphic.maxDepth(address) ~= 1 then
+                graphic.setPalette(address, colors)
+            end
         end
-    end
 
-    if screen then
-        applyOnScreen(screen)
-    else
-        for address in component.list("screen") do
-            applyOnScreen(address)
+        if screen then
+            applyOnScreen(screen)
+        else
+            for address in component.list("screen") do
+                applyOnScreen(address)
+            end
         end
     end
 end
@@ -146,12 +148,12 @@ function sysinit.init(box)
 
     if box then
         sysinit.initPalPath = "/system/palette.plt"
-        sysinit.applyPalette(sysinit.initPalPath)
+        sysinit.applyPalette(sysinit.initPalPath, true)
     else
         sysinit.initPalPath = "/data/palette.plt"
 
         if fs.exists(sysinit.initPalPath) then
-            sysinit.applyPalette(sysinit.initPalPath)
+            sysinit.applyPalette(sysinit.initPalPath, true)
         else
             local palette = require("palette")
             if minDepth == 1 then
