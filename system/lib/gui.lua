@@ -37,8 +37,6 @@ local smartShadowsColors = {
     colorslib.gray       --16) black
 }
 
-------------------------------------
-
 function gui.hideExtension(screen, path)
     local name = paths.name(path)
     if gui_container.viewFileExps[screen] then
@@ -50,16 +48,7 @@ end
 
 ------------------------------------
 
-function gui.getCustomZone(screen, x, y)
-    local cx, cy = graphic.getResolution(screen)
-    cx = cx / 2
-    cy = cy / 2
-    cx = cx - (x / 2)
-    cy = cy - (y / 2)
-    cx = math.round(cx) + 1
-    cy = math.round(cy) + 1
-    return cx, cy
-end
+local bwSizeX, bwSizeY = 60, 18
 
 function gui.getZone(screen)
     local cx, cy = graphic.getResolution(screen)
@@ -81,6 +70,17 @@ function gui.getBigZone(screen)
     cx = math.round(cx) + 1
     cy = math.round(cy) + 1
     return cx, cy, 52, 17
+end
+
+function gui.getCustomZone(screen, sx, sy)
+    local cx, cy = graphic.getResolution(screen)
+    cx = cx / 2
+    cy = cy / 2
+    cx = cx - math.round(sx / 2)
+    cy = cy - math.round(sy / 2)
+    cx = math.round(cx) + 1
+    cy = math.round(cy) + 1
+    return cx, cy, sx + 2, sy + 1
 end
 
 function gui.saveZone(screen)
@@ -304,11 +304,11 @@ function gui.bigWarn(screen, cx, cy, str, backgroundColor)
         window:set(2, 2, color, colors.orange, " ◢█◣ ")
         window:set(2, 3, color, colors.orange, "◢███◣")
         window:set(4, 2, colors.orange, colors.white, "!")
-    end, 50, 16)
+    end, bwSizeX, bwSizeY)
 
-    window:set(50 - 4, 15, colors.lightBlue, colors.white, " OK ")
+    window:set(bwSizeX - 4, bwSizeY - 1, colors.lightBlue, colors.white, " OK ")
     local function drawYes()
-        window:set(50 - 4, 15, colors.blue, colors.white, " OK ")
+        window:set(bwSizeX - 4, bwSizeY - 1, colors.blue, colors.white, " OK ")
         graphic.forceUpdate(screen)
         event.sleep(0.1)
     end
@@ -322,7 +322,7 @@ function gui.bigWarn(screen, cx, cy, str, backgroundColor)
         local eventData = {computer.pullSignal()}
         local windowEventData = window:uploadEvent(eventData)
         if windowEventData[1] == "touch" and windowEventData[5] == 0 then
-            if windowEventData[4] == 15 and windowEventData[3] > (50 - 5) and windowEventData[3] <= ((50 - 5) + 4) then
+            if windowEventData[4] == 17 and windowEventData[3] > (bwSizeX - 5) and windowEventData[3] <= ((bwSizeX - 5) + 4) then
                 drawYes()
                 break
             end
@@ -340,7 +340,7 @@ function gui.pleaseCharge(screen, minCharge, str)
 
     if system.getCharge() >= minCharge then return true end
 
-    local clear = saveZone(screen)
+    local clear = gui.saveZone(screen)
 
     local window = gui.smallWindow(screen, nil, nil, "in order to make " .. str .. ",\nthe charge level of the device must be at least " .. tostring(math.floor(minCharge)) .. "%", nil, function (window, color)
         window:set(2, 1, color, colors.red, "  " .. unicode.char(0x2800+192) ..  "  ")
@@ -385,7 +385,7 @@ function gui.pleaseSpace(screen, minSpace, str)
     local root = fs.get("/")
     if (root.spaceTotal() - root.spaceUsed()) >= minSpace then return true end
 
-    local clear = saveZone(screen)
+    local clear = gui.saveZone(screen)
 
     local window = gui.smallWindow(screen, nil, nil, "in order to make " .. str .. ",\nyou need a minimum " .. tostring(math.floor(minSpace)) .. "KB space", nil, function (window, color)
         window:set(2, 1, color, colors.red, "  " .. unicode.char(0x2800+192) ..  "  ")
@@ -558,7 +558,7 @@ function gui.input(screen, cx, cy, str, hidden, backgroundColor, default, disabl
     end
 end
 
-function gui.contentPos(screen, posX, posY, strs)
+function gui.contextPos(screen, posX, posY, strs)
     local gpu = graphic.findGpu(screen)
     local rx, ry = gpu.getResolution()
     local drawStrs = gui.contextStrs(strs)
@@ -599,7 +599,7 @@ end
 function gui.context(screen, posX, posY, strs, active)
     local gpu = graphic.findGpu(screen)
     local drawStrs = gui.contextStrs(strs)
-    local posX, posY, sizeX, sizeY = gui.contentPos(screen, posX, posY, drawStrs)
+    local posX, posY, sizeX, sizeY = gui.contextPos(screen, posX, posY, drawStrs)
     local sep = string.rep(gui_container.chars.splitLine, sizeX)
 
     local window = graphic.createWindow(screen, posX, posY, sizeX, sizeY)
@@ -662,7 +662,7 @@ function gui.context(screen, posX, posY, strs, active)
 end
 
 function gui.contextAuto(screen, posX, posY, strs, active)
-    local posX, posY, sizeX, sizeY = gui.contentPos(screen, posX, posY, strs)
+    local posX, posY, sizeX, sizeY = gui.contextPos(screen, posX, posY, strs)
     local clear = graphic.screenshot(screen, posX, posY, sizeX + 2, sizeY + 1)
     local result = {gui.context(screen, posX, posY, strs, active)}
     clear()
@@ -719,8 +719,12 @@ function gui.select(screen, cx, cy, label, actions, scroll, noCloseButton)
     local sel
 
     local function drawScrollBar()
-        window:fill(50, 2, 1, 14, colors.gray, 0, " ")
-        window:set(50, math.round(math.map(scroll, 0, #actions - 1, 2, 15)), colors.white, 0, " ")
+        window:fill(window.sizeX, 2, 1, window.sizeY - 2, colors.gray, 0, " ")
+        if #actions == 1 then
+            window:set(window.sizeX, 2, colors.white, 0, " ")
+        else
+            window:set(window.sizeX, math.round(math.map(scroll, 0, #actions - 1, 2, window.sizeY - 1)), colors.white, 0, " ")
+        end
     end
 
     local function redrawButton()
@@ -991,7 +995,7 @@ function gui.selectcomponent(screen, cx, cy, types, allowAutoConfirm, control, c
                         "view api"
                     }
                     local px, py = checkWindow:toRealPos(eventData[3], eventData[4])
-                    local x, y, sx, sy = gui.contentPos(screen, px, py, strs)
+                    local x, y, sx, sy = gui.contextPos(screen, px, py, strs)
                     local clear = graphic.screenshot(screen, x, y, sx + 2, sy + 1)
                     local _, action = gui.context(screen, x, y, strs)
                     clear()

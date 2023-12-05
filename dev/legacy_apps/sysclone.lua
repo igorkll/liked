@@ -13,7 +13,7 @@ local strs = {
     "  likeOS (core only)",
     "  full cloning of the system  "
 }
-local posX, posY, sizeX, sizeY = gui.contentPos(screen, posX, posY, strs)
+local posX, posY, sizeX, sizeY = gui.contextPos(screen, posX, posY, strs)
 local clear = graphic.screenshot(screen, posX, posY, sizeX + 2, sizeY + 1)
 local str2, num2 = gui.context(screen, posX, posY, strs, {true, true, true, true, not registry.banSystemCloning})
 clear()

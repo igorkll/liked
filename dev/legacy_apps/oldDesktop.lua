@@ -885,7 +885,7 @@ local function doIcon(windowEventData)
                             local posX, posY = window:toRealPos(windowEventData[3], windowEventData[4])
 
                             --posX, posY = findPos(posX, posY, 23, screenshotY, rx, ry)
-                            local posX, posY, sizeX, sizeY = gui.contentPos(screen, posX, posY, strs)
+                            local posX, posY, sizeX, sizeY = gui.contextPos(screen, posX, posY, strs)
                             local clear = screenshot(screen, posX, posY, sizeX + 2, sizeY + 1)
                             local str, num = gui.context(screen, posX, posY,
                             strs, active)
@@ -1016,7 +1016,7 @@ local function doIcon(windowEventData)
 
                             local posX, posY = window:toRealPos(windowEventData[3], windowEventData[4])
                             --posX, posY = findPos(posX, posY, 23, screenshotY, rx, ry)
-                            local posX, posY, sizeX, sizeY = gui.contentPos(screen, posX, posY, strs)
+                            local posX, posY, sizeX, sizeY = gui.contextPos(screen, posX, posY, strs)
                             local clear = screenshot(screen, posX, posY, sizeX + 2, sizeY + 1)
                             local str, num = gui.context(screen, posX, posY, strs, active)
                             clear()
@@ -1156,7 +1156,7 @@ local function doIcon(windowEventData)
 
                             local posX, posY = window:toRealPos(windowEventData[3], windowEventData[4])
                             --posX, posY = findPos(posX, posY, 23, #strs + 1, rx, ry)
-                            local posX, posY, sizeX, sizeY = gui.contentPos(screen, posX, posY, strs)
+                            local posX, posY, sizeX, sizeY = gui.contextPos(screen, posX, posY, strs)
                             local clear = screenshot(screen, posX, posY, sizeX + 2, sizeY + 1)
                             local str, num = gui.context(screen, posX, posY,
                             strs, active)
@@ -1298,7 +1298,7 @@ local function doIcon(windowEventData)
                 end
             end
 
-            local posX, posY, sizeX, sizeY = gui.contentPos(screen, posX, posY, strs)
+            local posX, posY, sizeX, sizeY = gui.contextPos(screen, posX, posY, strs)
             local clear = screenshot(screen, posX, posY, sizeX + 2, sizeY + 1)
             local str, num = gui.context(screen, posX, posY, strs, actives)
             clear()

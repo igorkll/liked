@@ -45,6 +45,8 @@
 /system/bin/shell.lua
 /system/bin/unpackArchive.lua
 /system/calls/gui_filepicker.lua
+/system/firmware/luabios/code.lua
+/system/firmware/luabios/label.txt
 /system/icons/afpx.t2p
 /system/icons/app.t2p
 /system/icons/badicon.t2p
@@ -76,6 +78,7 @@
 /system/lib/autorun.lua
 /system/lib/braille.lua
 /system/lib/draw.lua
+/system/lib/eeprom.lua
 /system/lib/format.lua
 /system/lib/gui.lua
 /system/lib/gui_container.lua

@@ -7,6 +7,7 @@ local component = require("component")
 local liked = require("liked")
 local bootloader = require("bootloader")
 local programs = require("programs")
+local eepromlib = require("eeprom")
 
 local colors = gui_container.colors
 
@@ -37,6 +38,7 @@ local dumpDataButton = layout:createButton(20, 13, 16, 1, nil, nil, "Dump Data",
 local editDataButton = layout:createButton(20, 15, 16, 1, nil, nil, "Edit Data", true)
 local wipeDataButton = layout:createButton(20 + 18, 13, 16, 1, nil, nil, "Wipe Data", true)
 local makeReadOnlyButton = layout:createButton(20 + 18, 11, 16, 1, nil, nil, "Make R/O", true)
+local flashFirmware = layout:createButton(20 + 18, 15, 16, 1, nil, nil, "Flash Firmware", true)
 
 local eepromMissingString = "EEPROM IS MISSING"
 local storageRo = "storage is readonly"
@@ -97,6 +99,19 @@ function flashButton:onClick()
             if path then
                 flashCode(assert(fs.readFile(path)))
             end
+        end
+
+        gRedraw()
+        redraw()
+    end
+end
+
+function flashFirmware:onClick()
+    if component.eeprom then
+        if storageRoState then
+            gui.warn(screen, nil, nil, storageRo)
+        elseif gui.pleaseCharge(screen, 20, "flash") then
+            eepromlib.menu(screen)
         end
 
         gRedraw()

@@ -145,7 +145,7 @@ function objclass:uploadEvent(eventData)
                 if not self.th then
                     self.th = thread.create(function ()
                         local x, y = self.gui.window:toRealPos(self.x + 1, self.y + 1)
-                        local px, py, sx, sy = gui.contentPos(self.gui.window.screen, x, y, gui.contextStrs(self.strs))
+                        local px, py, sx, sy = gui.contextPos(self.gui.window.screen, x, y, gui.contextStrs(self.strs))
                         local clear = graphic.screenshot(self.gui.window.screen, px, py, sx + 2, sy + 1)
                         local oldControlLock = self.gui.controlLock
                         self.gui.controlLock = true
