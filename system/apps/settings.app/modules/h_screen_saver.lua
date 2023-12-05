@@ -72,7 +72,7 @@ local function draw(set)
     selectWindow:set(18, 3, colors.black, colors.white, "screensaver timer: ")
     selectWindow:set(18 + 20, 3, colors.gray, colors.white, "-")
     selectWindow:set(18 + 6 + 20, 3, colors.gray, colors.white, "+")
-    selectWindow:set(18 + 2 + 20, 3, colors.black, colors.white, tostring(registry.screenSaverTimer or 0))
+    selectWindow:set(18 + 2 + 20, 3, colors.black, colors.white, tostring(registry.screenSaverTimer or "OFF"))
 
     if set then
         if selected == 1 then

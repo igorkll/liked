@@ -34,7 +34,7 @@ end
 local rootfs = fs.get("/")
 local maxDepth = graphic.findGpu(screen).maxDepth()
 
-local barTh, barRedraw = liked.drawUpBarTask(screen, true, colors.gray)
+local barTh, barRedraw = liked.drawUpBarTask(screen, true, colors.gray, -2)
 
 local function exec(...)
     barTh:suspend()
@@ -374,7 +374,7 @@ local function appInfo(data)
     local function ldraw()
         statusWindow:clear(colors.gray)
         statusWindow:set(3, 1, colors.gray, colors.white, title)
-        statusWindow:set(statusWindow.sizeX, statusWindow.sizeY, colors.red, colors.white, "X")
+        statusWindow:set(statusWindow.sizeX - 2, statusWindow.sizeY, colors.red, colors.white, " X ")
         statusWindow:set(1, statusWindow.sizeY, colors.red, colors.white, "<")
         barRedraw()
 
@@ -400,7 +400,7 @@ local function appInfo(data)
             if statusWindowEventData[3] == 1 and statusWindowEventData[4] == statusWindow.sizeY then
                 break
             end
-            if statusWindowEventData[3] == statusWindow.sizeX and statusWindowEventData[4] == statusWindow.sizeY then
+            if statusWindowEventData[3] >= statusWindow.sizeX - 2 and statusWindowEventData[4] == statusWindow.sizeY then
                 return true
             end
         end
@@ -436,7 +436,7 @@ local appLabels = {}
 
 local function drawStatus()
     statusWindow:clear(colors.gray)
-    statusWindow:set(statusWindow.sizeX, statusWindow.sizeY, colors.red, colors.white, "X")
+    statusWindow:set(statusWindow.sizeX - 2, statusWindow.sizeY, colors.red, colors.white, " X ")
     if not registry.disableCustomMarketUrls then
         statusWindow:set(1, statusWindow.sizeY, colors.orange, colors.white, "CUSTOM")
         statusWindow:set(8, 1, colors.gray, colors.white, title)
@@ -538,7 +538,7 @@ while true do
     end
 
     if statusWindowEventData[1] == "touch" then
-        if statusWindowEventData[3] == statusWindow.sizeX and statusWindowEventData[4] == statusWindow.sizeY then
+        if statusWindowEventData[3] >= statusWindow.sizeX - 2 and statusWindowEventData[4] == statusWindow.sizeY then
             break
         elseif statusWindowEventData[3] <= 6 and statusWindowEventData[4] == statusWindow.sizeY and not registry.disableCustomMarketUrls then
             exec("edit", screen, nickname, customPath)
@@ -553,17 +553,22 @@ while true do
     end
 
     if windowEventData[1] == "touch" then
+        local endapp
         for index, value in ipairs(appLabels) do
             local ret = value.tick(eventData)
             if ret == false then
-                gui_status(screen, nil, nil, "loading...")
+                gui.status(screen, nil, nil, "loading...")
                 if appInfo(appsTbl[index]) then
+                    endapp = true
                     break
                 end
                 draw(true)
             elseif ret then
                 draw(true)
             end
+        end
+        if endapp then
+            break
         end
     elseif windowEventData[1] == "scroll" then
         if windowEventData[5] > 0 then

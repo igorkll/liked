@@ -18,7 +18,7 @@ local rx, ry = gpu.getResolution()
 local path = paths.path(calls.call("getPath"))
 local modulesPath = paths.concat(path, "modules")
 
-local upTask, upRedraw = liked.drawUpBarTask(screen, true, colors.gray)
+local upTask, upRedraw = liked.drawFullUpBarTask(screen, "Settings", nil, nil, true)
 
 ------------------------------------
 
@@ -36,13 +36,6 @@ for i, file in ipairs(fs.list(modulesPath) or {}) do
         table.insert(modules, file)
     end
 end
-
-local function redrawStatus()
-    statusWindow:clear(colors.gray)
-    statusWindow:set(statusWindow.sizeX, 1, colors.red, colors.white, "X")
-    statusWindow:set(2, 1, colors.gray, colors.white, "Settings")
-end
-redrawStatus()
 
 local currentModule, moduleEnd
 local function draw(noReload)
@@ -73,7 +66,6 @@ local function draw(noReload)
 
     local env = bootloader.createEnv()
     env.gRedraw = function ()
-        redrawStatus()
         upRedraw()
         draw(true)
     end
@@ -128,7 +120,7 @@ while true do
     end
 
     if statusWindowEventData[1] == "touch" then
-        if statusWindowEventData[4] == 1 and statusWindowEventData[3] == statusWindow.sizeX then
+        if statusWindowEventData[4] == 1 and statusWindowEventData[3] >= statusWindow.sizeX - 2 then
             if moduleEnd then
                 moduleEnd()
             end

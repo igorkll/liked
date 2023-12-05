@@ -1,3 +1,4 @@
+local fs = require("filesystem")
 local thread = require("thread")
 local event = require("event")
 local graphic = require("graphic")
@@ -21,20 +22,23 @@ function screensaver.current(screen)
 end
 
 function screensaver.start(screen, path)
-    local clear = graphic.screenshot(screen)
-    local th = thread.createBackground(programs.load(path or require("gui_container").screenSaverPath), screen)
-    th.parentData.screen = screen
-    th:resume()
-    event.yield()
-    event.listen(nil, function (eventName, uuid)
-        if uuid == screen and (eventName == "touch" or eventName == "drag" or eventName == "scroll") then
-            current[screen] = nil
-            th:kill()
-            clear()
-            return false
-        end
-    end)
-    current[screen] = th
+    local lpath = path or require("gui_container").screenSaverPath
+    if lpath and fs.exists(lpath) then
+        local clear = graphic.screenshot(screen)
+        local th = thread.createBackground(programs.load(lpath), screen)
+        th.parentData.screen = screen
+        th:resume()
+        event.yield()
+        event.listen(nil, function (eventName, uuid)
+            if uuid == screen and (eventName == "touch" or eventName == "drag" or eventName == "scroll") then
+                current[screen] = nil
+                th:kill()
+                clear()
+                return false
+            end
+        end)
+        current[screen] = th
+    end
 end
 
 function screensaver.waitStart(screen, path)

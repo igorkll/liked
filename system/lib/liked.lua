@@ -503,9 +503,10 @@ end
 
 --------------------------------------------------------
 
-function liked.raw_drawUpBarTask(method, screen, withoutFill, bgcolor)
+function liked.raw_drawUpBarTask(method, screen, ...)
+    local tbl = {...}
     local function redraw()
-        liked.drawUpBar(screen, withoutFill, bgcolor)
+        liked.drawUpBar(screen, table.unpack(tbl))
         graphic.updateFlag(screen)
     end
     local th = method(function ()
@@ -518,12 +519,12 @@ function liked.raw_drawUpBarTask(method, screen, withoutFill, bgcolor)
     return th, redraw
 end
 
-function liked.drawUpBarTask(screen, withoutFill, bgcolor)
-    return liked.raw_drawUpBarTask(require("thread").create, screen, withoutFill, bgcolor)
+function liked.drawUpBarTask(...)
+    return liked.raw_drawUpBarTask(require("thread").create, ...)
 end
 
-function liked.drawUpBarTaskBg(screen, withoutFill, bgcolor)
-    return liked.raw_drawUpBarTask(require("thread").createBackground, screen, withoutFill, bgcolor)
+function liked.drawUpBarTaskBg(...)
+    return liked.raw_drawUpBarTask(require("thread").createBackground, ...)
 end
 
 
