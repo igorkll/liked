@@ -4,6 +4,7 @@ import sys
 import traceback
 import math
 from collections import Counter
+import random
 
 """
 colors = [
@@ -129,9 +130,24 @@ def hex_to_rgb(hex_color):
 
     return red, green, blue
 
+def color_similarity2(color1, color2):
+    # Извлекаем компоненты цвета
+    r1, g1, b1 = color1
+    r2, g2, b2 = color2
+
+    # Вычисляем евклидово расстояние между компонентами цвета
+    distance = math.sqrt((r1 - r2)**2 + (g1 - g2)**2 + (b1 - b2)**2)
+
+    # Нормализуем расстояние к диапазону [0, 1]
+    normalized_distance = distance / math.sqrt(255**2 + 255**2 + 255**2)
+
+    # Чем меньше нормализованное расстояние, тем более похожи цвета
+    similarity = 1 - normalized_distance
+    return similarity
+
 def parse_image_pixelwise(image_path):
     # Загрузка изображения
-    image = cv2.imread(image_path)
+    image = cv2.imread(image_path, cv2.IMREAD_UNCHANGED)
 
     # Проверка на успешную загрузку изображения
     if image is None:
@@ -158,20 +174,32 @@ def parse_image_pixelwise(image_path):
             for x in range(0, width - block_width + 1, block_width):
                 # Извлечение блока изображения размером 4x2
                 block = image[y:y + block_height, x:x + block_width]
-                
                 # print(make_braille(outputArray), end='')
 
                 dominant_colors = find_dominant_colors(block)
 
                 print(dominant_colors)
-                back = find_closest_color(convert_to_24bit(dominant_colors[0][0]), colors)
-                fore = 0
+                back, backcol, backnonused = find_closest_color(convert_to_24bit(dominant_colors[0][0]), colors), dominant_colors[0][0], False
+                fore, forecol, forenonused = 0, (0, 0, 0, 255), False
                 if len(dominant_colors) > 1:
                     fore = find_closest_color(convert_to_24bit(dominant_colors[1][0]), colors)
+                    forecol = dominant_colors[1][0]
                 else:
                     fore = back
+                    forecol = backcol
 
-                if back == 0 and fore == 0:
+                if backcol[3] < 200:
+                    backnonused = True
+                    back = 3
+
+                if forecol[3] < 200:
+                    forenonused = True
+                    fore = 3
+
+                if backnonused and forenonused:
+                    back = 0
+                    fore = 0
+                elif back == 0 and fore == 0:
                     fore = 15
 
                 outputArray = []
@@ -179,7 +207,16 @@ def parse_image_pixelwise(image_path):
                     outputArray.append([])
                     for color in line:
                         # formattedColor = convert_rgb_to_24bit(color[2], color[1], color[0])
-                        outputArray[-1].append(color_similarity((hex_to_rgb(colors[back])), (hex_to_rgb(colors[fore])), (color[2], color[1], color[0])) > 0.5)
+                        if forenonused and backnonused:
+                            outputArray[-1].append(False)
+                        elif forenonused:
+                            # outputArray[-1].append(color_similarity2((hex_to_rgb(colors[back])), (color[2], color[1], color[0])) > 0.5)
+                            outputArray[-1].append(color[3] >= 200)
+                        elif backnonused:
+                            # outputArray[-1].append(color_similarity2((hex_to_rgb(colors[fore])), (color[2], color[1], color[0])) > 0.5)
+                            outputArray[-1].append(color[3] < 200)
+                        else:
+                            outputArray[-1].append(color_similarity((hex_to_rgb(colors[back])), (hex_to_rgb(colors[fore])), (color[2], color[1], color[0])) > 0.5)
 
                 char = make_braille(outputArray)
                 print(back, fore, char)
@@ -192,7 +229,8 @@ if __name__ == "__main__":
     try:
         image_path = False
         if len(sys.argv) < 2:
-            image_path = "D:\\Users\\user\\Documents\\GitHub\liked\\tools\\test.png"
+            # image_path = "D:\\Users\\user\\Documents\\GitHub\liked\\tools\\test.png"
+            pass
         else:
             image_path = sys.argv[1]
         parse_image_pixelwise(image_path)
