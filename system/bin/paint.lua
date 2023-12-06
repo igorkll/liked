@@ -129,7 +129,16 @@ local function drawPixel(x, y, pixel)
     y = y + imageOffsetY
     if x < 1 or x > mainWindow.sizeX or y < 1 or y > mainWindow.sizeY then return end
     if pixel[1] ~= 0 or pixel[2] ~= 0 then
-        mainWindow:set(x, y, indexsColors[pixel[1] + 1], indexsColors[pixel[2] + 1], pixel[3])
+        local bg, fg = indexsColors[pixel[1] + 1], indexsColors[pixel[2] + 1]
+        if pixel[4] ~= pixel[5] then
+            if pixel[4] then
+                bg = imagelib.t3colors[pixel[4]]
+            end
+            if pixel[5] then
+                fg = imagelib.t3colors[pixel[5]]
+            end
+        end
+        mainWindow:set(x, y, bg, fg, pixel[3])
     else
         mainWindow:set(x, y, colors.black, colors.lightGray, "░")
     end
@@ -139,7 +148,11 @@ local function raw_save(path)
     local buffer = ""
     buffer = buffer .. string.char(image.sizeX)
     buffer = buffer .. string.char(image.sizeY)
-    buffer = buffer .. string.rep(string.char(0), 8)
+    if image[1][1][4] then
+        buffer = buffer .. "3" .. string.rep(string.char(0), 7)
+    else
+        buffer = buffer .. string.rep(string.char(0), 8)
+    end
 
     local writebit = calls.load("writebit")
     local readbit = calls.load("readbit")
@@ -152,6 +165,10 @@ local function raw_save(path)
                 bg = writebit(bg, i + 4, readbit(pixel[2], i))
             end
             buffer = buffer .. string.char(bg)
+            if image[1][1][4] then
+                buffer = buffer .. string.char(pixel[4] or 0)
+                buffer = buffer .. string.char(pixel[5] or 0)
+            end
             buffer = buffer .. string.char(#pixel[3])
             buffer = buffer .. pixel[3]
         end
@@ -211,7 +228,8 @@ local function load()
 
     local sizeX = string.byte(read(1))
     local sizeY = string.byte(read(1))
-    read(8)
+    local t3paletteSupport = read(1) == "3"
+    read(7)
 
     image.sizeX = sizeX
     image.sizeY = sizeY
@@ -221,6 +239,19 @@ local function load()
         image[cy] = {}
         for cx = 1, sizeX do
             colorByte      = string.byte(read(1))
+            local fullBack, fullFore
+            if t3paletteSupport then
+                if gpu.getDepth() == 8 then
+                    fullBack = string.byte(read(1))
+                    fullFore = string.byte(read(1))
+                    if fullBack == fullFore then
+                        fullBack = nil
+                        fullFore = nil
+                    end
+                else
+                    read(2)
+                end
+            end
             countCharBytes = string.byte(read(1))
 
             background = 
@@ -240,7 +271,7 @@ local function load()
                 char = " "
             end
 
-            image[cy][cx] = {background, foreground, char}
+            image[cy][cx] = {background, foreground, char, fullBack, fullFore}
         end
     end
 
@@ -510,6 +541,7 @@ while true do
                             pixel[2] = 15
                             pixel[3] = " "
                         end
+                        pixel[4], pixel[5] = nil, nil
                         drawPixel(px + (i - 1), py, pixel)
                     end
                 end
