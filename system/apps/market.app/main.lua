@@ -34,6 +34,8 @@ end
 local rootfs = fs.get("/")
 local maxDepth = graphic.findGpu(screen).maxDepth()
 
+local statusWindow = graphic.createWindow(screen, 1, 1, rx, 1)
+statusWindow:clear(colors.gray)
 local barTh, barRedraw = liked.drawUpBarTask(screen, true, colors.gray, -2)
 
 local function exec(...)
@@ -57,11 +59,7 @@ if netver > liked.version() then
     return
 end
 
-------------------------------------
-
-local statusWindow = graphic.createWindow(screen, 1, 1, rx, 1)
 local window = graphic.createWindow(screen, 1, 2, rx, ry - 1)
-
 local searchRead = window:readNoDraw(2, 1, window.sizeX - 2, colors.brown, colors.white, "search: ", nil, nil, true)
 
 ------------------------------------
@@ -253,7 +251,7 @@ local function applicationLabel(data, x, y)
         end
 
         if (data.dualboot and registry.data.disableDualboot) or (data.executer and registry.data.disableCustomPrograms) then
-            supportErr = "it is not possible to install dualboot on your liked edition"
+            supportErr = "it is not possible to install this on your \"liked\" edition"
         end
     end
 

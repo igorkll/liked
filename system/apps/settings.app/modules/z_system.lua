@@ -96,7 +96,7 @@ end
 
 layout:createText(2, 2, colors.white, "current version: " .. currentVersion)
 layout:createText(2, 4, colors.white, "current branch : " .. branch)
-layout:createText(2, 5, colors.white, "current   mode : " .. currentMode)
+layout:createText(2, 5, colors.white, "current edition: " .. currentMode)
 
 local lastVersionText = layout:createText(2, 3, colors.white, "last    version: loading...")
 local systemWeightLabel = layout:createText(2, 6, colors.white, "system  weight : calculation...")
