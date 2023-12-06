@@ -178,8 +178,8 @@ def parse_image_pixelwise(image_path):
                 for line in block:
                     outputArray.append([])
                     for color in line:
-                        formattedColor = convert_rgb_to_24bit(color[2], color[1], color[0])
-                        outputArray[-1].append(color_similarity((hex_to_rgb(back)), (hex_to_rgb(fore)), (hex_to_rgb(formattedColor))) > 0.5)
+                        # formattedColor = convert_rgb_to_24bit(color[2], color[1], color[0])
+                        outputArray[-1].append(color_similarity((hex_to_rgb(colors[back])), (hex_to_rgb(colors[fore])), (color[2], color[1], color[0])) > 0.5)
 
                 char = make_braille(outputArray)
                 print(back, fore, char)
@@ -192,7 +192,7 @@ if __name__ == "__main__":
     try:
         image_path = False
         if len(sys.argv) < 2:
-            image_path = "D:\\Users\\user\\Documents\\GitHub\liked\\tools\\settings.png"
+            image_path = "D:\\Users\\user\\Documents\\GitHub\liked\\tools\\test.png"
         else:
             image_path = sys.argv[1]
         parse_image_pixelwise(image_path)
@@ -201,5 +201,4 @@ if __name__ == "__main__":
         # Обработка исключения и вывод сообщения
         print(f"Произошла ошибка: {e}")
         traceback.print_exc()
-
-    while True: pass
+        while True: pass
