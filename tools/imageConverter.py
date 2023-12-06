@@ -2,8 +2,10 @@ import cv2
 import os
 import sys
 import traceback
+import math
 from collections import Counter
 
+"""
 colors = [
     0xffffff,
     0xffcc33,
@@ -20,6 +22,26 @@ colors = [
     0x663300,
     0x336600,
     0xff3333,
+    0x000000
+]
+"""
+
+colors = [
+    0xffffff,
+    0xF2B233,
+    0xE57FD8,
+    0x99B2F2,
+    0xDEDE6C,
+    0x7FCC19,
+    0xF2B2CC,
+    0x4C4C4C,
+    0x999999,
+    0x4C99B2,
+    0xB266E5,
+    0x3366CC,
+    0x7F664C,
+    0x57A64E,
+    0xCC4C4C,
     0x000000
 ]
 
@@ -83,6 +105,30 @@ def packNums(num1, num2):
     # Упаковка двух чисел в один байт
     return (num1 << 4) | num2
 
+def color_similarity(color1, color2, target_color):
+    def euclidean_distance(c1, c2):
+        return math.sqrt(sum((a - b) ** 2 for a, b in zip(c1, c2)))
+
+    distance1 = euclidean_distance(color1, target_color)
+    distance2 = euclidean_distance(color2, target_color)
+
+    total_distance = distance1 + distance2
+
+    # Предотвращение деления на ноль
+    if total_distance == 0:
+        return 0.5
+
+    coefficient = 1 - (distance1 / total_distance)
+    return coefficient
+
+def hex_to_rgb(hex_color):
+    # Получаем отдельные компоненты цвета
+    red = (hex_color >> 16) & 0xFF
+    green = (hex_color >> 8) & 0xFF
+    blue = hex_color & 0xFF
+
+    return red, green, blue
+
 def parse_image_pixelwise(image_path):
     # Загрузка изображения
     image = cv2.imread(image_path)
@@ -112,21 +158,35 @@ def parse_image_pixelwise(image_path):
             for x in range(0, width - block_width + 1, block_width):
                 # Извлечение блока изображения размером 4x2
                 block = image[y:y + block_height, x:x + block_width]
+                
+                # print(make_braille(outputArray), end='')
+
+                dominant_colors = find_dominant_colors(block)
+
+                print(dominant_colors)
+                back = find_closest_color(convert_to_24bit(dominant_colors[0][0]), colors)
+                fore = 0
+                if len(dominant_colors) > 1:
+                    fore = find_closest_color(convert_to_24bit(dominant_colors[1][0]), colors)
+                else:
+                    fore = back
+
+                if back == 0 and fore == 0:
+                    fore = 15
+
                 outputArray = []
                 for line in block:
                     outputArray.append([])
                     for color in line:
                         formattedColor = convert_rgb_to_24bit(color[2], color[1], color[0])
-                        outputArray[-1].append(color[0] > 128)
-                # print(make_braille(outputArray), end='')
+                        outputArray[-1].append(color_similarity((hex_to_rgb(back)), (hex_to_rgb(fore)), (hex_to_rgb(formattedColor))) > 0.5)
 
-                dominant_colors = find_dominant_colors(block)
-                back, fore = find_closest_color(convert_to_24bit(dominant_colors[0][0]), colors), find_closest_color(convert_to_24bit(dominant_colors[1][0]), colors)
                 char = make_braille(outputArray)
+                print(back, fore, char)
                 file.write(bytes([packNums(back, fore)]))
                 file.write(bytes([len(char.encode('utf-8'))]))
                 file.write(char.encode('utf-8'))
-            print("")
+            # print("")
 
 if __name__ == "__main__":
     try:
