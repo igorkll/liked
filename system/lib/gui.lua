@@ -29,10 +29,10 @@ local smartShadowsColors = {
     colorslib.black,     --8)  gray
     colorslib.gray,      --9)  lightGray
     colorslib.blue,      --10) cyan
-    colorslib.brown,     --11) purple
+    colorslib.blue,      --11) purple
     colorslib.brown,     --12) blue
     colorslib.black,     --13) brown
-    colorslib.brown,     --14) green
+    colorslib.gray,      --14) green
     colorslib.brown,     --15) red
     colorslib.gray       --16) black
 }
@@ -719,7 +719,7 @@ function gui.select(screen, cx, cy, label, actions, scroll, noCloseButton)
     local sel
 
     local function drawScrollBar()
-        window:fill(window.sizeX, 2, 1, window.sizeY - 2, colors.gray, 0, " ")
+        window:fill(window.sizeX, 2, 1, window.sizeY - 2, colors.brown, 0, " ")
         if #actions == 1 then
             window:set(window.sizeX, 2, colors.white, 0, " ")
         else

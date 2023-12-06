@@ -1,1 +1,1 @@
-EEPROM (Lua Bios)
+EEPROM (Lua BIOS)
