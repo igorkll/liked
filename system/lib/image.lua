@@ -82,6 +82,8 @@ function image.draw(screen, path, x, y, wallpaperMode) --wallpaperMode заст�
 
             if not oldFore then oldFore = foreground end
             if not oldBack then oldBack = background end
+            if not oldForeFull then oldForeFull = fullFore end
+            if not oldBackFull then oldBackFull = fullBack end
 
             local char = read(countCharBytes)
 
