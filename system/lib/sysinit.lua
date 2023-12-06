@@ -71,18 +71,11 @@ function sysinit.initScreen(screen)
         my = 25
     end
 
-    --вся эта хрень нужна для коректной инициализации чтобы экран не мигал при загрузке
-    gpu.setBackground(0x000000)
-    gpu.setForeground(0xffffff)
-    gpu.fill(1, 1, mx, my, " ")
-    graphic.forceUpdate(screen)
-
-    graphic.setDepth(screen, 1)
     gpu.setBackground(0x000000)
     gpu.setForeground(0xffffff)
     graphic.setResolution(screen, mx, my)
     gpu.fill(1, 1, mx, my, " ")
-    graphic.setDepth(screen, graphic.maxDepth(screen))
+    graphic.forceUpdate(screen)
     sysinit.applyPalette(sysinit.initPalPath, screen)
 end
 
