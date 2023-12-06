@@ -71,12 +71,16 @@ function sysinit.initScreen(screen)
         my = 25
     end
 
-    gpu.setBackground(0x000000)
-    gpu.setForeground(0xffffff)
     graphic.setResolution(screen, mx, my)
+    graphic.setDepth(screen, 1)
+    gpu.setBackground(0)
     gpu.fill(1, 1, mx, my, " ")
+    graphic.setDepth(screen, graphic.maxDepth(screen))
     graphic.forceUpdate(screen)
     sysinit.applyPalette(sysinit.initPalPath, screen)
+    gpu.setBackground(0)
+    gpu.fill(1, 1, mx, my, " ")
+    graphic.forceUpdate(screen)
 end
 
 function sysinit.runShell(screen, customShell)
