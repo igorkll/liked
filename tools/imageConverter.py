@@ -218,7 +218,7 @@ def parse_image_pixelwise(image_path):
                     for color in line:
                         # formattedColor = convert_rgb_to_24bit(color[2], color[1], color[0])
                         if bindColors:
-                            outputArray[-1].append(False)
+                            outputArray[-1].append(True)
                         elif forenonused and backnonused:
                             outputArray[-1].append(False)
                         elif forenonused:
@@ -233,8 +233,8 @@ def parse_image_pixelwise(image_path):
                 char = make_braille(outputArray)
                 print(back, fore, char)
                 file.write(bytes([packNums(back, fore)]))
-                file.write(bytes([fullBack]))
                 file.write(bytes([fullFore]))
+                file.write(bytes([fullBack]))
                 file.write(bytes([len(char.encode('utf-8'))]))
                 file.write(char.encode('utf-8'))
             # print("")
