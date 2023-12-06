@@ -63,10 +63,6 @@ function image.draw(screen, path, x, y, wallpaperMode) --wallpaperMode заст�
                 if gpu.getDepth() == 8 then
                     fullBack = image.t3colors[string.byte(read(1)) + 1]
                     fullFore = image.t3colors[string.byte(read(1)) + 1]
-                    if fullBack == fullFore then
-                        fullBack = nil
-                        fullFore = nil
-                    end
                 else
                     read(2)
                 end

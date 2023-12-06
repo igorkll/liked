@@ -190,8 +190,6 @@ def parse_image_pixelwise(image_path):
                     fore = back
                     forecol = backcol
 
-                bindColors = False
-
                 if backcol[3] < 200:
                     backnonused = True
                     back = 3
@@ -208,18 +206,13 @@ def parse_image_pixelwise(image_path):
 
                 fullBack = find_closest_color(convert_to_24bit(backcol), colors3t)
                 fullFore = find_closest_color(convert_to_24bit(forecol), colors3t)
-                if fullBack == fullFore:
-                    bindColors = True
-                    fullFore = 55
 
                 outputArray = []
                 for line in block:
                     outputArray.append([])
                     for color in line:
                         # formattedColor = convert_rgb_to_24bit(color[2], color[1], color[0])
-                        if bindColors:
-                            outputArray[-1].append(True)
-                        elif forenonused and backnonused:
+                        if forenonused and backnonused:
                             outputArray[-1].append(False)
                         elif forenonused:
                             # outputArray[-1].append(color_similarity2((hex_to_rgb(colors[back])), (color[2], color[1], color[0])) > 0.5)

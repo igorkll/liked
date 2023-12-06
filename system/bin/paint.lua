@@ -130,13 +130,11 @@ local function drawPixel(x, y, pixel)
     if x < 1 or x > mainWindow.sizeX or y < 1 or y > mainWindow.sizeY then return end
     if pixel[1] ~= 0 or pixel[2] ~= 0 then
         local bg, fg = indexsColors[pixel[1] + 1], indexsColors[pixel[2] + 1]
-        if pixel[4] ~= pixel[5] then
-            if pixel[4] then
-                bg = imagelib.t3colors[pixel[4]]
-            end
-            if pixel[5] then
-                fg = imagelib.t3colors[pixel[5]]
-            end
+        if pixel[4] then
+            bg = imagelib.t3colors[pixel[4]]
+        end
+        if pixel[5] then
+            fg = imagelib.t3colors[pixel[5]]
         end
         mainWindow:set(x, y, bg, fg, pixel[3])
     else
@@ -244,10 +242,6 @@ local function load()
                 if gpu.getDepth() == 8 then
                     fullBack = string.byte(read(1))
                     fullFore = string.byte(read(1))
-                    if fullBack == fullFore then
-                        fullBack = nil
-                        fullFore = nil
-                    end
                 else
                     read(2)
                 end
