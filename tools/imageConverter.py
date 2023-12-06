@@ -2,6 +2,7 @@ import cv2
 import os
 import sys
 import traceback
+from collections import Counter
 
 colors = [
     0xffffff,
@@ -22,10 +23,13 @@ colors = [
     0x000000
 ]
 
-def convert_bgr_to_24bit(r, g, b):
+def convert_rgb_to_24bit(r, g, b):
     # Объединение значений B, G и R в 24-битное число
     rgb_value = (r << 16) | (g << 8) | b
     return rgb_value
+
+def convert_to_24bit(col):
+    return convert_rgb_to_24bit(col[2], col[1], col[0])
 
 def make_braille(tbl):
     a, b, c, d, e, f, g, h = tbl[0][0], tbl[1][0], tbl[2][0], tbl[3][0], tbl[0][1], tbl[1][1], tbl[2][1], tbl[3][1]
@@ -71,6 +75,14 @@ def find_dominant_colors(color_matrix):
 
     return dominant_colors
 
+def packNums(num1, num2):
+    # Проверка, что числа находятся в диапазоне от 0 до 15
+    if not (0 <= num1 <= 15) or not (0 <= num2 <= 15):
+        raise ValueError("Числа должны быть в диапазоне от 0 до 15")
+
+    # Упаковка двух чисел в один байт
+    return (num1 << 4) | num2
+
 def parse_image_pixelwise(image_path):
     # Загрузка изображения
     image = cv2.imread(image_path)
@@ -94,7 +106,7 @@ def parse_image_pixelwise(image_path):
 
         file.write((width // block_width).to_bytes(1, 'little'))
         file.write((height // block_height).to_bytes(1, 'little'))
-        file.write("\0\0\0\0\0\0\0\0")
+        file.write(b"\0\0\0\0\0\0\0\0")
 
         for y in range(0, height - block_height + 1, block_height):
             for x in range(0, width - block_width + 1, block_width):
@@ -104,15 +116,16 @@ def parse_image_pixelwise(image_path):
                 for line in block:
                     outputArray.append([])
                     for color in line:
-                        formattedColor = convert_bgr_to_24bit(color[2], color[1], color[0])
+                        formattedColor = convert_rgb_to_24bit(color[2], color[1], color[0])
                         outputArray[-1].append(color[0] > 128)
                 # print(make_braille(outputArray), end='')
 
                 dominant_colors = find_dominant_colors(block)
-                back, fore = find_closest_color(convert_bgr_to_24bit(dominant_colors[0]), colors), find_closest_color(convert_bgr_to_24bit(dominant_colors[1]), colors)
+                back, fore = find_closest_color(convert_to_24bit(dominant_colors[0][0]), colors), find_closest_color(convert_to_24bit(dominant_colors[1][0]), colors)
                 char = make_braille(outputArray)
-                print(back, fore, char)
-
+                file.write(bytes([packNums(back, fore)]))
+                file.write(bytes([len(char.encode('utf-8'))]))
+                file.write(char.encode('utf-8'))
             print("")
 
 if __name__ == "__main__":
