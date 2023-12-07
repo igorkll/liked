@@ -7,6 +7,7 @@ local paths = require("paths")
 local graphic = require("graphic")
 local thread = require("thread")
 local computer = require("computer")
+local gui = require("gui")
 
 local screen = ...
 local manager = uix.manager(screen)
@@ -18,7 +19,9 @@ local path = "/data/userdata/images"
 local interval = 4
 
 layout:createText(2, ry - 5, nil, "Press 'Enter' key to exit from viewer")
+layout:createText(2, 2, nil, "likeOS water-mark: ")
 local startButton = layout:createButton(2, ry - 3, rx - 2, 3, nil, nil, "Start Slide Show", true)
+local waterMark = layout:createSwitch(21, 2, true)
 
 function startButton:onClick()
     layout.active = false
@@ -42,6 +45,11 @@ function startButton:onClick()
 
                     local startTime = computer.uptime()
                     image.draw(screen, fullpath, 1, 1)
+                    if waterMark.state then
+                        gui.drawtext(screen, 2, sy - 3, 0xffffff, "Operating System     : likeOS & liked")
+                        gui.drawtext(screen, 2, sy - 2, 0xffffff, "Application          : slideShow")
+                        gui.drawtext(screen, 2, sy - 1, 0xffffff, "Developer In Discord : smlogic")
+                    end
                     graphic.forceUpdate(screen)
                     local drawTime = computer.uptime() - startTime
                     
