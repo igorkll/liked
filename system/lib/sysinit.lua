@@ -88,13 +88,12 @@ function sysinit.initScreen(screen)
 
     local mx, my = sysinit.getResolution(screen)
 
-    gpu.setDepth(1)
-    gpu.setBackground(0)
-    gpu.fill(1, 1, mx, my, " ")
     gpu.setDepth(gpu.maxDepth())
-    graphic.forceUpdate(screen)
-    
+    gpu.setBackground(0)
+    gpu.setForeground(0xffffff)
     graphic.setResolution(screen, mx, my)
+    gpu.fill(1, 1, mx, my, " ")
+    graphic.forceUpdate(screen)
     sysinit.applyPalette(sysinit.initPalPath, screen)
 end
 

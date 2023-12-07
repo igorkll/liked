@@ -18,8 +18,8 @@ function storage.getLang()
     end
 end
 
-function storage.getConf()
-    return registry.new(system.getResourcePath("data.cfg"))
+function storage.getConf(default)
+    return registry.new(system.getResourcePath("data.cfg"), default)
 end
 
 storage.unloadable = true
