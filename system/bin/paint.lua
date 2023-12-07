@@ -261,7 +261,7 @@ local function load()
 
             char = read(countCharBytes)
 
-            if background == foreground then --во избежаниия визуальных артефактов отбражения unicode
+            if background == foreground and not fullBack then --во избежаниия визуальных артефактов отбражения unicode
                 char = " "
             end
 
