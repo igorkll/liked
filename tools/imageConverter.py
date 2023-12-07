@@ -204,8 +204,10 @@ def parse_image_pixelwise(image_path):
                 elif back == 0 and fore == 0:
                     fore = 15
 
-                fullBack = find_closest_color(convert_to_24bit(backcol), colors3t)
-                fullFore = find_closest_color(convert_to_24bit(forecol), colors3t)
+                fullBackCol = convert_to_24bit(backcol)
+                fullForeCol = convert_to_24bit(forecol)
+                fullBack = find_closest_color(fullBackCol, colors3t)
+                fullFore = find_closest_color(fullForeCol, colors3t)
 
                 outputArray = []
                 for line in block:
@@ -221,7 +223,8 @@ def parse_image_pixelwise(image_path):
                             # outputArray[-1].append(color_similarity2((hex_to_rgb(colors[fore])), (color[2], color[1], color[0])) > 0.5)
                             outputArray[-1].append(color[3] < 200)
                         else:
-                            outputArray[-1].append(color_similarity((hex_to_rgb(colors[back])), (hex_to_rgb(colors[fore])), (color[2], color[1], color[0])) > 0.5)
+                            # outputArray[-1].append(color_similarity((hex_to_rgb(colors[back])), (hex_to_rgb(colors[fore])), (color[2], color[1], color[0])) > 0.5)
+                            outputArray[-1].append(color_similarity((hex_to_rgb(fullBackCol)), (hex_to_rgb(fullForeCol)), (color[2], color[1], color[0])) > 0.5)
 
                 char = make_braille(outputArray)
                 print(back, fore, char)
