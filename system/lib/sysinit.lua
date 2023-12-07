@@ -19,6 +19,9 @@ function sysinit.applyPalette(path, screen)
         end
     end
 
+    local t3default = colors.t3default
+    colors.t3default = nil
+
     movetable(gui_container.indexsColors, colors)
     movetable(gui_container.colors, {
         white     = colors[1],
@@ -40,9 +43,17 @@ function sysinit.applyPalette(path, screen)
     })
 
     if screen ~= true then
+        local blackWhile
         local function applyOnScreen(address)
             if graphic.maxDepth(address) ~= 1 then
-                graphic.setPalette(address, colors)
+                if t3default and graphic.getDepth(address) == 8 then
+                    if not blackWhile then
+                        blackWhile = assert(serialization.load("/system/t3default.plt"))
+                    end
+                    graphic.setPalette(address, blackWhile)
+                else
+                    graphic.setPalette(address, colors)
+                end
             end
         end
 
@@ -56,6 +67,16 @@ function sysinit.applyPalette(path, screen)
     end
 end
 
+function sysinit.getResolution(screen)
+    local graphic = require("graphic")
+    local mx, my = graphic.maxResolution(screen)
+    if mx > 80 or my > 25 then
+        mx = 80
+        my = 25
+    end
+    return mx, my
+end
+
 function sysinit.initScreen(screen)
     local graphic = require("graphic")
     local component = require("component")
@@ -65,11 +86,7 @@ function sysinit.initScreen(screen)
 
     pcall(component.invoke, screen, "turnOn")
 
-    local mx, my = graphic.maxResolution(screen)
-    if mx > 80 or my > 25 then
-        mx = 80
-        my = 25
-    end
+    local mx, my = sysinit.getResolution(screen)
 
     gpu.setDepth(1)
     gpu.setBackground(0)
@@ -158,9 +175,9 @@ function sysinit.init(box)
         else
             local palette = require("palette")
             if minDepth == 1 then
-                palette.setSystemPalette("/system/palettes/original.plt")
+                palette.setSystemPalette("/system/palettes/original.plt", true)
             else
-                palette.setSystemPalette("/system/palettes/classic.plt")
+                palette.setSystemPalette("/system/palettes/classic.plt", true)
             end
         end
     end

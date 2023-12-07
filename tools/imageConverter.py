@@ -163,6 +163,15 @@ def parse_image_pixelwise(image_path):
     output_path, _ = os.path.splitext(image_path)
     output_path += ".t2p"
 
+    fullAdd = input("add full colors? Y/N: ")
+    if fullAdd == "Y":
+        fullAdd = True
+    elif fullAdd == "N":
+        fullAdd = False
+    else:
+        print("Incorrent Input")
+        return True
+
     # Попиксельный обход и обработка изображения
     with open(output_path, 'wb') as file:
         block_width = 2
@@ -170,7 +179,10 @@ def parse_image_pixelwise(image_path):
 
         file.write((width // block_width).to_bytes(1, 'little'))
         file.write((height // block_height).to_bytes(1, 'little'))
-        file.write(b"3\0\0\0\0\0\0\0")
+        if fullAdd:
+            file.write(b"3\0\0\0\0\0\0\0")
+        else:
+            file.write(b"\0\0\0\0\0\0\0\0")
 
         for y in range(0, height - block_height + 1, block_height):
             for x in range(0, width - block_width + 1, block_width):
@@ -198,10 +210,12 @@ def parse_image_pixelwise(image_path):
                     forenonused = True
                     fore = 3
 
+                antiAlpha = False
                 if backnonused and forenonused:
                     back = 0
                     fore = 0
                 elif back == 0 and fore == 0:
+                    antiAlpha = True
                     fore = 15
 
                 fullBackCol = convert_to_24bit(backcol)
@@ -214,7 +228,9 @@ def parse_image_pixelwise(image_path):
                     outputArray.append([])
                     for color in line:
                         # formattedColor = convert_rgb_to_24bit(color[2], color[1], color[0])
-                        if forenonused and backnonused:
+                        if antiAlpha:
+                            outputArray[-1].append(True)
+                        elif forenonused and backnonused:
                             outputArray[-1].append(False)
                         elif forenonused:
                             # outputArray[-1].append(color_similarity2((hex_to_rgb(colors[back])), (color[2], color[1], color[0])) > 0.5)
@@ -230,8 +246,9 @@ def parse_image_pixelwise(image_path):
                 char = make_braille(outputArray)
                 print(back, fore, char)
                 file.write(bytes([packNums(back, fore)]))
-                file.write(bytes([fullFore]))
-                file.write(bytes([fullBack]))
+                if fullAdd:
+                    file.write(bytes([fullFore]))
+                    file.write(bytes([fullBack]))
                 file.write(bytes([len(char.encode('utf-8'))]))
                 file.write(char.encode('utf-8'))
             # print("")
@@ -244,7 +261,8 @@ if __name__ == "__main__":
             pass
         else:
             image_path = sys.argv[1]
-        parse_image_pixelwise(image_path)
+        if parse_image_pixelwise(image_path):
+            while True: pass
 
     except Exception as e:
         # Обработка исключения и вывод сообщения

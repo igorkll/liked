@@ -340,8 +340,14 @@ function liked.loadApp(name, screen, nickname)
         if screen then
             if configTbl.restoreGraphic then
                 log{pcall(sysinit.initScreen, screen)}
-            elseif paletteFile or configTbl.restorePalette or configTbl.blackWhite then
-                palette.system(screen)
+            else
+                if paletteFile or configTbl.restorePalette or configTbl.blackWhite then
+                    palette.system(screen)
+                end
+
+                if configTbl.restoreResolution then
+                    graphic.setResolution(screen, sysinit.getResolution(screen))
+                end
             end
 
             if configTbl.noScreenSaver then
