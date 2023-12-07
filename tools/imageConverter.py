@@ -225,6 +225,7 @@ def parse_image_pixelwise(image_path):
                         else:
                             # outputArray[-1].append(color_similarity((hex_to_rgb(colors[back])), (hex_to_rgb(colors[fore])), (color[2], color[1], color[0])) > 0.5)
                             outputArray[-1].append(color_similarity((hex_to_rgb(fullBackCol)), (hex_to_rgb(fullForeCol)), (color[2], color[1], color[0])) > 0.5)
+                            # outputArray[-1].append(random.choice((True, False)))
 
                 char = make_braille(outputArray)
                 print(back, fore, char)
