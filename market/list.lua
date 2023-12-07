@@ -393,14 +393,14 @@ local list = {
         files = {"main.lua", "icon.t2p", "program.lua"}
     },
     {
-        name = "slideShow",
+        name = "slideshow",
         version = "1",
         vendor = "logic",
         description = "allows you to select a folder with images in .t2p format and display them at a specified interval",
         minDiskSpace = 64,
         
-        path = "/data/apps/slideShow.app",
-        urlPrimaryPart = selfurlpart .. "/apps/slideShow.app/",
+        path = "/data/apps/slideshow.app",
+        urlPrimaryPart = selfurlpart .. "/apps/slideshow.app/",
         files = {"main.lua", "icon.t2p", "config.cfg"}
     }
 }
