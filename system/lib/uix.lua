@@ -687,6 +687,8 @@ function uix:uploadEvent(eventData)
             obj:uploadEvent(eventData)
         end
     end
+
+    return eventData
 end
 
 function uix:draw()
@@ -820,10 +822,12 @@ function manager:select(layout)
     end
 
     self.current = layout
-    self.current.smartGuiManager = self
-    self.current.allowAutoActive = nil
-    self.current.active = true
-    self.current:draw()
+    if self.current then
+        self.current.smartGuiManager = self
+        self.current.allowAutoActive = nil
+        self.current.active = true
+        self.current:draw()
+    end
 end
 
 function manager:loop()
@@ -833,10 +837,13 @@ function manager:loop()
 
     while true do
         local eventData = {event.pull()}
-        self.current:uploadEvent(eventData)
+        local windowEventData
+        if self.current and not self.stopUpload then
+            windowEventData = self.current:uploadEvent(eventData)
+        end
 
         if self.onEvent then
-            self:onEvent(eventData)
+            self:onEvent(eventData, windowEventData)
         end
     end
 end
