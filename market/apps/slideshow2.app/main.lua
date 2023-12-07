@@ -25,7 +25,7 @@ layout:createText(2, ry - 5, nil, "Press 'Enter' key to exit from viewer")
 layout:createText(2, 2, nil, "likeOS water-mark: ")
 local startButton = layout:createButton(2, ry - 3, rx - 2, 3, nil, nil, "Start Slide Show", true)
 local waterMark = layout:createSwitch(21, 2, config.water)
-local folderText = layout:createText(2, 3)
+local folderText = layout:createText(2, 4)
 
 local invervalText = layout:createText(rx - 5, ry - 7)
 
@@ -42,8 +42,8 @@ end
 updateText()
 updateSeekText()
 
-local unselect = layout:createButton(2, 4, 10, 1, nil, nil, "unselect")
-local selectfolder = layout:createButton(13, 4, 8, 1, nil, nil, "select", true)
+local unselect = layout:createButton(2, 5, 10, 1, nil, nil, "unselect")
+local selectfolder = layout:createButton(13, 5, 8, 1, nil, nil, "select", true)
 layout:createText(2, ry - 7, nil, "inverval: ")
 local seek = layout:createSeek(12, ry - 7, rx - 18, nil, nil, nil, math.map(config.interval, 1, 60, 0, 1))
 
@@ -105,7 +105,7 @@ function startButton:onClick()
                         local drawTime = computer.uptime() - startTime
                         
                         local waitTime = config.interval - drawTime
-                        if waitTime < 0 then waitTime = 0 end
+                        if waitTime < 0.1 then waitTime = 0.1 end
                         os.sleep(waitTime)
                     end
                 end
