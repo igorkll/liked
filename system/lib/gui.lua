@@ -883,6 +883,13 @@ function gui.select(screen, cx, cy, label, actions, scroll, noCloseButton)
                 draw(lsel)
                 redrawButton()
             end
+
+            if windowEventData[3] == window.sizeX and windowEventData[4] < window.sizeY and windowEventData[4] > 1 then
+                scroll = math.mapRound(windowEventData[4], 2, window.sizeY - 1, 0, #actions - 1)
+                if scroll > #actions - 1 then scroll = #actions - 1 end
+                if scroll < 0 then scroll = 0 end
+                draw()
+            end
         end
 
         if windowEventData[1] == "scroll" then
