@@ -27,25 +27,42 @@ local startButton = layout:createButton(2, ry - 3, rx - 2, 3, nil, nil, "Start S
 local waterMark = layout:createSwitch(21, 2, config.water)
 local folderText = layout:createText(2, 3)
 
-local function updateFolderText()
+local invervalText = layout:createText(rx - 5, ry - 7)
+
+local function updateText()
     folderText.text = "images folder: " .. (config.folder and paths.name(config.folder) or "not selected")
     folderText:draw()
 end
-updateFolderText()
+
+local function updateSeekText()
+    invervalText.text = tostring(math.round(config.interval)) .. "S  "
+    invervalText:draw()
+end
+
+updateText()
+updateSeekText()
 
 local unselect = layout:createButton(2, 4, 10, 1, nil, nil, "unselect")
 local selectfolder = layout:createButton(13, 4, 8, 1, nil, nil, "select", true)
+layout:createText(2, ry - 7, nil, "inverval: ")
+local seek = layout:createSeek(12, ry - 7, rx - 18, nil, nil, nil, math.map(config.interval, 1, 60, 0, 1))
+
+function seek:onSeek(value)
+    config.interval = math.mapRound(value, 0, 1, 1, 60)
+    updateSeekText()
+end
+
 
 function unselect:onClick()
     config.folder = nil
-    updateFolderText()
+    updateText()
 end
 
 function selectfolder:onClick()
     local folder = iowindows.selectfolder(screen)
     if folder then
         config.folder = folder
-        updateFolderText()
+        updateText()
     end
     layout:draw()
 end

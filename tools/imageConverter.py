@@ -202,11 +202,11 @@ def parse_image_pixelwise(image_path):
                     fore = back
                     forecol = backcol
 
-                if backcol[3] < 200:
+                if len(backcol) > 3 and backcol[3] < 200:
                     backnonused = True
                     back = 3
 
-                if forecol[3] < 200:
+                if len(forecol) > 3 and forecol[3] < 200:
                     forenonused = True
                     fore = 3
 
@@ -228,16 +228,20 @@ def parse_image_pixelwise(image_path):
                     outputArray.append([])
                     for color in line:
                         # formattedColor = convert_rgb_to_24bit(color[2], color[1], color[0])
+                        alpha = 255
+                        if len(color) > 3:
+                            alpha = color[3]
+
                         if antiAlpha:
                             outputArray[-1].append(True)
                         elif forenonused and backnonused:
                             outputArray[-1].append(False)
                         elif forenonused:
                             # outputArray[-1].append(color_similarity2((hex_to_rgb(colors[back])), (color[2], color[1], color[0])) > 0.5)
-                            outputArray[-1].append(color[3] >= 200)
+                            outputArray[-1].append(alpha >= 200)
                         elif backnonused:
                             # outputArray[-1].append(color_similarity2((hex_to_rgb(colors[fore])), (color[2], color[1], color[0])) > 0.5)
-                            outputArray[-1].append(color[3] < 200)
+                            outputArray[-1].append(alpha < 200)
                         else:
                             # outputArray[-1].append(color_similarity((hex_to_rgb(colors[back])), (hex_to_rgb(colors[fore])), (color[2], color[1], color[0])) > 0.5)
                             outputArray[-1].append(color_similarity((hex_to_rgb(fullBackCol)), (hex_to_rgb(fullForeCol)), (color[2], color[1], color[0])) > 0.5)
