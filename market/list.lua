@@ -401,7 +401,7 @@ local list = {
         
         path = "/data/apps/slideshow.app",
         urlPrimaryPart = selfurlpart .. "/apps/slideshow.app/",
-        files = {"main.lua", "icon.t2p", "config.cfg"}
+        files = {"main.lua", "icon.t2p", "config.cfg", "hue.t2p"}
     }
 }
 

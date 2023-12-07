@@ -21,6 +21,8 @@ local manager = uix.manager(screen)
 local rx, ry = manager:zoneSize()
 local layout = manager:create("Slide Show")
 
+layout:createImage(rx - 30, 2, "hue.t2p", true, true)
+
 layout:createText(2, ry - 5, nil, "Press 'Enter' key to exit from viewer")
 layout:createText(2, 2, nil, "likeOS water-mark: ")
 local startButton = layout:createButton(2, ry - 3, rx - 2, 3, nil, nil, "Start Slide Show", true)

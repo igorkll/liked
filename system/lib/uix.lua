@@ -6,6 +6,7 @@ local liked = require("liked")
 local thread = require("thread")
 local event = require("event")
 local image = require("image")
+local system = require("system")
 
 local colors = gui_container.colors
 local uix = {colors = colors}
@@ -382,7 +383,7 @@ function objclass:draw()
         self.gui.window:fill(self.x, self.y, self.sx, self.sy, self.color, 0, " ")
     elseif self.type == "image" then
         local x, y = self.gui.window:toRealPos(self.x, self.y)
-        image.draw(self.gui.window.screen, self.path, x, y, self.wallpaperMode)
+        image.draw(self.gui.window.screen, self.path, x, y, self.wallpaperMode, self.forceFullColor)
     elseif self.type == "drawer" then
         self:func(self.gui.window:toRealPos(self.x, self.y))
     elseif self.type == "progress" then
@@ -609,12 +610,13 @@ function uix:createContext(x, y, sx, sy, back, fore, text, strs, funcs, actives)
     return obj
 end
 
-function uix:createImage(x, y, path, wallpaperMode)
+function uix:createImage(x, y, path, wallpaperMode, forceFullColor)
     local obj = setmetatable({gui = self, type = "image"}, {__index = objclass})
     obj.x = x
     obj.y = y
-    obj.path = path
+    obj.path = system.getResourcePath(path)
     obj.wallpaperMode = not not wallpaperMode
+    obj.forceFullColor = not not forceFullColor
 
     table.insert(self.objs, obj)
     return obj
