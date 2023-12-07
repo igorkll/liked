@@ -5,6 +5,7 @@ import traceback
 import math
 from collections import Counter
 import random
+import numpy as np
 
 """
 colors = [
@@ -150,6 +151,13 @@ def color_similarity2(color1, color2):
 def parse_image_pixelwise(image_path):
     # Загрузка изображения
     image = cv2.imread(image_path, cv2.IMREAD_UNCHANGED)
+
+    """
+    image = ordered_dithering(image)
+    cv2.imshow('Dithered Image', image)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
+    """
 
     # Проверка на успешную загрузку изображения
     if image is None:
