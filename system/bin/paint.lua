@@ -128,13 +128,17 @@ local function drawPixel(x, y, pixel)
     x = x + imageOffsetX
     y = y + imageOffsetY
     if x < 1 or x > mainWindow.sizeX or y < 1 or y > mainWindow.sizeY then return end
+
+    local depth = gpu.getDepth()
     if pixel[1] ~= 0 or pixel[2] ~= 0 then
         local bg, fg = indexsColors[pixel[1] + 1], indexsColors[pixel[2] + 1]
-        if pixel[4] then
-            bg = imagelib.t3colors[pixel[4]]
-        end
-        if pixel[5] then
-            fg = imagelib.t3colors[pixel[5]]
+        if depth == 8 then
+            if pixel[4] then
+                bg = imagelib.t3colors[pixel[4]]
+            end
+            if pixel[5] then
+                fg = imagelib.t3colors[pixel[5]]
+            end
         end
         mainWindow:set(x, y, bg, fg, pixel[3])
     else
@@ -239,12 +243,8 @@ local function load()
             colorByte      = string.byte(read(1))
             local fullBack, fullFore
             if t3paletteSupport then
-                if gpu.getDepth() == 8 then
-                    fullBack = string.byte(read(1))
-                    fullFore = string.byte(read(1))
-                else
-                    read(2)
-                end
+                fullBack = string.byte(read(1))
+                fullFore = string.byte(read(1))
             end
             countCharBytes = string.byte(read(1))
 
@@ -441,6 +441,7 @@ while true do
                 for y, tbl in ipairs(image) do
                     for x, pixel in ipairs(tbl) do
                         pixel[1], pixel[2] = pixel[2], pixel[1]
+                        pixel[5], pixel[4] = pixel[4], pixel[5]
                     end
                 end
                 draw()

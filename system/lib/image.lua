@@ -87,7 +87,7 @@ function image.draw(screen, path, x, y, wallpaperMode) --wallpaperMode заст�
 
             local char = read(countCharBytes)
 
-            if foreground ~= oldFore or background ~= oldBack or oldY ~= cy then
+            if foreground ~= oldFore or background ~= oldBack or fullBack ~= oldBackFull or fullFore ~= oldForeFull or oldY ~= cy then
                 if oldBack ~= 0 or oldFore ~= 0 then --прозрачность, в реальной картинке такого не будет потому что если paint замечает оба нуля то он меняет одной значения чтобы пиксель не мог просто так стать прозрачным
                     if oldBack == oldFore or isEmptyBuff then --по избежании визуальных артефактов при отображении unicode символов от лица сматряшего на монитор со стороны
                         gpu.setBackground(oldBackFull or colors[oldBack + 1])
