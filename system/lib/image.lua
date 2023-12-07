@@ -12,7 +12,7 @@ image.t3colors = {0x000000, 0x000040, 0x000080, 0x0000BF, 0x0000FF, 0x002400, 0x
 local colors = gui_container.indexsColors
 local readbit = bit32.readbit
 
-function image.draw(screen, path, x, y, wallpaperMode) --wallpaperMode заставляет считать цвет lightBlue как прозрачность
+function image.draw(screen, path, x, y, wallpaperMode, forceFullColor) --wallpaperMode заставляет считать цвет lightBlue как прозрачность
     --t2p drawer
     --t2p(tier 2 pic), bytes <sizeX> <sizeY> <зарезервировано> <зарезервировано> <зарезервировано> <зарезервировано> <зарезервировано> <зарезервировано> <зарезервировано> <зарезервировано> <4bit background, 4 bit foreground> <count char bytes> <char byte> 
     
@@ -60,7 +60,7 @@ function image.draw(screen, path, x, y, wallpaperMode) --wallpaperMode заст�
             colorByte      = string.byte(read(1))
             local fullBack, fullFore
             if t3paletteSupport then
-                if gpu.getDepth() == 8 then
+                if gpu.getDepth() == 8 or forceFullColor then
                     fullBack = image.t3colors[string.byte(read(1)) + 1]
                     fullFore = image.t3colors[string.byte(read(1)) + 1]
                 else

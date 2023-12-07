@@ -86,7 +86,9 @@ function startButton:onClick()
                     local fullpath = paths.concat(path, name)
                     if paths.extension(name) == "t2p" then
                         local sx, sy = image.size(fullpath)
-                        graphic.setResolution(screen, sx, sy)
+                        if not graphic.isValidResolution(screen, sx, sy) or not pcall(graphic.setResolution, screen, sx, sy) then
+                            sx, sy = graphic.maxResolution(screen)
+                        end
 
                         if first then
                             graphic.createWindow(screen, 1, 1, sx, sy):fill(1, 1, sx, sy, 0, 0, " ")
@@ -95,7 +97,7 @@ function startButton:onClick()
                         end
 
                         local startTime = computer.uptime()
-                        image.draw(screen, fullpath, 1, 1)
+                        image.draw(screen, fullpath, 1, 1, nil, true)
                         if waterMark.state then
                             gui.drawtext(screen, 2, sy - 3, 0xffffff, "Operating System     : likeOS & liked")
                             gui.drawtext(screen, 2, sy - 2, 0xffffff, "Application          : slideshow")
