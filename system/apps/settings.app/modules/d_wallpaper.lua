@@ -64,7 +64,7 @@ end
 
 
 local layout = uix.create(selectWindow)
-local colorpic = layout:createColorpic(18, 2, 24, 1, "wallpaper base color", colorpicColor, true)
+local colorpic = layout:createColorpic(18, 2, 24, 1, "wallpaper base color", colorpicColor or colors.lightBlue, true)
 local wallpaperLight = layout:createSeek(18, 4, 25, nil, nil, nil, (registry.wallpaperLight or 1) / 2)
 local wallpaperLightText = layout:createText(18 + 25 + 1, 4)
 
