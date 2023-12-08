@@ -534,14 +534,18 @@ function gui.input(screen, cx, cy, str, hidden, backgroundColor, default, disabl
         local out = reader.uploadEvent(eventData)
         if out then
             if out == true then
-                drawCancel()
+                if not noCancel then
+                    drawCancel()
+                    noShadow()
+                    return false
+                end
+            else
+                drawOk()
                 noShadow()
-                return false
+                return out
             end
-            drawOk()
-            noShadow()
-            return out
         end
+
         if windowEventData[1] == "touch" and windowEventData[5] == 0 then
             if windowEventData[4] == 7 and windowEventData[3] > (32 - 5 - 3) and windowEventData[3] <= ((32 - 5) + 4) then
                 drawOk()
@@ -1087,7 +1091,7 @@ function gui.checkPassword(screen, cx, cy, disableStartSound, noCancel)
     local regData = registry.data
     if regData then
         if regData.password then
-            local clear = saveZone(screen)
+            local clear = gui.saveZone(screen)
             local password = gui.input(screen, cx, cy, "enter password", true, nil, nil, disableStartSound, noCancel)
             clear()
 
@@ -1095,7 +1099,7 @@ function gui.checkPassword(screen, cx, cy, disableStartSound, noCancel)
                 if require("sha256").sha256(password .. (regData.passwordSalt or "")) == regData.password then
                     return true
                 else
-                    local clear = saveZone(screen)
+                    local clear = gui.saveZone(screen)
                     gui.warn(screen, cx, cy, "invalid password")
                     clear()
                 end

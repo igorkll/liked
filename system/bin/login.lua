@@ -8,4 +8,7 @@ local gui = require("gui")
 
 liked.drawUpBarTask(screen)
 liked.drawWallpaper(screen)
-gui.checkPasswordLoop(screen, nil, nil, true, true)
+
+repeat
+    os.sleep()
+until gui.checkPasswordLoop(screen, nil, nil, true, true)
