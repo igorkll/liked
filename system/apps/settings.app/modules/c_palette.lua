@@ -80,7 +80,7 @@ local function draw(set)
         palette.setSystemPalette(paths.concat(themesPath, themes[selected]))
         event.push("redrawDesktop")
         gRedraw()
-        redraw()
+        draw()
     end
 end
 draw()

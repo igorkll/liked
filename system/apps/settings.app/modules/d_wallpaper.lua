@@ -5,6 +5,8 @@ local paths = require("paths")
 local unicode = require("unicode")
 local event = require("event")
 local registry = require("registry")
+local uix = require("uix")
+local colorslib = require("colors")
 
 local colors = gui_container.colors
 
@@ -25,14 +27,21 @@ if fs.exists("/data/wallpaper.t2p") then
     file.close()
 end
 
-local selectColorWindow = graphic.createWindow(screen, posX + 16, posY, 16, ry - (posY - 1))
+local colorpicColor = registry.wallpaperBaseColor or "lightBlue"
+if type(colorpicColor) == "string" then
+    colorpicColor = uix.colors[colorslib[colorpicColor]]
+end
+
+
+--local selectColorWindow = graphic.createWindow(screen, posX + 16, posY, rx, ry - (posY - 1))
+
 local colorsNames = {}
 for key, value in pairs(colors) do
     table.insert(colorsNames, key)
 end
 table.sort(colorsNames)
 
-local selectWindow = graphic.createWindow(screen, posX, posY, 16, ry - (posY - 1))
+local selectWindow = graphic.createWindow(screen, posX, posY, rx, ry - (posY - 1))
 local selected = 1
 local wallpapaers = {"none"}
 for i, file in ipairs(fs.list(wallpapersPath) or {}) do
@@ -53,6 +62,17 @@ if currentWallpaperData then
     end
 end
 
+
+local layout = uix.create(selectWindow)
+local colorpic = layout:createColorpic(18, 2, 24, 1, "wallpaper color", colorpicColor, true)
+
+function colorpic:onColor(color)
+    registry.wallpaperBaseColor = color
+    event.push("redrawDesktop")
+end
+
+layout:draw()
+
 ------------------------------------
 
 local colors_names2ids = {}
@@ -62,7 +82,7 @@ local function draw(set)
     selectWindow:setCursor(1, 1)
     for i, file in ipairs(wallpapaers) do
         file = paths.hideExtension(file)
-        local str = file .. string.rep(" ", (selectWindow.sizeX - 2) - unicode.len(file))
+        local str = file .. string.rep(" ", 14 - unicode.len(file))
 
         local background = colors.black
         local foreground = selected == i and colors.white or colors.gray
@@ -76,6 +96,7 @@ local function draw(set)
         if i ~= #wallpapaers then selectWindow:write("\n") end
     end
 
+    --[[
     local currentColorName = registry.wallpaperBaseColor or "lightBlue"
     selectColorWindow:clear(colors.black)
     selectColorWindow:setCursor(1, 1)
@@ -95,6 +116,7 @@ local function draw(set)
 
         if i ~= #colorsNames then selectColorWindow:write("\n") end
     end
+    ]]
 
     if set then
         if selected == 1 then
@@ -104,6 +126,8 @@ local function draw(set)
         end
         event.push("redrawDesktop")
     end
+
+    layout:draw()
 end
 draw()
 
@@ -112,28 +136,32 @@ draw()
 return function(eventData)
     local selectWindowEventData = selectWindow:uploadEvent(eventData)
     if selectWindowEventData[1] == "scroll" then
-        if selected then
-            local oldselected = selected
-            if selectWindowEventData[5] > 0 then
-                selected = selected - 1
-                if selected < 1 then selected = 1 end
+        if selectWindowEventData[3] <= 16 then
+            if selected then
+                local oldselected = selected
+                if selectWindowEventData[5] > 0 then
+                    selected = selected - 1
+                    if selected < 1 then selected = 1 end
+                else
+                    selected = selected + 1
+                    if selected > #wallpapaers then selected = #wallpapaers end
+                end
+                if selected ~= oldselected then
+                    draw(true)
+                end
             else
-                selected = selected + 1
-                if selected > #wallpapaers then selected = #wallpapaers end
+                selected = 1
             end
-            if selected ~= oldselected then
-                draw(true)
-            end
-        else
-            selected = 1
         end
     elseif selectWindowEventData[1] == "touch" then
-        local posY = ((selectWindowEventData[4] - 1) // 3) + 1
+        if selectWindowEventData[3] <= 16 then
+            local posY = ((selectWindowEventData[4] - 1) // 3) + 1
 
-        if posY >= 1 and posY <= #wallpapaers then
-            if posY ~= selected then
-                selected = posY
-                draw(true)
+            if posY >= 1 and posY <= #wallpapaers then
+                if posY ~= selected then
+                    selected = posY
+                    draw(true)
+                end
             end
         end
     elseif selectWindowEventData[1] == "key_down" then
@@ -154,7 +182,9 @@ return function(eventData)
         end
     end
 
+    layout:uploadEvent(selectWindowEventData)
 
+    --[[
     local currentColorName = registry.wallpaperBaseColor or "lightBlue"
     local selectWindowEventData = selectColorWindow:uploadEvent(eventData)
     if selectWindowEventData[1] == "scroll" then
@@ -198,4 +228,5 @@ return function(eventData)
             draw(true)
         end
     end
+    ]]
 end

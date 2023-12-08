@@ -672,9 +672,16 @@ function uix:createColorpic(x, y, sx, sy, text, color, full)
     local button = self:createButton(x, y, sx, sy, nil, nil, text, true)
 
     local function updateColor()
+        if color == colors.black then
+            color = colors.gray
+        end
+        
         button.back = color
         button.fore = color == colors.white and colors.black or colors.white
+        button.back2 = button.fore
+        button.fore2 = button.back
     end
+    updateColor()
 
     function button:setColor(newcolor)
         color = newcolor
@@ -685,15 +692,16 @@ function uix:createColorpic(x, y, sx, sy, text, color, full)
         return color
     end
 
+    local screen = self.screen
     function button:onClick()
         local fcolor, fout
-        local clear = gui.saveBigZone(self.screen)
+        local clear = gui.saveBigZone(screen)
 
         if full then
-            fout = gui.selectfullcolor(self.screen, nil, nil, text)
+            fout = gui.selectfullcolor(screen, nil, nil, text)
             fcolor = fout
         else
-            fout = gui.selectcolor(self.screen, nil, nil, text)
+            fout = gui.selectcolor(screen, nil, nil, text)
             if fout and colorslib[fout] and colors[colorslib[fout]] then
                 fcolor = colors[colorslib[fout]]
             end
