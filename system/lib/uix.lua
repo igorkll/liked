@@ -7,6 +7,7 @@ local thread = require("thread")
 local event = require("event")
 local image = require("image")
 local system = require("system")
+local colorslib = require("colors")
 
 local colors = gui_container.colors
 local uix = {colors = colors}
@@ -665,6 +666,51 @@ end
 
 function uix:createCanvas(x, y, sx, sy, back, fore, char)
     return self:createCustom(x, y, canvasClass, sx, sy, back, fore, char)
+end
+
+function uix:createColorpic(x, y, sx, sy, text, color, full)
+    local button = self:createButton(x, y, sx, sy, nil, nil, text, true)
+
+    local function updateColor()
+        button.back = color
+        button.fore = color == colors.white and colors.black or colors.white
+    end
+
+    function button:setColor(newcolor)
+        color = newcolor
+        updateColor()
+    end
+
+    function button:getColor()
+        return color
+    end
+
+    function button:onClick()
+        local fcolor, fout
+        local clear = gui.saveBigZone(self.screen)
+
+        if full then
+            fout = gui.selectfullcolor(self.screen, nil, nil, text)
+            fcolor = fout
+        else
+            fout = gui.selectcolor(self.screen, nil, nil, text)
+            if fout and colorslib[fout] and colors[colorslib[fout]] then
+                fcolor = colors[colorslib[fout]]
+            end
+        end
+        clear()
+
+        if fcolor then
+            self:setColor(fcolor)
+            button:draw()
+        end
+
+        if fout and self.onColor then
+            self:onColor(fout, fcolor)
+        end
+    end
+
+    return button
 end
 
 function uix:setReturnLayout(returnLayout)
