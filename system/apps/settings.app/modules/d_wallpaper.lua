@@ -69,7 +69,7 @@ local wallpaperLight = layout:createSeek(18, 4, 25, nil, nil, nil, (registry.wal
 local wallpaperLightText = layout:createText(18 + 25 + 1, 4)
 
 local function updateText()
-    wallpaperLightText.text = "light: " .. tostring(math.round(wallpaperLight.value * 200)) .. "%"
+    wallpaperLightText.text = "light: " .. tostring(math.round(wallpaperLight.value * 200)) .. "%     "
     wallpaperLightText:draw()
 end
 updateText()
