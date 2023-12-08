@@ -102,13 +102,16 @@ while true do
         reader.setBuffer("")
         reader.redraw()
         lprint(colors.green, "LUA>")
-        syntax.draw(6, sizeY - 1, syntax.parse(readerData), graphic.findGpu(screen))
+        syntax.draw(6, sizeY - 1, syntax.parse(readerData), graphic.findGpu(screen), graphic.fakePalette)
         
         if readerData:sub(1, 1) == "=" then
             readerData = "return " .. readerData:sub(2, #readerData)
         end
 
-        env.gpu = graphic.findGpu(env.screen)
+        if not registry.interpreterSandbox then
+            env.gpu = graphic.findGpu(env.screen)
+        end
+
         local code, err = load(readerData, "=lua", "t", env)
         if code then
             local result = {pcall(code)}

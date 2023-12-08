@@ -878,14 +878,14 @@ function liked.drawWallpaper(screen, customFolder)
 
     local gpu = graphic.findGpu(screen)
     local rx, ry = gpu.getResolution()
-    gpu.setBackground(baseColor)
+    gpu.setBackground(colorlib.colorMul(baseColor, registry.wallpaperLight or 1))
     gpu.fill(1, 1, rx, ry, " ")
 
     local function wdraw(path)
         local ok, sx, sy = pcall(image.size, path)
         if ok then
             local ix, iy = math.round((rx / 2) - (sx / 2)) + 1, math.round((ry / 2) - (sy / 2)) + 1
-            pcall(image.draw, screen, path, ix, iy)
+            pcall(image.draw, screen, path, ix, iy, nil, nil, registry.wallpaperLight)
         end
     end
 
