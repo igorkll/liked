@@ -47,7 +47,7 @@ function sysinit.applyPalette(path, screen)
         local function applyOnScreen(address)
             if graphic.maxDepth(address) ~= 1 then
                 if t3default and graphic.getDepth(address) == 8 then
-                    graphic.fakePalette = colors
+                    graphic.fakePalette = table.low(colors)
                     if not blackWhile then
                         blackWhile = assert(serialization.load("/system/t3default.plt"))
                     end
