@@ -890,12 +890,18 @@ function liked.drawWallpaper(screen, customFolder)
     end
 
     local wallpaperPath = "/data/wallpaper.t2p"
+    if fs.exists(wallpaperPath) then
+        wdraw(wallpaperPath)
+    end
+
+    --[[ обои для папок были отключены, потому что это не совмем безопастно и в теории позволит сделать папку в которую нельзя будет зайти
     local customPath = paths.concat(customFolder or paths.path(wallpaperPath), paths.name(wallpaperPath))
     if fs.exists(customPath) then
         wdraw(customPath)
     elseif fs.exists(wallpaperPath) then
         wdraw(wallpaperPath)
     end
+    ]]
 end
 
 liked.unloadable = true

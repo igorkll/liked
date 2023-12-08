@@ -100,6 +100,7 @@ function installer.install_likedbox(vfs)
         "logo.lua",
         "main.lua",
         "likedlib",
+        "firmware",
         "sysdata",
         "branch.cfg"
     }
