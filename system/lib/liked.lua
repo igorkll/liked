@@ -453,7 +453,11 @@ function liked.applyBufferType()
 
     if graphic.allowHardwareBuffer or graphic.allowSoftwareBuffer then
         if not bufferTimerId then
-            bufferTimerId = event.timer(0.1, graphic.forceUpdate, math.huge)
+            bufferTimerId = event.timer(0.1, function ()
+                for address in component.list("screen") do
+                    graphic.update(address)
+                end
+            end, math.huge)
         end
     else
         if bufferTimerId then

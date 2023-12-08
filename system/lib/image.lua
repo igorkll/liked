@@ -57,7 +57,7 @@ function image.draw(screen, path, x, y, wallpaperMode, forceFullColor) --wallpap
     local isEmptyBuff = true
     for cy = 1, sy do
         for cx = 1, sx do
-            colorByte      = string.byte(read(1))
+            colorByte = string.byte(read(1))
             local fullBack, fullFore
             if t3paletteSupport then
                 if gpu.getDepth() == 8 or forceFullColor then

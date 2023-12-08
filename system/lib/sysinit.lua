@@ -47,11 +47,13 @@ function sysinit.applyPalette(path, screen)
         local function applyOnScreen(address)
             if graphic.maxDepth(address) ~= 1 then
                 if t3default and graphic.getDepth(address) == 8 then
+                    graphic.fakePalette = colors
                     if not blackWhile then
                         blackWhile = assert(serialization.load("/system/t3default.plt"))
                     end
                     graphic.setPalette(address, blackWhile)
                 else
+                    graphic.fakePalette = nil
                     graphic.setPalette(address, colors)
                 end
             end
@@ -81,18 +83,13 @@ function sysinit.initScreen(screen)
     local graphic = require("graphic")
     local component = require("component")
 
-    local gpu = graphic.findGpu(screen)
-    if not gpu then return end
-
     pcall(component.invoke, screen, "turnOn")
 
     local mx, my = sysinit.getResolution(screen)
 
-    gpu.setDepth(gpu.maxDepth())
-    gpu.setBackground(0)
-    gpu.setForeground(0xffffff)
+    graphic.setDepth(screen, graphic.maxDepth(screen))
     graphic.setResolution(screen, mx, my)
-    gpu.fill(1, 1, mx, my, " ")
+    graphic.clear(0)
     graphic.forceUpdate(screen)
     sysinit.applyPalette(sysinit.initPalPath, screen)
 end
@@ -130,7 +127,6 @@ function sysinit.init(box)
     local package = require("package")
 
     table.insert(package.paths, "/system/likedlib")
-
     table.insert(programs.paths, "/data/apps")
     table.insert(programs.paths, "/system/apps")
     table.insert(programs.paths, "/vendor/apps")
