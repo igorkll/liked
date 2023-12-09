@@ -56,16 +56,27 @@ local layout = uix.create(selectWindow)
 local colorpic = layout:createColorpic(18, 2, 24, 1, "wallpaper base color", colorpicColor or colors.lightBlue, true)
 local wallpaperLight = layout:createSeek(18, 4, 25, nil, nil, nil, (registry.wallpaperLight or 1) / 2)
 local wallpaperLightText = layout:createText(18 + 25 + 1, 4)
+local wallpaperLightReset = layout:createButton(18 + 25 + 8 + 5, 4, 3, 1, nil, nil, "R")
+
+layout:createText(18, 6, nil, "* It is not recommended to use wallpaper")
+layout:createText(18, 7, nil, "light on tier2 screens")
 
 local function updateText()
     wallpaperLightText.text = "light: " .. tostring(math.round(wallpaperLight.value * 200)) .. "%     "
     wallpaperLightText:draw()
+    wallpaperLightReset:draw()
 end
-updateText()
 
 function wallpaperLight:onSeek(value)
     registry.wallpaperLight = value * 2
     updateText()
+end
+
+function wallpaperLightReset:onClick()
+    registry.wallpaperLight = 1
+    wallpaperLight.value = 0.5
+    updateText()
+    wallpaperLight:draw()
 end
 
 function colorpic:onColor(color)
@@ -73,6 +84,7 @@ function colorpic:onColor(color)
     event.push("redrawDesktop")
 end
 
+updateText()
 layout:draw()
 
 ------------------------------------
@@ -129,6 +141,7 @@ local function draw(set)
         event.push("redrawDesktop")
     end
 
+    updateText()
     layout:draw()
 end
 draw()
