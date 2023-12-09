@@ -10,6 +10,7 @@ function host.deltaTime()
         local t2 = computer.uptime()
         delta = t2 - t1
     until delta ~= 0
+    return delta
 end
 
 function host.tps()
