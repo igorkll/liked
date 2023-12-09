@@ -1,5 +1,6 @@
 local sysinit = {}
 sysinit.screenThreads = {}
+sysinit.defaultPalettePath = "/system/palettes/light.plt"
 
 function sysinit.applyPalette(path, screen)
     local fs = require("filesystem")
@@ -118,6 +119,7 @@ end
 function sysinit.init(box)
     local fs = require("filesystem")
     _G._OSVERSION = "liked-v" .. assert(fs.readFile("/system/version.cfg"))
+    require("calls") --подгрузка лютай легаси дичи
     local bootloader = require("bootloader")
     bootloader.runlevel = "user"
 
@@ -172,7 +174,7 @@ function sysinit.init(box)
             if minDepth == 1 then
                 palette.setSystemPalette("/system/palettes/original.plt", true)
             else
-                palette.setSystemPalette("/system/palettes/classic.plt", true)
+                palette.setSystemPalette(sysinit.defaultPalettePath, true)
             end
         end
     end

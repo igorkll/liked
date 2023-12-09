@@ -77,6 +77,7 @@
 /system/lib/advLabeling.lua
 /system/lib/autorun.lua
 /system/lib/braille.lua
+/system/lib/calls.lua
 /system/lib/draw.lua
 /system/lib/eeprom.lua
 /system/lib/format.lua

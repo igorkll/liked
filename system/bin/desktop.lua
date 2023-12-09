@@ -1,7 +1,6 @@
 local graphic = require("graphic")
 local computer = require("computer")
 local event = require("event")
-local calls = require("calls")
 local unicode = require("unicode")
 local programs = require("programs")
 local gui_container = require("gui_container")
@@ -286,8 +285,6 @@ local function draw(old, check) --вызывает все перерисовки
         end
     end
 
-    local gui_drawtext = calls.load("gui_drawtext")
-
     drawWallpaper()
     drawStatus()
     drawBar(lUserPath, iconsCount)
@@ -312,7 +309,7 @@ local function draw(old, check) --вызывает все перерисовки
                 --    window:fill(iconX - 2, iconY - 1, iconSizeX + 4, iconSizeY + 2, colors.blue, 0, " ")
                 --end
                 local x, y = window:toRealPos(math.floor((centerIconX - (unicode.len(icon.shortName) / 2)) + 0.5), centerIconY + 2)
-                gui_drawtext(screen, x, y, colors.white, icon.shortName)
+                gui.drawtext(screen, x, y, colors.white, icon.shortName)
                 --window:set(iconX - (unicode.len(icon.name) // 2), iconY + iconY - 2, colors.lightBlue, colors.white, icon.name)
                 if icon.icon then
                     local sx, sy = window:toRealPos(iconX, iconY)

@@ -33,8 +33,8 @@ function palette.setSystemPalette(path, regOnly)
     if pcall(sysinit.applyPalette, path) then
         pcall(fs.copy, path, sysinit.initPalPath)
     else
-        pcall(fs.copy, "/system/palettes/classic.plt", sysinit.initPalPath)
-        sysinit.applyPalette("/system/palettes/classic.plt", regOnly)
+        pcall(fs.copy, sysinit.defaultPalettePath, sysinit.initPalPath)
+        sysinit.applyPalette(sysinit.defaultPalettePath, regOnly)
     end
 end
 
