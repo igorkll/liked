@@ -421,8 +421,8 @@ list.libs = {
         vendor = "logic",
         version = "3"
     },
-    ["bmp"] = {
-        url = selfurlpart .. "/libs/bmp.lua",
+    ["rsa"] = {
+        url = selfurlpart .. "/libs/rsa.lua",
         vendor = "logic",
         version = "1"
     }
