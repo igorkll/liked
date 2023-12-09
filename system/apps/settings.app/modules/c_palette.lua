@@ -33,7 +33,7 @@ if fs.exists(palettePath) then
     selected = nil
     for i, file in ipairs(fs.list(themesPath, true)) do
         if fs.equals(file, palettePath) then
-            selected = i + 1
+            selected = i
             break
         end
     end
