@@ -17,6 +17,7 @@ local parser = require("parser")
 local screensaver = require("screensaver")
 local image = require("image")
 local palette = require("palette")
+local warnings = require("warnings")
 
 local colors = gui_container.colors
 
@@ -1124,7 +1125,7 @@ local function doIcon(windowEventData)
                                     gui.status(screen, nil, nil, "downloading file...")
                                     local ok, err = require("internet").download(url, path)
                                     clear()
-                                    
+
                                     if ok then
                                         clear = nil
                                         draw()
@@ -1184,13 +1185,9 @@ while true do
         redrawFlag = false
         draw()
         if not warnPrinted then
-            local clear = saveZone(screen)
-            if computer.totalMemory() / 1024 < 512 then
-                gui_warn(screen, nil, nil, "small amount of RAM on the device\nthis can lead to problems")
-            end
-            local rootfs = fs.get("/")
-            if (rootfs.spaceTotal() - rootfs.spaceUsed()) / 1024 < 128 then
-                gui_warn(screen, nil, nil, "not enough free disk space\nthis can lead to problems")
+            local clear = gui.saveZone(screen)
+            for _, str in ipairs(warnings.list()) do
+                gui.warn(screen, nil, nil, str)
             end
             clear()
 

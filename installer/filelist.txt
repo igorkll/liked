@@ -94,6 +94,7 @@
 /system/lib/sysinit.lua
 /system/lib/uix.lua
 /system/lib/vkeyboard.lua
+/system/lib/warnings.lua
 /system/likedbox/logo.lua
 /system/likedbox/main.lua
 /system/likedbox/palette.plt
