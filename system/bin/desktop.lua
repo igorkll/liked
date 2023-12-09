@@ -1091,9 +1091,10 @@ local function doIcon(windowEventData)
                     draw()
                 end
             elseif str == "  download file" then
-                local clear = saveZone(screen)
-                local url = gui_input(screen, nil, nil, "url")
+                local clear = gui.saveZone(screen)
+                local url = gui.input(screen, nil, nil, "url")
                 clear()
+
                 if url and url ~= "" then
                     local filename = url
                     local index = string.find(filename, "/[^/]*$")
@@ -1105,39 +1106,44 @@ local function doIcon(windowEventData)
                         filename = string.sub(filename, 1, index - 1)
                     end
 
-                    local path = paths.sconcat(userPath, filename)
-                    if path then
-                        local replaceAllow
-                        if fs.exists(path) then
-                            local clear = saveZone(screen)
-                            replaceAllow = gui_yesno(screen, nil, nil, "overwrite the file?")
-                            clear()
-                        end
-                        if not fs.exists(path) or replaceAllow then
-                            local clear = saveZone(screen)
-                            gui_status(screen, nil, nil, "downloading file...")
-                            local data, err = getInternetFile(url)
-                            clear()
-                            if data then
-                                local file, err = fs.open(path, "wb")
-                                if file then
-                                    file.write(data)
-                                    file.close()
-                                    draw()
-                                else
-                                    warn("save error: " .. (err or "unknown error"))
+                    filename = gui.input(screen, nil, nil, "file name", false, nil, filename)
+                    clear()
+
+                    if filename then
+                        if #filename == 0 or filename:find("%/") or filename:find("%\\") then
+                            warn("invalid name")
+                        else
+                            local path = paths.sconcat(userPath, filename)
+                            if path then
+                                local replaceAllow
+                                if fs.exists(path) then
+                                    replaceAllow = gui.yesno(screen, nil, nil, "overwrite the file?")
+                                    clear()
+                                end
+                                if not fs.exists(path) or replaceAllow then
+                                    gui.status(screen, nil, nil, "downloading file...")
+                                    local ok, err = require("internet").download(url, path)
+                                    clear()
+                                    
+                                    if ok then
+                                        clear = nil
+                                        draw()
+                                    else
+                                        warn("download error: " .. (err or "unknown error"))
+                                    end
                                 end
                             else
-                                warn("download error: " .. (err or "unknown error"))
+                                warn("invalid name")
                             end
                         end
-                    else
-                        warn("invalid name")
                     end
+                end
+                if clear then
+                    clear()
                 end
             elseif creaters[num] then
                 local clear = saveZone(screen)
-                local name = gui_input(screen, nil, nil, creaters[num][1] .. " name")
+                local name = gui.input(screen, nil, nil, creaters[num][1] .. " name")
                 clear()
 
                 if type(name) == "string" then
