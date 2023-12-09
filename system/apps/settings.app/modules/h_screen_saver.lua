@@ -19,13 +19,6 @@ local screenSaversPath = "/system/screenSavers"
 
 ------------------------------------
 
-local currentData
-if fs.exists(screenSaverPath) then
-    local file = assert(fs.open(screenSaverPath, "rb"))
-    currentData = file.readAll()--получаем файл текуший темы для сравнения
-    file.close()
-end
-
 local selectWindow = graphic.createWindow(screen, posX, posY, rx - (posX - 1), ry - (posY - 1))
 local selected = 1
 local objs = {"none"}
@@ -33,14 +26,10 @@ for i, file in ipairs(fs.list(screenSaversPath) or {}) do
     table.insert(objs, file)
 end
 
-if currentData then
+if fs.exists(screenSaverPath) then
     selected = nil
-    for i, file in ipairs(fs.list(screenSaversPath) or {}) do
-        local file = assert(fs.open(paths.concat(screenSaversPath, file), "rb"))
-        local data = file.readAll() --получаем файл
-        file.close()
-
-        if data == currentData then
+    for i, file in ipairs(fs.list(screenSaversPath, true)) do
+        if fs.equals(file, screenSaverPath) then
             selected = i + 1
             break
         end

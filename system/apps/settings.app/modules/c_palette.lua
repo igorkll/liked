@@ -16,15 +16,9 @@ local gpu = graphic.findGpu(screen)
 local rx, ry = gpu.getResolution()
 
 local themesPath = "/system/palettes"
+local palettePath = "/data/palette.plt"
 
 ------------------------------------
-
-local currentThemeData
-if fs.exists("/data/palette.plt") then
-    local file = assert(fs.open("/data/palette.plt", "rb"))
-    currentThemeData = file.readAll()--получаем файл текуший темы для сравнения
-    file.close()
-end
 
 local selectWindow = graphic.createWindow(screen, posX, posY, 16, ry - (posY - 1))
 local colorsWindow = graphic.createWindow(screen, posX + 17, posY, 8, 18)
@@ -35,15 +29,11 @@ for i, file in ipairs(fs.list(themesPath) or {}) do
     table.insert(themes, file)
 end
 
-if currentThemeData then
+if fs.exists(palettePath) then
     selected = nil
-    for i, file in ipairs(fs.list(themesPath) or {}) do
-        local file = assert(fs.open(paths.concat(themesPath, file), "rb"))
-        local data = file.readAll()--получаем файл темы
-        file.close()
-
-        if data == currentThemeData then
-            selected = i
+    for i, file in ipairs(fs.list(themesPath, true)) do
+        if fs.equals(file, palettePath) then
+            selected = i + 1
             break
         end
     end

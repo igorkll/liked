@@ -26,7 +26,6 @@ if type(colorpicColor) == "string" then
     colorpicColor = uix.colors[colorslib[colorpicColor]]
 end
 
-
 --local selectColorWindow = graphic.createWindow(screen, posX + 16, posY, rx, ry - (posY - 1))
 
 local colorsNames = {}
