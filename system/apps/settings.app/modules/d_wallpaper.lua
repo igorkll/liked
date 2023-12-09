@@ -17,15 +17,9 @@ local gpu = graphic.findGpu(screen)
 local rx, ry = gpu.getResolution()
 
 local wallpapersPath = "/system/wallpapers"
+local wallpaperPath = "/data/wallpaper.t2p"
 
 ------------------------------------
-
-local currentWallpaperData
-if fs.exists("/data/wallpaper.t2p") then
-    local file = assert(fs.open("/data/wallpaper.t2p", "rb"))
-    currentWallpaperData = file.readAll()--получаем файл текуший темы для сравнения
-    file.close()
-end
 
 local colorpicColor = registry.wallpaperBaseColor or "lightBlue"
 if type(colorpicColor) == "string" then
@@ -44,18 +38,14 @@ table.sort(colorsNames)
 local selectWindow = graphic.createWindow(screen, posX, posY, rx, ry - (posY - 1))
 local selected = 1
 local wallpapaers = {"none"}
-for i, file in ipairs(fs.list(wallpapersPath) or {}) do
+for i, file in ipairs(fs.list(wallpapersPath)) do
     table.insert(wallpapaers, file)
 end
 
-if currentWallpaperData then
+if fs.exists(wallpaperPath) then
     selected = nil
-    for i, file in ipairs(fs.list(wallpapersPath) or {}) do
-        local file = assert(fs.open(paths.concat(wallpapersPath, file), "rb"))
-        local data = file.readAll()--получаем файл темы
-        file.close()
-
-        if data == currentWallpaperData then
+    for i, file in ipairs(fs.list(wallpapersPath, true)) do
+        if fs.equals(file, wallpaperPath) then
             selected = i + 1
             break
         end
