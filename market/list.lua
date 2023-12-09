@@ -425,6 +425,11 @@ list.libs = {
         url = selfurlpart .. "/libs/rsa.lua",
         vendor = "logic",
         version = "1"
+    },
+    ["host"] = {
+        url = selfurlpart .. "/libs/host.lua",
+        vendor = "logic",
+        version = "1"
     }
 }
 
