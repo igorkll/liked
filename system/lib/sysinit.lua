@@ -298,7 +298,7 @@ function sysinit.init(box)
                     sysinit.runShell(screen)
                 end
             end
-            os.sleep(0.1)
+            os.sleep(1)
         end
     end):resume()
 
