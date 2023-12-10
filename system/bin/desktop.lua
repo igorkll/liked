@@ -23,7 +23,7 @@ local colors = gui_container.colors
 
 ------------------------------------------------------------------------ init
 
-local screen, isFirst = ...
+local screen = ...
 local rx, ry = graphic.getResolution(screen)
 
 local statusWindow = graphic.createWindow(screen, 1, 1, rx, 1)

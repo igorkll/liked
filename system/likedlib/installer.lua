@@ -102,7 +102,8 @@ function installer.install_likedbox(vfs)
         "likedlib",
         "firmware",
         "sysdata",
-        "branch.cfg"
+        "branch.cfg",
+        "core/recovery.lua"
     }
     
     local systemFolder = installer.selfPath("system")
