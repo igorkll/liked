@@ -20,12 +20,11 @@ local function runScreenSaver(force)
         if not screensaver.current(screen) then
             t:suspend()
             screensaver.waitStart(screen)
-            oldScreenSaverTime = computer.uptime()
             t:resume()
-        else
-            oldScreenSaverTime = computer.uptime()
         end
     end
+
+    oldScreenSaverTime = computer.uptime()
 end
 
 vkeyboard.hook(screen, function ()

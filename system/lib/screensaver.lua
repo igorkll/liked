@@ -3,41 +3,43 @@ local thread = require("thread")
 local event = require("event")
 local graphic = require("graphic")
 local programs = require("programs")
+local logs = require("logs")
+local cache = require("cache")
 local screensaver = {}
 
-local enabled = {}
-local current = {}
+cache.static.screensaver_enabled = cache.static.screensaver_enabled or {}
+cache.static.screensaver_current = cache.static.screensaver_current or {}
 
 function screensaver.isEnabled(screen)
-    return enabled[screen] == true or enabled[screen] == nil
+    return cache.static.screensaver_enabled[screen] == true or cache.static.screensaver_enabled[screen] == nil
 end
 
 function screensaver.setEnabled(screen, state)
-    enabled[screen] = not not state
+    cache.static.screensaver_enabled[screen] = not not state
 end
 
 
 function screensaver.current(screen)
-    return current[screen]
+    return cache.static.screensaver_current[screen]
 end
 
 function screensaver.start(screen, path)
     local lpath = path or require("gui_container").screenSaverPath
     if lpath and fs.exists(lpath) then
         local clear = graphic.screenshot(screen)
-        local th = thread.createBackground(programs.load(lpath), screen)
+        local th = thread.createBackground(logs.check(programs.load(lpath)) or function() end, screen)
         th.parentData.screen = screen
         th:resume()
         event.yield()
         event.listen(nil, function (eventName, uuid)
             if uuid == screen and (eventName == "touch" or eventName == "drag" or eventName == "scroll") then
-                current[screen] = nil
+                cache.static.screensaver_current[screen] = nil
                 th:kill()
                 clear()
                 return false
             end
         end)
-        current[screen] = th
+        cache.static.screensaver_current[screen] = th
     end
 end
 
@@ -47,7 +49,6 @@ function screensaver.waitStart(screen, path)
         event.sleep()
     end
 end
-
 
 screensaver.unloadable = true
 return screensaver

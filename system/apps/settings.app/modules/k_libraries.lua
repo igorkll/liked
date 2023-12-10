@@ -50,9 +50,7 @@ local selector = thread.create(function ()
         if num then
             local name = raw_names[num]
             if name then
-                package.loaded[name] = nil
-                package.cache[name] = nil
-                _G[name] = nil
+                package.unload(name, true)
             end
         end
 

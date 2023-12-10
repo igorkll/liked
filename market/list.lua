@@ -396,12 +396,23 @@ local list = {
         name = "slideshow",
         version = "1",
         vendor = "logic",
-        description = "allows you to select a folder with images in .t2p format and display them at a specified interval",
+        description = "allows you to select a folder with images in .t2p format and display them at a specified interval\nit works in black and white mode on the monitors of the second shooting range. It is recommended to use it only on third-tier monitors",
         minDiskSpace = 64,
         
         path = "/data/apps/slideshow.app",
         urlPrimaryPart = selfurlpart .. "/apps/slideshow.app/",
         files = {"main.lua", "icon.t2p", "config.cfg", "hue.t2p"}
+    },
+    {
+        name = "videoplayer",
+        version = "1",
+        vendor = "logic",
+        description = "",
+        minDiskSpace = 64,
+        
+        path = "/data/apps/videoplayer.app",
+        urlPrimaryPart = selfurlpart .. "/apps/videoplayer.app/",
+        files = {"main.lua", "icon.t2p", "config.cfg"}
     }
 }
 
