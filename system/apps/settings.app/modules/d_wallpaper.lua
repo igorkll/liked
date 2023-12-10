@@ -58,8 +58,13 @@ local wallpaperLight = layout:createSeek(18, 4, 25, nil, nil, nil, (registry.wal
 local wallpaperLightText = layout:createText(18 + 25 + 1, 4)
 local wallpaperLightReset = layout:createButton(18 + 25 + 8 + 5, 4, 3, 1, nil, nil, "R")
 
-layout:createText(18, 6, nil, "* It is not recommended to use wallpaper")
-layout:createText(18, 7, nil, "light on tier2 screens")
+local text1 = layout:createText(18, selectWindow.sizeY - 2, nil, "* It is not recommended to use wallpaper")
+local text2 = layout:createText(18, selectWindow.sizeY - 1, nil, "light on tier2 screens")
+
+if graphic.getDepth(screen) == 8 then
+    text1.hidden = true
+    text2.hidden = true
+end
 
 local function updateText()
     wallpaperLightText.text = "light: " .. tostring(math.round(wallpaperLight.value * 200)) .. "%     "
