@@ -535,10 +535,12 @@ while true do
         if statusWindowEventData[3] >= statusWindow.sizeX - 2 and statusWindowEventData[4] == statusWindow.sizeY then
             break
         elseif statusWindowEventData[3] <= 3 and statusWindowEventData[4] == statusWindow.sizeY then
-            gui.contextFunc(screen, 2, 2, {
-                "custom urls"
+            gui.blackCall(gui.contextFunc, screen, 2, 2, {
+                "custom urls",
+                forceMode and "disable force mode" or "enable force mode"
             }, {
-                not registry.disableCustomMarketUrls
+                not registry.disableCustomMarketUrls,
+                not registry.disableMarketForceMode
             }, {
                 function ()
                     exec("edit", screen, nickname, customPath)
@@ -548,6 +550,10 @@ while true do
                     verCache = {}
                     downloaded = {}
                     listOffSet = 1
+                    draw(true)
+                end,
+                function ()
+                    forceMode = not forceMode
                     draw(true)
                 end
             })

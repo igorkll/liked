@@ -17,6 +17,7 @@ local programs = require("programs")
 local clipboard = require("clipboard")
 local parser = require("parser")
 local gui = {}
+gui.blackMode = false
 
 local smartShadowsColors = {
     colorslib.lightGray, --1)  white
@@ -600,7 +601,19 @@ function gui.contextStrs(strs)
     return drawStrs
 end
 
+function gui.blackCall(func, ...)
+    local oldBlackState = gui.blackMode
+    gui.blackMode = true
+    func(...)
+    gui.blackMode = oldBlackState
+end
+
 function gui.context(screen, posX, posY, strs, active)
+    local white, black = colors.white, colors.black
+    if gui.blackMode then
+        white, black = black, white
+    end
+
     local gpu = graphic.findGpu(screen)
     local drawStrs = gui.contextStrs(strs)
     local posX, posY, sizeX, sizeY = gui.contextPos(screen, posX, posY, drawStrs)
@@ -618,12 +631,12 @@ function gui.context(screen, posX, posY, strs, active)
                 str = sep
             end
 
-            local color = colors.white
-            local color2 = colors.black
+            local color = white
+            local color2 = black
             if (not active or active[i]) and not isSep then
                 if selected == i then
                     color = colors.blue
-                    color2 = colors.white
+                    color2 = white
                 end
                 window:set(1, i, color, color2, str .. (string.rep(" ", sizeX - unicode.wlen(str))))
             else
