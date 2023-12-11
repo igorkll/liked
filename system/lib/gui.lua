@@ -673,6 +673,16 @@ function gui.contextAuto(screen, posX, posY, strs, active)
     return table.unpack(result)
 end
 
+function gui.contextFunc(screen, posX, posY, strs, active, funcs)
+    local posX, posY, sizeX, sizeY = gui.contextPos(screen, posX, posY, strs)
+    local clear = graphic.screenshot(screen, posX, posY, sizeX + 2, sizeY + 1)
+    local _, num = gui.context(screen, posX, posY, strs, active)
+    clear()
+    if num and funcs and funcs[num] then
+        funcs[num]()
+    end
+end
+
 function gui.drawtext(screen, posX, posY, foreground, text)
     local gpu = graphic.findGpu(screen)
 

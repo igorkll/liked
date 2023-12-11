@@ -177,7 +177,11 @@ function liked.postInstall(screen, nickname, path)
     return true
 end
 
-function liked.uninstall(screen, nickname, path)
+function liked.uninstall(screen, nickname, path, hide)
+    if not hide then
+        gui.status(screen, nil, nil, "uninstalling \"" .. paths.name(path) .. "\"")
+    end
+
     local unregPath = paths.concat(path, "unreg.reg")
     if fs.exists(unregPath) and not fs.isDirectory(unregPath) then
         liked.assert(screen, liked.execute("applyReg", screen, nickname, unregPath, true))

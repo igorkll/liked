@@ -108,7 +108,7 @@ local function modifyList(lst)
     
         if not v.uninstall then
             function v.uninstall(self)
-                liked.uninstall(screen, nickname, self.path)
+                liked.uninstall(screen, nickname, self.path, true)
             end
         end
     
@@ -153,21 +153,21 @@ end
 
 local function doList(path)
     if fs.exists(path) then
-        local result = {pcall(getFile, path)}
+        local result = {fs.readFile(path)}
         if result[1] then
-            local result = {pcall(split2, unicode, result[2], {"\n"})}
-            if result[1] then
-                if type(result[2]) == "table" then
-                    for _, url in ipairs(result[2]) do
+            local result2 = {pcall(split2, unicode, result[1], {"\n"})}
+            if result2[1] then
+                if type(result2[2]) == "table" then
+                    for _, url in ipairs(result2[2]) do
                         if url ~= "" then
                             table.insert(urls, url)
                         end
                     end
                 else
-                    gui.warn(screen, nil, nil, "list-type-err: " .. (type(result[2]) or "unknown"))
+                    gui.warn(screen, nil, nil, "list-type-err: " .. (type(result2[2]) or "unknown"))
                 end
             else
-                gui.warn(screen, nil, nil, "fail to parse list: " .. (result[2] or "unknown"))
+                gui.warn(screen, nil, nil, "fail to parse list: " .. (result2[2] or "unknown"))
             end
         else
             gui.warn(screen, nil, nil, "fail to read list: " .. (result[2] or "unknown"))
@@ -191,7 +191,7 @@ local function reList()
     for index, url in ipairs(urls) do
         local id = tostring(index) .. "."
     
-        local data, err = getInternetFile(url)
+        local data, err = internet.get(url)
         if data then
             local code, err = load(data, "=list" .. index, "t", _ENV)
             if code then
@@ -292,7 +292,7 @@ local function applicationLabel(data, x, y)
         if not downloaded[img] then
             if not fs.exists(img) or cacheReg[data.name or "unknown"] ~= data.version then
                 draw("/system/icons/app.t2p")
-                fs.writeFile(img, getInternetFile(data.icon))
+                fs.writeFile(img, internet.get(data.icon))
                 cacheReg[data.name or "unknown"] = data.version
             end
             downloaded[img] = true
@@ -316,8 +316,8 @@ local function applicationLabel(data, x, y)
             if windowEventData[3] >= (applabel.sizeX - 13) and windowEventData[3] < ((applabel.sizeX - 13) + 13) and windowEventData[4] == 3 and data.license then
                 local license = "/tmp/market/" .. (data.name or "unknown") .. ".txt"
 
-                gui_status(screen, nil, nil, "license loading...")
-                assert(saveFile(license, assert(getInternetFile(data.license))))
+                gui.status(screen, nil, nil, "license loading...")
+                assert(fs.writeFile(license, assert(internet.get(data.license))))
                 exec("edit", screen, nickname, license, true)
                 fs.remove(license)
 
@@ -328,23 +328,23 @@ local function applicationLabel(data, x, y)
                 if instCache[data] and verCache[data] ~= data.version then
                     if supportErr then
                         gui.warn(screen, nil, nil, supportErr)
-                    elseif gui_yesno(screen, nil, nil, "update" .. formattedName) then
-                        gui_status(screen, nil, nil, "updating" .. formattedName2)
+                    elseif gui.yesno(screen, nil, nil, "update" .. formattedName) then
+                        gui.status(screen, nil, nil, "updating" .. formattedName2)
                         if data.uninstallOnUpdate then
                             data:uninstall()
                         end
                         data:install()
                     end
                 elseif instCache[data] then
-                    if gui_yesno(screen, nil, nil, "uninstall" .. formattedName) then
-                        gui_status(screen, nil, nil, "uninstalling" .. formattedName2)
+                    if gui.yesno(screen, nil, nil, "uninstall" .. formattedName) then
+                        gui.status(screen, nil, nil, "uninstalling" .. formattedName2)
                         data:uninstall()
                     end
                 else
                     if supportErr then
                         gui.warn(screen, nil, nil, supportErr)
-                    elseif gui_yesno(screen, nil, nil, "install" .. formattedName) then
-                        gui_status(screen, nil, nil, "installation" .. formattedName2)
+                    elseif gui.yesno(screen, nil, nil, "install" .. formattedName) then
+                        gui.status(screen, nil, nil, "installation" .. formattedName2)
                         data:install()
                     end
                 end
@@ -371,9 +371,9 @@ local function appInfo(data)
     local appLabel
     local function ldraw()
         statusWindow:clear(colors.gray)
-        statusWindow:set(3, 1, colors.gray, colors.white, title)
+        statusWindow:set(5, 1, colors.gray, colors.white, title)
         statusWindow:set(statusWindow.sizeX - 2, statusWindow.sizeY, colors.red, colors.white, " X ")
-        statusWindow:set(1, statusWindow.sizeY, colors.red, colors.white, "<")
+        statusWindow:set(1, statusWindow.sizeY, colors.red, colors.white, " < ")
         barRedraw()
 
         window:clear(colors.white)
@@ -395,7 +395,7 @@ local function appInfo(data)
 
         local statusWindowEventData = statusWindow:uploadEvent(eventData)    
         if statusWindowEventData[1] == "touch" then
-            if statusWindowEventData[3] == 1 and statusWindowEventData[4] == statusWindow.sizeY then
+            if statusWindowEventData[3] <= 3 and statusWindowEventData[4] == statusWindow.sizeY then
                 break
             end
             if statusWindowEventData[3] >= statusWindow.sizeX - 2 and statusWindowEventData[4] == statusWindow.sizeY then
@@ -435,12 +435,8 @@ local appLabels = {}
 local function drawStatus()
     statusWindow:clear(colors.gray)
     statusWindow:set(statusWindow.sizeX - 2, statusWindow.sizeY, colors.red, colors.white, " X ")
-    if not registry.disableCustomMarketUrls then
-        statusWindow:set(1, statusWindow.sizeY, colors.orange, colors.white, "CUSTOM")
-        statusWindow:set(8, 1, colors.gray, colors.white, title)
-    else
-        statusWindow:set(2, 1, colors.gray, colors.white, title)
-    end
+    statusWindow:set(1, statusWindow.sizeY, colors.lightGray, colors.gray, "...")
+    statusWindow:set(5, 1, colors.gray, colors.white, title)
     barRedraw()
 end
 
@@ -538,15 +534,23 @@ while true do
     if statusWindowEventData[1] == "touch" then
         if statusWindowEventData[3] >= statusWindow.sizeX - 2 and statusWindowEventData[4] == statusWindow.sizeY then
             break
-        elseif statusWindowEventData[3] <= 6 and statusWindowEventData[4] == statusWindow.sizeY and not registry.disableCustomMarketUrls then
-            exec("edit", screen, nickname, customPath)
-            gui_status(screen, nil, nil, "list updating...")
-            reList()
-            instCache = {}
-            verCache = {}
-            downloaded = {}
-            listOffSet = 1
-            draw(true)
+        elseif statusWindowEventData[3] <= 3 and statusWindowEventData[4] == statusWindow.sizeY then
+            gui.contextFunc(screen, 2, 2, {
+                "custom urls"
+            }, {
+                not registry.disableCustomMarketUrls
+            }, {
+                function ()
+                    exec("edit", screen, nickname, customPath)
+                    gui.status(screen, nil, nil, "list updating...")
+                    reList()
+                    instCache = {}
+                    verCache = {}
+                    downloaded = {}
+                    listOffSet = 1
+                    draw(true)
+                end
+            })
         end
     end
 
