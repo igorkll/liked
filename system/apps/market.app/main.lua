@@ -520,15 +520,21 @@ end
 
 local oldSel
 while true do
+    ::continue::
     local eventData = {computer.pullSignal()}
     local statusWindowEventData = statusWindow:uploadEvent(eventData)
     local windowEventData = window:uploadEvent(eventData)
 
     if listOffSet == 1 then
-        if searchRead.uploadEvent(windowEventData) or (not searchRead.getAllowUse() and oldSel) then
+        if searchRead.uploadEvent(windowEventData) or (not searchRead.getAllowUse() and oldSel) or (searchRead.getAllowUse() and windowEventData[1] == "scroll") then
+            searchRead.setAllowUse(false)
+            searchRead.redraw()
             draw(true)
+            oldSel = searchRead.getAllowUse()
+            goto continue
+        else
+            oldSel = searchRead.getAllowUse()
         end
-        oldSel = searchRead.getAllowUse()
     end
 
     if statusWindowEventData[1] == "touch" then
