@@ -44,6 +44,7 @@
 /system/bin/paint.lua
 /system/bin/shell.lua
 /system/bin/unpackArchive.lua
+/system/bin/xpkgInstall.lua
 /system/calls/gui_filepicker.lua
 /system/firmware/luabios/code.lua
 /system/firmware/luabios/label.txt

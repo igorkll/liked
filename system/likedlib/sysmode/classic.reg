@@ -10,5 +10,6 @@
     disableMarketForceMode = true,
     disableCustomFiles = true,
     disableCustomPrograms = true,
+    disableCustomPackages = true,
     settingsBlackList = {"eeprom", "buffer", "power", "libraries"}
 }

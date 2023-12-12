@@ -12,6 +12,7 @@ local event = require("event")
 local registry = require("registry")
 local gui = require("gui")
 local gui_container = require("gui_container")
+local archiver = require("archiver")
 local apps = {}
 
 function apps.load(name, screen, nickname)
@@ -304,6 +305,34 @@ function apps.uninstall(screen, nickname, path, hide)
     end
 
     registry.save()
+    return true
+end
+
+local function appList()
+    local list = {}
+    for _, name in ipairs(fs.list("/data/apps")) do
+        list[name] = true
+    end
+    return list
+end
+
+function apps.install(screen, nickname, path, hide)
+    if not hide then
+        local name = gui.hideExtension(screen, path)
+        if not gui.yesno(screen, nil, nil, "Are you sure you want to install the \"" .. name .."\" package?") then return false, "cancel" end
+        gui.status(screen, nil, nil, "installing \"" .. name .. "\"...")
+    end
+
+    local oldAppList = appList()
+    local ok, err = archiver.unpack(path, "/data")
+    if not ok then return nil, err end
+    for appName in pairs(appList()) do --тут есть проблема, если через xpkg обновить приложения, то postInstall не запуститься
+        if not oldAppList[appName] then
+            local fullpath = paths.concat("/data/apps", appName)
+            apps.postInstall(screen, nickname, fullpath)
+        end
+    end
+
     return true
 end
 

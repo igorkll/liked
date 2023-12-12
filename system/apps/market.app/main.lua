@@ -15,11 +15,10 @@ local sysdata = require("sysdata")
 local apps = require("apps")
 
 local cacheReg = registry.new("/data/cache/market/versions.dat")
-if not registry.libVersions then
-    registry.libVersions = {}
-end
-
 local colors = gui_container.colors
+
+if not registry.libVersions then registry.libVersions = {} end
+if not registry.appVersions then registry.appVersions = {} end
 
 ------------------------------------
 
@@ -95,36 +94,33 @@ local function modifyList(lst)
     end
 
     for i, v in ipairs(lst) do
-        local versionpath = paths.concat(v.path, "version.dat")
-    
         if not v.getVersion then
-            function v.getVersion(self)
-                if fs.exists(versionpath) then
-                    return fs.readFile(versionpath)
-                else
-                    return "unknown"
-                end
+            function v:getVersion()
+                return registry.appVersions[self.name] or "unknown"
             end
         end
     
         if not v.uninstall then
-            function v.uninstall(self)
+            function v:uninstall()
                 apps.uninstall(screen, nickname, self.path, true)
             end
         end
     
         if not v.isInstalled then
-            function v.isInstalled(self)
+            function v:isInstalled()
                 return fs.exists(self.path)
             end
         end
-    
-        local _install = v.install or function (self)
-            fs.makeDirectory(self.path)
-            for _, name in ipairs(self.files or {"icon.t2p", "main.lua"}) do
-                download(paths.concat(self.path, name), self.urlPrimaryPart .. name)
+        
+        if not v.install then
+            function v:install()
+                fs.makeDirectory(self.path)
+                for _, name in ipairs(self.files or {"icon.t2p", "main.lua"}) do
+                    download(paths.concat(self.path, name), self.urlPrimaryPart .. name)
+                end
             end
         end
+
         function v.install(self)
             if v.libs then
                 for _, name in ipairs(v.libs) do
@@ -137,12 +133,9 @@ local function modifyList(lst)
                 end
             end
 
-            save(versionpath, self.version)
-            _install(self)
-            if v.postInstall then
-                v:postInstall()
-            end
-
+            v:install()
+            if v.postInstall then v:postInstall() end
+            registry.appVersions[self.name] = self.version
             apps.postInstall(screen, nickname, self.path)
         end
     
