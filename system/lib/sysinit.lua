@@ -87,10 +87,10 @@ function sysinit.initScreen(screen)
     pcall(component.invoke, screen, "turnOn")
 
     local mx, my = sysinit.getResolution(screen)
-
     graphic.setDepth(screen, graphic.maxDepth(screen))
-    graphic.setResolution(screen, mx, my)
+    graphic.setPaletteColor(15, 0)
     graphic.clear(0)
+    graphic.setResolution(screen, mx, my)
     graphic.forceUpdate(screen)
     sysinit.applyPalette(sysinit.initPalPath, screen)
 end
