@@ -8,6 +8,7 @@ local liked = require("liked")
 local bootloader = require("bootloader")
 local programs = require("programs")
 local eepromlib = require("eeprom")
+local apps = require("apps")
 
 local colors = gui_container.colors
 
@@ -219,7 +220,7 @@ function editButton:onClick()
 
         while true do
             upTask:suspend()
-            assert(liked.execute("edit", screen, nil, file, storageRoState))
+            assert(apps.execute("edit", screen, nil, file, storageRoState))
             upTask:resume()
             local newdata = assert(fs.readFile(file))
             if data == newdata then
@@ -246,7 +247,7 @@ function editDataButton:onClick()
 
         while true do
             upTask:suspend()
-            assert(liked.execute("edit", screen, nil, file))
+            assert(apps.execute("edit", screen, nil, file))
             upTask:resume()
             local newdata = assert(fs.readFile(file))
             if data == newdata then

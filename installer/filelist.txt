@@ -75,6 +75,7 @@
 /system/installer/logo.lua
 /system/installer/main.lua
 /system/lib/advLabeling.lua
+/system/lib/apps.lua
 /system/lib/autorun.lua
 /system/lib/braille.lua
 /system/lib/calls.lua

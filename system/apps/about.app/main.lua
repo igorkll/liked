@@ -7,6 +7,7 @@ local fs = require("filesystem")
 local paths = require("paths")
 local programs = require("programs")
 local liked = require("liked")
+local apps = require("apps")
 
 local colors = gui_container.colors
 local screen, nickname = ...
@@ -116,15 +117,15 @@ while true do
     if windowEventData[1] == "touch" and windowEventData[3] >= 2 and windowEventData[3] <= 19 then
         barTh:suspend()
         if windowEventData[4] == 7 then
-            local result = {liked.execute(paths.concat(paths.path(system.getSelfScriptPath()), "componentlist.lua"), screen)}
+            local result = {apps.execute(paths.concat(paths.path(system.getSelfScriptPath()), "componentlist.lua"), screen)}
             assert(table.unpack(result))
             if result[1] and result[2] then
                 break
             end
         elseif windowEventData[4] == 9 then
-            liked.execute("edit", screen, nickname, "/system/LICENSE", true)
+            apps.execute("edit", screen, nickname, "/system/LICENSE", true)
         elseif windowEventData[4] == 11 then
-            liked.execute("edit", screen, nickname, "/system/core/LICENSE", true)
+            apps.execute("edit", screen, nickname, "/system/core/LICENSE", true)
         end
         barTh:resume()
         draw()

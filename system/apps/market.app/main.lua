@@ -12,6 +12,7 @@ local liked = require("liked")
 local gui = require("gui")
 local format = require("format")
 local sysdata = require("sysdata")
+local apps = require("apps")
 
 local cacheReg = registry.new("/data/cache/market/versions.dat")
 if not registry.libVersions then
@@ -40,7 +41,7 @@ local barTh, barRedraw = liked.drawUpBarTask(screen, true, colors.gray, -2)
 
 local function exec(...)
     barTh:suspend()
-    local result = {liked.execute(...)}
+    local result = {apps.execute(...)}
     barTh:resume()
     return table.unpack(result)
 end
@@ -108,7 +109,7 @@ local function modifyList(lst)
     
         if not v.uninstall then
             function v.uninstall(self)
-                liked.uninstall(screen, nickname, self.path, true)
+                apps.uninstall(screen, nickname, self.path, true)
             end
         end
     
@@ -142,7 +143,7 @@ local function modifyList(lst)
                 v:postInstall()
             end
 
-            liked.postInstall(screen, nickname, self.path)
+            apps.postInstall(screen, nickname, self.path)
         end
     
         if not v.icon and v.urlPrimaryPart then

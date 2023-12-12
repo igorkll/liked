@@ -18,6 +18,7 @@ local screensaver = require("screensaver")
 local image = require("image")
 local palette = require("palette")
 local warnings = require("warnings")
+local apps = require("apps")
 
 local colors = gui_container.colors
 
@@ -369,14 +370,14 @@ end
 local function execute(name, nickname, ...)
     timerEnable = false
     gui_status(screen, nil, nil, "loading...")
-    liked.bigAssert(screen, liked.execute(name, screen, nickname, ...))
+    liked.bigAssert(screen, apps.execute(name, screen, nickname, ...))
     draw()
     timerEnable = true
     redrawFlag = nil
 end
 
 local function uninstallApp(path, nickname)
-    liked.uninstall(screen, nickname, path)
+    apps.uninstall(screen, nickname, path)
 end
 
 local function fileDescriptor(icon, alternative, nickname) --открывает файл, сам решает через какую программу это сделать

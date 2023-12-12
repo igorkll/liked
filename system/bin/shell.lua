@@ -6,11 +6,12 @@ local computer = require("computer")
 local registry = require("registry")
 local lastinfo = require("lastinfo")
 local vkeyboard = require("vkeyboard")
+local apps = require("apps")
 local screen = ...
 
 local t = thread.create(function ()
-    assert(liked.execute("login", screen))
-    assert(liked.execute("desktop", screen))
+    assert(apps.execute("login", screen))
+    assert(apps.execute("desktop", screen))
 end)
 t:resume()
 

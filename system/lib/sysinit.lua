@@ -98,7 +98,7 @@ end
 function sysinit.runShell(screen, customShell)
     local thread = require("thread")
     local registry = require("registry")
-    local liked = require("liked")
+    local apps = require("apps")
 
     sysinit.initScreen(screen)
     
@@ -110,7 +110,7 @@ function sysinit.runShell(screen, customShell)
     end
 
     if sysinit.screenThreads[screen] then sysinit.screenThreads[screen]:kill() end
-    local t = thread.create(assert(liked.loadApp(shellName, screen)))
+    local t = thread.create(assert(apps.load(shellName, screen)))
     t.parentData.screen = screen
     t:resume() --поток по умалчанию спит
     sysinit.screenThreads[screen] = t
@@ -189,6 +189,7 @@ function sysinit.init(box)
 
     local thread = require("thread")
     local liked = require("liked")
+    local apps = require("apps")
     local registry = require("registry")
     local event = require("event")
     local system = require("system")
@@ -263,7 +264,7 @@ function sysinit.init(box)
     require("autorun").autorun()
     
     if programs.find("preinit") then
-        local ok, err = liked.execute("preinit")
+        local ok, err = apps.execute("preinit")
         if not ok then
             event.errLog(err)
         end
