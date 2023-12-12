@@ -845,7 +845,7 @@ local function doIcon(windowEventData)
                                 local state = gui_yesno(screen, nil, nil, "remove \"" .. v.name .. "\"?")
                                 clear2()
                                 if state then
-                                    gui.status(screen, nil, nil, "removing...")
+                                    gui.status(screen, nil, nil, "removing \"" .. v.name .. "\"...")
                                     liked.assert(screen, fs.remove(v.path))
                                     draw()
                                 end

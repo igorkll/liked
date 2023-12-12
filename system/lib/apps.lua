@@ -278,7 +278,7 @@ end
 
 function apps.uninstall(screen, nickname, path, hide)
     if not hide then
-        gui.status(screen, nil, nil, "uninstalling \"" .. gui.hideExtension(screen, path) .. "\"")
+        gui.status(screen, nil, nil, "uninstalling \"" .. gui.hideExtension(screen, path) .. "\"...")
     end
 
     local unregPath = paths.concat(path, "unreg.reg")
