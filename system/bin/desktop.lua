@@ -194,7 +194,7 @@ local function draw(old, check) --вызывает все перерисовки
         return
     end
 
-    gui_status(screen, nil, nil, "loading file-list...")
+    gui.status(screen, nil, nil, "loading file-list...")
 
     icons = {}
     local count = 0
@@ -358,18 +358,18 @@ event.timer(10, function()
 end, math.huge)
 
 local function warn(str)
-    local clear = saveZone(screen)
-    gui_warn(screen, nil, nil, str or "unknown error")
+    local clear = gui.saveZone(screen)
+    gui.warn(screen, nil, nil, str or "unknown error")
     clear()
 end
 
 local function warnNoClear(str)
-    gui_warn(screen, nil, nil, str or "unknown error")
+    gui.warn(screen, nil, nil, str or "unknown error")
 end
 
 local function execute(name, nickname, ...)
     timerEnable = false
-    gui_status(screen, nil, nil, "loading...")
+    gui.status(screen, nil, nil, "loading...")
     liked.bigAssert(screen, apps.execute(name, screen, nickname, ...))
     draw()
     timerEnable = true

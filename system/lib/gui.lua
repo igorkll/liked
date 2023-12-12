@@ -771,8 +771,16 @@ function gui.select(screen, cx, cy, label, actions, scroll, noCloseButton)
         redrawButton()
     end
 
-    local function getCol(idx)
-        return sel == idx and colors.blue or colors.black
+    local function getCol(idx, color)
+        return sel == idx and colors.blue or color
+    end
+
+    local function parseAction(action)
+        if type(action) == "table" then
+            return action[1], action[2]
+        else
+            return action, colors.black
+        end
     end
 
     local function draw(pos)
@@ -786,13 +794,15 @@ function gui.select(screen, cx, cy, label, actions, scroll, noCloseButton)
         for index, action in ipairs(actions) do
             local y = (index + 1) - scroll
             if y >= 2 and y < window.sizeY then
+                local astr, acol = parseAction(action)
+
                 if not pos or pos == index then
-                    window:fill(1, y, window.sizeX - 1, 1, getCol(index), colors.white, " ")
-                    window:set(2, y, getCol(index), colors.white, action)
+                    window:fill(1, y, window.sizeX - 1, 1, getCol(index, acol), colors.white, " ")
+                    window:set(2, y, getCol(index, acol), colors.white, astr)
                     lastLine = y
                 end
 
-                addrs[y] = action
+                addrs[y] = astr
                 addrsIdx[y] = index
             end
         end
@@ -815,12 +825,14 @@ function gui.select(screen, cx, cy, label, actions, scroll, noCloseButton)
         for index, action in ipairs(actions) do
             local y = (index + 1) - scroll
             if y >= 2 and y < window.sizeY then
+                local astr, acol = parseAction(action)
+
                 if y == 2 then
-                    window:fill(1, y, window.sizeX - 1, 1, getCol(index), colors.white, " ")
-                    window:set(2, y, getCol(index), colors.white, action)
+                    window:fill(1, y, window.sizeX - 1, 1, getCol(index, acol), colors.white, " ")
+                    window:set(2, y, getCol(index, acol), colors.white, astr)
                 end
 
-                addrs[y] = action
+                addrs[y] = astr
                 addrsIdx[y] = index
             end
         end
@@ -838,13 +850,15 @@ function gui.select(screen, cx, cy, label, actions, scroll, noCloseButton)
         for index, action in ipairs(actions) do
             local y = (index + 1) - scroll
             if y >= 2 and y < window.sizeY then
+                local astr, acol = parseAction(action)
+
                 if y == window.sizeY - 1 then
-                    window:fill(1, y, window.sizeX, 1, getCol(index), 0, " ")
-                    window:set(2, y, getCol(index), colors.white, action)
+                    window:fill(1, y, window.sizeX, 1, getCol(index, acol), 0, " ")
+                    window:set(2, y, getCol(index, acol), colors.white, astr)
                     noDraw = true
                 end
 
-                addrs[y] = action
+                addrs[y] = astr
                 addrsIdx[y] = index
             end
         end
@@ -868,7 +882,7 @@ function gui.select(screen, cx, cy, label, actions, scroll, noCloseButton)
                 end
             elseif windowEventData[3] >= window.sizeX - 9 and windowEventData[3] < window.sizeX and windowEventData[4] == window.sizeY then
                 if sel then
-                    return sel, scroll, windowEventData[5], windowEventData
+                    return sel, scroll, windowEventData[5], windowEventData, true
                 end
             end
         end
