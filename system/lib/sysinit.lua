@@ -83,15 +83,18 @@ end
 function sysinit.initScreen(screen)
     local graphic = require("graphic")
     local component = require("component")
-
     pcall(component.invoke, screen, "turnOn")
 
+    
     local mx, my = sysinit.getResolution(screen)
+
     graphic.setDepth(screen, graphic.maxDepth(screen))
+    graphic.setResolution(screen, mx, my)
+
     graphic.setPaletteColor(15, 0)
     graphic.clear(screen, 15, true)
-    graphic.setResolution(screen, mx, my)
     graphic.forceUpdate(screen)
+
     sysinit.applyPalette(sysinit.initPalPath, screen)
 end
 
