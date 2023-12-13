@@ -112,15 +112,12 @@ local function modifyList(lst)
             end
         end
         
-        if not v.install then
-            function v:install()
-                fs.makeDirectory(self.path)
-                for _, name in ipairs(self.files or {"icon.t2p", "main.lua"}) do
-                    download(paths.concat(self.path, name), self.urlPrimaryPart .. name)
-                end
+        local _install = v.install or function(self)
+            fs.makeDirectory(self.path)
+            for _, name in ipairs(self.files or {"icon.t2p", "main.lua"}) do
+                download(paths.concat(self.path, name), self.urlPrimaryPart .. name)
             end
         end
-
         function v.install(self)
             if v.libs then
                 for _, name in ipairs(v.libs) do
@@ -133,7 +130,7 @@ local function modifyList(lst)
                 end
             end
 
-            v:install()
+            _install(self)
             if v.postInstall then v:postInstall() end
             registry.appVersions[self.name] = self.version
             apps.postInstall(screen, nickname, self.path)
