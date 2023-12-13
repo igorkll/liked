@@ -540,6 +540,22 @@ local function doIcon(windowEventData)
 
                             table.insert(strs, "  unmount")
                             table.insert(active, true)
+
+                            local ejectDrive
+                            for address in component.list("disk_drive", true) do
+                                local methods = component.methods(address)
+                                if methods.eject ~= nil and methods.media ~= nil then
+                                    local media = component.invoke(address, "media")
+                                    if media and media == v.fs.address then
+                                        ejectDrive = address
+                                        break
+                                    end
+                                end
+                            end
+
+                            table.insert(strs, "  eject")
+                            table.insert(active, not not ejectDrive)
+
                             local posX, posY = window:toRealPos(windowEventData[3], windowEventData[4])
 
                             --posX, posY = findPos(posX, posY, 23, screenshotY, rx, ry)
@@ -560,6 +576,8 @@ local function doIcon(windowEventData)
                             elseif str == "  unmount" then
                                 fs.umount(v.path)
                                 draw()
+                            elseif str == "  eject" then
+                                pcall(component.invoke, ejectDrive, "eject")
                             elseif str == "  create dump" then
                                 local archiver = require("archiver")
                                 local clear = saveBigZone(screen)

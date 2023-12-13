@@ -765,7 +765,7 @@ function gui.select(screen, cx, cy, label, actions, scroll, noCloseButton)
             window:set(2, 1, colors.lightGray, colors.white, label)
         end
         if not noCloseButton then
-            window:set(window.sizeX, 1, colors.red, colors.white, "X")
+            window:set(window.sizeX - 2, 1, colors.red, colors.white, " X ")
         end
         window:fill(1, window.sizeY, window.sizeX, 1, colors.lightGray, 0, " ")
         redrawButton()
@@ -876,7 +876,7 @@ function gui.select(screen, cx, cy, label, actions, scroll, noCloseButton)
         local windowEventData = window:uploadEvent(eventData)
 
         if windowEventData[1] == "touch" then
-            if windowEventData[3] == window.sizeX and windowEventData[4] == 1 then
+            if windowEventData[3] >= window.sizeX - 2 and windowEventData[4] == 1 then
                 if not noCloseButton then
                     return nil, scroll, windowEventData[5], windowEventData
                 end
