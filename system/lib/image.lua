@@ -46,7 +46,18 @@ function image.draw(screen, path, x, y, wallpaperMode, forceFullColor, lightMul)
     local sx = string.byte(read(1))
     local sy = string.byte(read(1))
     local t3paletteSupport = read(1) == "3"
-    read(7)
+    if read(1) == "f" then
+        forceFullColor = true
+    end
+    local skipPalette
+    if read(1) == "p" then
+        skipPalette = true
+    end
+    read(5)
+
+    if skipPalette then
+        read(16 * 3)
+    end
 
     local function norm(x, y, text)
         if x <= 0 then
@@ -161,6 +172,23 @@ function image.draw(screen, path, x, y, wallpaperMode, forceFullColor, lightMul)
     end
 
     graphic.updateFlag(screen)
+end
+
+function image.readPalette(path)
+    local file = fs.open(path, "rb")
+    file.read(4)
+    local isPal = file.read(1) == "p"
+    file.read(5)
+
+    if isPal then
+        local palette = {}
+
+        for i = 0, 15 do
+            table.insert(palette, colorslib.blend(file.read(1), file.read(1), file.read(1)))
+        end
+
+        return palette
+    end
 end
 
 function image.size(path)
