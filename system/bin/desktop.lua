@@ -194,7 +194,7 @@ local function draw(old, check) --вызывает все перерисовки
         return
     end
 
-    gui.status(screen, nil, nil, "loading file-list...")
+    --gui.status(screen, nil, nil, "loading file-list...")
 
     icons = {}
     local count = 0
@@ -369,7 +369,7 @@ end
 
 local function execute(name, nickname, ...)
     timerEnable = false
-    gui.status(screen, nil, nil, "loading...")
+    --gui.status(screen, nil, nil, "loading...")
     liked.bigAssert(screen, apps.execute(name, screen, nickname, ...))
     draw()
     timerEnable = true
@@ -938,8 +938,8 @@ local function doIcon(windowEventData)
                 copyObject = nil
                 isCut = false
             end
+
             local readonly = fs.get(userPath).isReadOnly()
-            
             local strs = {"  paste", "  mount", "  download file", true, "  new directory", "  new text-file", "  new image"}
             local actives = {not not copyObject and not readonly, true, not not component.list("internet")() and not readonly,   false,   not readonly,   not readonly,   not readonly}
 
@@ -966,13 +966,13 @@ local function doIcon(windowEventData)
             end
 
             local posX, posY, sizeX, sizeY = gui.contextPos(screen, posX, posY, strs)
-            local clear = screenshot(screen, posX, posY, sizeX + 2, sizeY + 1)
+            local clear = graphic.screenshot(screen, posX, posY, sizeX + 2, sizeY + 1)
             local str, num = gui.context(screen, posX, posY, strs, actives)
             clear()
             
             if str == "  new image" then --new image
-                local clear = saveZone(screen)
-                local name = gui_input(screen, nil, nil, "image name")
+                local clear = gui.saveZone(screen)
+                local name = gui.input(screen, nil, nil, "image name")
                 clear()
 
                 if type(name) == "string" then
@@ -988,7 +988,7 @@ local function doIcon(windowEventData)
                     end
                 end
             elseif str == "  mount" then
-                local clear = saveBigZone(screen)
+                local clear = gui.saveBigZone(screen)
                 local addr = gui.selectcomponent(screen, nil, nil, "filesystem")
                 clear()
                 
@@ -1010,8 +1010,8 @@ local function doIcon(windowEventData)
                     draw()
                 end
             elseif str == "  new directory" then --new directory
-                local clear = saveZone(screen)
-                local name = gui_input(screen, nil, nil, "directory name")
+                local clear = gui.saveZone(screen)
+                local name = gui.input(screen, nil, nil, "directory name")
                 clear()
 
                 if type(name) == "string" then
@@ -1046,7 +1046,6 @@ local function doIcon(windowEventData)
                 end
             elseif str == "  paste" then
                 local copyFlag = true --произойдет ли копирования
-
                 
                 local toPath = paths.concat(userPath, paths.name(copyObject))
                 local oneDir = paths.path(copyObject) == paths.path(toPath) --если копирования и вставка производиться из одной и той же директории
@@ -1082,9 +1081,11 @@ local function doIcon(windowEventData)
                 if copyFlag then
                     if paths.canonical(toPath) ~= paths.canonical(copyObject) then
                         local tname = isDir and "directory" or "file"
-                        gui_status(screen, nil, nil, isCut and ("moving the " .. tname .. "...") or ("copying the " .. tname .. "..."))
-                        if failCheck(fs.copy(copyObject, toPath)) and isCut then
-                            liked.assert(screen, fs.remove(copyObject))
+                        gui.status(screen, nil, nil, isCut and ("moving the " .. tname .. "...") or ("copying the " .. tname .. "..."))
+                        if isCut then
+                            failCheck(fs.rename(copyObject, toPath))
+                        else
+                            failCheck(fs.copy(copyObject, toPath))
                         end
                     end
 

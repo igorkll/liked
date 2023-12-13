@@ -1085,7 +1085,7 @@ function gui.selectcomponent(screen, cx, cy, types, allowAutoConfirm, control, c
                         if callbacks and callbacks.onEdit then
                             callbacks.onEdit()
                         end
-                        require("liked").execute("edit", screen, nil, tempfile, true)
+                        require("apps").execute("edit", screen, nil, tempfile, true)
                         if callbacks and callbacks.onCloseEdit then
                             callbacks.onCloseEdit()
                         end
