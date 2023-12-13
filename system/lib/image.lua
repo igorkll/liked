@@ -175,24 +175,22 @@ function image.draw(screen, path, x, y, wallpaperMode, forceFullColor, lightMul)
 end
 
 function image.readPalette(path)
-    local file = fs.open(path, "rb")
+    local file = fs.open(path, "rb", true)
     file.read(4)
     local isPal = file.read(1) == "p"
     file.read(5)
 
     if isPal then
         local palette = {}
-
         for i = 0, 15 do
             table.insert(palette, colorslib.blend(file.read(1), file.read(1), file.read(1)))
         end
-
         return palette
     end
 end
 
 function image.size(path)
-    local file = fs.open(path, "rb")
+    local file = fs.open(path, "rb", 4)
     local sx = string.byte(file.read(1))
     local sy = string.byte(file.read(1))
     file.close()
