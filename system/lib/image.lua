@@ -65,7 +65,7 @@ function image.draw(screen, path, x, y, wallpaperMode, forceFullColor, lightMul)
             colorByte = string.byte(read(1))
             local fullBack, fullFore
             if t3paletteSupport then
-                if gpu.getDepth() == 8 or forceFullColor then
+                if forceFullColor or gpu.getDepth() == 8 then
                     fullBack = image.t3colors[string.byte(read(1)) + 1]
                     fullFore = image.t3colors[string.byte(read(1)) + 1]
                 else

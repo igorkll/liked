@@ -88,26 +88,33 @@ function startButton:onClick()
                     local fullpath = paths.concat(path, name)
                     if paths.extension(name) == "t2p" then
                         local sx, sy = image.size(fullpath)
+                        local cropped
                         if not graphic.isValidResolution(screen, sx, sy) or not pcall(graphic.setResolution, screen, sx, sy) then
                             sx, sy = graphic.maxResolution(screen)
+                            cropped = true
                         end
 
                         if first then
-                            graphic.createWindow(screen, 1, 1, sx, sy):fill(1, 1, sx, sy, 0, 0, " ")
+                            graphic.fill(screen, 1, 1, sx, sy, 0, 0, " ")
                             graphic.forceUpdate(screen)
                             first = false
                         end
 
                         local startTime = computer.uptime()
-                        image.draw(screen, fullpath, 1, 1, nil, true)
+                        if cropped then
+                            local ix, iy = image.size(fullpath)
+                            image.draw(screen, fullpath, 1 - (ix / 2), 1 - (iy / 2), nil, true)
+                        else
+                            image.draw(screen, fullpath, 1, 1, nil, true)
+                        end
                         if waterMark.state then
                             gui.drawtext(screen, 2, sy - 3, 0xffffff, "Operating System     : likeOS & liked")
                             gui.drawtext(screen, 2, sy - 2, 0xffffff, "Application          : slideshow")
                             gui.drawtext(screen, 2, sy - 1, 0xffffff, "Developer In Discord : smlogic")
                         end
                         graphic.forceUpdate(screen)
+
                         local drawTime = computer.uptime() - startTime
-                        
                         local waitTime = config.interval - drawTime
                         if waitTime < 0.1 then waitTime = 0.1 end
                         os.sleep(waitTime)
