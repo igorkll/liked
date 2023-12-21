@@ -100,6 +100,11 @@ function startButton:onClick()
                             first = false
                         end
 
+                        if graphic.getDepth(screen) == 4 then
+                            if not image.applyPalette(screen, fullpath) then
+                                palette.blackWhite(screen, true)
+                            end
+                        end
                         local startTime = computer.uptime()
                         if cropped then
                             local ix, iy = image.size(fullpath)
