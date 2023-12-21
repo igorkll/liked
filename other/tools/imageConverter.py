@@ -148,6 +148,17 @@ def color_similarity2(color1, color2):
     similarity = 1 - normalized_distance
     return similarity
 
+def get_popular_colors(image_path):
+    image = cv2.imread(image_path)
+    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+    image = image.reshape(-1, 3)
+
+    color_counts = Counter(tuple(color) for color in image)
+    popular_colors = color_counts.most_common(16)
+
+    return popular_colors
+
+
 def parse_image_pixelwise(image_path):
     # Загрузка изображения
     image = cv2.imread(image_path, cv2.IMREAD_UNCHANGED)
@@ -206,7 +217,13 @@ def parse_image_pixelwise(image_path):
         else:
             file.write(b"\0")
 
-        file.write(b"\0\0\0\0\0\0")
+        file.write(b"\0\0\0\0\0")
+
+        if addPal:
+            for color in get_popular_colors(image_path):
+                file.write(color[0])
+                file.write(color[1])
+                file.write(color[2])
 
         for y in range(0, height - block_height + 1, block_height):
             for x in range(0, width - block_width + 1, block_width):
