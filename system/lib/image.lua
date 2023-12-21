@@ -174,7 +174,7 @@ function image.draw(screen, path, x, y, wallpaperMode, forceFullColor, lightMul)
     graphic.updateFlag(screen)
 end
 
-function image.readPalette(path)
+function image.readPalette(path, fromZero)
     local file = fs.open(path, "rb", true)
     file.read(4)
     local isPal = file.read(1) == "p"
@@ -183,9 +183,22 @@ function image.readPalette(path)
     if isPal then
         local palette = {}
         for i = 0, 15 do
-            table.insert(palette, colorslib.blend(file.read(1), file.read(1), file.read(1)))
+            local color = colorslib.blend(file.read(1), file.read(1), file.read(1))
+            if fromZero then
+                palette[i] = color
+            else
+                table.insert(palette, color)
+            end
         end
         return palette
+    end
+end
+
+function image.applyPalette(screen, path)
+    local pal = image.readPalette(path)
+    if pal then
+        graphic.setPalette(screen, path)
+        return true
     end
 end
 
