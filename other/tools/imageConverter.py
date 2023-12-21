@@ -177,12 +177,12 @@ def parse_image_pixelwise(image_path):
     forceFull = False
     if fullAdd:
         forceFull = input("use full palette force? y/N: ") == "y"
-        print("full palette", fullAdd)
+        print("full palette", forceFull)
 
-    forceFull = False
+    addPal = False
     if fullAdd:
-        forceFull = input("add palette colors? y/N: ") == "y"
-        print("full palette", fullAdd)
+        addPal = input("add palette colors? y/N: ") == "y"
+        print("add palette", addPals)
 
     # Попиксельный обход и обработка изображения
     with open(output_path, 'wb') as file:
@@ -198,6 +198,11 @@ def parse_image_pixelwise(image_path):
 
         if forceFull:
             file.write(b"f")
+        else:
+            file.write(b"\0")
+
+        if addPal:
+            file.write(b"p")
         else:
             file.write(b"\0")
 
