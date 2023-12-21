@@ -183,7 +183,7 @@ function image.readPalette(path, fromZero)
     if isPal then
         local palette = {}
         for i = 0, 15 do
-            local color = colorslib.blend(file.read(1), file.read(1), file.read(1))
+            local color = colorslib.blend(string.byte(file.read(1)), string.byte(file.read(1)), string.byte(file.read(1)))
             if fromZero then
                 palette[i] = color
             else
@@ -197,7 +197,7 @@ end
 function image.applyPalette(screen, path)
     local pal = image.readPalette(path)
     if pal then
-        graphic.setPalette(screen, path)
+        graphic.setPalette(screen, pal)
         return true
     end
 end

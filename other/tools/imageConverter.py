@@ -193,7 +193,7 @@ def parse_image_pixelwise(image_path):
     addPal = False
     if fullAdd:
         addPal = input("add palette colors? y/N: ") == "y"
-        print("add palette", addPals)
+        print("add palette", addPal)
 
     # Попиксельный обход и обработка изображения
     with open(output_path, 'wb') as file:
@@ -221,9 +221,10 @@ def parse_image_pixelwise(image_path):
 
         if addPal:
             for color in get_popular_colors(image_path):
-                file.write(color[0])
-                file.write(color[1])
-                file.write(color[2])
+                print("palcolor", color)
+                file.write(bytes([color[0][0]]))
+                file.write(bytes([color[0][1]]))
+                file.write(bytes([color[0][2]]))
 
         for y in range(0, height - block_height + 1, block_height):
             for x in range(0, width - block_width + 1, block_width):
@@ -302,7 +303,7 @@ if __name__ == "__main__":
     try:
         image_path = False
         if len(sys.argv) < 2:
-            # image_path = "D:\\Users\\user\\Documents\\GitHub\liked\\tools\\test.png"
+            image_path = "C:\\Users\\Admin\\Documents\\GitHub\\liked\\other\\tools\\1.jpg"
             pass
         else:
             image_path = sys.argv[1]
