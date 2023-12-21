@@ -171,14 +171,18 @@ def parse_image_pixelwise(image_path):
     output_path, _ = os.path.splitext(image_path)
     output_path += ".t2p"
 
-    fullAdd = input("add full colors? Y/N: ")
-    if fullAdd == "Y":
-        fullAdd = True
-    elif fullAdd == "N":
-        fullAdd = False
-    else:
-        print("Incorrent Input")
-        return True
+    fullAdd = input("add full colors? y/N: ") == "y"
+    print("full palette", fullAdd)
+
+    forceFull = False
+    if fullAdd:
+        forceFull = input("use full palette force? y/N: ") == "y"
+        print("full palette", fullAdd)
+
+    forceFull = False
+    if fullAdd:
+        forceFull = input("add palette colors? y/N: ") == "y"
+        print("full palette", fullAdd)
 
     # Попиксельный обход и обработка изображения
     with open(output_path, 'wb') as file:
@@ -188,9 +192,16 @@ def parse_image_pixelwise(image_path):
         file.write((width // block_width).to_bytes(1, 'little'))
         file.write((height // block_height).to_bytes(1, 'little'))
         if fullAdd:
-            file.write(b"3\0\0\0\0\0\0\0")
+            file.write(b"3")
         else:
-            file.write(b"\0\0\0\0\0\0\0\0")
+            file.write(b"\0")
+
+        if forceFull:
+            file.write(b"f")
+        else:
+            file.write(b"\0")
+
+        file.write(b"\0\0\0\0\0\0")
 
         for y in range(0, height - block_height + 1, block_height):
             for x in range(0, width - block_width + 1, block_width):
