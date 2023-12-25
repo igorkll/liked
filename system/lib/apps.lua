@@ -94,6 +94,10 @@ function apps.load(name, screen, nickname)
                 oldScreenSaverState = screensaver.isEnabled(screen)
                 screensaver.setEnabled(screen, false)
             end
+
+            if configTbl.res then
+                graphic.setResolution(screen, table.unpack(configTbl.res))
+            end
         end
     end
 
@@ -106,7 +110,7 @@ function apps.load(name, screen, nickname)
                     palette.system(screen)
                 end
 
-                if configTbl.restoreResolution then
+                if configTbl.restoreResolution or configTbl.res then
                     graphic.setResolution(screen, sysinit.getResolution(screen))
                 end
             end

@@ -413,6 +413,18 @@ local list = {
         path = "/data/apps/videoplayer.app",
         urlPrimaryPart = selfurlpart .. "/apps/videoplayer.app/",
         files = {"main.lua", "icon.t2p", "config.cfg"}
+    },
+    {
+        name = "TPSmonitor",
+        version = "1",
+        vendor = "logic",
+        description = "",
+        minDiskSpace = 64,
+        libs = {"host"},
+        
+        path = "/data/apps/TPSmonitor.app",
+        urlPrimaryPart = selfurlpart .. "/apps/TPSmonitor.app/",
+        files = {"main.lua", "icon.t2p", "config.cfg"}
     }
 }
 
