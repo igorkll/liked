@@ -452,7 +452,7 @@ list.libs = {
     ["host"] = {
         url = selfurlpart .. "/libs/host.lua",
         vendor = "logic",
-        version = "1"
+        version = "2"
     }
 }
 

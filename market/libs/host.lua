@@ -7,6 +7,7 @@ function host.deltaTime()
     local delta
     local t1 = computer.uptime()
     repeat
+        pcall(computer.beep, 0)
         local t2 = computer.uptime()
         delta = t2 - t1
     until delta ~= 0
