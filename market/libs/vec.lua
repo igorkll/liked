@@ -38,6 +38,9 @@ vec.meta3 = {
     end,
     __len = function (vec)
         return vec:len()
+    end,
+    __call = function (self)
+        return vec.vec3(self.x, self.y, self.z)
     end
 }
 
@@ -77,6 +80,9 @@ vec.meta2 = {
     end,
     __len = function (vec)
         return vec:len()
+    end,
+    __call = function (self)
+        return vec.vec2(self.x, self.y)
     end
 }
 

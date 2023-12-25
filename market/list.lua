@@ -420,7 +420,7 @@ list.libs = {
     ["vec"] = {
         url = selfurlpart .. "/libs/vec.lua",
         vendor = "logic",
-        version = "1"
+        version = "2"
     },
     ["brainfuck"] = {
         url = selfurlpart .. "/libs/brainfuck.lua",
