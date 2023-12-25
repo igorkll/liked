@@ -72,7 +72,7 @@ end
 local deltatime = 0
 local fireworks = {}
 
-cone(0, 10, 2, colorsCount > 1 and 50, 3)
+cone(0, 10, 2, colorsCount > 1 and 300, 1)
 cone(10, 15, 2, colorsCount > 1 and 250, 1)
 cone(20, 10, 2)
 
