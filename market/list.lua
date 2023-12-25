@@ -287,7 +287,7 @@ local list = {
     },
     {
         name = "hologram",
-        version = "3",
+        version = "4",
         vendor = "logic",
         description = "this program allows you to display various effects on a holographic projector\nLevel 1 and 2 holographic projectors are supported\neffects can work in the background and on multiple projectors at the same time",
         minDiskSpace = 64,

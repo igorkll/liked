@@ -1,20 +1,8 @@
 local vec = require("vec")
 local holo = ...
-local buffer = {}
-for ix = 1, hx do
-    buffer[ix] = {}
-    for iy = 1, hy do
-        buffer[ix][iy] = {}
-        for iz = 1, hz do
-            buffer[ix][iy][iz] = 0
-        end
-    end
-end
 
 local function drawCircle_draw(y, x, z, color)
-    color = col(color)
-    holo.set(x, y, z, color)
-    buffer[x][y][z] = color
+    holo.set(x, y, z, col(color))
 end
 
 local function drawCircle_putpixel(w, cx, cy, x, y, color)
@@ -83,19 +71,23 @@ while true do
     local startTime = os.clock()
     for i = #fireworks, 1, -1 do
         local firework = fireworks[i]
-        dot(firework, buffer[math.round(firework.pos.x)][math.round(firework.pos.y)][math.round(firework.pos.z)])
+        dot(firework, 0)
         firework.pos = firework.pos + (firework.vec * deltatime)
-        if firework.pos.y >= firework.maxPos then
+        if firework.pos.x < 1 then firework.pos.x = 1 end
+        if firework.pos.z < 1 then firework.pos.z = 1 end
+        if firework.pos.x > hx then firework.pos.x = hx end
+        if firework.pos.z > hz then firework.pos.z = hz end
+        dot(firework, 3)
+        if firework.pos.y <= 1 then
             table.remove(fireworks, i)
-        else
+            firework.pos.y = 1
             dot(firework, 3)
         end
     end
-    if math.random(0, 5) == 0 then
+    if math.random(0, 2) == 0 then
         table.insert(fireworks, {
-            pos = vec.vec3(math.random(1, hx), 1, math.random(1, hz)),
-            vec = vec.vec3((math.random() - 0.5) * 4, math.random(20, 50), (math.random() - 0.5) * 4),
-            maxPos = math.random(hy / 2, hy - 2)
+            pos = vec.vec3(math.random(1, hx), hy, math.random(1, hz)),
+            vec = vec.vec3((math.random() - 0.5) * 16, -math.random(10, 20), (math.random() - 0.5) * 16)
         })
     end
     deltatime = math.max(0.1, os.clock() - startTime)
