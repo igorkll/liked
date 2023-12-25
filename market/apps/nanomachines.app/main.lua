@@ -372,10 +372,8 @@ while true do
     end
 
     if windowEventData[1] == "touch" then
-        if windowEventData[4] == 1 then
-            if windowEventData[3] == rx then
-                tryClose = true
-            end
+        if windowEventData[4] == 1 and windowEventData[3] >= rx - 2 then
+            tryClose = true
         end
         if windowEventData[4] == 2 then
             if windowEventData[3] >= 1 and windowEventData[3] <= 14 then

@@ -2,7 +2,7 @@ local vec = require("vec")
 local holo = ...
 
 local function drawCircle_draw(y, x, z, color, rand)
-    if not rand or math.random(0, 100) == 0 then
+    if not rand or math.random(0, rand) == 0 then
         holo.set(x, y, z, col(color))
     end
 end
@@ -51,10 +51,10 @@ end
 
 --------------------------------------------------
 
-local function cone(add, len, col, rand)
+local function cone(add, len, col, rand, randcol)
     for i = 0.5, len, 0.1 do
         if rand then
-            drawCircle(hx / 2, hy - i - 0 - add, hz / 2, i + 1, 1, true)
+            drawCircle(hx / 2, hy - i - 0 - add, hz / 2, i + 1, randcol, rand)
         end
         drawCircle(hx / 2, hy - i - 0 - add, hz / 2, i, col)
         drawCircle(hx / 2, hy - i - 1 - add, hz / 2, i, col)
@@ -66,14 +66,14 @@ local function get(pos)
 end
 
 local function dot(pos, color)
-    holo.set(math.round(pos.x), math.round(pos.y), math.round(pos.z), color)
+    holo.set(math.round(pos.x), math.round(pos.y), math.round(pos.z), col(color))
 end
 
 local deltatime = 0
 local fireworks = {}
 
-cone(0, 10, 2, true)
-cone(10, 15, 2, true)
+cone(0, 10, 2, colorsCount > 1 and 50, 3)
+cone(10, 15, 2, colorsCount > 1 and 250, 1)
 cone(20, 10, 2)
 
 while true do
@@ -102,7 +102,7 @@ while true do
     if true or math.random(0, 2) == 0 then
         table.insert(fireworks, {
             pos = vec.vec3(math.random(1, hx), hy, math.random(1, hz)),
-            vec = vec.vec3((math.random() - 0.5) * 16, -math.random(10, 20), (math.random() - 0.5) * 16)
+            vec = vec.vec3((math.random() - 0.5) * 4, -math.random(10, 20), (math.random() - 0.5) * 4)
         })
     end
 
