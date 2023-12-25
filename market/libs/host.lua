@@ -1,17 +1,14 @@
 local computer = require("computer")
 local bootloader = require("bootloader")
 local unicode = require("unicode")
+local natives = require("natives")
 local host = {}
 
 function host.deltaTime()
-    local delta
     local t1 = computer.uptime()
-    repeat
-        pcall(computer.beep, 0)
-        local t2 = computer.uptime()
-        delta = t2 - t1
-    until delta ~= 0
-    return delta
+    pcall(natives.computer.beep, 0)
+    local t2 = computer.uptime()
+    return t2 - t1
 end
 
 function host.tps()
