@@ -92,7 +92,11 @@ while true do
             firework.pos.y = 1
         end
         if firework.oldColor then
-            dot(firework.oldPos, firework.oldColor)
+            if firework.oldColor == 3 then
+                dot(firework.oldPos, 0)
+            else
+                dot(firework.oldPos, firework.oldColor)
+            end
         end
         firework.oldColor = get(firework.pos)
         firework.oldPos = firework.pos()
