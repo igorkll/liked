@@ -295,7 +295,7 @@ local list = {
 
         path = "/data/apps/hologram.app",
         urlPrimaryPart = selfurlpart .. "/apps/hologram.app/",
-        files = {"main.lua", "icon.t2p", "unreg.reg", "autorun.lua", "holograms/fireworks.lua", "holograms/fullbox.lua", "holograms/tree.lua"}
+        files = {"main.lua", "icon.t2p", "unreg.reg", "autorun.lua", "holograms/fireworks.lua", "holograms/fullbox.lua", "holograms/tree.lua", "holograms/christmasTree.lua"}
     },
     {
         name = "printer3d",
