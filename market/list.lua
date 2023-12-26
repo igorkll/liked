@@ -322,7 +322,7 @@ local list = {
         name = "chunkloader",
         version = "1",
         vendor = "logic",
-        description = "the program for managing the chankloader",
+        description = "the program for managing the chunkloader",
         minDiskSpace = 64,
 
         path = "/data/apps/chunkloader.app",
