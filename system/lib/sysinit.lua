@@ -83,19 +83,26 @@ end
 function sysinit.initScreen(screen)
     local graphic = require("graphic")
     local component = require("component")
-    pcall(component.invoke, screen, "turnOn")
-
     
+    pcall(component.invoke, screen, "turnOff")
+    
+    -- resolution & depth
     local mx, my = sysinit.getResolution(screen)
-
     graphic.setDepth(screen, graphic.maxDepth(screen))
     graphic.setResolution(screen, mx, my)
 
+    -- clear
     graphic.setPaletteColor(15, 0)
     graphic.clear(screen, 15, true)
     graphic.forceUpdate(screen)
 
+    -- palette
     sysinit.applyPalette(sysinit.initPalPath, screen)
+
+    -- show
+    graphic.clear(screen, 0x000000)
+    graphic.forceUpdate(screen)
+    pcall(component.invoke, screen, "turnOn")
 end
 
 function sysinit.runShell(screen, customShell)
@@ -253,7 +260,6 @@ function sysinit.init(box)
     ------------------------------------
 
     liked.applyBeepState()
-
     gui_container.refresh()
 
     ------------------------------------
@@ -267,10 +273,7 @@ function sysinit.init(box)
     require("autorun").autorun()
     
     if programs.find("preinit") then
-        local ok, err = apps.execute("preinit")
-        if not ok then
-            event.errLog(err)
-        end
+        apps.execute("preinit")
     end
 
     ------------------------------------
