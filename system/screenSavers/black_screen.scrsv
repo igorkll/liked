@@ -13,19 +13,23 @@ if depth > 1 then
     gpu.setPaletteColor(0, 0)
 end
 
-gpu.setBackground(0)
-gpu.setForeground(0)
+component.invoke(screen, "turnOff")
+gpu.setBackground(0, depth > 1)
+gpu.setForeground(0, depth > 1)
 gpu.fill(1, 1, mx, my, " ")
-graphic.forceUpdate(screen)
-
-component.invoke(screen, "turnOff") --energy saving
 
 local current = thread.current()
 current.kill = function (self)
+    gpu = graphic.findNativeGpu(screen)
+
     if oldPaletteColor then
-        graphic.findNativeGpu(screen).setPaletteColor(0, oldPaletteColor)
-        graphic.forceUpdate(screen)
+        gpu.setPaletteColor(0, oldPaletteColor)
     end
+    
+    gpu.setBackground(0x000000)
+    gpu.setForeground(0x000000)
+    gpu.fill(1, 1, mx, my, " ")
+
     component.invoke(screen, "turnOn")
     self:raw_kill()
 end
