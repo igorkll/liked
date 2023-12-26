@@ -110,6 +110,7 @@ function sysinit.initScreen(screen)
 
     if not sysinit.initedScreens[screen] then
         event.listen("key_down", function(_, uuid, c1, c2, nickname)
+            if not lastinfo.keyboards[screen] then return false end
             if table.exists(lastinfo.keyboards[screen], uuid) and c1 == 23 and c2 == 17 then
                 event.push("close", screen, nickname)
             end
