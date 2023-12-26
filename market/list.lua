@@ -441,12 +441,12 @@ local list = {
         name = "guidemo",
         version = "1",
         vendor = "logic",
-        description = "",
+        description = "demonstrates how the gui works in liked",
         minDiskSpace = 64,
         
         path = "/data/apps/guidemo.app",
         urlPrimaryPart = selfurlpart .. "/apps/guidemo.app/",
-        files = {"main.lua", "icon.t2p", "demo/switches.lua"}
+        files = {"main.lua", "icon.t2p", "demo/Switches.lua"}
     }
 }
 
