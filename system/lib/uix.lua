@@ -904,8 +904,8 @@ function manager:loop()
     end
 end
 
-function manager:create(...)
-    local layout = uix.createLayout(self.screen, ...)
+function manager:create(title, bgcolor, style)
+    local layout = uix.createLayout(self.screen, title, bgcolor, style)
     layout.allowAutoActive = nil
     if not self.firstLayout then self.firstLayout = layout end
     return layout

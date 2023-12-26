@@ -436,6 +436,17 @@ local list = {
         path = "/data/apps/clock.app",
         urlPrimaryPart = selfurlpart .. "/apps/clock.app/",
         files = {"main.lua", "icon.t2p", "config.cfg"}
+    },
+    {
+        name = "guidemo",
+        version = "1",
+        vendor = "logic",
+        description = "",
+        minDiskSpace = 64,
+        
+        path = "/data/apps/guidemo.app",
+        urlPrimaryPart = selfurlpart .. "/apps/guidemo.app/",
+        files = {"main.lua", "icon.t2p", "demo/switches.lua"}
     }
 }
 
