@@ -2,14 +2,13 @@ local host = require("host")
 local graphic = require("graphic")
 local colors = require("gui_container").colors
 local thread = require("thread")
-local lastinfo = require("lastinfo")
 local screen = ...
 
 local rx, ry = graphic.getResolution(screen)
 
 local exit
-thread.listen("key_down", function(_, uuid, c1, c2)
-    if table.exists(lastinfo.keyboards[screen], uuid) and c1 == 13 and c2 == 28 then
+thread.listen("close", function(_, uuid)
+    if screen == uuid then
         exit = true
     end
 end)

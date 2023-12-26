@@ -1,5 +1,6 @@
 local sysinit = {}
 sysinit.screenThreads = {}
+sysinit.initedScreens = {}
 sysinit.defaultPalettePath = "/system/palettes/light.plt"
 
 function sysinit.applyPalette(path, screen)
@@ -83,6 +84,8 @@ end
 function sysinit.initScreen(screen)
     local graphic = require("graphic")
     local component = require("component")
+    local event = require("event")
+    local lastinfo = require("lastinfo")
     
     pcall(component.invoke, screen, "turnOff")
     
@@ -103,6 +106,17 @@ function sysinit.initScreen(screen)
     graphic.clear(screen, 0x000000)
     graphic.forceUpdate(screen)
     pcall(component.invoke, screen, "turnOn")
+
+
+    if not sysinit.initedScreens[screen] then
+        event.listen("key_down", function(_, uuid, c1, c2, nickname)
+            if table.exists(lastinfo.keyboards[screen], uuid) and c1 == 23 and c2 == 17 then
+                event.push("close", screen, nickname)
+            end
+        end)
+
+        sysinit.initedScreens[screen] = true
+    end
 end
 
 function sysinit.runShell(screen, customShell)

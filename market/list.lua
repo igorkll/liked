@@ -418,12 +418,23 @@ local list = {
         name = "TPSmonitor",
         version = "1",
         vendor = "logic",
-        description = "",
+        description = "allows you to view changes in TPS dynamics on the server",
         minDiskSpace = 64,
         libs = {"host"},
         
         path = "/data/apps/TPSmonitor.app",
         urlPrimaryPart = selfurlpart .. "/apps/TPSmonitor.app/",
+        files = {"main.lua", "icon.t2p", "config.cfg"}
+    },
+    {
+        name = "clock",
+        version = "1",
+        vendor = "logic",
+        description = "displays the game and real time on the screen",
+        minDiskSpace = 64,
+        
+        path = "/data/apps/clock.app",
+        urlPrimaryPart = selfurlpart .. "/apps/clock.app/",
         files = {"main.lua", "icon.t2p", "config.cfg"}
     }
 }
