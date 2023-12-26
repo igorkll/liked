@@ -9,30 +9,21 @@ local parser = require("parser")
 local unicode = require("unicode")
 
 local screen, nickname, path = ...
-local cb = gui.selectcomponent(screen, nil, nil, {"command_block"}, true)
+local cb = gui.selectcomponentProxy(screen, nil, nil, {"command_block", "debug"}, true)
 if not cb then
     return
-else
-    cb = component.proxy(cb)
 end
 
-local _, drawUp = liked.drawFullUpBarTask(screen, "CommandBlock")
+local _, drawUp, callbacks = liked.drawFullUpBarTask(screen, "CommandBlock")
 local rx, ry = graphic.getResolution(screen)
 local term = require("term").create(screen, 1, 2, rx, ry - 1, true)
 term:clear()
 drawUp()
 
 local baseTh = thread.current()
-thread.create(function ()
-    while true do
-        local eventData = {event.pull()}
-        if eventData[1] == "touch" and eventData[2] == screen then
-            if eventData[3] == rx and eventData[4] == 1 then
-                baseTh:kill()
-            end
-        end
-    end
-end):resume()
+function callbacks.exit()
+    baseTh:kill()
+end
 
 local queue
 if path then
@@ -56,10 +47,17 @@ while true do
         end
     end
 
-    cb.setCommand(command)
-    local _, ret = cb.executeCommand()
-    if ret then
-        term:write(ret)
+    if cb.type == "debug" then
+        local ret = tostring(cb.runCommand(command))
+        if ret then
+            term:write(ret)
+        end
+    else
+        cb.setCommand(command)
+        local _, ret = cb.executeCommand()
+        if ret then
+            term:write(ret)
+        end
     end
     term:newLine()
     graphic.forceUpdate(screen)
