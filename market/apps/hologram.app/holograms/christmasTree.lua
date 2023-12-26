@@ -72,9 +72,28 @@ end
 local deltatime = 0
 local fireworks = {}
 
+for iy = 1, hy - 1 do
+    for idx = -1, 1 do
+        for idz = -1, 1 do
+            holo.set((hx / 2) + idx, iy, (hz / 2) + idz, col(2))
+        end
+    end
+end
+
+local function sdot(x, z)
+    holo.set((hz / 2) + x, hy, (hz / 2) + z, col(1))
+end
+
+sdot(0, 0)
+sdot(0, 1)
+sdot(0, -1)
+sdot(1, 0)
+sdot(-1, 0)
+
 cone(0, 10, 2, colorsCount > 1 and 300, 1)
 cone(10, 15, 2, colorsCount > 1 and 250, 1)
 cone(20, 10, 2)
+
 
 while true do
     local startTime = os.clock()
@@ -87,10 +106,13 @@ while true do
         if firework.pos.x > hx then firework.pos.x = hx end
         if firework.pos.z > hz then firework.pos.z = hz end
 
+        local removed
         if firework.pos.y <= 1 then
             table.remove(fireworks, i)
             firework.pos.y = 1
+            removed = true
         end
+
         if firework.oldColor then
             if firework.oldColor == 3 then
                 dot(firework.oldPos, 0)
@@ -98,9 +120,12 @@ while true do
                 dot(firework.oldPos, firework.oldColor)
             end
         end
-        firework.oldColor = get(firework.pos)
-        firework.oldPos = firework.pos()
-        dot(firework.pos, 3)
+
+        if not removed then
+            firework.oldColor = get(firework.pos)
+            firework.oldPos = firework.pos()
+            dot(firework.pos, 3)
+        end
     end
 
     if true or math.random(0, 2) == 0 then
