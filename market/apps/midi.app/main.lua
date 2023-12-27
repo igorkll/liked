@@ -1,36 +1,79 @@
+local gui = require("gui")
 local uix = require("uix")
 local midi = require("midi")
 
 local screen, nickname, path = ...
-local player = midi.create(path, midi.instruments())
+local player = path and midi.create(path, midi.instruments())
 
 local ui = uix.manager(screen)
 local layout = ui:create("Midi Player")
-local playButton = layout:createButton(2, 2, 16, 1, nil, nil, "Play")
-local pauseButton = layout:createButton(2, 4, 16, 1, nil, nil, "Pause")
-local stopButton = layout:createButton(2, 6, 16, 1, nil, nil, "Stop")
+local playButton = layout:createButton(2, 2, 16, 1, nil, nil, "Play", true)
+local pauseButton = layout:createButton(2, 4, 16, 1, nil, nil, "Pause", true)
+local stopButton = layout:createButton(2, 6, 16, 1, nil, nil, "Stop", true)
 
-local playerThread
-
-function playButton:onClick()
-    if not playerThread then
-        playerThread = player.createThread(true)
+local midfile = layout:createLabel(19, 2, 32, 1)
+local midth = layout:createLabel(19, 4, 32, 1)
+local function updateLabels()
+    if _G.playerObj then
+        midfile.text = gui.hideExtension(screen, _G.playerObj.filepath)
+    else
+        midfile.text = nil
     end
 
-    playerThread:resume()
+    if _G.playerThread then
+        local state = _G.playerThread:status()
+        if state == "running" then
+            midth.text = "playing"
+        elseif state == "suspended" then
+            midth.text = "paused"
+        else
+            midth.text = state
+        end
+    else
+        midth.text = "stopped"
+    end
+
+    midfile:draw()
+    midth:draw()
+end
+
+updateLabels()
+
+function playButton:onClick()
+    if not _G.playerThread then
+        if player then
+            _G.playerThread = player.createBackgroundThread(true)
+            _G.playerObj = player
+        else
+            gui.warn(screen, nil, nil, "open the midi file to start playback")
+            ui:draw()
+        end
+    end
+
+    if _G.playerThread then
+        _G.playerThread:resume()
+    end
+
+    updateLabels()
 end
 
 function pauseButton:onClick()
-    if playerThread then
-        playerThread:suspend()
+    if _G.playerThread then
+        _G.playerThread:suspend()
     end
+
+    updateLabels()
 end
 
 function stopButton:onClick()
-    if playerThread then
-        playerThread:kill()
-        playerThread = nil
+    if _G.playerThread then
+        _G.playerThread:kill()
+        _G.playerThread = nil
     end
+
+    _G.playerObj = nil
+
+    updateLabels()
 end
 
 ui:loop()

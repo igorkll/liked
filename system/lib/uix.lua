@@ -278,8 +278,10 @@ function objclass:draw()
 
         local x, y, sx, sy = self.x, self.y, self.sx, self.sy
         
+        local maxtextsize = self.sx
         local isRound = self.sy == 1 and self.gui.style == "round"
         if isRound then
+            maxtextsize = maxtextsize - 2
             local _, _, bg = self.gui.window:get(x, y)
             self.gui.window:fill(x + 1, y, sx - 2, sy, back, 0, " ")
             self.gui.window:set(x, y, bg, back, "◖")
@@ -289,6 +291,19 @@ function objclass:draw()
         end
 
         if self.text then
+            local dtext = self.text
+            local dlen = unicode.len(self.text)
+            if self.alignment == "right" then
+                if dlen > maxtextsize then
+                    dtext = unicode.sub(dtext, 1 + (dlen - maxtextsize), dlen)
+                end
+            else
+                if dlen > maxtextsize then
+                    dtext = unicode.sub(dtext, 1, maxtextsize)
+                end
+            end
+            dlen = unicode.len(dtext)
+
             local tx
             local ty = y + (math.round(sy / 2) - 1)
             if self.alignment == "left" then
@@ -297,14 +312,15 @@ function objclass:draw()
                     tx = tx + 1
                 end
             elseif self.alignment == "right" then
-                tx = (x + sx) - unicode.len(self.text)
+                tx = (x + sx) - dlen
                 if isRound then
                     tx = tx - 1
                 end
             else
-                tx = (x + math.round(sx / 2)) - math.round(unicode.len(self.text) / 2)
+                tx = (x + math.round(sx / 2)) - math.round(dlen / 2)
             end
-            self.gui.window:set(tx, ty, back, fore, self.text)
+
+            self.gui.window:set(tx, ty, back, fore, dtext)
         end
     elseif self.type == "switch" then
         local bg = self.state and self.enableColor or self.disableColor
@@ -457,6 +473,7 @@ function uix:createLabel(x, y, sx, sy, back, fore, text)
     obj.text = text
     uix.doColor(obj, back, fore)
     obj.alignment = "center"
+    obj.clamp = true
 
     table.insert(self.objs, obj)
     return obj
@@ -475,6 +492,7 @@ function uix:createButton(x, y, sx, sy, back, fore, text, autoRelease)
     obj.back2 = obj.fore
     obj.fore2 = obj.back
     obj.alignment = "center"
+    obj.clamp = true
 
     table.insert(self.objs, obj)
     return obj
@@ -595,6 +613,7 @@ function uix:createContext(x, y, sx, sy, back, fore, text, strs, funcs, actives)
     obj.text = text
     obj.state = false
     obj.alignment = "center"
+    obj.clamp = true
 
     obj.strs = strs or {}
     obj.funcs = funcs or {}
@@ -921,6 +940,12 @@ function manager:zoneSize()
     else
         local x, y = graphic.getResolution(self.screen)
         return x, y - 1
+    end
+end
+
+function manager:draw()
+    if self.current then
+        self.current:draw()
     end
 end
 
