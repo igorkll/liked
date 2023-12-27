@@ -14,16 +14,14 @@ end
 
 local lib = {}
 
-function lib.create(filepath, instruments, notemode, pitch, speed, noteduraction)
+function lib.create(filepath, instruments)
     local obj = {}
     obj.filepath = filepath
-    obj.speed = speed or 1
-    obj.noteduraction = noteduraction or speed or 1
-    obj.pitch = pitch or 1
     obj.instruments = instruments
-    obj.notemode = notemode or false
-    obj.min = false
-    obj.max = false
+
+    obj.speed = 1
+    obj.noteduraction = 1
+    obj.pitch = 1
 
     function obj.play()
         local component = require("component")
@@ -34,19 +32,13 @@ function lib.create(filepath, instruments, notemode, pitch, speed, noteduraction
         local instruments = obj.instruments
         local filename = obj.filepath
     
-        local function beepableFrequency(midiCode)
-            local freq
-            if obj.notemode then
-                freq = midiCode
+        local function beepableFrequency(midiCode, returnMidiCode)
+            local freq = note.freq(midiCode) * obj.pitch
+            if returnMidiCode then
+                return note.midi(freq)
             else
-                freq = note.freq(midiCode)
+                return freq
             end
-            freq = freq * obj.pitch
-            if obj.min and obj.max then
-                while freq < obj.min do freq = freq * 2 end
-                while freq > obj.max do freq = freq / 2 end
-            end
-            return freq
         end
     
         local f, reason = io.open(filename, "rb")
@@ -343,7 +335,7 @@ function lib.create(filepath, instruments, notemode, pitch, speed, noteduraction
                             if not duration then duration = 0 end
                             if not note then note = 1 end
                             if not channel then channel = "nil" end
-                            if channels[channel] and channels[channel](beepableFrequency(note), duration / obj.noteduraction) then
+                            if channels[channel] and channels[channel](beepableFrequency(note), beepableFrequency(note, true), duration / obj.noteduraction) then
                                 break
                             end
                         end

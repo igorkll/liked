@@ -447,6 +447,17 @@ local list = {
         path = "/data/apps/guidemo.app",
         urlPrimaryPart = selfurlpart .. "/apps/guidemo.app/",
         files = {"main.lua", "icon.t2p", "demo/Switches.lua"}
+    },
+    {
+        name = "midi",
+        version = "1",
+        vendor = "logic",
+        description = "allows to play midi files",
+        minDiskSpace = 64,
+        
+        path = "/data/apps/midi.app",
+        urlPrimaryPart = selfurlpart .. "/apps/midi.app/",
+        files = {"main.lua", "icon.t2p", "formats.cfg"}
     }
 }
 
