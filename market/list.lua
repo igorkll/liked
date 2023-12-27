@@ -458,7 +458,7 @@ local list = {
         
         path = "/data/apps/midi.app",
         urlPrimaryPart = selfurlpart .. "/apps/midi.app/",
-        files = {"main.lua", "icon.t2p", "formats.cfg"}
+        files = {"main.lua", "icon.t2p", "icon_1.t2p", "formats.cfg"}
     }
 }
 
