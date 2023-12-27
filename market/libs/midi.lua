@@ -3,6 +3,7 @@ local component = require("component")
 local computer = require("computer")
 local note = require("note")
 local bit32 = require("bit32")
+local fs = require("filesystem")
 
 local count = 0
 local function interrupt()
@@ -79,7 +80,7 @@ function lib.create(filepath, instruments)
             end
         end
     
-        local f, reason = io.open(filename, "rb")
+        local f, reason = fs.open(filename, "rb", true)
         if not f then
             return nil, reason
         end
@@ -408,4 +409,5 @@ function lib.create(filepath, instruments)
     return obj
 end
 
+lib.unloadable = true
 return lib
