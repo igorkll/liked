@@ -39,6 +39,7 @@ local function updateLabels()
 end
 updateLabels()
 
+local resetSettings = layout:createButton(2, ry - 7, 16, 1, nil, nil, "reset", true)
 layout:createText(2, ry - 5, nil, "speed   :")
 layout:createText(2, ry - 3, nil, "pitch   :")
 layout:createText(2, ry - 1, nil, "note len:")
@@ -64,6 +65,22 @@ local function writeSliders()
     end
 end
 readSliders()
+
+function resetSettings:onClick()
+    speedSeek.value = 0.5
+    pitchSeek.value = 0.5
+    noteLenSeek.value = 0.5
+
+    if _G.playerObj then
+        _G.playerObj.speed = speedSeek.value * 2
+        _G.playerObj.pitch = pitchSeek.value * 2
+        _G.playerObj.noteduraction = noteLenSeek.value * 2
+    end
+    
+    speedSeek:draw()
+    pitchSeek:draw()
+    noteLenSeek:draw()
+end
 
 function speedSeek:onSeek()
     writeSliders()

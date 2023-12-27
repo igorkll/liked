@@ -23,6 +23,26 @@ function lib.instruments()
     table.insert(instruments, function(freq, _, d)
         table.insert(beeps, {freq, d})
     end)
+
+    local iters = {}
+    local function getComponent(name, notRecurse)
+        if not iters[name] then
+            iters[name] = component.list(name, true)
+        end
+
+        local device = iters[name]()
+        if not device and not notRecurse then
+            iters[name] = nil
+            device = getComponent(name, true)
+        end
+        return device
+    end
+
+    local function clamp(freq)
+        if freq < 20 then return 20 end
+        if freq > 2000 then return 2000 end
+        return freq
+    end
     
     function instruments.flush()
         local devicesCount = 0
@@ -31,24 +51,26 @@ function lib.instruments()
         for address in component.list("beep", true) do devicesCount = devicesCount + 1 end
 
         if devicesCount > 0 then
-            for i = 1, #beeps do
-                local beep = beeps[i]
+            for k, beep in ipairs(beeps) do
+                local cbeep = getComponent("beep")
+                local note_block = getComponent("note_block")
+                local iron_noteblock = getComponent("iron_noteblock")
 
-                for address in component.list("note_block") do
-                    component.invoke(address, "trigger", (note.midi(beep[1]) + 6 - 60) % 24 + 1)
+                if cbeep then
+                    component.invoke(cbeep, "beep", {[clamp(beep[1])] = beep[2]})
                 end
 
-                for address in component.list("iron_noteblock") do
-                    component.invoke(address, "playNote", 1, (note.midi(beep[1]) + 6 - 60) % 24, 1)
+                if note_block then
+                    component.invoke(note_block, "trigger", (note.midi(beep[1]) + 6 - 60) % 24 + 1)
                 end
 
-                for address in component.list("beep") do
-                    component.invoke(address, "beep", {[beep[1]] = beep[2]})
+                if iron_noteblock then
+                    component.invoke(iron_noteblock, "playNote", 1, (note.midi(beep[1]) + 6 - 60) % 24, 1)
                 end
             end
         else
             for i = 1, #beeps do
-                computer.beep(beeps[i][1], beeps[i][2])
+                computer.beep(clamp(beeps[i][1]), beeps[i][2])
             end
         end
 
