@@ -3,6 +3,8 @@
 /system/main.lua
 /system/market_urls_dev.txt
 /system/market_urls_main.txt
+/system/media_urls_dev.txt
+/system/media_urls_main.txt
 /system/recoveryAccess.lua
 /system/recoveryScript.lua
 /system/registry.dat
@@ -17,6 +19,11 @@
 /system/apps/market.app/forceMode.lua
 /system/apps/market.app/icon.t2p
 /system/apps/market.app/main.lua
+/system/apps/mediastore.app/actions.cfg
+/system/apps/mediastore.app/custom.lua
+/system/apps/mediastore.app/forceMode.lua
+/system/apps/mediastore.app/icon.t2p
+/system/apps/mediastore.app/main.lua
 /system/apps/settings.app/icon.t2p
 /system/apps/settings.app/main.lua
 /system/apps/settings.app/shadow_demo.t2p
