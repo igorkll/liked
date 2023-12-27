@@ -7,8 +7,8 @@ local fs = require("filesystem")
 
 local oldInterruptTime = computer.uptime()
 local function interrupt()
-    if computer.uptime() - oldInterruptTime > 1 then
-        os.sleep()
+    if computer.uptime() - oldInterruptTime > 2 then
+        os.sleep(0)
         oldInterruptTime = computer.uptime()
     end
 end

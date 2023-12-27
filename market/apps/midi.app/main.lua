@@ -6,6 +6,7 @@ local screen, nickname, path = ...
 local player = path and midi.create(path, midi.instruments())
 
 local ui = uix.manager(screen)
+local rx, ry = ui:zoneSize()
 local layout = ui:create("Midi Player")
 local playButton = layout:createButton(2, 2, 16, 1, nil, nil, "Play", true)
 local pauseButton = layout:createButton(2, 4, 16, 1, nil, nil, "Pause", true)
@@ -36,8 +37,45 @@ local function updateLabels()
     midfile:draw()
     midth:draw()
 end
-
 updateLabels()
+
+layout:createText(2, 10, nil, "speed   :")
+layout:createText(2, 12, nil, "pitch   :")
+layout:createText(2, 14, nil, "note len:")
+local speedSeek = layout:createSeek(12, 10, rx - 12)
+local pitchSeek = layout:createSeek(12, 12, rx - 12)
+local noteLenSeek = layout:createSeek(12, 14, rx - 12)
+local function readSliders()
+    if _G.playerObj then
+        speedSeek.value = _G.playerObj.speed / 2
+        pitchSeek.value = _G.playerObj.pitch / 2
+        noteLenSeek.value = _G.playerObj.noteduraction / 2
+    else
+        speedSeek.value = 0.5
+        pitchSeek.value = 0.5
+        noteLenSeek.value = 0.5
+    end
+end
+local function writeSliders()
+    if _G.playerObj then
+        _G.playerObj.speed = speedSeek.value * 2
+        _G.playerObj.pitch = pitchSeek.value * 2
+        _G.playerObj.noteduraction = noteLenSeek.value * 2
+    end
+end
+readSliders()
+
+function speedSeek:onSeek()
+    writeSliders()
+end
+
+function pitchSeek:onSeek()
+    writeSliders()
+end
+
+function noteLenSeek:onSeek()
+    writeSliders()
+end
 
 function playButton:onClick()
     if not _G.playerThread then
@@ -55,6 +93,7 @@ function playButton:onClick()
     end
 
     updateLabels()
+    writeSliders()
 end
 
 function pauseButton:onClick()
@@ -72,7 +111,6 @@ function stopButton:onClick()
     end
 
     _G.playerObj = nil
-
     updateLabels()
 end
 
