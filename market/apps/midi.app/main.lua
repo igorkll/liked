@@ -17,12 +17,12 @@ function playButton:onClick()
         playerThread = player.createThread(true)
     end
 
-    playButton:resume()
+    playerThread:resume()
 end
 
 function pauseButton:onClick()
     if playerThread then
-        playButton:suspend()
+        playerThread:suspend()
     end
 end
 
