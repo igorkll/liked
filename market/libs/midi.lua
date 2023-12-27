@@ -5,12 +5,12 @@ local note = require("note")
 local bit32 = require("bit32")
 local fs = require("filesystem")
 
-local count = 0
+local oldInterruptTime = computer.uptime()
 local function interrupt()
-  count = count + 1
-  if count % 1024 == 0 then
-    os.sleep()
-  end
+    if computer.uptime() - oldInterruptTime > 1 then
+        os.sleep()
+        oldInterruptTime = computer.uptime()
+    end
 end
 
 -------------------------------------------------------
@@ -364,7 +364,7 @@ function lib.create(filepath, instruments)
             if hasEvent then
                 local delay = time.calcDelay(tick, lastTick) / obj.speed
                 -- delay % 0.05 == 0 doesn't seem to work
-                if math.floor(delay * 100 + 0.5) % 5 == 0 or true then
+                if delay > 0.05 then
                     os.sleep(delay)
                 else
                     -- Busy idle otherwise, because a sleep will take up to 50ms.
@@ -375,7 +375,7 @@ function lib.create(filepath, instruments)
                 lastTime = computer.uptime()
                 for _, track in ipairs(tracks) do
                     local event = track[tick]
-                    os.sleep(0)
+                    interrupt()
                     if event then
                         if type(event) == "number" then
                             time.mspb = event
