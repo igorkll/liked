@@ -3,7 +3,7 @@ local uix = require("uix")
 local midi = require("midi")
 
 local screen, nickname, path = ...
-local player = path and midi.create(path, midi.instruments())
+local player = _G.playerObj or (path and midi.create(path, midi.instruments()))
 
 local ui = uix.manager(screen)
 local rx, ry = ui:zoneSize()
@@ -76,7 +76,7 @@ function resetSettings:onClick()
         _G.playerObj.pitch = pitchSeek.value * 2
         _G.playerObj.noteduraction = noteLenSeek.value * 2
     end
-    
+
     speedSeek:draw()
     pitchSeek:draw()
     noteLenSeek:draw()
