@@ -17,16 +17,22 @@ local apps = require("apps")
 local cacheReg = registry.new("/data/cache/market/versions.dat")
 local colors = gui_container.colors
 
-if not registry.libVersions then registry.libVersions = {} end
-if not registry.appVersions then registry.appVersions = {} end
-
 ------------------------------------
 
 local screen, nickname, _, forceMode, mediaMode = ...
 
 local title = "Market"
+local urlsBase = "market_"
+local contentVersions
 if mediaMode then
+    if not registry.mediaVersions then registry.mediaVersions = {} end
+
     title = "Media Store"
+    urlsBase = "media_"
+    contentVersions = registry.mediaVersions
+else
+    if not registry.appVersions then registry.appVersions = {} end
+    contentVersions = registry.appVersions
 end
 
 local rx, ry
@@ -100,7 +106,7 @@ local function modifyList(lst)
     for i, v in ipairs(lst) do
         if not v.getVersion then
             function v:getVersion()
-                return registry.appVersions[self.name] or "unknown"
+                return contentVersions[self.name] or "unknown"
             end
         end
     
@@ -124,6 +130,8 @@ local function modifyList(lst)
         end
         function v.install(self)
             if v.libs then
+                if not registry.libVersions then registry.libVersions = {} end
+
                 for _, name in ipairs(v.libs) do
                     local info = glibs[name]
                     local path = paths.concat("/data/lib", name .. ".lua")
@@ -136,7 +144,7 @@ local function modifyList(lst)
 
             _install(self)
             if v.postInstall then v:postInstall() end
-            registry.appVersions[self.name] = self.version
+            contentVersions[self.name] = self.version
             apps.postInstall(screen, nickname, self.path)
         end
     
@@ -170,14 +178,14 @@ local function doList(path)
     end
 end
 
-local customPath = "/data/market_urls.txt"
+local customPath = "/data/" .. urlsBase .."urls.txt"
 
 local function reList()
     urls = {}
     if not registry.disableSystemMarketUrls then
-        doList("/system/market_urls_" .. sysdata.get("branch") .. ".txt")
+        doList("/system/" .. urlsBase .. "urls_" .. sysdata.get("branch") .. ".txt")
     end
-    doList("/vendor/market_urls.txt")
+    doList("/vendor/" .. urlsBase .. "urls.txt")
     if not registry.disableCustomMarketUrls then
         doList(customPath)
     end
