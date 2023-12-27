@@ -454,6 +454,7 @@ local list = {
         vendor = "logic",
         description = "allows to play midi files",
         minDiskSpace = 64,
+        libs = {"midi"},
         
         path = "/data/apps/midi.app",
         urlPrimaryPart = selfurlpart .. "/apps/midi.app/",
