@@ -1,6 +1,8 @@
 local thread = require("thread")
-
--------------------------------------------------------
+local component = require("component")
+local computer = require("computer")
+local note = require("note")
+local bit32 = require("bit32")
 
 local count = 0
 local function interrupt()
@@ -14,6 +16,47 @@ end
 
 local lib = {}
 
+function lib.instruments()
+    local instruments, beeps = {}, {}
+ 
+    table.insert(instruments, function(freq, _, d)
+        table.insert(beeps, {freq, d})
+    end)
+    
+    function instruments.flush()
+        local devicesCount = 0
+        for address in component.list("note_block", true) do devicesCount = devicesCount + 1 end
+        for address in component.list("iron_noteblock", true) do devicesCount = devicesCount + 1 end
+        for address in component.list("beep", true) do devicesCount = devicesCount + 1 end
+
+        if devicesCount > 0 then
+            for i = 1, #beeps do
+                local beep = beeps[i]
+
+                for address in component.list("note_block") do
+                    component.invoke(address, "trigger", (note.midi(beep[1]) + 6 - 60) % 24 + 1)
+                end
+
+                for address in component.list("iron_noteblock") do
+                    component.invoke(address, "playNote", noteInstrument, (note.midi(beep[1]) + 6 - 60) % 24, volume)
+                end
+
+                for address in component.list("beep") do
+                    component.invoke(address, "beep", {[beep[1]] = beep[2]})
+                end
+            end
+        else
+            for i = 1, #beeps do
+                computer.beep(beeps[i][1], beeps[i][2])
+            end
+        end
+
+        beeps = {}
+    end
+
+    return instruments
+end
+
 function lib.create(filepath, instruments)
     local obj = {}
     obj.filepath = filepath
@@ -24,11 +67,6 @@ function lib.create(filepath, instruments)
     obj.pitch = 1
 
     function obj.play()
-        local component = require("component")
-        local computer = require("computer")
-        local note = require("note")
-        local bit32 = require("bit32")
-
         local instruments = obj.instruments
         local filename = obj.filepath
     
@@ -290,11 +328,13 @@ function lib.create(filepath, instruments)
         f:close()
     
         --print("Playing " .. #tracks .. " tracks:")
+        --[[
         for _, track in ipairs(tracks) do
             if track.name then
                 --print(string.format("%s", track.name))
             end
         end
+        ]]
     
         local channels = {n=0}
         local lastTick, lastTime = 0, computer.uptime()
@@ -335,7 +375,7 @@ function lib.create(filepath, instruments)
                             if not duration then duration = 0 end
                             if not note then note = 1 end
                             if not channel then channel = "nil" end
-                            if channels[channel] and channels[channel](beepableFrequency(note), beepableFrequency(note, true), duration / obj.noteduraction) then
+                            if channels[channel] and channels[channel](beepableFrequency(note), beepableFrequency(note, true), duration / obj.noteduraction, track) then
                                 break
                             end
                         end
