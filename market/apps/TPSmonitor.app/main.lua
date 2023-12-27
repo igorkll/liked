@@ -6,10 +6,11 @@ local screen = ...
 
 local rx, ry = graphic.getResolution(screen)
 
-local exit
+local baseTh = thread.current()
 thread.listen("close", function(_, uuid)
     if screen == uuid then
-        exit = true
+        baseTh:kill()
+        return false
     end
 end)
 
@@ -27,9 +28,11 @@ local function getTpsColor(tps)
     end
 end
 
+local checktime = 0.1
+
 graphic.clear(screen, colors.black)
 while true do
-    local tps = host.tps()
+    local tps = host.tps(checktime)
     local color = getTpsColor(tps)
 
     graphic.fill(screen, 1, 1, rx, 1, colors.black, 0, " ")
@@ -41,9 +44,6 @@ while true do
     graphic.copy(screen, 1, 2, rx, ry, -1, 0)
     
     graphic.update(screen)
-    os.sleep(0.5)
 
-    if exit then
-        break
-    end
+    checktime = 2
 end

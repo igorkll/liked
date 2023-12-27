@@ -2,17 +2,18 @@ local computer = require("computer")
 local bootloader = require("bootloader")
 local unicode = require("unicode")
 local natives = require("natives")
+local time = require("time")
 local host = {}
 
-function host.deltaTime()
-    local t1 = computer.uptime()
-    pcall(natives.computer.beep, 0)
-    local t2 = computer.uptime()
-    return t2 - t1
+function host.deltaTime(checktime)
+    local t1 = time.getRealTime() / 1000
+    os.sleep(checktime or 1)
+    local t2 = time.getRealTime() / 1000
+    return (t2 - t1) / ((checktime or 1) * 20)
 end
 
-function host.tps()
-    return 1 / host.deltaTime()
+function host.tps(checktime)
+    return 1 / host.deltaTime(checktime)
 end
 
 function host.worldFolder()

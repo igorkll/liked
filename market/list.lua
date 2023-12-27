@@ -474,6 +474,11 @@ list.libs = {
     ["host"] = {
         url = selfurlpart .. "/libs/host.lua",
         vendor = "logic",
+        version = "3"
+    },
+    ["midi"] = {
+        url = selfurlpart .. "/libs/midi.lua",
+        vendor = "logic",
         version = "2"
     }
 }
