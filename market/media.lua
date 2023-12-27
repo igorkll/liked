@@ -19,7 +19,7 @@ local list = {
         
         path = "/data/userdata/midipack",
         urlPrimaryPart = selfurlpart .. "/media/midipack/",
-        files = {"aSongAboutHares.mid", "icon.t2p", "theIslandOfBadLuck.mid"}
+        files = {"icon.t2p", "aSongAboutHares.mid", "theIslandOfBadLuck.mid", "duckTalesTheme.mid", "GazaStripJava.mid"}
     }
 }
 
