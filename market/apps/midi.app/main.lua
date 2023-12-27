@@ -39,12 +39,12 @@ local function updateLabels()
 end
 updateLabels()
 
-layout:createText(2, 10, nil, "speed   :")
-layout:createText(2, 12, nil, "pitch   :")
-layout:createText(2, 14, nil, "note len:")
-local speedSeek = layout:createSeek(12, 10, rx - 12)
-local pitchSeek = layout:createSeek(12, 12, rx - 12)
-local noteLenSeek = layout:createSeek(12, 14, rx - 12)
+layout:createText(2, ry - 5, nil, "speed   :")
+layout:createText(2, ry - 3, nil, "pitch   :")
+layout:createText(2, ry - 1, nil, "note len:")
+local speedSeek   = layout:createSeek(12, ry - 5, rx - 12)
+local pitchSeek   = layout:createSeek(12, ry - 3, rx - 12)
+local noteLenSeek = layout:createSeek(12, ry - 1, rx - 12)
 local function readSliders()
     if _G.playerObj then
         speedSeek.value = _G.playerObj.speed / 2
