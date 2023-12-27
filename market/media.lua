@@ -11,15 +11,15 @@ end
 
 local list = {
     {
-        name = "midi",
+        name = "midipack",
         version = "1",
         vendor = "logic",
-        description = "allows to play midi files",
+        description = "a set of midi files",
         minDiskSpace = 64,
         
-        path = "/data/apps/midi.app",
-        urlPrimaryPart = selfurlpart .. "/apps/midi.app/",
-        files = {"main.lua", "icon.t2p", "formats.cfg"}
+        path = "/data/userdata/midipack",
+        urlPrimaryPart = selfurlpart .. "/media/midipack/",
+        files = {"aSongAboutHares.mid", "icon.t2p", "theIslandOfBadLuck.mid"}
     }
 }
 
