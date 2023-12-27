@@ -39,7 +39,7 @@ function lib.instruments()
                 end
 
                 for address in component.list("iron_noteblock") do
-                    component.invoke(address, "playNote", noteInstrument, (note.midi(beep[1]) + 6 - 60) % 24, volume)
+                    component.invoke(address, "playNote", 1, (note.midi(beep[1]) + 6 - 60) % 24, 1)
                 end
 
                 for address in component.list("beep") do
@@ -84,6 +84,18 @@ function lib.create(filepath, instruments)
         if not f then
             return nil, reason
         end
+
+        f.bufferRead = ""
+        local fread = f.read
+        function f.read(n)
+            if #f.bufferRead > 0 then
+                local s = f.bufferRead:sub(1, n)
+                f.bufferRead = f.bufferRead:sub(n + 1, #f.bufferRead)
+                return s
+            else
+                return fread(n)
+            end
+        end
     
         local function parseVarInt(s, bits) -- parses multiple bytes as an integer
             if not s then
@@ -99,11 +111,11 @@ function lib.create(filepath, instruments)
         end
     
         local function readChunkInfo() -- reads chunk header info
-            local id = f:read(4)
+            local id = f.read(4)
             if not id then
                 return
             end
-            return id, parseVarInt(f:read(4))
+            return id, parseVarInt(f.read(4))
         end
     
         -- Read the file header and with if file information.
@@ -112,9 +124,9 @@ function lib.create(filepath, instruments)
             return nil, "error parsing header (" .. id .. "/" .. size .. ")"
         end
     
-        local format = parseVarInt(f:read(2))
-        local tracks = parseVarInt(f:read(2))
-        local delta = parseVarInt(f:read(2))
+        local format = parseVarInt(f.read(2))
+        local tracks = parseVarInt(f.read(2))
+        local delta = parseVarInt(f.read(2))
     
         if format < 0 or format > 2 then
             return nil, "unknown format"
@@ -161,7 +173,8 @@ function lib.create(filepath, instruments)
             if id == "MTrk" then
                 local track = {}
                 local cursor = 0
-                local start, offset = f:seek(), 0
+                --local start, offset = f.seek(), 0
+                local start, offset = 0, 0
                 local inSysEx = false
                 local running = 0
     
@@ -169,7 +182,7 @@ function lib.create(filepath, instruments)
                     n = n or 1
                     if n > 0 then
                         offset = offset + n
-                        return f:read(n)
+                        return f.read(n)
                     end
                 end
                 local function readVariableLength()
@@ -296,8 +309,8 @@ function lib.create(filepath, instruments)
                         elseif metaType == 0x7F then -- Sequencer specific event
                         end
                     else
-                        f:seek("cur", -9)
-                        local area = f:read(16)
+                        f.seek("cur", -9)
+                        local area = f.read(16)
                         local dump = ""
                         for i = 1, area:len() do
                             dump = dump .. string.format(" %02X", area:byte(i))
@@ -316,17 +329,17 @@ function lib.create(filepath, instruments)
                 end
                 local delta = size - offset
                 if delta ~= 0 then
-                    f:seek("cur", delta)
+                    f.seek("cur", delta)
                 end
                 totalOffset = totalOffset + size
                 table.insert(tracks, track)
             else
                 --print(string.format("Encountered unknown chunk type %s, skipping.", id))
-                f:seek("cur", size)
+                f.seek("cur", size)
             end
         end
     
-        f:close()
+        f.close()
     
         --print("Playing " .. #tracks .. " tracks:")
         --[[
@@ -362,7 +375,7 @@ function lib.create(filepath, instruments)
                 lastTime = computer.uptime()
                 for _, track in ipairs(tracks) do
                     local event = track[tick]
-                    os.sleep()
+                    os.sleep(0)
                     if event then
                         if type(event) == "number" then
                             time.mspb = event
@@ -403,6 +416,14 @@ function lib.create(filepath, instruments)
             return thread.create(function() local ok, err = obj.loop() if not ok then error(err, 2) end end)
         else
             return thread.create(function() local ok, err = obj.play() if not ok then error(err, 2) end end)
+        end
+    end
+
+    obj.createBackgroundThread = function(loop)
+        if loop then
+            return thread.createBackground(function() local ok, err = obj.loop() if not ok then error(err, 2) end end)
+        else
+            return thread.createBackground(function() local ok, err = obj.play() if not ok then error(err, 2) end end)
         end
     end
 
