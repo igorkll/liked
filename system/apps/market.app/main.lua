@@ -22,9 +22,13 @@ if not registry.appVersions then registry.appVersions = {} end
 
 ------------------------------------
 
-local title = "Market"
+local screen, nickname, _, forceMode, mediaMode = ...
 
-local screen, nickname, _, forceMode = ...
+local title = "Market"
+if mediaMode then
+    title = "Media Store"
+end
+
 local rx, ry
 do
     local gpu = graphic.findGpu(screen)
