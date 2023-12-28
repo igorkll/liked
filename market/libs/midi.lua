@@ -145,17 +145,12 @@ function lib.instruments()
             end
 
             for sound, beeps in pairs(soundCards) do
-                if not initedSoundCards[sound.address] then
-                    for i = 1, 8 do
-                        sound.close(i)
-                    end
-                    sound.process()
-
-                    initedSoundCards[sound.address] = true
+                for i = 1, 8 do
+                    sound.close(i)
                 end
+                sound.process()
 
                 local maxTime = 0
-                local opened = {}
                 for i, beep in ipairs(beeps) do
                     local channel = noiseChannel[sound.address] or 1
                     noiseChannel[sound.address] = channel + 1
@@ -170,18 +165,8 @@ function lib.instruments()
                     sound.setVolume(channel, beep.volume or 1)
 
                     maxTime = math.max(maxTime, beep.time)
-                    opened[channel] = triangle
-                end
-
-                for i = 1, 8 do
-                    if not opened[i] then
-                        sound.close(i)
-                    end
                 end
                 sound.delay(maxTime * 1000)
-                for port in pairs(opened) do
-                    sound.close(port)
-                end
                 sound.process()
             end
         else
