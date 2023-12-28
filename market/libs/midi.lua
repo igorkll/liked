@@ -17,10 +17,20 @@ end
 
 local lib = {}
 
+local snoise = 1
+local sine = 2
+local triangle = 3
+local sawtooth = 4
 lib.programToWave = {
     
 }
 
+local piano = 0
+local drum = 1
+local sticks = 2
+local smallDrum = 3
+local bassGuitar = 4
+local piano2 = 5
 lib.programToNote = {
 
 }
@@ -78,7 +88,7 @@ function lib.instruments()
                 end
 
                 if iron_noteblock then
-                    component.invoke(iron_noteblock, "playNote", lib.programToNote[beep.track.program or 0] or 7, (beep.note + 6 - 60) % 24, beep.volume or 1)
+                    component.invoke(iron_noteblock, "playNote", lib.programToNote[beep.track.program or 0] or 0, (beep.note + 6 - 60) % 24, beep.volume or 1)
                 end
 
                 if noise then
