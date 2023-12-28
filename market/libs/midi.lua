@@ -17,23 +17,147 @@ end
 
 local lib = {}
 
-local snoise = 1
+local square = 1
 local sine = 2
 local triangle = 3
 local sawtooth = 4
-lib.programToWave = {
-    
+local midiToWave = {
+    [  2] = square,
+    [  4] = square,
+    [  5] = square,
+    -- celesta
+    [  8] = sine,
+    -- glockenspiel
+    [  9] = sawtooth,
+    -- music box
+    [ 10] = sine,
+    -- vibraphone
+    [ 11] = sine,
+    -- marimba
+    [ 12] = sine,
+    -- xylophone
+    [ 13] = sine,
+    -- tubular bells
+    [ 14] = sawtooth,
+    -- Guitars
+    [ 24] = triangle,
+    [ 25] = triangle,
+    [ 26] = triangle,
+    [ 27] = triangle,
+    [ 28] = triangle,
+    [ 29] = triangle,
+    [ 30] = triangle,
+    [ 31] = triangle,
+    -- Basses
+    [32] = sawtooth,
+    [33] = sawtooth,
+    [34] = sawtooth,
+    [35] = sawtooth,
+    [36] = sawtooth,
+    [37] = sawtooth,
+    [38] = sawtooth,
+    [39] = sawtooth,
+    -- Pipes
+    [72] = sine,
+    [73] = sine,
+    [74] = sine,
+    [75] = sine,
+    [76] = sine,
+    [77] = sine,
+    [78] = sine,
+    [79] = sine,
+    -- square wave
+    [80] = square,
+    -- banjo
+    [105] = square,
+    -- tinkle bell
+    [112] = sine,
 }
 
-local piano = 0
-local drum = 1
-local sticks = 2
-local smallDrum = 3
-local bassGuitar = 4
-local piano2 = 5
-lib.programToNote = {
+function lib.programToWave(program)
+    return midiToWave[program]
+end
 
+
+
+
+--piano = 0
+--drum = 1
+--sticks = 2
+--smallDrum = 3
+--bassGuitar = 4
+--xylophone = 5
+local glowstone = 3
+local iron_block = 0
+local gold_block = 0
+local bone_block = 2
+local white_wool = 0
+local acacia_log = 4
+local clay = 1
+local hay_block = 2
+local packed_ice = 0
+local emerald_block = 0
+
+local midiToNote = {
+    [  2] = glowstone,
+    [  4] = glowstone,
+    [  5] = glowstone,
+    -- celesta
+    [  8] = iron_block,
+    -- glockenspiel
+    [  9] = gold_block,
+    -- music box
+    [ 10] = iron_block,
+    -- vibraphone
+    [ 11] = iron_block,
+    -- marimba
+    [ 12] = iron_block,
+    -- xylophone
+    [ 13] = bone_block,
+    -- tubular bells
+    [ 14] = gold_block,
+    -- Guitars
+    [ 24] = white_wool,
+    [ 25] = white_wool,
+    [ 26] = white_wool,
+    [ 27] = white_wool,
+    [ 28] = white_wool,
+    [ 29] = white_wool,
+    [ 30] = white_wool,
+    [ 31] = white_wool,
+    -- Basses
+    [32] = acacia_log,
+    [33] = acacia_log,
+    [34] = acacia_log,
+    [35] = acacia_log,
+    [36] = acacia_log,
+    [37] = acacia_log,
+    [38] = acacia_log,
+    [39] = acacia_log,
+    -- Pipes
+    [72] = clay,
+    [73] = clay,
+    [74] = clay,
+    [75] = clay,
+    [76] = clay,
+    [77] = clay,
+    [78] = clay,
+    [79] = clay,
+    -- square wave
+    [80] = emerald_block,
+    -- banjo
+    [105] = hay_block,
+    -- tinkle bell
+    [112] = packed_ice,
 }
+
+function lib.programToNote(program)
+    return midiToNote[program]
+end
+
+
+
+
 
 function lib.instruments()
     local instruments, beeps = {}, {}
@@ -88,7 +212,7 @@ function lib.instruments()
                 end
 
                 if iron_noteblock then
-                    component.invoke(iron_noteblock, "playNote", lib.programToNote[beep.track.program or 0] or 0, (beep.note + 6 - 60) % 24, beep.volume or 1)
+                    component.invoke(iron_noteblock, "playNote", beep.track.program and lib.programToNote(beep.track.program) or 0, (beep.note + 6 - 60) % 24, beep.volume or 1)
                 end
 
                 if noise then
@@ -109,7 +233,7 @@ function lib.instruments()
                         noiseChannel[noise.address] = 2
                     end
 
-                    noise.setMode(channel, lib.programToWave[beep.track.program or 0] or 1)
+                    noise.setMode(channel, beep.track.program and lib.programToWave(beep.track.program) or 1)
                     noise.add(channel, clamp(beep.freq), beep.time)
                 end
 
