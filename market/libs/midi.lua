@@ -145,28 +145,25 @@ function lib.instruments()
             end
 
             for sound, beeps in pairs(soundCards) do
+                sound.clear()
                 for i = 1, 8 do
                     sound.close(i)
                 end
-                sound.process()
-
-                local maxTime = 0
-                for i, beep in ipairs(beeps) do
-                    local channel = noiseChannel[sound.address] or 1
-                    noiseChannel[sound.address] = channel + 1
+                
+                local delay = 0
+                for channel, beep in ipairs(beeps) do
                     if channel > 8 then
-                        channel = 1
-                        noiseChannel[sound.address] = 2
+                        break
                     end
 
-                    sound.open(channel)
                     sound.setWave(channel, beep.track.program and lib.programToWave(beep.track.program, true) or 1)
                     sound.setFrequency(channel, clamp(beep.freq))
                     sound.setVolume(channel, beep.volume or 1)
-
-                    maxTime = math.max(maxTime, beep.time)
+                    
+                    sound.open(channel)
+                    delay = math.max(delay, beep.time)
                 end
-                sound.delay(maxTime * 1000)
+                sound.delay(delay * 1000)
                 sound.process()
             end
         else
