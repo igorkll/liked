@@ -414,7 +414,6 @@ function lib.create(filepath, instruments)
             end
             if hasEvent then
                 local delay = time.calcDelay(tick, lastTick) / obj.speed
-                delay = delay - (computer.uptime() - lastTime)
                 if delay > 0 then
                     -- delay % 0.05 == 0 doesn't seem to work
                     if delay > 0.05 then
