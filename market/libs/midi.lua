@@ -91,7 +91,7 @@ function lib.instruments()
                         noiseChannel[noise.address] = 2
                     end
 
-                    noise.setMode(channel, 2)
+                    noise.setMode(channel, 4)
                     noise.add(channel, clamp(beep.freq), beep.time)
                 end
 
@@ -115,7 +115,7 @@ function lib.create(filepath, instruments)
     obj.instruments = instruments
 
     obj.speed = 1
-    obj.noteduraction = 1
+    obj.duration = 1
     obj.pitch = 1
 
     function obj.play()
@@ -414,14 +414,18 @@ function lib.create(filepath, instruments)
             end
             if hasEvent then
                 local delay = time.calcDelay(tick, lastTick) / obj.speed
-                -- delay % 0.05 == 0 doesn't seem to work
-                if delay > 0.05 then
-                    os.sleep(delay)
-                else
-                    -- Busy idle otherwise, because a sleep will take up to 50ms.
-                    local begin = os.clock()
-                    while os.clock() - begin < delay do end
+                delay = delay - (computer.uptime() - lastTime)
+                if delay > 0 then
+                    -- delay % 0.05 == 0 doesn't seem to work
+                    if delay > 0.05 then
+                        os.sleep(delay)
+                    else
+                        -- Busy idle otherwise, because a sleep will take up to 50ms.
+                        local begin = os.clock()
+                        while os.clock() - begin < delay do end
+                    end
                 end
+
                 lastTick = tick
                 lastTime = computer.uptime()
                 for _, track in ipairs(tracks) do
@@ -444,8 +448,9 @@ function lib.create(filepath, instruments)
                             local beep = {}
                             beep.freq = beepableFrequency(note)
                             beep.note = beepableFrequency(note, true)
-                            beep.time = duration / obj.noteduraction
+                            beep.time = duration * obj.duration
                             beep.track = track
+                            beep.event = event
 
                             if channels[channel] and channels[channel](beep) then
                                 break

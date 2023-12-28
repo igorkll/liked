@@ -50,7 +50,7 @@ local function readSliders()
     if _G.playerObj then
         speedSeek.value = _G.playerObj.speed / 2
         pitchSeek.value = _G.playerObj.pitch / 2
-        noteLenSeek.value = _G.playerObj.noteduraction / 2
+        noteLenSeek.value = _G.playerObj.duration / 2
     else
         speedSeek.value = 0.5
         pitchSeek.value = 0.5
@@ -61,7 +61,7 @@ local function writeSliders()
     if _G.playerObj then
         _G.playerObj.speed = speedSeek.value * 2
         _G.playerObj.pitch = pitchSeek.value * 2
-        _G.playerObj.noteduraction = noteLenSeek.value * 2
+        _G.playerObj.duration = noteLenSeek.value * 2
     end
 end
 readSliders()
@@ -74,7 +74,7 @@ function resetSettings:onClick()
     if _G.playerObj then
         _G.playerObj.speed = speedSeek.value * 2
         _G.playerObj.pitch = pitchSeek.value * 2
-        _G.playerObj.noteduraction = noteLenSeek.value * 2
+        _G.playerObj.duration = noteLenSeek.value * 2
     end
 
     speedSeek:draw()
