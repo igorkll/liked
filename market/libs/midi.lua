@@ -17,6 +17,9 @@ end
 
 local lib = {}
 
+------------------------------------------------------- midi to wave
+
+local cnoise = -1 --support only sound card(dont supported a noise card)
 local square = 1
 local sine = 2
 local triangle = 3
@@ -79,14 +82,14 @@ function lib.programToWave(program)
 end
 
 
-
+------------------------------------------------------- midi to noteblock
 
 --piano = 0
 --drum = 1
 --sticks = 2
 --smallDrum = 3
 --bassGuitar = 4
---xylophone = 5
+--xylophone (piano 2) = 5
 local glowstone = 3
 local iron_block = 0
 local gold_block = 0
@@ -155,9 +158,7 @@ function lib.programToNote(program)
     return midiToNote[program]
 end
 
-
-
-
+------------------------------------------------------- instruments
 
 function lib.instruments()
     local instruments, beeps = {}, {}
@@ -187,6 +188,7 @@ function lib.instruments()
     end
 
     local noiseChannel = {}
+    local initedSoundCards = {}
     
     function instruments.flush()
         local devicesCount = 0
@@ -194,14 +196,17 @@ function lib.instruments()
         for address in component.list("iron_noteblock", true) do devicesCount = devicesCount + 1 end
         for address in component.list("beep", true) do devicesCount = devicesCount + 1 end
         for address in component.list("noise", true) do devicesCount = devicesCount + 1 end
+        for address in component.list("sound", true) do devicesCount = devicesCount + 1 end
 
         if devicesCount > 0 then
             local noiseCards = {}
+            local soundCards = {}
             for i, beep in ipairs(beeps) do
                 local cbeep = getComponent("beep")
                 local note_block = getComponent("note_block")
                 local iron_noteblock = getComponent("iron_noteblock")
                 local noise = getComponent("noise")
+                local sound = getComponent("sound")
 
                 if cbeep then
                     component.invoke(cbeep, "beep", {[clamp(beep.freq)] = beep.time})
@@ -222,6 +227,14 @@ function lib.instruments()
                     end
                     table.insert(noiseCards[noise], beep)
                 end
+
+                if sound then
+                    sound = component.proxy(sound)
+                    if not soundCards[sound] then
+                        soundCards[sound] = {}
+                    end
+                    table.insert(soundCards[sound], beep)
+                end
             end
 
             for noise, beeps in pairs(noiseCards) do
@@ -238,6 +251,34 @@ function lib.instruments()
                 end
 
                 noise.process()
+            end
+
+            for sound, beeps in pairs(soundCards) do
+                if not initedSoundCards[sound.address] then
+                    for i = 1, 8 do
+                        sound.close(i)
+                    end
+                    
+                    initedSoundCards[sound.address] = true
+                end
+
+                for i, beep in ipairs(beeps) do
+                    local channel = noiseChannel[sound.address] or 1
+                    noiseChannel[sound.address] = channel + 1
+                    if channel > 8 then
+                        channel = 1
+                        noiseChannel[sound.address] = 2
+                    end
+
+                    sound.close(channel)
+                    sound.open(channel)
+                    sound.setWave(channel, beep.track.program and lib.programToWave(beep.track.program, true) or 1)
+                    sound.setFrequency(channel, clamp(beep.freq))
+                    sound.setVolume(channel, beep.volume or 1)
+                    --sound.setADSR(channel, 1000, 500, 0.33, 1000)
+                    sound.delay(beep.time * 1000)
+                    sound.process()
+                end
             end
         else
             for i = 1, #beeps do
