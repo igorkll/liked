@@ -20,8 +20,8 @@ local lib = {}
 function lib.instruments()
     local instruments, beeps = {}, {}
  
-    table.insert(instruments, function(freq, _, d)
-        table.insert(beeps, {freq, d})
+    table.insert(instruments, function(beep)
+        table.insert(beeps, beep)
     end)
 
     local iters = {}
@@ -43,34 +43,63 @@ function lib.instruments()
         if freq > 2000 then return 2000 end
         return freq
     end
+
+    local noiseChannel = {}
     
     function instruments.flush()
         local devicesCount = 0
         for address in component.list("note_block", true) do devicesCount = devicesCount + 1 end
         for address in component.list("iron_noteblock", true) do devicesCount = devicesCount + 1 end
         for address in component.list("beep", true) do devicesCount = devicesCount + 1 end
+        for address in component.list("noise", true) do devicesCount = devicesCount + 1 end
 
         if devicesCount > 0 then
-            for k, beep in ipairs(beeps) do
+            local noiseCards = {}
+            for i, beep in ipairs(beeps) do
                 local cbeep = getComponent("beep")
                 local note_block = getComponent("note_block")
                 local iron_noteblock = getComponent("iron_noteblock")
+                local noise = getComponent("noise")
 
                 if cbeep then
-                    component.invoke(cbeep, "beep", {[clamp(beep[1])] = beep[2]})
+                    component.invoke(cbeep, "beep", {[clamp(beep.freq)] = beep.time})
                 end
 
                 if note_block then
-                    component.invoke(note_block, "trigger", (note.midi(beep[1]) + 6 - 60) % 24 + 1)
+                    component.invoke(note_block, "trigger", (beep.note + 6 - 60) % 24 + 1)
                 end
 
                 if iron_noteblock then
-                    component.invoke(iron_noteblock, "playNote", 1, (note.midi(beep[1]) + 6 - 60) % 24, 1)
+                    component.invoke(iron_noteblock, "playNote", 1, (beep.note + 6 - 60) % 24, 1)
                 end
+
+                if noise then
+                    noise = component.proxy(noise)
+                    if not noiseCards[noise] then
+                        noiseCards[noise] = {}
+                    end
+                    table.insert(noiseCards[noise], beep)
+                end
+            end
+
+            for noise, beeps in pairs(noiseCards) do
+                for i, beep in ipairs(beeps) do
+                    local channel = noiseChannel[noise.address] or 1
+                    noiseChannel[noise.address] = channel + 1
+                    if channel > 8 then
+                        channel = 1
+                        noiseChannel[noise.address] = 2
+                    end
+
+                    noise.setMode(channel, 2)
+                    noise.add(channel, clamp(beep.freq), beep.time)
+                end
+
+                noise.process()
             end
         else
             for i = 1, #beeps do
-                computer.beep(clamp(beeps[i][1]), beeps[i][2])
+                computer.beep(clamp(beeps[i].freq), beeps[i].time)
             end
         end
 
@@ -411,7 +440,14 @@ function lib.create(filepath, instruments)
                             if not duration then duration = 0 end
                             if not note then note = 1 end
                             if not channel then channel = "nil" end
-                            if channels[channel] and channels[channel](beepableFrequency(note), beepableFrequency(note, true), duration / obj.noteduraction, track) then
+
+                            local beep = {}
+                            beep.freq = beepableFrequency(note)
+                            beep.note = beepableFrequency(note, true)
+                            beep.time = duration / obj.noteduraction
+                            beep.track = track
+
+                            if channels[channel] and channels[channel](beep) then
                                 break
                             end
                         end
