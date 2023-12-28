@@ -17,6 +17,14 @@ end
 
 local lib = {}
 
+lib.programToWave = {
+    
+}
+
+lib.programToNote = {
+
+}
+
 function lib.instruments()
     local instruments, beeps = {}, {}
  
@@ -70,7 +78,7 @@ function lib.instruments()
                 end
 
                 if iron_noteblock then
-                    component.invoke(iron_noteblock, "playNote", 1, (beep.note + 6 - 60) % 24, 1)
+                    component.invoke(iron_noteblock, "playNote", lib.programToNote[beep.track.program or 0] or 1, (beep.note + 6 - 60) % 24, beep.track.volume or 1)
                 end
 
                 if noise then
@@ -91,7 +99,7 @@ function lib.instruments()
                         noiseChannel[noise.address] = 2
                     end
 
-                    noise.setMode(channel, 4)
+                    noise.setMode(channel, lib.programToWave[beep.track.program or 0] or 1)
                     noise.add(channel, clamp(beep.freq), beep.time)
                 end
 
@@ -305,7 +313,7 @@ function lib.create(filepath, instruments)
                     elseif status == 0xB0 then -- Controller
                         parseVoiceMessage(event) -- not handled
                     elseif status == 0xC0 then -- Program change
-                        parseVarInt(read()) -- not handled
+                        track.program = parseVarInt(read()) -- not handled
                     elseif status == 0xD0 then -- Channel pressure
                         parseVarInt(read()) -- not handled
                     elseif status == 0xE0 then -- Pitch / modulation wheel
