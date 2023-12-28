@@ -78,7 +78,7 @@ function lib.instruments()
                 end
 
                 if iron_noteblock then
-                    component.invoke(iron_noteblock, "playNote", lib.programToNote[beep.track.program or 0] or 1, (beep.note + 6 - 60) % 24, beep.track.volume or 1)
+                    component.invoke(iron_noteblock, "playNote", lib.programToNote[beep.track.program or 0] or 7, (beep.note + 6 - 60) % 24, beep.volume or 1)
                 end
 
                 if noise then
@@ -456,6 +456,7 @@ function lib.create(filepath, instruments)
                             beep.freq = beepableFrequency(note)
                             beep.note = beepableFrequency(note, true)
                             beep.time = duration * obj.duration
+                            beep.volume = velocity / 127
                             beep.track = track
                             beep.event = event
 
