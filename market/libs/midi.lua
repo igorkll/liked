@@ -19,62 +19,13 @@ local lib = {}
 
 ------------------------------------------------------- midi to wave
 
-local cnoise = -1 --support only sound card(dont supported a noise card)
+local noise = -1 --support only sound card(dont supported a noise card)
 local square = 1
 local sine = 2
 local triangle = 3
 local sawtooth = 4
+
 local midiToWave = {
-    [  2] = square,
-    [  4] = square,
-    [  5] = square,
-    -- celesta
-    [  8] = sine,
-    -- glockenspiel
-    [  9] = sawtooth,
-    -- music box
-    [ 10] = sine,
-    -- vibraphone
-    [ 11] = sine,
-    -- marimba
-    [ 12] = sine,
-    -- xylophone
-    [ 13] = sine,
-    -- tubular bells
-    [ 14] = sawtooth,
-    -- Guitars
-    [ 24] = triangle,
-    [ 25] = triangle,
-    [ 26] = triangle,
-    [ 27] = triangle,
-    [ 28] = triangle,
-    [ 29] = triangle,
-    [ 30] = triangle,
-    [ 31] = triangle,
-    -- Basses
-    [32] = sawtooth,
-    [33] = sawtooth,
-    [34] = sawtooth,
-    [35] = sawtooth,
-    [36] = sawtooth,
-    [37] = sawtooth,
-    [38] = sawtooth,
-    [39] = sawtooth,
-    -- Pipes
-    [72] = sine,
-    [73] = sine,
-    [74] = sine,
-    [75] = sine,
-    [76] = sine,
-    [77] = sine,
-    [78] = sine,
-    [79] = sine,
-    -- square wave
-    [80] = square,
-    -- banjo
-    [105] = square,
-    -- tinkle bell
-    [112] = sine,
 }
 
 function lib.programToWave(program)
@@ -84,74 +35,14 @@ end
 
 ------------------------------------------------------- midi to noteblock
 
---piano = 0
---drum = 1
---sticks = 2
---smallDrum = 3
---bassGuitar = 4
---xylophone (piano 2) = 5
-local glowstone = 3
-local iron_block = 0
-local gold_block = 0
-local bone_block = 2
-local white_wool = 0
-local acacia_log = 4
-local clay = 1
-local hay_block = 2
-local packed_ice = 0
-local emerald_block = 0
+local piano = 0
+local drum = 1
+local sticks = 2
+local smallDrum = 3
+local bassGuitar = 4
+local xylophone = 5 --piano 2
 
 local midiToNote = {
-    [  2] = glowstone,
-    [  4] = glowstone,
-    [  5] = glowstone,
-    -- celesta
-    [  8] = iron_block,
-    -- glockenspiel
-    [  9] = gold_block,
-    -- music box
-    [ 10] = iron_block,
-    -- vibraphone
-    [ 11] = iron_block,
-    -- marimba
-    [ 12] = iron_block,
-    -- xylophone
-    [ 13] = bone_block,
-    -- tubular bells
-    [ 14] = gold_block,
-    -- Guitars
-    [ 24] = white_wool,
-    [ 25] = white_wool,
-    [ 26] = white_wool,
-    [ 27] = white_wool,
-    [ 28] = white_wool,
-    [ 29] = white_wool,
-    [ 30] = white_wool,
-    [ 31] = white_wool,
-    -- Basses
-    [32] = acacia_log,
-    [33] = acacia_log,
-    [34] = acacia_log,
-    [35] = acacia_log,
-    [36] = acacia_log,
-    [37] = acacia_log,
-    [38] = acacia_log,
-    [39] = acacia_log,
-    -- Pipes
-    [72] = clay,
-    [73] = clay,
-    [74] = clay,
-    [75] = clay,
-    [76] = clay,
-    [77] = clay,
-    [78] = clay,
-    [79] = clay,
-    -- square wave
-    [80] = emerald_block,
-    -- banjo
-    [105] = hay_block,
-    -- tinkle bell
-    [112] = packed_ice,
 }
 
 function lib.programToNote(program)
@@ -258,10 +149,13 @@ function lib.instruments()
                     for i = 1, 8 do
                         sound.close(i)
                     end
-                    
+                    sound.process()
+
                     initedSoundCards[sound.address] = true
                 end
 
+                local maxTime = 0
+                local opened = {}
                 for i, beep in ipairs(beeps) do
                     local channel = noiseChannel[sound.address] or 1
                     noiseChannel[sound.address] = channel + 1
@@ -270,15 +164,25 @@ function lib.instruments()
                         noiseChannel[sound.address] = 2
                     end
 
-                    sound.close(channel)
                     sound.open(channel)
                     sound.setWave(channel, beep.track.program and lib.programToWave(beep.track.program, true) or 1)
                     sound.setFrequency(channel, clamp(beep.freq))
                     sound.setVolume(channel, beep.volume or 1)
-                    --sound.setADSR(channel, 1000, 500, 0.33, 1000)
-                    sound.delay(beep.time * 1000)
-                    sound.process()
+
+                    maxTime = math.max(maxTime, beep.time)
+                    opened[channel] = triangle
                 end
+
+                for i = 1, 8 do
+                    if not opened[i] then
+                        sound.close(i)
+                    end
+                end
+                sound.delay(maxTime * 1000)
+                for port in pairs(opened) do
+                    sound.close(port)
+                end
+                sound.process()
             end
         else
             for i = 1, #beeps do
