@@ -28,7 +28,7 @@ local sawtooth = 4
 local midiToWave = {
 }
 
-function lib.programToWave(program)
+function lib.programToWave(program, noiseSupport)
     return midiToWave[program]
 end
 
@@ -153,7 +153,7 @@ function lib.instruments()
                     end
                 end
 
-                noise.process()
+                while not noise.process() do os.sleep() end
             end
 
             for sound, beeps in pairs(soundCards) do
@@ -189,7 +189,7 @@ function lib.instruments()
                 end
 
                 for port, wait in pairs(opened) do
-                    sound.delay(wait)
+                    sound.delay(wait * 1000)
                     sound.close(port)
                 end
 
@@ -565,7 +565,7 @@ function lib.create(filepath, instruments)
 
             if instruments.tick then instruments.tick() end
         end
-        
+
         return true
     end
 
