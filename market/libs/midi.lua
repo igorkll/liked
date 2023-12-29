@@ -80,6 +80,11 @@ function lib.instruments()
 
     local noiseChannel = {}
     local initedSoundCards = {}
+
+    function instruments.start()
+        noiseChannel = {}
+        initedSoundCards = {}
+    end
     
     function instruments.flush()
         local devicesCount = 0
@@ -129,6 +134,8 @@ function lib.instruments()
             end
 
             for noise, beeps in pairs(noiseCards) do
+                local usedChannel = {}
+
                 for i, beep in ipairs(beeps) do
                     local channel = noiseChannel[noise.address] or 1
                     noiseChannel[noise.address] = channel + 1
@@ -137,34 +144,56 @@ function lib.instruments()
                         noiseChannel[noise.address] = 2
                     end
 
-                    noise.setMode(channel, beep.track.program and lib.programToWave(beep.track.program) or 1)
-                    noise.add(channel, clamp(beep.freq), beep.time)
+                    if not usedChannel[channel] then
+                        noise.setMode(channel, beep.track.program and lib.programToWave(beep.track.program) or 1)
+                        noise.add(channel, clamp(beep.freq), beep.time)
+                        usedChannel[channel] = true
+                    else
+                        break
+                    end
                 end
 
                 noise.process()
             end
 
             for sound, beeps in pairs(soundCards) do
-                sound.clear()
-                for i = 1, 8 do
-                    sound.close(i)
+                if not initedSoundCards[sound.address] then
+                    sound.clear()
+                    for i = 1, sound.channel_count do
+                        sound.resetAM(i)
+                        sound.resetFM(i)
+                        sound.resetEnvelope(i)
+                        sound.close(i)
+                    end
+                    sound.setTotalVolume(1)
+                    sound.process()
+
+                    initedSoundCards[sound.address] = true
                 end
-                
-                local delay = 0
-                for channel, beep in ipairs(beeps) do
+
+                local opened = {}
+                for _, beep in ipairs(beeps) do
+                    local channel = noiseChannel[sound.address] or 1
+                    noiseChannel[sound.address] = channel + 1
                     if channel > 8 then
-                        break
+                        channel = 1
+                        noiseChannel[sound.address] = 2
                     end
 
                     sound.setWave(channel, beep.track.program and lib.programToWave(beep.track.program, true) or 1)
                     sound.setFrequency(channel, clamp(beep.freq))
                     sound.setVolume(channel, beep.volume or 1)
-                    
+
                     sound.open(channel)
-                    delay = math.max(delay, beep.time)
+                    opened[channel] = beep.time
                 end
-                sound.delay(delay * 1000)
-                sound.process()
+
+                for port, wait in pairs(opened) do
+                    sound.delay(wait)
+                    sound.close(port)
+                end
+
+                while not sound.process() do os.sleep(0) end
             end
         else
             for i = 1, #beeps do
@@ -190,6 +219,10 @@ function lib.create(filepath, instruments)
     function obj.play()
         local instruments = obj.instruments
         local filename = obj.filepath
+
+        if instruments.start then
+            instruments.start()
+        end
     
         local function beepableFrequency(midiCode, returnMidiCode)
             local freq = note.freq(midiCode) * obj.pitch
@@ -529,7 +562,10 @@ function lib.create(filepath, instruments)
                 end
                 if instruments.flush then instruments.flush() end
             end
+
+            if instruments.tick then instruments.tick() end
         end
+        
         return true
     end
 
