@@ -11,5 +11,6 @@
     disableCustomFiles = true,
     disableCustomPrograms = true,
     disableCustomPackages = true,
-    settingsBlackList = {"eeprom", "buffer", "power", "libraries"}
+    settingsBlackList = {"eeprom", "buffer", "power", "libraries"},
+    sysmodeVersion = 1
 }

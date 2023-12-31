@@ -1,3 +1,4 @@
 {
-    disableRecovery = false
+    disableRecovery = false,
+    sysmodeVersion = 1
 }

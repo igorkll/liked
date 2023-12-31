@@ -1,6 +1,8 @@
 local sysdata = require("sysdata")
 local system = require("system")
 local registry = require("registry")
+local serialization = require("serialization")
+
 local sysmode = {}
 sysmode.modes = {
     full = {
@@ -16,11 +18,13 @@ function sysmode.current()
 end
 
 function sysmode.init()
-    local regModePath = sysmode.current().reg
-    if regModePath and not registry.data.modeRegApply then
-        registry.apply(regModePath)
-        registry.data.modeRegApply = true
-        registry.save()
+    local smode = sysmode.current()
+    if smode.reg then
+        local sdata = assert(serialization.load(smode.reg))
+        if not registry.sysmodeVersion or registry.sysmodeVersion ~= sdata.sysmodeVersion then
+            registry.apply(sdata)
+            registry.save()
+        end
     end
 end
 
