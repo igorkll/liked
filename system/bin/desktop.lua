@@ -197,14 +197,45 @@ local function draw(old, check) --вызывает все перерисовки
     --gui.status(screen, nil, nil, "loading file-list...")
 
     icons = {}
+
     local count = 0
+
+    local function checkIcon(v, customPath)
+        local path
+        if customPath then
+            path = customPath
+        else
+            path = paths.concat(userPath, v)
+        end
+
+        local fsProxy, localFsPath = fs.get(path)
+        local isFs = paths.equals(localFsPath, "/")
+
+        if gui.isVisible(screen, path) then
+            if iconmode == 0 or not paths.equals(userPath, defaultUserPath) then
+                return true
+            elseif iconmode == 3 then
+                if isFs then
+                    return true
+                end
+            elseif iconmode == 2 then
+                if not customPath and not isFs then
+                    return true
+                end
+            elseif iconmode == 1 then
+                if customPath then
+                    return true
+                end
+            end
+        end
+    end
 
     local function addIcon(i, v, customPath)
         count = count + 1
         if count > (iconsX * iconsY) then
             return true
         end
-
+        
         local path
         if customPath then
             path = customPath
@@ -237,40 +268,31 @@ local function draw(old, check) --вызывает все перерисовки
             icondata.labelReadonly = fs.isLabelReadOnly(path)
         end
 
-        if iconmode == 0 or not paths.equals(userPath, defaultUserPath) then
-            table.insert(icons, icondata)
-        elseif iconmode == 3 then
-            if isFs then
-                table.insert(icons, icondata)
-            end
-        elseif iconmode == 2 then
-            if not customPath and not isFs then
-                table.insert(icons, icondata)
-            end
-        elseif iconmode == 1 then
-            if customPath then
-                table.insert(icons, icondata)
-            end
-        end
+        table.insert(icons, icondata)
     end
 
     local tbl = {}
 
     if paths.canonical(userPath) == paths.canonical(iconsPath) then
         for i, v in ipairs(iconAliases) do
-            if fs.exists(v) then
+            if fs.exists(v) and checkIcon(nil, v) then
                 table.insert(tbl, {nil, v})
             end
         end
         for i, path in ipairs(userPaths) do
             for i, file in ipairs(fs.list(path) or {}) do
-                table.insert(tbl, {nil, paths.concat(path, file)})
+                local v = paths.concat(path, file)
+                if checkIcon(nil, v) then
+                    table.insert(tbl, {nil, v})
+                end
             end
         end
     end
 
-    for i, v in ipairs(fs.list(userPath)) do
-        table.insert(tbl, {v})
+    for i, file in ipairs(fs.list(userPath)) do
+        if checkIcon(file) then
+            table.insert(tbl, {file})
+        end
     end
 
     local iconsCount = #tbl
@@ -1250,10 +1272,9 @@ while true do
         elseif statusWindowEventData[4] == 1 and statusWindowEventData[3] >= 6 and statusWindowEventData[3] <= 12 then
             contextMenuOpen = 2
             drawStatus()
-            local clear = screenshot(screen, 7, 2, 28, 3)
-            local str, num = gui.context(screen, 7, 2,
-            {gui_container.viewFileExps[screen] and "  hide file extensions  " or "  show file extensions  ", gui_container.userRoot[screen] and "  hide root directory" or "  show root directory"},
-            {not registry.disableFileExps, not registry.disableRootAccess})
+            local str, num = gui.contextAuto(screen, 7, 2,
+            {gui_container.viewFileExps[screen] and "  hide file extensions  " or "  show file extensions  ", gui_container.userRoot[screen] and "  hide root directory" or "  show root directory", gui_container.hiddenFiles[screen] and "  hide hidden files" or "  show hidden files"},
+            {not registry.disableFileExps, not registry.disableRootAccess, not registry.disableHiddenFiles})
             contextMenuOpen = nil
 
             if num == 1 then
@@ -1267,8 +1288,9 @@ while true do
                 end
                 userPath = gui_container.checkPath(screen, userPath)
                 draw()
-            else
-                clear()
+            elseif num == 3 then
+                gui_container.hiddenFiles[screen] = not gui_container.hiddenFiles[screen]
+                draw()
             end
             
             drawStatus()

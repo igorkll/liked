@@ -19,6 +19,7 @@ gui_container.userRoot = {} --{screen = path, ...}
 gui_container.viewFileExps = {} --если адрес экрана сдесь равен true то разширения имен файлов не будут скрыты
 gui_container.devModeStates = {} --легаси, и почти негде не используеться, dev-mode был удален из системы
 gui_container.unlockedDisks = {}
+gui_container.hiddenFiles = {}
 
 gui_container.chars = {
     threeDots = "…",

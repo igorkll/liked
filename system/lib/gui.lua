@@ -47,6 +47,10 @@ function gui.hideExtension(screen, path)
     end
 end
 
+function gui.isVisible(screen, path)
+    return gui_container.hiddenFiles[screen] or not fs.getAttribute(path, "hidden")
+end
+
 ------------------------------------
 
 function gui.bwSize(screen)

@@ -1,4 +1,7 @@
 local unicode = require("unicode")
+local paths = require("paths")
+local fs = require("filesystem")
+
 local screen, nickname, selfurl = ...
 
 local selfurlpart = selfurl
@@ -19,7 +22,11 @@ local list = {
         
         path = "/data/userdata/midipack",
         urlPrimaryPart = selfurlpart .. "/media/midipack/",
-        files = {"icon.t2p", "aSongAboutHares.mid", "theIslandOfBadLuck.mid", "duckTalesTheme.mid", "gazaStripJava.mid", "gazaStripPunk.mid"}
+        files = {"icon.t2p", "aSongAboutHares.mid", "theIslandOfBadLuck.mid", "duckTalesTheme.mid", "gazaStripJava.mid", "gazaStripPunk.mid"},
+        
+        postInstall = function (self)
+            fs.setAttribute(paths.concat(self.path, "icon.t2p"), "hidden", true)
+        end
     }
 }
 
