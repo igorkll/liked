@@ -1,5 +1,6 @@
 {
     settingsBlackList = {"eeprom", "buffer", "power", "libraries", "users", "lock"},
     demoMode = true,
+    defaultScreenSaverPath = "/system/screenSavers/color_dots.scrsv",
     modifierVersion = 1
 }

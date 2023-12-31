@@ -259,7 +259,8 @@ function sysinit.init(box)
     ------------------------------------
 
     if not box and not fs.exists(gui_container.screenSaverPath) and not registry.screenSaverDefaultSetted then
-        pcall(fs.copy, "/system/screenSavers/black_screen.scrsv", gui_container.screenSaverPath)
+        pcall(fs.copy, registry.defaultScreenSaverPath or "/system/screenSavers/black_screen.scrsv", gui_container.screenSaverPath)
+        registry.defaultScreenSaverPath = nil
         registry.screenSaverDefaultSetted = true
     end
 
