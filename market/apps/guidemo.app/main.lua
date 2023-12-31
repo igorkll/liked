@@ -12,7 +12,7 @@ for i, path in ipairs(fs.list(system.getResourcePath("demo"), true)) do
     local title = paths.hideExtension(paths.name(path))
     local button = layout:createButton(2, 2 + ((i - 1) * 2), 24, 1, nil, nil, title, true)
     local localLayout = ui:create(title)
-    dofile(path, localLayout, uix.colors, ui:zoneSize())
+    dofile(path, screen, localLayout, uix.colors, ui:zoneSize())
     localLayout:setReturnLayout(layout)
 
     function button:onClick()

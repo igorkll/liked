@@ -5,7 +5,8 @@ local event = require("event")
 local gui_container = require("gui_container")
 local colorslib = require("colors")
 
-local layout, colors, rx, ry = ...
+local screen, layout, colors, rx, ry = ...
+local fullDepth = graphic.getDepth(screen) == 8
 
 local switchsCount = 0
 for x = 2, rx - 5, 8 do
@@ -21,7 +22,7 @@ for x = 2, rx - 5, 8 do
         index = index + 1
         local r, g, b = colorslib.hsvToRgb(math.round(math.map(index, 0, switchsCount, 0, 255)), 255, 255)
         local color = colorslib.blend(r, g, b)
-        local color2 = colorslib.blend(r * 0.3, g * 0.3, b * 0.3)
+        local color2 = fullDepth and colorslib.blend(r * 0.3, g * 0.3, b * 0.3) or colors.gray
         table.insert(switchs, layout:createSwitch(x, y, math.random() > 0.5, color, color2))
     end
 end
