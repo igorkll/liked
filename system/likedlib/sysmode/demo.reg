@@ -1,0 +1,5 @@
+{
+    settingsBlackList = {"eeprom", "buffer", "power", "libraries", "users", "lock"},
+    demoMode = true,
+    modifierVersion = 1
+}

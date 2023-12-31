@@ -151,6 +151,11 @@ end
 
 --------------------------------------------------------
 
+local demotitle = {
+    "a demo version is likeOS",
+    "some functions may be disabled"
+}
+
 local bufferTimerId
 function liked.applyBufferType()
     graphic.allowSoftwareBuffer = registry.bufferType == "software"
@@ -159,10 +164,16 @@ function liked.applyBufferType()
     graphic.bindCache = {}
     graphic.screensBuffers = {}
 
-    if graphic.allowHardwareBuffer or graphic.allowSoftwareBuffer then
+    if graphic.allowHardwareBuffer or graphic.allowSoftwareBuffer or registry.demoMode then
         if not bufferTimerId then
             bufferTimerId = event.timer(0.1, function ()
                 for address in component.list("screen") do
+                    if registry.demoMode then
+                        local rx, ry = graphic.getResolution(address)
+                        for i, v in ipairs(demotitle) do
+                            graphic.set(address, 2, ry - (#demotitle - i) - 1, colors.gray, colors.white, v)
+                        end
+                    end
                     graphic.update(address)
                 end
             end, math.huge)

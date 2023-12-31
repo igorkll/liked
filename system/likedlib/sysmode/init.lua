@@ -11,6 +11,10 @@ sysmode.modes = {
     },
     classic = {
         reg = system.getResourcePath("classic.reg")
+    },
+    demo = {
+        reg = system.getResourcePath("classic.reg"),
+        modifier = system.getResourcePath("demo.reg")
     }
 }
 
@@ -20,13 +24,19 @@ end
 
 function sysmode.init()
     local smode = sysmode.current()
-    if smode.reg then
-        local sdata = assert(serialization.load(smode.reg))
-        if not registry.sysmodeVersion or registry.sysmodeVersion ~= sdata.sysmodeVersion then
-            registry.apply(sdata)
-            registry.save()
+
+    local function apply(vtag, regPath)
+        if regPath then
+            local sdata = assert(serialization.load(regPath))
+            if not registry[vtag] or registry[vtag] ~= sdata[vtag] then
+                registry.apply(sdata)
+                registry.save()
+            end
         end
     end
+
+    apply("sysmodeVersion", smode.reg)
+    apply("modifierVersion", smode.modifier)
 
     if registry.filesBlackList then
         for _, path in ipairs(registry.filesBlackList) do
