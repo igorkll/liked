@@ -241,7 +241,7 @@ function vkeyboard.hook(screen, exitCallback)
             end
 
             return table.unpack(tbl)
-        end, tbl)
+        end, tbl, "vkeyboard error")
     end)
 end
 

@@ -20,6 +20,11 @@ local colors = gui_container.colors
 
 local screen, nickname, _, forceMode, mediaMode = ...
 
+local installBox = mediaMode and "  download   " or "   install   "
+local installMsg = mediaMode and "download" or "install"
+local uninstallBox = mediaMode and "   delete    " or "  uninstall  "
+local uninstallMsg = mediaMode and "delete" or "uninstall"
+
 local cachePath = mediaMode and "/data/cache/mediastore" or "/data/cache/market"
 local cacheReg = registry.new(paths.concat(cachePath, "versions.dat"))
 
@@ -235,7 +240,7 @@ local function applicationLabel(data, x, y)
     if not forceMode or registry.disableMarketForceMode then
         if data.minDiskSpace then
             if freeSpace < data.minDiskSpace then
-                supportErr = "not enough space to install. need: " .. tostring(data.minDiskSpace) .. "KB"
+                supportErr = "not enough space to " .. installMsg .. ". need: " .. tostring(data.minDiskSpace) .. "KB"
             end
         end
 
@@ -256,7 +261,7 @@ local function applicationLabel(data, x, y)
         end
 
         if (data.dualboot and registry.data.disableDualboot) or (data.executer and registry.data.disableCustomPrograms) then
-            supportErr = "it is not possible to install this on your \"liked\" edition"
+            supportErr = "it is not possible to " .. installMsg .. " this on your \"liked\" edition"
         end
     end
 
@@ -282,9 +287,9 @@ local function applicationLabel(data, x, y)
             if instCache[data] and verCache[data] ~= data.version then
                 applabel:set(applabel.sizeX - 13, 2, altCol or colors.orange, colors.white, "   update    ")
             elseif instCache[data] then
-                applabel:set(applabel.sizeX - 13, 2, colors.red, colors.white,    "  uninstall  ")
+                applabel:set(applabel.sizeX - 13, 2, colors.red, colors.white, uninstallBox)
             else
-                applabel:set(applabel.sizeX - 13, 2, altCol or colors.green, colors.white,  "   install   ")
+                applabel:set(applabel.sizeX - 13, 2, altCol or colors.green, colors.white,  installBox)
             end
         end
         
@@ -341,15 +346,23 @@ local function applicationLabel(data, x, y)
                         data:install()
                     end
                 elseif instCache[data] then
-                    if gui.yesno(screen, nil, nil, "uninstall" .. formattedName) then
-                        gui.status(screen, nil, nil, "uninstalling" .. formattedName2)
+                    if gui.yesno(screen, nil, nil, uninstallMsg .. formattedName) then
+                        if mediaMode then
+                            gui.status(screen, nil, nil, "deleting" .. formattedName2)
+                        else
+                            gui.status(screen, nil, nil, "uninstalling" .. formattedName2)
+                        end
                         data:uninstall()
                     end
                 else
                     if supportErr then
                         gui.warn(screen, nil, nil, supportErr)
-                    elseif gui.yesno(screen, nil, nil, "install" .. formattedName) then
-                        gui.status(screen, nil, nil, "installation" .. formattedName2)
+                    elseif gui.yesno(screen, nil, nil, installMsg .. formattedName) then
+                        if mediaMode then
+                            gui.status(screen, nil, nil, "downloading" .. formattedName2)
+                        else
+                            gui.status(screen, nil, nil, "installation" .. formattedName2)
+                        end
                         data:install()
                     end
                 end
