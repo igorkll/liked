@@ -2,6 +2,8 @@ local graphic = require("graphic")
 local gui_container = require("gui_container")
 local registry = require("registry")
 local calls = require("calls")
+local gui = require("gui")
+local liked = require("liked")
 
 local colors = gui_container.colors
 
@@ -28,13 +30,14 @@ return function(eventData)
     local windowEventData = window:uploadEvent(eventData)
     if windowEventData[1] == "touch" then
         if windowEventData[4] == 2 and windowEventData[3] >= 1 and windowEventData[3] <= 16 then
-            local data = calls.call("gui_input", screen, nil, nil, "timezone")
+            local data = gui.input(screen, nil, nil, "timezone")
             if data then
                 data = tonumber(data)
                 if not data then
-                    calls.call("gui_warn", screen, nil, nil, "uncorrent input")
+                    gui.warn(screen, nil, nil, "uncorrent input")
                 else
                     registry.timeZone = data
+                    liked.applyTimeZone()
                 end
             end
             draw()

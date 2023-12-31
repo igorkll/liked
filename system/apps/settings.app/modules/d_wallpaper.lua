@@ -60,7 +60,6 @@ local wallpaperLightReset = layout:createButton(18 + 25 + 8 + 5, 4, 3, 1, nil, n
 
 local text1 = layout:createText(18, selectWindow.sizeY - 2, nil, "* It is not recommended to use wallpaper")
 local text2 = layout:createText(18, selectWindow.sizeY - 1, nil, "light on tier2 screens")
-
 if graphic.getDepth(screen) == 8 then
     text1.hidden = true
     text2.hidden = true

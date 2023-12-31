@@ -21,6 +21,7 @@ local palette = require("palette")
 local package = require("package")
 local screensaver = require("screensaver")
 local image = require("image")
+local logs = require("logs")
 local sysinit = require("sysinit")
 local liked = {}
 
@@ -215,6 +216,19 @@ function liked.applyBeepState()
         computer.beep = system.stub
     else
         computer.beep = natives.computer.beep
+    end
+end
+
+function liked.applyTimeZone()
+    logs.timeZone = registry.timeZone or 0
+    if not gui_container.timeZoneHook then
+        package.applyHook(function (libname, lib)
+            if libname == "logs" then
+                lib.timeZone = registry.timeZone or 0
+            end
+            return lib
+        end)
+        gui_container.timeZoneHook = true
     end
 end
 

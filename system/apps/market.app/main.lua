@@ -14,12 +14,14 @@ local format = require("format")
 local sysdata = require("sysdata")
 local apps = require("apps")
 
-local cacheReg = registry.new("/data/cache/market/versions.dat")
 local colors = gui_container.colors
 
 ------------------------------------
 
 local screen, nickname, _, forceMode, mediaMode = ...
+
+local cachePath = mediaMode and "/data/cache/mediastore" or "/data/cache/market"
+local cacheReg = registry.new(paths.concat(cachePath, "versions.dat"))
 
 local title = "Market"
 local urlsBase = "market_"
@@ -291,7 +293,7 @@ local function applicationLabel(data, x, y)
     end
     
     if data.icon then
-        img = paths.concat("/data/cache/market", (data.name or "unknown") .. ".t2p")
+        img = paths.concat(cachePath, (data.name or "unknown") .. ".t2p")
         if not downloaded[img] then
             if not fs.exists(img) or cacheReg[data.name or "unknown"] ~= data.version then
                 draw("/system/icons/app.t2p")

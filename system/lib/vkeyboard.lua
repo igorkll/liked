@@ -5,6 +5,7 @@ local unicode = require("unicode")
 local computer = require("computer")
 local lastinfo = require("lastinfo")
 local thread = require("thread")
+local utils = require("utils")
 local vkeyboard = {}
 
 local function postDraw(self)
@@ -191,54 +192,56 @@ function vkeyboard.hook(screen, exitCallback)
     event.hyperHook(function (...)
         local tbl = {...}
 
-        if tbl[1] == "touch" then
-            if tbl[2] == screen and #lastinfo.keyboards[screen] == 0 then
-                if clicks[tbl[2]] then
-                    local clk = clicks[tbl[2]]
+        return utils.safeExec(function ()
+            if tbl[1] == "touch" then
+                if tbl[2] == screen and #lastinfo.keyboards[screen] == 0 then
+                    if clicks[tbl[2]] then
+                        local clk = clicks[tbl[2]]
 
-                    if clk[1] == tbl[3] and clk[2] == tbl[4] and computer.uptime() - clk[3] <= 0.3 then
-                        clk[3] = computer.uptime()
-                        clk[4] = clk[4] + 1
-                        if clk[4] >= 3 then
-                            event.push("vkeyboard", tbl[2], tbl[6])
+                        if clk[1] == tbl[3] and clk[2] == tbl[4] and computer.uptime() - clk[3] <= 0.3 then
+                            clk[3] = computer.uptime()
+                            clk[4] = clk[4] + 1
+                            if clk[4] >= 3 then
+                                event.push("vkeyboard", tbl[2], tbl[6])
+                            end
+                        else
+                            clicks[tbl[2]] = {tbl[3], tbl[4], computer.uptime(), 1}
                         end
                     else
                         clicks[tbl[2]] = {tbl[3], tbl[4], computer.uptime(), 1}
                     end
-                else
-                    clicks[tbl[2]] = {tbl[3], tbl[4], computer.uptime(), 1}
                 end
-            end
-        elseif tbl[1] == "vkeyboard" and tbl[2] == screen and not opened[tbl[2]] then
-            opened[tbl[2]] = true
+            elseif tbl[1] == "vkeyboard" and tbl[2] == screen and not opened[tbl[2]] then
+                opened[tbl[2]] = true
 
-            local threads = thread.all()
-            local suspended = {}
-            for _, t in ipairs(threads) do
-                if t.parentData.screen == tbl[2] then
-                    t:suspend()
-                    table.insert(suspended, t)
+                local threads = thread.all()
+                local suspended = {}
+                for _, t in ipairs(threads) do
+                    if t.parentData.screen == tbl[2] then
+                        t:suspend()
+                        table.insert(suspended, t)
+                    end
                 end
-            end
-            local clear = vkeyboard.save(screen)
+                local clear = vkeyboard.save(screen)
 
-            local str = vkeyboard.input(tbl[2])
-            if str then
-                event.push("softwareInsert", tbl[2], str, tbl[3])
-            end
-            if exitCallback then
-                exitCallback()
+                local str = vkeyboard.input(tbl[2])
+                if str then
+                    event.push("softwareInsert", tbl[2], str, tbl[3])
+                end
+                if exitCallback then
+                    exitCallback()
+                end
+
+                clear()
+                for _, t in ipairs(suspended) do
+                    t:resume()
+                end
+
+                opened[tbl[2]] = nil
             end
 
-            clear()
-            for _, t in ipairs(suspended) do
-                t:resume()
-            end
-
-            opened[tbl[2]] = nil
-        end
-
-        return ...
+            return table.unpack(tbl)
+        end, tbl)
     end)
 end
 
