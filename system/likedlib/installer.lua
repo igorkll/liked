@@ -99,6 +99,7 @@ function installer.install_likedbox(vfs)
         "market_urls_main.txt",
         "media_urls_dev.txt",
         "media_urls_main.txt",
+        "liked",
         "logo.lua",
         "main.lua",
         "likedlib",

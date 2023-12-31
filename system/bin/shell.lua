@@ -48,6 +48,8 @@ while true do
         oldScreenSaverTime = computer.uptime()
     elseif (eventData[1] == "key_down" or eventData[1] == "key_up" or eventData[1] == "clipboard") and table.exists(lastinfo.keyboards[screen] or {}, eventData[2]) then
         oldScreenSaverTime = computer.uptime()
+    elseif (eventData[1] == "vcursor_key_down" or eventData[1] == "vcursor_key_up" or eventData[1] == "vcursor_clipboard") and table.exists(lastinfo.keyboards[screen] or {}, eventData[2]) then
+        oldScreenSaverTime = computer.uptime()
     elseif registry.screenSaverTimer and computer.uptime() - oldScreenSaverTime > registry.screenSaverTimer then
         runScreenSaver()
     end
