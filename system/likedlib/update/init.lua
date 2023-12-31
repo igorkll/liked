@@ -4,6 +4,7 @@ local fs = require("filesystem")
 local computer = require("computer")
 local serialization = require("serialization")
 local sysdata = require("sysdata")
+local registry = require("registry")
 local update = {}
 update.updaterPath = paths.concat(paths.path(system.getSelfScriptPath()), "update.lua")
 
@@ -22,7 +23,7 @@ function update.run(branch, mode)
     data.branch = branch or sysdata.get("branch")
     data.mode = mode or sysdata.get("mode")
     
-    update._write({data = data})
+    update._write({data = data, filesBlackList = registry.filesBlackList})
     computer.shutdown("fast")
 end
 

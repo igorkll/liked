@@ -137,17 +137,30 @@ local function saveFile(path, data)
     proxy.close(file)
 end
 
+local function inBlackList(path)
+    path = canonical(path)
+    if installdata.filesBlackList then
+        for i, blackpath in ipairs(installdata.filesBlackList) do
+            if canonical(blackpath) == path then
+                return true
+            end
+        end
+    end
+end
+
 local function installUrl(urlPart, state2)
     local filelist = split(assert(getInternetFile(urlPart .. "/installer/filelist.txt")), "\n")
+    local count = 0
     for i, v in ipairs(filelist) do
-        if v ~= "" then
+        if v ~= "" and not inBlackList(v) then
             local filedata = assert(getInternetFile(urlPart .. v))
 
-            if i % 10 == 0 then
+            if count % 5 == 0 then
                 printState((((i - 1) / (#filelist - 1)) / 2) + (state2 and 0.5 or 0))
             end
 
             saveFile(v, filedata)
+            count = count + 1
         end
     end
 end

@@ -2,6 +2,7 @@ local sysdata = require("sysdata")
 local system = require("system")
 local registry = require("registry")
 local serialization = require("serialization")
+local fs = require("filesystem")
 
 local sysmode = {}
 sysmode.modes = {
@@ -24,6 +25,14 @@ function sysmode.init()
         if not registry.sysmodeVersion or registry.sysmodeVersion ~= sdata.sysmodeVersion then
             registry.apply(sdata)
             registry.save()
+        end
+    end
+
+    if registry.filesBlackList then
+        for _, path in ipairs(registry.filesBlackList) do
+            if fs.exists(path) then
+                fs.remove(path)
+            end
         end
     end
 end
