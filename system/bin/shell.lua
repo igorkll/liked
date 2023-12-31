@@ -6,7 +6,9 @@ local computer = require("computer")
 local registry = require("registry")
 local lastinfo = require("lastinfo")
 local vkeyboard = require("vkeyboard")
+local vcursor = require("vcursor")
 local apps = require("apps")
+local graphic = require("graphic")
 local screen = ...
 
 local t = thread.create(function ()
@@ -28,10 +30,14 @@ local function runScreenSaver(force)
     oldScreenSaverTime = computer.uptime()
 end
 
+if graphic.getDeviceTier(screen) <= 1 then
+    vcursor.hook(screen)
+    vcursor.setEnable(screen, true)
+end
+
 vkeyboard.hook(screen, function ()
     oldScreenSaverTime = computer.uptime()
 end)
-
 
 while true do
     local eventData = {event.pull(0.1)}
