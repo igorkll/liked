@@ -49,7 +49,14 @@ end
 
 ------------------------------------
 
-local bwSizeX, bwSizeY = 60, 18
+function gui.bwSize(screen)
+    local rx, ry = graphic.getResolution(screen)
+    if rx <= 50 then
+        return 50, 16
+    else
+        return 60, 18
+    end
+end
 
 function gui.getZone(screen)
     local cx, cy = graphic.getResolution(screen)
@@ -89,7 +96,8 @@ function gui.saveZone(screen)
 end
 
 function gui.saveBigZone(screen)
-    return graphic.screenshot(screen, gui.getCustomZone(screen, 60, 18))
+    local bwSizeX, bwSizeY = gui.bwSize(screen)
+    return graphic.screenshot(screen, gui.getCustomZone(screen, bwSizeX, bwSizeY))
 end
 
 ------------------------------------
@@ -300,6 +308,8 @@ function gui.warn(screen, cx, cy, str, backgroundColor)
 end
 
 function gui.bigWarn(screen, cx, cy, str, backgroundColor)
+    local bwSizeX, bwSizeY = gui.bwSize(screen)
+
     local window, noShadow = gui.smallWindow(screen, cx, cy, str, backgroundColor, function (window, color)
         window:set(2, 1, color, colors.orange, "  " .. unicode.char(0x2800+192) ..  "  ")
         window:set(2, 2, color, colors.orange, " ◢█◣ ")

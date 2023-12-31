@@ -16,23 +16,25 @@ local colors = gui_container.colors
 
 local screen = ...
 
-local chunkloader = gui.selectcomponent(screen, nil, nil, "chunkloader", true)
+local chunkloader = gui.selectcomponentProxy(screen, nil, nil, "chunkloader", true)
 if not chunkloader then return end
 
 local rx, ry = graphic.getResolution(screen)
 local window = graphic.createWindow(screen, 1, 1, rx, ry)
 local layout = uix.create(window, colors.black)
-layout:createAutoUpBar("Chunkloader")
+local up = layout:createAutoUpBar("Chunkloader")
 
 ---------------------------------------
 
-local switch = layout:createBigSwitch((rx / 2) - 7, 6, chunkloader.isActive())
+local switch = layout:createBigSwitch((rx / 2) - 7, ry <= 16 and 1 or 6, chunkloader.isActive())
 
 function switch:onSwitch()
     chunkloader.setActive(self.state)
+    up:draw()
 end
 
 layout:draw()
+up:draw()
 
 while true do
     local eventData = {event.pull()}
