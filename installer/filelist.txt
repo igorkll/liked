@@ -20,6 +20,7 @@
 /system/apps/market.app/icon.t2p
 /system/apps/market.app/main.lua
 /system/apps/mediastore.app/actions.cfg
+/system/apps/mediastore.app/clearCache.lua
 /system/apps/mediastore.app/custom.lua
 /system/apps/mediastore.app/forceMode.lua
 /system/apps/mediastore.app/icon.t2p
