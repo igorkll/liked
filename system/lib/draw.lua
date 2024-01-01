@@ -5,6 +5,8 @@ draw.modes.full = 1
 draw.modes.semi = 2
 draw.modes.braille = 3
 
+-------------------------------- base
+
 function draw:size()
     local rx, ry = self.window.sizeX, self.window.sizeY
     if self.mode == draw.modes.box then
@@ -19,8 +21,13 @@ function draw:size()
 end
 
 function draw:dot(x, y, color)
-    x = math.round(x)
-    y = math.round(y)
+    x = self:normalizePos(x)
+    y = self:normalizePos(y)
+
+    if self.mask then
+        color = self.mask(x, y, color) or color
+    end
+
     color = color or 0xffffff
 
     if self.mode == draw.modes.box then
@@ -30,11 +37,17 @@ function draw:dot(x, y, color)
     end
 end
 
+function draw:update()
+    graphic.update(self.window.screen)
+end
+
+-------------------------------- graphic
+
 function draw:line(x0, y0, x1, y1, color)
-    x0 = math.round(x0)
-    y0 = math.round(y0)
-    x1 = math.round(x1)
-    y1 = math.round(y1)
+    x0 = self:normalizePos(x0)
+    y0 = self:normalizePos(y0)
+    x1 = self:normalizePos(x1)
+    y1 = self:normalizePos(y1)
     color = color or 0xffffff
 
     local sx, sy, e2, err;
@@ -61,15 +74,15 @@ function draw:line(x0, y0, x1, y1, color)
 end
 
 function draw:fill(x, y, sx, sy, color)
-    x = math.round(y)
-    x = math.round(y)
+    x = self:normalizePos(y)
+    x = self:normalizePos(y)
     sx = math.round(sx)
     sy = math.round(sy)
     color = color or 0xffffff
 
-    if self.mode == draw.modes.box then
+    if self.mode == draw.modes.box and not self.mask then
         self.window:fill(x, y, sx * 2, sy, color, 0, " ")
-    elseif self.mode == draw.modes.full then
+    elseif self.mode == draw.modes.full and not self.mask then
         self.window:fill(x, y, sx, sy, color, 0, " ")
     else
         for ix = x, x + (sx - 1) do
@@ -81,8 +94,8 @@ function draw:fill(x, y, sx, sy, color)
 end
 
 function draw:rect(x, y, sx, sy, color)
-    x = math.round(y)
-    x = math.round(y)
+    x = self:normalizePos(y)
+    x = self:normalizePos(y)
     sx = math.round(sx)
     sy = math.round(sy)
     color = color or 0xffffff
@@ -100,23 +113,35 @@ function draw:clear(color)
     self.window:clear(color or 0x000000)
 end
 
+-------------------------------- advanced
 
+function draw:setColorMask(mask)
+    self.mask = mask
+end
 
+-------------------------------- internal
 
-function draw.create(window, mode)
+function draw:normalizePos(pos)
+    return math.round(pos) + self.goffset
+end
+
+-------------------------------- main
+
+function draw.create(window, mode, fromZero)
     mode = mode or draw.modes.full
-    if mode < 0 or mode > draw.modes.braille then
+    if mode < draw.modes.box or mode > draw.modes.braille then
         error("the wrong mode", 2)
     end
 
     if type(window) == "string" then
-        window = graphic.create(window, 1, 1, graphic.getResolution(window))
+        window = graphic.createWindow(window, 1, 1, graphic.getResolution(window))
     end
 
     return setmetatable(
         {
             window = window,
-            mode = mode
+            mode = mode,
+            goffset = fromZero and 1 or 0
         },
         {
             __index = draw
