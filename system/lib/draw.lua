@@ -25,7 +25,7 @@ function draw:dot(x, y, color)
     y = math.round(y)
 
     if self.mask then
-        color = self.mask(x, y, color) or color
+        color = self.mask(x, y, color, table.unpack(self.maskArgs)) or color
     end
 
     color = color or 0xffffff
@@ -34,6 +34,17 @@ function draw:dot(x, y, color)
         self.window:set(((x - 1) * 2) + 1, y, color, 0, "  ")
     elseif self.mode == draw.modes.full then
         self.window:set(x, y, color, 0, " ")
+    elseif self.mode == draw.modes.semi then
+        local realY = ((y - 1) // 2) + 1
+        local _, _, fore, back = pcall(self.window.get, self.window, x, realY)
+        if fore then
+            if y % 2 == 0 then
+                fore = color
+            else
+                back = color
+            end
+            self.window:set(x, realY, back, fore, "▄")
+        end
     end
 end
 
@@ -127,9 +138,9 @@ function draw:circle(x, y, r, color)
     y = math.round(y) + 1.5
     r = math.round(r) + 0.5
 
-    local rx, ry = self.window.sizeX, self.window.sizeY
+    local rx, ry = self:size()
     local px, py
-    for ix = math.max(-r, -x), math.min(r, (rx - x) - 1) do
+    for ix = math.max(-r, -x), math.min(r, rx - x) do
         px = x + ix
         for iy = math.max(-r, -y), math.min(r, ry - y) do
             py = y + iy
@@ -190,8 +201,9 @@ end
 
 -------------------------------- advanced
 
-function draw:setColorMask(mask)
+function draw:setColorMask(mask, ...)
     self.mask = mask
+    self.maskArgs = {...}
 end
 
 -------------------------------- main

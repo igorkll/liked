@@ -3,7 +3,7 @@ local colors = require("colors")
 local liked = require("liked")
 
 local screen = ...
-local render = draw.create(screen, draw.modes.box)
+local render = draw.create(screen, draw.modes.semi)
 local rx, ry = render:size()
 
 liked.regExit(screen)
@@ -21,9 +21,9 @@ while true do
     render:clear()
     render:setColorMask(hueMash)
     render:line(2, 2, rx - 1, ry - 1)
-    render:circle(cx, cy, 6)
+    render:circle(cx, cy, 5)
     render:setColorMask()
-    render:drawCircle(cx, cy, 6, 0xff0000)
+    render:drawCircle(cx, cy, 5, 0xff0000)
     render:update()
     os.sleep(0.1)
 
