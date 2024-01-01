@@ -30,6 +30,8 @@ while true do
     render:circle(cx, cy, 10)
     render:setColorMask()
     render:drawCircle(cx, cy, 10, 0xff0000)
+    render:rect(2, 2, 10, 10, 0x00ffff)
+    render:fill(15, 15, 10, 10, 0xff00ff)
     render:update()
-    os.sleep(0.2)
+    os.sleep(0.1)
 end
