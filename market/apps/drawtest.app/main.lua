@@ -15,14 +15,15 @@ local function hueMash(x, y)
 end
 
 local cx, cy = 5, 5
+local count = 0
 
 while true do
     render:clear()
     render:setColorMask(hueMash)
     render:line(2, 2, rx - 1, ry - 1)
-    render:circle(cx, cy, 5)
+    render:circle(cx, cy, 6)
     render:setColorMask()
-    render:drawCircle(cx, cy, 5, 0xff0000)
+    render:drawCircle(cx, cy, 6, 0xff0000)
     render:update()
     os.sleep(0.1)
 
@@ -31,10 +32,10 @@ while true do
     else
         cx = cx + 1
     end
-
     if cy > ry then
         cy = 1
     else
         cy = cy + 1
     end
+    count = count + 1
 end

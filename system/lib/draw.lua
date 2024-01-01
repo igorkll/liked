@@ -123,8 +123,9 @@ local function quadInCircle(qx, qy, qs, cx, cy, cr)
 end
 
 function draw:circle(x, y, r, color)
-    x = math.round(x) + 0.5
-    y = math.round(y) + 0.5
+    x = math.round(x) + 1.5
+    y = math.round(y) + 1.5
+    r = math.round(r) + 0.5
 
     local rx, ry = self.window.sizeX, self.window.sizeY
     local px, py
