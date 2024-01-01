@@ -7,16 +7,20 @@ draw.modes.braille = 3
 
 -------------------------------- base
 
+local function map(...)
+    return math.ceil(math.map(...))
+end
+
 function draw:toRealPos(x, y) --конвертирует позицию с холста в позицию opencomputers
     local sx, sy = self:size()
     local rx, ry = self.window.sizeX, self.window.sizeY
-    return math.mapRound(x, 1, sx, 1, rx), math.mapRound(y, 1, sy, 1, ry)
+    return map(x, 1, sx, 1, rx), map(y, 1, sy, 1, ry)
 end
 
 function draw:toFakePos(x, y) --конвертирует позицию opencomputers в позицию холста
     local sx, sy = self:size()
     local rx, ry = self.window.sizeX, self.window.sizeY
-    return math.mapRound(x, 1, rx, 1, sx), math.mapRound(y, 1, ry, 1, sy)
+    return map(x, 1, rx, 1, sx), map(y, 1, ry, 1, sy)
 end
 
 function draw:size()
@@ -224,8 +228,10 @@ function draw:touchscreen(eventData)
             eventData = self.window:uploadEvent(eventData)
         end
 
-        eventData[3], eventData[4] = self:toFakePos(eventData[3], eventData[4])
-        return eventData
+        if eventData and eventData[3] then
+            eventData[3], eventData[4] = self:toFakePos(eventData[3], eventData[4])
+            return eventData
+        end
     end
 end
 
