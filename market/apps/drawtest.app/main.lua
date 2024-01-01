@@ -1,6 +1,7 @@
 local draw = require("draw")
 local colors = require("colors")
 local liked = require("liked")
+local thread = require("thread")
 
 local screen = ...
 local render = draw.create(screen, draw.modes.semi)
@@ -16,6 +17,14 @@ end
 
 local cx, cy = 5, 5
 local count = 0
+local pixels = {}
+
+thread.listen(nil, function (...)
+    local eventData = render:touchscreen({...})
+    if eventData and (eventData[1] == "touch" or eventData[1] == "drag") then
+        table.insert(pixels, {eventData[3], eventData[4]})
+    end
+end)
 
 while true do
     render:clear()
@@ -24,6 +33,9 @@ while true do
     render:circle(cx, cy, 5)
     render:setColorMask()
     render:drawCircle(cx, cy, 5, 0xff0000)
+    for i, v in ipairs(pixels) do
+        render:dot(v[1], v[2], 0xffffff)
+    end
     render:update()
     os.sleep(0.1)
 

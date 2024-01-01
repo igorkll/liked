@@ -7,6 +7,18 @@ draw.modes.braille = 3
 
 -------------------------------- base
 
+function draw:toRealPos(x, y) --конвертирует позицию с холста в позицию opencomputers
+    local sx, sy = self:size()
+    local rx, ry = self.window.sizeX, self.window.sizeY
+    return math.mapRound(x, 1, sx, 1, rx), math.mapRound(y, 1, sy, 1, ry)
+end
+
+function draw:toFakePos(x, y) --конвертирует позицию opencomputers в позицию холста
+    local sx, sy = self:size()
+    local rx, ry = self.window.sizeX, self.window.sizeY
+    return math.mapRound(x, 1, rx, 1, sx), math.mapRound(y, 1, ry, 1, sy)
+end
+
 function draw:size()
     local rx, ry = self.window.sizeX, self.window.sizeY
     if self.mode == draw.modes.box then
@@ -204,6 +216,17 @@ end
 function draw:setColorMask(mask, ...)
     self.mask = mask
     self.maskArgs = {...}
+end
+
+function draw:touchscreen(eventData)
+    if eventData[2] == self.window.screen and (eventData[1] == "touch" or eventData[1] == "drag" or eventData[1] == "drop" or eventData[1] == "scroll") then
+        if not eventData.windowEventData then
+            eventData = self.window:uploadEvent(eventData)
+        end
+
+        eventData[3], eventData[4] = self:toFakePos(eventData[3], eventData[4])
+        return eventData
+    end
 end
 
 -------------------------------- main

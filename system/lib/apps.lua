@@ -13,6 +13,7 @@ local registry = require("registry")
 local gui = require("gui")
 local gui_container = require("gui_container")
 local archiver = require("archiver")
+local component = require("component")
 local apps = {}
 
 function apps.load(name, screen, nickname)
@@ -72,6 +73,7 @@ function apps.load(name, screen, nickname)
     end
 
     local oldScreenSaverState
+    local oldPrecise
 
     --------------------------------
 
@@ -98,6 +100,11 @@ function apps.load(name, screen, nickname)
             if configTbl.res then
                 graphic.setResolution(screen, table.unpack(configTbl.res))
             end
+
+            if configTbl.precise ~= nil and graphic.getDeviceTier(screen) == 3 then
+                oldPrecise = not not component.invoke(screen, "isPrecise")
+                component.invoke(screen, "setPrecise", configTbl.precise)
+            end
         end
     end
 
@@ -117,6 +124,10 @@ function apps.load(name, screen, nickname)
 
             if configTbl.noScreenSaver then
                 screensaver.setEnabled(screen, oldScreenSaverState)
+            end
+
+            if oldPrecise ~= nil then
+                component.invoke(screen, "setPrecise", oldPrecise)
             end
         end
     end
