@@ -212,7 +212,12 @@ function draw:drawCircle(x, y, r, color)
 end
 
 function draw:clear(color)
-    self.window:clear(color or 0x000000)
+    if self.mask then
+        local sx, sy = self:size()
+        self:fill(1, 1, sx, sy, color)
+    else
+        self.window:clear(color or 0x000000)
+    end
 end
 
 -------------------------------- advanced
