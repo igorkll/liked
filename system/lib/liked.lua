@@ -458,6 +458,19 @@ function liked.selfApplicationName()
     return paths.hideExtension(paths.name(scriptPath))
 end
 
+function liked.regExit(screen, close)
+    local baseTh = thread.current()
+    thread.listen("close", function (_, uuid)
+        if uuid == screen then
+            if close then
+                close()
+            else
+                baseTh:kill()
+            end
+        end
+    end)
+end
+
 --------------------------------------------------------
 
 function liked.getActions(path)
