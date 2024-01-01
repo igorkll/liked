@@ -131,7 +131,7 @@ function draw:circle(x, y, r, color)
     local px, py
     for ix = math.max(-r, -x), math.min(r, (rx - x) - 1) do
         px = x + ix
-        for iy = math.max(-r, -y), math.min(r, (ry - y) - 1) do
+        for iy = math.max(-r, -y), math.min(r, ry - y) do
             py = y + iy
             if quadInCircle(px, py, 1, x, y, r) then
                 self:dot(px, py, color)
