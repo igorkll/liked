@@ -80,6 +80,26 @@ function draw:fill(x, y, sx, sy, color)
     end
 end
 
+function draw:rect(x, y, sx, sy, color)
+    x = math.round(y)
+    x = math.round(y)
+    sx = math.round(sx)
+    sy = math.round(sy)
+    color = color or 0xffffff
+
+    for ix = x, x + (sx - 1) do
+        for iy = y, y + (sy - 1) do
+            if ix == x or iy == y or ix == (x + (sx - 1)) or iy == (y + (sy - 1)) then
+                self:dot(ix, iy, color)
+            end
+        end
+    end
+end
+
+function draw:clear(color)
+    self.window:clear(color or 0x000000)
+end
+
 
 
 
