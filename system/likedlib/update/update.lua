@@ -1,15 +1,26 @@
---local installdata = {data={branch="main",mode="full"}} --пристыковываеться к скрипту на этапе обновления
+--local installdata = {data={branch="main",mode="full"},filesBlackList={}} --пристыковываеться к скрипту на этапе обновления
+
+local component = component or require("component")
+local computer = computer or require("computer")
+local unicode = unicode or require("unicode")
 
 local function initScreen(gpu, screen)
     if gpu.getScreen() ~= screen then
         gpu.bind(screen, false)
     end
+
+    local rx, ry = 50, 16
+    local mrx, mry = gpu.maxResolution()
+    if component.list("tablet", true)() then
+        rx, ry = mrx, mry
+    end
+
     gpu.setDepth(1)
     gpu.setDepth(gpu.maxDepth())
-    gpu.setResolution(50, 16)
+    gpu.setResolution(rx, ry)
     gpu.setBackground(0)
-    gpu.setForeground(0xFFFFFF)
-    gpu.fill(1, 1, 50, 16, " ")
+    gpu.setForeground(0xffffff)
+    gpu.fill(1, 1, rx, ry, " ")
 end
 
 local function centerPrint(gpu, text, y)
@@ -23,27 +34,45 @@ local function printState(num)
     local gpu = component.proxy(component.list("gpu")() or "")
     if gpu then
         for screen in component.list("screen") do
+            -- init
             if not screensInited then
                 initScreen(gpu, screen)
 
                 if gpu.getDepth() > 1 then
                     gpu.setPaletteColor(0, 0x5bb9f0)
                     gpu.setPaletteColor(1, 0xffffff)
-
-                    gpu.setBackground(0, true)
-                    gpu.setForeground(1, true)
+                    gpu.setPaletteColor(2, 0x818181)
                 else
-                    gpu.setBackground(0xFFFFFF)
+                    gpu.setBackground(0xffffff)
                     gpu.setForeground(0x000000)
                 end
             elseif gpu.getScreen() ~= screen then
                 gpu.bind(screen, false)
             end
 
+            -- draw
             local rx, ry = gpu.getResolution()
+            local depth = gpu.getDepth()
+
+            if depth > 1 then
+                gpu.setBackground(0, true)
+                gpu.setForeground(1, true)
+            end
+
+            local textPos = math.floor(ry / 2)
+
             gpu.fill(1, 1, rx, ry, " ")
-            centerPrint(gpu, str, math.floor(ry / 2))
+            centerPrint(gpu, str, textPos)
             centerPrint(gpu, "please do not turn off the device!", ry - 1)
+            if depth > 1 then
+                gpu.setForeground(2, true)
+            end
+            gpu.fill(2, textPos + 1, rx - 2, 1, "⎯")
+            if depth > 1 then
+                gpu.setForeground(1, true)
+            end
+            gpu.fill(2, textPos + 1, math.floor(((rx - 2) * num) + 0.5), 1, "⠶")
+            
         end
         screensInited = true
     end
@@ -177,7 +206,7 @@ for name, content in pairs(installdata.data) do
     saveFile("/system/sysdata/" .. name, content)
 end
 
---удаляем этот файл
+--удаляем этот файл (обычно этот скрипт выполняеться от сюда)
 proxy.remove("/likeOS_startup.lua")
 
 --перезагружаем устройтсво
