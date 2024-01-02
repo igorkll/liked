@@ -1,4 +1,6 @@
 local uix = require("uix")
+local gobjs = require("gobjs")
+local fs = require("filesystem")
 
 local screen = ...
 local ui = uix.manager(screen)
@@ -61,12 +63,17 @@ hiObj = helloLayout:createCustom((rx / 2) - 11, (ry / 2) - 6, blinckedHi)
 next1 = helloLayout:createButton((rx / 2) - 7, ry - 1, 16, 1, uix.colors.lightBlue, uix.colors.white, "next", true)
 
 function next1:onClick()
-    os.exit()
+    ui:select(licenseLayout)
 end
 
 helloLayout:timer(0.2, function ()
     hiObj:draw()
 end, math.huge)
+
+--------------------------------
+
+licenseLayout = ui:simpleCreate(uix.colors.cyan, uix.styles[2])
+licenseLayout:createCustom(2, 2, gobjs.scrolltext, rx - 2, ry - 4, assert(fs.readFile("/system/LICENSE")):gsub("\r", ""))
 
 --------------------------------
 

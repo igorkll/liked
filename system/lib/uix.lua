@@ -772,13 +772,15 @@ function uix:uploadEvent(eventData)
         eventData = self.window:uploadEvent(eventData)
     end
 
-    if self.onEvent then
-        self:onEvent(eventData)
-    end
+    if eventData and table.len(eventData) > 0 then
+        if self.onEvent then
+            self:onEvent(eventData)
+        end
 
-    for _, obj in ipairs(self.objs) do
-        if obj.uploadEvent then
-            obj:uploadEvent(eventData)
+        for _, obj in ipairs(self.objs) do
+            if obj.uploadEvent then
+                obj:uploadEvent(eventData)
+            end
         end
     end
 
@@ -831,6 +833,17 @@ function uix:select()
 end
 
 ---------------------------------- uix methods
+
+function uix.objEvent(self, eventData)
+    if eventData and (eventData[1] == "touch" or eventData[1] == "drop" or eventData[1] == "drag" or eventData[1] == "scroll") then
+        if eventData[3] >= self.x and eventData[4] >= self.y and eventData[3] < self.x + self.sizeX and eventData[4] < self.y + self.sizeY then
+            eventData[3] = (eventData[3] - self.x) + 1
+            eventData[4] = (eventData[4] - self.y) + 1
+
+            return eventData
+        end
+    end
+end
 
 function uix.doColor(obj, back, fore)
     obj.back = back or colors.white
