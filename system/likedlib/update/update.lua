@@ -194,6 +194,15 @@ local function installUrl(urlPart, state2)
     end
 end
 
+local function sleep(time)
+    local startTime = computer.uptime()
+    repeat
+        computer.pullSignal(time - (computer.uptime() - startTime))
+    until computer.uptime() - startTime >= time
+end
+
+--------------------------------
+
 --удаляем старую систему во избежании конфликта версий
 proxy.remove("/system")
 
@@ -208,6 +217,10 @@ end
 
 --удаляем этот файл (обычно этот скрипт выполняеться от сюда)
 proxy.remove("/likeOS_startup.lua")
+
+--отображаем 100% в течении двух секунд
+printState(1)
+sleep(2)
 
 --перезагружаем устройтсво
 computer.shutdown("fast")
