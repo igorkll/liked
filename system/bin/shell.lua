@@ -12,6 +12,11 @@ local graphic = require("graphic")
 local screen = ...
 
 local t = thread.create(function ()
+    if not registry.systemConfigured then
+        assert(apps.execute("setup", screen))
+        registry.systemConfigured = true
+    end
+    
     assert(apps.execute("login", screen))
     assert(apps.execute("desktop", screen))
 end)

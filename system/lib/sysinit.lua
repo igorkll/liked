@@ -222,6 +222,9 @@ function sysinit.init(box)
     local registry = require("registry")
     local event = require("event")
     local system = require("system")
+
+    local devicetype = system.getDeviceType()
+    local isTablet = devicetype == "tablet"
     
     ------------------------------------
 
@@ -236,8 +239,7 @@ function sysinit.init(box)
     ------------------------------------
 
     if not registry.powerMode then
-        local devicetype = system.getDeviceType()
-        if devicetype == "tablet" and not box then
+        if isTablet and not box then
             registry.powerMode = "energy saving"
         else
             registry.powerMode = "power"
@@ -259,7 +261,11 @@ function sysinit.init(box)
     ------------------------------------
 
     if not box and not fs.exists(gui_container.screenSaverPath) and not registry.screenSaverDefaultSetted then
-        pcall(fs.copy, registry.defaultScreenSaverPath or "/system/screenSavers/black_screen.scrsv", gui_container.screenSaverPath)
+        if isTablet then
+            pcall(fs.copy, registry.defaultScreenSaverPath or "/system/screenSavers/black_screen.scrsv", gui_container.screenSaverPath)
+        else
+            pcall(fs.copy, registry.defaultScreenSaverPath or "/system/screenSavers/color_dots.scrsv", gui_container.screenSaverPath)
+        end
         registry.defaultScreenSaverPath = nil
         registry.screenSaverDefaultSetted = true
     end

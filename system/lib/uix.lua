@@ -746,6 +746,25 @@ end
 
 
 
+
+function uix:timer(time, callback, count)
+    return thread.timer(time, function ()
+        if not self.bgWork then return end
+        return callback()
+    end, count)
+end
+
+function uix:listen(eventType, callback)
+    return thread.listen(eventType, function ()
+        if not self.bgWork then return end
+        return callback()
+    end)
+end
+
+
+
+
+
 function uix:uploadEvent(eventData)
     if self.controlLock or not self.active then return end
 
@@ -839,18 +858,10 @@ function uix.create(window, bgcolor, style)
     guiobj.bgcolor = bgcolor
     guiobj.controlLock = false
     guiobj.active = false
+    guiobj.bgWork = true
     guiobj.allowAutoActive = true
 
     return guiobj
-end
-
-function uix.createAuto(screen, title, bgcolor, style) --legacy
-    local rx, ry = graphic.getResolution(screen)
-    local window = graphic.createWindow(screen, 1, 1, rx, ry)
-
-    local layout = uix.create(window, bgcolor or colors.black, style)
-    layout:createUp(title)
-    return layout
 end
 
 function uix.createLayout(screen, title, bgcolor, style)
@@ -860,6 +871,23 @@ function uix.createLayout(screen, title, bgcolor, style)
 
     local layout = uix.create(window, bgcolor or colors.black, style)
     layout:createUp(title or liked.selfApplicationName())
+    return layout
+end
+
+function uix.createSimpleLayout(screen, bgcolor, style)
+    local rx, ry = graphic.getResolution(screen)
+    local window = graphic.createWindow(screen, 1, 1, rx, ry)
+    return uix.create(window, bgcolor or colors.black, style)
+end
+
+---------------------------------- legacy
+
+function uix.createAuto(screen, title, bgcolor, style) --legacy
+    local rx, ry = graphic.getResolution(screen)
+    local window = graphic.createWindow(screen, 1, 1, rx, ry)
+
+    local layout = uix.create(window, bgcolor or colors.black, style)
+    layout:createUp(title)
     return layout
 end
 
@@ -893,6 +921,7 @@ local manager = {}
 function manager:select(layout)
     if self.current then
         self.current.active = false
+        self.current.bgWork = false
         self.current:stop()
     end
 
@@ -901,6 +930,7 @@ function manager:select(layout)
         self.current.smartGuiManager = self
         self.current.allowAutoActive = nil
         self.current.active = true
+        self.current.bgWork = true
         self.current:draw()
     end
 end
@@ -925,6 +955,15 @@ end
 
 function manager:create(title, bgcolor, style)
     local layout = uix.createLayout(self.screen, title, bgcolor, style)
+    layout.bgWork = false
+    layout.allowAutoActive = nil
+    if not self.firstLayout then self.firstLayout = layout end
+    return layout
+end
+
+function manager:simpleCreate(bgcolor, style)
+    local layout = uix.createSimpleLayout(self.screen, bgcolor, style)
+    layout.bgWork = false
     layout.allowAutoActive = nil
     if not self.firstLayout then self.firstLayout = layout end
     return layout
