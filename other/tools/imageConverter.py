@@ -158,6 +158,21 @@ def get_popular_colors(image_path):
 
     return popular_colors
 
+def floyd(image):
+    height, width = image.shape
+
+    for y in range(height):
+        for x in range(width):
+            oldpixel = image[y, x]
+            newpixel = find_closest_palette_color(oldpixel)
+            image[y, x] = newpixel
+            quant_error = oldpixel - newpixel
+            
+            image[y    , x + 1] = image[y    , x + 1] + quant_error * 7 / 16
+            image[y + 1, x - 1] = image[y + 1, x - 1] + quant_error * 3 / 16
+            image[y + 1, x    ] = image[y + 1, x    ] + quant_error * 5 / 16
+            image[y + 1, x + 1] = image[y + 1, x + 1] + quant_error * 1 / 16
+
 
 def parse_image_pixelwise(image_path):
     # Загрузка изображения
@@ -194,6 +209,12 @@ def parse_image_pixelwise(image_path):
     if fullAdd:
         addPal = input("add palette colors? y/N: ") == "y"
         print("add palette", addPal)
+
+    floydUse = input("use disiring? y/N: ") == "y"
+    print("floydUse", addPal)
+
+    if floydUse:
+        floyd(image)
 
     # Попиксельный обход и обработка изображения
     with open(output_path, 'wb') as file:
