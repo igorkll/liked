@@ -313,6 +313,7 @@ local list = {
         vendor = "logic",
         description = "contains a minecraft-style watch and compass\nthe compass points north and only works on a tablet",
         minDiskSpace = 64,
+        libs = {"draw"},
 
         path = "/data/apps/toolbox.app",
         urlPrimaryPart = selfurlpart .. "/apps/toolbox.app/",
@@ -459,6 +460,18 @@ local list = {
         path = "/data/apps/midi.app",
         urlPrimaryPart = selfurlpart .. "/apps/midi.app/",
         files = {"main.lua", "icon.t2p", "icon_1.t2p", "formats.cfg"}
+    },
+    {
+        name = "drawtest",
+        version = "1",
+        vendor = "logic",
+        description = "an application demonstrating the \"liked\" graphical mode",
+        minDiskSpace = 64,
+        libs = {"draw"},
+        
+        path = "/data/apps/drawtest.app",
+        urlPrimaryPart = selfurlpart .. "/apps/drawtest.app/",
+        files = {"main.lua", "icon.t2p", "config.cfg"}
     }
 }
 
@@ -492,6 +505,11 @@ list.libs = {
         url = selfurlpart .. "/libs/midi.lua",
         vendor = "logic",
         version = "2"
+    },
+    ["draw"] = {
+        url = selfurlpart .. "/libs/draw.lua",
+        vendor = "logic",
+        version = "1"
     }
 }
 
