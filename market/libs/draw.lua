@@ -1,5 +1,6 @@
 local graphic = require("graphic")
-local draw = {modes = {}}
+local gui_container = require("gui_container")
+local draw = {modes = {}, colors = gui_container.colors}
 draw.modes.box = 0
 draw.modes.full = 1
 draw.modes.semi = 2
@@ -214,7 +215,7 @@ end
 function draw:clear(color)
     if self.mask then
         local sx, sy = self:size()
-        self:fill(1, 1, sx, sy, color)
+        self:fill(1, 1, sx, sy, color or 0x000000)
     else
         self.window:clear(color or 0x000000)
     end
