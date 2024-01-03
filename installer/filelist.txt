@@ -53,6 +53,8 @@
 /system/bin/shell.lua
 /system/bin/unpackArchive.lua
 /system/bin/xpkgInstall.lua
+/system/bin/setup.app/config.cfg
+/system/bin/setup.app/main.lua
 /system/calls/gui_filepicker.lua
 /system/firmware/luabios/code.lua
 /system/firmware/luabios/label.txt
@@ -92,6 +94,7 @@
 /system/lib/draw.lua
 /system/lib/eeprom.lua
 /system/lib/format.lua
+/system/lib/gobjs.lua
 /system/lib/gui.lua
 /system/lib/gui_container.lua
 /system/lib/hdd.lua
