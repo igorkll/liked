@@ -8,15 +8,25 @@ local render = draw.create(liked.applicationWindow(screen, "Shooting"), draw.mod
 local rx, ry = render:size()
 liked.regExit(screen, nil, true)
 
-local cx, cy = rx / 3, ry / 2
-local mr = (ry / 2) - 5
+local mr = math.round(ry / 2) - 1
+local cand = 2
+local cx, cy = mr + 2, ry / 2
 
 local function redraw()
     render:clear(draw.colors.lightGray)
     local state = false
-    for r = mr, 3, -3 do
-        render:circle(cx, cy, r, state and draw.colors.gray or draw.colors.white)
-        state = not state
+    local skip = math.huge
+    for r = mr, cand, -1 do
+        if skip >= 2 or r == cand then
+            local color = state and draw.colors.gray or draw.colors.white
+            if r == cand then
+                color = draw.colors.red
+            end
+            render:circle(cx, cy, r, color)
+            state = not state
+            skip = 0
+        end
+        skip = skip + 1
     end
 end
 redraw()
