@@ -20,8 +20,15 @@ local sx, sy = render:size()
 local cr = (sx / 2) - 2
 local cx, cy = (sx / 2) - 1, sy / 2
 
+local gameUsers = {}
+
+local function drawUsers()
+    appWindow:set(3, 2, draw.colors.white, draw.colors.gray, " User      Color     Score ")
+end
+
 local function redraw()
     appWindow:clear(draw.colors.black)
+    drawUsers()
 
     render:clear(draw.colors.lightGray)
     local state = false
@@ -40,6 +47,6 @@ while true do
     local eventData = {event.pull()}
     local shotEventData = render:touchscreen(eventData)
     if shotEventData and shotEventData[1] == "touch" then
-        render:dot(shotEventData[3], shotEventData[4], draw.colors.yellow)
+        render:dot(shotEventData[3], shotEventData[4], draw.colors.cyan)
     end
 end
