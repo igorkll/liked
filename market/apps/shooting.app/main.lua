@@ -2,31 +2,35 @@ local draw = require("draw")
 local colors = require("colors")
 local liked = require("liked")
 local thread = require("thread")
+local graphic = require("graphic")
 
 local screen = ...
-local render = draw.create(liked.applicationWindow(screen, "Shooting"), draw.modes.semi)
-local rx, ry = render:size()
+local rx, ry = graphic.getResolution(screen)
+liked.drawFullUpBarTask(screen, "Shooting")
 liked.regExit(screen, nil, true)
 
-local mr = math.round(ry / 2) - 1
-local cand = 2
-local cx, cy = mr + 2, ry / 2
+local showWindowSizeX = ry * 2
+
+local shotWindow = graphic.createWindow(screen, 1, 2, showWindowSizeX, ry - 1)
+local appWindow = graphic.createWindow(screen, showWindowSizeX + 1, 2, rx - showWindowSizeX, ry - 1)
+local render = draw.create(shotWindow, draw.modes.semi)
+local sx, sy = render:size()
+
+local cr = (sx / 2) - 2
+local cx, cy = (sx / 2) - 1, sy / 2
 
 local function redraw()
+    appWindow:clear(draw.colors.black)
+
     render:clear(draw.colors.lightGray)
     local state = false
-    local skip = math.huge
-    for r = mr, cand, -1 do
-        if skip >= 2 or r == cand then
-            local color = state and draw.colors.gray or draw.colors.white
-            if r == cand then
-                color = draw.colors.red
-            end
-            render:circle(cx, cy, r, color)
-            state = not state
-            skip = 0
+    for r = cr, 2, -3 do
+        local color = state and draw.colors.gray or draw.colors.white
+        if r == 2 then
+            color = draw.colors.red
         end
-        skip = skip + 1
+        render:circle(cx, cy, r, color)
+        state = not state
     end
 end
 redraw()
