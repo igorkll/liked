@@ -1,4 +1,4 @@
 {
-    disableRecovery = false,
+    enableRecoveryAfterSetup = true,
     sysmodeVersion = 1
 }

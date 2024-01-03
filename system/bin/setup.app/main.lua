@@ -4,6 +4,7 @@ local fs = require("filesystem")
 local graphic = require("graphic")
 local colorlib = require("colors")
 local computer = require("computer")
+local registry = require("registry")
 
 local screen = ...
 local ui = uix.manager(screen)
@@ -43,7 +44,7 @@ end
 --------------------------------
 
 helloLayout = ui:simpleCreate(uix.colors.cyan, uix.styles[2])
-helloLayout:createText(2, 1, uix.colors.white, "liked & likeOS")
+--helloLayout:createText(2, 1, uix.colors.white, "liked & likeOS")
 
 hiObj = helloLayout:createCustom((rx / 2) - 11, (ry / 2) - 6, blinckedHi)
 
@@ -87,10 +88,18 @@ end
 licenseLayout = ui:simpleCreate(uix.colors.cyan, uix.styles[2])
 licenseLayout:createCustom(3, 2, gobjs.scrolltext, rx - 4, ry - 4, assert(fs.readFile("/system/LICENSE")):gsub("\r", ""))
 
-back1 = licenseLayout:createButton(3, ry - 1, 16, 1, uix.colors.lightBlue, uix.colors.white, " ← back", true)
+back1 = licenseLayout:createButton(3, ry - 1, 8, 1, uix.colors.lightBlue, uix.colors.white, " ← back", true)
 back1.alignment = "left"
 function back1:onClick()
     ui:select(helloLayout)
+end
+
+next2 = licenseLayout:createButton(rx - 16, ry - 1, 16, 1, uix.colors.lightBlue, uix.colors.white, "accept & next", true)
+function next2:onClick()
+    if registry.enableRecoveryAfterSetup then
+        registry.disableRecovery = false
+    end
+    os.exit()
 end
 
 --------------------------------
