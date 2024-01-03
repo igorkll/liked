@@ -46,9 +46,11 @@ helloLayout = ui:simpleCreate(uix.colors.cyan, uix.styles[2])
 helloLayout:createText(2, 1, uix.colors.white, "liked & likeOS")
 
 hiObj = helloLayout:createCustom((rx / 2) - 11, (ry / 2) - 6, blinckedHi)
-hiObj:draw()
 
+graphic.setPaletteColor(screen, colorlib.red, 0xffffff)
 local function blink()
+    hiObj:draw()
+
     local tick = 90
     helloLayout:timer(0.1, function ()
         local value = math.abs(math.sin(math.rad(tick)))
