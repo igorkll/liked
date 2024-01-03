@@ -472,6 +472,18 @@ local list = {
         path = "/data/apps/drawtest.app",
         urlPrimaryPart = selfurlpart .. "/apps/drawtest.app/",
         files = {"main.lua", "icon.t2p", "config.cfg"}
+    },
+    {
+        name = "shooting",
+        version = "1",
+        vendor = "logic",
+        description = "shoot at the target with your friends!",
+        minDiskSpace = 64,
+        libs = {"draw"},
+        
+        path = "/data/apps/shooting.app",
+        urlPrimaryPart = selfurlpart .. "/apps/shooting.app/",
+        files = {"main.lua", "icon.t2p"}
     }
 }
 
