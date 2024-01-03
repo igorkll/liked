@@ -2,6 +2,7 @@ local draw = require("draw")
 local colors = require("colors")
 local liked = require("liked")
 local thread = require("thread")
+local event = require("event")
 local graphic = require("graphic")
 
 local screen = ...
@@ -36,5 +37,9 @@ end
 redraw()
 
 while true do
-    os.sleep(0.1)
+    local eventData = {event.pull()}
+    local shotEventData = render:touchscreen(eventData)
+    if shotEventData and shotEventData[1] == "touch" then
+        render:dot(shotEventData[3], shotEventData[4], draw.colors.yellow)
+    end
 end
