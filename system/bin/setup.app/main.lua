@@ -73,7 +73,7 @@ end, math.huge)
 --------------------------------
 
 licenseLayout = ui:simpleCreate(uix.colors.cyan, uix.styles[2])
-licenseLayout:createCustom(2, 2, gobjs.scrolltext, rx - 2, ry - 4, assert(fs.readFile("/system/LICENSE")):gsub("\r", ""))
+licenseLayout:createCustom(3, 2, gobjs.scrolltext, rx - 4, ry - 4, assert(fs.readFile("/system/LICENSE")):gsub("\r", ""))
 
 --------------------------------
 
