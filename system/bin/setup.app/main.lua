@@ -97,6 +97,7 @@ end
 next2 = licenseLayout:createButton(rx - 16, ry - 1, 16, 1, uix.colors.lightBlue, uix.colors.white, "accept & next", true)
 function next2:onClick()
     if registry.enableRecoveryAfterSetup then
+        registry.enableRecoveryAfterSetup = nil
         registry.disableRecovery = false
     end
     os.exit()
