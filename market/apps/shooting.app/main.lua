@@ -4,6 +4,7 @@ local liked = require("liked")
 local thread = require("thread")
 local event = require("event")
 local graphic = require("graphic")
+local uix = require("uix")
 
 local screen = ...
 local rx, ry = graphic.getResolution(screen)
@@ -14,20 +15,23 @@ local showWindowSizeX = ry * 2
 
 local shotWindow = graphic.createWindow(screen, 1, 2, showWindowSizeX, ry - 1)
 local appWindow = graphic.createWindow(screen, showWindowSizeX + 1, 2, rx - showWindowSizeX, ry - 1)
+local ui = uix.create(appWindow, draw.colors.black, uix.styles[2])
 local render = draw.create(shotWindow, draw.modes.semi)
 local sx, sy = render:size()
 
 local cr = (sx / 2) - 2
 local cx, cy = (sx / 2) - 1, sy / 2
 
+--------------------------------
+
 local gameUsers = {}
 
 local function drawUsers()
     appWindow:set(3, 2, draw.colors.white, draw.colors.gray, " User      Color     Score ")
+    ui:draw()
 end
 
 local function redraw()
-    appWindow:clear(draw.colors.black)
     drawUsers()
 
     render:clear(draw.colors.lightGray)
