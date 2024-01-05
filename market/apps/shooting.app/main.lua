@@ -32,8 +32,9 @@ local gameUsers = {}
 local bg, fg = uix.colors.white, uix.colors.gray
 local bl = uix.colors.black
 local usedColors
+local colorsEnd
 local function recreateUsedColors()
-    usedColors = {[bg] = true, [fg] = true, [bl] = true, [draw.colors.red] = true}
+    usedColors = {[bg] = true, [fg] = true, [bl] = true, [draw.colors.red] = true, [uix.colors.lightGray] = true}
 end
 recreateUsedColors()
 
@@ -99,28 +100,38 @@ local function lowLevelGenerateColor()
     if graphic.getDepth(screen) == 8 then
         return colors.blend(math.random(0, 255), math.random(0, 255), math.random(0, 255))
     else
-        local r = math.random(1, 5)
+        local r = math.random(1, 8)
         if r == 1 then
             return draw.colors.cyan
         elseif r == 2 then
             return draw.colors.orange
         elseif r == 3 then
-            return draw.colors.red
+            return draw.colors.brown
         elseif r == 4 then
             return draw.colors.green
         elseif r == 5 then
             return draw.colors.lime
+        elseif r == 6 then
+            return draw.colors.pink
+        elseif r == 7 then
+            return draw.colors.purple
+        elseif r == 8 then
+            return draw.colors.magenta
         end
     end
+    return draw.colors.black
 end
 
 local function generateColor()
-    for i = 1, 16 do
-        local color = lowLevelGenerateColor()
-        if not usedColors[color] then
-            return color
+    if not colorsEnd then
+        for i = 1, 4096 do
+            local color = lowLevelGenerateColor()
+            if not usedColors[color] then
+                return color
+            end
         end
     end
+    colorsEnd = true
     return lowLevelGenerateColor()
 end
 
@@ -149,6 +160,7 @@ local recreate = ui:createButton(3, ui.window.sizeY - 1, 16, 1, nil, nil, "recre
 function recreate:onClick()
     recreateUsedColors()
     gameUsers = {}
+    colorsEnd = nil
     redraw()
 end
 
@@ -161,6 +173,10 @@ while true do
         local user = generateUser(shotEventData[6])
         local px, py = shotEventData[3], shotEventData[4]
         render:dot(px, py, user.color)
+        render:dot(px, py+1, user.color)
+        render:dot(px, py-1, user.color)
+        render:dot(px+1, py, user.color)
+        render:dot(px-1, py, user.color)
         user.score = user.score + mathScore(px, py)
         drawUsers()
     end
