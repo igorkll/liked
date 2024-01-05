@@ -5,11 +5,16 @@ local thread = require("thread")
 local event = require("event")
 local graphic = require("graphic")
 local uix = require("uix")
+local gui = require("gui")
 
 local screen = ...
 local rx, ry = graphic.getResolution(screen)
 liked.drawFullUpBarTask(screen, "Shooting")
-liked.regExit(screen, nil, true)
+local exitFlag
+liked.regExit(screen, function ()
+    exitFlag = true
+    event.stub()
+end, true)
 
 local showWindowSizeX = ry * 2
 
@@ -182,4 +187,15 @@ while true do
     end
 
     ui:uploadEvent(eventData)
+
+    if exitFlag then
+        local clear = gui.saveZone(screen)
+        if gui.yesno(screen, nil, nil, "are you sure you want to get out?") then
+            return
+        else
+            clear()
+        end
+        
+        exitFlag = nil
+    end
 end
