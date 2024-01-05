@@ -25,7 +25,7 @@ local render = draw.create(shotWindow, draw.modes.semi)
 local sx, sy = render:size()
 
 local cr = (sx / 2) - 2
-local cx, cy = (sx / 2) - 1, sy / 2
+local cx, cy = (sx / 2) - 1, (sy / 2) - 1
 
 --------------------------------
 
@@ -92,12 +92,12 @@ local function mathDist(x, y, x2, y2)
 end
 
 local function mathScore(px, py)
-    local dist = mathDist(cx, cy, px, py)
+    local dist = mathDist(cx, cy, px - 1, py - 1)
     local fraction = dist / cr
     if fraction < 1 then
         return math.round((1 - fraction) * 25)
     else
-        return 0
+        return -math.round((fraction - 0.7) * 25)
     end
 end
 
@@ -195,7 +195,7 @@ while true do
         else
             clear()
         end
-        
+
         exitFlag = nil
     end
 end
