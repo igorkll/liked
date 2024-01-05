@@ -24,10 +24,43 @@ local cx, cy = (sx / 2) - 1, sy / 2
 
 --------------------------------
 
+local userNamePos = 4
+local colorPos = 16
+local scorePos = 22
+
 local gameUsers = {}
+local bg, fg = uix.colors.white, uix.colors.gray
+local bl = uix.colors.black
+local usedColors
+local function recreateUsedColors()
+    usedColors = {[bg] = true, [fg] = true, [bl] = true, [draw.colors.red] = true}
+end
+recreateUsedColors()
+
+ui:createLabel(3, 2, 26, 1, bg)
+ui:createText(userNamePos, 2, fg, "User")
+ui:createText(colorPos, 2, fg, "Color")
+ui:createText(scorePos, 2, fg, "Score")
+
+ui:createCustom(3, 3, {
+    onCreate = function (self)
+        self.w = self.gui.window
+    end,
+    draw = function (self)
+        for i, data in ipairs(gameUsers) do
+            local pos = self.y + (i - 1)
+            local lbg = i % 2 == 0 and uix.colors.gray or uix.colors.lightGray
+            self.w:fill(self.x, pos, 26, 1, lbg, 0, " ")
+            self.w:set(1 + userNamePos, pos, lbg, bl, data.nickname)
+            self.w:set(1 + colorPos, pos, data.color, 0, "  ")
+            self.w:set(1 + scorePos, pos, lbg, bl, tostring(data.score))
+        end
+    end
+})
+
+--------------------------------
 
 local function drawUsers()
-    appWindow:set(3, 2, draw.colors.white, draw.colors.gray, " User      Color     Score ")
     ui:draw()
 end
 
@@ -45,12 +78,92 @@ local function redraw()
         state = not state
     end
 end
+
+--------------------------------
+
+local function mathDist(x, y, x2, y2)
+    return math.sqrt(((x - x2) ^ 2) + ((y - y2) ^ 2))
+end
+
+local function mathScore(px, py)
+    local dist = mathDist(cx, cy, px, py)
+    local fraction = dist / cr
+    if fraction < 1 then
+        return math.round((1 - fraction) * 25)
+    else
+        return 0
+    end
+end
+
+local function lowLevelGenerateColor()
+    if graphic.getDepth(screen) == 8 then
+        return colors.blend(math.random(0, 255), math.random(0, 255), math.random(0, 255))
+    else
+        local r = math.random(1, 5)
+        if r == 1 then
+            return draw.colors.cyan
+        elseif r == 2 then
+            return draw.colors.orange
+        elseif r == 3 then
+            return draw.colors.red
+        elseif r == 4 then
+            return draw.colors.green
+        elseif r == 5 then
+            return draw.colors.lime
+        end
+    end
+end
+
+local function generateColor()
+    for i = 1, 16 do
+        local color = lowLevelGenerateColor()
+        if not usedColors[color] then
+            return color
+        end
+    end
+    return lowLevelGenerateColor()
+end
+
+--------------------------------
+
+local function findUser(nickname)
+    for i, data in ipairs(gameUsers) do
+        if data.nickname == nickname then
+            return data
+        end
+    end
+end
+
+local function generateUser(nickname)
+    local user = findUser(nickname)
+    if not user then
+        local color = generateColor()
+        usedColors[color] = true
+        user = {color = color, nickname = nickname, score = 0}
+        table.insert(gameUsers, user)
+    end
+    return user
+end
+
+local recreate = ui:createButton(3, ui.window.sizeY - 1, 16, 1, nil, nil, "recreate", true)
+function recreate:onClick()
+    recreateUsedColors()
+    gameUsers = {}
+    redraw()
+end
+
 redraw()
 
 while true do
     local eventData = {event.pull()}
     local shotEventData = render:touchscreen(eventData)
     if shotEventData and shotEventData[1] == "touch" then
-        render:dot(shotEventData[3], shotEventData[4], draw.colors.cyan)
+        local user = generateUser(shotEventData[6])
+        local px, py = shotEventData[3], shotEventData[4]
+        render:dot(px, py, user.color)
+        user.score = user.score + mathScore(px, py)
+        drawUsers()
     end
+
+    ui:uploadEvent(eventData)
 end
