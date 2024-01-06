@@ -54,6 +54,7 @@
 /system/bin/unpackArchive.lua
 /system/bin/xpkgInstall.lua
 /system/bin/setup.app/config.cfg
+/system/bin/setup.app/inet.lua
 /system/bin/setup.app/main.lua
 /system/calls/gui_filepicker.lua
 /system/firmware/luabios/code.lua

@@ -2,6 +2,7 @@ local draw = require("draw")
 local colors = require("colors")
 local liked = require("liked")
 local thread = require("thread")
+local adv = require("adv")
 
 local screen = ...
 local render = draw.create(screen, draw.modes.semi)
@@ -10,9 +11,8 @@ local rx, ry = render:size()
 liked.regExit(screen)
 
 
-local function hueMash(x, y)
-    local value = ((x / rx) + (y / ry)) / 2
-    return colors.blend(colors.hsvToRgb(value * 255, 255, 255))
+local function hueMash(x, y, _, px, py, cr)
+    return colors.blend(colors.hsvToRgb(adv.dist2(x, y, px, py) * cr * 2, 255, 255))
 end
 
 local cx, cy = 15, 15
@@ -26,7 +26,7 @@ end)
 
 while true do
     render:clear()
-    render:setColorMask(hueMash)
+    render:setColorMask(hueMash, cx + 1, cy + 1, 10)
     render:circle(cx, cy, 10)
     render:setColorMask()
     render:drawCircle(cx, cy, 10, 0xff0000)

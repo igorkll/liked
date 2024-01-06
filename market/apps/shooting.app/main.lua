@@ -6,6 +6,7 @@ local event = require("event")
 local graphic = require("graphic")
 local uix = require("uix")
 local gui = require("gui")
+local adv = require("adv")
 
 local screen = ...
 local rx, ry = graphic.getResolution(screen)
@@ -87,12 +88,8 @@ end
 
 --------------------------------
 
-local function mathDist(x, y, x2, y2)
-    return math.sqrt(((x - x2) ^ 2) + ((y - y2) ^ 2))
-end
-
 local function mathScore(px, py)
-    local dist = mathDist(cx, cy, px - 1, py - 1)
+    local dist = adv.dist2(cx, cy, px - 1, py - 1)
     local fraction = dist / cr
     if fraction < 1 then
         return math.round((1 - fraction) * 25)

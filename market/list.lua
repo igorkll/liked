@@ -467,7 +467,7 @@ local list = {
         vendor = "logic",
         description = "an application demonstrating the \"liked\" graphical mode",
         minDiskSpace = 64,
-        libs = {"draw"},
+        libs = {"draw", "adv"},
         
         path = "/data/apps/drawtest.app",
         urlPrimaryPart = selfurlpart .. "/apps/drawtest.app/",
@@ -479,7 +479,7 @@ local list = {
         vendor = "logic",
         description = "shoot at the target with your friends!",
         minDiskSpace = 64,
-        libs = {"draw"},
+        libs = {"draw", "adv"},
         
         path = "/data/apps/shooting.app",
         urlPrimaryPart = selfurlpart .. "/apps/shooting.app/",
@@ -520,6 +520,11 @@ list.libs = {
     },
     ["draw"] = {
         url = selfurlpart .. "/libs/draw.lua",
+        vendor = "logic",
+        version = "1"
+    },
+    ["adv"] = {
+        url = selfurlpart .. "/libs/adv.lua",
         vendor = "logic",
         version = "1"
     }
