@@ -190,7 +190,7 @@ local customPath = "/data/" .. urlsBase .."urls.txt"
 local function reList()
     urls = {}
     if not registry.disableSystemMarketUrls then
-        doList("/system/" .. urlsBase .. "urls_" .. sysdata.get("branch") .. ".txt")
+        doList("/system/liked/" .. urlsBase .. "urls_" .. sysdata.get("branch") .. ".txt")
     end
     doList("/vendor/" .. urlsBase .. "urls.txt")
     if not registry.disableCustomMarketUrls then

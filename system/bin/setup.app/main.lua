@@ -5,8 +5,17 @@ local graphic = require("graphic")
 local colorlib = require("colors")
 local computer = require("computer")
 local registry = require("registry")
+local apps = require("apps")
+local system = require("system")
+
+--------------------------------
 
 local screen = ...
+
+function _G.doSetup(name)
+    assert(apps.execute(system.getResourcePath(name .. ".lua"), screen))
+end
+
 local ui = uix.manager(screen)
 local rx, ry = ui:size()
 
@@ -48,7 +57,7 @@ helloLayout = ui:simpleCreate(uix.colors.cyan, uix.styles[2])
 
 hiObj = helloLayout:createCustom((rx / 2) - 11, (ry / 2) - 6, blinckedHi)
 
-graphic.setPaletteColor(screen, colorlib.red, 0xffffff)
+--graphic.setPaletteColor(screen, colorlib.red, 0xffffff)
 local function blink()
     hiObj:draw()
 
@@ -96,11 +105,7 @@ end
 
 next2 = licenseLayout:createButton(rx - 16, ry - 1, 16, 1, uix.colors.lightBlue, uix.colors.white, "accept & next", true)
 function next2:onClick()
-    if registry.enableRecoveryAfterSetup then
-        registry.enableRecoveryAfterSetup = nil
-        registry.disableRecovery = false
-    end
-    os.exit()
+    doSetup("inet")
 end
 
 --------------------------------
