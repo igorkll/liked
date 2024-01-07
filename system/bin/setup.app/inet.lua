@@ -8,6 +8,7 @@ local registry = require("registry")
 local internet = require("internet")
 local image = require("image")
 local gui = require("gui")
+local account = require("account")
 
 local screen = ...
 local ui = uix.manager(screen)
@@ -43,13 +44,30 @@ end
 
 --------------------------------
 
+local loginInputPos = (rx / 2) - 19
+
 accountLayout = ui:simpleCreate(uix.colors.cyan, uix.styles[2])
+loginZone = accountLayout:createInput(loginInputPos, ry - 6, 40, uix.colors.white, uix.colors.black, false, nil, nil, nil, "login   : ")
+passwordZone = accountLayout:createInput(loginInputPos, ry - 4, 40, uix.colors.white, uix.colors.black, true, nil, nil, nil, "password: ")
 
 function accountLayout:onSelect()
     if not accountLayout.imagePath then
-        accountLayout.imagePath = uix.getSysImgPath("account")
-        local accountImage = accountLayout:createImage(((rx / 2) - (image.sizeX(accountLayout.imagePath) / 2)) + 1, 2, accountLayout.imagePath)
-        accountImage.wallpaperMode = true
+        accountLayout.locked = account.getLocked()
+        if accountLayout.locked then
+            accountLayout.imagePath = uix.getSysImgPath("accountLock")
+            local accountImage = accountLayout:createImage(((rx / 2) - (image.sizeX(accountLayout.imagePath) / 2)) + 1, 2, accountLayout.imagePath)
+            accountImage.wallpaperMode = true
+
+            loginZone.read.setBuffer(accountLayout.locked)
+            loginZone.read.setLock(true)
+
+            accountLayout:createVText(rx / 2, ry - 9, uix.colors.orange, "your device is locked")
+            accountLayout:createVText(rx / 2, ry - 8, uix.colors.orange, "enter your account password to confirm that you are the owner")
+        else
+            accountLayout.imagePath = uix.getSysImgPath("account")
+            local accountImage = accountLayout:createImage(((rx / 2) - (image.sizeX(accountLayout.imagePath) / 2)) + 1, 2, accountLayout.imagePath)
+            accountImage.wallpaperMode = true
+        end
     end
 end
 

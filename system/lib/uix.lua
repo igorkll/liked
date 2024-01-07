@@ -542,6 +542,10 @@ function uix:createText(x, y, color, text)
     return obj
 end
 
+function uix:createVText(x, y, color, text)
+    return self:createText(x - (unicode.len(text) // 2), y, color, text)
+end
+
 function uix:createInput(x, y, sx, back, fore, hidden, default, syntax, maxlen, preStr, titleColor, title)
     local obj = setmetatable({gui = self, type = "input"}, {__index = objclass})
     obj.x = x
