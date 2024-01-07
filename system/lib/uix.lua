@@ -8,6 +8,7 @@ local event = require("event")
 local image = require("image")
 local system = require("system")
 local colorslib = require("colors")
+local paths = require("paths")
 
 local colors = gui_container.colors
 local uix = {colors = colors}
@@ -833,6 +834,10 @@ function uix:select()
 end
 
 ---------------------------------- uix methods
+
+function uix.getSysImgPath(name)
+    return paths.concat("/system/images", name .. ".t2p")
+end
 
 function uix.objEvent(self, eventData)
     if eventData and (eventData[1] == "touch" or eventData[1] == "drop" or eventData[1] == "drag" or eventData[1] == "scroll") then

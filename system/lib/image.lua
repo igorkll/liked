@@ -211,5 +211,13 @@ function image.size(path)
     return sx, sy
 end
 
+function image.sizeX(path)
+    return (image.size(path))
+end
+
+function image.sizeY(path)
+    return (select(2, image.size(path)))
+end
+
 image.unloadable = true
 return image

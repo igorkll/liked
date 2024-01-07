@@ -81,12 +81,12 @@ do
         ui:select(licenseLayout)
     end
 
-    local reboot = helloLayout:createButton(rx - 16, 4, 16, 1, uix.colors.lightBlue, uix.colors.white, "reboot", true)
+    local reboot = helloLayout:createButton(rx - 17, 4, 16, 1, uix.colors.lightBlue, uix.colors.white, "reboot", true)
     function reboot:onClick()
         computer.shutdown(true)
     end
 
-    local shutdown = helloLayout:createButton(rx - 16, 2, 16, 1, uix.colors.lightBlue, uix.colors.white, "shutdown", true)
+    local shutdown = helloLayout:createButton(rx - 17, 2, 16, 1, uix.colors.lightBlue, uix.colors.white, "shutdown", true)
     function shutdown:onClick()
         computer.shutdown()
     end
@@ -103,9 +103,10 @@ function back1:onClick()
     ui:select(helloLayout)
 end
 
-next2 = licenseLayout:createButton(rx - 16, ry - 1, 16, 1, uix.colors.lightBlue, uix.colors.white, "accept & next", true)
+next2 = licenseLayout:createButton(rx - 17, ry - 1, 16, 1, uix.colors.lightBlue, uix.colors.white, "accept & next", true)
 function next2:onClick()
     doSetup("inet")
+    ui:draw()
 end
 
 --------------------------------
