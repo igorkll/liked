@@ -10,9 +10,12 @@ local image = require("image")
 local gui = require("gui")
 local account = require("account")
 
-local screen = ...
-local ui = uix.manager(screen)
+local screen, _, window = ...
+local ui = uix.manager(screen, window)
 local rx, ry = ui:size()
+if window then
+    rx, ry = window.sizeX, window.sizeY
+end
 
 --------------------------------
 
@@ -62,7 +65,7 @@ function accountLayout:onSelect()
             loginZone.read.setLock(true)
 
             accountLayout:createVText(rx / 2, ry - 9, uix.colors.orange, "your device is locked")
-            accountLayout:createVText(rx / 2, ry - 8, uix.colors.orange, "enter your account password to confirm that you are the owner")
+            accountLayout:createVText(rx / 2, ry - 8, uix.colors.orange, "enter account password to confirm that you are the owner")
         else
             accountLayout.imagePath = uix.getSysImgPath("account")
             local accountImage = accountLayout:createImage(((rx / 2) - (image.sizeX(accountLayout.imagePath) / 2)) + 1, 2, accountLayout.imagePath)
@@ -71,9 +74,11 @@ function accountLayout:onSelect()
     end
 end
 
-local backButton2 = accountLayout:createButton(3, ry - 1, 8, 1, uix.colors.lightBlue, uix.colors.white, " ← back", true)
-function backButton2:onClick()
-    os.exit()
+if not window then
+    local backButton2 = accountLayout:createButton(3, ry - 1, 8, 1, uix.colors.lightBlue, uix.colors.white, " ← back", true)
+    function backButton2:onClick()
+        os.exit()
+    end
 end
 
 --------------------------------

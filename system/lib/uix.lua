@@ -887,9 +887,12 @@ function uix.create(window, bgcolor, style)
 end
 
 function uix.createLayout(screen, title, bgcolor, style)
-    local rx, ry = graphic.getResolution(screen)
-    local window = graphic.createWindow(screen, 1, 2, rx, ry - 1)
-    window.outsideEvents = true
+    local window = screen
+    if type(screen) == "string" then
+        local rx, ry = graphic.getResolution(screen)
+        window = graphic.createWindow(screen, 1, 2, rx, ry - 1)
+        window.outsideEvents = true
+    end
 
     local layout = uix.create(window, bgcolor or colors.black, style)
     layout:createUp(title or liked.selfApplicationName())
@@ -897,8 +900,11 @@ function uix.createLayout(screen, title, bgcolor, style)
 end
 
 function uix.createSimpleLayout(screen, bgcolor, style)
-    local rx, ry = graphic.getResolution(screen)
-    local window = graphic.createWindow(screen, 1, 1, rx, ry)
+    local window = screen
+    if type(screen) == "string" then
+        local rx, ry = graphic.getResolution(screen)
+        window = graphic.createWindow(screen, 1, 1, rx, ry)
+    end
     return uix.create(window, bgcolor or colors.black, style)
 end
 
@@ -977,7 +983,7 @@ function manager:loop()
 end
 
 function manager:create(title, bgcolor, style)
-    local layout = uix.createLayout(self.screen, title, bgcolor, style)
+    local layout = uix.createLayout(self.window or self.screen, title, bgcolor, style)
     layout.bgWork = false
     layout.allowAutoActive = nil
     if not self.firstLayout then self.firstLayout = layout end
@@ -985,7 +991,7 @@ function manager:create(title, bgcolor, style)
 end
 
 function manager:simpleCreate(bgcolor, style)
-    local layout = uix.createSimpleLayout(self.screen, bgcolor, style)
+    local layout = uix.createSimpleLayout(self.window or self.screen, bgcolor, style)
     layout.bgWork = false
     layout.allowAutoActive = nil
     if not self.firstLayout then self.firstLayout = layout end
@@ -1011,8 +1017,8 @@ function manager:draw()
     end
 end
 
-function uix.manager(screen)
-    return setmetatable({screen = screen}, {__index = manager})
+function uix.manager(screen, window)
+    return setmetatable({screen = screen, window = window}, {__index = manager})
 end
 
 ----------------------------------
