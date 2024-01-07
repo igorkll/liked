@@ -44,9 +44,14 @@ end
 --------------------------------
 
 accountLayout = ui:simpleCreate(uix.colors.cyan, uix.styles[2])
-accountLayout.imagePath = uix.getSysImgPath("account")
-local accountImage = accountLayout:createImage(((rx / 2) - (image.sizeX(accountLayout.imagePath) / 2)) + 1, 2, accountLayout.imagePath)
-accountImage.wallpaperMode = true
+
+function accountLayout:onSelect()
+    if not accountLayout.imagePath then
+        accountLayout.imagePath = uix.getSysImgPath("account")
+        local accountImage = accountLayout:createImage(((rx / 2) - (image.sizeX(accountLayout.imagePath) / 2)) + 1, 2, accountLayout.imagePath)
+        accountImage.wallpaperMode = true
+    end
+end
 
 local backButton2 = accountLayout:createButton(3, ry - 1, 8, 1, uix.colors.lightBlue, uix.colors.white, " ← back", true)
 function backButton2:onClick()

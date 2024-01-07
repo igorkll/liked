@@ -118,6 +118,7 @@
 /system/likedbox/palette.plt
 /system/likedbox/registry.dat
 /system/likedbox/bin/shell.lua
+/system/likedlib/account.lua
 /system/likedlib/installer.lua
 /system/likedlib/sysdata.lua
 /system/likedlib/sysmode/classic.reg
