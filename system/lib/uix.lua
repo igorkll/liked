@@ -546,12 +546,12 @@ function uix:createVText(x, y, color, text)
     return self:createText(x - (unicode.len(text) // 2), y, color, text)
 end
 
-function uix:createInput(x, y, sx, back, fore, hidden, default, syntax, maxlen, preStr, titleColor, title)
+function uix:createInput(x, y, sx, back, fore, testHidden, default, syntax, maxlen, preStr, titleColor, title)
     local obj = setmetatable({gui = self, type = "input"}, {__index = objclass})
     obj.x = x
     obj.y = y
     obj.sx = sx
-    obj.hidden = hidden
+    obj.testHidden = testHidden
     obj.default = default
     obj.syntax = syntax
     obj.titleColor = titleColor or colors.lightGray
@@ -559,9 +559,9 @@ function uix:createInput(x, y, sx, back, fore, hidden, default, syntax, maxlen, 
     uix.doColor(obj, back, fore)
 
     if self.style == "round" then
-        obj.read = self.window:readNoDraw(x + 1, y, sx - 2, obj.back, obj.fore, preStr, hidden, default, true, syntax)
+        obj.read = self.window:readNoDraw(x + 1, y, sx - 2, obj.back, obj.fore, preStr, testHidden, default, true, syntax)
     else
-        obj.read = self.window:readNoDraw(x, y, sx, obj.back, obj.fore, preStr, hidden, default, true, syntax)
+        obj.read = self.window:readNoDraw(x, y, sx, obj.back, obj.fore, preStr, testHidden, default, true, syntax)
     end
     
     obj.oldText = obj.read.getBuffer()
