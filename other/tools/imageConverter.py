@@ -158,20 +158,62 @@ def get_popular_colors(image_path):
 
     return popular_colors
 
+def toCVcolor(color):
+    r, g, b = hex_to_rgb(color)
+    return [b, g, r, 0]
+
+# find_closest_color(target_color, color_array)
+def find_closest_palette_color(color):
+    return toCVcolor(colors3t[find_closest_color(convert_to_24bit(color), colors3t)])
+
 def floyd(image):
-    height, width = image.shape
+    height, width, channels = image.shape
 
     for y in range(height):
         for x in range(width):
+            print("currentpixel", image[y, x])
+
             oldpixel = image[y, x]
             newpixel = find_closest_palette_color(oldpixel)
+            newpixel[3] = oldpixel[3]
             image[y, x] = newpixel
-            quant_error = oldpixel - newpixel
+
+            print("currentpixel2", newpixel)
+
+            quant_error_b = abs(oldpixel[0] - newpixel[0]) / 255
+            quant_error_g = abs(oldpixel[1] - newpixel[1]) / 255
+            quant_error_r = abs(oldpixel[2] - newpixel[2]) / 255
+            print("add", quant_error_b, quant_error_g, quant_error_r)
             
-            image[y    , x + 1] = image[y    , x + 1] + quant_error * 7 / 16
-            image[y + 1, x - 1] = image[y + 1, x - 1] + quant_error * 3 / 16
-            image[y + 1, x    ] = image[y + 1, x    ] + quant_error * 5 / 16
-            image[y + 1, x + 1] = image[y + 1, x + 1] + quant_error * 1 / 16
+            try:
+                image[y    , x + 1][0] += quant_error_b * 7 / 16
+                image[y    , x + 1][1] += quant_error_g * 7 / 16
+                image[y    , x + 1][2] += quant_error_r * 7 / 16
+            except Exception as e:
+                print(f"colorset error 1: {e}")
+            
+            try:
+                image[y + 1, x - 1][0] += quant_error_b * 3 / 16
+                image[y + 1, x - 1][1] += quant_error_g * 3 / 16
+                image[y + 1, x - 1][2] += quant_error_r * 3 / 16
+            except Exception as e:
+                print(f"colorset error 2: {e}")
+
+            try:
+                image[y + 1, x    ][0] += quant_error_b * 5 / 16
+                image[y + 1, x    ][1] += quant_error_g * 5 / 16
+                image[y + 1, x    ][2] += quant_error_r * 5 / 16
+            except Exception as e:
+                print(f"colorset error 3: {e}")
+
+            try:
+                image[y + 1, x + 1][0] += quant_error_b * 1 / 16
+                image[y + 1, x + 1][1] += quant_error_g * 1 / 16
+                image[y + 1, x + 1][2] += quant_error_r * 1 / 16
+            except Exception as e:
+                print(f"colorset error 4: {e}")
+
+            print("new color", image[y, x])
 
 
 def parse_image_pixelwise(image_path):
@@ -211,10 +253,12 @@ def parse_image_pixelwise(image_path):
         print("add palette", addPal)
 
     floydUse = input("use disiring? y/N: ") == "y"
-    print("floydUse", addPal)
+    print("floydUse", floydUse)
 
     if floydUse:
+        print("floyd start")
         floyd(image)
+        print("floyd end")
 
     # Попиксельный обход и обработка изображения
     with open(output_path, 'wb') as file:
@@ -312,6 +356,14 @@ def parse_image_pixelwise(image_path):
 
                 char = make_braille(outputArray)
                 print(back, fore, char)
+
+                """
+                if back != 15 and back != 3:
+                    back = 5
+                if fore != 15 and fore != 3:
+                    fore = 5
+                """
+
                 file.write(bytes([packNums(back, fore)]))
                 if fullAdd:
                     file.write(bytes([fullFore]))

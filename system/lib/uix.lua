@@ -949,6 +949,7 @@ function manager:select(layout)
         self.current.allowAutoActive = nil
         self.current.active = true
         self.current.bgWork = true
+        if self.current.onSelect then self.current:onSelect() end
         self.current:draw()
     end
 end

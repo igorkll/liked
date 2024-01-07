@@ -28,7 +28,7 @@ end
 local recheckButton = inetLayout:createButton(rx - 17, ry - 1, 16, 1, uix.colors.lightBlue, uix.colors.white, "recheck", true)
 function recheckButton:onClick()
     if internet.check() then
-        ui:select(accauntLayout)
+        ui:select(accountLayout)
     else
         gui.warn(screen, nil, nil, "there is still no internet connection")
         ui:draw()
@@ -43,9 +43,12 @@ end
 
 --------------------------------
 
-accauntLayout = ui:simpleCreate(uix.colors.cyan, uix.styles[2])
+accountLayout = ui:simpleCreate(uix.colors.cyan, uix.styles[2])
+accountLayout.imagePath = uix.getSysImgPath("account")
+local accountImage = accountLayout:createImage(((rx / 2) - (image.sizeX(accountLayout.imagePath) / 2)) + 1, 2, accountLayout.imagePath)
+accountImage.wallpaperMode = true
 
-local backButton2 = accauntLayout:createButton(3, ry - 1, 8, 1, uix.colors.lightBlue, uix.colors.white, " ← back", true)
+local backButton2 = accountLayout:createButton(3, ry - 1, 8, 1, uix.colors.lightBlue, uix.colors.white, " ← back", true)
 function backButton2:onClick()
     os.exit()
 end
@@ -53,7 +56,7 @@ end
 --------------------------------
 
 if internet.check() then
-    ui:select(accauntLayout)
+    ui:select(accountLayout)
 else
     ui:select(inetLayout)
 end

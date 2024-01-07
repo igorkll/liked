@@ -7,6 +7,8 @@ local computer = require("computer")
 local registry = require("registry")
 local apps = require("apps")
 local system = require("system")
+local event = require("event")
+local sysinit = require("sysinit")
 
 --------------------------------
 
@@ -72,7 +74,7 @@ local function blink()
         end
     end, math.huge)
 end
-blink()
+
 helloLayout:timer(4, blink, math.huge)
 
 do
@@ -90,6 +92,10 @@ do
     function shutdown:onClick()
         computer.shutdown()
     end
+end
+
+function helloLayout:onSelect()
+    blink()
 end
 
 --------------------------------
@@ -111,6 +117,10 @@ function next2:onClick()
     else
         ui:draw()
     end
+end
+
+function licenseLayout:onSelect()
+    sysinit.initScreen(screen)
 end
 
 --------------------------------
