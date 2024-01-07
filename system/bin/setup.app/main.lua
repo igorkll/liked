@@ -106,7 +106,11 @@ end
 next2 = licenseLayout:createButton(rx - 17, ry - 1, 16, 1, uix.colors.lightBlue, uix.colors.white, "accept & next", true)
 function next2:onClick()
     doSetup("inet")
-    ui:draw()
+    if registry.systemConfigured then
+        os.exit()
+    else
+        ui:draw()
+    end
 end
 
 --------------------------------

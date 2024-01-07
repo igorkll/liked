@@ -37,6 +37,7 @@ end
 
 local skipButton = inetLayout:createButton(rx - 17, ry - 3, 16, 1, uix.colors.lightBlue, uix.colors.white, "skip internet", true)
 function skipButton:onClick()
+    doSetup("end")
     os.exit()
 end
 

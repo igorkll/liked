@@ -6,4 +6,5 @@ if registry.enableRecoveryAfterSetup then
     registry.disableRecovery = false
 end
 
+registry.systemConfigured = true
 _G.doSetup = nil
