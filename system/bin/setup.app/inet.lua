@@ -51,18 +51,19 @@ end
 
 --------------------------------
 
-local loginInputPos = (rx / 2) - 19
+local loginInputPos = math.ceil((rx / 2) - 20)
+local bpos = math.ceil((rx / 2) - 8)
 
 accountLayout = ui:simpleCreate(uix.colors.cyan, uix.styles[2])
 loginZone = accountLayout:createInput(loginInputPos, ry - 8, 40, uix.colors.white, uix.colors.black, false, nil, nil, nil,    "login   : ")
 passwordZone = accountLayout:createInput(loginInputPos, ry - 6, 40, uix.colors.white, uix.colors.black, true, nil, nil, nil,  "password: ")
 passwordZone2 = accountLayout:createInput(loginInputPos, ry - 4, 40, uix.colors.white, uix.colors.black, true, nil, nil, nil, "password: ")
 
-registerButton = accountLayout:createButton(((rx / 2) - 8) - 10, ry - 2, 16, 1, uix.colors.lightBlue, uix.colors.white, "register", true)
-loginButton = accountLayout:createButton(((rx / 2) - 8) + 10, ry - 2, 16, 1, uix.colors.lightBlue, uix.colors.white, "login", true)
+registerButton = accountLayout:createButton(bpos - 10, ry - 2, 16, 1, uix.colors.lightBlue, uix.colors.white, "register", true)
+loginButton = accountLayout:createButton(bpos + 10, ry - 2, 16, 1, uix.colors.lightBlue, uix.colors.white, "login", true)
 
-accountDelButton = accountLayout:createButton(((rx / 2) - 8) - 10, ry - 2, 16, 1, uix.colors.lightBlue, uix.colors.white, "delete account", true)
-unloginButton = accountLayout:createButton(((rx / 2) - 8) + 10, ry - 2, 16, 1, uix.colors.lightBlue, uix.colors.white, "unlogin", true)
+accountDelButton = accountLayout:createButton(bpos - 10, ry - 2, 16, 1, uix.colors.lightBlue, uix.colors.white, "delete account", true)
+unloginButton = accountLayout:createButton(bpos + 10, ry - 2, 16, 1, uix.colors.lightBlue, uix.colors.white, "unlogin", true)
 
 function accountLayout:onSelect()
     if not accountLayout.imagePath then
@@ -148,6 +149,7 @@ function registerButton:onClick()
     if pass then
         if msg("you have successfully created an account!\nnow you can log in to it", account.register(loginZone.read.getBuffer(), pass)) then
             refresh()
+            return true
         end
     end
 end
@@ -157,6 +159,7 @@ function loginButton:onClick()
     if pass then
         if msg("you have successfully logged in to your account", account.login(loginZone.read.getBuffer(), pass)) then
             refresh()
+            return true
         end
     end
 end
@@ -166,6 +169,7 @@ function accountDelButton:onClick()
     if pass and gui.yesno(screen, nil, nil, "do you really want to delete your account :(") and gui.pleaseType(screen, "ACDEL", "delete account") then
         if msg("you have successfully deleted your account", account.unregister(loginZone.read.getBuffer(), pass)) then
             refresh()
+            return true
         end
     end
 end
@@ -175,6 +179,7 @@ function unloginButton:onClick()
     if pass then
         if msg("you have successfully logged out of your account", account.unlogin(pass)) then
             refresh()
+            return true
         end
     end
 end

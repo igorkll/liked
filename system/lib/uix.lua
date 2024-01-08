@@ -130,6 +130,7 @@ end
 
 function objclass:uploadEvent(eventData)
     if self.disabled or self.dh then return end
+    local retval
     if self.type == "button" or self.type == "context" then
         if self.state and (eventData[1] == "touch" or eventData[1] == "drop") then
             if self.type ~= "context" then
@@ -137,7 +138,7 @@ function objclass:uploadEvent(eventData)
                 self:draw()
 
                 if self.onDrop then
-                    self:onDrop(eventData[5], eventData[6], eventData)
+                    retval = self:onDrop(eventData[5], eventData[6], eventData)
                 end
             end
         elseif not self.state and eventData[1] == "touch" and eventData[3] >= self.x and eventData[4] >= self.y and eventData[3] < self.x + self.sx and eventData[4] < self.y + self.sy then
@@ -179,7 +180,7 @@ function objclass:uploadEvent(eventData)
                 end
                 
                 if self.onClick then
-                    self:onClick(eventData[5], eventData[6], eventData)
+                    retval = self:onClick(eventData[5], eventData[6], eventData)
                 end
             end
         end
@@ -267,6 +268,7 @@ function objclass:uploadEvent(eventData)
             end
         end
     end
+    return retval
 end
 
 function objclass:draw()
@@ -783,8 +785,10 @@ function uix:uploadEvent(eventData)
         end
 
         for _, obj in ipairs(self.objs) do
-            if obj.uploadEvent then
-                obj:uploadEvent(eventData)
+            if obj.uploadEvent and not obj.disabled then
+                if obj:uploadEvent(eventData) then
+                    break
+                end
             end
         end
     end
@@ -817,7 +821,7 @@ function uix:draw()
     end
 
     for _, obj in ipairs(self.objs) do
-        if obj.draw then
+        if obj.draw and not obj.hidden and not obj.dh then
             obj:draw()
         end
     end
