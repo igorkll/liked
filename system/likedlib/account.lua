@@ -62,13 +62,13 @@ end
 function account.register(name, password)
     local card = internet.cardProxy()
     local userdata = card.request(regHost, json.encode({name = name, password = password}))
-    return tostring(userdata.read())
+    return tostring(internet.readAll(userdata))
 end
 
 function account.unregister(name, password)
     local card = internet.cardProxy()
     local userdata = card.request(unregHost, json.encode({name = name, password = password}))
-    return tostring(userdata.read())
+    return tostring(internet.readAll(userdata))
 end
 
 account.unloadable = true
