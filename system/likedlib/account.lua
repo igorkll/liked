@@ -27,6 +27,18 @@ end
 
 --------------------------------
 
+local function post(lhost, data)
+    local card = internet.cardProxy()
+    local userdata = card.request(lhost, data)
+    local ok, err = internet.wait(userdata)
+    if not ok then
+        return err
+    end
+    local num, str, tbl = userdata.response()
+    return tostring(str)
+end
+
+
 function account.getLocked() --получает с сервера, на какую учетную запись заблокировано устройтсво
     return
 end
@@ -60,15 +72,11 @@ function account.unlogin(password)
 end
 
 function account.register(name, password)
-    local card = internet.cardProxy()
-    local userdata = card.request(regHost, json.encode({name = name, password = password}))
-    return tostring(internet.readAll(userdata))
+    return post(regHost, json.encode({name = name, password = password}))
 end
 
 function account.unregister(name, password)
-    local card = internet.cardProxy()
-    local userdata = card.request(unregHost, json.encode({name = name, password = password}))
-    return tostring(internet.readAll(userdata))
+    return post(unregHost, json.encode({name = name, password = password}))
 end
 
 account.unloadable = true
