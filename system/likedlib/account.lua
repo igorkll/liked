@@ -11,6 +11,12 @@ function account.checkToken(token)
     return true
 end
 
+function account.getStorage()
+    local proxy = require("component").proxy(require("computer").tmpAddress())
+    proxy.cloud = true
+    return proxy
+end
+
 --------------------------------
 
 function account.getLocked() --получает с сервера, на какую учетную запись заблокировано устройтсво

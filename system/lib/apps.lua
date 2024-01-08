@@ -18,7 +18,7 @@ local apps = {}
 
 function apps.load(name, screen, nickname)
     checkArg(1, name, "string")
-    checkArg(2, screen, "string")
+    checkArg(2, screen, "string", "nil")
     checkArg(3, nickname, "string", "nil")
 
     local path = programs.find(name)

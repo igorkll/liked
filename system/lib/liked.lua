@@ -558,7 +558,9 @@ function liked.getIcon(screen, path)
         end
         if fsProxy then
             local disklevel = system.getDiskLevel(fsProxy.address)
-            if disklevel == "tmp" then
+            if fsProxy.cloud then
+                icon = liked.findIcon("cloud")
+            elseif disklevel == "tmp" then
                 icon = liked.findIcon("tmp")
             elseif disklevel == "fdd" then
                 if fsProxy.exists("/init.lua") then

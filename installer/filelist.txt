@@ -24,6 +24,7 @@
 /system/apps/settings.app/icon.t2p
 /system/apps/settings.app/main.lua
 /system/apps/settings.app/shadow_demo.t2p
+/system/apps/settings.app/modules/a_account.lua
 /system/apps/settings.app/modules/a_lock.lua
 /system/apps/settings.app/modules/b_users.lua
 /system/apps/settings.app/modules/c_palette.lua
@@ -46,6 +47,7 @@
 /system/bin/fileinfo.lua
 /system/bin/login.lua
 /system/bin/paint.lua
+/system/bin/preinit.lua
 /system/bin/shell.lua
 /system/bin/unpackArchive.lua
 /system/bin/xpkgInstall.lua
@@ -60,6 +62,7 @@
 /system/icons/badicon.t2p
 /system/icons/bootdevice.t2p
 /system/icons/cfg.t2p
+/system/icons/cloud.t2p
 /system/icons/dat.t2p
 /system/icons/fdd.t2p
 /system/icons/file.t2p
@@ -81,6 +84,7 @@
 /system/icons/xpkg.t2p
 /system/images/account.t2p
 /system/images/accountLock.t2p
+/system/images/accountLogin.t2p
 /system/images/internet.t2p
 /system/images/noInternet.t2p
 /system/images/switch_off.t2p
