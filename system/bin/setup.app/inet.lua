@@ -186,6 +186,8 @@ function accountDelButton:onClick()
             refresh()
             return true
         end
+    else
+        ui:draw()
     end
 end
 
