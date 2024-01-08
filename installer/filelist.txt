@@ -103,6 +103,7 @@
 /system/lib/hdd.lua
 /system/lib/image.lua
 /system/lib/iowindows.lua
+/system/lib/json.lua
 /system/lib/liked.lua
 /system/lib/palette.lua
 /system/lib/screensaver.lua

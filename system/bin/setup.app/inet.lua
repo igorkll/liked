@@ -143,15 +143,9 @@ local function pass()
     end
 end
 
-local function msg(msg, ok, err)
-    if ok then
-        gui.done(screen, nil, nil, msg)
-    else
-        gui.warn(screen, nil, nil, err or "unknown error")
-    end
-
+local function msg(msg)
+    gui.done(screen, nil, nil, msg)
     ui:draw()
-    return ok
 end
 
 local function refresh()
@@ -162,30 +156,27 @@ end
 function registerButton:onClick()
     local pass = pass()
     if pass then
-        if msg("you have successfully created an account!\nnow you can log in to it", account.register(loginZone.read.getBuffer(), pass)) then
-            refresh()
-            return true
-        end
+        msg(account.register(loginZone.read.getBuffer(), pass))
+        refresh()
+        return true
     end
 end
 
 function loginButton:onClick()
     local pass = pass()
     if pass then
-        if msg("you have successfully logged in to your account", account.login(loginZone.read.getBuffer(), pass)) then
-            refresh()
-            return true
-        end
+        msg(account.login(loginZone.read.getBuffer(), pass))
+        refresh()
+        return true
     end
 end
 
 function accountDelButton:onClick()
     local pass = pass()
     if pass and gui.yesno(screen, nil, nil, "do you really want to delete your account :(") and gui.pleaseType(screen, "ACDEL", "delete account") then
-        if msg("you have successfully deleted your account", account.unregister(loginZone.read.getBuffer(), pass)) then
-            refresh()
-            return true
-        end
+        msg(account.unregister(loginZone.read.getBuffer(), pass))
+        refresh()
+        return true
     else
         ui:draw()
     end
@@ -194,10 +185,9 @@ end
 function unloginButton:onClick()
     local pass = pass()
     if pass then
-        if msg("you have successfully logged out of your account", account.unlogin(pass)) then
-            refresh()
-            return true
-        end
+        msg(account.unlogin(pass))
+        refresh()
+        return true
     end
 end
 
