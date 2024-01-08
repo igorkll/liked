@@ -53,6 +53,15 @@ end
 
 ------------------------------------
 
+gui.zoneX = 32
+gui.zoneY = 8
+
+gui.bigZoneX = 50
+gui.bigZoneY = 16
+
+gui.veryBigZoneX = 60
+gui.veryBigZoneY = 18
+
 function gui.bwSize(screen)
     local rx, ry = graphic.getResolution(screen)
     if rx <= 50 then

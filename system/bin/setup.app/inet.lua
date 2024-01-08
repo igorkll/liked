@@ -13,8 +13,10 @@ local account = require("account")
 local screen, _, window = ...
 local ui = uix.manager(screen, window)
 local rx, ry = ui:size()
+local pwx, pwy
 if window then
     rx, ry = window.sizeX, window.sizeY
+    pwx, pwy = (window.sizeX / 2) - (gui.zoneX / 2), (window.sizeY / 2) - (gui.zoneY / 2)
 end
 
 --------------------------------
@@ -23,11 +25,6 @@ local inetLayout = ui:simpleCreate(uix.colors.cyan, uix.styles[2])
 inetLayout.imagePath = uix.getSysImgPath("noInternet")
 inetLayout:createLabel(2, 2, inetLayout.window.sizeX - 2, 1, uix.colors.cyan, uix.colors.white, "there is no internet connection")
 inetLayout:createImage((rx / 2) - (image.sizeX(inetLayout.imagePath) / 2), 4, inetLayout.imagePath)
-
-local backButton = inetLayout:createButton(3, ry - 1, 8, 1, uix.colors.lightBlue, uix.colors.white, " ← back", true)
-function backButton:onClick()
-    os.exit()
-end
 
 local recheckButton = inetLayout:createButton(rx - 17, ry - 1, 16, 1, uix.colors.lightBlue, uix.colors.white, "recheck", true)
 function recheckButton:onClick()
@@ -39,10 +36,17 @@ function recheckButton:onClick()
     end
 end
 
-local skipButton = inetLayout:createButton(rx - 17, ry - 3, 16, 1, uix.colors.lightBlue, uix.colors.white, "skip internet", true)
-function skipButton:onClick()
-    doSetup("end")
-    os.exit()
+if not window then
+    local backButton = inetLayout:createButton(3, ry - 1, 8, 1, uix.colors.lightBlue, uix.colors.white, " ← back", true)
+    function backButton:onClick()
+        os.exit()
+    end
+
+    local skipButton = inetLayout:createButton(rx - 17, ry - 3, 16, 1, uix.colors.lightBlue, uix.colors.white, "skip internet", true)
+    function skipButton:onClick()
+        doSetup("end")
+        os.exit()
+    end
 end
 
 --------------------------------
@@ -50,8 +54,9 @@ end
 local loginInputPos = (rx / 2) - 19
 
 accountLayout = ui:simpleCreate(uix.colors.cyan, uix.styles[2])
-loginZone = accountLayout:createInput(loginInputPos, ry - 6, 40, uix.colors.white, uix.colors.black, false, nil, nil, nil, "login   : ")
-passwordZone = accountLayout:createInput(loginInputPos, ry - 4, 40, uix.colors.white, uix.colors.black, true, nil, nil, nil, "password: ")
+loginZone = accountLayout:createInput(loginInputPos, ry - 8, 40, uix.colors.white, uix.colors.black, false, nil, nil, nil,    "login   : ")
+passwordZone = accountLayout:createInput(loginInputPos, ry - 6, 40, uix.colors.white, uix.colors.black, true, nil, nil, nil,  "password: ")
+passwordZone2 = accountLayout:createInput(loginInputPos, ry - 4, 40, uix.colors.white, uix.colors.black, true, nil, nil, nil, "password: ")
 
 function accountLayout:onSelect()
     if not accountLayout.imagePath then
@@ -72,6 +77,24 @@ function accountLayout:onSelect()
             accountImage.wallpaperMode = true
         end
     end
+end
+
+registerButton = accountLayout:createButton(((rx / 2) - 8) - 10, ry - 2, 16, 1, uix.colors.lightBlue, uix.colors.white, "register")
+loginButton = accountLayout:createButton(((rx / 2) - 8) + 10, ry - 2, 16, 1, uix.colors.lightBlue, uix.colors.white, "login")
+
+local function pass()
+    local pass1 = passwordZone.read.getBuffer()
+    local pass2 = passwordZone2.read.getBuffer()
+    if pass1 == pass2 then
+        return pass1
+    else
+        gui.warn(screen, nil, nil, "passwords don't equals")
+    end
+end
+
+function registry:onClick()
+    local pass = pass()
+    
 end
 
 if not window then
