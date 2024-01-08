@@ -65,6 +65,14 @@ loginButton = accountLayout:createButton(bpos + 10, ry - 2, 16, 1, uix.colors.li
 accountDelButton = accountLayout:createButton(bpos - 10, ry - 2, 16, 1, uix.colors.lightBlue, uix.colors.white, "delete account", true)
 unloginButton = accountLayout:createButton(bpos + 10, ry - 2, 16, 1, uix.colors.lightBlue, uix.colors.white, "unlogin", true)
 
+if not window then
+    next3 = accountLayout:createButton(rx - 7, ry - 1, 6, 1, uix.colors.lightBlue, uix.colors.white, "next", true)
+    function next3:onClick()
+        doSetup("end")
+        os.exit()
+    end
+end
+
 function accountLayout:onSelect()
     if not accountLayout.imagePath then
         accountLayout.locked = account.getLocked()
@@ -79,6 +87,10 @@ function accountLayout:onSelect()
         loginButton.dh = true
         accountDelButton.dh = true
         unloginButton.dh = true
+        
+        if next3 then
+            next3.dh = false
+        end
 
         if vtext1 then vtext1:destroy() end
         if vtext2 then vtext2:destroy() end
@@ -105,6 +117,9 @@ function accountLayout:onSelect()
             vtext1 = accountLayout:createVText(rx / 2, ry - 11, uix.colors.orange, "your device is locked")
             vtext2 = accountLayout:createVText(rx / 2, ry - 10, uix.colors.orange, "enter account password to confirm that you are the owner")
 
+            if next3 then
+                next3.dh = true
+            end
             loginButton.dh = false
         else
             accountLayout.imagePath = uix.getSysImgPath("account")

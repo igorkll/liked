@@ -14,7 +14,7 @@ end
 --------------------------------
 
 function account.getLocked() --получает с сервера, на какую учетную запись заблокировано устройтсво
-    return registry.account
+    return registry.account or "QWE"
 end
 
 function account.getLogin()
