@@ -69,8 +69,8 @@ function accountLayout:onSelect()
             loginZone.read.setBuffer(accountLayout.locked)
             loginZone.read.setLock(true)
 
-            accountLayout:createVText(rx / 2, ry - 9, uix.colors.orange, "your device is locked")
-            accountLayout:createVText(rx / 2, ry - 8, uix.colors.orange, "enter account password to confirm that you are the owner")
+            accountLayout:createVText(rx / 2, ry - 11, uix.colors.orange, "your device is locked")
+            accountLayout:createVText(rx / 2, ry - 10, uix.colors.orange, "enter account password to confirm that you are the owner")
         else
             accountLayout.imagePath = uix.getSysImgPath("account")
             local accountImage = accountLayout:createImage(((rx / 2) - (image.sizeX(accountLayout.imagePath) / 2)) + 1, 2, accountLayout.imagePath)
@@ -79,8 +79,8 @@ function accountLayout:onSelect()
     end
 end
 
-registerButton = accountLayout:createButton(((rx / 2) - 8) - 10, ry - 2, 16, 1, uix.colors.lightBlue, uix.colors.white, "register")
-loginButton = accountLayout:createButton(((rx / 2) - 8) + 10, ry - 2, 16, 1, uix.colors.lightBlue, uix.colors.white, "login")
+registerButton = accountLayout:createButton(((rx / 2) - 8) - 10, ry - 2, 16, 1, uix.colors.lightBlue, uix.colors.white, "register", true)
+loginButton = accountLayout:createButton(((rx / 2) - 8) + 10, ry - 2, 16, 1, uix.colors.lightBlue, uix.colors.white, "login", true)
 
 local function pass()
     local pass1 = passwordZone.read.getBuffer()
@@ -89,12 +89,37 @@ local function pass()
         return pass1
     else
         gui.warn(screen, nil, nil, "passwords don't equals")
+        ui:draw()
     end
 end
 
-function registry:onClick()
+local function msg(reg, ok, err)
+    if ok then
+        if reg then
+            gui.done(screen, nil, nil, "you have successfully created an account!\nnow you can log in to it")
+        else
+            gui.done(screen, nil, nil, "you have successfully logged in to your account")
+        end
+    else
+        gui.warn(screen, nil, nil, err or "unknown error")
+    end
+
+    ui:draw()
+    return ok
+end
+
+function registerButton:onClick()
     local pass = pass()
-    
+    if pass then
+        
+    end
+end
+
+function loginButton:onClick()
+    local pass = pass()
+    if pass then
+        msg(false, account.login(loginZone.read.getBuffer(), pass))
+    end
 end
 
 if not window then

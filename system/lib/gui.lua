@@ -320,6 +320,42 @@ function gui.warn(screen, cx, cy, str, backgroundColor)
     noShadow()
 end
 
+function gui.done(screen, cx, cy, str, backgroundColor)
+    local window, noShadow = gui.smallWindow(screen, cx, cy, str, backgroundColor, function (window, color)
+        window:set(2, 1, color, colors.green, "  " .. unicode.char(0x2800+192) ..  "  ")
+        window:set(2, 2, color, colors.green, " ◢█◣ ")
+        window:set(2, 3, color, colors.green, "◢███◣")
+        window:set(4, 2, colors.green, colors.white, "~")
+    end)
+
+    window:set(32 - 4, 7, colors.lightBlue, colors.white, " OK ")
+    local function drawYes()
+        window:set(32 - 4, 7, colors.blue, colors.white, " OK ")
+        graphic.forceUpdate(screen)
+        event.sleep(0.1)
+    end
+
+    graphic.forceUpdate(screen)
+    if registry.soundEnable then
+        sound.done()
+    end
+
+    while true do
+        local eventData = {computer.pullSignal()}
+        local windowEventData = window:uploadEvent(eventData)
+        if windowEventData[1] == "touch" and windowEventData[5] == 0 then
+            if windowEventData[4] == 7 and windowEventData[3] > (32 - 5) and windowEventData[3] <= ((32 - 5) + 4) then
+                drawYes()
+                break
+            end
+        elseif windowEventData[1] == "key_down" and windowEventData[4] == 28 then
+            drawYes()
+            break
+        end
+    end
+    noShadow()
+end
+
 function gui.bigWarn(screen, cx, cy, str, backgroundColor)
     local bwSizeX, bwSizeY = gui.bwSize(screen)
 
@@ -346,7 +382,7 @@ function gui.bigWarn(screen, cx, cy, str, backgroundColor)
         local eventData = {computer.pullSignal()}
         local windowEventData = window:uploadEvent(eventData)
         if windowEventData[1] == "touch" and windowEventData[5] == 0 then
-            if windowEventData[4] == 17 and windowEventData[3] > (bwSizeX - 5) and windowEventData[3] <= ((bwSizeX - 5) + 4) then
+            if windowEventData[4] == (bwSizeY - 1) and windowEventData[3] > (bwSizeX - 5) and windowEventData[3] <= ((bwSizeX - 5) + 4) then
                 drawYes()
                 break
             end
