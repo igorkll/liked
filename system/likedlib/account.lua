@@ -27,16 +27,30 @@ function account.login(name, password)
     end
 
     registry.account = name
+    registry.accountPassword = password
     return true
 end
 
-function account.unlogin()
+function account.unlogin(password)
     if not registry.account then
         return nil, "you are not logged in to account"
     end
 
-    registry.account = nil
-    return true
+    if password == registry.accountPassword then
+        registry.account = nil
+        registry.accountPassword = nil
+        return true
+    else
+        return nil, "invalid password"
+    end
+end
+
+function account.register(name, password)
+
+end
+
+function account.unregister(name, password)
+
 end
 
 account.unloadable = true

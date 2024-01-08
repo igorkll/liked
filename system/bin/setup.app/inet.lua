@@ -58,29 +58,63 @@ loginZone = accountLayout:createInput(loginInputPos, ry - 8, 40, uix.colors.whit
 passwordZone = accountLayout:createInput(loginInputPos, ry - 6, 40, uix.colors.white, uix.colors.black, true, nil, nil, nil,  "password: ")
 passwordZone2 = accountLayout:createInput(loginInputPos, ry - 4, 40, uix.colors.white, uix.colors.black, true, nil, nil, nil, "password: ")
 
+registerButton = accountLayout:createButton(((rx / 2) - 8) - 10, ry - 2, 16, 1, uix.colors.lightBlue, uix.colors.white, "register", true)
+loginButton = accountLayout:createButton(((rx / 2) - 8) + 10, ry - 2, 16, 1, uix.colors.lightBlue, uix.colors.white, "login", true)
+
+accountDelButton = accountLayout:createButton(((rx / 2) - 8) - 10, ry - 2, 16, 1, uix.colors.lightBlue, uix.colors.white, "delete account", true)
+unloginButton = accountLayout:createButton(((rx / 2) - 8) + 10, ry - 2, 16, 1, uix.colors.lightBlue, uix.colors.white, "unlogin", true)
+
 function accountLayout:onSelect()
     if not accountLayout.imagePath then
         accountLayout.locked = account.getLocked()
-        if accountLayout.locked then
+        accountLayout.login = account.getLogin()
+
+        loginZone.read.setBuffer("")
+        passwordZone.read.setBuffer("")
+        passwordZone2.read.setBuffer("")
+        loginZone.read.setLock(false)
+
+        registerButton.dh = true
+        loginButton.dh = true
+        accountDelButton.dh = true
+        unloginButton.dh = true
+
+        if vtext1 then vtext1:destroy() end
+        if vtext2 then vtext2:destroy() end
+        if accountImage then accountImage:destroy() end
+
+        if accountLayout.login then
+            accountLayout.imagePath = uix.getSysImgPath("accountLogin")
+            accountImage = accountLayout:createImage(((rx / 2) - (image.sizeX(accountLayout.imagePath) / 2)) + 1, 2, accountLayout.imagePath)
+            accountImage.wallpaperMode = true
+
+            loginZone.read.setBuffer(accountLayout.login)
+            loginZone.read.setLock(true)
+
+            accountDelButton.dh = false
+            unloginButton.dh = false
+        elseif accountLayout.locked then
             accountLayout.imagePath = uix.getSysImgPath("accountLock")
-            local accountImage = accountLayout:createImage(((rx / 2) - (image.sizeX(accountLayout.imagePath) / 2)) + 1, 2, accountLayout.imagePath)
+            accountImage = accountLayout:createImage(((rx / 2) - (image.sizeX(accountLayout.imagePath) / 2)) + 1, 2, accountLayout.imagePath)
             accountImage.wallpaperMode = true
 
             loginZone.read.setBuffer(accountLayout.locked)
             loginZone.read.setLock(true)
 
-            accountLayout:createVText(rx / 2, ry - 11, uix.colors.orange, "your device is locked")
-            accountLayout:createVText(rx / 2, ry - 10, uix.colors.orange, "enter account password to confirm that you are the owner")
+            vtext1 = accountLayout:createVText(rx / 2, ry - 11, uix.colors.orange, "your device is locked")
+            vtext2 = accountLayout:createVText(rx / 2, ry - 10, uix.colors.orange, "enter account password to confirm that you are the owner")
+
+            loginButton.dh = false
         else
             accountLayout.imagePath = uix.getSysImgPath("account")
-            local accountImage = accountLayout:createImage(((rx / 2) - (image.sizeX(accountLayout.imagePath) / 2)) + 1, 2, accountLayout.imagePath)
+            accountImage = accountLayout:createImage(((rx / 2) - (image.sizeX(accountLayout.imagePath) / 2)) + 1, 2, accountLayout.imagePath)
             accountImage.wallpaperMode = true
+
+            registerButton.dh = false
+            loginButton.dh = false
         end
     end
 end
-
-registerButton = accountLayout:createButton(((rx / 2) - 8) - 10, ry - 2, 16, 1, uix.colors.lightBlue, uix.colors.white, "register", true)
-loginButton = accountLayout:createButton(((rx / 2) - 8) + 10, ry - 2, 16, 1, uix.colors.lightBlue, uix.colors.white, "login", true)
 
 local function pass()
     local pass1 = passwordZone.read.getBuffer()
@@ -93,13 +127,9 @@ local function pass()
     end
 end
 
-local function msg(reg, ok, err)
+local function msg(msg, ok, err)
     if ok then
-        if reg then
-            gui.done(screen, nil, nil, "you have successfully created an account!\nnow you can log in to it")
-        else
-            gui.done(screen, nil, nil, "you have successfully logged in to your account")
-        end
+        gui.done(screen, nil, nil, msg)
     else
         gui.warn(screen, nil, nil, err or "unknown error")
     end
@@ -108,17 +138,44 @@ local function msg(reg, ok, err)
     return ok
 end
 
+local function refresh()
+    accountLayout.imagePath = nil
+    ui:select(accountLayout)
+end
+
 function registerButton:onClick()
     local pass = pass()
     if pass then
-        
+        if msg("you have successfully created an account!\nnow you can log in to it", account.register(loginZone.read.getBuffer(), pass)) then
+            refresh()
+        end
     end
 end
 
 function loginButton:onClick()
     local pass = pass()
     if pass then
-        msg(false, account.login(loginZone.read.getBuffer(), pass))
+        if msg("you have successfully logged in to your account", account.login(loginZone.read.getBuffer(), pass)) then
+            refresh()
+        end
+    end
+end
+
+function accountDelButton:onClick()
+    local pass = pass()
+    if pass and gui.yesno(screen, nil, nil, "do you really want to delete your account :(") and gui.pleaseType(screen, "ACDEL", "delete account") then
+        if msg("you have successfully deleted your account", account.unregister(loginZone.read.getBuffer(), pass)) then
+            refresh()
+        end
+    end
+end
+
+function unloginButton:onClick()
+    local pass = pass()
+    if pass then
+        if msg("you have successfully logged out of your account", account.unlogin(pass)) then
+            refresh()
+        end
     end
 end
 

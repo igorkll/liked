@@ -129,7 +129,7 @@ function objclass:stop()
 end
 
 function objclass:uploadEvent(eventData)
-    if self.disabled then return end
+    if self.disabled or self.dh then return end
     if self.type == "button" or self.type == "context" then
         if self.state and (eventData[1] == "touch" or eventData[1] == "drop") then
             if self.type ~= "context" then
@@ -270,7 +270,7 @@ function objclass:uploadEvent(eventData)
 end
 
 function objclass:draw()
-    if self.hidden then return end
+    if self.hidden or self.dh then return end
     if self.type == "label" or self.type == "button" or self.type == "context" then
         local back, fore = self.back, self.fore
         if self.state then
