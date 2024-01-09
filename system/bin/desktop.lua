@@ -90,6 +90,11 @@ local function checkData()
     end
 end
 
+local imgexps = {"t1p", "t2p", "t3p"}
+local function isImage(exp)
+    return table.exists(imgexps, exp)
+end
+
 ------------------------------------------------------------------------ draw
 
 local contextMenuOpen = nil
@@ -427,7 +432,7 @@ local function fileDescriptor(icon, alternative, nickname) --открывает 
         userPath = gui_container.checkPath(screen, icon.path)
         draw()
         return true
-    elseif icon.exp == "t2p" then
+    elseif isImage(icon.exp) then
         execute("paint", nickname, icon.path)
         return true
     elseif icon.exp == "lua" then
@@ -801,7 +806,7 @@ local function doIcon(windowEventData)
 
                                 table.insert(strs, "  set as palette")
                                 table.insert(active, true)
-                            elseif v.exp == "t2p" and not v.isDir then
+                            elseif isImage(v.exp) and not v.isDir then
                                 addLine()
 
                                 table.insert(strs, "  set as wallpaper")

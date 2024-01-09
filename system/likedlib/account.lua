@@ -34,8 +34,8 @@ local function post(lhost, data)
     if not ok then
         return err
     end
-    local num, str, tbl = userdata.response()
-    return tostring(str)
+
+    return internet.readAll(userdata)
 end
 
 

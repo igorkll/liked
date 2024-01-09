@@ -13,6 +13,11 @@ image.t3colors = {0x000000, 0x000040, 0x000080, 0x0000BF, 0x0000FF, 0x002400, 0x
 local colors = gui_container.indexsColors
 local readbit = bit32.readbit
 
+local function otherCheck(path, exp)
+    path = paths.changeExtension(path, exp)
+    return fs.exists(path) and path
+end
+
 function image.draw(screen, path, x, y, wallpaperMode, forceFullColor, lightMul) --wallpaperMode заставляет считать цвет lightBlue как прозрачность
     --t2p drawer
     --t2p(tier 2 pic), bytes <sizeX> <sizeY> <зарезервировано> <зарезервировано> <зарезервировано> <зарезервировано> <зарезервировано> <зарезервировано> <зарезервировано> <зарезервировано> <4bit background, 4 bit foreground> <count char bytes> <char byte> 
@@ -20,8 +25,14 @@ function image.draw(screen, path, x, y, wallpaperMode, forceFullColor, lightMul)
     lightMul = lightMul or 1
 
     local gpu = graphic.findGpu(screen)
-    path = paths.canonical(path)
+    local depth = gpu.getDepth()
+    if depth == 8 then
+        path = otherCheck(path, "t3p") or path
+    elseif depth == 1 then
+        path = otherCheck(path, "t1p") or path
+    end
 
+    path = paths.canonical(path)
     cache.cache.images = cache.cache.images or {}
 
     local buffer
