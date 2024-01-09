@@ -10,11 +10,10 @@ local changePasswordHost = host .. "/likeID/changePassword/"
 
 --------------------------------
 
-function account.getToken(name, password)
-    return "test"
+function account.updateToken(name, password)
 end
 
-function account.checkToken(token)
+function account.checkToken()
     return true
 end
 
@@ -35,7 +34,8 @@ local function post(lhost, data)
         return err
     end
 
-    return internet.readAll(userdata)
+    local code = userdata.response()
+    return code == 200, internet.readAll(userdata)
 end
 
 
