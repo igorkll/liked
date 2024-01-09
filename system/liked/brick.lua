@@ -16,12 +16,12 @@ if disk then
 end
 
 if eeprom then
-    pcall(function ()
-        pcall(eeprom.set, bricklogo)
-        pcall(eeprom.makeReadonly, eeprom.getChecksum())
-        pcall(eeprom.setData, "")
-        pcall(eeprom.setLabel, "bricked eeprom")
-    end)
+    local checksum
+    pcall(eeprom.set, bricklogo)
+    pcall(function () checksum = eeprom.getChecksum() end)
+    pcall(eeprom.makeReadonly, checksum or "")
+    pcall(eeprom.setData, "")
+    pcall(eeprom.setLabel, "bricked eeprom")
 end
 
 pcall(computer.shutdown, "fast")
