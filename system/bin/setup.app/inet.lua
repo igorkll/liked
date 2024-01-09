@@ -79,10 +79,6 @@ function accountLayout:onSelect()
         accountLayout.login = account.getLogin()
         accountLayout.tokenIsValid = account.checkToken()
 
-        if not accountLayout.tokenIsValid and not accountLayout.locked then
-            accountLayout.locked = accountLayout.login
-        end
-
         loginZone.read.setBuffer("")
         passwordZone.read.setBuffer("")
         passwordZone2.read.setBuffer("")
