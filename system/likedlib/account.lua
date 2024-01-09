@@ -8,10 +8,30 @@ local regHost = host .. "/likeID/reg/"
 local unregHost = host .. "/likeID/unreg/"
 local changePasswordHost = host .. "/likeID/changePassword/"
 local getTokenHost = host .. "/likeID/getToken/"
+local checkTokenHost = host .. "/likeID/checkToken/"
+
+local function post(lhost, data)
+    local card = internet.cardProxy()
+    local userdata = card.request(lhost, data)
+    local ok, err = internet.wait(userdata)
+    if not ok then
+        return err
+    end
+
+    local code = userdata.response()
+    return code == 200, internet.readAll(userdata)
+end
 
 --------------------------------
 
 function account.updateToken(name, password)
+    local ok, tokenOrError = post(getTokenHost, json.encode({name = name, password = password}))
+    if ok then
+        registry.accountToken = tokenOrError
+        return true
+    else
+        return nil, tokenOrError
+    end
 end
 
 function account.checkToken()
@@ -31,19 +51,6 @@ end
 
 --------------------------------
 
-local function post(lhost, data)
-    local card = internet.cardProxy()
-    local userdata = card.request(lhost, data)
-    local ok, err = internet.wait(userdata)
-    if not ok then
-        return err
-    end
-
-    local code = userdata.response()
-    return code == 200, internet.readAll(userdata)
-end
-
-
 function account.getLocked() --получает с сервера, на какую учетную запись заблокировано устройтсво
     return
 end
@@ -54,12 +61,15 @@ end
 
 function account.login(name, password)
     if registry.account then
-        return "log out from another account first"
+        return false, "logout from another account first"
     end
 
-    registry.account = name
-    registry.accountPassword = password
-    return "you have successfully logged in to your account"
+    if account.updateToken(name, password) then
+        registry.account = name
+        return true, "you have successfully login to your account"
+    end
+
+    return false, "failed to get a token"
 end
 
 function account.unlogin(password)
