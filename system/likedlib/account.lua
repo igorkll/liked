@@ -25,6 +25,10 @@ function account.getStorage()
     return proxy
 end
 
+function account.isBricked()
+    
+end
+
 --------------------------------
 
 local function post(lhost, data)
