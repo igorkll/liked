@@ -21,7 +21,7 @@ local t = thread.create(function ()
     if not registry.systemConfigured then
         assert(apps.execute("setup", screen))
     end
-    if internet.check() and account.getLogin() and not account.checkToken() then
+    if internet.check() and account.getLocked() and not account.checkToken() then
         account.loginWindow(screen)
     end
     
