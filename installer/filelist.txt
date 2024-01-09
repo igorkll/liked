@@ -119,7 +119,6 @@
 /system/lib/vkeyboard.lua
 /system/lib/warnings.lua
 /system/liked/brick.lua
-/system/liked/bricklogo.lua
 /system/liked/market_urls_dev.txt
 /system/liked/market_urls_main.txt
 /system/liked/media_urls_dev.txt
