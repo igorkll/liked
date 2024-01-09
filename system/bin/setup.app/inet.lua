@@ -163,7 +163,9 @@ end
 function registerButton:onClick()
     local pass = pass()
     if pass then
-        if msg(account.register(loginZone.read.getBuffer(), pass)) then
+        local name = loginZone.read.getBuffer()
+        if msg(account.register(name, pass)) then
+            account.login(name, pass)
             refresh()
             return true
         end
@@ -189,7 +191,6 @@ function accountDelButton:onClick()
     local pass = pass()
     if pass and gui.yesno(screen, nil, nil, "do you really want to delete your account :(") and gui.pleaseType(screen, "ACDEL", "delete account") then
         if msg(account.unregister(loginZone.read.getBuffer(), pass)) then
-            msg(account.unlogin(pass))
             refresh()
             return true
         end

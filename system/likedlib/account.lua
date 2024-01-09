@@ -52,7 +52,7 @@ function account.updateToken(name, password)
 end
 
 function account.checkToken()
-    return false
+    return registry.account and registry.accountToken and (post(checkTokenHost, {name = registry.account, token = registry.accountToken}))
 end
 
 function account.getStorage()
@@ -85,12 +85,14 @@ function account.getLogin()
 end
 
 function account.login(name, password)
-    if account.updateToken(name, password) then
+    local ok, err = account.updateToken(name, password)
+
+    if ok then
         registry.account = name
         return true, "you have successfully login to your account"
     end
 
-    return false, "failed to get a token"
+    return false, err
 end
 
 function account.unlogin(password)
@@ -112,7 +114,11 @@ function account.register(name, password)
 end
 
 function account.unregister(name, password)
-    return post(unregHost, {name = name, password = password})
+    local ok, err = post(unregHost, {name = name, password = password})
+    if ok then
+        account.unlogin(password)
+    end
+    return ok, err
 end
 
 function account.changePassword(name, password, newPassword)
