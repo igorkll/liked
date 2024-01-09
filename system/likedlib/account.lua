@@ -28,6 +28,7 @@ local function post(lhost, data)
     local code = userdata.response()
     return code == 200, internet.readAll(userdata)
 end
+account._raw_post = post
 
 --------------------------------
 
