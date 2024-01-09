@@ -79,5 +79,9 @@ function account.unregister(name, password)
     return post(unregHost, json.encode({name = name, password = password}))
 end
 
+function account.changePassword(name, password, newPassword)
+    return post(unregHost, json.encode({name = name, password = password, newPassword = newPassword}))
+end
+
 account.unloadable = true
 return account

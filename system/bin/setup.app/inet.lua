@@ -143,9 +143,11 @@ local function pass()
     end
 end
 
-local function msg(msg)
-    gui.done(screen, nil, nil, msg)
+local function msg(ok, msg)
+    gui.done(screen, nil, nil, tostring(msg) or "unknown error")
     ui:draw()
+
+    return ok
 end
 
 local function refresh()
@@ -156,27 +158,31 @@ end
 function registerButton:onClick()
     local pass = pass()
     if pass then
-        msg(account.register(loginZone.read.getBuffer(), pass))
-        refresh()
-        return true
+        if msg(account.register(loginZone.read.getBuffer(), pass)) then
+            refresh()
+            return true
+        end
     end
 end
 
 function loginButton:onClick()
     local pass = pass()
     if pass then
-        msg(account.login(loginZone.read.getBuffer(), pass))
-        refresh()
-        return true
+        if msg(account.login(loginZone.read.getBuffer(), pass)) then
+            refresh()
+            return true
+        end
     end
 end
 
 function accountDelButton:onClick()
     local pass = pass()
     if pass and gui.yesno(screen, nil, nil, "do you really want to delete your account :(") and gui.pleaseType(screen, "ACDEL", "delete account") then
-        msg(account.unregister(loginZone.read.getBuffer(), pass))
-        refresh()
-        return true
+        if msg(account.unregister(loginZone.read.getBuffer(), pass)) then
+            msg(account.unlogin(pass))
+            refresh()
+            return true
+        end
     else
         ui:draw()
     end
@@ -185,9 +191,10 @@ end
 function unloginButton:onClick()
     local pass = pass()
     if pass then
-        msg(account.unlogin(pass))
-        refresh()
-        return true
+        if msg(account.unlogin(pass)) then
+            refresh()
+            return true
+        end
     end
 end
 
