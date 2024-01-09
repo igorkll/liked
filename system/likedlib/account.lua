@@ -1,6 +1,8 @@
 local registry = require("registry")
 local internet = require("internet")
 local json = require("json")
+local graphic = require("graphic")
+local apps = require("apps")
 local account = {}
 
 local host = "http://127.0.0.1"
@@ -9,8 +11,13 @@ local unregHost = host .. "/likeID/unreg/"
 local changePasswordHost = host .. "/likeID/changePassword/"
 local getTokenHost = host .. "/likeID/getToken/"
 local checkTokenHost = host .. "/likeID/checkToken/"
+local userExistsHost = host .. "/likeID/userExists/"
 
 local function post(lhost, data)
+    if type(data) == "table" then
+        data = json.encode(data)
+    end
+
     local card = internet.cardProxy()
     local userdata = card.request(lhost, data)
     local ok, err = internet.wait(userdata)
@@ -24,8 +31,17 @@ end
 
 --------------------------------
 
+function account.check()
+    if registry.account then
+        if not post(userExistsHost, {name = registry.account}) then
+            registry.accountToken = nil
+            registry.account = nil
+        end
+    end
+end
+
 function account.updateToken(name, password)
-    local ok, tokenOrError = post(getTokenHost, json.encode({name = name, password = password}))
+    local ok, tokenOrError = post(getTokenHost, {name = name, password = password})
     if ok then
         registry.accountToken = tokenOrError
         return true
@@ -35,7 +51,7 @@ function account.updateToken(name, password)
 end
 
 function account.checkToken()
-    return true
+    return false
 end
 
 function account.getStorage()
@@ -49,6 +65,14 @@ function account.isBricked()
     
 end
 
+function account.loginWindow(screen)
+    account.check()
+    account.loginWindowOpenFlag = true
+    local window = graphic.createWindow(screen)
+    assert(apps.execute("/system/bin/setup.app/inet.lua", screen, nil, window, true))
+    account.loginWindowOpenFlag = nil
+end
+
 --------------------------------
 
 function account.getLocked() --получает с сервера, на какую учетную запись заблокировано устройтсво
@@ -60,10 +84,6 @@ function account.getLogin()
 end
 
 function account.login(name, password)
-    if registry.account then
-        return false, "logout from another account first"
-    end
-
     if account.updateToken(name, password) then
         registry.account = name
         return true, "you have successfully login to your account"
@@ -87,15 +107,15 @@ function account.unlogin(password)
 end
 
 function account.register(name, password)
-    return post(regHost, json.encode({name = name, password = password}))
+    return post(regHost, {name = name, password = password})
 end
 
 function account.unregister(name, password)
-    return post(unregHost, json.encode({name = name, password = password}))
+    return post(unregHost, {name = name, password = password})
 end
 
 function account.changePassword(name, password, newPassword)
-    return post(unregHost, json.encode({name = name, password = password, newPassword = newPassword}))
+    return post(unregHost, {name = name, password = password, newPassword = newPassword})
 end
 
 account.unloadable = true
