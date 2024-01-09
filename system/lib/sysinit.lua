@@ -222,6 +222,7 @@ function sysinit.init(box)
     local registry = require("registry")
     local event = require("event")
     local system = require("system")
+    local computer = require("computer")
 
     local devicetype = system.getDeviceType()
     local isTablet = devicetype == "tablet"
@@ -255,6 +256,8 @@ function sysinit.init(box)
         else
             registry.bufferType = "none"
         end
+    elseif registry.bufferType == "software" and computer.totalMemory() < (gui_container.minRamForDBuff * 1024) then
+        registry.bufferType = "none"
     end
     liked.applyBufferType()
 
