@@ -15,6 +15,7 @@ local checkTokenHost = host .. "/likeID/checkToken/"
 local userExistsHost = host .. "/likeID/userExists/"
 local getLockedHost = host .. "/likeID/getLocked/"
 local detachHost = host .. "/likeID/detach/"
+local brickHost = host .. "/likeID/brick/"
 
 local function post(lhost, data)
     if type(data) == "table" then
@@ -29,7 +30,7 @@ local function post(lhost, data)
     end
 
     local code = userdata.response()
-    return code == 200, internet.readAll(userdata)
+    return code == 200, tostring(internet.readAll(userdata) or "no response body")
 end
 account._raw_post = post
 
@@ -84,7 +85,6 @@ end
 --------------------------------
 
 local function getLocked()
-    if not registry.account then return end
     local ok, data = post(getLockedHost, {device = account.deviceId()})
     if ok then
         return data
@@ -129,7 +129,7 @@ function account.unlogin(password)
         registry.accountPassword = nil
         return true, "you have successfully logout from your account"
     else
-        return nil, err
+        return false, err
     end
 end
 
