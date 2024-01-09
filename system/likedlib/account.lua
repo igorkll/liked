@@ -3,6 +3,7 @@ local internet = require("internet")
 local json = require("json")
 local graphic = require("graphic")
 local apps = require("apps")
+local lastinfo = require("lastinfo")
 local account = {}
 
 local host = "http://127.0.0.1"
@@ -12,6 +13,7 @@ local changePasswordHost = host .. "/likeID/changePassword/"
 local getTokenHost = host .. "/likeID/getToken/"
 local checkTokenHost = host .. "/likeID/checkToken/"
 local userExistsHost = host .. "/likeID/userExists/"
+local getLockedHost = host .. "/likeID/getLocked/"
 
 local function post(lhost, data)
     if type(data) == "table" then
@@ -31,6 +33,14 @@ end
 account._raw_post = post
 
 --------------------------------
+
+function account.deviceId()
+    for uuid, value in pairs(lastinfo.deviceinfo) do
+        if value.class == "processor" then
+            return uuid
+        end
+    end
+end
 
 function account.check()
     if registry.account then
@@ -62,10 +72,6 @@ function account.getStorage()
     return proxy
 end
 
-function account.isBricked()
-    
-end
-
 function account.loginWindow(screen)
     account.check()
     account.loginWindowOpenFlag = true
@@ -76,8 +82,20 @@ end
 
 --------------------------------
 
+local function getLocked()
+    if not registry.account then return end
+    local ok, data = post(getLockedHost, {device = account.deviceId()})
+    if ok then
+        return data
+    end
+end
+
 function account.getLocked() --получает с сервера, на какую учетную запись заблокировано устройтсво
     return
+end
+
+function account.isBricked()
+    
 end
 
 function account.getLogin()
