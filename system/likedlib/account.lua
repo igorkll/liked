@@ -14,6 +14,7 @@ local getTokenHost = host .. "/likeID/getToken/"
 local checkTokenHost = host .. "/likeID/checkToken/"
 local userExistsHost = host .. "/likeID/userExists/"
 local getLockedHost = host .. "/likeID/getLocked/"
+local detachHost = host .. "/likeID/detach/"
 
 local function post(lhost, data)
     if type(data) == "table" then
@@ -52,7 +53,7 @@ function account.check()
 end
 
 function account.updateToken(name, password)
-    local ok, tokenOrError = post(getTokenHost, {name = name, password = password})
+    local ok, tokenOrError = post(getTokenHost, {name = name, password = password, device = account.deviceId()})
     if ok then
         registry.accountToken = tokenOrError
         return true
@@ -91,11 +92,15 @@ local function getLocked()
 end
 
 function account.getLocked() --получает с сервера, на какую учетную запись заблокировано устройтсво
-    return
+    local data = getLocked()
+    if data and data:sub(1, 1) == "0" then
+        return data:sub(2, #data)
+    end
 end
 
 function account.isBricked()
-    
+    local data = getLocked()
+    return data and data:sub(1, 1) == "1"
 end
 
 function account.getLogin()
@@ -115,15 +120,16 @@ end
 
 function account.unlogin(password)
     if not registry.account then
-        return "you are not logged in to account"
+        return false, "you are not logged in to account"
     end
 
-    if password == registry.accountPassword then
+    local ok, err = post(detachHost, {name = registry.account, password = password, device = account.deviceId()})
+    if ok then
         registry.account = nil
         registry.accountPassword = nil
-        return "you have successfully logged out from your account"
+        return true, "you have successfully logout from your account"
     else
-        return "invalid password"
+        return nil, err
     end
 end
 
