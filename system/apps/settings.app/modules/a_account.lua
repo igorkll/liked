@@ -13,7 +13,9 @@ local rx, ry = graphic.getResolution(screen)
 local window = graphic.createWindow(screen, posX, posY, rx - (posX - 1), ry - (posY - 1))
 
 local th = thread.create(function ()
-    assert(apps.execute("/system/bin/setup.app/inet.lua", screen, nil, window))
+    assert(apps.execute("/system/bin/setup.app/inet.lua", screen, nil, window, nil, function ()
+        gRedraw()
+    end))
 end)
 th:resume()
 

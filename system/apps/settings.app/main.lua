@@ -60,7 +60,7 @@ local function draw(noReload)
     local maxLine = #modules
     selectWindow:fill(1, maxLine + 1, selectWindow.sizeX, selectWindow.sizeY - maxLine, colors.lightGray, 0, " ")
 
-    if moduleEnd then
+    if moduleEnd and not noReload then
         moduleEnd()
     end
 

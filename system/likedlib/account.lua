@@ -211,8 +211,8 @@ function account.unlogin(password)
     end
 end
 
-function account.register(name, password)
-    return post(regHost, {name = name, password = password})
+function account.register(name, password, cid, ccode)
+    return post(regHost, {name = name, password = password, cid = cid, ccode = ccode})
 end
 
 function account.unregister(name, password)

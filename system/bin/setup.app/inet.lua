@@ -10,7 +10,7 @@ local image = require("image")
 local gui = require("gui")
 local account = require("account")
 
-local screen, _, window, autoexit = ...
+local screen, _, window, autoexit, noCaptcha = ...
 local ui = uix.manager(screen, window)
 local rx, ry = ui:size()
 local pwx, pwy
@@ -160,11 +160,22 @@ function registerButton:onClick()
     local pass = pass()
     if pass then
         local name = loginZone.read.getBuffer()
-        if msg(account.register(name, pass)) then
-            account.login(name, pass)
-            refresh()
-            return true
+        local cid, ccode = account.captcha(screen)
+        if cid then
+            if msg(account.register(name, pass, cid, ccode)) then
+                if noCaptcha then
+                    noCaptcha()
+                end
+                account.login(name, pass)
+                refresh()
+                return true
+            end
         end
+        
+        if noCaptcha then
+            noCaptcha()
+        end
+        ui:draw()
     end
 end
 
