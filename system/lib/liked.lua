@@ -560,6 +560,8 @@ function liked.getIcon(screen, path)
             local disklevel = system.getDiskLevel(fsProxy.address)
             if fsProxy.cloud then
                 icon = liked.findIcon("cloud")
+            elseif fsProxy.public then
+                icon = liked.findIcon("publicStorage")
             elseif disklevel == "tmp" then
                 icon = liked.findIcon("tmp")
             elseif disklevel == "fdd" then

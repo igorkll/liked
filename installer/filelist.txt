@@ -74,6 +74,7 @@
 /system/icons/log.t2p
 /system/icons/lua.t2p
 /system/icons/plt.t2p
+/system/icons/publicStorage.t2p
 /system/icons/raid.t2p
 /system/icons/reg.t2p
 /system/icons/scrsv.t2p

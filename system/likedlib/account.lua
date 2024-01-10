@@ -164,6 +164,13 @@ function account.getStorage()
     return proxy
 end
 
+function account.getPublicStorage()
+    if not registry.account then return end
+    local proxy = require("component").proxy(require("computer").getBootAddress())
+    proxy.public = true
+    return proxy
+end
+
 function account.loginWindow(screen)
     account.check()
     account.loginWindowOpenFlag = true

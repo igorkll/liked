@@ -6,26 +6,39 @@ local internet = require("internet")
 local thread = require("thread")
 
 local storagePath = "/data/userdata/cloudStorage"
+local publicStoragePath = "/data/userdata/publicStorage"
+
+local function realCheck()
+    if internet.check() then
+        account.check()
+        
+        local storage = account.getStorage()
+        if storage then
+            if not fs.exists(storagePath) then
+                fs.mount(storage, storagePath)
+            end
+        elseif fs.exists(storagePath) then
+            fs.umount(storagePath)
+        end
+
+        local publicStorage = account.getPublicStorage()
+        if publicStorage then
+            if not fs.exists(publicStoragePath) then
+                fs.mount(publicStorage, publicStoragePath)
+            end
+        elseif fs.exists(publicStoragePath) then
+            fs.umount(publicStoragePath)
+        end
+
+        if account.isBricked() then
+            assert(programs.execute("/system/liked/brick.lua"))
+        end
+    end
+end
 
 local function check()
-    thread.createBackground(function ()
-        if internet.check() then
-            account.check()
-            
-            local storage = account.getStorage()
-            if storage then
-                if not fs.exists(storagePath) then
-                    fs.mount(storage, storagePath)
-                end
-            elseif fs.exists(storagePath) then
-                fs.umount(storagePath)
-            end
-
-            if account.isBricked() then
-                assert(programs.execute("/system/liked/brick.lua"))
-            end
-        end
-    end)
+    thread.createBackground(realCheck)
 end
 
 event.timer(5, check, math.huge)
+realCheck()
