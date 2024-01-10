@@ -170,9 +170,9 @@ local function pass()
 end
 
 local function pass2()
-    local pass1 = gui.input(screen, nil, nil, "new password")
+    local pass1 = gui.input(screen, nil, nil, "new password", true)
     if not pass1 then ui:draw() return end
-    local pass2 = gui.input(screen, nil, nil, "confirm the password")
+    local pass2 = gui.input(screen, nil, nil, "confirm the password", true)
     if not pass2 then ui:draw() return end
 
     if pass1 == pass2 then
