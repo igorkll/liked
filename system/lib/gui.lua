@@ -16,7 +16,7 @@ local fs = require("filesystem")
 local programs = require("programs")
 local clipboard = require("clipboard")
 local parser = require("parser")
-local gui = {}
+local gui = {colors = colors}
 gui.blackMode = false
 
 local smartShadowsColors = {

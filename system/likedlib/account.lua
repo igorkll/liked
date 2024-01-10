@@ -4,6 +4,12 @@ local json = require("json")
 local graphic = require("graphic")
 local apps = require("apps")
 local lastinfo = require("lastinfo")
+local uuid = require("uuid")
+local gui = require("gui")
+local uix = require("uix")
+local paths = require("paths")
+local fs = require("filesystem")
+local event = require("event")
 local account = {}
 
 local host = "http://127.0.0.1"
@@ -16,6 +22,7 @@ local userExistsHost = host .. "/likeID/userExists/"
 local getLockedHost = host .. "/likeID/getLocked/"
 local detachHost = host .. "/likeID/detach/"
 local brickHost = host .. "/likeID/brick/"
+local captchaHost = host .. "/likeID/captcha/"
 
 local function post(lhost, data)
     if type(data) == "table" then
@@ -35,6 +42,39 @@ end
 account._raw_post = post
 
 --------------------------------
+
+function account.getCaptcha()
+    local ok, data = post(captchaHost, {})
+    if ok then
+        return data:sub(1, #uuid.null), data:sub(#uuid.null + 1, #data)
+    end
+end
+
+function account.captcha(screen, cx, cy)
+    while true do
+        local id, img = account.getCaptcha()
+        if not id then
+            break
+        end
+
+        local imagePath = paths.concat("/tmp", id)
+        fs.writeFile(imagePath, img)
+        
+        local window, noShadow = gui.smallWindow(screen, cx, cy, nil, nil, nil, 50, 16)
+        local layout = uix.create(window, uix.colors.lightGray)
+
+        layout:createImage(2, 3, imagePath)
+        local input = layout:createInput(2, 10, 48, uix.colors.white, uix.colors.black, nil, nil, nil, 8, "input: ")
+        local refresh = layout:createButton(2, 12, 8, 1, uix.colors.blue, uix.colors.white, "refresh", true)
+        local enter = layout:createButton(50 - 10, 12, 8, 1, uix.colors.blue, uix.colors.white, "enter", true)
+
+        while true do
+            local eventData = event.pull()
+            local windowEventData = window:uploadEvent(eventData)
+            layout:uploadEvent(windowEventData)
+        end
+    end
+end
 
 --------------------------------
 
