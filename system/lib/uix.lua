@@ -204,7 +204,13 @@ function objclass:uploadEvent(eventData)
             end
         end
     elseif self.type == "input" then
-        self.read.uploadEvent(eventData)
+        local str = self.read.uploadEvent(eventData)
+        if str then
+            if self.onTextAccepted then
+                self:onTextAccepted(str)
+            end
+        end
+
         local text = self.read.getBuffer()
         if text ~= self.oldText then
             self.oldText = text

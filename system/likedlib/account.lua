@@ -96,17 +96,23 @@ function account.captcha(screen)
             event.stub()
         end
 
+        function input:onTextAccepted()
+            enterFlag = true
+        end
+
         while true do
             local eventData = {event.pull(1)}
             local windowEventData = window:uploadEvent(eventData)
             layout:uploadEvent(windowEventData)
 
             if exitFlag then
+                noShadow()
                 return
             elseif refreshFlag then
+                noShadow()
                 break
             elseif enterFlag then
-                return id, input.read.getBuffer()
+                return id, input.read.getBuffer(), noShadow
             end
         end
     end
