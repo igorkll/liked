@@ -51,6 +51,7 @@ function account.getCaptcha()
 end
 
 function account.captcha(screen)
+    local lNoShadow
     while true do
         gui.status(screen, nil, nil, "loading a captcha...")
 
@@ -62,8 +63,13 @@ function account.captcha(screen)
         local imagePath = paths.concat("/tmp", id)
         fs.writeFile(imagePath, img)
         
+        if lNoShadow then
+            lNoShadow()
+            lNoShadow = nil
+        end
+
         -- draw
-        local window, noShadow = gui.smallWindow(screen, cx, cy, nil, nil, nil, 50, 16)
+        local window, noShadow = gui.smallWindow(screen, nil, nil, nil, nil, nil, 50, 16)
         local layout = uix.create(window, uix.colors.lightGray)
         layout:createPlane(1, 1, layout.sizeX, 1, uix.colors.gray)
         layout:createVText(window.sizeX / 2, 2, uix.colors.white, "enter the text from the image")
@@ -109,7 +115,7 @@ function account.captcha(screen)
                 noShadow()
                 return
             elseif refreshFlag then
-                noShadow()
+                lNoShadow = noShadow
                 break
             elseif enterFlag then
                 return id, input.read.getBuffer(), noShadow
@@ -162,7 +168,7 @@ function account.loginWindow(screen)
     account.check()
     account.loginWindowOpenFlag = true
     local window = graphic.createWindow(screen)
-    assert(apps.execute("/system/bin/setup.app/inet.lua", screen, nil, window, true))
+    assert(apps.execute("/system/bin/setup.app/inet.lua", screen, nil, window, true, nil, true))
     account.loginWindowOpenFlag = nil
 end
 
@@ -217,20 +223,33 @@ function account.unlogin(password)
     end
 end
 
+
 function account.register(name, password, cid, ccode)
     return post(regHost, {name = name, password = password, cid = cid, ccode = ccode})
 end
 
-function account.unregister(name, password)
-    local ok, err = post(unregHost, {name = name, password = password})
+function account.unregister(password)
+    if not registry.account then
+        return false, "you are not logged in to account"
+    end
+
+    local ok, err = post(unregHost, {name = registry.account, password = password})
     if ok then
         account.unlogin(password)
     end
     return ok, err
 end
 
-function account.changePassword(name, password, newPassword)
-    return post(unregHost, {name = name, password = password, newPassword = newPassword})
+function account.changePassword(password, newPassword)
+    if not registry.account then
+        return false, "you are not logged in to account"
+    end
+
+    local ok, err = post(changePasswordHost, {name = registry.account, password = password, newPassword = newPassword})
+    if ok then
+        account.login(registry.account, newPassword)
+    end
+    return ok, err
 end
 
 account.unloadable = true

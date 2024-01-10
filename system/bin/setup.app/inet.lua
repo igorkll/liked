@@ -10,7 +10,7 @@ local image = require("image")
 local gui = require("gui")
 local account = require("account")
 
-local screen, _, window, autoexit, noCaptcha = ...
+local screen, _, window, autoexit, noCaptcha, rsButtons = ...
 local ui = uix.manager(screen, window)
 local rx, ry = ui:size()
 local pwx, pwy
@@ -19,12 +19,28 @@ if window then
     pwx, pwy = (window.sizeX / 2) - (gui.zoneX / 2), (window.sizeY / 2) - (gui.zoneY / 2)
 end
 
+local function addRSbuttons(layout)
+    if rsButtons then
+        local reboot = layout:createButton(rx - 17, 4, 16, 1, uix.colors.lightBlue, uix.colors.white, "reboot", true)
+        function reboot:onClick()
+            computer.shutdown(true)
+        end
+
+        local shutdown = layout:createButton(rx - 17, 2, 16, 1, uix.colors.lightBlue, uix.colors.white, "shutdown", true)
+        function shutdown:onClick()
+            computer.shutdown()
+        end
+    end
+end
+
 --------------------------------
 
 local inetLayout = ui:simpleCreate(uix.colors.cyan, uix.styles[2])
 inetLayout.imagePath = uix.getSysImgPath("noInternet")
 inetLayout:createLabel(2, 2, inetLayout.window.sizeX - 2, 1, uix.colors.cyan, uix.colors.white, "there is no internet connection")
 inetLayout:createImage((rx / 2) - (image.sizeX(inetLayout.imagePath) / 2), 4, inetLayout.imagePath)
+
+addRSbuttons(inetLayout)
 
 local recheckButton = inetLayout:createButton(rx - 17, ry - 1, 16, 1, uix.colors.lightBlue, uix.colors.white, "recheck", true)
 function recheckButton:onClick()
@@ -65,6 +81,11 @@ loginButton = accountLayout:createButton(bpos + 10, ry - 2, 16, 1, uix.colors.li
 accountDelButton = accountLayout:createButton(bpos - 10, ry - 2, 16, 1, uix.colors.lightBlue, uix.colors.white, "delete account", true)
 unloginButton = accountLayout:createButton(bpos + 10, ry - 2, 16, 1, uix.colors.lightBlue, uix.colors.white, "logout", true)
 
+changePassword = accountLayout:createButton(3, 2, 17, 1, uix.colors.lightBlue, uix.colors.white, "change password", true)
+devicesControl = accountLayout:createButton(3, 4, 17, 1, uix.colors.lightBlue, uix.colors.white, "devices control", true)
+
+addRSbuttons(accountLayout)
+
 if not window then
     next3 = accountLayout:createButton(rx - 7, ry - 1, 6, 1, uix.colors.lightBlue, uix.colors.white, "next", true)
     function next3:onClick()
@@ -88,6 +109,8 @@ function accountLayout:onSelect()
         loginButton.dh = true
         accountDelButton.dh = true
         unloginButton.dh = true
+        changePassword.dh = true
+        devicesControl.dh = true
         
         if next3 then
             next3.dh = false
@@ -107,6 +130,8 @@ function accountLayout:onSelect()
 
             accountDelButton.dh = false
             unloginButton.dh = false
+            changePassword.dh = false
+            devicesControl.dh = false
         elseif accountLayout.locked then
             accountLayout.imagePath = uix.getSysImgPath("accountLock")
             accountImage = accountLayout:createImage(((rx / 2) - (image.sizeX(accountLayout.imagePath) / 2)) + 1, 2, accountLayout.imagePath)
@@ -137,6 +162,21 @@ local function pass()
     local pass1 = passwordZone.read.getBuffer()
     local pass2 = passwordZone2.read.getBuffer()
     if pass1 == pass2 then
+        return pass1
+    else
+        gui.warn(screen, nil, nil, "passwords don't equals")
+        ui:draw()
+    end
+end
+
+local function pass2()
+    local pass1 = gui.input(screen, nil, nil, "new password")
+    if not pass1 then ui:draw() return end
+    local pass2 = gui.input(screen, nil, nil, "confirm the password")
+    if not pass2 then ui:draw() return end
+
+    if pass1 == pass2 then
+        ui:draw()
         return pass1
     else
         gui.warn(screen, nil, nil, "passwords don't equals")
@@ -194,10 +234,23 @@ function loginButton:onClick()
     end
 end
 
+function changePassword:onClick()
+    local pass = pass()
+    if pass then
+        local newPassword = pass2()
+        if newPassword then
+            if msg(account.changePassword(pass, newPassword)) then
+                refresh()
+                return true
+            end
+        end
+    end
+end
+
 function accountDelButton:onClick()
     local pass = pass()
     if pass and gui.yesno(screen, nil, nil, "do you really want to delete your account :(") and gui.pleaseType(screen, "ACDEL", "delete account") then
-        if msg(account.unregister(loginZone.read.getBuffer(), pass)) then
+        if msg(account.unregister(pass)) then
             refresh()
             return true
         end
