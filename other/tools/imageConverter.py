@@ -244,6 +244,123 @@ def floyd(image):
                 pixel[i] = round(clamp(pixel[i], 0, 255))
             image[y, x] = pixel
 
+def imgToT2p(image, fullAdd, forceFull, addPal, floydUse):
+    # Получение размеров изображения
+    height, width, channels = image.shape
+
+    # Попиксельный обход и обработка изображения
+    block_width = 2
+    block_height = 4
+
+    outdata = b""
+
+    outdata += ((width // block_width).to_bytes(1, 'little'))
+    outdata += ((height // block_height).to_bytes(1, 'little'))
+    if fullAdd:
+        outdata += (b"3")
+    else:
+        outdata += (b"\0")
+
+    if forceFull:
+        outdata += (b"f")
+    else:
+        outdata += (b"\0")
+
+    if addPal:
+        outdata += (b"p")
+    else:
+        outdata += (b"\0")
+
+    outdata += (b"\0\0\0\0\0")
+
+    if addPal:
+        for color in get_popular_colors(image_path):
+            print("palcolor", color)
+            outdata += (bytes([color[0][0]]))
+            outdata += (bytes([color[0][1]]))
+            outdata += (bytes([color[0][2]]))
+
+    for y in range(0, height - block_height + 1, block_height):
+        for x in range(0, width - block_width + 1, block_width):
+            # Извлечение блока изображения размером 4x2
+            block = image[y:y + block_height, x:x + block_width]
+            # print(make_braille(outputArray), end='')
+
+            dominant_colors = find_dominant_colors(block)
+
+            print(dominant_colors)
+            back, backcol, backnonused = find_closest_color(convert_to_24bit(dominant_colors[0][0]), colors), dominant_colors[0][0], False
+            fore, forecol, forenonused = 0, (0, 0, 0, 255), False
+            if len(dominant_colors) > 1:
+                fore = find_closest_color(convert_to_24bit(dominant_colors[1][0]), colors)
+                forecol = dominant_colors[1][0]
+            else:
+                fore = back
+                forecol = backcol
+
+            if len(backcol) > 3 and backcol[3] < 200:
+                backnonused = True
+                back = 3
+
+            if len(forecol) > 3 and forecol[3] < 200:
+                forenonused = True
+                fore = 3
+
+            antiAlpha = False
+            if backnonused and forenonused:
+                back = 0
+                fore = 0
+            elif back == 0 and fore == 0:
+                antiAlpha = True
+                fore = 15
+
+            fullBackCol = convert_to_24bit(backcol)
+            fullForeCol = convert_to_24bit(forecol)
+            fullBack = find_closest_color(fullBackCol, colors3t)
+            fullFore = find_closest_color(fullForeCol, colors3t)
+
+            outputArray = []
+            for line in block:
+                outputArray.append([])
+                for color in line:
+                    # formattedColor = convert_rgb_to_24bit(color[2], color[1], color[0])
+                    alpha = 255
+                    if len(color) > 3:
+                        alpha = color[3]
+
+                    if antiAlpha:
+                        outputArray[-1].append(True)
+                    elif forenonused and backnonused:
+                        outputArray[-1].append(False)
+                    elif forenonused:
+                        # outputArray[-1].append(color_similarity2((hex_to_rgb(colors[back])), (color[2], color[1], color[0])) > 0.5)
+                        outputArray[-1].append(alpha >= 200)
+                    elif backnonused:
+                        # outputArray[-1].append(color_similarity2((hex_to_rgb(colors[fore])), (color[2], color[1], color[0])) > 0.5)
+                        outputArray[-1].append(alpha < 200)
+                    else:
+                        # outputArray[-1].append(color_similarity((hex_to_rgb(colors[back])), (hex_to_rgb(colors[fore])), (color[2], color[1], color[0])) > 0.5)
+                        outputArray[-1].append(color_similarity((hex_to_rgb(fullBackCol)), (hex_to_rgb(fullForeCol)), (color[2], color[1], color[0])) > 0.5)
+                        # outputArray[-1].append(random.choice((True, False)))
+
+            char = make_braille(outputArray)
+            print(back, fore, char)
+
+            """
+            if back != 15 and back != 3:
+                back = 5
+            if fore != 15 and fore != 3:
+                fore = 5
+            """
+
+            outdata += (bytes([packNums(back, fore)]))
+            if fullAdd:
+                outdata += (bytes([fullFore]))
+                outdata += (bytes([fullBack]))
+            outdata += (bytes([len(char.encode('utf-8'))]))
+            outdata += (char.encode('utf-8'))
+
+    return outdata
 
 def parse_image_pixelwise(image_path):
     # Загрузка изображения
@@ -260,9 +377,6 @@ def parse_image_pixelwise(image_path):
     if image is None:
         print(f"Не удалось загрузить изображение: {image_path}")
         return
-
-    # Получение размеров изображения
-    height, width, channels = image.shape
 
     # Генерация выходного пути на основе входного с изменением расширения на "t2p"
     output_path, _ = os.path.splitext(image_path)
@@ -289,117 +403,10 @@ def parse_image_pixelwise(image_path):
         floyd(image)
         print("floyd end")
 
-    # Попиксельный обход и обработка изображения
+    outbytes = imgToT2p(image, fullAdd, forceFull, addPal, floydUse)
     with open(output_path, 'wb') as file:
-        block_width = 2
-        block_height = 4
+        file.write(outbytes)
 
-        file.write((width // block_width).to_bytes(1, 'little'))
-        file.write((height // block_height).to_bytes(1, 'little'))
-        if fullAdd:
-            file.write(b"3")
-        else:
-            file.write(b"\0")
-
-        if forceFull:
-            file.write(b"f")
-        else:
-            file.write(b"\0")
-
-        if addPal:
-            file.write(b"p")
-        else:
-            file.write(b"\0")
-
-        file.write(b"\0\0\0\0\0")
-
-        if addPal:
-            for color in get_popular_colors(image_path):
-                print("palcolor", color)
-                file.write(bytes([color[0][0]]))
-                file.write(bytes([color[0][1]]))
-                file.write(bytes([color[0][2]]))
-
-        for y in range(0, height - block_height + 1, block_height):
-            for x in range(0, width - block_width + 1, block_width):
-                # Извлечение блока изображения размером 4x2
-                block = image[y:y + block_height, x:x + block_width]
-                # print(make_braille(outputArray), end='')
-
-                dominant_colors = find_dominant_colors(block)
-
-                print(dominant_colors)
-                back, backcol, backnonused = find_closest_color(convert_to_24bit(dominant_colors[0][0]), colors), dominant_colors[0][0], False
-                fore, forecol, forenonused = 0, (0, 0, 0, 255), False
-                if len(dominant_colors) > 1:
-                    fore = find_closest_color(convert_to_24bit(dominant_colors[1][0]), colors)
-                    forecol = dominant_colors[1][0]
-                else:
-                    fore = back
-                    forecol = backcol
-
-                if len(backcol) > 3 and backcol[3] < 200:
-                    backnonused = True
-                    back = 3
-
-                if len(forecol) > 3 and forecol[3] < 200:
-                    forenonused = True
-                    fore = 3
-
-                antiAlpha = False
-                if backnonused and forenonused:
-                    back = 0
-                    fore = 0
-                elif back == 0 and fore == 0:
-                    antiAlpha = True
-                    fore = 15
-
-                fullBackCol = convert_to_24bit(backcol)
-                fullForeCol = convert_to_24bit(forecol)
-                fullBack = find_closest_color(fullBackCol, colors3t)
-                fullFore = find_closest_color(fullForeCol, colors3t)
-
-                outputArray = []
-                for line in block:
-                    outputArray.append([])
-                    for color in line:
-                        # formattedColor = convert_rgb_to_24bit(color[2], color[1], color[0])
-                        alpha = 255
-                        if len(color) > 3:
-                            alpha = color[3]
-
-                        if antiAlpha:
-                            outputArray[-1].append(True)
-                        elif forenonused and backnonused:
-                            outputArray[-1].append(False)
-                        elif forenonused:
-                            # outputArray[-1].append(color_similarity2((hex_to_rgb(colors[back])), (color[2], color[1], color[0])) > 0.5)
-                            outputArray[-1].append(alpha >= 200)
-                        elif backnonused:
-                            # outputArray[-1].append(color_similarity2((hex_to_rgb(colors[fore])), (color[2], color[1], color[0])) > 0.5)
-                            outputArray[-1].append(alpha < 200)
-                        else:
-                            # outputArray[-1].append(color_similarity((hex_to_rgb(colors[back])), (hex_to_rgb(colors[fore])), (color[2], color[1], color[0])) > 0.5)
-                            outputArray[-1].append(color_similarity((hex_to_rgb(fullBackCol)), (hex_to_rgb(fullForeCol)), (color[2], color[1], color[0])) > 0.5)
-                            # outputArray[-1].append(random.choice((True, False)))
-
-                char = make_braille(outputArray)
-                print(back, fore, char)
-
-                """
-                if back != 15 and back != 3:
-                    back = 5
-                if fore != 15 and fore != 3:
-                    fore = 5
-                """
-
-                file.write(bytes([packNums(back, fore)]))
-                if fullAdd:
-                    file.write(bytes([fullFore]))
-                    file.write(bytes([fullBack]))
-                file.write(bytes([len(char.encode('utf-8'))]))
-                file.write(char.encode('utf-8'))
-            # print("")
 
 if __name__ == "__main__":
     try:
