@@ -484,6 +484,17 @@ local list = {
         path = "/data/apps/shooting.app",
         urlPrimaryPart = selfurlpart .. "/apps/shooting.app/",
         files = {"main.lua", "icon.t2p"}
+    },
+    {
+        name = "componentLog",
+        version = "1",
+        vendor = "logic",
+        description = "allows you to log component accesses",
+        minDiskSpace = 64,
+        
+        path = "/data/apps/componentLog.app",
+        urlPrimaryPart = selfurlpart .. "/apps/componentLog.app/",
+        files = {"main.lua", "icon.t2p"}
     }
 }
 

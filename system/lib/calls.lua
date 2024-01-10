@@ -98,7 +98,15 @@ function calls.find(name)
 end
 
 function calls.load(name)
-    if calls.loaded[name] or calls.cache[name] then return calls.loaded[name] or calls.cache[name] end
+    if calls.loaded[name] or calls.cache[name] then
+        local lib = calls.loaded[name] or calls.cache[name]
+        if lib then
+            if lib == true then
+                return
+            end
+            return lib
+        end
+    end
 
     local path = calls.find(name)
     if not path then return nil, "no such call" end
@@ -111,7 +119,7 @@ function calls.load(name)
     local code, err = load(data, "=" .. path, nil, _G) --не _ENV потому что там "личьные" глобалы в _G то что нужно системным вызовам
     if not code then return nil, err end
 
-    calls.cache[name] = code
+    calls.cache[name] = true
     return code
 end
 
