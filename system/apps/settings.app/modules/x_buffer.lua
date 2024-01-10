@@ -52,7 +52,8 @@ local function draw(set)
     end
 
     if set then
-        if selected ~= 2 or computer.totalMemory() >= (gui_container.minRamForDBuff * 1024) then
+        local minRam = liked.minRamForDBuff()
+        if selected ~= 2 or computer.totalMemory() >= (minRam * 1024) then
             local inits = {}
             for address in component.list("screen") do
                 table.insert(inits, {address, graphic.screenshot(address)})
@@ -67,7 +68,7 @@ local function draw(set)
             end
         else
             local clear = graphic.screenshot(screen)
-            gui.warn(screen, nil, nil, "A minimum of " .. math.round(gui_container.minRamForDBuff) .. "kb of RAM is required to activate software buffering")
+            gui.warn(screen, nil, nil, "A minimum of " .. math.round(minRam) .. "kb of RAM is required to activate software buffering")
             selected = oldselected
             clear()
             draw()

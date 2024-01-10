@@ -668,5 +668,13 @@ function liked.drawWallpaper(screen, customFolder)
     ]]
 end
 
+function liked.minRamForDBuff()
+    local kb = 512
+    for _ in component.list("screen") do
+        kb = kb + 256
+    end
+    return kb
+end
+
 liked.unloadable = true
 return liked

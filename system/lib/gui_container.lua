@@ -1,5 +1,4 @@
 local gui_container = {}
-gui_container.minRamForDBuff = 768
 gui_container.criticalChargeLevel = 20
 
 gui_container.colors = {}

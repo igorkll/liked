@@ -256,7 +256,7 @@ function sysinit.init(box)
         else
             registry.bufferType = "none"
         end
-    elseif registry.bufferType == "software" and computer.totalMemory() < (gui_container.minRamForDBuff * 1024) then
+    elseif registry.bufferType == "software" and computer.totalMemory() < (liked.minRamForDBuff() * 1024) then
         registry.bufferType = "none"
     end
     liked.applyBufferType()
