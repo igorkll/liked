@@ -262,8 +262,10 @@ function gui.smallWindow(screen, cx, cy, str, backgroundColor, icon, sx, sy)
     if color == textColor then
         textColor = colors.black
     end
-    for i, v in ipairs(parser.parseTraceback(str, sx - 9, sy - 3)) do
-        window:set(8, i + 1, color, textColor, v)
+    if str then
+        for i, v in ipairs(parser.parseTraceback(str, sx - 9, sy - 3)) do
+            window:set(8, i + 1, color, textColor, v)
+        end
     end
 
     if icon then

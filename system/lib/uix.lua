@@ -272,6 +272,8 @@ function objclass:uploadEvent(eventData)
 end
 
 function objclass:draw()
+    local style = self.style or self.gui.style
+
     if self.hidden or self.dh then return end
     if self.type == "label" or self.type == "button" or self.type == "context" then
         local back, fore = self.back, self.fore
@@ -282,7 +284,7 @@ function objclass:draw()
         local x, y, sx, sy = self.x, self.y, self.sx, self.sy
         
         local maxtextsize = self.sx
-        local isRound = self.sy == 1 and self.gui.style == "round"
+        local isRound = self.sy == 1 and style == "round"
         if isRound then
             maxtextsize = maxtextsize - 2
             local _, _, bg = self.gui.window:get(x, y)
@@ -330,13 +332,13 @@ function objclass:draw()
         local _, _, fg = self.gui.window:get(self.x, self.y)
 
         if self.checkbox then
-            if self.gui.style == "round" then
+            if style == "round" then
                 self.gui.window:set(self.x, self.y, self.pointerColor, bg, "◖◗")
             else
                 self.gui.window:set(self.x, self.y, self.pointerColor, bg, "⠰⠆")
             end
         else
-            if self.gui.style == "round" then
+            if style == "round" then
                 self.gui.window:set(self.x, self.y, fg, bg, "◖████◗")
                 if self.state then
                     self.gui.window:set(self.x + 3, self.y, bg, self.pointerColor, "◖█")
@@ -365,7 +367,7 @@ function objclass:draw()
         end
     elseif self.type == "input" then
         local _, _, bg = self.gui.window:get(self.x, self.y)
-        if self.gui.style == "round" then
+        if style == "round" then
             self.gui.window:set(self.x, self.y, bg, self.back, "◖")
             self.gui.window:set(self.x + (self.sx - 1), self.y, bg, self.back, "◗")
         end
@@ -378,7 +380,7 @@ function objclass:draw()
         if self.vertical then
             self.gui.window:fill(self.x, self.y, 1, dotpos, bg, self.fillColor, "┃")
             self.gui.window:fill(self.x, self.y + dotpos, 1, self.size - dotpos, bg, self.color, "┃")
-            if self.gui.style == "round" then
+            if style == "round" then
                 self.gui.window:set(self.x, self.y + dotpos, bg, self.dotcolor, "●")
             else
                 self.gui.window:set(self.x, self.y + dotpos, bg, self.dotcolor, "█")
@@ -386,7 +388,7 @@ function objclass:draw()
         else
             self.gui.window:fill(self.x, self.y, dotpos, 1, bg, self.fillColor, gui_container.chars.wideSplitLine)
             self.gui.window:fill(self.x + dotpos, self.y, self.size - dotpos, 1, bg, self.color, gui_container.chars.wideSplitLine)
-            if self.gui.style == "round" then
+            if style == "round" then
                 if dotpos >= self.size - 1 then dotpos = dotpos - 1 end
                 self.gui.window:set(self.x + dotpos, self.y, bg, self.dotcolor, "◖◗")
             else
@@ -886,6 +888,8 @@ function uix.create(window, bgcolor, style)
     guiobj.active = false
     guiobj.bgWork = true
     guiobj.allowAutoActive = true
+    guiobj.sizeX = window.sizeX
+    guiobj.sizeY = window.sizeY
 
     return guiobj
 end

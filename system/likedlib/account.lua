@@ -50,8 +50,10 @@ function account.getCaptcha()
     end
 end
 
-function account.captcha(screen, cx, cy)
+function account.captcha(screen)
     while true do
+        gui.status(screen, nil, nil, "loading a captcha...")
+
         local id, img = account.getCaptcha()
         if not id then
             break
@@ -60,18 +62,52 @@ function account.captcha(screen, cx, cy)
         local imagePath = paths.concat("/tmp", id)
         fs.writeFile(imagePath, img)
         
+        -- draw
         local window, noShadow = gui.smallWindow(screen, cx, cy, nil, nil, nil, 50, 16)
         local layout = uix.create(window, uix.colors.lightGray)
+        layout:createPlane(1, 1, layout.sizeX, 1, uix.colors.gray)
+        layout:createVText(window.sizeX / 2, 2, uix.colors.white, "enter the text from the image")
+        layout:createImage(2, 4, imagePath)
+        local input = layout:createInput(12, 15, layout.sizeX - 12 - 9 - 1, uix.colors.white, uix.colors.black, nil, nil, nil, 8)
+        local refresh = layout:createButton(2, 15, 9, 1, uix.colors.blue, uix.colors.white, "refresh", true)
+        local enter = layout:createButton(50 - 9, 15, 9, 1, uix.colors.blue, uix.colors.white, "enter", true)
+        local exit = layout:createButton(window.sizeX - 2, 1, 3, 1, uix.colors.red, uix.colors.white, "X", true)
+        exit.style = uix.styles[2]
+        layout:draw()
+        fs.remove(imagePath)
 
-        layout:createImage(2, 3, imagePath)
-        local input = layout:createInput(2, 10, 48, uix.colors.white, uix.colors.black, nil, nil, nil, 8, "input: ")
-        local refresh = layout:createButton(2, 12, 8, 1, uix.colors.blue, uix.colors.white, "refresh", true)
-        local enter = layout:createButton(50 - 10, 12, 8, 1, uix.colors.blue, uix.colors.white, "enter", true)
+        -- action
+
+        local enterFlag
+        function enter:onClick()
+            enterFlag = true
+            event.stub()
+        end
+
+        local refreshFlag
+        function refresh:onClick()
+            refreshFlag = true
+            event.stub()
+        end
+
+        local exitFlag
+        function exit:onClick()
+            exitFlag = true
+            event.stub()
+        end
 
         while true do
-            local eventData = event.pull()
+            local eventData = {event.pull(1)}
             local windowEventData = window:uploadEvent(eventData)
             layout:uploadEvent(windowEventData)
+
+            if exitFlag then
+                return
+            elseif refreshFlag then
+                break
+            elseif enterFlag then
+                return id, input.read.getBuffer()
+            end
         end
     end
 end
