@@ -19,6 +19,8 @@ local image = require("image")
 local palette = require("palette")
 local warnings = require("warnings")
 local apps = require("apps")
+local account = require("account")
+local internet = require("internet")
 
 local colors = gui_container.colors
 
@@ -1226,6 +1228,7 @@ event.listen("redrawDesktop", function()
     redrawFlag = true
 end)
 
+local lastCheckTime
 local warnPrinted
 while true do
     if redrawFlag then
@@ -1242,7 +1245,7 @@ while true do
         end
     end
 
-    local eventData = {computer.pullSignal(0.5)}
+    local eventData = {event.pull(0.5)}
     local windowEventData = window:uploadEvent(eventData)
     local statusWindowEventData = statusWindow:uploadEvent(eventData)
     if statusWindowEventData[1] == "touch" then
@@ -1335,5 +1338,15 @@ while true do
                 listForward()
             end
         end
+    end
+
+    if component.isPrimary(screen) and (not lastCheckTime or computer.uptime() - lastCheckTime > 5) then
+        if internet.check() and account.getLocked() and not account.checkToken() then
+            timerEnable = false
+            account.loginWindow(screen)
+            timerEnable = true
+            draw()
+        end
+        lastCheckTime = computer.uptime()
     end
 end
