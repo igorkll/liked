@@ -90,8 +90,17 @@ local function clearScreen()
     gpu.fill(1, 1, rx, ry, " ")
 end
 
-local function menu(label, strs, funcs, withoutBackButton, refresh)
+local function status(text)
+    clearScreen()
+    centerPrint(math.floor((ry / 2) + 0.5), text)
+end
+
+local function menu(label, lstrs, funcs, withoutBackButton, refresh)
     local selected = 1
+    local strs = {}
+    for i, v in ipairs(lstrs) do
+        strs[i] = v
+    end
 
     if not withoutBackButton then
         table.insert(strs, "Back")
@@ -322,6 +331,42 @@ local editions = {"full", "classic", "demo"}
 
 --------------------------------------------
 
+local function segments(path)
+    local parts = {}
+    for part in path:gmatch("[^\\/]+") do
+        local current, up = part:find("^%.?%.$")
+        if current then
+            if up == 2 then
+                table.remove(parts)
+            end
+        else
+            table.insert(parts, part)
+        end
+    end
+    return parts
+end
+
+local function canonical(path)
+    local result = table.concat(segments(path), "/")
+    if unicode.sub(path, 1, 1) == "/" then
+        return "/" .. result
+    else
+        return result
+    end
+end
+
+local function fs_path(path)
+    local parts = segments(path)
+    local result = table.concat(parts, "/", 1, #parts - 1) .. "/"
+    if unicode.sub(path, 1, 1) == "/" and unicode.sub(result, 1, 1) ~= "/" then
+        return canonical("/" .. result)
+    else
+        return canonical(result)
+    end
+end
+
+--------------------------------------------
+
 local function getBlackList(branch, edition)
     local editionInfo = assert(wget(baseUrl .. branch .. "/system/likedlib/sysmode/" .. edition .. ".reg"))
     if editionInfo then
@@ -333,7 +378,7 @@ local function getBlackList(branch, edition)
 end
 
 local function getInstallData(branch, edition)
-    return {data = {branch = branch, mode = edition}, filesBlackList = getBlackList(branch, edition), label = "liked"}
+    return {data = {branch = branch, mode = edition}, filesBlackList = getBlackList(branch, edition), label = "liked", noWait = true}
 end
 
 local function getInstallDataStr(branch, edition)
@@ -344,9 +389,60 @@ local function buildUpdater(branch, edition)
     return getInstallDataStr(branch, edition) .. "\n" .. assert(wget(baseUrl .. branch .. "/system/likedlib/update/update.lua"))
 end
 
-local function install(disk, branch, edition)
+local function isOpenOS(address)
+    return component.invoke(address, "exists", "/lib/core/boot.lua")
+end
+
+local function isMineOS(address)
+    return component.invoke(address, "exists", "/OS.lua")
+end
+
+local function downloadFile(diskProxy, branch, path, toPath)
+    local content = assert(wget(baseUrl .. branch .. path))
+    diskProxy.makeDirectory(fs_path(toPath))
+    local file = diskProxy.open(toPath, "wb")
+    diskProxy.write(file, content)
+    diskProxy.close(file)
+end
+
+local function install(disk, branch, edition, doOpenOS, doMineOS)
+    local diskProxy = component.proxy(disk)
+
+    if doOpenOS then
+        diskProxy.rename("/init.lua", "/openOS.lua")
+        downloadFile(diskProxy, branch, "/market/apps/openOS.app/actions.cfg", "/vendor/apps/openOS.app/actions.cfg")
+        downloadFile(diskProxy, branch, "/market/apps/openOS.app/icon.t2p", "/vendor/apps/openOS.app/icon.t2p")
+        downloadFile(diskProxy, branch, "/market/apps/openOS.app/lua5_2.lua", "/vendor/apps/openOS.app/lua5_2.lua")
+        downloadFile(diskProxy, branch, "/market/apps/openOS.app/main.lua", "/vendor/apps/openOS.app/main.lua")
+        downloadFile(diskProxy, branch, "/market/apps/openOS.app/uninstall.lua", "/vendor/apps/openOS.app/uninstall.lua")
+    end
+
+    if doMineOS then
+        downloadFile(diskProxy, branch, "/market/apps/mineOS.app/LICENSE", "/vendor/apps/mineOS.app/LICENSE")
+        downloadFile(diskProxy, branch, "/market/apps/mineOS.app/actions.cfg", "/vendor/apps/mineOS.app/actions.cfg")
+        downloadFile(diskProxy, branch, "/market/apps/mineOS.app/icon.t2p", "/vendor/apps/mineOS.app/icon.t2p")
+        downloadFile(diskProxy, branch, "/market/apps/mineOS.app/lua5_2.lua", "/vendor/apps/mineOS.app/lua5_2.lua")
+        downloadFile(diskProxy, branch, "/market/apps/mineOS.app/main.lua", "/vendor/apps/mineOS.app/main.lua")
+        downloadFile(diskProxy, branch, "/market/apps/mineOS.app/uninstall.lua", "/vendor/apps/mineOS.app/uninstall.lua")
+        downloadFile(diskProxy, branch, "/market/apps/mineOS.app/mineOS.lua", "/mineOS.lua")
+
+        local eeprom = component.proxy(component.list("eeprom")() or "")
+        if eeprom then
+            eeprom.setData("")
+            eeprom.setLabel(assert(wget(baseUrl .. branch .. "/system/firmware/likeloader/label.txt")))
+            eeprom.set(assert(wget(baseUrl .. branch .. "/system/firmware/likeloader/code.lua")))
+        end
+    end
+
     assert(load(buildUpdater(branch, edition), "=updater", nil, _G))(disk)
-    pcall(computer.setBootAddress, disk)
+    if computer.setBootAddress then
+        pcall(computer.setBootAddress, disk)
+    else
+        local eeprom = component.proxy(component.list("eeprom")() or "")
+        if eeprom then
+            eeprom.setData(disk) --потому что в mineOS нет функции computer.setBootAddress
+        end
+    end
     pcall(computer.shutdown, "fast")
 end
 
@@ -354,6 +450,16 @@ end
 
 local function generateTitle(address)
     return address:sub(1, 8) .. "-" .. (component.invoke(address, "getLabel") or "no label")
+end
+
+local function openOSMineOSStr(openOS, mineOS)
+    if openOS and mineOS then
+        return "save 'openOS & mineOS'"
+    elseif openOS then
+        return "save 'openOS'"
+    elseif mineOS then
+        return "save 'mineOS'"
+    end
 end
 
 local function generateFunction(address)
@@ -365,7 +471,24 @@ local function generateFunction(address)
                 local funcs = {}
                 for _, edition in ipairs(editions) do
                     table.insert(funcs, function ()
-                        install(address, branch, edition)
+                        local openOS, mineOS = isOpenOS(address), isMineOS(address)
+                        local omStr = openOSMineOSStr(openOS, mineOS)
+
+                        local strs, funcs = {"format disk"}, {function ()
+                            status("installation...")
+                            component.invoke(address, "remove", "/")
+                            install(address, branch, edition)
+                        end}
+
+                        if omStr then
+                            table.insert(strs, omStr)
+                            table.insert(funcs, function ()
+                                status("installation...")
+                                install(address, branch, edition, openOS, mineOS)
+                            end)
+                        end
+
+                        menu(title .. " | installation options", strs, funcs)
                     end)
                 end
                 menu(title .. " | select edition", editions, funcs)
@@ -375,14 +498,18 @@ local function generateFunction(address)
     end
 end
 
+local function isAllowedDisk(address)
+    return address ~= computer.tmpAddress() and not component.invoke(address, "isReadOnly")
+end
+
 local function generateList()
     local strs, funcs = {}, {}
-    if drive then
+    if drive and isAllowedDisk(drive) then
         table.insert(strs, generateTitle(drive))
         table.insert(funcs, generateFunction(drive))
     end
     for address in component.list("filesystem", true) do
-        if address ~= drive then
+        if address ~= drive and isAllowedDisk(address) then
             table.insert(strs, generateTitle(address))
             table.insert(funcs, generateFunction(address))
         end

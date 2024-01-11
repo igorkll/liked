@@ -55,6 +55,8 @@
 /system/bin/setup.app/inet.lua
 /system/bin/setup.app/main.lua
 /system/calls/gui_filepicker.lua
+/system/firmware/likeloader/code.lua
+/system/firmware/likeloader/label.txt
 /system/firmware/luabios/code.lua
 /system/firmware/luabios/label.txt
 /system/icons/afpx.t2p
