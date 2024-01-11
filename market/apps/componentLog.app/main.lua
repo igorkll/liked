@@ -42,9 +42,11 @@ else
     gui.done(screen, nil, nil, "the logger is enabled")
     
     _G.componentLog[address] = {hookfunc, event.timer(1, function ()
-        hook.delComponentHook(address, hookfunc)
-        logs.logs(logsStrs, "component-log", logPath)
-        hook.addComponentHook(address, hookfunc)
-        logsStrs = {}
+        if #logsStrs > 0 then
+            hook.delComponentHook(address, hookfunc)
+            logs.logs(logsStrs, "component-log", logPath)
+            hook.addComponentHook(address, hookfunc)
+            logsStrs = {}
+        end
     end, math.huge)}
 end
