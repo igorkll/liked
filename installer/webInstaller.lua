@@ -397,9 +397,9 @@ local function isMineOS(address)
     return component.invoke(address, "exists", "/OS.lua")
 end
 
-local function downloadFile(branch, path, toPath)
+local function downloadFile(diskProxy, branch, path, toPath)
     local content = assert(wget(baseUrl .. branch .. path))
-    local diskProxy = component.proxy(drive)
+
     diskProxy.makeDirectory(fs_path(toPath))
     local file = diskProxy.open(toPath, "wb")
     diskProxy.write(file, content)
@@ -411,21 +411,21 @@ local function install(disk, branch, edition, doOpenOS, doMineOS)
 
     if doOpenOS then
         diskProxy.rename("/init.lua", "/openOS.lua")
-        downloadFile(branch, "/market/apps/openOS.app/actions.cfg", "/vendor/apps/openOS.app/actions.cfg")
-        downloadFile(branch, "/market/apps/openOS.app/icon.t2p", "/vendor/apps/openOS.app/icon.t2p")
-        downloadFile(branch, "/market/apps/openOS.app/lua5_2.lua", "/vendor/apps/openOS.app/lua5_2.lua")
-        downloadFile(branch, "/market/apps/openOS.app/main.lua", "/vendor/apps/openOS.app/main.lua")
-        downloadFile(branch, "/market/apps/openOS.app/uninstall.lua", "/vendor/apps/openOS.app/uninstall.lua")
+        downloadFile(diskProxy, branch, "/market/apps/openOS.app/actions.cfg", "/vendor/apps/openOS.app/actions.cfg")
+        downloadFile(diskProxy, branch, "/market/apps/openOS.app/icon.t2p", "/vendor/apps/openOS.app/icon.t2p")
+        downloadFile(diskProxy, branch, "/market/apps/openOS.app/lua5_2.lua", "/vendor/apps/openOS.app/lua5_2.lua")
+        downloadFile(diskProxy, branch, "/market/apps/openOS.app/main.lua", "/vendor/apps/openOS.app/main.lua")
+        downloadFile(diskProxy, branch, "/market/apps/openOS.app/uninstall.lua", "/vendor/apps/openOS.app/uninstall.lua")
     end
 
     if doMineOS then
-        downloadFile(branch, "/market/apps/mineOS.app/LICENSE", "/vendor/apps/mineOS.app/LICENSE")
-        downloadFile(branch, "/market/apps/mineOS.app/actions.cfg", "/vendor/apps/mineOS.app/actions.cfg")
-        downloadFile(branch, "/market/apps/mineOS.app/icon.t2p", "/vendor/apps/mineOS.app/icon.t2p")
-        downloadFile(branch, "/market/apps/mineOS.app/lua5_2.lua", "/vendor/apps/mineOS.app/lua5_2.lua")
-        downloadFile(branch, "/market/apps/mineOS.app/main.lua", "/vendor/apps/mineOS.app/main.lua")
-        downloadFile(branch, "/market/apps/mineOS.app/uninstall.lua", "/vendor/apps/mineOS.app/uninstall.lua")
-        downloadFile(branch, "/market/apps/mineOS.app/mineOS.lua", "/mineOS.lua")
+        downloadFile(diskProxy, branch, "/market/apps/mineOS.app/LICENSE", "/vendor/apps/mineOS.app/LICENSE")
+        downloadFile(diskProxy, branch, "/market/apps/mineOS.app/actions.cfg", "/vendor/apps/mineOS.app/actions.cfg")
+        downloadFile(diskProxy, branch, "/market/apps/mineOS.app/icon.t2p", "/vendor/apps/mineOS.app/icon.t2p")
+        downloadFile(diskProxy, branch, "/market/apps/mineOS.app/lua5_2.lua", "/vendor/apps/mineOS.app/lua5_2.lua")
+        downloadFile(diskProxy, branch, "/market/apps/mineOS.app/main.lua", "/vendor/apps/mineOS.app/main.lua")
+        downloadFile(diskProxy, branch, "/market/apps/mineOS.app/uninstall.lua", "/vendor/apps/mineOS.app/uninstall.lua")
+        downloadFile(diskProxy, branch, "/market/apps/mineOS.app/mineOS.lua", "/mineOS.lua")
 
         local eeprom = component.proxy(component.list("eeprom")() or "")
         if eeprom then
