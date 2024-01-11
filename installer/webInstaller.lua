@@ -359,14 +359,35 @@ local function generateTitle(address)
     return address:sub(1, 8) .. "-" .. (component.invoke(address, "getLabel") or "no label")
 end
 
+local function generateFunction(address)
+    local title = generateTitle(address)
+    return function ()
+        local funcs = {}
+        for _, branch in ipairs(branches) do
+            table.insert(funcs, function ()
+                local funcs = {}
+                for _, edition in ipairs(editions) do
+                    table.insert(funcs, function ()
+                        install(address, branch, edition)
+                    end)
+                end
+                menu(title .. " | select edition", editions, funcs)
+            end)
+        end
+        menu(title .. " | select branch", branches, funcs)
+    end
+end
+
 local function generateList()
     local strs, funcs = {}, {}
     if drive then
         table.insert(strs, generateTitle(drive))
+        table.insert(funcs, generateFunction(drive))
     end
     for address in component.list("filesystem", true) do
         if address ~= drive then
             table.insert(strs, generateTitle(address))
+            table.insert(funcs, generateFunction(address))
         end
     end
     return strs, funcs
@@ -374,5 +395,4 @@ end
 
 --------------------------------------------
 
-local strs, funcs = generateList()
-menu("liked & likeOS - web installer", strs, funcs)
+menu("liked & likeOS - web installer", generateList())
