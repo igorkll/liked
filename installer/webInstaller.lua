@@ -354,3 +354,25 @@ local function install(disk, branch, edition)
 end
 
 --------------------------------------------
+
+local function generateTitle(address)
+    return address:sub(1, 8) .. "-" .. (component.invoke(address, "getLabel") or "no label")
+end
+
+local function generateList()
+    local strs, funcs = {}, {}
+    if drive then
+        table.insert(strs, generateTitle(drive))
+    end
+    for address in component.list("filesystem", true) do
+        if address ~= drive then
+            table.insert(strs, generateTitle(address))
+        end
+    end
+    return strs, funcs
+end
+
+--------------------------------------------
+
+local strs, funcs = generateList()
+menu("liked & likeOS - web installer", strs, funcs)
