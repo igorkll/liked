@@ -399,7 +399,6 @@ end
 
 local function downloadFile(diskProxy, branch, path, toPath)
     local content = assert(wget(baseUrl .. branch .. path))
-
     diskProxy.makeDirectory(fs_path(toPath))
     local file = diskProxy.open(toPath, "wb")
     diskProxy.write(file, content)
