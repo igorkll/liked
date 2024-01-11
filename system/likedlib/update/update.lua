@@ -229,14 +229,16 @@ end
 
 --отображаем 100% в течении двух секунд
 if printState(1) then
-    if computer.getBootAddress() ~= proxy.address then
+    if computer.getBootAddress and computer.setBootAddress and computer.getBootAddress() ~= proxy.address then
         computer.setBootAddress(proxy.address)
-    else
+    elseif not installdata.noWait then
         sleep(2)
     end
-elseif computer.getBootAddress() ~= proxy.address then
+elseif computer.getBootAddress and computer.setBootAddress and computer.getBootAddress() ~= proxy.address then
     computer.setBootAddress(proxy.address)
 end
 
 --перезагружаем устройтсво
-computer.shutdown("fast")
+if computer.setBootAddress then
+    computer.shutdown("fast")
+end

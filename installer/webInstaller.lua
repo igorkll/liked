@@ -90,6 +90,11 @@ local function clearScreen()
     gpu.fill(1, 1, rx, ry, " ")
 end
 
+local function status(text)
+    clearScreen()
+    centerPrint(math.floor((ry / 2) + 0.5), text)
+end
+
 local function menu(label, lstrs, funcs, withoutBackButton, refresh)
     local selected = 1
     local strs = {}
@@ -326,6 +331,42 @@ local editions = {"full", "classic", "demo"}
 
 --------------------------------------------
 
+local function segments(path)
+    local parts = {}
+    for part in path:gmatch("[^\\/]+") do
+        local current, up = part:find("^%.?%.$")
+        if current then
+            if up == 2 then
+                table.remove(parts)
+            end
+        else
+            table.insert(parts, part)
+        end
+    end
+    return parts
+end
+
+local function canonical(path)
+    local result = table.concat(segments(path), "/")
+    if unicode.sub(path, 1, 1) == "/" then
+        return "/" .. result
+    else
+        return result
+    end
+end
+
+local function fs_path(path)
+    local parts = segments(path)
+    local result = table.concat(parts, "/", 1, #parts - 1) .. "/"
+    if unicode.sub(path, 1, 1) == "/" and unicode.sub(result, 1, 1) ~= "/" then
+        return canonical("/" .. result)
+    else
+        return canonical(result)
+    end
+end
+
+--------------------------------------------
+
 local function getBlackList(branch, edition)
     local editionInfo = assert(wget(baseUrl .. branch .. "/system/likedlib/sysmode/" .. edition .. ".reg"))
     if editionInfo then
@@ -337,7 +378,7 @@ local function getBlackList(branch, edition)
 end
 
 local function getInstallData(branch, edition)
-    return {data = {branch = branch, mode = edition}, filesBlackList = getBlackList(branch, edition), label = "liked"}
+    return {data = {branch = branch, mode = edition}, filesBlackList = getBlackList(branch, edition), label = "liked", noWait = true}
 end
 
 local function getInstallDataStr(branch, edition)
@@ -359,6 +400,7 @@ end
 local function downloadFile(branch, path, toPath)
     local content = assert(wget(baseUrl .. branch .. path))
     local diskProxy = component.proxy(drive)
+    diskProxy.makeDirectory(fs_path(toPath))
     local file = diskProxy.open(toPath, "wb")
     diskProxy.write(file, content)
     diskProxy.close(file)
@@ -394,7 +436,14 @@ local function install(disk, branch, edition, doOpenOS, doMineOS)
     end
 
     assert(load(buildUpdater(branch, edition), "=updater", nil, _G))(disk)
-    pcall(computer.setBootAddress, disk)
+    if computer.setBootAddress then
+        pcall(computer.setBootAddress, disk)
+    else
+        local eeprom = component.proxy(component.list("eeprom")() or "")
+        if eeprom then
+            eeprom.setData(disk) --потому что в mineOS нет функции computer.setBootAddress
+        end
+    end
     pcall(computer.shutdown, "fast")
 end
 
@@ -427,6 +476,7 @@ local function generateFunction(address)
                         local omStr = openOSMineOSStr(openOS, mineOS)
 
                         local strs, funcs = {"format disk"}, {function ()
+                            status("installation...")
                             component.invoke(address, "remove", "/")
                             install(address, branch, edition)
                         end}
@@ -434,6 +484,7 @@ local function generateFunction(address)
                         if omStr then
                             table.insert(strs, omStr)
                             table.insert(funcs, function ()
+                                status("installation...")
                                 install(address, branch, edition, openOS, mineOS)
                             end)
                         end
