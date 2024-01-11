@@ -1230,6 +1230,7 @@ end)
 
 local lastCheckTime
 local warnPrinted
+local lolzLock
 while true do
     if redrawFlag then
         redrawFlag = false
@@ -1341,12 +1342,19 @@ while true do
     end
 
     if component.isPrimary(screen) and (not lastCheckTime or computer.uptime() - lastCheckTime > 5) then
-        if internet.check() and account.getLocked() and not account.checkToken() then
-            timerEnable = false
-            account.loginWindow(screen)
-            timerEnable = true
-            draw()
-        end
         lastCheckTime = computer.uptime()
+        thread.create(function ()
+            if internet.check() and account.getLocked() and not account.checkToken() then
+                lolzLock = true
+            end
+        end):resume()
+    end
+
+    if lolzLock then
+        lolzLock = false
+        timerEnable = false
+        account.loginWindow(screen)
+        timerEnable = true
+        draw()
     end
 end
