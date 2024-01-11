@@ -498,14 +498,18 @@ local function generateFunction(address)
     end
 end
 
+local function isAllowedDisk(address)
+    return address ~= computer.tmpAddress() and not component.invoke(address, "isReadOnly")
+end
+
 local function generateList()
     local strs, funcs = {}, {}
-    if drive then
+    if drive and isAllowedDisk(drive) then
         table.insert(strs, generateTitle(drive))
         table.insert(funcs, generateFunction(drive))
     end
     for address in component.list("filesystem", true) do
-        if address ~= drive then
+        if address ~= drive and isAllowedDisk(address) then
             table.insert(strs, generateTitle(address))
             table.insert(funcs, generateFunction(address))
         end
