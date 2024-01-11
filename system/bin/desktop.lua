@@ -1341,20 +1341,18 @@ while true do
         end
     end
 
-    if component.isPrimary(screen) and (not lastCheckTime or computer.uptime() - lastCheckTime > 5) then
+    if lolzLock then
+        timerEnable = false
+        account.loginWindow(screen)
+        timerEnable = true
+        draw()
+        lolzLock = false
+    elseif component.isPrimary(screen) and (not lastCheckTime or computer.uptime() - lastCheckTime > 5) then
         lastCheckTime = computer.uptime()
         thread.create(function ()
             if internet.check() and account.getLocked() and not account.checkToken() then
                 lolzLock = true
             end
         end):resume()
-    end
-
-    if lolzLock then
-        lolzLock = false
-        timerEnable = false
-        account.loginWindow(screen)
-        timerEnable = true
-        draw()
     end
 end
