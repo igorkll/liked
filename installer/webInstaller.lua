@@ -347,8 +347,10 @@ local function buildUpdater(branch, edition)
     return getInstallDataStr(branch, edition) .. "\n" .. assert(wget(baseUrl .. branch .. "/system/likedlib/update/update.lua"))
 end
 
-local function install()
-    
+local function install(disk, branch, edition)
+    assert(load(buildUpdater(branch, edition), "=updater", nil, _G))(disk)
+    pcall(computer.setBootAddress, disk)
+    pcall(computer.shutdown, "fast")
 end
 
 --------------------------------------------

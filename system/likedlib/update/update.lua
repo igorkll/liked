@@ -85,7 +85,7 @@ printState(0)
 --------------------------------
 
 local internet = component.proxy(component.list("internet")() or error("no internet card found", 0))
-local proxy = component.proxy(computer.getBootAddress())
+local proxy = component.proxy((...) or computer.getBootAddress())
 
 local function getInternetFile(url)
     local handle, data, result, reason = internet.request(url), ""
