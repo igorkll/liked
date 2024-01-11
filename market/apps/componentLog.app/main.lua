@@ -41,7 +41,7 @@ else
     hook.addComponentHook(address, hookfunc)
     gui.done(screen, nil, nil, "the logger is enabled")
     
-    _G.componentLog[address] = {hookfunc, event.timer(5, function ()
+    _G.componentLog[address] = {hookfunc, event.timer(1, function ()
         hook.delComponentHook(address, hookfunc)
         logs.logs(logsStrs, "component-log", logPath)
         hook.addComponentHook(address, hookfunc)
