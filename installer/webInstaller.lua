@@ -380,6 +380,13 @@ local function install(disk, branch, edition, doOpenOS, doMineOS)
         downloadFile(branch, "/market/apps/mineOS.app/main.lua", "/vendor/apps/mineOS.app/main.lua")
         downloadFile(branch, "/market/apps/mineOS.app/uninstall.lua", "/vendor/apps/mineOS.app/uninstall.lua")
         downloadFile(branch, "/market/apps/mineOS.app/mineOS.lua", "/mineOS.lua")
+
+        local eeprom = component.proxy(component.list("eeprom")() or "")
+        if eeprom then
+            eeprom.setData("")
+            eeprom.setLabel(assert(wget(baseUrl .. branch .. "/system/firmware/likeloader/label.txt")))
+            eeprom.set(assert(wget(baseUrl .. branch .. "/system/firmware/likeloader/code.lua")))
+        end
     end
 
     assert(load(buildUpdater(branch, edition), "=updater", nil, _G))(disk)
