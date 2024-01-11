@@ -347,4 +347,8 @@ local function buildUpdater(branch, edition)
     return getInstallDataStr(branch, edition) .. "\n" .. assert(wget(baseUrl .. branch .. "/system/likedlib/update/update.lua"))
 end
 
+local function install()
+    
+end
+
 --------------------------------------------

@@ -1,4 +1,4 @@
---local installdata = {data={branch="main",mode="full"},filesBlackList={}} --пристыковываеться к скрипту на этапе обновления
+--local installdata = {data={branch="main",mode="full"},filesBlackList={},self=selfpath} --пристыковываеться к скрипту на этапе обновления
 
 local component = component or require("component")
 local computer = computer or require("computer")
@@ -32,6 +32,7 @@ local screensInited
 local function printState(num)
     local str = "working with updates: " .. tostring(math.floor((num * 100) + 0.5)) .. "%"
     local gpu = component.proxy(component.list("gpu")() or "")
+    local printed = false
     if gpu then
         for screen in component.list("screen") do
             -- init
@@ -72,10 +73,11 @@ local function printState(num)
                 gpu.setForeground(1, true)
             end
             gpu.fill(2, textPos + 1, math.floor(((rx - 2) * num) + 0.5), 1, "⠶")
-            
+            printed = true
         end
         screensInited = true
     end
+    return printed
 end
 
 printState(0)
@@ -215,12 +217,15 @@ for name, content in pairs(installdata.data) do
     saveFile("/system/sysdata/" .. name, content)
 end
 
---удаляем этот файл (обычно этот скрипт выполняеться от сюда)
-proxy.remove("/likeOS_startup.lua")
+--удаляем свой же файл, чтобы после перезагрузки обновления не началось заного
+if installdata.self then
+    proxy.remove(installdata.self)
+end
 
 --отображаем 100% в течении двух секунд
-printState(1)
-sleep(2)
+if printState(1) then
+    sleep(2)
+end
 
 --перезагружаем устройтсво
 computer.shutdown("fast")

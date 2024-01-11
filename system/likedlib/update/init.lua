@@ -15,7 +15,8 @@ function update._generate(data)
 end
 
 function update._write(data)
-    assert(fs.writeFile("/likeOS_startup.lua", update._generate(data)))
+    data.self = "/likeOS_startup.lua"
+    assert(fs.writeFile(data.self, update._generate(data)))
 end
 
 function update.run(branch, mode)
