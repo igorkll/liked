@@ -22,7 +22,9 @@ if not registry.doNotMoundDisks then
                 event.push("redrawDesktop")
             end
             local mountpoint = require("hdd").genName(uuid)
-            assert(fs.mount(uuid, mountpoint))
+            if not fs.exists(mountpoint) then
+                assert(fs.mount(uuid, mountpoint))
+            end
             mountlist[uuid] = mountpoint
         end
     end)
