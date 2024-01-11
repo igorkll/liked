@@ -1,5 +1,4 @@
 {
-    reg_rm_list = {"demoMode", "settingsBlackList"}, --exit from demo mode
     interpreterSandbox = true,
     disableCustomMarketUrls = true,
     disableRootAccess = true,

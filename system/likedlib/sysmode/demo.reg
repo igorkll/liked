@@ -1,7 +1,21 @@
 {
-    settingsBlackList = {"eeprom", "buffer", "power", "libraries", "users", "lock"},
-    demoMode = true,
     defaultScreenSaverPath = "/system/screenSavers/color_dots.scrsv",
     systemConfigured = true,
-    modifierVersion = 1
+    demoMode = true,
+
+    interpreterSandbox = true,
+    disableCustomMarketUrls = true,
+    disableRootAccess = true,
+    disableRecovery = true,
+    disableExternalBoot = true,
+    disableSystemSettings = true,
+    disableChangeBranch = true,
+    disableDualboot = true,
+    disableMarketForceMode = true,
+    disableCustomFiles = true,
+    disableCustomPrograms = true,
+    disableCustomPackages = true,
+    settingsBlackList = {"eeprom", "buffer", "power", "libraries", "users", "lock", "account"},
+    filesBlackList = {"/system/firmware/luabios", "/system/firmware/luabios/code.lua", "/system/firmware/luabios/label.txt", "/system/recoveryAccess.lua", "/system/recoveryScript.lua", "/system/core/recovery.lua", "/system/apps/settings.app/modules/w_eeprom.lua", "/system/apps/settings.app/modules/x_buffer.lua", "/system/apps/settings.app/modules/y_power.lua", "/system/apps/settings.app/modules/k_libraries.lua", "/system/apps/settings.app/modules/a_account.lua"},
+    sysmodeVersion = 1
 }

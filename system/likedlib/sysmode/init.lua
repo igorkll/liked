@@ -13,8 +13,7 @@ sysmode.modes = {
         reg = system.getResourcePath("classic.reg")
     },
     demo = {
-        reg = system.getResourcePath("classic.reg"),
-        modifier = system.getResourcePath("demo.reg")
+        reg = system.getResourcePath("demo.reg")
     }
 }
 
