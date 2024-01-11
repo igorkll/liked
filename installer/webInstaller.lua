@@ -90,8 +90,12 @@ local function clearScreen()
     gpu.fill(1, 1, rx, ry, " ")
 end
 
-local function menu(label, strs, funcs, withoutBackButton, refresh)
+local function menu(label, lstrs, funcs, withoutBackButton, refresh)
     local selected = 1
+    local strs = {}
+    for i, v in ipairs(lstrs) do
+        strs[i] = v
+    end
 
     if not withoutBackButton then
         table.insert(strs, "Back")
