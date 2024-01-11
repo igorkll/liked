@@ -12,11 +12,16 @@ local graphic = require("graphic")
 local account = require("account")
 local internet = require("internet")
 local component = require("component")
+local palette = require("palette")
 
 local screen = ...
 
-if liked.recoveryMode and not component.isPrimary(screen) then
-    event.wait()
+if liked.recoveryMode then
+    if not component.isPrimary(screen) then
+        event.wait()
+    end
+
+    palette.fromFile(screen, "/system/palettes/original.plt")
 end
 
 local t = thread.create(function ()
