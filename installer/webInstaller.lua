@@ -344,7 +344,44 @@ local function buildUpdater(branch, edition)
     return getInstallDataStr(branch, edition) .. "\n" .. assert(wget(baseUrl .. branch .. "/system/likedlib/update/update.lua"))
 end
 
-local function install(disk, branch, edition)
+local function isOpenOS(address)
+    return component.invoke(address, "exists", "/lib/core/boot.lua")
+end
+
+local function isMineOS(address)
+    return component.invoke(address, "exists", "/OS.lua")
+end
+
+local function downloadFile(branch, path, toPath)
+    local content = assert(wget(baseUrl .. branch .. path))
+    local diskProxy = component.proxy(drive)
+    local file = diskProxy.open(toPath, "wb")
+    diskProxy.write(file, content)
+    diskProxy.close(file)
+end
+
+local function install(disk, branch, edition, doOpenOS, doMineOS)
+    local diskProxy = component.proxy(disk)
+
+    if doOpenOS then
+        diskProxy.rename("/init.lua", "/openOS.lua")
+        downloadFile(branch, "/market/apps/openOS.app/actions.cfg", "/vendor/apps/openOS.app/actions.cfg")
+        downloadFile(branch, "/market/apps/openOS.app/icon.t2p", "/vendor/apps/openOS.app/icon.t2p")
+        downloadFile(branch, "/market/apps/openOS.app/lua5_2.lua", "/vendor/apps/openOS.app/lua5_2.lua")
+        downloadFile(branch, "/market/apps/openOS.app/main.lua", "/vendor/apps/openOS.app/main.lua")
+        downloadFile(branch, "/market/apps/openOS.app/uninstall.lua", "/vendor/apps/openOS.app/uninstall.lua")
+    end
+
+    if doMineOS then
+        downloadFile(branch, "/market/apps/mineOS.app/LICENSE", "/vendor/apps/mineOS.app/LICENSE")
+        downloadFile(branch, "/market/apps/mineOS.app/actions.cfg", "/vendor/apps/mineOS.app/actions.cfg")
+        downloadFile(branch, "/market/apps/mineOS.app/icon.t2p", "/vendor/apps/mineOS.app/icon.t2p")
+        downloadFile(branch, "/market/apps/mineOS.app/lua5_2.lua", "/vendor/apps/mineOS.app/lua5_2.lua")
+        downloadFile(branch, "/market/apps/mineOS.app/main.lua", "/vendor/apps/mineOS.app/main.lua")
+        downloadFile(branch, "/market/apps/mineOS.app/uninstall.lua", "/vendor/apps/mineOS.app/uninstall.lua")
+        downloadFile(branch, "/market/apps/mineOS.app/mineOS.lua", "/mineOS.lua")
+    end
+
     assert(load(buildUpdater(branch, edition), "=updater", nil, _G))(disk)
     pcall(computer.setBootAddress, disk)
     pcall(computer.shutdown, "fast")
