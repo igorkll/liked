@@ -33,9 +33,6 @@ if not drive then --если через getBootAddress не получилось
         drive = require("filesystem").get("/").address
     end)
 end
-if drive then
-    drive = component.proxy(drive)
-end
 
 --------------------------------------------
 
