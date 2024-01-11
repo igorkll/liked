@@ -217,6 +217,11 @@ for name, content in pairs(installdata.data) do
     saveFile("/system/sysdata/" .. name, content)
 end
 
+--устанавливаем label диска при необходимости
+if installdata.label then
+    pcall(proxy.setLabel, installdata.label)
+end
+
 --удаляем свой же файл, чтобы после перезагрузки обновления не началось заного
 if installdata.self then
     proxy.remove(installdata.self)
@@ -224,7 +229,13 @@ end
 
 --отображаем 100% в течении двух секунд
 if printState(1) then
-    sleep(2)
+    if computer.getBootAddress() ~= proxy.address then
+        computer.setBootAddress(proxy.address)
+    else
+        sleep(2)
+    end
+elseif computer.getBootAddress() ~= proxy.address then
+    computer.setBootAddress(proxy.address)
 end
 
 --перезагружаем устройтсво

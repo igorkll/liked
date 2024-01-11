@@ -333,7 +333,7 @@ local function getBlackList(branch, edition)
 end
 
 local function getInstallData(branch, edition)
-    return {data={branch = branch, mode = edition}, filesBlackList = getBlackList(branch, edition)}
+    return {data = {branch = branch, mode = edition}, filesBlackList = getBlackList(branch, edition), label = "liked"}
 end
 
 local function getInstallDataStr(branch, edition)
