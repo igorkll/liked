@@ -433,7 +433,7 @@ local function generateFunction(address)
 
                         if omStr then
                             table.insert(strs, omStr)
-                            table.insert(strs, function ()
+                            table.insert(funcs, function ()
                                 install(address, branch, edition, openOS, mineOS)
                             end)
                         end
