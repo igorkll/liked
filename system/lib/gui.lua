@@ -149,66 +149,68 @@ function gui.shadow(gpu, x, y, sx, sy, mul, full)
     end
 
     local origs = {}
-    if registry.shadowType == "advanced" then
-        local shadowPosesX, shadowPosesY = getPoses()
+    if not require("liked").recoveryMode then
+        if registry.shadowType == "advanced" then
+            local shadowPosesX, shadowPosesY = getPoses()
 
-        for i = 1, #shadowPosesX do
-            local ok, char, fore, back = pcall(gpu.get, shadowPosesX[i], shadowPosesY[i])
-            if ok and char and fore and back then
-                table.insert(origs, {shadowPosesX[i], shadowPosesY[i], char, fore, back})
+            for i = 1, #shadowPosesX do
+                local ok, char, fore, back = pcall(gpu.get, shadowPosesX[i], shadowPosesY[i])
+                if ok and char and fore and back then
+                    table.insert(origs, {shadowPosesX[i], shadowPosesY[i], char, fore, back})
 
-                gpu.setForeground(colorslib.colorMul(fore, mul or 0.6))
-                gpu.setBackground(colorslib.colorMul(back, mul or 0.6))
-                gpu.set(shadowPosesX[i], shadowPosesY[i], char)
-            end
-        end
-    elseif registry.shadowType == "smart" then
-        local shadowPosesX, shadowPosesY = getPoses()
-
-        local palcache = {}
-        local function getPalCol(source)
-            if depth > 1 then
-                for i = 0, 15 do
-                    local col = palcache[i]
-                    if not col then
-                        col = gpu.getPaletteColor(i)
-                        palcache[i] = col
-                    end
-                    if col == source then
-                        return i
-                    end
+                    gpu.setForeground(colorslib.colorMul(fore, mul or 0.6))
+                    gpu.setBackground(colorslib.colorMul(back, mul or 0.6))
+                    gpu.set(shadowPosesX[i], shadowPosesY[i], char)
                 end
             end
-            return 0
-        end
+        elseif registry.shadowType == "smart" then
+            local shadowPosesX, shadowPosesY = getPoses()
 
-        for i = 1, #shadowPosesX do
-            local ok, char, fore, back, forePal, backPal = pcall(gpu.get, shadowPosesX[i], shadowPosesY[i])
-            if ok and char and fore and back then
-                table.insert(origs, {shadowPosesX[i], shadowPosesY[i], char, fore, back})
-
-                if not forePal then forePal = getPalCol(fore) end
-                gpu.setForeground(smartShadowsColors[forePal + 1], depth > 1)
-                if not backPal then backPal = getPalCol(back) end
-                gpu.setBackground(smartShadowsColors[backPal + 1], depth > 1)
-                
-                gpu.set(shadowPosesX[i], shadowPosesY[i], char)
+            local palcache = {}
+            local function getPalCol(source)
+                if depth > 1 then
+                    for i = 0, 15 do
+                        local col = palcache[i]
+                        if not col then
+                            col = gpu.getPaletteColor(i)
+                            palcache[i] = col
+                        end
+                        if col == source then
+                            return i
+                        end
+                    end
+                end
+                return 0
             end
-        end
-    elseif registry.shadowType == "simple" then
-        local shadowPosesX, shadowPosesY = getPoses()
-        for i = 1, #shadowPosesX do
-            local ok, char, fore, back, forePal, backPal = pcall(gpu.get, shadowPosesX[i], shadowPosesY[i])
-            if ok and char and fore and back then
-                table.insert(origs, {shadowPosesX[i], shadowPosesY[i], char, fore, back})
-            end
-        end
 
-        gpu.setBackground(colors.gray)
-        if full then
-            gpu.fill(x, y, sx, sy, " ")
-        else
-            gpu.fill(x + 1, y + 1, (sx + 1) + (registry.shadowMode == "compact" and -1 or 0), sy, " ")
+            for i = 1, #shadowPosesX do
+                local ok, char, fore, back, forePal, backPal = pcall(gpu.get, shadowPosesX[i], shadowPosesY[i])
+                if ok and char and fore and back then
+                    table.insert(origs, {shadowPosesX[i], shadowPosesY[i], char, fore, back})
+
+                    if not forePal then forePal = getPalCol(fore) end
+                    gpu.setForeground(smartShadowsColors[forePal + 1], depth > 1)
+                    if not backPal then backPal = getPalCol(back) end
+                    gpu.setBackground(smartShadowsColors[backPal + 1], depth > 1)
+                    
+                    gpu.set(shadowPosesX[i], shadowPosesY[i], char)
+                end
+            end
+        elseif registry.shadowType == "simple" then
+            local shadowPosesX, shadowPosesY = getPoses()
+            for i = 1, #shadowPosesX do
+                local ok, char, fore, back, forePal, backPal = pcall(gpu.get, shadowPosesX[i], shadowPosesY[i])
+                if ok and char and fore and back then
+                    table.insert(origs, {shadowPosesX[i], shadowPosesY[i], char, fore, back})
+                end
+            end
+
+            gpu.setBackground(colors.gray)
+            if full then
+                gpu.fill(x, y, sx, sy, " ")
+            else
+                gpu.fill(x + 1, y + 1, (sx + 1) + (registry.shadowMode == "compact" and -1 or 0), sy, " ")
+            end
         end
     end
 

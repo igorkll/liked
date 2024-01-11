@@ -12,21 +12,29 @@ local graphic = require("graphic")
 local account = require("account")
 local internet = require("internet")
 local component = require("component")
+
 local screen = ...
 
+if liked.recoveryMode and not component.isPrimary(screen) then
+    event.wait()
+end
+
 local t = thread.create(function ()
-    while doSetup or account.loginWindowOpenFlag do
-        os.sleep()
+    if not liked.recoveryMode then
+        while doSetup or account.loginWindowOpenFlag do
+            os.sleep()
+        end
+        
+        if not registry.systemConfigured then
+            assert(apps.execute("setup", screen))
+        end
+        if component.isPrimary(screen) and internet.check() and account.getLocked() and not account.checkToken() then
+            account.loginWindow(screen)
+        end
+        
+        assert(apps.execute("login", screen))
     end
-    
-    if not registry.systemConfigured then
-        assert(apps.execute("setup", screen))
-    end
-    if component.isPrimary(screen) and internet.check() and account.getLocked() and not account.checkToken() then
-        account.loginWindow(screen)
-    end
-    
-    assert(apps.execute("login", screen))
+
     assert(apps.execute("desktop", screen))
 end)
 t:resume()

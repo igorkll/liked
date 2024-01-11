@@ -23,7 +23,7 @@ local screensaver = require("screensaver")
 local image = require("image")
 local logs = require("logs")
 local sysinit = require("sysinit")
-local liked = {}
+local liked = {recoveryMode = bootloader.recoveryMode}
 
 local colors = gui_container.colors
 
@@ -158,8 +158,13 @@ local demotitle = {
 
 local bufferTimerId
 function liked.applyBufferType()
-    graphic.allowSoftwareBuffer = registry.bufferType == "software"
-    graphic.allowHardwareBuffer = registry.bufferType == "hardware"
+    if liked.recoveryMode then
+        graphic.allowSoftwareBuffer = false
+        graphic.allowHardwareBuffer = false
+    else
+        graphic.allowSoftwareBuffer = registry.bufferType == "software"
+        graphic.allowHardwareBuffer = registry.bufferType == "hardware"
+    end
     graphic.vgpus = {}
     graphic.bindCache = {}
     graphic.screensBuffers = {}
@@ -633,6 +638,17 @@ function liked.getIcon(screen, path)
 end
 
 function liked.drawWallpaper(screen, customFolder)
+    local gpu = graphic.findGpu(screen)
+    local rx, ry = gpu.getResolution()
+
+    if liked.recoveryMode then
+        gpu.setBackground(0x000000)
+        gpu.setForeground(0xffffff)
+        gpu.fill(1, 1, rx, ry, " ")
+        gpu.set(rx - 14, ry - 2, "Recovery mode")
+        return
+    end
+
     local baseColor = colors.lightBlue
     if registry.wallpaperBaseColor then
         if type(registry.wallpaperBaseColor) == "string" then
@@ -641,9 +657,7 @@ function liked.drawWallpaper(screen, customFolder)
             baseColor = registry.wallpaperBaseColor
         end
     end
-
-    local gpu = graphic.findGpu(screen)
-    local rx, ry = gpu.getResolution()
+    
     gpu.setBackground(colorlib.colorMul(baseColor, registry.wallpaperLight or 1))
     gpu.fill(1, 1, rx, ry, " ")
 
