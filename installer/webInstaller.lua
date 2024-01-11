@@ -393,6 +393,16 @@ local function generateTitle(address)
     return address:sub(1, 8) .. "-" .. (component.invoke(address, "getLabel") or "no label")
 end
 
+local function openOSMineOSStr(openOS, mineOS)
+    if openOS and mineOS then
+        return "save 'openOS & mineOS'"
+    elseif openOS then
+        return "save 'openOS'"
+    elseif mineOS then
+        return "save 'mineOS'"
+    end
+end
+
 local function generateFunction(address)
     local title = generateTitle(address)
     return function ()
@@ -402,7 +412,22 @@ local function generateFunction(address)
                 local funcs = {}
                 for _, edition in ipairs(editions) do
                     table.insert(funcs, function ()
-                        install(address, branch, edition)
+                        local openOS, mineOS = isOpenOS(address), isMineOS(address)
+                        local omStr = openOSMineOSStr(openOS, mineOS)
+
+                        local strs, funcs = {"format disk"}, {function ()
+                            component.invoke(address, "remove", "/")
+                            install(address, branch, edition)
+                        end}
+
+                        if omStr then
+                            table.insert(strs, omStr)
+                            table.insert(strs, function ()
+                                install(address, branch, edition, openOS, mineOS)
+                            end)
+                        end
+
+                        menu(title .. " | installation options", strs, funcs)
                     end)
                 end
                 menu(title .. " | select edition", editions, funcs)
