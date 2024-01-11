@@ -124,8 +124,10 @@
 /system/liked/brick.lua
 /system/liked/market_urls_dev.txt
 /system/liked/market_urls_main.txt
+/system/liked/market_urls_test.txt
 /system/liked/media_urls_dev.txt
 /system/liked/media_urls_main.txt
+/system/liked/media_urls_test.txt
 /system/liked/reset.lua
 /system/likedbox/logo.lua
 /system/likedbox/main.lua
