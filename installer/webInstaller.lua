@@ -7,10 +7,34 @@ local unicode = unicode or require("unicode")
 local gpu = component.proxy(component.list("gpu")() or error("no gpu", 0))
 local internet = component.proxy(component.list("internet")() or error("no internet card", 0))
 
+--------------------------------------------
+
 local screen = gpu.getScreen()
 if not screen then
     screen = component.list("screen")() or error("no screen", 0)
     gpu.bind(screen)
+end
+
+gpu.setBackground(0x000000)
+gpu.setForeground(0xffffff)
+local rx, ry = gpu.maxResolution()
+gpu.setResolution(math.min(rx, 80), math.min(ry, 25))
+rx, ry = gpu.getResolution()
+gpu.fill(1, 1, rx, ry, " ")
+
+--------------------------------------------
+
+local drive
+pcall(function ()
+    drive = computer.getBootAddress() --в случаи с luabios если сменить EEPROM после запуска компьтера то данный метод вернет nil и строку об отсутвии компонента
+end)
+if not drive then --если через getBootAddress не получилось(например если чип EEPROM был сменен, в bios с которого произошла загрузка не может без него вернуть строку с адресом диска)
+    pcall(function ()
+        drive = require("filesystem").get("/").address
+    end)
+end
+if drive then
+    drive = component.proxy(drive)
 end
 
 --------------------------------------------
@@ -302,7 +326,7 @@ local editions = {"full", "classic", "demo"}
 --------------------------------------------
 
 local function getBlackList(branch, edition)
-    local editionInfo = wget(baseUrl .. branch .. "/system/likedlib/sysmode/" .. edition .. ".reg")
+    local editionInfo = assert(wget(baseUrl .. branch .. "/system/likedlib/sysmode/" .. edition .. ".reg"))
     if editionInfo then
         local tbl = unserialize(editionInfo)
         if tbl then
@@ -311,8 +335,16 @@ local function getBlackList(branch, edition)
     end
 end
 
+local function getInstallData(branch, edition)
+    return {data={branch = branch, mode = edition}, filesBlackList = getBlackList(branch, edition)}
+end
+
+local function getInstallDataStr(branch, edition)
+    return "local installdata = " .. serialize(getInstallData(branch, edition))
+end
+
 local function buildUpdater(branch, edition)
-    
+    return getInstallDataStr(branch, edition) .. "\n" .. assert(wget(baseUrl .. branch .. "/system/likedlib/update/update.lua"))
 end
 
 --------------------------------------------
