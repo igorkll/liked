@@ -147,6 +147,7 @@ function account.updateToken(name, password)
     local ok, tokenOrError = post(getTokenHost, {name = name, password = password, device = account.deviceId()})
     if ok then
         registry.accountToken = tokenOrError
+        event.push("accountChanged")
         return true
     else
         return nil, tokenOrError
@@ -165,10 +166,6 @@ function account.getStorage()
 end
 
 function account.getPublicStorage()
-    if not registry.account then return end
-    local proxy = require("component").proxy(require("computer").getBootAddress())
-    proxy.public = true
-    return proxy
 end
 
 function account.loginWindow(screen)
@@ -224,6 +221,7 @@ function account.unlogin(password)
     if ok then
         registry.account = nil
         registry.accountPassword = nil
+        event.push("accountChanged")
         return true, "you have successfully logout from your account"
     else
         return false, err

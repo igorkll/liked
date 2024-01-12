@@ -39,9 +39,10 @@ if not liked.recoveryMode then
     end
 
     local function check()
-        thread.createBackground(realCheck)
+        thread.createBackground(realCheck):resume()
     end
 
-    event.timer(5, check, math.huge)
     realCheck()
+    event.timer(5, check, math.huge)
+    event.listen("accountChanged", check)
 end

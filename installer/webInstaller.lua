@@ -435,21 +435,18 @@ local function install(disk, branch, edition, doOpenOS, doMineOS)
     end
 
     assert(load(buildUpdater(branch, edition), "=updater", nil, _G))(disk)
-    if computer.setBootAddress then
-        pcall(computer.setBootAddress, disk)
-    else
-        local eeprom = component.proxy(component.list("eeprom")() or "")
-        if eeprom then
-            eeprom.setData(disk) --потому что в mineOS нет функции computer.setBootAddress
-        end
-    end
+    pcall(computer.setBootAddress, disk)
     pcall(computer.shutdown, "fast")
 end
 
 --------------------------------------------
 
 local function generateTitle(address)
-    return address:sub(1, 8) .. "-" .. (component.invoke(address, "getLabel") or "no label")
+    local title = address:sub(1, 8) .. "-" .. (component.invoke(address, "getLabel") or "no label")
+    if address == drive then
+        title = title .. " (self disk)"
+    end
+    return title
 end
 
 local function openOSMineOSStr(openOS, mineOS)
