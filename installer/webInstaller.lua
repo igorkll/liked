@@ -12,7 +12,7 @@ pcall(function ()
     local graphic = require("graphic")
     gpu = graphic.findGpu(likeScreen)
     updateScreen = function()
-        graphic.update(likeScreen)
+        graphic.forceUpdate(likeScreen)
     end
 end)
 if not gpu then
@@ -21,8 +21,8 @@ end
 
 --------------------------------------------
 
-local screen = gpu.getScreen()
-if not screen then
+local screen = likeScreen or gpu.getScreen()
+if not updateScreen and not screen then
     screen = component.list("screen")() or error("no screen", 0)
     gpu.bind(screen)
 end
