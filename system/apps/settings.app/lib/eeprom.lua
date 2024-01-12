@@ -20,18 +20,18 @@ function eeprom.list(screen)
                 label = fs.readFile(paths.concat(fullpath, "label.txt")) or label
                 data = fs.readFile(paths.concat(fullpath, "data.txt")) or data
                 code = paths.concat(fullpath, "code.lua")
+            end
 
+            table.insert(labels, label)
+            table.insert(list, {label = label, data = data, code = code, makeData = function ()
                 local datamakePath = paths.concat(fullpath, "data.lua")
                 if fs.exists(datamakePath) then
                     local result = {apps.executeWithWarn(datamakePath, screen)}
                     if result[1] then
-                        data = tostring(result[2] or "")
+                        return tostring(result[2] or "")
                     end
                 end
-            end
-
-            table.insert(labels, label)
-            table.insert(list, {label = label, data = data, code = code})
+            end})
         end
     end
     return labels, list
@@ -43,15 +43,17 @@ function eeprom.menu(screen)
     local num = gui.select(screen, nil, nil, "select firmware", labels)
     clear()
     if num and gui.pleaseType(screen, "FLASH", "flash eeprom") then
-        gui.status(screen, nil, nil, "flashing...")
-        eeprom.flash(list[num])
+        eeprom.flash(screen, list[num])
     end
 end
 
-function eeprom.flash(firmware)
+function eeprom.flash(screen, firmware)
     local eeprom = component.eeprom
+    local data = firmware.makeData() or firmware.data or ""
+
+    gui.status(screen, nil, nil, "flashing...")
     eeprom.set(assert(fs.readFile(firmware.code)))
-    eeprom.setData(firmware.data or "")
+    eeprom.setData(data)
     eeprom.setLabel(firmware.label or "UNKNOWN")
 end
 
