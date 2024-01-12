@@ -24,6 +24,7 @@
 /system/apps/settings.app/icon.t2p
 /system/apps/settings.app/main.lua
 /system/apps/settings.app/shadow_demo.t2p
+/system/apps/settings.app/lib/eeprom.lua
 /system/apps/settings.app/modules/a_account.lua
 /system/apps/settings.app/modules/a_lock.lua
 /system/apps/settings.app/modules/b_users.lua
@@ -103,7 +104,6 @@
 /system/lib/apps.lua
 /system/lib/autorun.lua
 /system/lib/calls.lua
-/system/lib/eeprom.lua
 /system/lib/format.lua
 /system/lib/gobjs.lua
 /system/lib/gui.lua
