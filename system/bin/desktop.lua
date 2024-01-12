@@ -1350,7 +1350,9 @@ while true do
     elseif component.isPrimary(screen) and (not lastCheckTime or computer.uptime() - lastCheckTime > 5) then
         lastCheckTime = computer.uptime()
         thread.create(function ()
-            account.smartLoginWindow(screen)
+            if account.isLoginWindowNeed(screen) then
+                lolzLock = true
+            end
         end):resume()
     end
 end

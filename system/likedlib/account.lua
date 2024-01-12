@@ -31,6 +31,9 @@ local function post(lhost, data)
     end
 
     local card = internet.cardProxy()
+    if not card then
+        return false, "there is no internet card"
+    end
     local userdata = card.request(lhost, data)
     local ok, err = internet.wait(userdata)
     if not ok then
@@ -177,8 +180,12 @@ function account.loginWindow(screen)
     account.loginWindowOpenFlag = nil
 end
 
+function account.isLoginWindowNeed(screen)
+    return component.isPrimary(screen) and (registry.oldLocked or (internet.check() and account.getLocked() and not account.checkToken()))
+end
+
 function account.smartLoginWindow(screen)
-    if component.isPrimary(screen) and (registry.oldLocked or (internet.check() and account.getLocked() and not account.checkToken())) then
+    if account.isLoginWindowNeed(screen) then
         account.loginWindow(screen)
     end
 end
