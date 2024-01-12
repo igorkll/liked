@@ -187,6 +187,16 @@ function apps.execute(name, screen, nickname, ...)
     end
 end
 
+function apps.executeWithWarn(name, screen, nickname, ...)
+    local result = {apps.execute(name, screen, nickname, ...)}
+    if screen and not result[1] then
+        local clear = gui.saveBigZone(screen)
+        gui.bigWarn(screen, nil, nil, tostring(result[2] or "unknown error"))
+        clear()
+    end
+    return table.unpack(result)
+end
+
 local function doFormats(appPath, path, delete)
     local data = assert(serialization.load(path))
 
