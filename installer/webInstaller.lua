@@ -4,8 +4,20 @@ local unicode = unicode or require("unicode")
 
 --------------------------------------------
 
-local gpu = component.proxy(component.list("gpu")() or error("no gpu", 0))
 local internet = component.proxy(component.list("internet")() or error("no internet card", 0))
+local likeScreen = ...
+local gpu
+local updateScreen
+pcall(function ()
+    local graphic = require("graphic")
+    gpu = graphic.findGpu(likeScreen)
+    updateScreen = function()
+        graphic.update(likeScreen)
+    end
+end)
+if not gpu then
+    gpu = component.proxy(component.list("gpu")() or error("no gpu", 0))
+end
 
 --------------------------------------------
 
@@ -93,6 +105,7 @@ end
 local function status(text)
     clearScreen()
     centerPrint(math.floor((ry / 2) + 0.5), text)
+    if updateScreen then updateScreen() end
 end
 
 local function menu(label, lstrs, funcs, withoutBackButton, refresh)
@@ -120,6 +133,8 @@ local function menu(label, lstrs, funcs, withoutBackButton, refresh)
             centerPrint(3 + i, str)
             if i == selected then invertColor() end
         end
+
+        if updateScreen then updateScreen() end
     end
     redraw()
 
