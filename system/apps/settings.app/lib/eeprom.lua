@@ -28,7 +28,7 @@ function eeprom.list(screen)
                 if fs.exists(datamakePath) then
                     local result = {apps.executeWithWarn(datamakePath, screen)}
                     if result[1] then
-                        return tostring(result[2] or "")
+                        return result[2]
                     end
                 end
             end})
@@ -42,19 +42,21 @@ function eeprom.menu(screen)
     local clear = gui.saveBigZone(screen)
     local num = gui.select(screen, nil, nil, "select firmware", labels)
     clear()
-    if num and gui.pleaseType(screen, "FLASH", "flash eeprom") then
+    if num then
         eeprom.flash(screen, list[num])
     end
 end
 
-function eeprom.flash(screen, firmware)
-    local eeprom = component.eeprom
+function eeprom.flash(screen, firmware, force)
     local data = firmware.makeData() or firmware.data or ""
+    if data ~= true and (force or gui.pleaseType(screen, "FLASH", "flash eeprom")) then
+        local eeprom = component.eeprom
 
-    gui.status(screen, nil, nil, "flashing...")
-    eeprom.set(assert(fs.readFile(firmware.code)))
-    eeprom.setData(data)
-    eeprom.setLabel(firmware.label or "UNKNOWN")
+        gui.status(screen, nil, nil, "flashing...")
+        eeprom.set(assert(fs.readFile(firmware.code)))
+        eeprom.setData(data)
+        eeprom.setLabel(firmware.label or "UNKNOWN")
+    end
 end
 
 eeprom.unloadable = true
