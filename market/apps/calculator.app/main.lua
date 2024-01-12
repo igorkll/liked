@@ -1,6 +1,6 @@
 local uix = require("uix")
 local unicode = require("unicode")
-local ui = uix.manager(...)
+local ui = uix.manager((...))
 
 local backgroundColor = uix.colors.white
 local numTextColor = uix.colors.black
