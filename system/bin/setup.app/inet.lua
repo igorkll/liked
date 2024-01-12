@@ -9,6 +9,7 @@ local internet = require("internet")
 local image = require("image")
 local gui = require("gui")
 local account = require("account")
+local event = require("event")
 
 local screen, _, window, autoexit, noCaptcha, rsButtons = ...
 local ui = uix.manager(screen, window)
@@ -94,6 +95,27 @@ if not window then
     end
 end
 
+local function doLocked(locked)
+    if locked then
+        event.push("closeSettings", screen)
+    end
+
+    if not locked then
+        locked = nil
+    end
+
+    if locked ~= registry.oldLocked then
+        if locked then
+            registry.old_disableRecovery = registry.disableRecovery
+            registry.disableRecovery = true
+        else
+            registry.disableRecovery = registry.old_disableRecovery
+            registry.old_disableRecovery = nil
+        end
+        registry.oldLocked = locked
+    end
+end
+
 function accountLayout:onSelect()
     if not accountLayout.imagePath then
         accountLayout.locked = account.getLocked()
@@ -120,6 +142,7 @@ function accountLayout:onSelect()
         if vtext2 then vtext2:destroy() end
         if accountImage then accountImage:destroy() end
 
+        local locked
         if accountLayout.login and accountLayout.tokenIsValid then
             accountLayout.imagePath = uix.getSysImgPath("accountLogin")
             accountImage = accountLayout:createImage(((rx / 2) - (image.sizeX(accountLayout.imagePath) / 2)) + 1, 2, accountLayout.imagePath)
@@ -133,6 +156,8 @@ function accountLayout:onSelect()
             changePassword.dh = false
             devicesControl.dh = false
         elseif accountLayout.locked then
+            locked = true
+            
             accountLayout.imagePath = uix.getSysImgPath("accountLock")
             accountImage = accountLayout:createImage(((rx / 2) - (image.sizeX(accountLayout.imagePath) / 2)) + 1, 2, accountLayout.imagePath)
             accountImage.wallpaperMode = true
@@ -155,6 +180,7 @@ function accountLayout:onSelect()
             registerButton.dh = false
             loginButton.dh = false
         end
+        doLocked(locked)
     end
 end
 
@@ -224,6 +250,7 @@ function loginButton:onClick()
     if pass then
         if msg(account.login(loginZone.read.getBuffer(), pass)) then
             if autoexit then
+                doLocked(false)
                 os.exit()
                 return
             end

@@ -33,9 +33,7 @@ local t = thread.create(function ()
         if not registry.systemConfigured then
             assert(apps.execute("setup", screen))
         end
-        if component.isPrimary(screen) and internet.check() and account.getLocked() and not account.checkToken() then
-            account.loginWindow(screen)
-        end
+        account.smartLoginWindow(screen)
         
         assert(apps.execute("login", screen))
     end

@@ -10,6 +10,7 @@ local uix = require("uix")
 local paths = require("paths")
 local fs = require("filesystem")
 local event = require("event")
+local component = require("component")
 local account = {}
 
 local host = "http://176.53.161.98"
@@ -160,7 +161,7 @@ end
 
 function account.getStorage()
     if not registry.account then return end
-    local proxy = require("component").proxy(require("computer").tmpAddress())
+    local proxy = component.proxy(require("computer").tmpAddress())
     proxy.cloud = true
     return proxy
 end
@@ -174,6 +175,12 @@ function account.loginWindow(screen)
     local window = graphic.createWindow(screen)
     assert(apps.execute("/system/bin/setup.app/inet.lua", screen, nil, window, true, nil, true))
     account.loginWindowOpenFlag = nil
+end
+
+function account.smartLoginWindow(screen)
+    if component.isPrimary(screen) and (registry.oldLocked or (internet.check() and account.getLocked() and not account.checkToken())) then
+        account.loginWindow(screen)
+    end
 end
 
 --------------------------------

@@ -6,6 +6,7 @@ local calls = require("calls")
 local gui_container = require("gui_container")
 local paths = require("paths")
 local bootloader = require("bootloader")
+local thread = require("thread")
 local registry = require("registry")
 
 local colors = gui_container.colors
@@ -78,8 +79,20 @@ local function draw(noReload)
 end
 draw()
 
+local stopFlag
+
+thread.listen("closeSettings", function (_, uuid)
+    if uuid == screen then
+        stopFlag = true
+    end
+end)
+
 while true do
-    local eventData = {event.pull()}
+    if stopFlag then
+        os.exit()
+    end
+
+    local eventData = {event.pull(0.5)}
     local selectWindowEventData = selectWindow:uploadEvent(eventData)
     local statusWindowEventData = statusWindow:uploadEvent(eventData)
 
