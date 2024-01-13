@@ -97,10 +97,14 @@ function gui_container.getUserRoot(screen)
     return path
 end
 
-function gui_container.short(str, max)
+function gui_container.short(str, max, endcheck)
     local len = unicode.len(str)
     if len > max then
-        return gui_container.chars.threeDots .. unicode.sub(str, (len - max) + 2, len)
+        if endcheck then
+            return unicode.sub(str, 1, max - 1) .. gui_container.chars.threeDots
+        else
+            return gui_container.chars.threeDots .. unicode.sub(str, (len - max) + 2, len)
+        end
     end
     return str
 end

@@ -938,8 +938,9 @@ function gui.select(screen, cx, cy, label, actions, scroll, noCloseButton, overl
 
     draw()
 
+    local timeout = 0.2
     while true do
-        local eventData = {computer.pullSignal()}
+        local eventData = {computer.pullSignal(timeout)}
         local windowEventData = window:uploadEvent(eventData)
         if windowEventCallback then
             local ret, lAlwaysConfirm = windowEventCallback(windowEventData, window)
@@ -951,6 +952,8 @@ function gui.select(screen, cx, cy, label, actions, scroll, noCloseButton, overl
                 drawBase()
             end
         end
+        
+        timeout = nil
 
         if windowEventData[1] == "touch" then
             if windowEventData[3] >= window.sizeX - 2 and windowEventData[4] == 1 then

@@ -28,7 +28,6 @@ local function iowindow(screen, dirmode, exp, save)
     ---- main
     local path = gui_container.defaultUserRoot
     local pathPos = 5 + (save and 17 or 0)
-    local reader
 
     local function retpathFunc(list, num, fullpath, confirm)
         local isDir = num == 1 or fs.isDirectory(fullpath)
@@ -44,7 +43,7 @@ local function iowindow(screen, dirmode, exp, save)
                 end
                 if save then
                     if isDir == dirmode then
-                        if gui.yesno(screen, nil, nil, "are you sure you want to " .. (isDir and "merge the directory?" or "overwrite the file?")) then
+                        if fs.exists(fullpath) and gui.yesno(screen, nil, nil, "are you sure you want to " .. (isDir and "merge the directory?" or "overwrite the file?")) then
                             return retpath
                         end
                     else
@@ -72,17 +71,18 @@ local function iowindow(screen, dirmode, exp, save)
                     end
 
                     local smartString = format.smartConcat()
-                    smartString.add(1, gui_container.short(name, 34))
-                    smartString.add(47 - 5, lexp and ((gui_container.typenames[lexp] or gui_container.short(lexp, 6))) or "", true)
+                    smartString.add(1, gui_container.short(name, 34, true))
+                    smartString.add(47 - 5, lexp and gui_container.short(gui_container.typenames[lexp] or lexp, 6, true) or "", true)
                     smartString.add(47, isDir and "DIR" or "FILE", true)
                     table.insert(list, {smartString.get(), gui_container.typecolors[lexp] or gui_container.colors.black, name = file})
                 end
             end
         end
         
+        local reader
         local num, _, _, _, confirm = gui.select(screen, nil, nil, title, list, nil, nil, function (window)
             window:set(1, window.sizeY, gui_container.colors.red, gui_container.colors.white, " + ")
-            window:set(pathPos, window.sizeY, gui_container.colors.lightGray, gui_container.colors.white, gui_container.short(gui_container.toUserPath(screen, path), 21))
+            window:set(pathPos, window.sizeY, gui_container.colors.lightGray, gui_container.colors.white, gui_container.short(gui_container.toUserPath(screen, path), save and 18 or 35))
             if save then
                 if not reader then
                     reader = window:read(5, window.sizeY, 16, gui_container.colors.white, gui_container.colors.gray, nil, nil, nil, true)
@@ -94,7 +94,10 @@ local function iowindow(screen, dirmode, exp, save)
             local fakeConfirm = reader and #reader.getBuffer() > 0
 
             if reader then
-                reader.uploadEvent(windowEventData)
+                local ret = reader.uploadEvent(windowEventData)
+                if ret then
+                    return -1, fakeConfirm
+                end
             end
 
             if windowEventData[1] == "touch" then
@@ -112,6 +115,11 @@ local function iowindow(screen, dirmode, exp, save)
 
             return nil, fakeConfirm
         end)
+
+        if num == -1 then
+            num = nil
+            confirm = true
+        end
 
         if num then
             if num ~= true then
