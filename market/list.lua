@@ -103,7 +103,7 @@ local list = {
     },
     {
         name = "lua",
-        version = "4",
+        version = "5",
         vendor = "logic",
         description = "lua code interpreter",
         minDiskSpace = 64,

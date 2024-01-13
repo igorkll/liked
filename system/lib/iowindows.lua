@@ -9,9 +9,9 @@ local function iowindow(screen, dirmode, exp, save)
     ---- title
     local title = ""
     if save then
-        title = title .. "Save "
+        title = title .. "save "
     else
-        title = title .. "Select "
+        title = title .. "select "
     end
     
     if exp then
@@ -19,9 +19,9 @@ local function iowindow(screen, dirmode, exp, save)
     end
 
     if dirmode then
-        title = title .. "Folder"
+        title = title .. "folder"
     else
-        title = title .. "File"
+        title = title .. "file"
     end
 
     ---- main
@@ -34,9 +34,14 @@ local function iowindow(screen, dirmode, exp, save)
             if isDir or not dirmode then
                 local name = paths.name(file)
                 local lexp = paths.extension(name)
-                if not exp or lexp == exp then
+                if isDir or not exp or lexp == exp then
                     if exp then
                         name = paths.hideExtension(name)
+                    end
+                    if isDir then
+                        name = "D-" .. name
+                    else
+                        name = "F-" .. name
                     end
                     table.insert(list, {name, gui_container.typecolors[lexp] or gui_container.colors.black, name = file})
                 end
@@ -47,11 +52,12 @@ local function iowindow(screen, dirmode, exp, save)
         if num then
             local fullpath = paths.concat(path, list[num].name)
             local isDir = fs.isDirectory(fullpath)
+            local lexp = paths.extension(fullpath)
 
             if isDir and not confirm then
                 path = gui_container.checkPath(screen, fullpath)
             else
-                if isDir == dirmode then
+                if isDir == dirmode and (not exp or lexp == exp) then
                     return fullpath
                 else
                     gui.warn(screen, nil, nil, "it is impossible to select this object")
