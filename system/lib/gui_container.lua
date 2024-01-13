@@ -54,10 +54,7 @@ gui_container.openVia = {
     ["xpkg"] = "xpkgInstall",
 }
 
-gui_container.typecolors = { --тут косяк, политра может быть изменена а тут не измениться, и могут быть сбои при присвоения цвета. нала переделать на индексы палитры
-    ["app"] = gui_container.colors.red,
-    ["afpx"] = gui_container.colors.orange,
-    ["lua"] = gui_container.colors.lime
+gui_container.typecolors = {
 }
 
 gui_container.typenames = {
@@ -167,6 +164,16 @@ end
 ]]
 
 function gui_container.refresh()
+    local colors = {
+        ["app"] = gui_container.colors.red,
+        ["afpx"] = gui_container.colors.orange,
+        ["lua"] = gui_container.colors.lime
+    }
+
+    for k, v in pairs(colors) do
+        gui_container.typecolors[k] = v
+    end
+
     local registry = require("registry")
     for str, tbl in pairs(registry.gui_container or {}) do
         for key, value in pairs(tbl) do

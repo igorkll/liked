@@ -68,6 +68,7 @@ local function draw(set)
 
     if set then
         palette.setSystemPalette(paths.concat(themesPath, themes[selected]))
+        gui_container.refresh()
         event.push("redrawDesktop")
         gRedraw()
         draw()

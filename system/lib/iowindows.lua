@@ -35,10 +35,15 @@ local function iowindow(screen, dirmode, exp, save)
                 local name = paths.name(file)
                 local lexp = paths.extension(name)
                 if isDir or not exp or lexp == exp then
+                    local hide
                     if exp and not gui_container.hiddenFiles[screen] then
+                        hide = true
                         name = paths.hideExtension(name)
                     end
                     local function f(str)
+                        if not hide then
+                            return str
+                        end
                         return str .. (lexp and ((gui_container.typenames[lexp] or lexp) .. "-") or "")
                     end
                     if isDir then
