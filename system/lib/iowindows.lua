@@ -27,7 +27,7 @@ local function iowindow(screen, dirmode, exp, save)
 
     ---- main
     local path = gui_container.defaultUserRoot
-    local pathPos = 5 + (save and 16 or 0)
+    local pathPos = 5 + (save and 17 or 0)
     local reader
 
     local function retpathFunc(list, num, fullpath, confirm)
@@ -72,8 +72,9 @@ local function iowindow(screen, dirmode, exp, save)
                     end
 
                     local smartString = format.smartConcat()
-                    smartString.add(1, name)
-                    smartString.add(47, (lexp and ((gui_container.typenames[lexp] or lexp) .. "-") or "") .. (isDir and " DIR" or "FILE"), true)
+                    smartString.add(1, gui_container.short(name, 34))
+                    smartString.add(47 - 5, lexp and ((gui_container.typenames[lexp] or gui_container.short(lexp, 6))) or "", true)
+                    smartString.add(47, isDir and "DIR" or "FILE", true)
                     table.insert(list, {smartString.get(), gui_container.typecolors[lexp] or gui_container.colors.black, name = file})
                 end
             end
