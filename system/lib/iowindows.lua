@@ -88,6 +88,8 @@ local function iowindow(screen, dirmode, exp, save)
                 reader.redraw()
             end
         end, function (windowEventData, window)
+            local fakeConfirm = #reader.getBuffer() > 0
+
             if reader then
                 reader.uploadEvent(windowEventData)
             end
@@ -100,10 +102,12 @@ local function iowindow(screen, dirmode, exp, save)
 
                     if name then
                         fs.makeDirectory(paths.concat(path, name))
-                        return true
+                        return true, fakeConfirm
                     end
                 end
             end
+
+            return nil, fakeConfirm
         end)
 
         if num then
@@ -114,7 +118,7 @@ local function iowindow(screen, dirmode, exp, save)
                     return retpath
                 end
             end
-        elseif ( confirm) and reader then
+        elseif confirm and reader then
             local buff = reader.getBuffer()
             local ret = retpathFunc(nil, nil, paths.concat(path, buff .. (exp and ("." .. exp) or "")), true)
             if ret then
