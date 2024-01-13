@@ -117,6 +117,7 @@ while true do
         local code, err = load(readerData, "=lua", "t", env)
         if code then
             local result = {xpcall(code, debug.traceback)}
+            window.selected = true
             if result[1] then
                 if #result > 1 then
                     lprint(colors.white, table.unpack(result, 2))
