@@ -36,14 +36,15 @@ local function iowindow(screen, dirmode, exp, save)
         if isDir and not confirm then
             path = gui_container.checkPath(screen, fullpath)
         else
-            if isDir == dirmode and (not exp or lexp == exp) then
+            local exists = fs.exists(fullpath)
+            if (not exists or isDir == dirmode) and (not exp or lexp == exp) then
                 local retpath = fullpath
                 if num and list and list[num].name == ".." then
                     retpath = paths.canonical(path)
                 end
                 if save then
                     if isDir == dirmode then
-                        if fs.exists(fullpath) and gui.yesno(screen, nil, nil, "are you sure you want to " .. (isDir and "merge the directory?" or "overwrite the file?")) then
+                        if not exists or gui.yesno(screen, nil, nil, "are you sure you want to " .. (isDir and "merge the directory?" or "overwrite the file?")) then
                             return retpath
                         end
                     else
@@ -131,9 +132,9 @@ local function iowindow(screen, dirmode, exp, save)
             end
         elseif confirm and reader then
             local buff = reader.getBuffer()
-            local ret = retpathFunc(nil, nil, paths.concat(path, buff .. (exp and ("." .. exp) or "")), true)
-            if ret then
-                return ret
+            local retpath = retpathFunc(nil, nil, paths.concat(path, buff .. (exp and ("." .. exp) or "")), true)
+            if retpath then
+                return retpath
             end
         else
             return
