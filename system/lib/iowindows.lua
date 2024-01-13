@@ -35,13 +35,16 @@ local function iowindow(screen, dirmode, exp, save)
                 local name = paths.name(file)
                 local lexp = paths.extension(name)
                 if isDir or not exp or lexp == exp then
-                    if exp then
+                    if exp and not gui_container.hiddenFiles[screen] then
                         name = paths.hideExtension(name)
                     end
+                    local function f(str)
+                        return str .. (lexp and ((gui_container.typenames[lexp] or lexp) .. "-") or "")
+                    end
                     if isDir then
-                        name = "D-" .. name
+                        name = f("D-") .. name
                     else
-                        name = "F-" .. name
+                        name = f("F-") .. name
                     end
                     table.insert(list, {name, gui_container.typecolors[lexp] or gui_container.colors.black, name = file})
                 end
@@ -60,7 +63,7 @@ local function iowindow(screen, dirmode, exp, save)
                 if isDir == dirmode and (not exp or lexp == exp) then
                     return fullpath
                 else
-                    gui.warn(screen, nil, nil, "it is impossible to select this object")
+                    gui.warn(screen, nil, nil, "select the " .. (dirmode and "folder" or "file") .. (exp and (" with the " .. exp .. " extension") or ""))
                 end
             end
         else
