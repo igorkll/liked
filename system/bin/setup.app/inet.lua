@@ -12,7 +12,8 @@ local account = require("account")
 local event = require("event")
 
 local screen, _, window, autoexit, noCaptcha, rsButtons = ...
-local ui = uix.manager(screen, window)
+local ui = uix.manager(screen)
+ui.window = window
 local rx, ry = ui:size()
 local pwx, pwy
 if window then
@@ -127,15 +128,15 @@ function accountLayout:onSelect()
         passwordZone2.read.setBuffer("")
         loginZone.read.setLock(false)
 
-        registerButton.dh = true
-        loginButton.dh = true
-        accountDelButton.dh = true
-        unloginButton.dh = true
-        changePassword.dh = true
-        devicesControl.dh = true
+        registerButton.disabledHidden = true
+        loginButton.disabledHidden = true
+        accountDelButton.disabledHidden = true
+        unloginButton.disabledHidden = true
+        changePassword.disabledHidden = true
+        devicesControl.disabledHidden = true
         
         if next3 then
-            next3.dh = false
+            next3.disabledHidden = false
         end
 
         if vtext1 then vtext1:destroy() end
@@ -151,10 +152,10 @@ function accountLayout:onSelect()
             loginZone.read.setBuffer(accountLayout.login)
             loginZone.read.setLock(true)
 
-            accountDelButton.dh = false
-            unloginButton.dh = false
-            changePassword.dh = false
-            devicesControl.dh = false
+            accountDelButton.disabledHidden = false
+            unloginButton.disabledHidden = false
+            changePassword.disabledHidden = false
+            devicesControl.disabledHidden = false
         elseif accountLayout.locked then
             locked = true
             
@@ -169,16 +170,16 @@ function accountLayout:onSelect()
             vtext2 = accountLayout:createVText(rx / 2, ry - 10, uix.colors.orange, "enter account password to confirm that you are the owner")
 
             if next3 then
-                next3.dh = true
+                next3.disabledHidden = true
             end
-            loginButton.dh = false
+            loginButton.disabledHidden = false
         else
             accountLayout.imagePath = uix.getSysImgPath("account")
             accountImage = accountLayout:createImage(((rx / 2) - (image.sizeX(accountLayout.imagePath) / 2)) + 1, 2, accountLayout.imagePath)
             accountImage.wallpaperMode = true
 
-            registerButton.dh = false
-            loginButton.dh = false
+            registerButton.disabledHidden = false
+            loginButton.disabledHidden = false
         end
         doLocked(locked)
     end

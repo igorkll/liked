@@ -25,7 +25,7 @@ local rx, ry = ui:size()
 
 local blinckedHi = {}
 
-function blinckedHi:draw()
+function blinckedHi:onDraw()
     local line = self.y
     local gpu = graphic.findGpu(screen)
     if gpu then

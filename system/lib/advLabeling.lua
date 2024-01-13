@@ -23,5 +23,9 @@ function advLabeling.getLabel(address)
     return label
 end
 
+function advLabeling.getNameTag(address)
+    return address:sub(1, 8) .. "-" .. (advLabeling.getLabel(address) or "no label")
+end
+
 advLabeling.unloadable = true
 return advLabeling

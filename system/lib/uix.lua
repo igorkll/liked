@@ -29,7 +29,7 @@ function canvasClass:onCreate(sx, sy, back, fore, char)
     self.sy = sy
 end
 
-function canvasClass:draw()
+function canvasClass:onDraw()
     self.drawed = true
     if self.screenshot then
         self.screenshot()
@@ -38,6 +38,8 @@ function canvasClass:draw()
         self.gui.window:fill(self.x, self.y, self.sx, self.sy, self.back, self.fore, self.char)
     end
 end
+
+
 
 function canvasClass:set(x, y, back, fore, text, vertical)
     if vertical then
@@ -129,7 +131,7 @@ function objclass:stop()
 end
 
 function objclass:uploadEvent(eventData)
-    if self.disabled or self.dh then return end
+    if self.disabled or self.disabledHidden then return end
     local retval
     if self.type == "button" or self.type == "context" then
         if self.state and (eventData[1] == "touch" or eventData[1] == "drop") then
@@ -278,9 +280,8 @@ function objclass:uploadEvent(eventData)
 end
 
 function objclass:draw()
+    if self.hidden or self.disabledHidden then return end
     local style = self.style or self.gui.style
-
-    if self.hidden or self.dh then return end
     if self.type == "label" or self.type == "button" or self.type == "context" then
         local back, fore = self.back, self.fore
         if self.state then
@@ -426,7 +427,32 @@ function objclass:draw()
     end
 end
 
----------------------------------- layout methods
+---------------------------------- base custom class
+
+local baseCustom = {}
+baseCustom.destroy = objclass.destroy
+
+function baseCustom:uploadEvent(eventData)
+    if self.disabled or self.disabledHidden then return end
+    if self.onEvent then
+        self:onEvent(eventData)
+    end
+end
+
+function baseCustom:draw()
+    if self.hidden or self.disabledHidden then return end
+    if self.onDraw then
+        self:onDraw()
+    end
+end
+
+function baseCustom:stop()
+    if self.onStop then
+        self:onStop()
+    end
+end
+
+---------------------------------- layout objects
 
 function uix:createUpBar(title, withoutFill, bgcolor) --working only in fullscreen ui
     local obj = setmetatable({gui = self, type = "up"}, {__index = objclass})
@@ -681,11 +707,11 @@ function uix:createProgress(x, y, sx, fore, back, value)
 end
 
 function uix:createCustom(x, y, cls, ...)
-    if not cls.destroy then
-        cls.destroy = objclass.destroy
-    end
+    cls.destroy = objclass.destroy
+    cls.gui = self
+    cls.window = self.window
 
-    local obj = setmetatable({gui = self}, {__index = cls})
+    local obj = setmetatable(cls, {__index = baseCustom})
     obj.x = x
     obj.y = y
     obj.args = {...}
@@ -755,12 +781,11 @@ function uix:createColorpic(x, y, sx, sy, text, color, full)
     return button
 end
 
+------------------------------------ layout api
+
 function uix:setReturnLayout(returnLayout)
     self.returnLayout = returnLayout
 end
-
-
-
 
 function uix:timer(time, callback, count)
     return thread.timer(time, function ()
@@ -776,10 +801,6 @@ function uix:listen(eventType, callback)
     end)
 end
 
-
-
-
-
 function uix:uploadEvent(eventData)
     if self.controlLock or not self.active then return end
 
@@ -793,7 +814,7 @@ function uix:uploadEvent(eventData)
         end
 
         for _, obj in ipairs(self.objs) do
-            if obj.uploadEvent and not obj.disabled then
+            if obj.uploadEvent then
                 if obj:uploadEvent(eventData) then
                     break
                 end
@@ -829,7 +850,7 @@ function uix:draw()
     end
 
     for _, obj in ipairs(self.objs) do
-        if obj.draw and not obj.hidden and not obj.dh then
+        if obj.draw then
             obj:draw()
         end
     end
@@ -922,7 +943,7 @@ function uix.createSimpleLayout(screen, bgcolor, style)
     return uix.create(window, bgcolor or colors.black, style)
 end
 
----------------------------------- legacy
+---------------------------------- legacy manager
 
 function uix.createAuto(screen, title, bgcolor, style) --legacy
     local rx, ry = graphic.getResolution(screen)
@@ -1031,8 +1052,8 @@ function manager:draw()
     end
 end
 
-function uix.manager(screen, window)
-    return setmetatable({screen = screen, window = window}, {__index = manager})
+function uix.manager(screen)
+    return setmetatable({screen = screen}, {__index = manager})
 end
 
 ----------------------------------
