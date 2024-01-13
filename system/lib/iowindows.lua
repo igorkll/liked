@@ -2,6 +2,7 @@ local gui = require("gui")
 local paths = require("paths")
 local fs = require("filesystem")
 local gui_container = require("gui_container")
+local text = require("text")
 local iowindows = {}
 
 local function iowindow(screen, dirmode, exp, save)
@@ -24,10 +25,13 @@ local function iowindow(screen, dirmode, exp, save)
     end
 
     ---- main
-    local function process(root, path)
-        local list = {{".. (back)", gui_container.colors.black, name = ".."}}
+    local path = gui_container.defaultUserRoot
+
+    while true do
+        local list = {{".. (back / current)", gui_container.colors.black, name = ".."}}
         for i, file in ipairs(fs.list(path)) do
-            if fs.isDirectory(paths.concat(path, file)) or not dirmode then
+            local isDir = fs.isDirectory(paths.concat(path, file))
+            if isDir or not dirmode then
                 local name = paths.name(file)
                 local lexp = paths.extension(name)
                 if not exp or lexp == exp then
@@ -45,24 +49,17 @@ local function iowindow(screen, dirmode, exp, save)
             local isDir = fs.isDirectory(fullpath)
 
             if isDir and not confirm then
-                return process(root, fullpath)
+                path = gui_container.checkPath(screen, fullpath)
             else
                 if isDir == dirmode then
                     return fullpath
                 else
-                    local clear = gui.saveZone(screen)
                     gui.warn(screen, nil, nil, "it is impossible to select this object")
-                    clear()
                 end
             end
         else
-            return true
+            return
         end
-    end
-
-    local result = process(gui_container.defaultUserRoot, gui_container.defaultUserRoot)
-    if result ~= true then
-        return result
     end
 end
 
