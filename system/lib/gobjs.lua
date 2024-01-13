@@ -20,14 +20,10 @@ function gobjs.scrolltext:onCreate(sizeX, sizeY, text)
     self.scrollBar = false
 end
 
-function gobjs.scrolltext:_lines()
-    self.lines = self.lines or parser.split(unicode, self.text, "\n")
-end
-
-function gobjs.scrolltext:uploadEvent(eventData)
+function gobjs.scrolltext:onEvent(eventData)
     eventData = uix.objEvent(self, eventData)
     if eventData and eventData[1] == "scroll" then
-        self:_lines()
+        self:reLines()
         local max = #self.lines
 
         local oldScroll = self.scroll
@@ -40,8 +36,8 @@ function gobjs.scrolltext:uploadEvent(eventData)
     end
 end
 
-function gobjs.scrolltext:draw()
-    self:_lines()
+function gobjs.scrolltext:onDraw()
+    self:reLines()
     self.w:fill(self.x, self.y, self.sizeX, self.sizeY, self.bg, 0, " ")
     for i, str in ipairs(self.lines) do
         local linePos = (self.y + (i - 1)) - self.scroll
@@ -66,6 +62,12 @@ function gobjs.scrolltext:draw()
             self.w:set(linePosX, linePos, self.bg, self.fg, str)
         end
     end
+end
+
+
+
+function gobjs.scrolltext:reLines()
+    self.lines = self.lines or parser.split(unicode, self.text, "\n")
 end
 
 function gobjs.scrolltext:setText(text)
