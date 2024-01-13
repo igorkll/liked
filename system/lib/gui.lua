@@ -807,6 +807,7 @@ function gui.select(screen, cx, cy, label, actions, scroll, noCloseButton, overl
     local addrs
     local addrsIdx
     local sel
+    local alwaysConfirm
 
     local function drawScrollBar()
         window:fill(window.sizeX, 2, 1, window.sizeY - 2, colors.brown, 0, " ")
@@ -818,7 +819,7 @@ function gui.select(screen, cx, cy, label, actions, scroll, noCloseButton, overl
     end
 
     local function redrawButton()
-        window:set(window.sizeX - 9, window.sizeY, sel and colors.lime or colors.green, colors.white, " CONFIRM ")
+        window:set(window.sizeX - 9, window.sizeY, (sel or alwaysConfirm) and colors.lime or colors.green, colors.white, " CONFIRM ")
     end
 
     local function drawBase()
@@ -941,10 +942,11 @@ function gui.select(screen, cx, cy, label, actions, scroll, noCloseButton, overl
         local eventData = {computer.pullSignal()}
         local windowEventData = window:uploadEvent(eventData)
         if windowEventCallback then
-            local ret = windowEventCallback(windowEventData, window)
+            local ret, lAlwaysConfirm = windowEventCallback(windowEventData, window)
             if ret ~= nil then
                 return ret
             end
+            alwaysConfirm = lAlwaysConfirm
         end
 
         if windowEventData[1] == "touch" then
@@ -953,7 +955,7 @@ function gui.select(screen, cx, cy, label, actions, scroll, noCloseButton, overl
                     return nil, scroll, windowEventData[5], windowEventData
                 end
             elseif windowEventData[3] >= window.sizeX - 9 and windowEventData[3] < window.sizeX and windowEventData[4] == window.sizeY then
-                if sel then
+                if sel or alwaysConfirm then
                     return sel, scroll, windowEventData[5], windowEventData, true
                 end
             end

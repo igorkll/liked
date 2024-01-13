@@ -28,6 +28,7 @@ local function iowindow(screen, dirmode, exp, save)
     ---- main
     local path = gui_container.defaultUserRoot
     local pathPos = 5 + (save and 16 or 0)
+    local reader
 
     local function retpathFunc(list, num, fullpath, confirm)
         local isDir = num == 1 or fs.isDirectory(fullpath)
@@ -38,7 +39,7 @@ local function iowindow(screen, dirmode, exp, save)
         else
             if isDir == dirmode and (not exp or lexp == exp) then
                 local retpath = fullpath
-                if list[num].name == ".." then
+                if num and list and list[num].name == ".." then
                     retpath = paths.canonical(path)
                 end
                 if save then
@@ -66,7 +67,7 @@ local function iowindow(screen, dirmode, exp, save)
                 local name = paths.name(file)
                 local lexp = paths.extension(name)
                 if isDir or not exp or lexp == exp then
-                    if exp and not gui_container.viewFileExps[screen] then
+                    if not gui_container.viewFileExps[screen] then
                         name = paths.hideExtension(name)
                     end
 
@@ -81,7 +82,16 @@ local function iowindow(screen, dirmode, exp, save)
         local num, _, _, _, confirm = gui.select(screen, nil, nil, title, list, nil, nil, function (window)
             window:set(1, window.sizeY, gui_container.colors.red, gui_container.colors.white, " + ")
             window:set(pathPos, window.sizeY, gui_container.colors.lightGray, gui_container.colors.white, gui_container.short(gui_container.toUserPath(screen, path), 21))
+            if not reader then
+                reader = window:read(5, window.sizeY, 16, gui_container.colors.white, gui_container.colors.gray, nil, nil, nil, true)
+            else
+                reader.redraw()
+            end
         end, function (windowEventData, window)
+            if reader then
+                reader.uploadEvent(windowEventData)
+            end
+
             if windowEventData[1] == "touch" then
                 if windowEventData[4] == window.sizeY and windowEventData[3] <= 3 then
                     local clear = gui.saveZone(screen)
@@ -103,6 +113,12 @@ local function iowindow(screen, dirmode, exp, save)
                 if retpath then
                     return retpath
                 end
+            end
+        elseif ( confirm) and reader then
+            local buff = reader.getBuffer()
+            local ret = retpathFunc(nil, nil, paths.concat(path, buff .. (exp and ("." .. exp) or "")), true)
+            if ret then
+                return ret
             end
         else
             return
