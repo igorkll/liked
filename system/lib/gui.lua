@@ -791,7 +791,7 @@ function gui.drawtext(screen, posX, posY, foreground, text)
     end
 end
 
-function gui.select(screen, cx, cy, label, actions, scroll, noCloseButton)
+function gui.select(screen, cx, cy, label, actions, scroll, noCloseButton, overlay)
     --=gui_select(screen, nil, nil, "LOLZ", {"test 1", "test 2", "test 3"})
 
     local gpu = graphic.findGpu(screen)
@@ -832,6 +832,9 @@ function gui.select(screen, cx, cy, label, actions, scroll, noCloseButton)
         end
         window:fill(1, window.sizeY, window.sizeX, 1, colors.lightGray, 0, " ")
         redrawButton()
+        if overlay then
+            overlay()
+        end
     end
 
     local function getCol(idx, color)

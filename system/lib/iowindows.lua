@@ -26,6 +26,9 @@ local function iowindow(screen, dirmode, exp, save)
 
     ---- main
     local path = gui_container.defaultUserRoot
+    local rewriteStr = ""
+    local cx, cy = gui.getBigZone(screen)
+    local bPlasePosX, bPlasePosY = cx, cy + 50
 
     while true do
         local list = {{".. (back / current)", gui_container.colors.black, name = ".."}}
@@ -66,7 +69,13 @@ local function iowindow(screen, dirmode, exp, save)
                 path = gui_container.checkPath(screen, fullpath)
             else
                 if isDir == dirmode and (not exp or lexp == exp) then
-                    return fullpath
+                    local retpath = fullpath
+                    if list[num].name == ".." then
+                        retpath = path
+                    end
+                    if not save or gui.yesno(screen, nil, nil, rewriteStr) then
+                        return retpath
+                    end
                 else
                     gui.warn(screen, nil, nil, "select the " .. (dirmode and "folder" or "file") .. (exp and (" with the " .. exp .. " extension") or ""))
                 end
