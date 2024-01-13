@@ -82,13 +82,15 @@ local function iowindow(screen, dirmode, exp, save)
         local num, _, _, _, confirm = gui.select(screen, nil, nil, title, list, nil, nil, function (window)
             window:set(1, window.sizeY, gui_container.colors.red, gui_container.colors.white, " + ")
             window:set(pathPos, window.sizeY, gui_container.colors.lightGray, gui_container.colors.white, gui_container.short(gui_container.toUserPath(screen, path), 21))
-            if not reader then
-                reader = window:read(5, window.sizeY, 16, gui_container.colors.white, gui_container.colors.gray, nil, nil, nil, true)
-            else
-                reader.redraw()
+            if save then
+                if not reader then
+                    reader = window:read(5, window.sizeY, 16, gui_container.colors.white, gui_container.colors.gray, nil, nil, nil, true)
+                else
+                    reader.redraw()
+                end
             end
         end, function (windowEventData, window)
-            local fakeConfirm = #reader.getBuffer() > 0
+            local fakeConfirm = reader and #reader.getBuffer() > 0
 
             if reader then
                 reader.uploadEvent(windowEventData)

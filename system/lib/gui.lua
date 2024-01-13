@@ -946,7 +946,10 @@ function gui.select(screen, cx, cy, label, actions, scroll, noCloseButton, overl
             if ret ~= nil then
                 return ret
             end
-            alwaysConfirm = lAlwaysConfirm
+            if alwaysConfirm ~= lAlwaysConfirm then
+                alwaysConfirm = lAlwaysConfirm
+                drawBase()
+            end
         end
 
         if windowEventData[1] == "touch" then
