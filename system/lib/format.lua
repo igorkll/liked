@@ -11,7 +11,11 @@ function format.smartConcat()
     smart.buff = {}
     smart.idx = 0
 
-    function smart.add(x, text)
+    function smart.add(x, text, reverse)
+        if reverse then
+            x = x - (unicode.len(text) - 1)
+        end
+
         local len = unicode.len(text)
         local last = x + (len - 1)
         local index = 1

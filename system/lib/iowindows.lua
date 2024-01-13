@@ -3,6 +3,7 @@ local paths = require("paths")
 local fs = require("filesystem")
 local gui_container = require("gui_container")
 local text = require("text")
+local format = require("format")
 local iowindows = {}
 
 local function iowindow(screen, dirmode, exp, save)
@@ -26,9 +27,36 @@ local function iowindow(screen, dirmode, exp, save)
 
     ---- main
     local path = gui_container.defaultUserRoot
-    local rewriteStr = ""
-    local cx, cy = gui.getBigZone(screen)
-    local bPlasePosX, bPlasePosY = cx, cy + 50
+    local pathPos = 5 + (save and 16 or 0)
+
+    local function retpathFunc(list, num, fullpath, confirm)
+        local isDir = num == 1 or fs.isDirectory(fullpath)
+        local lexp = paths.extension(fullpath)
+
+        if isDir and not confirm then
+            path = gui_container.checkPath(screen, fullpath)
+        else
+            if isDir == dirmode and (not exp or lexp == exp) then
+                local retpath = fullpath
+                if list[num].name == ".." then
+                    retpath = paths.canonical(path)
+                end
+                if save then
+                    if isDir == dirmode then
+                        if gui.yesno(screen, nil, nil, "are you sure you want to " .. (isDir and "merge the directory?" or "overwrite the file?")) then
+                            return retpath
+                        end
+                    else
+                        gui.warn(screen, nil, nil, "you should choose " .. (dirmode and "folder" or "file") .. " instead of " .. (dirmode and "folder" or "file"))
+                    end
+                else
+                    return retpath
+                end
+            else
+                gui.warn(screen, nil, nil, "select the " .. (dirmode and "folder" or "file") .. (exp and (" with the " .. exp .. " extension") or ""))
+            end
+        end
+    end
 
     while true do
         local list = {{".. (back / current)", gui_container.colors.black, name = ".."}}
@@ -38,46 +66,42 @@ local function iowindow(screen, dirmode, exp, save)
                 local name = paths.name(file)
                 local lexp = paths.extension(name)
                 if isDir or not exp or lexp == exp then
-                    local hide
-                    if exp and not gui_container.hiddenFiles[screen] then
-                        hide = true
+                    if exp and not gui_container.viewFileExps[screen] then
                         name = paths.hideExtension(name)
                     end
-                    local function f(str)
-                        if not hide then
-                            return str
-                        end
-                        return str .. (lexp and ((gui_container.typenames[lexp] or lexp) .. "-") or "")
-                    end
-                    if isDir then
-                        name = f("D-") .. name
-                    else
-                        name = f("F-") .. name
-                    end
-                    table.insert(list, {name, gui_container.typecolors[lexp] or gui_container.colors.black, name = file})
+
+                    local smartString = format.smartConcat()
+                    smartString.add(1, name)
+                    smartString.add(47, (lexp and ((gui_container.typenames[lexp] or lexp) .. "-") or "") .. (isDir and " DIR" or "FILE"), true)
+                    table.insert(list, {smartString.get(), gui_container.typecolors[lexp] or gui_container.colors.black, name = file})
                 end
             end
         end
         
-        local num, _, _, _, confirm = gui.select(screen, nil, nil, title, list)
-        if num then
-            local fullpath = paths.concat(path, list[num].name)
-            local isDir = fs.isDirectory(fullpath)
-            local lexp = paths.extension(fullpath)
+        local num, _, _, _, confirm = gui.select(screen, nil, nil, title, list, nil, nil, function (window)
+            window:set(1, window.sizeY, gui_container.colors.red, gui_container.colors.white, " + ")
+            window:set(pathPos, window.sizeY, gui_container.colors.lightGray, gui_container.colors.white, gui_container.short(gui_container.toUserPath(screen, path), 21))
+        end, function (windowEventData, window)
+            if windowEventData[1] == "touch" then
+                if windowEventData[4] == window.sizeY and windowEventData[3] <= 3 then
+                    local clear = gui.saveZone(screen)
+                    local name = gui.input(screen, nil, nil, "folder name")
+                    clear()
 
-            if isDir and not confirm then
-                path = gui_container.checkPath(screen, fullpath)
-            else
-                if isDir == dirmode and (not exp or lexp == exp) then
-                    local retpath = fullpath
-                    if list[num].name == ".." then
-                        retpath = path
+                    if name then
+                        fs.makeDirectory(paths.concat(path, name))
+                        return true
                     end
-                    if not save or gui.yesno(screen, nil, nil, rewriteStr) then
-                        return retpath
-                    end
-                else
-                    gui.warn(screen, nil, nil, "select the " .. (dirmode and "folder" or "file") .. (exp and (" with the " .. exp .. " extension") or ""))
+                end
+            end
+        end)
+
+        if num then
+            if num ~= true then
+                local fullpath = paths.concat(path, list[num].name)
+                local retpath = retpathFunc(list, num, fullpath, confirm)
+                if retpath then
+                    return retpath
                 end
             end
         else

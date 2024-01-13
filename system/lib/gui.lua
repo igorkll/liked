@@ -791,7 +791,7 @@ function gui.drawtext(screen, posX, posY, foreground, text)
     end
 end
 
-function gui.select(screen, cx, cy, label, actions, scroll, noCloseButton, overlay)
+function gui.select(screen, cx, cy, label, actions, scroll, noCloseButton, overlay, windowEventCallback)
     --=gui_select(screen, nil, nil, "LOLZ", {"test 1", "test 2", "test 3"})
 
     local gpu = graphic.findGpu(screen)
@@ -833,7 +833,7 @@ function gui.select(screen, cx, cy, label, actions, scroll, noCloseButton, overl
         window:fill(1, window.sizeY, window.sizeX, 1, colors.lightGray, 0, " ")
         redrawButton()
         if overlay then
-            overlay()
+            overlay(window)
         end
     end
 
@@ -940,6 +940,12 @@ function gui.select(screen, cx, cy, label, actions, scroll, noCloseButton, overl
     while true do
         local eventData = {computer.pullSignal()}
         local windowEventData = window:uploadEvent(eventData)
+        if windowEventCallback then
+            local ret = windowEventCallback(windowEventData, window)
+            if ret ~= nil then
+                return ret
+            end
+        end
 
         if windowEventData[1] == "touch" then
             if windowEventData[3] >= window.sizeX - 2 and windowEventData[4] == 1 then
