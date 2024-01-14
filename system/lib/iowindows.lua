@@ -43,12 +43,8 @@ local function iowindow(screen, dirmode, exp, save)
                     retpath = paths.canonical(path)
                 end
                 if save then
-                    if isDir == dirmode then
-                        if not exists or gui.yesno(screen, nil, nil, "are you sure you want to " .. (isDir and "merge the directory?" or "overwrite the file?")) then
-                            return retpath
-                        end
-                    else
-                        gui.warn(screen, nil, nil, "you should choose " .. (dirmode and "folder" or "file") .. " instead of " .. (dirmode and "folder" or "file"))
+                    if not exists or gui.yesno(screen, nil, nil, "are you sure you want to " .. (isDir and "merge the directory?" or "overwrite the file?")) then
+                        return retpath
                     end
                 else
                     return retpath
@@ -59,6 +55,7 @@ local function iowindow(screen, dirmode, exp, save)
         end
     end
 
+    local inputTextBuffer
     while true do
         local list = {{".. (back / current)", gui_container.colors.black, name = ".."}}
         for i, file in ipairs(fs.list(path)) do
@@ -86,13 +83,18 @@ local function iowindow(screen, dirmode, exp, save)
             window:set(pathPos, window.sizeY, gui_container.colors.lightGray, gui_container.colors.white, gui_container.short(gui_container.toUserPath(screen, path), save and 18 or 35))
             if save then
                 if not reader then
-                    reader = window:read(5, window.sizeY, 16, gui_container.colors.white, gui_container.colors.gray, nil, nil, nil, true)
+                    reader = window:readNoDraw(5, window.sizeY, 16, gui_container.colors.white, gui_container.colors.gray, nil, nil, nil, true)
+                    if inputTextBuffer then
+                        reader.setBuffer(inputTextBuffer)
+                        reader.redraw()
+                    end
                 else
                     reader.redraw()
                 end
             end
         end, function (windowEventData, window)
-            local fakeConfirm = reader and #reader.getBuffer() > 0
+            inputTextBuffer = reader.getBuffer()
+            local fakeConfirm = reader and #inputTextBuffer > 0
 
             if reader then
                 local ret = reader.uploadEvent(windowEventData)
