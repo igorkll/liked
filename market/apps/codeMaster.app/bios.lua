@@ -11,6 +11,7 @@ local function splash(str)
 end
 
 splash("TEST TEST")
+device.beep(2000, 0.05)
 
 while true do
     sleep()

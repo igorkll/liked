@@ -37,6 +37,12 @@ local function createSandbox()
             os.sleep(time or 0.05)
         end,
 
+        device = {
+            beep = function (freq, delay)
+                sound.beep(freq, delay, true)
+            end
+        },
+
         storage = {
             getData = function()
                 return gamesave.data
@@ -120,7 +126,6 @@ local function powerOff()
     end
 
     deviceScreen:clear(uix.colors.black)
-    sound.beep(1400, 0.05)
 end
 
 local function powerOn()
@@ -129,8 +134,6 @@ local function powerOn()
         computerThread = thread.create(code)
         computerThread:resume()
     end
-
-    sound.beep(2000, 0.05)
 end
 
 -------------------------------- menu
