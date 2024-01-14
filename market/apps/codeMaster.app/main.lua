@@ -12,6 +12,9 @@ local rx, ry = ui:zoneSize()
 
 -------------------------------- vars
 
+local dataLimit = 4 * 1024
+local codeLimit = 16 * 1024
+
 local gamesavePath
 local gamesave
 local computerThread
@@ -19,17 +22,22 @@ local computerThread
 local function exitFromGame()
     gamesavePath = nil
     gamesave = nil
+    if computerThread then
+        computerThread:kill()
+    end
     computerThread = nil
     ui:select(menuLayout)
 end
 
 local function startGame(num)
+    exitFromGame()
+
     gamesavePath = system.getResourcePath(paths.concat("saves", tostring(math.round(num))))
     gamesave = registry.new(paths.concat(gamesavePath, "settings.dat"), {
         code = assert(fs.readFile(system.getResourcePath("example.lua"))),
         data = ""
     })
-    computerThread = nil
+    
     deviceScreen:clear(uix.colors.black)
     ui:select(gameLayout)
 end
@@ -45,6 +53,30 @@ local function createSandbox()
         load = function (chunk, chunkname, mode, env)
             return load(chunk, chunkname, "t", env or sandbox)
         end,
+
+        storage = {
+            getData = function()
+                return gamesave.data
+            end,
+            setData = function(data)
+                checkArg(1, data, "string")
+                if #data > dataLimit then
+                    error("the maximum amount of data is 4KB", 2)
+                end
+                gamesave.data = data
+            end,
+
+            getCode = function()
+                return gamesave.code
+            end,
+            setCode = function(code)
+                checkArg(1, code, "string")
+                if #code > codeLimit then
+                    error("the maximum amount of data is 16KB", 2)
+                end
+                gamesave.code = code
+            end,
+        },
 
         screen = {
             clear = function ()
