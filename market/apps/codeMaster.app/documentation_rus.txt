@@ -9,3 +9,17 @@
 2 - зеленый
 3 - желтый
 
+api - screen:
+screen.clear() - очищает экран
+screen.set(x, y, char:" ", color:0) - устанавливает 1 символ на экране
+screen.getSize():number, number - возврашяет разрешения экрана
+
+api - storage:
+storage.getData():string - возврашяет сохраненную строку данных
+storage.setData(string) - устанавливает строку данных(максимальный размер 4кб)
+storage.getCode():string - возврашяет код компьтера
+storage.setCode(string) - устанавливает код компьтера, и он начнет выполняться после перезагрузки (максимальный размер 16кб)
+
+api - device:
+device.shutdown() - выключает устройтсво
+device.reboot() - перезагружает устройтсво

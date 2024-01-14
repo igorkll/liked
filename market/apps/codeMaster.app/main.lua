@@ -26,10 +26,54 @@ end
 local function startGame(num)
     gamesavePath = system.getResourcePath(paths.concat("saves", tostring(math.round(num))))
     gamesave = registry.new(paths.concat(gamesavePath, "settings.dat"), {
-        code = assert(fs.readFile(system.getResourcePath("example.lua")))
+        code = assert(fs.readFile(system.getResourcePath("example.lua"))),
+        data = ""
     })
     computerThread = nil
+    deviceScreen:clear(uix.colors.black)
     ui:select(gameLayout)
+end
+
+local function createSandbox()
+    local sandbox
+    sandbox = {
+        math = table.deepclone(math),
+        table = table.deepclone(table),
+        string = table.deepclone(string),
+        bit32 = table.deepclone(bit32),
+
+        load = function (chunk, chunkname, mode, env)
+            return load(chunk, chunkname, "t", env or sandbox)
+        end,
+
+        screen = {
+            clear = function ()
+                deviceScreen:clear(uix.colors.black)
+            end,
+            set = function (x, y, char, color)
+                local lcolor = uix.colors.red
+                if color == 1 then
+                    lcolor = uix.colors.green
+                elseif color == 2 then
+                    lcolor = uix.colors.blue
+                elseif color == 3 then
+                    lcolor = uix.colors.yellow
+                end
+
+                if #char ~= 1 then error("unsupported string length", 2) end
+                local byte = string.byte(char)
+                if byte < 32 or byte > 126 then
+                    char = "?"
+                end
+
+                deviceScreen:set(x, y, uix.colors.black, lcolor, char)
+            end,
+            getSize = function ()
+                return deviceScreen.sx, deviceScreen.sy
+            end
+        }
+    }
+    return sandbox
 end
 
 -------------------------------- menu
@@ -65,6 +109,10 @@ end
 
 gameLayout = ui:create("Code Master", uix.colors.white, uix.styles[2])
 gameLayout:setReturnLayout(exitFromGame)
+
+deviceScreenSize = ry - 4
+gameLayout:createPlane(5, 3, rx - 8, deviceScreenSize, uix.colors.lightGray)
+deviceScreen = gameLayout:createCanvas(5, 3, deviceScreenSize * 2, deviceScreenSize)
 
 --------------------------------
 
