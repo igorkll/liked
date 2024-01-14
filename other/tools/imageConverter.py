@@ -68,7 +68,7 @@ def find_closest_color(target_color, color_array):
     target_b = target_color & 0xFF
 
     closest_index = None
-    closest_distance = float('inf')
+    closest_distance = math.inf
 
     # Перебор всех цветов в массиве
     for i, color in enumerate(color_array):
@@ -78,9 +78,15 @@ def find_closest_color(target_color, color_array):
         array_b = color & 0xFF
 
         # Вычисление евклидова расстояния между цветами
+        """
         distance = ((target_r - array_r) ** 2 +
                     (target_g - array_g) ** 2 +
                     (target_b - array_b) ** 2) ** 0.5
+        """
+
+        distance = math.sqrt((target_r - array_r) ** 2 +
+                    (target_g - array_g) ** 2 +
+                    (target_b - array_b) ** 2)
 
         # Обновление ближайшего цвета, если найден более близкий
         if distance < closest_distance:
@@ -174,75 +180,63 @@ def clamp(n, min, max):
     else: 
         return n 
 
+'''
 def colorDiff(c1, c2):
-    r, g, b = c1[2] / 255, c1[1] / 255, c1[0] / 255
-    r1, g1, b1 = c2[2] / 255, c2[1] / 255, c2[0] / 255
-    
-    return abs((r + g + b) - (r1 + g1 + b1)) / 3
+    return math.sqrt(((c1[0] - c2[0]) ** 2) + ((c1[1] - c2[1]) ** 2) + ((c1[2] - c2[2]) ** 2))
+'''
 
 def floyd(image):
     height, width, channels = image.shape
 
     for y in range(height):
         for x in range(width):
-            print("currentpixel", image[y, x])
+            #print("currentpixel", image[y, x])
 
             oldpixel = [image[y, x][0], image[y, x][1], image[y, x][2], image[y, x][3]]
             newpixel = find_closest_palette_color(oldpixel)
             newpixel[3] = oldpixel[3]
             image[y, x] = newpixel
 
-            print("currentpixel2", newpixel)
+            #print("currentpixel2", newpixel)
 
-            # quant_error_b = (oldpixel[0] - newpixel[0]) / 1
-            # quant_error_g = (oldpixel[1] - newpixel[1]) / 1
-            # quant_error_r = (oldpixel[2] - newpixel[2]) / 1
-            quant_error = colorDiff(oldpixel, newpixel)
-            quant_error_b = quant_error
-            quant_error_g = quant_error
-            quant_error_r = quant_error
+            quant_error_b = (oldpixel[0] - newpixel[0]) / 1
+            quant_error_g = (oldpixel[1] - newpixel[1]) / 1
+            quant_error_r = (oldpixel[2] - newpixel[2]) / 1
+            # quant_error = colorDiff(oldpixel, newpixel)
+            # quant_error_b = quant_error
+            # quant_error_g = quant_error
+            # quant_error_r = quant_error
 
-            print("old data", oldpixel, oldpixel[0], oldpixel[1], oldpixel[2])
-            print("new data", newpixel, newpixel[0], newpixel[1], newpixel[2])
-            print("add", quant_error_b, quant_error_g, quant_error_r)
+            #print("old data", oldpixel, oldpixel[0], oldpixel[1], oldpixel[2])
+            #print("new data", newpixel, newpixel[0], newpixel[1], newpixel[2])
+            #print("add", quant_error_b, quant_error_g, quant_error_r)
             
+            def lsum(x, y, rate):
+                image[y, x][0] = clamp(image[y, x][0] + quant_error_b * rate, 0, 255)
+                image[y, x][1] = clamp(image[y, x][1] + quant_error_g * rate, 0, 255)
+                image[y, x][2] = clamp(image[y, x][2] + quant_error_r * rate, 0, 255)
+
             try:
-                image[y    , x + 1][0] += quant_error_b * 7 / 16
-                image[y    , x + 1][1] += quant_error_g * 7 / 16
-                image[y    , x + 1][2] += quant_error_r * 7 / 16
+                lsum(x + 1, y, 7 / 16)
             except Exception as e:
                 print(f"colorset error 1: {e}")
             
             try:
-                image[y + 1, x - 1][0] += quant_error_b * 3 / 16
-                image[y + 1, x - 1][1] += quant_error_g * 3 / 16
-                image[y + 1, x - 1][2] += quant_error_r * 3 / 16
+                lsum(x - 1, y + 1, 3 / 16)
             except Exception as e:
                 print(f"colorset error 2: {e}")
 
             try:
-                image[y + 1, x    ][0] += quant_error_b * 5 / 16
-                image[y + 1, x    ][1] += quant_error_g * 5 / 16
-                image[y + 1, x    ][2] += quant_error_r * 5 / 16
+                lsum(x, y + 1, 5 / 16)
             except Exception as e:
                 print(f"colorset error 3: {e}")
 
             try:
-                image[y + 1, x + 1][0] += quant_error_b * 1 / 16
-                image[y + 1, x + 1][1] += quant_error_g * 1 / 16
-                image[y + 1, x + 1][2] += quant_error_r * 1 / 16
+                lsum(x + 1, y + 1, 1 / 16)
             except Exception as e:
                 print(f"colorset error 4: {e}")
 
-            print("new color", image[y, x])
-
-    print("checking floyd")
-    for y in range(height):
-        for x in range(width):
-            pixel = image[y, x]
-            for i in range(4):
-                pixel[i] = round(clamp(pixel[i], 0, 255))
-            image[y, x] = pixel
+            #print("new color", image[y, x])
 
 def imgToT2p(image, fullAdd, forceFull, addPal, floydUse):
     # Получение размеров изображения

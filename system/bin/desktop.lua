@@ -267,7 +267,8 @@ local function draw(old, check) --вызывает все перерисовки
             index = i,
             name = fullName,
             isAlias = not not customPath,
-            isDir = fs.isDirectory(path)
+            isDir = fs.isDirectory(path),
+            hidden = fs.getAttribute(path, "hidden")
         }
 
         if isFs then
@@ -340,7 +341,7 @@ local function draw(old, check) --вызывает все перерисовки
                 --    window:fill(iconX - 2, iconY - 1, iconSizeX + 4, iconSizeY + 2, colors.blue, 0, " ")
                 --end
                 local x, y = window:toRealPos(math.floor((centerIconX - (unicode.len(icon.shortName) / 2)) + 0.5), centerIconY + 2)
-                gui.drawtext(screen, x, y, colors.white, icon.shortName)
+                gui.drawtext(screen, x, y, icon.hidden and colors.lightGray or colors.white, icon.shortName)
                 --window:set(iconX - (unicode.len(icon.name) // 2), iconY + iconY - 2, colors.lightBlue, colors.white, icon.name)
                 if icon.icon then
                     local sx, sy = window:toRealPos(iconX, iconY)
