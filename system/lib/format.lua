@@ -47,7 +47,7 @@ end
 
 function format.visionProtectionConvert(color)
     local r, g, b = colorlib.unBlend(color)
-    return colorlib.blend(r * 0.8, g * 0.8, b * 0.6)
+    return colorlib.blend(r * 0.8, g * 0.7, b * 0.3)
 end
 
 function format.raw_objectPos(rx, ry, sx, sy, offsetX, offsetY)
