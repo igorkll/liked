@@ -6,6 +6,9 @@ local unicode = require("unicode")
 local event = require("event")
 local calls = require("calls")
 local palette = require("palette")
+local uix = require("uix")
+local registry = require("registry")
+local liked = require("liked")
 
 local colors = gui_container.colors
 
@@ -22,6 +25,20 @@ local palettePath = "/data/palette.plt"
 
 local selectWindow = graphic.createWindow(screen, posX, posY, 16, ry - (posY - 1))
 local colorsWindow = graphic.createWindow(screen, posX + 17, posY, 8, 18)
+local settingsWindow = graphic.createWindow(screen, posX + 17 + 8, posY, 50, ry - 1)
+
+local layout = uix.create(settingsWindow)
+local visionProtection = layout:createSwitch(2, 2, registry.visionProtection)
+layout:createText(2 + 7, 2, uix.colors.white, "vision protection")
+
+function visionProtection:onSwitch()
+    if self.state then
+        registry.visionProtection = true
+    else
+        registry.visionProtection = nil
+    end
+    liked.applyVisionProtection()
+end
 
 local selected = 1
 local themes = {}
@@ -66,6 +83,8 @@ local function draw(set)
         if i ~= #themes then selectWindow:write("\n") end
     end
 
+    layout:draw()
+
     if set then
         palette.setSystemPalette(paths.concat(themesPath, themes[selected]))
         gui_container.refresh()
@@ -79,6 +98,8 @@ draw()
 ------------------------------------
 
 return function(eventData)
+    layout:uploadEvent(eventData)
+
     local selectWindowEventData = selectWindow:uploadEvent(eventData)
 
     if selectWindowEventData[1] == "scroll" then

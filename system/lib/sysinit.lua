@@ -290,6 +290,7 @@ function sysinit.init(box)
 
     liked.applyBeepState()
     liked.applyTimeZone()
+    liked.applyVisionProtection()
     gui_container.refresh()
 
     ------------------------------------
