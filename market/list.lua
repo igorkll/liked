@@ -495,6 +495,17 @@ local list = {
         path = "/data/apps/componentLog.app",
         urlPrimaryPart = selfurlpart .. "/apps/componentLog.app/",
         files = {"main.lua", "icon.t2p"}
+    },
+    {
+        name = "codeMaster",
+        version = "1",
+        vendor = "logic",
+        description = "A game for real programmers!\nthis is a virtual computer with its own API,\nhas serious limitations on the speed of code execution and capabilities",
+        minDiskSpace = 64,
+        
+        path = "/data/apps/codeMaster.app",
+        urlPrimaryPart = selfurlpart .. "/apps/codeMaster.app/",
+        files = {"main.lua", "icon.t2p", "example.lua", "logo.t2p"}
     }
 }
 

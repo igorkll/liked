@@ -224,7 +224,11 @@ function objclass:uploadEvent(eventData)
         if self.gui.returnLayout then
             local _, py = self.gui.window:toFakePos(1, 1)
             if eventData[1] == "touch" and eventData[3] >= 1 and eventData[3] <= 3 and eventData[4] == py then
-                self.gui.returnLayout:select()
+                if type(self.gui.returnLayout) == "function" then
+                    self.gui.returnLayout()
+                else
+                    self.gui.returnLayout:select()
+                end
             end
         end
     elseif self.type == "seek" then
