@@ -134,55 +134,65 @@ function objclass:uploadEvent(eventData)
     if self.disabled or self.disabledHidden then return end
     local retval
     if self.type == "button" or self.type == "context" then
-        if self.state and (eventData[1] == "touch" or eventData[1] == "drop") then
-            if self.type ~= "context" then
-                self.state = false
+        if self.toggle then
+            if eventData[1] == "touch" and eventData[3] >= self.x and eventData[4] >= self.y and eventData[3] < self.x + self.sx and eventData[4] < self.y + self.sy then
+                self.state = not self.state
                 self:draw()
-
-                if self.onDrop then
-                    retval = self:onDrop(eventData[5], eventData[6], eventData)
+                if self.onSwitch then
+                    self:onSwitch(eventData[5], eventData[6], eventData)
                 end
             end
-        elseif not self.state and eventData[1] == "touch" and eventData[3] >= self.x and eventData[4] >= self.y and eventData[3] < self.x + self.sx and eventData[4] < self.y + self.sy then
-            if self.type == "context" then
-                self.state = true
-                self:draw()
-
-                if not self.th then
-                    self.th = thread.create(function ()
-                        local x, y = self.gui.window:toRealPos(self.x + 1, self.y + 1)
-                        local px, py, sx, sy = gui.contextPos(self.gui.window.screen, x, y, gui.contextStrs(self.strs))
-                        local clear = graphic.screenshot(self.gui.window.screen, px, py, sx + 2, sy + 1)
-                        local oldControlLock = self.gui.controlLock
-                        self.gui.controlLock = true
-                        local _, num = gui.context(self.gui.window.screen, px, py, self.strs, self.actives)
-                        self.gui.controlLock = oldControlLock
-                        clear()
-                        if num and self.funcs[num] then
-                            self.funcs[num]()
-                        end
-
-                        self.state = false
-                        self:draw()
-
-                        self.th:suspend()
-                        self.th = nil
-                    end)
-                    self.th:resume()
-                end
-            else
-                self.state = true
-                self:draw()
-                graphic.forceUpdate(self.gui.window.screen)
-                if self.autoRelease then
-                    os.sleep(0.1)
+        else
+            if self.state and (eventData[1] == "touch" or eventData[1] == "drop") then
+                if self.type ~= "context" then
                     self.state = false
                     self:draw()
-                    graphic.forceUpdate(self.gui.window.screen)
+
+                    if self.onDrop then
+                        retval = self:onDrop(eventData[5], eventData[6], eventData)
+                    end
                 end
-                
-                if self.onClick then
-                    retval = self:onClick(eventData[5], eventData[6], eventData)
+            elseif not self.state and eventData[1] == "touch" and eventData[3] >= self.x and eventData[4] >= self.y and eventData[3] < self.x + self.sx and eventData[4] < self.y + self.sy then
+                if self.type == "context" then
+                    self.state = true
+                    self:draw()
+
+                    if not self.th then
+                        self.th = thread.create(function ()
+                            local x, y = self.gui.window:toRealPos(self.x + 1, self.y + 1)
+                            local px, py, sx, sy = gui.contextPos(self.gui.window.screen, x, y, gui.contextStrs(self.strs))
+                            local clear = graphic.screenshot(self.gui.window.screen, px, py, sx + 2, sy + 1)
+                            local oldControlLock = self.gui.controlLock
+                            self.gui.controlLock = true
+                            local _, num = gui.context(self.gui.window.screen, px, py, self.strs, self.actives)
+                            self.gui.controlLock = oldControlLock
+                            clear()
+                            if num and self.funcs[num] then
+                                self.funcs[num]()
+                            end
+
+                            self.state = false
+                            self:draw()
+
+                            self.th:suspend()
+                            self.th = nil
+                        end)
+                        self.th:resume()
+                    end
+                else
+                    self.state = true
+                    self:draw()
+                    graphic.forceUpdate(self.gui.window.screen)
+                    if self.autoRelease then
+                        os.sleep(0.1)
+                        self.state = false
+                        self:draw()
+                        graphic.forceUpdate(self.gui.window.screen)
+                    end
+                    
+                    if self.onClick then
+                        retval = self:onClick(eventData[5], eventData[6], eventData)
+                    end
                 end
             end
         end
@@ -529,6 +539,7 @@ function uix:createButton(x, y, sx, sy, back, fore, text, autoRelease)
     obj.fore2 = obj.back
     obj.alignment = "center"
     obj.clamp = true
+    obj.toggle = false
 
     table.insert(self.objs, obj)
     return obj

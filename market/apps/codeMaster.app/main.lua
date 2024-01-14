@@ -5,6 +5,7 @@ local paths = require("paths")
 local sound = require("sound")
 local fs = require("filesystem")
 local apps = require("apps")
+local thread = require("thread")
 
 local screen = ...
 local ui = uix.manager(screen)
@@ -18,29 +19,6 @@ local codeLimit = 16 * 1024
 local gamesavePath
 local gamesave
 local computerThread
-
-local function exitFromGame()
-    gamesavePath = nil
-    gamesave = nil
-    if computerThread then
-        computerThread:kill()
-    end
-    computerThread = nil
-    ui:select(menuLayout)
-end
-
-local function startGame(num)
-    exitFromGame()
-
-    gamesavePath = system.getResourcePath(paths.concat("saves", tostring(math.round(num))))
-    gamesave = registry.new(paths.concat(gamesavePath, "settings.dat"), {
-        code = assert(fs.readFile(system.getResourcePath("example.lua"))),
-        data = ""
-    })
-    
-    deviceScreen:clear(uix.colors.black)
-    ui:select(gameLayout)
-end
 
 local function createSandbox()
     local sandbox
@@ -113,6 +91,32 @@ local function createSandbox()
     return sandbox
 end
 
+local function exitFromGame()
+    gamesavePath = nil
+    gamesave = nil
+    if computerThread then
+        computerThread:kill()
+    end
+    computerThread = nil
+    ui:select(menuLayout)
+end
+
+local function startGame(num)
+    gamesavePath = system.getResourcePath(paths.concat("saves", tostring(math.round(num))))
+    gamesave = registry.new(paths.concat(gamesavePath, "settings.dat"), {
+        bios = assert(fs.readFile(system.getResourcePath("bios.lua"))),
+        code = assert(fs.readFile(system.getResourcePath("example.lua"))),
+        data = ""
+    })
+
+    local code = load(gamesave.bios) --ошибки в BIOS нечем не будут обработаны
+    if code then
+        computerThread = thread.create(code)
+    end
+
+    ui:select(gameLayout)
+end
+
 -------------------------------- menu
 
 startButtonsBack, startButtonsFore = uix.colors.lightGray, uix.colors.black
@@ -150,6 +154,13 @@ gameLayout:setReturnLayout(exitFromGame)
 deviceScreenSize = ry - 4
 gameLayout:createPlane(5, 3, rx - 8, deviceScreenSize, uix.colors.lightGray)
 deviceScreen = gameLayout:createCanvas(5, 3, deviceScreenSize * 2, deviceScreenSize)
+powerButton = gameLayout:createButton()
+
+function gameLayout:onSelect()
+    deviceScreen:clear(uix.colors.black)
+    powerButton.state = false
+    computerThread:resume()
+end
 
 --------------------------------
 
