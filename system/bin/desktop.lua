@@ -1231,6 +1231,7 @@ end)
 local lastCheckTime
 local warnPrinted
 local lolzLock
+local accountCheckTimeout = 15 + math.random(-5, 5)
 while true do
     if redrawFlag then
         redrawFlag = false
@@ -1347,8 +1348,10 @@ while true do
         timerEnable = true
         draw()
         lolzLock = false
-    elseif component.isPrimary(screen) and (not lastCheckTime or computer.uptime() - lastCheckTime > 5) then
+    elseif component.isPrimary(screen) and (not lastCheckTime or computer.uptime() - lastCheckTime > accountCheckTimeout) then
         lastCheckTime = computer.uptime()
+        accountCheckTimeout = 15 + math.random(-5, 5)
+        
         thread.create(function ()
             if account.isLoginWindowNeed(screen) then
                 lolzLock = true
