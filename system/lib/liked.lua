@@ -248,10 +248,6 @@ function liked.applyTimeZone()
     end
 end
 
-function liked.applyVisionProtection()
-    
-end
-
 --------------------------------------------------------
 
 function liked.raw_drawUpBarTask(method, screen, ...)

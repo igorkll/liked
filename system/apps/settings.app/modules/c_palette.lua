@@ -8,7 +8,7 @@ local calls = require("calls")
 local palette = require("palette")
 local uix = require("uix")
 local registry = require("registry")
-local liked = require("liked")
+local sysinit = require("sysinit")
 
 local colors = gui_container.colors
 
@@ -37,7 +37,10 @@ function visionProtection:onSwitch()
     else
         registry.visionProtection = nil
     end
-    liked.applyVisionProtection()
+    sysinit.applyPalette(sysinit.initPalPath, screen)
+
+    gRedraw()
+    draw()
 end
 
 local selected = 1
@@ -58,7 +61,7 @@ end
 
 ------------------------------------
 
-local function draw(set)
+function draw(set)
     selectWindow:clear(colors.black)
     colorsWindow:fill(1, 1, colorsWindow.sizeX, colorsWindow.sizeY, colors.black, colors.brown, "▒")
     selectWindow:setCursor(1, 1)

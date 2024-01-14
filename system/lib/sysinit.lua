@@ -9,6 +9,7 @@ function sysinit.applyPalette(path, screen)
     local component  = require("component")
     local graphic = require("graphic")
     local gui_container = require("gui_container")
+    local registry = require("registry")
 
     local colors = assert(serialization.load(path))
 
@@ -23,6 +24,14 @@ function sysinit.applyPalette(path, screen)
 
     local t3default = colors.t3default
     colors.t3default = nil
+
+    if registry.visionProtection then
+        local colorlib = require("colors")
+        for i, v in ipairs(colors) do
+            local r, g, b = colorlib.unBlend(v)
+            colors[i] = colorlib.blend(r * 0.8, g * 0.8, b * 0.6)
+        end
+    end
 
     movetable(gui_container.indexsColors, colors)
     movetable(gui_container.colors, {
@@ -290,7 +299,6 @@ function sysinit.init(box)
 
     liked.applyBeepState()
     liked.applyTimeZone()
-    liked.applyVisionProtection()
     gui_container.refresh()
 
     ------------------------------------
