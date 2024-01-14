@@ -4,9 +4,11 @@ local system = require("system")
 local paths = require("paths")
 local sound = require("sound")
 local fs = require("filesystem")
+local apps = require("apps")
 
 local screen = ...
 local ui = uix.manager(screen)
+local rx, ry = ui:zoneSize()
 
 -------------------------------- vars
 
@@ -41,6 +43,16 @@ for i = 0, 5 do
     function start:onClick()
         startGame(i)
     end
+end
+
+local rusDocumentationButton = menuLayout:createButton(rx - 20, ry - 3, 20, 1, startButtonsBack, startButtonsFore, "rus documentation", true)
+function rusDocumentationButton:onClick()
+    apps.execute("edit", screen, nil, system.getResourcePath("documentation_rus.txt"), true)
+end
+
+local engDocumentationButton = menuLayout:createButton(rx - 20, ry - 1, 20, 1, startButtonsBack, startButtonsFore, "eng documentation", true)
+function engDocumentationButton:onClick()
+    apps.execute("edit", screen, nil, system.getResourcePath("documentation_eng.txt"), true)
 end
 
 -------------------------------- game

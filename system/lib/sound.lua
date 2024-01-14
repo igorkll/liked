@@ -35,7 +35,7 @@ function sound.beep(freq, delay, blocked)
             component.invoke(noise, "setMode", channel, 1)
             component.invoke(noise, "add", channel, freq, delay)
             component.invoke(noise, "process")
-            noiseChannelNums[noise] = noiseChannelNums[noise] + 1
+            noiseChannelNums[noise] = channel + 1
             if noiseChannelNums[noise] > 8 then
                 noiseChannelNums[noise] = 1
             end
