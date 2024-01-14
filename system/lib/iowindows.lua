@@ -134,9 +134,13 @@ local function iowindow(screen, dirmode, exp, save)
             end
         elseif confirm and reader then
             local buff = reader.getBuffer()
-            local retpath = retpathFunc(nil, nil, paths.concat(path, buff .. (exp and ("." .. exp) or "")), true)
-            if retpath then
-                return retpath
+            if #buff == 0 or buff:find("%\\") or buff:find("%/") or (exp and buff:find("%.")) then
+                gui.warn(screen, nil, nil, "incorrect file name")
+            else
+                local retpath = retpathFunc(nil, nil, paths.concat(path, buff .. (exp and ("." .. exp) or "")), true)
+                if retpath then
+                    return retpath
+                end
             end
         else
             return
