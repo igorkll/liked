@@ -60,7 +60,7 @@ local function iowindow(screen, dirmode, exp, save)
         local list = {{".. (back / current)", gui_container.colors.black, name = ".."}}
         for i, file in ipairs(fs.list(path)) do
             local fullpath = paths.concat(path, file)
-            local isDir = fs.isDirectory()
+            local isDir = fs.isDirectory(fullpath)
             if gui.isVisible(screen, fullpath) and (isDir or not dirmode) then
                 local name = paths.name(file)
                 local lexp = paths.extension(name)
@@ -94,8 +94,11 @@ local function iowindow(screen, dirmode, exp, save)
                 end
             end
         end, function (windowEventData, window)
-            inputTextBuffer = reader.getBuffer()
-            local fakeConfirm = reader and #inputTextBuffer > 0
+            local fakeConfirm
+            if reader then
+                inputTextBuffer = reader.getBuffer()
+                fakeConfirm = #inputTextBuffer > 0
+            end
 
             if reader then
                 local ret = reader.uploadEvent(windowEventData)
