@@ -27,9 +27,10 @@ function sysinit.applyPalette(path, screen)
 
     if registry.visionProtection then
         local colorlib = require("colors")
+        local format = require("format")
+        
         for i, v in ipairs(colors) do
-            local r, g, b = colorlib.unBlend(v)
-            colors[i] = colorlib.blend(r * 0.8, g * 0.8, b * 0.6)
+            colors[i] = format.visionProtectionConvert(v)
         end
     end
 
