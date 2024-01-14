@@ -469,16 +469,11 @@ function uix:createUpBar(title, withoutFill, bgcolor) --working only in fullscre
     obj.close = self:createButton(px - 2, py, 3, 1)
     obj.close.hidden = true
 
-    --тут некоректно использовать таймер, так как он продолжит тикать даже если система приостановит программу для работы screensaver
-    obj.thread = thread.create(function ()
-        while true do
-            os.sleep(10)
-            if self.active then
-                obj:draw()
-            end
+    obj.timer = thread.timer(10, function ()
+        if self.active then
+            obj:draw()
         end
-    end)
-    obj.thread:resume()
+    end, math.huge)
 
     local destroy = obj.destroy
     function obj:destroy()
@@ -868,6 +863,17 @@ function uix:stop()
     end
 end
 
+function uix:fullStop()
+    self.active = false
+    self.bgWork = false
+    self:stop()
+end
+
+function uix:fullStart()
+    self.active = true
+    self.bgWork = true
+end
+
 function uix:select()
     if self.smartGuiManager then
         self.smartGuiManager:select(self)
@@ -985,20 +991,31 @@ end
 
 local manager = {}
 
+function manager:fullStop()
+    if self.current then
+        self.current:fullStop()
+    end
+end
+
+function manager:fullStart()
+    if self.current then
+        self.current:fullStart()
+    end
+end
+
 function manager:select(layout)
     if self.current then
-        self.current.active = false
-        self.current.bgWork = false
-        self.current:stop()
+        self.current:fullStop()
     end
 
     self.current = layout
     if self.current then
         self.current.smartGuiManager = self
         self.current.allowAutoActive = nil
-        self.current.active = true
-        self.current.bgWork = true
-        if self.current.onSelect then self.current:onSelect() end
+        self.current:fullStart()
+        if self.current.onSelect then
+            self.current:onSelect()
+        end
         self.current:draw()
     end
 end

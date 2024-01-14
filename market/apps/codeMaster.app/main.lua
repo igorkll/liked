@@ -47,12 +47,18 @@ end
 
 local rusDocumentationButton = menuLayout:createButton(rx - 20, ry - 3, 20, 1, startButtonsBack, startButtonsFore, "rus documentation", true)
 function rusDocumentationButton:onClick()
+    ui:fullStop()
     apps.execute("edit", screen, nil, system.getResourcePath("documentation_rus.txt"), true)
+    ui:fullStart()
+    ui:draw()
 end
 
 local engDocumentationButton = menuLayout:createButton(rx - 20, ry - 1, 20, 1, startButtonsBack, startButtonsFore, "eng documentation", true)
 function engDocumentationButton:onClick()
+    ui:fullStop()
     apps.execute("edit", screen, nil, system.getResourcePath("documentation_eng.txt"), true)
+    ui:fullStart()
+    ui:draw()
 end
 
 -------------------------------- game
