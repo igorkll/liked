@@ -92,6 +92,7 @@ local function createSandbox()
 end
 
 local function exitFromGame()
+    deviceScreen:clear(uix.colors.black)
     gamesavePath = nil
     gamesave = nil
     if computerThread then
@@ -109,12 +110,27 @@ local function startGame(num)
         data = ""
     })
 
-    local code = load(gamesave.bios) --ошибки в BIOS нечем не будут обработаны
-    if code then
-        computerThread = thread.create(code)
+    ui:select(gameLayout)
+end
+
+local function powerOff()
+    if computerThread then
+        computerThread:kill()
+        computerThread = nil
     end
 
-    ui:select(gameLayout)
+    deviceScreen:clear(uix.colors.black)
+    sound.beep(1400, 0.05)
+end
+
+local function powerOn()
+    local code = load(gamesave.bios, "=bios", "t", createSandbox()) --ошибки в BIOS нечем не будут обработаны
+    if code then
+        computerThread = thread.create(code)
+        computerThread:resume()
+    end
+
+    sound.beep(2000, 0.05)
 end
 
 -------------------------------- menu
@@ -151,15 +167,24 @@ end
 gameLayout = ui:create("Code Master", uix.colors.white, uix.styles[2])
 gameLayout:setReturnLayout(exitFromGame)
 
-deviceScreenSize = ry - 4
-gameLayout:createPlane(5, 3, rx - 8, deviceScreenSize, uix.colors.lightGray)
-deviceScreen = gameLayout:createCanvas(5, 3, deviceScreenSize * 2, deviceScreenSize)
-powerButton = gameLayout:createButton()
+gameLayout:createPlane(5, 3, rx - 8, ry - 4, uix.colors.lightGray)
+deviceScreen = gameLayout:createCanvas(7, 4, (ry - 6) * 2, ry - 6)
+
+powerButton = gameLayout:createButton(rx - 10, 3, 7, 3, uix.colors.red, uix.colors.white, "POWER")
+powerButton.back2 = uix.colors.brown
+powerButton.fore2 = uix.colors.white
+powerButton.toggle = true
+function powerButton:onSwitch()
+    if self.state then
+        powerOn()
+    else
+        powerOff()
+    end
+end
 
 function gameLayout:onSelect()
     deviceScreen:clear(uix.colors.black)
     powerButton.state = false
-    computerThread:resume()
 end
 
 --------------------------------
