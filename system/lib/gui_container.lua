@@ -58,7 +58,9 @@ gui_container.typecolors = {
 }
 
 gui_container.typenames = {
+    ["t1p"] = "image",
     ["t2p"] = "image",
+    ["t3p"] = "image",
     ["txt"] = "text",
     ["afpx"] = "archive",
     ["scrsv"] = "screensaver"
@@ -68,7 +70,9 @@ gui_container.knownExps = { --данные файлы не будет предл
     ["scrsv"] = true,   
     ["lua"] = true,
     ["app"] = true,
+    ["t1p"] = true,
     ["t2p"] = true,
+    ["t3p"] = true,
     ["plt"] = true,
     ["dat"] = true,
     ["cfg"] = true,

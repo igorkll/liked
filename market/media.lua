@@ -37,7 +37,7 @@ local list = {
         
         path = "/data/userdata/t2wallpaperPack",
         urlPrimaryPart = selfurlpart .. "/media/t2wallpaperPack/",
-        files = {"icon.t2p", "1.t2p", "1.t2p", "1.t2p", "1.t2p"},
+        files = {"icon.t2p", "1.t2p", "2.t2p", "3.t2p", "4.t2p"},
         
         postInstall = function (self)
             fs.setAttribute(paths.concat(self.path, "icon.t2p"), "hidden", true)
