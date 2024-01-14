@@ -59,8 +59,9 @@ local function iowindow(screen, dirmode, exp, save)
     while true do
         local list = {{".. (back / current)", gui_container.colors.black, name = ".."}}
         for i, file in ipairs(fs.list(path)) do
-            local isDir = fs.isDirectory(paths.concat(path, file))
-            if isDir or not dirmode then
+            local fullpath = paths.concat(path, file)
+            local isDir = fs.isDirectory()
+            if gui.isVisible(screen, fullpath) and (isDir or not dirmode) then
                 local name = paths.name(file)
                 local lexp = paths.extension(name)
                 if isDir or not exp or lexp == exp then
