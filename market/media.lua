@@ -29,6 +29,21 @@ local list = {
         end
     },
     {
+        name = "t2wallpaperPack",
+        version = "1",
+        vendor = "logic",
+        description = "a set of wallpapers for tier2",
+        minDiskSpace = 64,
+        
+        path = "/data/userdata/t2wallpaperPack",
+        urlPrimaryPart = selfurlpart .. "/media/t2wallpaperPack/",
+        files = {"icon.t2p", "1.t2p", "1.t2p", "1.t2p", "1.t2p"},
+        
+        postInstall = function (self)
+            fs.setAttribute(paths.concat(self.path, "icon.t2p"), "hidden", true)
+        end
+    },
+    {
         name = "t3wallpaperPack",
         version = "1",
         vendor = "logic",
@@ -37,7 +52,11 @@ local list = {
         
         path = "/data/userdata/t3wallpaperPack",
         urlPrimaryPart = selfurlpart .. "/media/t3wallpaperPack/",
-        files = {"1.t3p", "2.t3p", "3.t3p", "4.t3p"}
+        files = {"icon.t2p", "1.t3p", "2.t3p", "3.t3p", "4.t3p"},
+        
+        postInstall = function (self)
+            fs.setAttribute(paths.concat(self.path, "icon.t2p"), "hidden", true)
+        end
     }
 }
 

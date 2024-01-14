@@ -1,2 +1,2 @@
 local screen, nickname = ...
-require("apps").execute("market", screen, nickname, nil, false, true)
+assert(require("apps").execute("market", screen, nickname, nil, false, true))
