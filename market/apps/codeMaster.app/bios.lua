@@ -1,7 +1,16 @@
-screen.clear()
-screen.set(1, 1, "R", 0)
-screen.set(2, 1, "G", 1)
-screen.set(3, 1, "B", 2)
+local function drawText(x, y, str, color)
+    for i = 1, #str do
+        screen.set(x + (i - 1), y, str:sub(i, i), color)
+    end
+end
+
+local function splash(str)
+    screen.clear()
+    drawText(1, 1, "ERROR")
+    drawText(1, 2, str, 3)
+end
+
+splash("TEST TEST")
 
 while true do
     sleep()

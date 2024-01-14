@@ -9,6 +9,9 @@
 2 - зеленый
 3 - желтый
 
+функции:
+traceback - функция из библиотеки debug
+
 api - screen:
 screen.clear() - очищает экран
 screen.set(x, y, char:" ", color:0) - устанавливает 1 символ на экране
