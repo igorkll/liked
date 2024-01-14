@@ -54,6 +54,11 @@ local function createSandbox()
             return load(chunk, chunkname, "t", env or sandbox)
         end,
 
+        sleep = function (time)
+            checkArg(1, time, "number")
+            os.sleep(time or 0.05)
+        end,
+
         storage = {
             getData = function()
                 return gamesave.data
