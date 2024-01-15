@@ -9,8 +9,8 @@
 2 - зеленый
 3 - желтый
 
-функции:
-traceback - функция из библиотеки debug
+api - debug:
+debug.traceback - функция из библиотеки debug
 
 api - screen:
 screen.clear() - очищает экран
@@ -24,5 +24,6 @@ storage.getCode():string - возврашяет код компьтера
 storage.setCode(string) - устанавливает код компьтера, и он начнет выполняться после перезагрузки (максимальный размер 16кб)
 
 api - device:
+device.beep(freq, time) - вызывает блокирующий писк
 device.shutdown() - выключает устройтсво
 device.reboot() - перезагружает устройтсво

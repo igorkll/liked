@@ -16,6 +16,7 @@ local rx, ry = ui:zoneSize()
 local dataLimit = 4 * 1024
 local codeLimit = 16 * 1024
 
+local biosCode = assert(fs.readFile(system.getResourcePath("bios.lua")))
 local gamesavePath
 local gamesave
 local computerThread
@@ -37,34 +38,10 @@ local function createSandbox()
             os.sleep(time or 0.05)
         end,
 
-        device = {
-            beep = function (freq, delay)
-                sound.beep(freq, delay, true)
-            end
-        },
+        ------ apis
 
-        storage = {
-            getData = function()
-                return gamesave.data
-            end,
-            setData = function(data)
-                checkArg(1, data, "string")
-                if #data > dataLimit then
-                    error("the maximum amount of data is 4KB", 2)
-                end
-                gamesave.data = data
-            end,
-
-            getCode = function()
-                return gamesave.code
-            end,
-            setCode = function(code)
-                checkArg(1, code, "string")
-                if #code > codeLimit then
-                    error("the maximum amount of data is 16KB", 2)
-                end
-                gamesave.code = code
-            end,
+        debug = {
+            traceback = debug.traceback
         },
 
         screen = {
@@ -92,7 +69,36 @@ local function createSandbox()
             getSize = function ()
                 return deviceScreen.sx, deviceScreen.sy
             end
-        }
+        },
+
+        storage = {
+            getData = function()
+                return gamesave.data
+            end,
+            setData = function(data)
+                checkArg(1, data, "string")
+                if #data > dataLimit then
+                    error("the maximum amount of data is 4KB", 2)
+                end
+                gamesave.data = data
+            end,
+            getCode = function()
+                return gamesave.code
+            end,
+            setCode = function(code)
+                checkArg(1, code, "string")
+                if #code > codeLimit then
+                    error("the maximum amount of data is 16KB", 2)
+                end
+                gamesave.code = code
+            end,
+        },
+
+        device = {
+            beep = function (freq, delay)
+                sound.beep(freq, delay, true)
+            end
+        },
     }
     return sandbox
 end
@@ -111,7 +117,6 @@ end
 local function startGame(num)
     gamesavePath = system.getResourcePath(paths.concat("saves", tostring(math.round(num))))
     gamesave = registry.new(paths.concat(gamesavePath, "settings.dat"), {
-        bios = assert(fs.readFile(system.getResourcePath("bios.lua"))),
         code = assert(fs.readFile(system.getResourcePath("example.lua"))),
         data = ""
     })
@@ -129,7 +134,7 @@ local function powerOff()
 end
 
 local function powerOn()
-    local code = load(gamesave.bios, "=bios", "t", createSandbox()) --ошибки в BIOS нечем не будут обработаны
+    local code = load(biosCode, "=bios", "t", createSandbox()) --ошибки в BIOS нечем не будут обработаны
     if code then
         computerThread = thread.create(code)
         computerThread:resume()
