@@ -24,6 +24,17 @@ local computerThread
 local rebootFlag
 local startTime
 
+local callBudgetVal = 0
+local callBudgetMax = 100
+local function callBudget(num)
+    callBudgetVal = callBudgetVal + num
+    if callBudgetVal > callBudgetMax then
+        local mval = callBudgetVal - callBudgetMax
+        callBudgetVal = mval
+        os.sleep(0.05)
+    end
+end
+
 local function createSandbox()
     local sandbox
     sandbox = {
@@ -64,6 +75,7 @@ local function createSandbox()
         screen = {
             clear = function ()
                 deviceScreen:clear(uix.colors.black)
+                callBudget(10)
             end,
             set = function (x, y, char, color)
                 checkArg(1, x, "number")
@@ -87,6 +99,7 @@ local function createSandbox()
                 end
 
                 deviceScreen:set(x, y, uix.colors.black, lcolor, char)
+                callBudget(10)
             end,
             getSize = function ()
                 return deviceScreen.sx, deviceScreen.sy
@@ -103,6 +116,7 @@ local function createSandbox()
                     error("the maximum amount of data is 4KB", 2)
                 end
                 gamesave.data = data
+                callBudget(50)
             end,
             getCode = function()
                 return gamesave.code
@@ -113,6 +127,7 @@ local function createSandbox()
                     error("the maximum amount of data is 16KB", 2)
                 end
                 gamesave.code = code
+                callBudget(50)
             end,
         },
 
