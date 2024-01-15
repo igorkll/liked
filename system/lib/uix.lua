@@ -129,6 +129,8 @@ function objclass:stop()
                 self:onDrop()
             end
         end
+    elseif self.type == "input" then
+        self.read.setDrawLock(true)
     end
 end
 
@@ -395,6 +397,7 @@ function objclass:draw()
             self.gui.window:set(self.x + (self.sx - 1), self.y, bg, self.back, "◗")
         end
         
+        self.read.setDrawLock(false)
         self.read.redraw()
     elseif self.type == "seek" then
         local _, _, bg = self.gui.window:get(self.x, self.y)

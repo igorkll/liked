@@ -370,6 +370,7 @@ function gameLayout:onSelect()
     computerError = nil
     deviceScreen:clear(uix.colors.black)
     powerButton.state = false
+    inputStr.read.setBuffer("")
 end
 
 gameLayout:timer(0.1, function ()
