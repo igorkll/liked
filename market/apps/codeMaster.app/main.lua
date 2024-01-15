@@ -339,8 +339,10 @@ end, math.huge)
 
 function ui:onEvent()
     if computerError then
-        gui.warn(screen, nil, nil, computerError)
+        gui.bigWarn(screen, nil, nil, computerError)
         ui:draw()
+        deviceScreen:clear(uix.colors.black)
+
         computerError = nil
     end
 end
