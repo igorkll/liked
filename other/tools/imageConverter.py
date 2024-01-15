@@ -6,6 +6,7 @@ import math
 from collections import Counter
 import random
 import numpy as np
+import copy
 
 """
 colors = [
@@ -226,7 +227,7 @@ def floyd(image, t2mode):
 
             #print("new color", image[y, x])
 
-def imgToT2p(image, fullAdd, forceFull, addPal, floydUse):
+def imgToT2p(image, fullAdd, forceFull, addPal):
     # Получение размеров изображения
     height, width, channels = image.shape
 
@@ -364,37 +365,58 @@ def parse_image_pixelwise(image_path):
     output_path, _ = os.path.splitext(image_path)
     output_path += ".t2p"
 
-    fullAdd = input("add full colors? y/N: ") == "y"
-    print("full palette", fullAdd)
+    output_path3, _ = os.path.splitext(image_path)
+    output_path3 += ".t3p"
 
-    forceFull = False
-    if fullAdd:
-        forceFull = input("use full palette force? y/N: ") == "y"
-        print("full palette", forceFull)
+    autoMode = input("use auto-mode? y/N: ") == "y"
+    print("autoMode", autoMode)
 
-    addPal = False
-    if fullAdd:
-        addPal = input("add palette colors? y/N: ") == "y"
-        print("add palette", addPal)
+    if autoMode:
+        imageT2 = copy.deepcopy(image)
+        imageT3 = copy.deepcopy(image)
 
-    floydUse = input("use disiring? y/N: ") == "y"
-    print("floydUse", floydUse)
+        floyd(imageT2, True)
+        outbytes = imgToT2p(imageT2, False, False, False)
+        with open(output_path, 'wb') as file:
+            file.write(outbytes)
 
-    if floydUse:
-        floydT2Use = input("disiring for tier2? y/N: ") == "y"
-        print("floydT2Use", floydT2Use)
 
-        if floydT2Use and fullAdd:
-            print("conflicting floydT2Use and fullAdd operations")
-            while True: pass           
+        floyd(imageT3, False)
+        outbytes2 = imgToT2p(imageT3, True, True, False)
+        with open(output_path3, 'wb') as file:
+            file.write(outbytes2)
+    else:
+        fullAdd = input("add full colors? y/N: ") == "y"
+        print("full palette", fullAdd)
 
-        print("floyd start")
-        floyd(image, floydT2Use)
-        print("floyd end")
+        forceFull = False
+        if fullAdd:
+            forceFull = input("use full palette force? y/N: ") == "y"
+            print("full palette", forceFull)
 
-    outbytes = imgToT2p(image, fullAdd, forceFull, addPal, floydUse)
-    with open(output_path, 'wb') as file:
-        file.write(outbytes)
+        addPal = False
+        if fullAdd:
+            addPal = input("add palette colors? y/N: ") == "y"
+            print("add palette", addPal)
+
+        floydUse = input("use disiring? y/N: ") == "y"
+        print("floydUse", floydUse)
+
+        if floydUse:
+            floydT2Use = input("disiring for tier2? y/N: ") == "y"
+            print("floydT2Use", floydT2Use)
+
+            if floydT2Use and fullAdd:
+                print("conflicting floydT2Use and fullAdd operations")
+                while True: pass           
+
+            print("floyd start")
+            floyd(image, floydT2Use)
+            print("floyd end")
+
+        outbytes = imgToT2p(image, fullAdd, forceFull, addPal)
+        with open(output_path, 'wb') as file:
+            file.write(outbytes)
 
 
 if __name__ == "__main__":
