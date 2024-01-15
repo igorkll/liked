@@ -49,6 +49,11 @@ local function createSandbox()
                 deviceScreen:clear(uix.colors.black)
             end,
             set = function (x, y, char, color)
+                checkArg(1, x, "number")
+                checkArg(2, y, "number")
+                checkArg(3, char, "string")
+                checkArg(4, color, "number", "nil")
+
                 local lcolor = uix.colors.red
                 if color == 1 then
                     lcolor = uix.colors.green
@@ -96,7 +101,20 @@ local function createSandbox()
 
         device = {
             beep = function (freq, delay)
+                checkArg(1, freq, "number", "nil")
+                checkArg(2, delay, "number", "nil")
                 sound.beep(freq, delay, true)
+            end,
+            shutdown = function()
+                powerOff()
+                powerButton.state = false
+                powerButton:draw()
+                os.sleep()
+            end,
+            reboot = function()
+                deviceScreen:clear(uix.colors.black)
+                powerOn()
+                os.sleep()
             end
         },
     }
@@ -124,7 +142,7 @@ local function startGame(num)
     ui:select(gameLayout)
 end
 
-local function powerOff()
+function powerOff()
     if computerThread then
         computerThread:kill()
         computerThread = nil
@@ -133,9 +151,12 @@ local function powerOff()
     deviceScreen:clear(uix.colors.black)
 end
 
-local function powerOn()
+function powerOn()
     local code = load(biosCode, "=bios", "t", createSandbox()) --ошибки в BIOS нечем не будут обработаны
     if code then
+        if computerThread then
+            computerThread:kill()
+        end
         computerThread = thread.create(code)
         computerThread:resume()
     end
