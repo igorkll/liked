@@ -171,6 +171,21 @@ local function createSandbox()
                 checkArg(1, str, "string")
                 inputStr.read.setBuffer(str)
                 inputStr:draw()
+            end,
+            isAction = function()
+                return not not actionButton.state
+            end,
+            isUp = function()
+                return not not upButton.state
+            end,
+            isDown = function()
+                return not not downButton.state
+            end,
+            isLeft = function()
+                return not not leftButton.state
+            end,
+            isRight = function()
+                return not not rightButton.state
             end
         }
     }
@@ -200,6 +215,8 @@ local function startGame(num)
 end
 
 function powerOff()
+    callBudgetVal = 0
+
     if computerThread then
         computerThread:kill()
         computerThread = nil
@@ -364,6 +381,13 @@ inputStr = gameLayout:createInput(9 + 36, ry - 3, 30, uix.colors.white, uix.colo
 function exampleButton:onClick()
     importExample()
 end
+
+local offsetX, offsetY = 1, 11
+upButton = gameLayout:createButton(offsetX + 9 + 36 + 6, offsetY, 7, 3, uix.colors.green, uix.colors.white, "UP")
+actionButton = gameLayout:createButton(offsetX + 9 + 36 + 6, offsetY + 3, 7, 3, uix.colors.orange, uix.colors.white, "A")
+downButton = gameLayout:createButton(offsetX + 9 + 36 + 6, offsetY + 6, 7, 3, uix.colors.green, uix.colors.white, "DOWN")
+leftButton = gameLayout:createButton(offsetX + 9 + 36 - 1, offsetY + 3, 7, 3, uix.colors.green, uix.colors.white, "LEFT")
+rightButton = gameLayout:createButton(offsetX + 9 + 36 + 6 + 7, offsetY + 3, 7, 3, uix.colors.green, uix.colors.white, "RIGHT")
 
 function gameLayout:onSelect()
     rebootFlag = nil
