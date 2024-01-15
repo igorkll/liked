@@ -1033,13 +1033,13 @@ function manager:select(layout)
     end
 end
 
-function manager:loop()
+function manager:loop(timeout)
     if self.firstLayout and not self.current then
         self:select(self.firstLayout)
     end
 
     while true do
-        local eventData = {event.pull()}
+        local eventData = {event.pull(timeout)}
         local windowEventData
         if self.current and not self.stopUpload then
             windowEventData = self.current:uploadEvent(eventData)

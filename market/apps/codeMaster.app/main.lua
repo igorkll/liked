@@ -9,6 +9,7 @@ local thread = require("thread")
 local computer = require("computer")
 local iowindows = require("iowindows")
 local graphic = require("graphic")
+local gui = require("gui")
 
 local screen = ...
 local ui = uix.manager(screen)
@@ -25,6 +26,7 @@ local exampleCode = assert(fs.readFile(system.getResourcePath("example.lua")))
 local gamesavePath
 local gamesave
 local computerThread
+local computerError
 local rebootFlag
 local startTime
 
@@ -203,7 +205,16 @@ function powerOn()
 
         startTime = computer.uptime()
 
-        computerThread = thread.create(code)
+        computerThread = thread.create(function ()
+            local ok, err = xpcall(code, debug.traceback)
+            if not ok then
+                computerError = tostring(err or "unknown error")
+                if computerThread then
+                    computerThread:kill()
+                    computerThread = nil
+                end
+            end
+        end)
         computerThread:resume()
     end
 end
@@ -237,7 +248,7 @@ function importCode()
     local wstart = wstop()
     ui:fullStop()
     local clear = graphic.screenshot(screen)
-    graphic.clear(screen, uix.colors.black)
+    graphic.clear(screen, uix.colors.white)
     local path = iowindows.selectfile(screen, "lua")
     clear()
     if path then
@@ -310,6 +321,7 @@ end
 
 function gameLayout:onSelect()
     rebootFlag = nil
+    computerError = nil
     deviceScreen:clear(uix.colors.black)
     powerButton.state = false
 end
@@ -325,4 +337,12 @@ end, math.huge)
 
 --------------------------------
 
-ui:loop()
+function ui:onEvent()
+    if computerError then
+        gui.warn(screen, nil, nil, computerError)
+        ui:draw()
+        computerError = nil
+    end
+end
+
+ui:loop(0.5)
