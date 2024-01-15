@@ -22,7 +22,8 @@ local codeLimit = 16 * 1024
 
 local selfAppPath = paths.path(system.getSelfScriptPath())
 local biosCode = assert(fs.readFile(system.getResourcePath("bios.lua")))
-local exampleCode = assert(fs.readFile(system.getResourcePath("example.lua")))
+local examplesPath = system.getResourcePath("examples")
+local exampleCode = assert(fs.readFile(paths.concat(examplesPath, "hello.lua")))
 local gamesavePath
 local gamesave
 local computerThread
@@ -259,6 +260,30 @@ function importCode()
     wstart()
 end
 
+function importExample()
+    local wstart = wstop()
+    ui:fullStop()
+    local clear = graphic.screenshot(screen)
+    graphic.clear(screen, uix.colors.white)
+    local list = {}
+    local nativeList = fs.list(examplesPath)
+    for i, name in ipairs(nativeList) do
+        table.insert(list, paths.hideExtension(name))
+    end
+    local num = gui.select(screen, nil, nil, "load example", list)
+    local path
+    if num then
+        path = paths.concat(examplesPath, nativeList[num])
+    end
+    clear()
+    if path then
+        gamesave.code = assert(fs.readFile(path))
+    end
+    ui:fullStart()
+    ui:draw()
+    wstart()
+end
+
 -------------------------------- menu
 
 startButtonsBack, startButtonsFore = uix.colors.lightGray, uix.colors.black
@@ -317,6 +342,11 @@ end
 importButton = gameLayout:createButton(rx - 13, 6, 10, 1, uix.colors.green, uix.colors.white, "IMPORT", true)
 function importButton:onClick()
     importCode()
+end
+
+exampleButton = gameLayout:createButton(rx - 13, 7, 10, 1, uix.colors.lightBlue, uix.colors.white, "EXAMPLE", true)
+function exampleButton:onClick()
+    importExample()
 end
 
 function gameLayout:onSelect()
