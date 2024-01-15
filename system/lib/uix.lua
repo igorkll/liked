@@ -123,9 +123,11 @@ function objclass:stop()
             self.th = nil
         end
     elseif self.type == "button" then
-        self.state = false
-        if self.onDrop then
-            self:onDrop()
+        if not self.toggle then
+            self.state = false
+            if self.onDrop then
+                self:onDrop()
+            end
         end
     end
 end

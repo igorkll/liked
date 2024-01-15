@@ -7,6 +7,8 @@ local fs = require("filesystem")
 local apps = require("apps")
 local thread = require("thread")
 local computer = require("computer")
+local iowindows = require("iowindows")
+local graphic = require("graphic")
 
 local screen = ...
 local ui = uix.manager(screen)
@@ -206,6 +208,46 @@ function powerOn()
     end
 end
 
+
+function wstop()
+    if computerThread then
+        powerOff()
+        return function ()
+            powerOn()
+        end
+    else
+        return system.stub
+    end
+end
+
+function editCode()
+    local wstart = wstop()
+    ui:fullStop()
+    local path = os.tmpname()
+    assert(fs.writeFile(path, gamesave.code))
+    apps.execute("edit", screen, nil, path)
+    gamesave.code = assert(fs.readFile(path))
+    fs.remove(path)
+    ui:fullStart()
+    ui:draw()
+    wstart()
+end
+
+function importCode()
+    local wstart = wstop()
+    ui:fullStop()
+    local clear = graphic.screenshot(screen)
+    graphic.clear(screen, uix.colors.black)
+    local path = iowindows.selectfile(screen, "lua")
+    clear()
+    if path then
+        gamesave.code = assert(fs.readFile(path))
+    end
+    ui:fullStart()
+    ui:draw()
+    wstart()
+end
+
 -------------------------------- menu
 
 startButtonsBack, startButtonsFore = uix.colors.lightGray, uix.colors.black
@@ -243,7 +285,7 @@ gameLayout:setReturnLayout(exitFromGame)
 gameLayout:createPlane(5, 3, rx - 8, ry - 4, uix.colors.lightGray)
 deviceScreen = gameLayout:createCanvas(7, 4, (ry - 6) * 2, ry - 6)
 
-powerButton = gameLayout:createButton(rx - 10, 3, 7, 1, uix.colors.red, uix.colors.white, "POWER")
+powerButton = gameLayout:createButton(rx - 13, 3, 10, 1, uix.colors.red, uix.colors.white, "POWER")
 powerButton.back2 = uix.colors.brown
 powerButton.fore2 = uix.colors.white
 powerButton.toggle = true
@@ -254,6 +296,16 @@ function powerButton:onSwitch()
     else
         powerOff()
     end
+end
+
+editButton = gameLayout:createButton(rx - 13, 5, 10, 1, uix.colors.orange, uix.colors.white, "EDIT", true)
+function editButton:onClick()
+    editCode()
+end
+
+importButton = gameLayout:createButton(rx - 13, 6, 10, 1, uix.colors.green, uix.colors.white, "IMPORT", true)
+function importButton:onClick()
+    importCode()
 end
 
 function gameLayout:onSelect()
