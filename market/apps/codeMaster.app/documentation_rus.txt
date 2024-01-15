@@ -28,3 +28,7 @@ device.beep(freq, time) - вызывает блокирующий писк
 device.shutdown() - выключает устройтсво
 device.reboot() - перезагружает устройтсво
 device.uptime() - возвращяет время работы устройтсва в секундах
+
+api - keyboard:
+keyboard.get():string - возвращяет строку из строки ввода пользователя
+keyboard.set(string) - записывает строку в строку ввода пользователя

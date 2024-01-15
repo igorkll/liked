@@ -161,6 +161,17 @@ local function createSandbox()
             uptime = function()
                 return computer.uptime() - startTime
             end
+        },
+
+        keyboard = {
+            get = function()
+                return inputStr.read.getBuffer()
+            end,
+            set = function(str)
+                checkArg(1, str, "string")
+                inputStr.read.setBuffer(str)
+                inputStr:draw()
+            end
         }
     }
     sandbox._G = sandbox
