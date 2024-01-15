@@ -27,17 +27,31 @@ local startTime
 local function createSandbox()
     local sandbox
     sandbox = {
+        _VERSION = _VERSION,
+
         math = table.deepclone(math),
         table = table.deepclone(table),
         string = table.deepclone(string),
         bit32 = table.deepclone(bit32),
+        coroutine = table.deepclone(coroutine),
+
+        assert = assert,
+        error = error,
+        ipairs = ipairs,
+        next = next,
+        pairs = pairs,
+        pcall = pcall,
+        tonumber = tonumber,
+        tostring = tostring,
+        type = type,
+        xpcall = xpcall,
 
         load = function (chunk, chunkname, mode, env)
             return load(chunk, chunkname, "t", env or sandbox)
         end,
 
         sleep = function (time)
-            checkArg(1, time, "number")
+            checkArg(1, time, "number", "nil")
             os.sleep(time or 0.05)
         end,
 
@@ -124,8 +138,9 @@ local function createSandbox()
             uptime = function()
                 return computer.uptime() - startTime
             end
-        },
+        }
     }
+    sandbox._G = sandbox
     return sandbox
 end
 
@@ -210,7 +225,7 @@ gameLayout:setReturnLayout(exitFromGame)
 gameLayout:createPlane(5, 3, rx - 8, ry - 4, uix.colors.lightGray)
 deviceScreen = gameLayout:createCanvas(7, 4, (ry - 6) * 2, ry - 6)
 
-powerButton = gameLayout:createButton(rx - 10, 3, 7, 3, uix.colors.red, uix.colors.white, "POWER")
+powerButton = gameLayout:createButton(rx - 10, 3, 7, 1, uix.colors.red, uix.colors.white, "POWER")
 powerButton.back2 = uix.colors.brown
 powerButton.fore2 = uix.colors.white
 powerButton.toggle = true
