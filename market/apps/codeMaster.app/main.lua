@@ -372,7 +372,7 @@ function importButton:onClick()
     importCode()
 end
 
-exampleButton = gameLayout:createButton(rx - 13, 7, 10, 1, uix.colors.lightBlue, uix.colors.white, "EXAMPLE", true)
+exampleButton = gameLayout:createButton(rx - 13, 7, 10, 1, uix.colors.lightBlue, uix.colors.white, "EXAMPLES", true)
 function exampleButton:onClick()
     importExample()
 end
