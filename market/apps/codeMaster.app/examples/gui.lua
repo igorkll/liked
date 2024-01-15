@@ -8,7 +8,7 @@ local function drawtext(x, y, text, color)
 end
 
 local function centertext(x, y, text, color)
-    drawtext(x - math.round(#text / 2), y, text, color)
+    drawtext(x - (math.round(#text / 2) - 1), y, text, color)
 end
 
 local states = {}
