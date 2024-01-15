@@ -136,7 +136,7 @@ local function createSandbox()
                 end
                 gamesave.code = code
                 callBudget(50)
-            end,
+            end
         },
 
         device = {
@@ -345,6 +345,11 @@ function importButton:onClick()
 end
 
 exampleButton = gameLayout:createButton(rx - 13, 7, 10, 1, uix.colors.lightBlue, uix.colors.white, "EXAMPLE", true)
+function exampleButton:onClick()
+    importExample()
+end
+
+inputStr = gameLayout:createInput(9 + 36, ry - 3, 30, uix.colors.white, uix.colors.black, nil, nil, nil, 128)
 function exampleButton:onClick()
     importExample()
 end
