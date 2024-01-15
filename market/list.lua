@@ -505,7 +505,7 @@ local list = {
         
         path = "/data/apps/codeMaster.app",
         urlPrimaryPart = selfurlpart .. "/apps/codeMaster.app/",
-        files = {"main.lua", "icon.t2p", "example.lua", "logo.t2p"}
+        files = {"main.lua", "icon.t2p", "logo.t2p", "bios.lua", "documentation_rus.txt", "examples/hello.lua", "examples/dots.lua"}
     }
 }
 
