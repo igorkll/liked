@@ -17,7 +17,9 @@ local rx, ry = ui:zoneSize()
 local dataLimit = 4 * 1024
 local codeLimit = 16 * 1024
 
+local selfAppPath = paths.path(system.getSelfScriptPath())
 local biosCode = assert(fs.readFile(system.getResourcePath("bios.lua")))
+local exampleCode = assert(fs.readFile(system.getResourcePath("example.lua")))
 local gamesavePath
 local gamesave
 local computerThread
@@ -171,9 +173,9 @@ local function exitFromGame()
 end
 
 local function startGame(num)
-    gamesavePath = system.getResourcePath(paths.concat("saves", tostring(math.round(num))))
+    gamesavePath = paths.concat(selfAppPath, "saves", tostring(math.round(num)))
     gamesave = registry.new(paths.concat(gamesavePath, "settings.dat"), {
-        code = assert(fs.readFile(system.getResourcePath("example.lua"))),
+        code = exampleCode,
         data = ""
     })
 
