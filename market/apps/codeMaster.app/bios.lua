@@ -12,6 +12,8 @@ end
 
 splash("TEST TEST")
 device.beep(2000, 0.05)
+device.reboot()
+device.beep(1000, 0.05)
 
 while true do
     sleep()

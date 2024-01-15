@@ -483,7 +483,7 @@ local list = {
         
         path = "/data/apps/shooting.app",
         urlPrimaryPart = selfurlpart .. "/apps/shooting.app/",
-        files = {"main.lua", "icon.t2p"}
+        files = {"main.lua", "icon.t2p", "config.cfg"}
     },
     {
         name = "componentLog",

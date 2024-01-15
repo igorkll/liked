@@ -27,3 +27,4 @@ api - device:
 device.beep(freq, time) - вызывает блокирующий писк
 device.shutdown() - выключает устройтсво
 device.reboot() - перезагружает устройтсво
+device.uptime() - возвращяет время работы устройтсва в секундах

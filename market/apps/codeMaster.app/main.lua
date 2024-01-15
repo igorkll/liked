@@ -6,6 +6,7 @@ local sound = require("sound")
 local fs = require("filesystem")
 local apps = require("apps")
 local thread = require("thread")
+local computer = require("computer")
 
 local screen = ...
 local ui = uix.manager(screen)
@@ -20,6 +21,8 @@ local biosCode = assert(fs.readFile(system.getResourcePath("bios.lua")))
 local gamesavePath
 local gamesave
 local computerThread
+local rebootFlag
+local startTime
 
 local function createSandbox()
     local sandbox
@@ -112,9 +115,14 @@ local function createSandbox()
                 os.sleep()
             end,
             reboot = function()
-                deviceScreen:clear(uix.colors.black)
-                powerOn()
+                rebootFlag = true
+                powerOff()
+                powerButton.state = false
+                powerButton:draw()
                 os.sleep()
+            end,
+            uptime = function()
+                return computer.uptime() - startTime
             end
         },
     }
@@ -157,6 +165,9 @@ function powerOn()
         if computerThread then
             computerThread:kill()
         end
+
+        startTime = computer.uptime()
+
         computerThread = thread.create(code)
         computerThread:resume()
     end
@@ -204,6 +215,7 @@ powerButton.back2 = uix.colors.brown
 powerButton.fore2 = uix.colors.white
 powerButton.toggle = true
 function powerButton:onSwitch()
+    rebootFlag = nil
     if self.state then
         powerOn()
     else
@@ -212,9 +224,19 @@ function powerButton:onSwitch()
 end
 
 function gameLayout:onSelect()
+    rebootFlag = nil
     deviceScreen:clear(uix.colors.black)
     powerButton.state = false
 end
+
+gameLayout:timer(0.1, function ()
+    if rebootFlag then
+        powerButton.state = true
+        powerButton:draw()
+        powerOn()
+        rebootFlag = nil
+    end
+end, math.huge)
 
 --------------------------------
 
