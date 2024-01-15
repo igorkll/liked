@@ -304,13 +304,15 @@ function sysinit.init(box)
 
     ------------------------------------
 
-    bootloader.unittests("/vendor/unittests")
-    bootloader.unittests("/data/unittests")
+    if not liked.recoveryMode then
+        bootloader.unittests("/vendor/unittests")
+        bootloader.unittests("/data/unittests")
 
-    bootloader.autorunsIn("/vendor/autoruns")
-    bootloader.autorunsIn("/data/autoruns")
+        bootloader.autorunsIn("/vendor/autoruns")
+        bootloader.autorunsIn("/data/autoruns")
 
-    require("autorun").autorun()
+        require("autorun").autorun()
+    end
     
     if programs.find("preinit") then
         apps.execute("preinit")
