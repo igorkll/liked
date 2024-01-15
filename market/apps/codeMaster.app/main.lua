@@ -110,14 +110,15 @@ local function createSandbox()
 
         storage = {
             getData = function()
-                return gamesave.data
+                return gamesave.data.data
             end,
             setData = function(data)
                 checkArg(1, data, "string")
                 if #data > dataLimit then
                     error("the maximum amount of data is 4KB", 2)
                 end
-                gamesave.data = data
+                gamesave.data.data = data
+                gamesave.save()
                 callBudget(50)
             end,
             getCode = function()
