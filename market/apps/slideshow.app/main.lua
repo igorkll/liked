@@ -10,6 +10,7 @@ local computer = require("computer")
 local gui = require("gui")
 local storage = require("storage")
 local iowindows = require("iowindows")
+local palette = require("palette")
 
 local config = storage.getConf({
     interval = 4,

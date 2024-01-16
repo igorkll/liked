@@ -506,6 +506,17 @@ local list = {
         path = "/data/apps/codeMaster.app",
         urlPrimaryPart = selfurlpart .. "/apps/codeMaster.app/",
         files = {"main.lua", "icon.t2p", "logo.t2p", "bios.lua", "documentation_rus.txt", "examples/hello.lua", "examples/dots.lua"}
+    },
+    {
+        name = "imageViewer",
+        version = "1",
+        vendor = "logic",
+        description = "allows you to view images in full screen",
+        minDiskSpace = 64,
+        
+        path = "/data/apps/imageViewer.app",
+        urlPrimaryPart = selfurlpart .. "/apps/imageViewer.app/",
+        files = {"main.lua", "icon.t2p", "config.cfg", "logo.t2p", "logo.t3p"}
     }
 }
 
