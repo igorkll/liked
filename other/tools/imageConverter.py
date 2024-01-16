@@ -53,11 +53,32 @@ def make_braille(tbl):
     a, b, c, d, e, f, g, h = tbl[0][0], tbl[1][0], tbl[2][0], tbl[3][0], tbl[0][1], tbl[1][1], tbl[2][1], tbl[3][1]
     return chr(10240 + 128*h + 64*d + 32*g + 16*f + 8*e + 4*c + 2*b + a)
 
-def find_closest_color(target_color, color_array):
+def color_similarity2(color1, color2):
+    # Извлекаем компоненты цвета
+    r1, g1, b1 = color1
+    r2, g2, b2 = color2
+
+    # Вычисляем евклидово расстояние между компонентами цвета
+    distance = math.sqrt((r1 - r2)**2 + (g1 - g2)**2 + (b1 - b2)**2)
+
+    # Нормализуем расстояние к диапазону [0, 1]
+    normalized_distance = distance / math.sqrt(255**2 + 255**2 + 255**2)
+
+    # Чем меньше нормализованное расстояние, тем более похожи цвета
+    similarity = 1 - normalized_distance
+    return similarity
+
+def hex_to_rgb(hex_color):
+    # Получаем отдельные компоненты цвета
+    red = (hex_color >> 16) & 0xFF
+    green = (hex_color >> 8) & 0xFF
+    blue = hex_color & 0xFF
+
+    return red, green, blue
+
+def find_closest_color(target_color, color_array): # работает через RGB
     # Извлечение компонент цвета цели (R, G, B)
-    target_r = (target_color >> 16) & 0xFF
-    target_g = (target_color >> 8) & 0xFF
-    target_b = target_color & 0xFF
+    target_r, target_g, target_b = hex_to_rgb(target_color)
 
     closest_index = None
     closest_distance = math.inf
@@ -65,20 +86,10 @@ def find_closest_color(target_color, color_array):
     # Перебор всех цветов в массиве
     for i, color in enumerate(color_array):
         # Извлечение компонент цвета из массива (R, G, B)
-        array_r = (color >> 16) & 0xFF
-        array_g = (color >> 8) & 0xFF
-        array_b = color & 0xFF
+        array_r, array_g, array_b = hex_to_rgb(color)
 
-        # Вычисление евклидова расстояния между цветами
-        """
-        distance = ((target_r - array_r) ** 2 +
-                    (target_g - array_g) ** 2 +
-                    (target_b - array_b) ** 2) ** 0.5
-        """
-
-        distance = math.sqrt((target_r - array_r) ** 2 +
-                    (target_g - array_g) ** 2 +
-                    (target_b - array_b) ** 2)
+        # Вычисление разницу между цветами
+        distance = 1 - color_similarity2((target_r, target_g, target_b), (array_r, array_g, array_b))
 
         # Обновление ближайшего цвета, если найден более близкий
         if distance < closest_distance:
@@ -123,34 +134,11 @@ def color_similarity(color1, color2, target_color):
     coefficient = 1 - (distance1 / total_distance)
     return coefficient
 
-def hex_to_rgb(hex_color):
-    # Получаем отдельные компоненты цвета
-    red = (hex_color >> 16) & 0xFF
-    green = (hex_color >> 8) & 0xFF
-    blue = hex_color & 0xFF
-
-    return red, green, blue
-
 def palette_deconvert(pal):
     newpal = []
     for c in pal:
         newpal.append(((hex_to_rgb(c)), 255))
     return newpal
-
-def color_similarity2(color1, color2):
-    # Извлекаем компоненты цвета
-    r1, g1, b1 = color1
-    r2, g2, b2 = color2
-
-    # Вычисляем евклидово расстояние между компонентами цвета
-    distance = math.sqrt((r1 - r2)**2 + (g1 - g2)**2 + (b1 - b2)**2)
-
-    # Нормализуем расстояние к диапазону [0, 1]
-    normalized_distance = distance / math.sqrt(255**2 + 255**2 + 255**2)
-
-    # Чем меньше нормализованное расстояние, тем более похожи цвета
-    similarity = 1 - normalized_distance
-    return similarity
 
 def get_popular_colors(image_path):
     image = cv2.imread(image_path)
@@ -175,7 +163,6 @@ def toCVcolor(color):
     r, g, b = hex_to_rgb(color)
     return [b, g, r, 0]
 
-# find_closest_color(target_color, color_array)
 def find_closest_palette_color(color):
     return toCVcolor(colors3t[find_closest_color(convert_to_24bit(color), colors3t)])
 
