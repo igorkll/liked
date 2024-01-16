@@ -378,11 +378,13 @@ def imgToT2p(image, fullAdd, forceFull, addPal, palette=None):
     return outdata
 
 def cropSize(img, mrx, mry):
+    print("-- start crop")
+
     height, width, channels = img.shape
     newHeight, newWidth = height, width
     while newHeight > mrx or newWidth > mrx or ((newHeight * newWidth) > (mrx * mry)):
-        newHeight = newHeight * 0.9
-        newWidth = newWidth * 0.9
+        newHeight = newHeight * 0.99
+        newWidth = newWidth * 0.99
 
     newHeight = math.floor(newHeight)
     newWidth = math.floor(newWidth)
@@ -393,9 +395,7 @@ def cropSize(img, mrx, mry):
     print("new resolution", newWidth, newHeight)
     return cv2.resize(img, (newWidth, newHeight))
 
-def parse_image_pixelwise(image_path, forceAuto, fake_image_path):
-    debug_print(image_path, forceAuto, fake_image_path)
-
+def startConverter(image_path, out_image_path, forceAuto):
     # Загрузка изображения
     image = cv2.imread(image_path, cv2.IMREAD_UNCHANGED)
 
@@ -412,11 +412,8 @@ def parse_image_pixelwise(image_path, forceAuto, fake_image_path):
         return
 
     # Генерация выходного пути на основе входного с изменением расширения на "t2p"
-    output_path, _ = os.path.splitext(fake_image_path)
+    output_path, _ = os.path.splitext(out_image_path)
     output_path += ".t2p"
-
-    output_path3, _ = os.path.splitext(fake_image_path)
-    output_path3 += ".t3p"
 
     autoMode = forceAuto
     if not autoMode:
@@ -436,6 +433,8 @@ def parse_image_pixelwise(image_path, forceAuto, fake_image_path):
 
         floyd(imageT3, False)
         outbytes2 = imgToT2p(imageT3, True, True, False)
+        output_path3, _ = os.path.splitext(out_image_path)
+        output_path3 += ".t3p"
         with open(output_path3, 'wb') as file:
             file.write(outbytes2)
     else:
@@ -476,9 +475,9 @@ if __name__ == "__main__":
     try:
         image_path = False
         if len(sys.argv) < 2:
-            # print("specify the path to the image")
-            # while True: pass
-            image_path = "D:\\Users\\user\\Documents\\GitHub\\liked\\other\\tools\\sourse"
+            print("specify the path to the image")
+            while True: pass
+            # image_path = "D:\\Users\\user\\Documents\\GitHub\\liked\\other\\tools\\sourse"
         else:
             image_path = sys.argv[1]
         
@@ -487,10 +486,10 @@ if __name__ == "__main__":
                 pathname = os.path.join(image_path, f)
                 if not os.path.exists(image_path + "_out"):
                     os.mkdir(image_path + "_out")
-                if parse_image_pixelwise(pathname, True, os.path.join(image_path + "_out", f)):
+                if startConverter(pathname, os.path.join(image_path + "_out", f), True):
                     while True: pass
         else:
-            if parse_image_pixelwise(image_path, False, image_path):
+            if startConverter(image_path, image_path, False):
                 while True: pass
 
     except Exception as e:
