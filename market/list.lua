@@ -560,6 +560,11 @@ list.libs = {
         url = selfurlpart .. "/libs/adv.lua",
         vendor = "logic",
         version = "1"
+    },
+    ["glasses"] = {
+        url = selfurlpart .. "/libs/glasses.lua",
+        vendor = "logic",
+        version = "1"
     }
 }
 
