@@ -21,7 +21,7 @@ local manager = uix.manager(screen)
 local rx, ry = manager:zoneSize()
 local layout = manager:create("Image Viewer")
 
-layout:createImage(rx - 29, 1, "logo.t2p", true, true)
+layout:createImage(rx - 29, 1, "logo.t2p")
 
 layout:createText(2, ry - 5, nil, "Press 'Enter' key to exit from viewer")
 layout:createText(2, 2, nil, "likeOS water-mark: ")
@@ -72,21 +72,17 @@ function startButton:onClick()
             sx, sy = graphic.maxResolution(screen)
             cropped = true
         end
-
         if graphic.getDepth(screen) == 4 then
-            if not image.applyPalette(screen, path) then
-                palette.blackWhite(screen, true)
-            end
+            image.applyPalette(screen, path)
         end
-        
+        graphic.clear(screen, uix.colors.black)
         local startTime = computer.uptime()
         if cropped then
             local ix, iy = image.size(path, screen)
-            image.draw(screen, path, 1 - (ix / 2), 1 - (iy / 2), nil, true)
+            image.draw(screen, path, 1 - (ix / 2), 1 - (iy / 2))
         else
-            image.draw(screen, path, 1, 1, nil, true)
+            image.draw(screen, path, 1, 1)
         end
-
         if waterMark.state then
             gui.drawtext(screen, 2, sy - 3, 0xffffff, "Operating System     : likeOS & liked")
             gui.drawtext(screen, 2, sy - 2, 0xffffff, "Application          : slideshow")

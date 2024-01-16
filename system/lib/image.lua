@@ -42,6 +42,7 @@ function image.draw(screen, path, x, y, wallpaperMode, forceFullColor, lightMul)
         return
     end
 
+    local llcolors = image.readPalette(path, false, screen) or colors
     lightMul = lightMul or 1
     path = image.repath(screen, path)
 
@@ -134,7 +135,7 @@ function image.draw(screen, path, x, y, wallpaperMode, forceFullColor, lightMul)
             if foreground ~= oldFore or background ~= oldBack or fullBack ~= oldBackFull or fullFore ~= oldForeFull or oldY ~= cy then
                 if oldBack ~= 0 or oldFore ~= 0 then --прозрачность, в реальной картинке такого не будет потому что если paint замечает оба нуля то он меняет одной значения чтобы пиксель не мог просто так стать прозрачным
                     if (oldBack == oldFore or isEmptyBuff) and not oldBackFull then --по избежании визуальных артефактов при отображении unicode символов от лица сматряшего на монитор со стороны
-                        gpu.setBackground(colorslib.colorMul(colors[oldBack + 1], lightMul))
+                        gpu.setBackground(colorslib.colorMul(llcolors[oldBack + 1], lightMul))
                         gpu.set(norm(oldX + (x - 1), oldY + (y - 1), string.rep(" ", unicode.len(buff))))
                     else
                         local col, col2
@@ -146,12 +147,12 @@ function image.draw(screen, path, x, y, wallpaperMode, forceFullColor, lightMul)
                         if col then
                             gpu.setBackground(col)
                         else
-                            gpu.setBackground(colorslib.colorMul(oldBackFull or colors[oldBack + 1], lightMul))
+                            gpu.setBackground(colorslib.colorMul(oldBackFull or llcolors[oldBack + 1], lightMul))
                         end
                         if col2 then
                             gpu.setForeground(col2)
                         else
-                            gpu.setForeground(colorslib.colorMul(oldForeFull or colors[oldFore + 1], lightMul))
+                            gpu.setForeground(colorslib.colorMul(oldForeFull or llcolors[oldFore + 1], lightMul))
                         end
                         gpu.set(norm(oldX + (x - 1), oldY + (y - 1), buff))
                     end
@@ -176,7 +177,7 @@ function image.draw(screen, path, x, y, wallpaperMode, forceFullColor, lightMul)
 
     if oldBack ~= 0 or oldFore ~= 0 then --прозрачность, в реальной картинке такого не будет потому что если paint замечает оба нуля то он меняет одной значения чтобы пиксель не мог просто так стать прозрачным
         if (oldBack == oldFore or isEmptyBuff) and not oldBackFull then --по избежании визуальных артефактов при отображении unicode символов от лица сматряшего на монитор со стороны
-            gpu.setBackground(colorslib.colorMul(colors[oldBack + 1], lightMul))
+            gpu.setBackground(colorslib.colorMul(llcolors[oldBack + 1], lightMul))
             gpu.set(norm(oldX + (x - 1), oldY + (y - 1), string.rep(" ", unicode.len(buff))))
         else
             local col, col2
@@ -188,12 +189,12 @@ function image.draw(screen, path, x, y, wallpaperMode, forceFullColor, lightMul)
             if col then
                 gpu.setBackground(col)
             else
-                gpu.setBackground(colorslib.colorMul(oldBackFull or colors[oldBack + 1], lightMul))
+                gpu.setBackground(colorslib.colorMul(oldBackFull or llcolors[oldBack + 1], lightMul))
             end
             if col2 then
                 gpu.setForeground(col2)
             else
-                gpu.setForeground(colorslib.colorMul(oldForeFull or colors[oldFore + 1], lightMul))
+                gpu.setForeground(colorslib.colorMul(oldForeFull or llcolors[oldFore + 1], lightMul))
             end
             gpu.set(norm(oldX + (x - 1), oldY + (y - 1), buff))
         end
