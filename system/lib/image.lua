@@ -37,12 +37,17 @@ function image.repath(screen, path)
 end
 
 --wallpaperMode заставляет считать цвет lightBlue как прозрачность
-function image.draw(screen, path, x, y, wallpaperMode, forceFullColor, lightMul)
+function image.draw(screen, path, x, y, wallpaperMode, forceFullColor, lightMul, imagePaletteUsed)
     if liked.recoveryMode then
         return
     end
 
-    local llcolors = image.readPalette(path, false, screen) or colors
+    local llcolors = colors
+    if imagePaletteUsed then
+        llcolors = image.readPalette(path, false, screen) or colors
+    end
+
+    
     lightMul = lightMul or 1
     path = image.repath(screen, path)
 

@@ -72,16 +72,23 @@ function startButton:onClick()
             sx, sy = graphic.maxResolution(screen)
             cropped = true
         end
+        local customPalette
         if graphic.getDepth(screen) == 4 then
-            image.applyPalette(screen, path)
+            if not image.applyPalette(screen, path) then
+                palette.fromFile(screen, "/system/palettes/light.plt", true)
+            else
+                customPalette = true
+            end
+        else
+            palette.blackWhite(screen, true)
         end
         graphic.clear(screen, uix.colors.black)
         local startTime = computer.uptime()
         if cropped then
             local ix, iy = image.size(path, screen)
-            image.draw(screen, path, 1 - (ix / 2), 1 - (iy / 2))
+            image.draw(screen, path, 1 - (ix / 2), 1 - (iy / 2), nil, nil, nil, customPalette)
         else
-            image.draw(screen, path, 1, 1)
+            image.draw(screen, path, 1, 1, nil, nil, nil, customPalette)
         end
         if waterMark.state then
             gui.drawtext(screen, 2, sy - 3, 0xffffff, "Operating System     : likeOS & liked")
