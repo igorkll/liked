@@ -13,7 +13,7 @@ local gui = require("gui")
 local format = require("format")
 local sysdata = require("sysdata")
 local apps = require("apps")
-local test = require("test")
+local text = require("text")
 
 local colors = gui_container.colors
 
@@ -140,14 +140,30 @@ local function modifyList(lst)
             if v.libs then
                 if not registry.libVersions then registry.libVersions = {} end
 
-                for _, name in ipairs(v.libs) do
-                    local info = glibs[name]
-                    local path = paths.concat("/data/lib", name .. ".lua")
-                    if not fs.exists(path) or registry.libVersions[name] ~= info.version then
-                        download(path, info.url)
-                        registry.libVersions[name] = info.version
+                local installed = {}
+                local function installLibs(libs)
+                    for _, name in ipairs(libs) do
+                        if not installed[name] then
+                            local info = glibs[name]
+                            local path = paths.concat("/data/lib", name .. ".lua")
+                            if not fs.exists(path) or registry.libVersions[name] ~= info.version then
+                                download(path, info.url)
+                                if info.files then
+                                    for _, dat in ipairs(info.files) do
+                                        download(dat.path, dat.url)
+                                    end
+                                end
+                                registry.libVersions[name] = info.version
+                            end
+
+                            if info.libs then
+                                installLibs(info.libs)
+                            end
+                            installed[name] = true
+                        end
                     end
                 end
+                installLibs(v.libs)
             end
 
             _install(self)
@@ -477,7 +493,7 @@ local function draw(clear)
     local added = {}
 
     for _, v in ipairs(list) do
-        local finding = test.escapePattern(searchRead.getBuffer())
+        local finding = text.escapePattern(searchRead.getBuffer())
         
         local function isSearch(str)
             if not str or finding == "" then
