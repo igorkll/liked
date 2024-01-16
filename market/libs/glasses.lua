@@ -1,7 +1,14 @@
 local component = require("component")
 local gui = require("gui")
 local graphic = require("graphic")
+local computer = require("computer")
 local glasses = {}
+
+function glasses.ramCheck()
+    if computer.freeMemory() < (16 * 1024) then
+        os.sleep(0)
+    end
+end
 
 --------------------------------------- objects methods
 
@@ -11,65 +18,59 @@ function glasses:destroy(object)
     end
 end
 
-function glasses:set(object)
+function glasses:setColor(object, color)
     if self.type == 1 then
-        object.delete()
+        object.setColor(color)
     end
 end
 
---------------------------------------- glasses methods
+--------------------------------------- ui settings methods
+
+function glasses:setScale(value)
+    self.scale = value
+end
+
+--------------------------------------- glasses draw methods
 
 function glasses:clear()
     if self.type == 1 then
-        self.proxy:clear()
+        self.proxy.clear()
     end
 end
 
 function glasses:drawText(x, y, text, color)
+    x = (x - 1) * 8 * self.scale
+    y = (y - 1) * 8 * self.scale
+
     if self.type == 1 then
-        return self.proxy:addText(x, y, text, color)
+        local object = self.proxy.addText(x, y, text)
+        object.setColor(color)
+        object.setScale(self.scale)
+        return object
     end
 end
 
 function glasses:flush()
     if self.type == 1 then
-        self.proxy:sync()
+        self.proxy.sync()
     end
 end
 
 --------------------------------------- advanced methods
 
 function glasses:screenCapture(screen)
-    local oldRx, oldRy
-    local currentImageC = {}
-    local currentImageF = {}
-    local currentImageB = {}
-    local objects = {}
-
     return function ()
+        self:clear()
         local gpu = graphic.findGpu(screen)
         local rx, ry = gpu.getResolution()
-        if rx ~= oldRx or ry ~= oldRy then
-            self:clear()
-            oldRx, oldRy = rx, ry
-            currentImageC = {}
-            currentImageF = {}
-            currentImageB = {}
-        end
-        for i = 0, (rx * ry) - 1 do
-            local x, y = (i % rx) + 1, (i // ry) + 1
-            local char, fore, back = gpu.get(x, y)
-            if char ~= currentImageC[i] or fore ~= currentImageF[i] or back ~= currentImageB[i] then
-                if objects[i] then
-                    self:destroy(objects[i])
-                end
-
-                currentImageC[i] = char
-                currentImageF[i] = fore
-                currentImageB[i] = back
+        for ix = 1, rx do
+            for iy = 1, ry do
+                local char, fore, back = gpu.get(ix, iy)
+                self:drawText(ix, iy, "█", back)
+                self:drawText(ix, iy, char, fore)
+                glasses.ramCheck()
             end
         end
-
         self:flush()
     end
 end
@@ -89,10 +90,11 @@ end
 
 function glasses.create(address)
     local proxy = component.proxy(address)
-
     local obj = setmetatable({}, {__index = glasses})
     obj.proxy = proxy
     obj.type = select(2, table.exists(glassesTypes, proxy.type))
+    obj.scale = 0.5
+
     return obj
 end
 
