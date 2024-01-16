@@ -227,7 +227,7 @@ end
 function image.applyPalette(screen, path)
     path = image.repath(screen, path)
 
-    local pal = image.readPalette(path, screen)
+    local pal = image.readPalette(path, false, screen)
     if pal then
         graphic.setPalette(screen, pal)
         return true
