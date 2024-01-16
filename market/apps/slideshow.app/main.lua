@@ -87,7 +87,7 @@ function startButton:onClick()
                 for _, name in ipairs(fs.list(path)) do
                     local fullpath = paths.concat(path, name)
                     local exp = paths.extension(name)
-                    if exp == "t2p" or exp == "t3p" then
+                    if exp == "t2p" then
                         local sx, sy = image.size(fullpath)
                         local cropped
                         if not graphic.isValidResolution(screen, sx, sy) or not pcall(graphic.setResolution, screen, sx, sy) then

@@ -147,6 +147,19 @@ def get_popular_colors(image_path):
 
     return popular_colors
 
+def get_palette_colors(image_path):
+    image = cv2.imread(image_path)
+    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+    image = image.reshape(-1, 3)
+
+    color_counts = Counter(tuple(color) for color in image)
+    popular_colors = color_counts.most_common(16)
+
+    while len(popular_colors) < 16:
+        popular_colors.append(((0, 0, 0), 0))
+
+    return popular_colors
+
 def toCVcolor(color):
     r, g, b = hex_to_rgb(color)
     return [b, g, r, 0]
@@ -155,8 +168,8 @@ def toCVcolor(color):
 def find_closest_palette_color(color):
     return toCVcolor(colors3t[find_closest_color(convert_to_24bit(color), colors3t)])
 
-def find_closest_palette_color_t2(color):
-    return toCVcolor(colors[find_closest_color(convert_to_24bit(color), colors)])
+def find_closest_palette_color_t2(color, customPalette):
+    return toCVcolor(colors[find_closest_color(convert_to_24bit(color), customPalette)])
 
 def clamp(n, min, max): 
     if n < min: 
@@ -180,7 +193,7 @@ def floyd(image, t2mode):
 
             oldpixel = [image[y, x][0], image[y, x][1], image[y, x][2], image[y, x][3]]
             if t2mode:
-                newpixel = find_closest_palette_color_t2(oldpixel)
+                newpixel = find_closest_palette_color_t2(oldpixel, t2mode)
             else:
                 newpixel = find_closest_palette_color(oldpixel)
             newpixel[3] = oldpixel[3]
@@ -257,7 +270,7 @@ def imgToT2p(image, fullAdd, forceFull, addPal):
     outdata += (b"\0\0\0\0\0")
 
     if addPal:
-        for color in get_popular_colors(image_path):
+        for color in get_palette_colors(image_path):
             print("palcolor", color)
             outdata += (bytes([color[0][0]]))
             outdata += (bytes([color[0][1]]))
@@ -345,7 +358,7 @@ def imgToT2p(image, fullAdd, forceFull, addPal):
 
     return outdata
 
-def parse_image_pixelwise(image_path):
+def parse_image_pixelwise(image_path, forceAuto):
     # Загрузка изображения
     image = cv2.imread(image_path, cv2.IMREAD_UNCHANGED)
 
@@ -368,18 +381,19 @@ def parse_image_pixelwise(image_path):
     output_path3, _ = os.path.splitext(image_path)
     output_path3 += ".t3p"
 
-    autoMode = input("use auto-mode? y/N: ") == "y"
-    print("autoMode", autoMode)
+    autoMode = forceAuto
+    if not autoMode:
+        autoMode = input("use auto-mode? y/N: ") == "y"
+        print("autoMode", autoMode)
 
     if autoMode:
         imageT2 = copy.deepcopy(image)
         imageT3 = copy.deepcopy(image)
 
-        floyd(imageT2, True)
-        outbytes = imgToT2p(imageT2, False, False, False)
+        floyd(imageT2, get_palette_colors(image_path))
+        outbytes = imgToT2p(imageT2, False, False, True)
         with open(output_path, 'wb') as file:
             file.write(outbytes)
-
 
         floyd(imageT3, False)
         outbytes2 = imgToT2p(imageT3, True, True, False)
@@ -423,12 +437,20 @@ if __name__ == "__main__":
     try:
         image_path = False
         if len(sys.argv) < 2:
-            image_path = "C:\\Users\\Admin\\Documents\\GitHub\\liked\\other\\tools\\1.jpg"
+            print("specify the path to the image")
+            while True: pass
             pass
         else:
             image_path = sys.argv[1]
-        if parse_image_pixelwise(image_path):
-            while True: pass
+        
+        if os.path.isdir(image_path):
+            for f in os.listdir(image_path):
+                pathname = os.path.join(image_path, f)
+                if parse_image_pixelwise(pathname, False):
+                    while True: pass
+        else:
+            if parse_image_pixelwise(image_path, False):
+                while True: pass
 
     except Exception as e:
         # Обработка исключения и вывод сообщения
