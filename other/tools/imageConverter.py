@@ -220,27 +220,27 @@ def floyd(image, t2mode):
             #debug_print("add", quant_error_b, quant_error_g, quant_error_r)
             
             def lsum(x, y, rate):
-                image[y, x][0] = clamp(image[y, x][0] + quant_error_b * rate, 0, 255)
-                image[y, x][1] = clamp(image[y, x][1] + quant_error_g * rate, 0, 255)
-                image[y, x][2] = clamp(image[y, x][2] + quant_error_r * rate, 0, 255)
+                image[y, x][0] = clamp(image[y, x][0] + ((quant_error_b * rate) / 16), 0, 255)
+                image[y, x][1] = clamp(image[y, x][1] + ((quant_error_g * rate) / 16), 0, 255)
+                image[y, x][2] = clamp(image[y, x][2] + ((quant_error_r * rate) / 16), 0, 255)
 
             try:
-                lsum(x + 1, y, 7 / 16)
+                lsum(x + 1, y, 7)
             except Exception as e:
                 debug_print(f"colorset error 1: {e}")
             
             try:
-                lsum(x - 1, y + 1, 3 / 16)
+                lsum(x - 1, y + 1, 3)
             except Exception as e:
                 debug_print(f"colorset error 2: {e}")
 
             try:
-                lsum(x, y + 1, 5 / 16)
+                lsum(x, y + 1, 5)
             except Exception as e:
                 debug_print(f"colorset error 3: {e}")
 
             try:
-                lsum(x + 1, y + 1, 1 / 16)
+                lsum(x + 1, y + 1, 1)
             except Exception as e:
                 debug_print(f"colorset error 4: {e}")
 
