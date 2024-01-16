@@ -40,7 +40,7 @@ function glasses:clear()
 end
 
 function glasses:drawText(x, y, text, color)
-    x = (x - 1) * 4 * self.scale
+    x = (x - 1) * 6 * self.scale
     y = (y - 1) * 8 * self.scale
 
     if self.type == 1 then
@@ -61,10 +61,11 @@ end
 
 function glasses:screenCapture(screen)
     return function ()
-        self:clear()
         local gpu = graphic.findGpu(screen)
         local rx, ry = gpu.getResolution()
 
+        self:clear()
+        --[[
         local _, oldFore, oldBack = gpu.get(1, 1)
         local oldX, oldY = 1, 1
         local buff = ""
@@ -73,7 +74,7 @@ function glasses:screenCapture(screen)
             for cx = 1, rx do
                 local char, fore, back = gpu.get(cx, cy)
 
-                if fore ~= oldFore or back ~= oldBack or oldY ~= cy then
+                if fore ~= oldFore or back ~= oldBack or oldY ~= cy or unicode.len(buff) > 4 then
                     self:drawText(oldX, oldY, ("█"):rep(unicode.len(buff)), oldBack)
                     self:drawText(oldX, oldY, buff, oldFore)
                     glasses.ramCheck()
@@ -93,6 +94,16 @@ function glasses:screenCapture(screen)
             self:drawText(oldX, oldY, ("█"):rep(unicode.len(buff)), oldBack)
             self:drawText(oldX, oldY, buff, oldFore)
             glasses.ramCheck()
+        end
+        ]]
+
+        for cy = 1, ry do
+            for cx = 1, rx do
+                local char, fore, back = gpu.get(cx, cy)
+                self:drawText(cx, cy, "█", back)
+                self:drawText(cx, cy, char, fore)
+                glasses.ramCheck()
+            end
         end
 
         self:flush()
@@ -117,7 +128,7 @@ function glasses.create(address)
     local obj = setmetatable({}, {__index = glasses})
     obj.proxy = proxy
     obj.type = select(2, table.exists(glassesTypes, proxy.type))
-    obj.scale = 0.5
+    obj.scale = 0.7
 
     return obj
 end
