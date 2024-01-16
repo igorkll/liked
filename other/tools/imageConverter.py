@@ -391,7 +391,7 @@ def cropSize(img, mrx, mry):
     print("max resolution", mrx, mry)
     print("old resolution", width, height)
     print("new resolution", newWidth, newHeight)
-    return cv2.resize(img, (newHeight, newWidth))
+    return cv2.resize(img, (newWidth, newHeight))
 
 def parse_image_pixelwise(image_path, forceAuto, fake_image_path):
     debug_print(image_path, forceAuto, fake_image_path)
