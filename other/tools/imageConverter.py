@@ -40,6 +40,12 @@ def convert_rgb_to_24bit(r, g, b):
 def convert_to_24bit(col):
     return convert_rgb_to_24bit(col[2], col[1], col[0])
 
+def palette_convert(pal):
+    newpal = []
+    for c in pal:
+        newpal.append(convert_to_24bit(c[0]))
+    return newpal
+
 def make_braille(tbl):
     a, b, c, d, e, f, g, h = tbl[0][0], tbl[1][0], tbl[2][0], tbl[3][0], tbl[0][1], tbl[1][1], tbl[2][1], tbl[3][1]
     return chr(10240 + 128*h + 64*d + 32*g + 16*f + 8*e + 4*c + 2*b + a)
@@ -148,12 +154,8 @@ def get_popular_colors(image_path):
     return popular_colors
 
 def get_palette_colors(image_path):
-    image = cv2.imread(image_path)
-    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-    image = image.reshape(-1, 3)
-
-    color_counts = Counter(tuple(color) for color in image)
-    popular_colors = color_counts.most_common(16)
+    print("get_palette_colors", image_path)
+    popular_colors = get_popular_colors(image_path)
 
     while len(popular_colors) < 16:
         popular_colors.append(((0, 0, 0), 0))
@@ -240,7 +242,7 @@ def floyd(image, t2mode):
 
             #print("new color", image[y, x])
 
-def imgToT2p(image, fullAdd, forceFull, addPal):
+def imgToT2p(image, fullAdd, forceFull, addPal, palette=None):
     # Получение размеров изображения
     height, width, channels = image.shape
 
@@ -269,8 +271,8 @@ def imgToT2p(image, fullAdd, forceFull, addPal):
 
     outdata += (b"\0\0\0\0\0")
 
-    if addPal:
-        for color in get_palette_colors(image_path):
+    if addPal and palette:
+        for color in palette:
             print("palcolor", color)
             outdata += (bytes([color[0][0]]))
             outdata += (bytes([color[0][1]]))
@@ -358,7 +360,9 @@ def imgToT2p(image, fullAdd, forceFull, addPal):
 
     return outdata
 
-def parse_image_pixelwise(image_path, forceAuto):
+def parse_image_pixelwise(image_path, forceAuto, fake_image_path):
+    print(image_path, forceAuto, fake_image_path)
+
     # Загрузка изображения
     image = cv2.imread(image_path, cv2.IMREAD_UNCHANGED)
 
@@ -375,10 +379,10 @@ def parse_image_pixelwise(image_path, forceAuto):
         return
 
     # Генерация выходного пути на основе входного с изменением расширения на "t2p"
-    output_path, _ = os.path.splitext(image_path)
+    output_path, _ = os.path.splitext(fake_image_path)
     output_path += ".t2p"
 
-    output_path3, _ = os.path.splitext(image_path)
+    output_path3, _ = os.path.splitext(fake_image_path)
     output_path3 += ".t3p"
 
     autoMode = forceAuto
@@ -390,8 +394,9 @@ def parse_image_pixelwise(image_path, forceAuto):
         imageT2 = copy.deepcopy(image)
         imageT3 = copy.deepcopy(image)
 
-        floyd(imageT2, get_palette_colors(image_path))
-        outbytes = imgToT2p(imageT2, False, False, True)
+        palette = get_palette_colors(image_path)
+        floyd(imageT2, palette_convert(palette))
+        outbytes = imgToT2p(imageT2, False, False, True, palette)
         with open(output_path, 'wb') as file:
             file.write(outbytes)
 
@@ -446,10 +451,12 @@ if __name__ == "__main__":
         if os.path.isdir(image_path):
             for f in os.listdir(image_path):
                 pathname = os.path.join(image_path, f)
-                if parse_image_pixelwise(pathname, False):
+                if not os.path.exists(image_path + "_out"):
+                    os.mkdir(image_path + "_out")
+                if parse_image_pixelwise(pathname, True, os.path.join(image_path + "_out", f)):
                     while True: pass
         else:
-            if parse_image_pixelwise(image_path, False):
+            if parse_image_pixelwise(image_path, False, image_path):
                 while True: pass
 
     except Exception as e:
