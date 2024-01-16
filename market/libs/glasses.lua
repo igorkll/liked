@@ -2,6 +2,7 @@ local component = require("component")
 local gui = require("gui")
 local graphic = require("graphic")
 local computer = require("computer")
+local unicode = require("unicode")
 local glasses = {}
 
 function glasses.ramCheck()
@@ -39,7 +40,7 @@ function glasses:clear()
 end
 
 function glasses:drawText(x, y, text, color)
-    x = (x - 1) * 8 * self.scale
+    x = (x - 1) * 4 * self.scale
     y = (y - 1) * 8 * self.scale
 
     if self.type == 1 then
@@ -63,14 +64,37 @@ function glasses:screenCapture(screen)
         self:clear()
         local gpu = graphic.findGpu(screen)
         local rx, ry = gpu.getResolution()
-        for ix = 1, rx do
-            for iy = 1, ry do
-                local char, fore, back = gpu.get(ix, iy)
-                self:drawText(ix, iy, "█", back)
-                self:drawText(ix, iy, char, fore)
-                glasses.ramCheck()
+
+        local _, oldFore, oldBack = gpu.get(1, 1)
+        local oldX, oldY = 1, 1
+        local buff = ""
+
+        for cy = 1, ry do
+            for cx = 1, rx do
+                local char, fore, back = gpu.get(cx, cy)
+
+                if fore ~= oldFore or back ~= oldBack or oldY ~= cy then
+                    self:drawText(oldX, oldY, ("█"):rep(unicode.len(buff)), oldBack)
+                    self:drawText(oldX, oldY, buff, oldFore)
+                    glasses.ramCheck()
+
+                    oldFore = fore
+                    oldBack = back
+                    oldX = cx
+                    oldY = cy
+                    buff = char
+                else
+                    buff = buff .. char
+                end
             end
         end
+
+        if oldFore then
+            self:drawText(oldX, oldY, ("█"):rep(unicode.len(buff)), oldBack)
+            self:drawText(oldX, oldY, buff, oldFore)
+            glasses.ramCheck()
+        end
+
         self:flush()
     end
 end
