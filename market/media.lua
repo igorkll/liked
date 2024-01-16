@@ -69,7 +69,7 @@ local list = {
         urlPrimaryPart = selfurlpart .. "/media/slideshow/",
         files = (function()
             local list = {"icon.t2p"}
-            for i = 1, 3 do
+            for i = 1, 6 do
                 table.insert(list, tostring(math.round(i)) .. ".t2p")
                 table.insert(list, tostring(math.round(i)) .. ".t3p")
             end

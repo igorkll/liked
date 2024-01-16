@@ -83,11 +83,18 @@ function startButton:onClick()
         local first = true
 
         thread.create(function ()
+            local hidden = {}
+            for _, fullpath in ipairs(fs.list(path, true)) do
+                if fs.getAttribute(fullpath, "hidden") then
+                    hidden[fullpath] = true
+                end
+            end
+
             while true do
                 for _, name in ipairs(fs.list(path)) do
                     local fullpath = paths.concat(path, name)
                     local exp = paths.extension(name)
-                    if exp == "t2p" then
+                    if exp == "t2p" and not hidden[fullpath] then
                         local sx, sy = image.size(fullpath, screen)
                         local cropped
                         if not graphic.isValidResolution(screen, sx, sy) or not pcall(graphic.setResolution, screen, sx, sy) then
