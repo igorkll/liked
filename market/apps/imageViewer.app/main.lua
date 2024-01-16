@@ -92,7 +92,7 @@ function startButton:onClick()
         end
         if waterMark.state then
             gui.drawtext(screen, 2, sy - 3, 0xffffff, "Operating System     : likeOS & liked")
-            gui.drawtext(screen, 2, sy - 2, 0xffffff, "Application          : slideshow")
+            gui.drawtext(screen, 2, sy - 2, 0xffffff, "Application          : image viewer")
             gui.drawtext(screen, 2, sy - 1, 0xffffff, "Developer In Discord : smlogic")
         end
         graphic.forceUpdate(screen)
