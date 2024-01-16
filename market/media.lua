@@ -57,6 +57,28 @@ local list = {
         postInstall = function (self)
             fs.setAttribute(paths.concat(self.path, "icon.t2p"), "hidden", true)
         end
+    },
+    {
+        name = "slideshow",
+        version = "1",
+        vendor = "logic",
+        description = "slideshow set for tier2 and tier3",
+        minDiskSpace = 64,
+        
+        path = "/data/userdata/slideshow",
+        urlPrimaryPart = selfurlpart .. "/media/slideshow/",
+        files = (function()
+            local list = {"icon.t2p"}
+            for i = 1, 3 do
+                table.insert(list, tostring(math.round(i)) .. ".t2p")
+                table.insert(list, tostring(math.round(i)) .. ".t3p")
+            end
+            return list
+        end)(),
+        
+        postInstall = function (self)
+            fs.setAttribute(paths.concat(self.path, "icon.t2p"), "hidden", true)
+        end
     }
 }
 
