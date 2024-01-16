@@ -88,7 +88,7 @@ function startButton:onClick()
                     local fullpath = paths.concat(path, name)
                     local exp = paths.extension(name)
                     if exp == "t2p" then
-                        local sx, sy = image.size(fullpath)
+                        local sx, sy = image.size(fullpath, screen)
                         local cropped
                         if not graphic.isValidResolution(screen, sx, sy) or not pcall(graphic.setResolution, screen, sx, sy) then
                             sx, sy = graphic.maxResolution(screen)
@@ -108,7 +108,7 @@ function startButton:onClick()
                         end
                         local startTime = computer.uptime()
                         if cropped then
-                            local ix, iy = image.size(fullpath)
+                            local ix, iy = image.size(fullpath, screen)
                             image.draw(screen, fullpath, 1 - (ix / 2), 1 - (iy / 2), nil, true)
                         else
                             image.draw(screen, fullpath, 1, 1, nil, true)
