@@ -13,6 +13,7 @@ local gui = require("gui")
 local format = require("format")
 local sysdata = require("sysdata")
 local apps = require("apps")
+local test = require("test")
 
 local colors = gui_container.colors
 
@@ -476,7 +477,7 @@ local function draw(clear)
     local added = {}
 
     for _, v in ipairs(list) do
-        local finding = format.escape_pattern(searchRead.getBuffer())
+        local finding = test.escapePattern(searchRead.getBuffer())
         
         local function isSearch(str)
             if not str or finding == "" then
