@@ -131,6 +131,12 @@ def hex_to_rgb(hex_color):
 
     return red, green, blue
 
+def palette_deconvert(pal):
+    newpal = []
+    for c in pal:
+        newpal.append(((hex_to_rgb(c)), 255))
+    return newpal
+
 def color_similarity2(color1, color2):
     # Извлекаем компоненты цвета
     r1, g1, b1 = color1
@@ -208,8 +214,7 @@ def floyd(image, t2mode):
             if len(oldpixel) >= 4:
                 newpixel[3] = oldpixel[3]
             elif len(newpixel) >= 4:
-                print("rmpixel", newpixel)
-                newpixel.remove(3)
+                del newpixel[3]
 
             image[y, x] = newpixel
 
@@ -372,6 +377,22 @@ def imgToT2p(image, fullAdd, forceFull, addPal, palette=None):
 
     return outdata
 
+def cropSize(img, mrx, mry):
+    height, width, channels = img.shape
+    newHeight, newWidth = height, width
+    while newHeight > mrx or newWidth > mrx or ((newHeight * newWidth) > (mrx * mry)):
+        newHeight = newHeight * 0.9
+        newWidth = newWidth * 0.9
+
+    newHeight = math.floor(newHeight)
+    newWidth = math.floor(newWidth)
+
+    print("-- crop")
+    print("max resolution", mrx, mry)
+    print("old resolution", width, height)
+    print("new resolution", newWidth, newHeight)
+    return cv2.resize(img, (newHeight, newWidth))
+
 def parse_image_pixelwise(image_path, forceAuto, fake_image_path):
     debug_print(image_path, forceAuto, fake_image_path)
 
@@ -403,12 +424,13 @@ def parse_image_pixelwise(image_path, forceAuto, fake_image_path):
         debug_print("autoMode", autoMode)
 
     if autoMode:
-        imageT2 = copy.deepcopy(image)
-        imageT3 = copy.deepcopy(image)
+        imageT2 = cropSize(copy.deepcopy(image), 160, 100)
+        imageT3 = cropSize(copy.deepcopy(image), 320, 200)
 
-        palette = get_palette_colors(image_path)
-        floyd(imageT2, palette_convert(palette))
-        outbytes = imgToT2p(imageT2, False, False, True, palette)
+        # palette = get_palette_colors(image_path)
+        palette = colors
+        floyd(imageT2, palette)
+        outbytes = imgToT2p(imageT2, False, False, True, palette_deconvert(palette))
         with open(output_path, 'wb') as file:
             file.write(outbytes)
 
