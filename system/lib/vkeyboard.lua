@@ -6,6 +6,9 @@ local computer = require("computer")
 local lastinfo = require("lastinfo")
 local thread = require("thread")
 local utils = require("utils")
+local vcomponent = require("vcomponent")
+local hook = require("hook")
+local uuid = require("uuid")
 local vkeyboard = {}
 
 local function postDraw(self)
@@ -14,10 +17,18 @@ local function postDraw(self)
     self.gui.window:fill(self.x, self.y + (self.sy - 1), self.sx, 1, bg, uix.colors.lightGray, "⣤")
 end
 
-function vkeyboard.input(screen, splash)
+function vkeyboard.input(screen, splash, allowActions)
     local rx, ry = graphic.getResolution(screen)
     local window = graphic.createWindow(screen, 5, ry - 18, rx - 8, 18)
-    local layout = uix.create(window, uix.colors.lightGray, "square")
+
+    local layout1 = uix.create(window, uix.colors.lightGray, "square")
+    local layout2 = uix.create(window, uix.colors.lightGray, "square")
+    local layout = layout1
+
+    local function selectLayout(l)
+        layout = l
+        layout:draw()
+    end
 
     local currentInput, returnVal = ""
     local inputLabel = layout:createLabel(2, 2, window.sizeX - 2, 1, uix.colors.gray, uix.colors.white)
@@ -61,16 +72,20 @@ function vkeyboard.input(screen, splash)
     local upperCase = layout:createCheckbox(40, window.sizeY - 1)
     layout:createText(43, window.sizeY - 1, nil, "Upper Case")
 
-    local function addButton(index, y, char)
-        local button = layout:createButton(8 + ((index - 1) * 4), 4 + (y * 3), 3, 3, uix.colors.blue, uix.colors.white, char, true)
+    local function addButton(index, y, char, func)
+        local button = layout:createButton(8 + ((index - 1) * 4), 4 + (y * 3), 3, 3, func and uix.colors.green or uix.colors.blue, uix.colors.white, char, true)
         button.postDraw = postDraw
         function button:onClick()
-            if upperCase.state then
-                currentInput = currentInput .. char:upper()
+            if func then
+                func(self)
             else
-                currentInput = currentInput .. char
+                if upperCase.state then
+                    currentInput = currentInput .. char:upper()
+                else
+                    currentInput = currentInput .. char
+                end
+                doInput()
             end
-            doInput()
         end
     end
 
@@ -141,11 +156,49 @@ function vkeyboard.input(screen, splash)
     addButton(15, 3, "&")
     addButton(16, 3, "*")
 
+    if allowActions then
+        addButton(13, 4, "#", function ()
+            selectLayout(layout2)
+        end)
+    end
     addButton(14, 4, "~")
     addButton(15, 4, ",")
     addButton(16, 4, ".")
 
-    layout:draw()
+    layout = layout2
+
+    local back = layout:createButton(window.sizeX - 3, 1, 3, 1, uix.colors.red, uix.colors.white, "X", true)
+    back.postDraw = postDraw
+    function back:onClick()
+        selectLayout(layout1)
+    end
+
+    addButton(0, -1, "^W", function ()
+        returnVal = {23, 17}
+    end)
+
+    addButton(1, -1, "^A", function ()
+        returnVal = {1, 30}
+    end)
+
+    addButton(2, -1, "^C", function ()
+        returnVal = {3, 46}
+    end)
+
+    addButton(3, -1, "^V", function ()
+        returnVal = {22, 47}
+    end)
+
+    addButton(4, -1, "^X", function ()
+        returnVal = {24, 45}
+    end)
+
+    addButton(5, -1, "^Y", function ()
+        returnVal = {25, 21}
+    end)
+
+
+    selectLayout(layout1)
 
     while true do
         local eventData = {event.pull()}
@@ -189,6 +242,19 @@ function vkeyboard.hook(screen, exitCallback)
     if hooked[screen] then return end
     hooked[screen] = true
 
+    local virtualKeyboardUuid = uuid.next()
+    hook.addComponentHook(screen, function (address, method, args)
+        return address, method, args, function (result)
+            if result[1] and method == "getKeyboards" then
+                if type(result[2]) == "table" then
+                    table.insert(result[2], virtualKeyboardUuid)
+                end
+            end
+            return result
+        end
+    end)
+    vcomponent.register(virtualKeyboardUuid, "keyboard", {}, {})
+
     event.hyperHook(function (...)
         local tbl = {...}
 
@@ -224,9 +290,14 @@ function vkeyboard.hook(screen, exitCallback)
                 end
                 local clear = vkeyboard.save(screen)
 
-                local str = vkeyboard.input(tbl[2])
+                local str = vkeyboard.input(tbl[2], nil, true)
                 if str then
-                    event.push("softwareInsert", tbl[2], str, tbl[3])
+                    if type(str) == "table" then
+                        event.push("key_down", virtualKeyboardUuid, str[1], str[2], tbl[3])
+                        event.push("key_up", virtualKeyboardUuid, str[1], str[2], tbl[3])
+                    else
+                        event.push("softwareInsert", tbl[2], str, tbl[3])
+                    end
                 end
                 if exitCallback then
                     exitCallback()
