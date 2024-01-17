@@ -423,6 +423,15 @@ function apps.check()
             end
         end
     end
+
+    for name in pairs(shadowApps) do
+        if not installedApps[name] then
+            local lpath = paths.concat(shadowPath, name)
+            if fs.isDirectory(lpath) then
+                fs.remove(lpath)
+            end
+        end
+    end
 end
 
 apps.unloadable = true
