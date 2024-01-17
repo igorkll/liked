@@ -163,11 +163,11 @@ function gui.shadow(gpu, x, y, sx, sy, mul, full)
                 end
             end
         elseif registry.shadowType == "smart" then
-            local shadowPosesX, shadowPosesY = getPoses()
+            if depth > 1 then
+                local shadowPosesX, shadowPosesY = getPoses()
 
-            local palcache = {}
-            local function getPalCol(source)
-                if depth > 1 then
+                local palcache = {}
+                local function getPalCol(source)
                     for i = 0, 15 do
                         local col = palcache[i]
                         if not col then
@@ -179,20 +179,28 @@ function gui.shadow(gpu, x, y, sx, sy, mul, full)
                         end
                     end
                 end
-                return 0
-            end
 
-            for i = 1, #shadowPosesX do
-                local ok, char, fore, back, forePal, backPal = pcall(gpu.get, shadowPosesX[i], shadowPosesY[i])
-                if ok and char and fore and back then
-                    table.insert(origs, {shadowPosesX[i], shadowPosesY[i], char, fore, back})
+                for i = 1, #shadowPosesX do
+                    local ok, char, fore, back, forePal, backPal = pcall(gpu.get, shadowPosesX[i], shadowPosesY[i])
+                    if ok and char and fore and back then
+                        table.insert(origs, {shadowPosesX[i], shadowPosesY[i], char, fore, back})
 
-                    if not forePal then forePal = getPalCol(fore) end
-                    gpu.setForeground(gui.smartShadowsColors[forePal + 1], depth > 1)
-                    if not backPal then backPal = getPalCol(back) end
-                    gpu.setBackground(gui.smartShadowsColors[backPal + 1], depth > 1)
-                    
-                    gpu.set(shadowPosesX[i], shadowPosesY[i], char)
+                        if not forePal then forePal = getPalCol(fore) end
+                        if forePal then
+                            gpu.setForeground(gui_container.indexsColors[gui.smartShadowsColors[forePal + 1] + 1])
+                        else
+                            gpu.setForeground(fore)
+                        end
+                        
+                        if not backPal then backPal = getPalCol(back) end
+                        if backPal then
+                            gpu.setBackground(gui_container.indexsColors[gui.smartShadowsColors[backPal + 1] + 1])
+                        else
+                            gpu.setBackground(back)
+                        end
+
+                        gpu.set(shadowPosesX[i], shadowPosesY[i], char)
+                    end
                 end
             end
         elseif registry.shadowType == "simple" then
