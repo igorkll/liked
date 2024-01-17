@@ -336,7 +336,8 @@ function apps.postInstall(screen, nickname, path, version)
     end
 
     createShadow(paths.name(path))
-    installedInfo[paths.name(path)] = tostring(version or "unknown")
+    installedInfo.data[paths.name(path)] = tostring(version or "unknown")
+    installedInfo.save()
     registry.save()
     return true
 end
@@ -378,7 +379,8 @@ function apps.uninstall(screen, nickname, path, hide)
         if text.startwith(unicode, path, appsPath) then
             fs.remove(paths.concat(shadowPath, paths.name(path)))
         end
-        installedInfo[paths.name(path)] = nil
+        installedInfo.data[paths.name(path)] = nil
+        installedInfo.save()
     end
     registry.save()
     return true
@@ -407,12 +409,12 @@ function apps.check()
             createShadow(name)
         end
 
-        if not installedInfo[name] then
+        if not installedInfo.data[name] then
             apps.postInstall(nil, nil, paths.concat(appsPath, name))
         end
     end
 
-    for name in pairs(installedInfo) do
+    for name in pairs(installedInfo.data) do
         if not installedApps[name] then
             local lpath = paths.concat(shadowPath, name)
             if fs.isDirectory(lpath) then
