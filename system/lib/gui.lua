@@ -166,37 +166,31 @@ function gui.shadow(gpu, x, y, sx, sy, mul, full)
             if depth > 1 then
                 local shadowPosesX, shadowPosesY = getPoses()
 
-                local palcache = {}
                 local function getPalCol(source)
                     for i = 0, 15 do
-                        local col = palcache[i]
-                        if not col then
-                            col = gpu.getPaletteColor(i)
-                            palcache[i] = col
-                        end
-                        if col == source then
+                        if gui_container.indexsColors[i + 1] == source then
                             return i
                         end
                     end
                 end
 
                 for i = 1, #shadowPosesX do
-                    local ok, char, fore, back, forePal, backPal = pcall(gpu.get, shadowPosesX[i], shadowPosesY[i])
+                    local ok, char, fore, back = pcall(gpu.get, shadowPosesX[i], shadowPosesY[i])
                     if ok and char and fore and back then
                         table.insert(origs, {shadowPosesX[i], shadowPosesY[i], char, fore, back})
 
-                        if not forePal then forePal = getPalCol(fore) end
+                        local forePal = getPalCol(fore)
                         if forePal then
                             gpu.setForeground(gui_container.indexsColors[gui.smartShadowsColors[forePal + 1] + 1])
                         else
-                            gpu.setForeground(fore)
+                            gpu.setForeground(colorslib.colorMul(fore, mul or 0.6))
                         end
                         
-                        if not backPal then backPal = getPalCol(back) end
+                        local backPal = getPalCol(back)
                         if backPal then
                             gpu.setBackground(gui_container.indexsColors[gui.smartShadowsColors[backPal + 1] + 1])
                         else
-                            gpu.setBackground(back)
+                            gpu.setBackground(colorslib.colorMul(back, mul or 0.6))
                         end
 
                         gpu.set(shadowPosesX[i], shadowPosesY[i], char)
