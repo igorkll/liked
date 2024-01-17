@@ -14,9 +14,37 @@ local gui = require("gui")
 local gui_container = require("gui_container")
 local archiver = require("archiver")
 local component = require("component")
+local text = require("text")
+local unicode = require("unicode")
 local apps = {}
 
 local installedInfo = registry.new("/data/installedInfo.dat")
+local appsPath = "/data/apps/"
+local shadowPath = "/data/applicationsShadow/"
+
+local function appList(folder)
+    local list = {}
+    for _, name in ipairs(fs.list(folder)) do
+        local fullpath = paths.concat(folder, name)
+        if fs.isDirectory(fullpath) then
+            list[paths.name(name)] = true
+        end
+    end
+    return list
+end
+
+local function createShadow(appName)
+    fs.makeDirectory(paths.concat(shadowPath, appName))
+
+    local function move(file)
+        fs.copy(paths.concat(appsPath, appName, file), paths.concat(shadowPath, appName, file))
+    end
+    
+    move("unreg.reg")
+    move("formats.cfg")
+    move("uninstall.lua")
+    move("autorun.lua")
+end
 
 local function doFormats(appPath, path, delete)
     local data = assert(serialization.load(path))
@@ -281,11 +309,15 @@ function apps.executeWithWarn(name, screen, nickname, ...)
 end
 
 function apps.postInstall(screen, nickname, path, version)
-    path = paths.canonical(path)
+    local function lassert(...)
+        if screen then
+            liked.assert(...)
+        end
+    end
 
     local regPath = paths.concat(path, "reg.reg")
     if fs.exists(regPath) and not fs.isDirectory(regPath) then
-        liked.assert(screen, apps.execute("applyReg", screen, nickname, regPath, true))
+        lassert(apps.execute("applyReg", screen, nickname, regPath, true))
     end
 
     local formatsPath = paths.concat(path, "formats.cfg")
@@ -295,7 +327,7 @@ function apps.postInstall(screen, nickname, path, version)
 
     local installPath = paths.concat(path, "install.lua")
     if fs.exists(installPath) and not fs.isDirectory(installPath) then
-        liked.assert(screen, apps.execute(installPath, screen, nickname))
+        lassert(apps.execute(installPath, screen, nickname))
     end
 
     local autorunPath = paths.concat(path, "autorun.lua")
@@ -304,21 +336,29 @@ function apps.postInstall(screen, nickname, path, version)
         apps.execute(autorunPath, screen, nickname)
     end
 
-    installedInfo[path] = version or "unknown"
+    if text.startwith(unicode, path, appsPath) then
+        createShadow(paths.name(path))
+    end
+
+    installedInfo[paths.name(path)] = tostring(version or "unknown")
     registry.save()
     return true
 end
 
 function apps.uninstall(screen, nickname, path, hide)
-    path = paths.canonical(path)
+    local function lassert(...)
+        if screen then
+            liked.assert(...)
+        end
+    end
 
-    if not hide then
+    if not hide and screen then
         gui.status(screen, nil, nil, "uninstalling \"" .. gui.hideExtension(screen, path) .. "\"...")
     end
 
     local unregPath = paths.concat(path, "unreg.reg")
     if fs.exists(unregPath) and not fs.isDirectory(unregPath) then
-        liked.assert(screen, apps.execute("applyReg", screen, nickname, unregPath, true))
+        lassert(apps.execute("applyReg", screen, nickname, unregPath, true))
     end
 
     local formatsPath = paths.concat(path, "formats.cfg")
@@ -328,9 +368,9 @@ function apps.uninstall(screen, nickname, path, hide)
 
     local uninstallPath = paths.concat(path, "uninstall.lua")
     if fs.exists(uninstallPath) and not fs.isDirectory(uninstallPath) then
-        liked.assert(screen, apps.execute(uninstallPath, screen, nickname))
+        lassert(apps.execute(uninstallPath, screen, nickname))
     else
-        liked.assert(screen, fs.remove(path))
+        lassert(fs.remove(path))
     end
 
     local autorunPath = paths.concat(path, "autorun.lua")
@@ -338,7 +378,11 @@ function apps.uninstall(screen, nickname, path, hide)
         require("autorun").reg("system", autorunPath, true)
     end
 
-    installedInfo[path] = nil
+    if text.startwith(unicode, path, appsPath) then
+        fs.remove(paths.concat(shadowPath, paths.name(path)))
+    end
+
+    installedInfo[paths.name(path)] = nil
     registry.save()
     return true
 end
@@ -357,35 +401,6 @@ function apps.install(screen, nickname, path, hide)
     return ok, err
 end
 
--------------------------------- checker
-
-local appsPath = "/data/apps"
-local shadowPath = "/data/applicationsShadow"
-
-local function appList(folder)
-    local list = {}
-    for _, name in ipairs(fs.list(folder)) do
-        local fullpath = paths.concat(folder, name)
-        if fs.isDirectory(fullpath) then
-            list[name] = true
-        end
-    end
-    return list
-end
-
-local function createShadow(appName)
-    fs.makeDirectory(paths.concat(shadowPath, appName))
-
-    local function move(file)
-        fs.copy(paths.concat(appsPath, appName, file), paths.concat(shadowPath, appName, file))
-    end
-    
-    move("unreg.reg")
-    move("formats.cfg")
-    move("uninstall.lua")
-    move("autorun.lua")
-end
-
 function apps.check()
     local installedApps = appList(appsPath)
     local shadowApps = appList(shadowPath)
@@ -393,6 +408,19 @@ function apps.check()
     for name in pairs(installedApps) do
         if not shadowApps[name] then
             createShadow(name)
+        end
+
+        if not installedInfo[name] then
+            apps.postInstall(nil, nil, paths.concat(appsPath, name))
+        end
+    end
+
+    for name in pairs(installedInfo) do
+        if not installedApps[name] then
+            local lpath = paths.concat(shadowPath, name)
+            if fs.isDirectory(lpath) then
+                apps.uninstall(nil, nil, lpath)
+            end
         end
     end
 end

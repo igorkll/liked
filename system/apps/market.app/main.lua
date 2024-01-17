@@ -169,7 +169,7 @@ local function modifyList(lst)
             _install(self)
             if v.postInstall then v:postInstall() end
             contentVersions[self.name] = self.version
-            apps.postInstall(screen, nickname, self.path)
+            apps.postInstall(screen, nickname, self.path, self.version)
         end
     
         if not v.icon and v.urlPrimaryPart then
