@@ -43,6 +43,6 @@ if not liked.recoveryMode then
     end
 
     realCheck()
-    event.timer(5, check, math.huge)
+    event.timer(60, check, math.huge)
     event.listen("accountChanged", check)
 end

@@ -23,6 +23,8 @@ local screensaver = require("screensaver")
 local image = require("image")
 local logs = require("logs")
 local sysinit = require("sysinit")
+local lastinfo = require("lastinfo")
+local vcomponent = require("vcomponent")
 local liked = {recoveryMode = bootloader.recoveryMode}
 
 local colors = gui_container.colors
@@ -695,6 +697,15 @@ function liked.minRamForDBuff()
         kb = kb + 256
     end
     return kb
+end
+
+function liked.isRealKeyboards(screen)
+    for i, address in ipairs(lastinfo.keyboards[screen]) do
+        if not vcomponent.isVirtual(address) then
+            return true
+        end
+    end
+    return false
 end
 
 --------------------------------------------------------
