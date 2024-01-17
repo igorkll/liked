@@ -9,6 +9,7 @@ local utils = require("utils")
 local vcomponent = require("vcomponent")
 local hook = require("hook")
 local uuid = require("uuid")
+local gui = require("gui")
 local vkeyboard = {}
 
 local function postDraw(self)
@@ -20,6 +21,7 @@ end
 function vkeyboard.input(screen, splash, allowActions)
     local rx, ry = graphic.getResolution(screen)
     local window = graphic.createWindow(screen, 5, ry - 18, rx - 8, 18)
+    gui.shadow(graphic.findGpu(screen), 5, ry - 18, rx - 8, 18)
 
     local layout1 = uix.create(window, uix.colors.lightGray, "square")
     local layout2 = uix.create(window, uix.colors.lightGray, "square")
@@ -221,7 +223,7 @@ end
 
 function vkeyboard.save(screen)
     local rx, ry = graphic.getResolution(screen)
-    local clear = graphic.screenshot(screen, 5, ry - 18, rx - 8, 18)
+    local clear = graphic.screenshot(screen, 5, ry - 18, rx - 6, 19)
 
     local oldStates = {}
     for i, window in ipairs(graphic.windows) do

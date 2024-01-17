@@ -5,12 +5,15 @@ local programs = require("programs")
 local internet = require("internet")
 local thread = require("thread")
 local liked = require("liked")
+local apps = require("apps")
 
 if not liked.recoveryMode then
     local storagePath = "/data/userdata/cloudStorage"
     local publicStoragePath = "/data/userdata/publicStorage"
 
     local function realCheck()
+        apps.check()
+        
         if internet.check() then
             account.check()
             

@@ -799,6 +799,7 @@ function gui.select(screen, cx, cy, label, actions, scroll, noCloseButton, overl
     end
 
     local window = graphic.createWindow(screen, cx, cy, 50, 16, true)
+    local noShadow = gui.shadow(graphic.findGpu(screen), cx, cy, 50, 16)
 
     --------------------------------------------
 
@@ -943,6 +944,7 @@ function gui.select(screen, cx, cy, label, actions, scroll, noCloseButton, overl
         if windowEventCallback then
             local ret, lAlwaysConfirm = windowEventCallback(windowEventData, window)
             if ret ~= nil then
+                noShadow()
                 return ret
             end
             if alwaysConfirm ~= lAlwaysConfirm then
@@ -954,10 +956,12 @@ function gui.select(screen, cx, cy, label, actions, scroll, noCloseButton, overl
         if windowEventData[1] == "touch" then
             if windowEventData[3] >= window.sizeX - 2 and windowEventData[4] == 1 then
                 if not noCloseButton then
+                    noShadow()
                     return nil, scroll, windowEventData[5], windowEventData
                 end
             elseif windowEventData[3] >= window.sizeX - 9 and windowEventData[3] < window.sizeX and windowEventData[4] == window.sizeY then
                 if sel or alwaysConfirm then
+                    noShadow()
                     return sel, scroll, windowEventData[5], windowEventData, true
                 end
             end
@@ -981,6 +985,7 @@ function gui.select(screen, cx, cy, label, actions, scroll, noCloseButton, overl
                 if windowEventData[1] == "touch" and sel and sel == addrsIdx[windowEventData[4]] then
                     draw(sel)
                     redrawButton()
+                    noShadow()
                     return sel, scroll, windowEventData[5], windowEventData
                 end
                 local oldsel = sel

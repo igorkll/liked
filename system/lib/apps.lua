@@ -16,6 +16,89 @@ local archiver = require("archiver")
 local component = require("component")
 local apps = {}
 
+local installedInfo = registry.new("/data/installedInfo.dat")
+
+local function doFormats(appPath, path, delete)
+    local data = assert(serialization.load(path))
+
+    if not registry.data.gui_container then registry.data.gui_container = {} end
+    if not registry.data.gui_container.knownExps then registry.data.gui_container.knownExps = {} end
+    if not registry.data.gui_container.typecolors then registry.data.gui_container.typecolors = {} end
+    if not registry.data.gui_container.typenames then registry.data.gui_container.typenames = {} end
+    if not registry.data.gui_container.editable then registry.data.gui_container.editable = {} end
+    if not registry.data.gui_container.openVia then registry.data.gui_container.openVia = {} end
+    
+    local function rmData(extension, key)
+        registry.data.gui_container[key][extension] = nil
+        gui_container[key][extension] = nil
+    end
+
+    for extension, formatInfo in pairs(data) do
+        if delete then
+            rmData(extension, "knownExps")
+        else
+            registry.data.gui_container.knownExps[extension] = true
+        end
+
+        if formatInfo.color then
+            if delete then
+                rmData(extension, "typecolors")
+            else
+                registry.data.gui_container.typecolors[extension] = formatInfo.color
+            end
+        else
+            rmData(extension, "typecolors")
+        end
+
+        if formatInfo.name then
+            if delete then
+                rmData(extension, "typenames")
+            else
+                registry.data.gui_container.typenames[extension] = formatInfo.name
+            end
+        else
+            rmData(extension, "typenames")
+        end
+
+        if formatInfo.editable then
+            if delete then
+                rmData(extension, "editable")
+            else
+                registry.data.gui_container.editable[extension] = true
+            end
+        else
+            rmData(extension, "editable")
+        end
+
+        if formatInfo.program then
+            if delete then
+                rmData(extension, "openVia")
+            else
+                registry.data.gui_container.openVia[extension] = paths.xconcat(appPath, formatInfo.program)
+            end
+        else
+            rmData(extension, "openVia")
+        end
+
+        if formatInfo.icon then
+            if not registry.data.icons then
+                registry.data.icons = {}
+            end
+
+            if delete then
+                registry.data.icons[extension] = nil
+            else
+                registry.data.icons[extension] = paths.xconcat(appPath, formatInfo.icon)
+            end
+        end
+    end
+
+    registry.save()
+    gui_container.refresh()
+end
+
+--------------------------------------------
+
 function apps.load(name, screen, nickname)
     checkArg(1, name, "string")
     checkArg(2, screen, "string", "nil")
@@ -197,86 +280,9 @@ function apps.executeWithWarn(name, screen, nickname, ...)
     return table.unpack(result)
 end
 
-local function doFormats(appPath, path, delete)
-    local data = assert(serialization.load(path))
+function apps.postInstall(screen, nickname, path, version)
+    path = paths.canonical(path)
 
-    if not registry.data.gui_container then registry.data.gui_container = {} end
-    if not registry.data.gui_container.knownExps then registry.data.gui_container.knownExps = {} end
-    if not registry.data.gui_container.typecolors then registry.data.gui_container.typecolors = {} end
-    if not registry.data.gui_container.typenames then registry.data.gui_container.typenames = {} end
-    if not registry.data.gui_container.editable then registry.data.gui_container.editable = {} end
-    if not registry.data.gui_container.openVia then registry.data.gui_container.openVia = {} end
-    
-    local function rmData(extension, key)
-        registry.data.gui_container[key][extension] = nil
-        gui_container[key][extension] = nil
-    end
-
-    for extension, formatInfo in pairs(data) do
-        if delete then
-            rmData(extension, "knownExps")
-        else
-            registry.data.gui_container.knownExps[extension] = true
-        end
-
-        if formatInfo.color then
-            if delete then
-                rmData(extension, "typecolors")
-            else
-                registry.data.gui_container.typecolors[extension] = formatInfo.color
-            end
-        else
-            rmData(extension, "typecolors")
-        end
-
-        if formatInfo.name then
-            if delete then
-                rmData(extension, "typenames")
-            else
-                registry.data.gui_container.typenames[extension] = formatInfo.name
-            end
-        else
-            rmData(extension, "typenames")
-        end
-
-        if formatInfo.editable then
-            if delete then
-                rmData(extension, "editable")
-            else
-                registry.data.gui_container.editable[extension] = true
-            end
-        else
-            rmData(extension, "editable")
-        end
-
-        if formatInfo.program then
-            if delete then
-                rmData(extension, "openVia")
-            else
-                registry.data.gui_container.openVia[extension] = paths.xconcat(appPath, formatInfo.program)
-            end
-        else
-            rmData(extension, "openVia")
-        end
-
-        if formatInfo.icon then
-            if not registry.data.icons then
-                registry.data.icons = {}
-            end
-
-            if delete then
-                registry.data.icons[extension] = nil
-            else
-                registry.data.icons[extension] = paths.xconcat(appPath, formatInfo.icon)
-            end
-        end
-    end
-
-    registry.save()
-    gui_container.refresh()
-end
-
-function apps.postInstall(screen, nickname, path)
     local regPath = paths.concat(path, "reg.reg")
     if fs.exists(regPath) and not fs.isDirectory(regPath) then
         liked.assert(screen, apps.execute("applyReg", screen, nickname, regPath, true))
@@ -298,11 +304,14 @@ function apps.postInstall(screen, nickname, path)
         apps.execute(autorunPath, screen, nickname)
     end
 
+    installedInfo[path] = version or "unknown"
     registry.save()
     return true
 end
 
 function apps.uninstall(screen, nickname, path, hide)
+    path = paths.canonical(path)
+
     if not hide then
         gui.status(screen, nil, nil, "uninstalling \"" .. gui.hideExtension(screen, path) .. "\"...")
     end
@@ -329,16 +338,9 @@ function apps.uninstall(screen, nickname, path, hide)
         require("autorun").reg("system", autorunPath, true)
     end
 
+    installedInfo[path] = nil
     registry.save()
     return true
-end
-
-local function appList()
-    local list = {}
-    for _, name in ipairs(fs.list("/data/apps")) do
-        list[name] = true
-    end
-    return list
 end
 
 function apps.install(screen, nickname, path, hide)
@@ -348,17 +350,51 @@ function apps.install(screen, nickname, path, hide)
         gui.status(screen, nil, nil, "installing \"" .. name .. "\"...")
     end
 
-    local oldAppList = appList()
     local ok, err = archiver.unpack(path, "/data")
-    if not ok then return nil, err end
-    for appName in pairs(appList()) do --тут есть проблема, если через xpkg обновить приложения, то postInstall не запуститься
-        if not oldAppList[appName] then
-            local fullpath = paths.concat("/data/apps", appName)
-            apps.postInstall(screen, nickname, fullpath)
+    if ok then
+        apps.check()
+    end
+    return ok, err
+end
+
+-------------------------------- checker
+
+local appsPath = "/data/apps"
+local shadowPath = "/data/applicationsShadow"
+
+local function appList(folder)
+    local list = {}
+    for _, name in ipairs(fs.list(folder)) do
+        local fullpath = paths.concat(folder, name)
+        if fs.isDirectory(fullpath) then
+            list[name] = true
         end
     end
+    return list
+end
 
-    return true
+local function createShadow(appName)
+    fs.makeDirectory(paths.concat(shadowPath, appName))
+
+    local function move(file)
+        fs.copy(paths.concat(appsPath, appName, file), paths.concat(shadowPath, appName, file))
+    end
+    
+    move("unreg.reg")
+    move("formats.cfg")
+    move("uninstall.lua")
+    move("autorun.lua")
+end
+
+function apps.check()
+    local installedApps = appList(appsPath)
+    local shadowApps = appList(shadowPath)
+
+    for name in pairs(installedApps) do
+        if not shadowApps[name] then
+            createShadow(name)
+        end
+    end
 end
 
 apps.unloadable = true

@@ -8,16 +8,20 @@ local fs = require("filesystem")
 local paths = require("paths")
 local gui = require("gui")
 local uix = require("uix")
+local registry = require("registry")
 
 local cx, cy = gui.getBigZone(screen)
 
 local window = graphic.createWindow(screen, cx, cy, 50, 16, true)
-local layout = uix.create(window, nil, uix.styles[2])
-local checkbox = layout:createCheckbox(2, 11, not not fs.getAttribute(path, "hidden"), colors.red, colors.gray, colors.black)
-layout:createText(5, 11, colors.black, "hidden")
+gui.shadow(graphic.findGpu(screen), cx, cy, 50, 16)
 
-function checkbox:onSwitch()
-    fs.setAttribute(path, "hidden", self.state)
+local layout = uix.create(window, nil, uix.styles[2])
+if not registry.disableHiddenFiles then
+    local checkbox = layout:createCheckbox(2, 11, not not fs.getAttribute(path, "hidden"), colors.red, colors.gray, colors.black)
+    layout:createText(5, 11, colors.black, "hidden")
+    function checkbox:onSwitch()
+        fs.setAttribute(path, "hidden", self.state)
+    end
 end
 
 window:clear(colors.white)
