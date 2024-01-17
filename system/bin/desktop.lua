@@ -254,7 +254,7 @@ local function draw(old, check) --вызывает все перерисовки
         local fsProxy, localFsPath = fs.get(path)
         local isFs = paths.equals(localFsPath, "/")
 
-        local shortName, fullName = liked.getName(screen, path)
+        local shortName, fullName = liked.getName(screen, path, not not customPath)
         local icon = liked.getIcon(screen, path)
 
         local icondata = {

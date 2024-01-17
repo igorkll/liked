@@ -442,9 +442,9 @@ function liked.reg(str, key, value)
 end
 ]]
 
-function liked.getName(screen, path)
+function liked.getName(screen, path, isAlias)
     local name
-    if gui_container.viewFileExps[screen] then
+    if not isAlias and gui_container.viewFileExps[screen] then
         name = paths.name(path)
     else
         name = paths.name(paths.hideExtension(path))
