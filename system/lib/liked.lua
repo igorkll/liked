@@ -219,8 +219,8 @@ function liked.applyPowerMode()
                     if eventData[1] and wakeupEvents[eventData[1]] then
                         event.minTime = 0.05
                         oldWakeTIme = computer.uptime()
-                    elseif computer.uptime() - oldWakeTIme > 4 then
-                        event.minTime = 5
+                    elseif computer.uptime() - oldWakeTIme > 10 then
+                        event.minTime = 4
                     end
                 end
             end)
