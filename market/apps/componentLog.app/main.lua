@@ -5,6 +5,7 @@ local paths = require("paths")
 local logs = require("logs")
 local hook = require("hook")
 local event = require("event")
+local advLabeling = require("advLabeling")
 
 _G.componentLog = _G.componentLog or {}
 

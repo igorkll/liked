@@ -414,6 +414,8 @@ function apps.install(screen, nickname, path, hide)
 end
 
 function apps.check()
+    if liked.recoveryMode then return end
+    
     local installedApps = appList(appsPath)
     local shadowApps = appList(shadowPath)
 

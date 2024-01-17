@@ -55,14 +55,16 @@ local function runScreenSaver(force)
     oldScreenSaverTime = computer.uptime()
 end
 
-if graphic.getDeviceTier(screen) <= 1 then
-    vcursor.hook(screen)
-    vcursor.setEnable(screen, true)
-end
+if not liked.recoveryMode then
+    if graphic.getDeviceTier(screen) <= 1 then
+        vcursor.hook(screen)
+        vcursor.setEnable(screen, true)
+    end
 
-vkeyboard.hook(screen, function ()
-    oldScreenSaverTime = computer.uptime()
-end)
+    vkeyboard.hook(screen, function ()
+        oldScreenSaverTime = computer.uptime()
+    end)
+end
 
 while true do
     local eventData = {event.pull(0.1)}
@@ -76,6 +78,8 @@ while true do
     elseif (eventData[1] == "vcursor_key_down" or eventData[1] == "vcursor_key_up" or eventData[1] == "vcursor_clipboard") and table.exists(lastinfo.keyboards[screen] or {}, eventData[2]) then
         oldScreenSaverTime = computer.uptime()
     elseif registry.screenSaverTimer and computer.uptime() - oldScreenSaverTime > registry.screenSaverTimer then
-        runScreenSaver()
+        if not liked.recoveryMode then
+            runScreenSaver()
+        end
     end
 end
