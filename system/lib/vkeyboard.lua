@@ -63,6 +63,11 @@ function vkeyboard.input(screen, splash, allowActions)
         returnVal = currentInput
     end
 
+    local back = layout:createButton(window.sizeX - 2, 1, 3, 1, uix.colors.red, uix.colors.white, "X", true)
+    function back:onClick()
+        returnVal = true
+    end
+
     local space = layout:createButton(3, window.sizeY - 1, window.sizeX / 2, 1, uix.colors.blue, uix.colors.white, "⣇" .. ("⣀"):rep(4) .. "⣸", true)
     function space:onClick()
         currentInput = currentInput .. " "
@@ -72,8 +77,8 @@ function vkeyboard.input(screen, splash, allowActions)
     local upperCase = layout:createCheckbox(40, window.sizeY - 1)
     layout:createText(43, window.sizeY - 1, nil, "Upper Case")
 
-    local function addButton(index, y, char, func)
-        local button = layout:createButton(8 + ((index - 1) * 4), 4 + (y * 3), 3, 3, func and uix.colors.green or uix.colors.blue, uix.colors.white, char, true)
+    local function addButton(index, y, char, func, line1)
+        local button = layout:createButton(8 + ((index - 1) * 4), (line1 and 2 or 4) + (y * 3), 3, 3, func and uix.colors.green or uix.colors.blue, uix.colors.white, char, true)
         button.postDraw = postDraw
         function button:onClick()
             if func then
@@ -167,35 +172,34 @@ function vkeyboard.input(screen, splash, allowActions)
 
     layout = layout2
 
-    local back = layout:createButton(window.sizeX - 3, 1, 3, 1, uix.colors.red, uix.colors.white, "X", true)
-    back.postDraw = postDraw
+    local back = layout:createButton(window.sizeX - 2, 1, 3, 1, uix.colors.red, uix.colors.white, "X", true)
     function back:onClick()
         selectLayout(layout1)
     end
 
-    addButton(0, -1, "^W", function ()
+    addButton(0, 0, "^W", function ()
         returnVal = {23, 17}
-    end)
+    end, true)
 
-    addButton(1, -1, "^A", function ()
+    addButton(1, 0, "^A", function ()
         returnVal = {1, 30}
-    end)
+    end, true)
 
-    addButton(2, -1, "^C", function ()
+    addButton(2, 0, "^C", function ()
         returnVal = {3, 46}
-    end)
+    end, true)
 
-    addButton(3, -1, "^V", function ()
+    addButton(3, 0, "^V", function ()
         returnVal = {22, 47}
-    end)
+    end, true)
 
-    addButton(4, -1, "^X", function ()
+    addButton(4, 0, "^X", function ()
         returnVal = {24, 45}
-    end)
+    end, true)
 
-    addButton(5, -1, "^Y", function ()
+    addButton(5, 0, "^Y", function ()
         returnVal = {25, 21}
-    end)
+    end, true)
 
 
     selectLayout(layout1)
@@ -260,7 +264,7 @@ function vkeyboard.hook(screen, exitCallback)
 
         return utils.safeExec(function ()
             if tbl[1] == "touch" then
-                if tbl[2] == screen and #lastinfo.keyboards[screen] == 0 then
+                if tbl[2] == screen and #lastinfo.keyboards[screen] <= 1 then
                     if clicks[tbl[2]] then
                         local clk = clicks[tbl[2]]
 
