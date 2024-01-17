@@ -18,8 +18,7 @@ local clipboard = require("clipboard")
 local parser = require("parser")
 local gui = {colors = colors}
 gui.blackMode = false
-
-local smartShadowsColors = {
+gui.smartShadowsColors = {
     colorslib.lightGray, --1)  white
     colorslib.brown,     --2)  orange
     colorslib.purple,    --3)  magenta
@@ -189,9 +188,9 @@ function gui.shadow(gpu, x, y, sx, sy, mul, full)
                     table.insert(origs, {shadowPosesX[i], shadowPosesY[i], char, fore, back})
 
                     if not forePal then forePal = getPalCol(fore) end
-                    gpu.setForeground(smartShadowsColors[forePal + 1], depth > 1)
+                    gpu.setForeground(gui.smartShadowsColors[forePal + 1], depth > 1)
                     if not backPal then backPal = getPalCol(back) end
-                    gpu.setBackground(smartShadowsColors[backPal + 1], depth > 1)
+                    gpu.setBackground(gui.smartShadowsColors[backPal + 1], depth > 1)
                     
                     gpu.set(shadowPosesX[i], shadowPosesY[i], char)
                 end

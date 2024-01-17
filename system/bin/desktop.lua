@@ -340,12 +340,17 @@ local function draw(old, check) --вызывает все перерисовки
                 --if selectedIcons[userPath] == icon.index then
                 --    window:fill(iconX - 2, iconY - 1, iconSizeX + 4, iconSizeY + 2, colors.blue, 0, " ")
                 --end
+                local baseColor = liked.getBaseWallpaperColor()
                 local x, y = window:toRealPos(math.floor((centerIconX - (unicode.len(icon.shortName) / 2)) + 0.5), centerIconY + 2)
-                gui.drawtext(screen, x, y, icon.hidden and colors.lightGray or colors.white, icon.shortName)
+                gui.drawtext(screen, x, y, icon.hidden and colors.lightGray or (baseColor == colors.white and colors.black or colors.white), icon.shortName)
                 --window:set(iconX - (unicode.len(icon.name) // 2), iconY + iconY - 2, colors.lightBlue, colors.white, icon.name)
                 if icon.icon then
                     local sx, sy = window:toRealPos(iconX, iconY)
-                    pcall(image.draw, screen, icon.icon, sx, sy, true)
+                    if baseColor ~= colors.lightBlue then
+                        pcall(image.draw, screen, icon.icon, sx, sy, true, nil, nil, nil, baseColor)
+                    else
+                        pcall(image.draw, screen, icon.icon, sx, sy, true)
+                    end
                 end
             end
         end

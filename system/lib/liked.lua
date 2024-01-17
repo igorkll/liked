@@ -637,6 +637,18 @@ function liked.getIcon(screen, path)
     return icon
 end
 
+function liked.getBaseWallpaperColor()
+    local baseColor = colors.lightBlue
+    if registry.wallpaperBaseColor then
+        if type(registry.wallpaperBaseColor) == "string" then
+            baseColor = colors[registry.wallpaperBaseColor]
+        elseif type(registry.wallpaperBaseColor) == "number" then
+            baseColor = registry.wallpaperBaseColor
+        end
+    end
+    return baseColor
+end
+
 function liked.drawWallpaper(screen, customFolder)
     local gpu = graphic.findGpu(screen)
     local rx, ry = gpu.getResolution()
@@ -649,14 +661,7 @@ function liked.drawWallpaper(screen, customFolder)
         return
     end
 
-    local baseColor = colors.lightBlue
-    if registry.wallpaperBaseColor then
-        if type(registry.wallpaperBaseColor) == "string" then
-            baseColor = colors[registry.wallpaperBaseColor]
-        elseif type(registry.wallpaperBaseColor) == "number" then
-            baseColor = registry.wallpaperBaseColor
-        end
-    end
+    local baseColor = liked.getBaseWallpaperColor()
     
     gpu.setBackground(colorlib.colorMul(baseColor, registry.wallpaperLight or 1))
     gpu.fill(1, 1, rx, ry, " ")
