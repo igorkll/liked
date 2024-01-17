@@ -43,7 +43,6 @@ local function createShadow(appName)
     move("unreg.reg")
     move("formats.cfg")
     move("uninstall.lua")
-    move("autorun.lua")
 end
 
 local function doFormats(appPath, path, delete)
