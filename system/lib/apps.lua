@@ -310,7 +310,7 @@ end
 function apps.postInstall(screen, nickname, path, version)
     local function lassert(...)
         if screen then
-            liked.assert(...)
+            liked.assert(screen, ...)
         end
     end
 
@@ -335,10 +335,7 @@ function apps.postInstall(screen, nickname, path, version)
         apps.execute(autorunPath, screen, nickname)
     end
 
-    if text.startwith(unicode, path, appsPath) then
-        createShadow(paths.name(path))
-    end
-
+    createShadow(paths.name(path))
     installedInfo[paths.name(path)] = tostring(version or "unknown")
     registry.save()
     return true
@@ -347,7 +344,7 @@ end
 function apps.uninstall(screen, nickname, path, hide)
     local function lassert(...)
         if screen then
-            liked.assert(...)
+            liked.assert(screen, ...)
         end
     end
 
@@ -377,11 +374,12 @@ function apps.uninstall(screen, nickname, path, hide)
         require("autorun").reg("system", autorunPath, true)
     end
 
-    if text.startwith(unicode, path, appsPath) then
-        fs.remove(paths.concat(shadowPath, paths.name(path)))
+    if not fs.exists(path) then
+        if text.startwith(unicode, path, appsPath) then
+            fs.remove(paths.concat(shadowPath, paths.name(path)))
+        end
+        installedInfo[paths.name(path)] = nil
     end
-
-    installedInfo[paths.name(path)] = nil
     registry.save()
     return true
 end
@@ -419,15 +417,6 @@ function apps.check()
             local lpath = paths.concat(shadowPath, name)
             if fs.isDirectory(lpath) then
                 apps.uninstall(nil, nil, lpath)
-            end
-        end
-    end
-
-    for name in pairs(shadowApps) do
-        if not installedApps[name] then
-            local lpath = paths.concat(shadowPath, name)
-            if fs.isDirectory(lpath) then
-                fs.remove(lpath)
             end
         end
     end
