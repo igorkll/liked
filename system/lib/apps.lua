@@ -314,6 +314,12 @@ function apps.postInstall(screen, nickname, path, version)
         end
     end
 
+    version = tostring(version or "unknown")
+    local pname = paths.name(path)
+    if installedInfo.data[pname] and installedInfo.data[pname] == version then
+        return false
+    end
+
     local regPath = paths.concat(path, "reg.reg")
     if fs.exists(regPath) and not fs.isDirectory(regPath) then
         lassert(apps.execute("applyReg", screen, nickname, regPath, true))
@@ -335,8 +341,8 @@ function apps.postInstall(screen, nickname, path, version)
         apps.execute(autorunPath, screen, nickname)
     end
 
-    createShadow(paths.name(path))
-    installedInfo.data[paths.name(path)] = tostring(version or "unknown")
+    createShadow(pname)
+    installedInfo.data[pname] = version
     installedInfo.save()
     registry.save()
     return true
