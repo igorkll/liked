@@ -792,7 +792,7 @@ function gui.drawtext(screen, posX, posY, foreground, text)
     end
 end
 
-function gui.select(screen, cx, cy, label, actions, scroll, noCloseButton, overlay, windowEventCallback)
+function gui.select(screen, cx, cy, label, actions, scroll, noCloseButton, overlay, windowEventCallback, noCleanShadow, disableShadow)
     --=gui_select(screen, nil, nil, "LOLZ", {"test 1", "test 2", "test 3"})
 
     local gpu = graphic.findGpu(screen)
@@ -801,7 +801,10 @@ function gui.select(screen, cx, cy, label, actions, scroll, noCloseButton, overl
     end
 
     local window = graphic.createWindow(screen, cx, cy, 50, 16, true)
-    local noShadow = gui.shadow(graphic.findGpu(screen), cx, cy, 50, 16)
+    local noShadow
+    if not disableShadow then
+        noShadow = gui.shadow(graphic.findGpu(screen), cx, cy, 50, 16)
+    end
 
     --------------------------------------------
 
@@ -946,8 +949,8 @@ function gui.select(screen, cx, cy, label, actions, scroll, noCloseButton, overl
         if windowEventCallback then
             local ret, lAlwaysConfirm = windowEventCallback(windowEventData, window)
             if ret ~= nil then
-                noShadow()
-                return ret
+                if not noCleanShadow and noShadow then noShadow() end
+                return ret, nil, nil, nil, nil, noShadow
             end
             if alwaysConfirm ~= lAlwaysConfirm then
                 alwaysConfirm = lAlwaysConfirm
@@ -958,13 +961,13 @@ function gui.select(screen, cx, cy, label, actions, scroll, noCloseButton, overl
         if windowEventData[1] == "touch" then
             if windowEventData[3] >= window.sizeX - 2 and windowEventData[4] == 1 then
                 if not noCloseButton then
-                    noShadow()
-                    return nil, scroll, windowEventData[5], windowEventData
+                    if not noCleanShadow and noShadow then noShadow() end
+                    return nil, scroll, windowEventData[5], windowEventData, nil, noShadow
                 end
             elseif windowEventData[3] >= window.sizeX - 9 and windowEventData[3] < window.sizeX and windowEventData[4] == window.sizeY then
                 if sel or alwaysConfirm then
-                    noShadow()
-                    return sel, scroll, windowEventData[5], windowEventData, true
+                    if not noCleanShadow and noShadow then noShadow() end
+                    return sel, scroll, windowEventData[5], windowEventData, true, noShadow
                 end
             end
         end
@@ -987,8 +990,8 @@ function gui.select(screen, cx, cy, label, actions, scroll, noCloseButton, overl
                 if windowEventData[1] == "touch" and sel and sel == addrsIdx[windowEventData[4]] then
                     draw(sel)
                     redrawButton()
-                    noShadow()
-                    return sel, scroll, windowEventData[5], windowEventData
+                    if not noCleanShadow and noShadow then noShadow() end
+                    return sel, scroll, windowEventData[5], windowEventData, nil, noShadow
                 end
                 local oldsel = sel
                 sel = addrsIdx[windowEventData[4]]
@@ -1067,6 +1070,7 @@ function gui.selectcomponent(screen, cx, cy, types, allowAutoConfirm, control, c
     end
 
     local cancel, out
+    local gNoShadow
 
     local th
     th = thread.create(function ()
@@ -1075,6 +1079,7 @@ function gui.selectcomponent(screen, cx, cy, types, allowAutoConfirm, control, c
         end
 
         local scroll
+        local shadowDrawer
 
         while true do
             local strs = {}
@@ -1108,8 +1113,12 @@ function gui.selectcomponent(screen, cx, cy, types, allowAutoConfirm, control, c
                 return
             end
 
-            local idx, lscroll, button, eventData = gui.select(screen, cx, cy, typesstr, strs, scroll, control)
+            local idx, lscroll, button, eventData, _, noShadow = gui.select(screen, cx, cy, typesstr, strs, scroll, control, nil, nil, true, shadowDrawer)
             scroll = lscroll
+            if not shadowDrawer then
+                gNoShadow = noShadow
+            end
+            shadowDrawer = true
 
             if idx then
                 local addr = addresses[idx]
@@ -1189,6 +1198,7 @@ function gui.selectcomponent(screen, cx, cy, types, allowAutoConfirm, control, c
         local eventData = {computer.pullSignal(0.1)}
 
         if cancel or out then
+            gNoShadow()
             return out
         end
 
