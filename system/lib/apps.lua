@@ -351,7 +351,7 @@ function apps.uninstall(screen, nickname, path, hide)
 
     if fs.get(path).address ~= fs.bootaddress then
         if screen then
-            gui.warn(screen, nil, nil, "it is not possible to uninstall the application from another disk\nuse the \"remove\" operation")
+            gui.warn(screen, nil, nil, "it is not possible to uninstall the application from another disk.\nuse the \"remove\" operation")
         end
         return
     end
