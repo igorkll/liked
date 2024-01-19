@@ -190,9 +190,14 @@ function account.getStorage()
     local existsCache = {}
     local isDirCache = {}
     local function cacheClr(path)
-        path = paths.canonical(path)
-        existsCache[path] = nil
-        isDirCache[path] = nil
+        if path then
+            path = paths.canonical(path)
+            existsCache[path] = nil
+            isDirCache[path] = nil
+        else
+            existsCache = {}
+            isDirCache = {}            
+        end
     end
 
 
@@ -231,12 +236,12 @@ function account.getStorage()
     end
 
     function proxy.remove(path)
-        cacheClr(path)
+        cacheClr()
         return request("remove", path)
     end
 
     function proxy.rename(path, path2)
-        cacheClr(path2)
+        cacheClr()
         return request("rename", path, path2)
     end
 
@@ -314,8 +319,6 @@ function account.getStorage()
     end
 
     function proxy.open(path, mode)
-        cacheClr(path)
-
         mode = (mode or "rb"):lower()
         local modeChar = mode:sub(1, 1)
         local byteMode = mode:sub(2, 2) == "b"
@@ -335,6 +338,7 @@ function account.getStorage()
             end
         end
 
+        cacheClr(path)
         return obj
     end
 
