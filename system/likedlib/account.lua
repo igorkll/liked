@@ -263,8 +263,20 @@ function account.getStorage()
     function proxy.read(obj, size)
         size = math.min(size, 2048)
         if obj.readMode then
-            local str = obj.content.sub(obj.tool, 1, size)
+            local str = obj.tool.sub(obj.content, obj.cur, obj.cur + (size - 1))
+            obj.cur = obj.cur + obj.tool.len(str)
+            return str
         end
+    end
+
+    function proxy.seek(obj, mode, offset)
+        if mode == "cur" then
+            obj.cur = obj.cur + offset
+        if mode == "set" then
+            obj.cur = offset + 1
+        end
+        if obj.cur < 1 then obj.cur = 1 end
+        return obj.cur - 1
     end
 
     function proxy.write(obj, str)
@@ -285,6 +297,7 @@ function account.getStorage()
         obj.writeMode = modeChar == "w" or modeChar == "a"
         obj.content = ""
         obj.tool = byteMode and string or unicode
+        obj.cur = 1
 
         if obj.readMode or modeChar == "a" then
             obj.content = readFile(path)
