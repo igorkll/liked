@@ -187,7 +187,16 @@ function account.getStorage()
 
     ------------------------------------
     
-    local dirCache = {}
+    local existsCache = {}
+    local isDirCache = {}
+    local function cacheClr(path)
+        path = paths.canonical(path)
+        existsCache[path] = nil
+        isDirCache[path] = nil
+    end
+
+
+
     local proxy = {}
 
     function proxy.spaceUsed()
@@ -200,19 +209,21 @@ function account.getStorage()
 
     function proxy.exists(path)
         path = paths.canonical(path)
-        if dirCache[path] ~= nil then
-            return true
+        if existsCache[path] ~= nil then
+            return existsCache[path]
         end
-        return request("exists", path)
+
+        existsCache[path] = request("exists", path)
+        return existsCache[path]
     end
 
     function proxy.isDirectory(path)
         path = paths.canonical(path)
-        if dirCache[path] ~= nil then
-            return dirCache[path]
+        if isDirCache[path] ~= nil then
+            return isDirCache[path]
         end
-        dirCache[path] = request("isDirectory", path)
-        return dirCache[path]
+        isDirCache[path] = request("isDirectory", path)
+        return isDirCache[path]
     end
 
     function proxy.lastModified(path)
@@ -220,14 +231,12 @@ function account.getStorage()
     end
 
     function proxy.remove(path)
-        path = paths.canonical(path)
-        dirCache[path] = nil
+        cacheClr(path)
         return request("remove", path)
     end
 
     function proxy.rename(path, path2)
-        path2 = paths.canonical(path2)
-        dirCache[path2] = nil
+        cacheClr(path2)
         return request("rename", path, path2)
     end
 
@@ -236,8 +245,7 @@ function account.getStorage()
     end
 
     function proxy.makeDirectory(path)
-        path = paths.canonical(path)
-        dirCache[path] = nil
+        cacheClr(path)
         return request("makeDirectory", path)
     end
 
@@ -306,8 +314,8 @@ function account.getStorage()
     end
 
     function proxy.open(path, mode)
-        path = paths.canonical(path)
-        dirCache[path] = nil
+        cacheClr(path)
+
         mode = (mode or "rb"):lower()
         local modeChar = mode:sub(1, 1)
         local byteMode = mode:sub(2, 2) == "b"

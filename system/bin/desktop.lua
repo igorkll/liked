@@ -992,7 +992,7 @@ local function doIcon(windowEventData)
                 isCut = false
             end
 
-            local readonly = fs.get(userPath).isReadOnly()
+            local readonly = fs.isReadOnly(userPath)
             local strs = {"  paste", "  mount", "  download file", true, "  new directory", "  new text-file", "  new image"}
             local actives = {not not copyObject and not readonly, true, not not component.list("internet")() and not readonly,   false,   not readonly,   not readonly,   not readonly}
 

@@ -109,7 +109,10 @@ function calls.load(name)
     end
 
     local path = calls.find(name)
-    if not path then return nil, "no such call" end
+    if not path then
+        calls.cache[name] = true
+        return nil, "no such call"
+    end
 
     local file, err = fs.open(path, "rb")
     if not file then return nil, err end
@@ -119,7 +122,7 @@ function calls.load(name)
     local code, err = load(data, "=" .. path, nil, _G) --не _ENV потому что там "личьные" глобалы в _G то что нужно системным вызовам
     if not code then return nil, err end
 
-    calls.cache[name] = true
+    calls.cache[name] = code
     return code
 end
 
