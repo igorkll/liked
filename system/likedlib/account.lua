@@ -264,15 +264,18 @@ function account.getStorage()
         size = math.min(size, 2048)
         if obj.readMode then
             local str = obj.tool.sub(obj.content, obj.cur, obj.cur + (size - 1))
-            obj.cur = obj.cur + obj.tool.len(str)
-            return str
+            local strlen = obj.tool.len(str)
+            obj.cur = obj.cur + strlen
+            if strlen > 0 then
+                return str
+            end
         end
     end
 
     function proxy.seek(obj, mode, offset)
         if mode == "cur" then
             obj.cur = obj.cur + offset
-        if mode == "set" then
+        elseif mode == "set" then
             obj.cur = offset + 1
         end
         if obj.cur < 1 then obj.cur = 1 end
@@ -310,6 +313,7 @@ function account.getStorage()
 
     proxy.type = "filesystem"
     proxy.uuid = uuid.next()
+    proxy.virtual = true
     proxy.cloud = true
     return proxy
 end
