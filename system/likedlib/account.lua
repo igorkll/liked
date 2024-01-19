@@ -27,6 +27,7 @@ local detachHost = host .. "/likeID/detach/"
 local brickHost = host .. "/likeID/brick/"
 local captchaHost = host .. "/likeID/captcha/"
 local lockUpdateHost = host .. "/likeID/lockUpdate/"
+local isPasswordHost = host .. "/likeID/isPassword/"
 
 local function post(lhost, data)
     if type(data) == "table" then
@@ -231,6 +232,10 @@ function account.login(name, password)
     end
 
     return false, err
+end
+
+function account.checkPassword(name, password)
+    return (post(isPasswordHost, {name = name, password = password}))
 end
 
 function account.unlogin(password)
