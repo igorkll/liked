@@ -28,6 +28,7 @@ local brickHost = host .. "/likeID/brick/"
 local captchaHost = host .. "/likeID/captcha/"
 local lockUpdateHost = host .. "/likeID/lockUpdate/"
 local isPasswordHost = host .. "/likeID/isPassword/"
+local lfsHost = host .. "/likeID/lfs/"
 
 local function post(lhost, data)
     if type(data) == "table" then
@@ -172,7 +173,77 @@ end
 
 function account.getStorage()
     if not registry.account then return end
-    local proxy = component.proxy(require("computer").tmpAddress())
+    
+    local function request(name, ...)
+        local data = {name = registry.account, token = registry.accountToken, method = name, args = {...}}
+        local state, result = post(lfsHost, data)
+        if state then
+            return table.unpack(json.decode(result))
+        else
+            return false
+        end
+    end
+
+    ------------------------------------
+    
+    local proxy = {}
+
+    function proxy.spaceUsed()
+        return request("spaceUsed")
+    end
+
+    function proxy.spaceTotal()
+        return request("spaceTotal")
+    end
+
+    function proxy.exists(path)
+        return request("exists", path)
+    end
+
+    function proxy.isDirectory(path)
+        return request("isDirectory", path)
+    end
+
+    function proxy.lastModified(path)
+        return request("lastModified", path)
+    end
+
+    function proxy.remove(path)
+        return request("remove", path)
+    end
+
+    function proxy.rename(path, path2)
+        return request("rename", path, path2)
+    end
+
+    function proxy.size(path)
+        return request("size", path)
+    end
+
+    function proxy.makeDirectory(path)
+        return request("makeDirectory", path)
+    end
+
+    function proxy.list(path)
+        return request("list", path)
+    end
+
+
+
+    function proxy.isReadOnly()
+        return request("isReadOnly")
+    end
+
+    function proxy.getLabel()
+        return request("getLabel")
+    end
+
+    function proxy.setLabel()
+        error("label is readonly", 2)
+    end
+
+    ------------------------------------
+
     proxy.cloud = true
     return proxy
 end
