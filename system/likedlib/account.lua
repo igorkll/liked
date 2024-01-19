@@ -312,7 +312,7 @@ function account.getStorage()
     ------------------------------------
 
     proxy.type = "filesystem"
-    proxy.uuid = uuid.next()
+    proxy.address = uuid.next()
     proxy.virtual = true
     proxy.cloud = true
     return proxy
