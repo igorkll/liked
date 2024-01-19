@@ -11,6 +11,7 @@ local paths = require("paths")
 local fs = require("filesystem")
 local event = require("event")
 local component = require("component")
+local unicode = require("unicode")
 local account = {}
 
 local host = "http://127.0.0.1"
@@ -244,6 +245,58 @@ function account.getStorage()
 
     ------------------------------------
 
+    local function readFile(path)
+        return request("readFile", path)
+    end
+
+    local function writeFile(path, data)
+        return request("writeFile", path, data)
+    end
+
+
+    function proxy.close(obj)
+        if obj.writeMode then
+            writeFile(obj.path, obj.content)
+        end
+    end
+
+    function proxy.read(obj, size)
+        size = math.min(size, 2048)
+        if obj.readMode then
+            local str = obj.content.sub(obj.tool, 1, size)
+        end
+    end
+
+    function proxy.write(obj, str)
+        if obj.writeMode then
+            obj.content = obj.content .. str
+            return true
+        end
+    end
+
+    function proxy.open(path, mode)
+        mode = (mode or "rb"):lower()
+        local modeChar = mode:sub(1, 1)
+        local byteMode = mode:sub(2, 2) == "b"
+
+        local obj = {}
+        obj.path = path
+        obj.readMode = modeChar == "r"
+        obj.writeMode = modeChar == "w" or modeChar == "a"
+        obj.content = ""
+        obj.tool = byteMode and string or unicode
+
+        if obj.readMode or modeChar == "a" then
+            obj.content = readFile(path)
+        end
+
+        return obj
+    end
+
+    ------------------------------------
+
+    proxy.type = "filesystem"
+    proxy.uuid = uuid.next()
     proxy.cloud = true
     return proxy
 end
