@@ -187,6 +187,7 @@ function account.getStorage()
 
     ------------------------------------
     
+    local dirCache = {}
     local proxy = {}
 
     function proxy.spaceUsed()
@@ -198,11 +199,20 @@ function account.getStorage()
     end
 
     function proxy.exists(path)
+        path = paths.canonical(path)
+        if dirCache[path] ~= nil then
+            return true
+        end
         return request("exists", path)
     end
 
     function proxy.isDirectory(path)
-        return request("isDirectory", path)
+        path = paths.canonical(path)
+        if dirCache[path] ~= nil then
+            return dirCache[path]
+        end
+        dirCache[path] = request("isDirectory", path)
+        return dirCache[path]
     end
 
     function proxy.lastModified(path)
@@ -210,10 +220,14 @@ function account.getStorage()
     end
 
     function proxy.remove(path)
+        path = paths.canonical(path)
+        dirCache[path] = nil
         return request("remove", path)
     end
 
     function proxy.rename(path, path2)
+        path2 = paths.canonical(path2)
+        dirCache[path2] = nil
         return request("rename", path, path2)
     end
 
@@ -222,6 +236,8 @@ function account.getStorage()
     end
 
     function proxy.makeDirectory(path)
+        path = paths.canonical(path)
+        dirCache[path] = nil
         return request("makeDirectory", path)
     end
 
@@ -290,6 +306,8 @@ function account.getStorage()
     end
 
     function proxy.open(path, mode)
+        path = paths.canonical(path)
+        dirCache[path] = nil
         mode = (mode or "rb"):lower()
         local modeChar = mode:sub(1, 1)
         local byteMode = mode:sub(2, 2) == "b"
@@ -304,6 +322,9 @@ function account.getStorage()
 
         if obj.readMode or modeChar == "a" then
             obj.content = readFile(path)
+            if not obj.content then
+                return
+            end
         end
 
         return obj
