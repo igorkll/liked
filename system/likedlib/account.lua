@@ -13,7 +13,9 @@ local event = require("event")
 local component = require("component")
 local account = {}
 
-local host = "http://176.53.161.98"
+local host = "http://127.0.0.1"
+--local host = "http://176.53.161.98"
+
 local regHost = host .. "/likeID/reg/"
 local unregHost = host .. "/likeID/unreg/"
 local changePasswordHost = host .. "/likeID/changePassword/"
@@ -24,6 +26,7 @@ local getLockedHost = host .. "/likeID/getLocked/"
 local detachHost = host .. "/likeID/detach/"
 local brickHost = host .. "/likeID/brick/"
 local captchaHost = host .. "/likeID/captcha/"
+local lockUpdateHost = host .. "/likeID/lockUpdate/"
 
 local function post(lhost, data)
     if type(data) == "table" then
@@ -143,6 +146,10 @@ function account.check()
         if not post(userExistsHost, {name = registry.account}) then
             registry.accountToken = nil
             registry.account = nil
+        end
+
+        if registry.account and registry.accountToken then
+            post(lockUpdateHost, {name = registry.account, token = registry.accountToken, device = account.deviceId()})
         end
     end
 end
