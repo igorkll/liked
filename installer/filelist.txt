@@ -1,3 +1,4 @@
+/system/boxBlacklist.lst
 /system/LICENSE
 /system/logo.lua
 /system/main.lua
@@ -55,7 +56,6 @@
 /system/bin/setup.app/end.lua
 /system/bin/setup.app/inet.lua
 /system/bin/setup.app/main.lua
-/system/calls/gui_filepicker.lua
 /system/firmware/likeloader/code.lua
 /system/firmware/likeloader/label.txt
 /system/firmware/luabios/code.lua

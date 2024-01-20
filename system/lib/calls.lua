@@ -80,6 +80,23 @@ calls.loaded = { --тут записаны функции которые ран�
 
     screenshot = function (screen, x, y, sx, sy)
         return require("graphic").screenshot(screen, x, y, sx, sy)
+    end,
+
+    gui_filepicker = function (screen, cx, cy, dir, exp, save, dirmode, dircombine, defname)
+        local iowindows = require("iowindows")
+        if dirmode then
+            if save then
+                return iowindows.savefolder(screen, exp)
+            else
+                return iowindows.selectfolder(screen, exp)
+            end
+        else
+            if save then
+                return iowindows.savefile(screen, exp)
+            else
+                return iowindows.selectfile(screen, exp)
+            end
+        end
     end
 } --вы можете записать сюда функции которые не должны выгружаться
 calls.cache = {}

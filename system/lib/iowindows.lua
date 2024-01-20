@@ -15,7 +15,14 @@ local function iowindow(screen, dirmode, exp, save)
         title = title .. "select "
     end
     
+    local exps
     if exp then
+        if type(exp) == "table" then
+            exps = exp
+            exp = exps[1]
+        else
+            exps = {exp}
+        end
         title = title .. (gui_container.typenames[exp] or exp) .. " "
     end
 
@@ -87,11 +94,9 @@ local function iowindow(screen, dirmode, exp, save)
                     reader = window:readNoDraw(5, window.sizeY, 16, gui_container.colors.white, gui_container.colors.gray, nil, nil, nil, true)
                     if inputTextBuffer then
                         reader.setBuffer(inputTextBuffer)
-                        reader.redraw()
                     end
-                else
-                    reader.redraw()
                 end
+                reader.redraw()
             end
         end, function (windowEventData, window)
             local fakeConfirm

@@ -2,6 +2,7 @@ local fs = require("filesystem")
 local gui = require("gui")
 local paths = require("paths")
 local liked = require("liked")
+local serialization = require("serialization")
 local installer = {}
 
 local targetsys = "/mnt/tmpmount"
@@ -82,29 +83,7 @@ function installer.install_likedbox(vfs)
 
     installer.rmTarget("system")
 
-    local bl = {
-        "installer",
-        "likedbox",
-        "screenSavers",
-        "palettes",
-        "wallpapers",
-        "icons",
-        "bin",
-        "apps",
-        "autoruns",
-        "recoveryScript.lua",
-        "recoveryAccess.lua",
-        "registry.dat",
-        "liked",
-        "logo.lua",
-        "main.lua",
-        "likedlib",
-        "firmware",
-        "sysdata",
-        "branch.cfg",
-        "core/recovery.lua"
-    }
-    
+    local bl = assert(serialization.load("/system/boxBlacklist.lst"))
     local systemFolder = installer.selfPath("system")
     local targetSystemFolder = installer.targetPath("system")
     local success, err = fs.copy(systemFolder, targetSystemFolder, function (from)
