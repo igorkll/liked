@@ -83,7 +83,7 @@ function installer.install_likedbox(vfs)
 
     installer.rmTarget("system")
 
-    local bl = assert(serialization.load("/system/boxBlacklist.lst"))
+    local bl = assert(serialization.load("/system/box.lst"))
     local systemFolder = installer.selfPath("system")
     local targetSystemFolder = installer.targetPath("system")
     local success, err = fs.copy(systemFolder, targetSystemFolder, function (from)

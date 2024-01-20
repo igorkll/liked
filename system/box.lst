@@ -19,5 +19,5 @@
     "sysdata",
     "branch.cfg",
     "core/recovery.lua",
-    "boxBlacklist.lst"
+    "box.lst"
 }

@@ -1,4 +1,4 @@
-/system/boxBlacklist.lst
+/system/box.lst
 /system/LICENSE
 /system/logo.lua
 /system/main.lua
