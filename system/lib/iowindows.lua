@@ -63,6 +63,8 @@ local function iowindow(screen, dirmode, exp, save)
     end
 
     local inputTextBuffer
+    local disableShadow
+    local clearShadow
     while true do
         local list = {{".. (back / current)", gui_container.colors.black, name = ".."}}
         for i, file in ipairs(fs.list(path)) do
@@ -86,7 +88,7 @@ local function iowindow(screen, dirmode, exp, save)
         end
         
         local reader
-        local num, _, _, _, confirm = gui.select(screen, nil, nil, title, list, nil, nil, function (window)
+        local num, _, _, _, confirm, lClearShadow = gui.select(screen, nil, nil, title, list, nil, nil, function (window)
             window:set(1, window.sizeY, gui_container.colors.red, gui_container.colors.white, " + ")
             window:set(pathPos, window.sizeY, gui_container.colors.lightGray, gui_container.colors.white, gui_container.short(gui_container.toUserPath(screen, path), save and 18 or 35))
             if save then
@@ -126,7 +128,9 @@ local function iowindow(screen, dirmode, exp, save)
             end
 
             return nil, fakeConfirm
-        end)
+        end, true, disableShadow)
+        disableShadow = true
+        clearShadow = clearShadow or lClearShadow
 
         if num == -1 then
             num = nil
@@ -138,6 +142,7 @@ local function iowindow(screen, dirmode, exp, save)
                 local fullpath = paths.concat(path, list[num].name)
                 local retpath = retpathFunc(list, num, fullpath, confirm)
                 if retpath then
+                    clearShadow()
                     return retpath
                 end
             end
@@ -148,10 +153,12 @@ local function iowindow(screen, dirmode, exp, save)
             else
                 local retpath = retpathFunc(nil, nil, paths.concat(path, buff .. (exp and ("." .. exp) or "")), true)
                 if retpath then
+                    clearShadow()
                     return retpath
                 end
             end
         else
+            clearShadow()
             return
         end
     end
