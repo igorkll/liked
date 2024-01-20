@@ -41,7 +41,7 @@ function sound.beep(freq, delay, blocked)
             end
 
             if blocked then
-                os.sleep(delay)
+                os.sleep(delay + 0.1)
             end
         else
             computer.beep(freq, delay)

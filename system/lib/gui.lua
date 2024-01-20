@@ -16,6 +16,7 @@ local fs = require("filesystem")
 local programs = require("programs")
 local clipboard = require("clipboard")
 local parser = require("parser")
+local lastinfo = require("lastinfo")
 local gui = {colors = colors}
 gui.blackMode = false
 gui.smartShadowsColors = {
@@ -1122,6 +1123,19 @@ function gui.selectcomponent(screen, cx, cy, types, allowAutoConfirm, control, c
             end
             shadowDrawer = true
 
+            local function openEdit(tempfile)
+                local clear = graphic.screenshot(screen)
+                if callbacks and callbacks.onEdit then
+                    callbacks.onEdit()
+                end
+                require("apps").execute("edit", screen, nil, tempfile, true)
+                if callbacks and callbacks.onCloseEdit then
+                    callbacks.onCloseEdit()
+                end
+                clear()
+                fs.remove(tempfile)
+            end
+
             if idx then
                 local addr = addresses[idx]
                 if button == 0 and not control then
@@ -1134,7 +1148,8 @@ function gui.selectcomponent(screen, cx, cy, types, allowAutoConfirm, control, c
                         "copy address",
                         "set label",
                         "clear label",
-                        "view api"
+                        "view api",
+                        "device info"
                     }
                     local px, py = checkWindow:toRealPos(eventData[3], eventData[4])
                     local x, y, sx, sy = gui.contextPos(screen, px, py, strs)
@@ -1175,16 +1190,29 @@ function gui.selectcomponent(screen, cx, cy, types, allowAutoConfirm, control, c
                         end
                         file.close()
 
-                        local clear = graphic.screenshot(screen)
-                        if callbacks and callbacks.onEdit then
-                            callbacks.onEdit()
+                        openEdit(tempfile)
+                    elseif action == 6 then
+                        local format = require("format")
+
+                        local tempfile = paths.concat("/tmp", component.type(addr) .. "_" .. math.round(math.random(0, 9999)) .. ".txt")
+                        local file = fs.open(tempfile, "wb")
+                        local tbl = lastinfo.deviceinfo[addr] or {}
+                        local maxMethodLen = 0
+                        for name in pairs(tbl) do
+                            name = tostring(name)
+                            if unicode.len(name) > maxMethodLen then
+                                maxMethodLen = unicode.len(name)
+                            end
                         end
-                        require("apps").execute("edit", screen, nil, tempfile, true)
-                        if callbacks and callbacks.onCloseEdit then
-                            callbacks.onCloseEdit()
+                        for k, v in pairs(tbl) do
+                            local smart = format.smartConcat()
+                            smart.add(1, tostring(k))
+                            smart.add(maxMethodLen + 2, "-")
+                            smart.add(maxMethodLen + 4, tostring(v) .. "\n")
+                            file.write(smart.get())
                         end
-                        clear()
-                        fs.remove(tempfile)
+                        file.close()
+                        openEdit(tempfile)
                     end
                 end
             else
