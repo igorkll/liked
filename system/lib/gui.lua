@@ -792,7 +792,7 @@ function gui.drawtext(screen, posX, posY, foreground, text)
     end
 end
 
-function gui.select(screen, cx, cy, label, actions, scroll, noCloseButton, overlay, windowEventCallback, noCleanShadow, disableShadow)
+function gui.select(screen, cx, cy, label, actions, scroll, noCloseButton, overlay, windowEventCallback, noCleanShadow, disableShadow, alwaysConfirm)
     --=gui_select(screen, nil, nil, "LOLZ", {"test 1", "test 2", "test 3"})
 
     local gpu = graphic.findGpu(screen)
@@ -812,7 +812,6 @@ function gui.select(screen, cx, cy, label, actions, scroll, noCloseButton, overl
     local addrs
     local addrsIdx
     local sel
-    local alwaysConfirm
 
     local function drawScrollBar()
         window:fill(window.sizeX, 2, 1, window.sizeY - 2, colors.brown, 0, " ")
@@ -837,10 +836,13 @@ function gui.select(screen, cx, cy, label, actions, scroll, noCloseButton, overl
             window:set(window.sizeX - 2, 1, colors.red, colors.white, " X ")
         end
         window:fill(1, window.sizeY, window.sizeX, 1, colors.lightGray, 0, " ")
-        redrawButton()
         if overlay then
-            overlay(window)
+            local ret = overlay(window)
+            if ret ~= nil then
+                alwaysConfirm = ret
+            end
         end
+        redrawButton()
     end
 
     local function getCol(idx, color)

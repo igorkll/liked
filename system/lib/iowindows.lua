@@ -91,15 +91,20 @@ local function iowindow(screen, dirmode, exp, save)
         local num, _, _, _, confirm, lClearShadow = gui.select(screen, nil, nil, title, list, nil, nil, function (window)
             window:set(1, window.sizeY, gui_container.colors.red, gui_container.colors.white, " + ")
             window:set(pathPos, window.sizeY, gui_container.colors.lightGray, gui_container.colors.white, gui_container.short(gui_container.toUserPath(screen, path), save and 18 or 35))
+            local ret
             if save then
                 if not reader then
                     reader = window:readNoDraw(5, window.sizeY, 16, gui_container.colors.white, gui_container.colors.gray, nil, nil, nil, true)
                     if inputTextBuffer then
                         reader.setBuffer(inputTextBuffer)
+                        if #inputTextBuffer > 0 then
+                            ret = true
+                        end
                     end
                 end
                 reader.redraw()
             end
+            return ret
         end, function (windowEventData, window)
             local fakeConfirm
             if reader then
