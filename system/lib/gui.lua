@@ -1082,7 +1082,7 @@ function gui.selectcomponent(screen, cx, cy, types, allowAutoConfirm, control, c
         end
 
         local scroll
-        local shadowDrawer
+        local shadowDrawed
 
         while true do
             local strs = {}
@@ -1116,12 +1116,12 @@ function gui.selectcomponent(screen, cx, cy, types, allowAutoConfirm, control, c
                 return
             end
 
-            local idx, lscroll, button, eventData, _, noShadow = gui.select(screen, cx, cy, typesstr, strs, scroll, control, nil, nil, true, shadowDrawer)
+            local idx, lscroll, button, eventData, _, noShadow = gui.select(screen, cx, cy, typesstr, strs, scroll, control, nil, nil, true, shadowDrawed)
             scroll = lscroll
-            if not shadowDrawer then
+            if not shadowDrawed then
                 gNoShadow = noShadow
             end
-            shadowDrawer = true
+            shadowDrawed = true
 
             local function openEdit(tempfile)
                 local clear = graphic.screenshot(screen)
@@ -1228,7 +1228,7 @@ function gui.selectcomponent(screen, cx, cy, types, allowAutoConfirm, control, c
         local eventData = {computer.pullSignal(0.1)}
 
         if cancel or out then
-            gNoShadow()
+            if gNoShadow then gNoShadow() end
             return out
         end
 

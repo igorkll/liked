@@ -353,6 +353,9 @@ function sysinit.init(box)
 
     sysinit.init = nil
     sysinit.inited = true
+    event.timer(3, function ()
+        sysinit.full = true
+    end)
 end
 
 return sysinit
