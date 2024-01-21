@@ -23,7 +23,7 @@ end
 
 layout1:listen("tablet_use", function (_, data)
     if type(data) == "table" then
-        data = serialization.serialize(data, 1)
+        data = serialization.serialize(data, 1024)
     else
         data = tostring(data or "error")
     end
