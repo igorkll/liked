@@ -724,7 +724,17 @@ function uix:createProgress(x, y, sx, fore, back, value)
 end
 
 function uix:createCustom(x, y, cls, ...)
-    local obj = setmetatable({}, {__index = setmetatable(cls, {__index = baseCustom})})
+    local function makeMT(cls)
+        local mt = getmetatable(cls)
+        if mt then
+            mt.__index = baseCustom
+        else
+            setmetatable(cls, {__index = baseCustom})
+        end
+        return cls
+    end
+
+    local obj = setmetatable({}, {__index = makeMT(cls)})
     obj.destroy = objclass.destroy
     obj.gui = self
     obj.window = self.window
