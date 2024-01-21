@@ -522,7 +522,7 @@ local list = {
         name = "analyzer",
         version = "1",
         vendor = "logic",
-        description = "allows you to get information about objects (opencomputers blocks) via tablet using the improvements \"barcode_reader\" (analyzer)",
+        description = "allows you to get information about objects via tablet using the improvements: barcode_reader (analyzer), geolyzer and navigation",
         minDiskSpace = 64,
         
         path = "/data/apps/analyzer.app",
