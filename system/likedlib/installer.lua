@@ -122,6 +122,37 @@ function installer.install_selfsys(vfs)
     return installer.uinit(vfs, rootfs.getLabel() or "self-sys", installer.toTarget("."))
 end
 
+function installer.install_boxfile(vfs, path)
+    local success, err = installer.init(vfs)
+    if not success then return nil, err end
+
+    -- format
+    installer.rmTarget(".")
+    
+    -- installing likedbox or core
+    local ok, err
+    if paths.extension(path) == "sbox" then
+        ok, err = installer.install_core(vfs)
+    else
+        ok, err = installer.install_likedbox(vfs)
+    end
+
+    if ok then
+        -- unpacking archive
+        local aok, aerr = require("")
+
+        -- set label
+        if aok then
+            pcall(vfs.setLabel, paths.hideExtension(paths.name(path)))
+        else
+            pcall(vfs.setLabel, "failed")
+            return nil, aerr
+        end
+    end
+
+    return ok, err
+end
+
 ----------------------------------------------------------------------
 
 function installer.context(screen, posX, posY, vfs)
