@@ -6,6 +6,7 @@ local sound = require("sound")
 
 local screen = ...
 local ui = uix.manager(screen)
+local rx, ry = ui:zoneSize()
 
 --------------------------------- layout 1
 
@@ -28,7 +29,7 @@ end
 
 layout2 = ui:create("layout 2", uix.colors.lightGray)
 layout2:setReturnLayout(layout1)
-layout2:createText(2, 2, uix.colors.white, "LOLZ")
+layout2:createText(2, ry - 1, uix.colors.white, "LOLZ")
 
 ---------------------------------
 
