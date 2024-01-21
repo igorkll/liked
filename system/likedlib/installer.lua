@@ -139,7 +139,7 @@ function installer.install_boxfile(vfs, path)
 
     if ok then
         -- unpacking archive
-        local aok, aerr = require("")
+        local aok, aerr = require("archiver").unpack(path, targetsys)
 
         -- set label
         if aok then
