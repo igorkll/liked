@@ -65,6 +65,7 @@
 /system/icons/app.t2p
 /system/icons/badicon.t2p
 /system/icons/bootdevice.t2p
+/system/icons/box.t2p
 /system/icons/cfg.t2p
 /system/icons/cloud.t2p
 /system/icons/dat.t2p
@@ -81,6 +82,7 @@
 /system/icons/publicStorage.t2p
 /system/icons/raid.t2p
 /system/icons/reg.t2p
+/system/icons/sbox.t2p
 /system/icons/scrsv.t2p
 /system/icons/t1p.t2p
 /system/icons/t2p.t2p
