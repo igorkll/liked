@@ -52,6 +52,8 @@ gui_container.openVia = {
     ["afpx"] = "unpackArchive",
     ["reg"] = "applyReg",
     ["xpkg"] = "xpkgInstall",
+    ["box"] = "boxInstall",
+    ["sbox"] = "boxInstall",
 }
 
 gui_container.typecolors = {
@@ -80,7 +82,9 @@ gui_container.knownExps = { --данные файлы не будет предл
     ["afpx"] = true,
     ["txt"] = true, --текстовому документу не нужно отдельная кнопка, он по умалчанию открываеться через редактор
     ["reg"] = true,
-    ["xpkg"] = true
+    ["xpkg"] = true,
+    ["box"] = true,
+    ["sbox"] = true
 }
 
 gui_container.editable = { --вместо "open is text editor" будет писаться "edit"

@@ -1247,6 +1247,10 @@ function gui.selectcomponentProxy(screen, cx, cy, types, allowAutoConfirm, contr
     end
 end
 
+function gui.selectExternalFs(screen, cx, cy)
+    return gui.selectcomponentProxy(screen, cx, cy, {"filesystem"}, false, false, nil, {fs.bootaddress, fs.tmpaddress})
+end
+
 function gui.checkPassword(screen, cx, cy, disableStartSound, noCancel)
     local regData = registry.data
     if regData then

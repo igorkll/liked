@@ -44,6 +44,7 @@
 /system/autoruns/a_mounter.lua
 /system/autoruns/b_powerCheck.lua
 /system/bin/applyReg.lua
+/system/bin/boxInstall.lua
 /system/bin/desktop.lua
 /system/bin/edit.lua
 /system/bin/fileinfo.lua
