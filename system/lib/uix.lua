@@ -805,16 +805,16 @@ function uix:setReturnLayout(returnLayout)
 end
 
 function uix:timer(time, callback, count)
-    return thread.timer(time, function ()
+    return thread.timer(time, function (...)
         if not self.bgWork then return end
-        return callback()
+        return callback(...)
     end, count)
 end
 
 function uix:listen(eventType, callback)
-    return thread.listen(eventType, function ()
+    return thread.listen(eventType, function (...)
         if not self.bgWork then return end
-        return callback()
+        return callback(...)
     end)
 end
 

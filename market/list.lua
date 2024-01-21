@@ -519,14 +519,14 @@ local list = {
         files = {"main.lua", "icon.t2p", "config.cfg", "logo.t2p", "logo.t3p"}
     },
     {
-        name = "tablet",
+        name = "analyzer",
         version = "1",
         vendor = "logic",
-        description = "allows you to get information about objects using the improvements \"barcode_reader\" (analyzer)",
+        description = "allows you to get information about objects (opencomputers blocks) via tablet using the improvements \"barcode_reader\" (analyzer)",
         minDiskSpace = 64,
         
-        path = "/data/apps/tablet.app",
-        urlPrimaryPart = selfurlpart .. "/apps/tablet.app/",
+        path = "/data/apps/analyzer.app",
+        urlPrimaryPart = selfurlpart .. "/apps/analyzer.app/",
         files = {"main.lua", "icon.t2p"}
     }
 }
