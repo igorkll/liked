@@ -131,10 +131,14 @@ function installer.install_boxfile(vfs, path, splashCallback)
     installer.rmTarget(".")
     
     -- installing likedbox or core
+    local exp = paths.extension(path) 
     local ok, err
-    if paths.extension(path) == "sbox" then
+    if exp == "sbox" then
         if splashCallback then splashCallback("installing core...") end
         ok, err = installer.install_core(vfs)
+    elseif exp == "vbox" then
+        if splashCallback then splashCallback("installing liked...") end
+        ok, err = installer.install_liked(vfs)
     else
         if splashCallback then splashCallback("installing box...") end
         ok, err = installer.install_likedbox(vfs)

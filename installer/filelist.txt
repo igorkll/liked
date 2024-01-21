@@ -90,6 +90,7 @@
 /system/icons/tmp.t2p
 /system/icons/txt.t2p
 /system/icons/unknown.t2p
+/system/icons/vbox.t2p
 /system/icons/xpkg.t2p
 /system/images/account.t2p
 /system/images/account.t3p

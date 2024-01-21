@@ -124,9 +124,11 @@ function objclass:stop()
         end
     elseif self.type == "button" then
         if not self.toggle then
-            self.state = false
-            if self.onDrop then
-                self:onDrop()
+            if self.state then
+                self.state = false
+                if self.onDrop then
+                    self:onDrop()
+                end
             end
         end
     elseif self.type == "input" then
