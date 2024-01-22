@@ -18,6 +18,5 @@
     "firmware",
     "sysdata",
     "branch.cfg",
-    "core/recovery.lua",
-    "box.lst"
+    "core/recovery.lua"
 }

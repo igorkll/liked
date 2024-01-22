@@ -1,4 +1,3 @@
-/system/box.lst
 /system/LICENSE
 /system/logo.lua
 /system/main.lua
@@ -126,6 +125,7 @@
 /system/lib/uix.lua
 /system/lib/vkeyboard.lua
 /system/lib/warnings.lua
+/system/liked/box.lst
 /system/liked/brick.lua
 /system/liked/market_urls_dev.txt
 /system/liked/market_urls_main.txt
