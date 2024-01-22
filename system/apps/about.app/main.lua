@@ -3,6 +3,8 @@ local system = require("system")
 local uix = require("uix")
 local fs = require("filesystem")
 local thread = require("thread")
+local bitMapFonts = require("bitMapFonts")
+local font = bitMapFonts.load()
 
 local screen = ...
 local ui = uix.manager(screen)

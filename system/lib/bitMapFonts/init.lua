@@ -42,13 +42,13 @@ function fontObj:char(char)
 	return chartable
 end
 
-function fontObj:draw(callback, x, y, text, scale, color) --callback(x, y, scale, char)
+function fontObj:draw(callback, x, y, text, scale, color) --callback(x, y, scale, char, color)
     color = color or 0xffffff
     scale = scale or 1
 
     if type(callback) == "string" then
         local gpu = graphic.findGpu(callback)
-        
+
         gpu.setBackground(color)
         callback = function(x, y, scale, char)
             gpu.fill(x, y, scale, scale, char)
