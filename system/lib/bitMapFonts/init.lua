@@ -42,23 +42,34 @@ function fontObj:char(char)
 	return chartable
 end
 
-function fontObj:draw(gpu, x, y, color, text, scale)
-    if type(gpu) == "string" then
-        gpu = graphic.findGpu(gpu)
-    end
-
+function fontObj:draw(callback, x, y, text, scale, color) --callback(x, y, scale, char)
     color = color or 0xffffff
     scale = scale or 1
-    local ceilScale = math.ceil(scale)
 
-    gpu.setBackground(color)
+    if type(callback) == "string" then
+        local gpu = graphic.findGpu(callback)
+        
+        gpu.setBackground(color)
+        callback = function(x, y, scale, char)
+            gpu.fill(x, y, scale, scale, char)
+        end
+    elseif type(callback) == "table" then
+        local gpu = callback
+
+        gpu.setBackground(color)
+        callback = function(x, y, scale, char)
+            gpu.fill(x, y, scale, scale, char)
+        end
+    end
+
+    local ceilScale = math.ceil(scale)
     for i = 1, unicode.len(text) do
         local char = self:char(unicode.sub(text, i, i))
         local pos = x + ((i - 1) * (self.sx + 1) * scale)
         for ypos = 1, self.sy do
             for xpos = 1, self.sx do
                 if char[ypos]:sub(xpos, xpos) == "1" then
-                    gpu.fill(pos + ((xpos - 1) * scale), y + ((ypos - 1) * scale), ceilScale, ceilScale, " ")
+                    callback(pos + ((xpos - 1) * scale), y + ((ypos - 1) * scale), ceilScale, " ", color)
                 end
             end
         end
