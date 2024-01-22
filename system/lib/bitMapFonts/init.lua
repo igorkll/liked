@@ -40,10 +40,15 @@ function fontObj:draw(gpu, x, y, color, text, scale)
     color = color or 0xffffff
     scale = scale or 1
 
+    gpu.setBackground(color)
     for i = 1, unicode.len(text) do
         local char = self:char(unicode.sub(text, i, i))
         local pos = x + ((i - 1) * (self.sx + 1) * scale)
-        
+        for ypos = 1, self.sy do
+            for xpos = 1, self.sx do
+                gpu.set(pos + (xpos - 1), y + (ypos - 1), char:sub(xpos, xpos) == "1")
+            end
+        end
     end
 end
 
@@ -78,4 +83,5 @@ function bitMapFonts.load()
     return setmetatable(obj, {__index = fontObj})
 end
 
+bitMapFonts.unloadable = true
 return bitMapFonts
