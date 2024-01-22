@@ -141,6 +141,7 @@ function installer.install_boxfile(vfs, path, splashCallback)
         ok, err = installer.install_liked(vfs)
     elseif exp == "ebox" then
         -- nothing
+        ok = true
     else
         if splashCallback then splashCallback("installing box...") end
         ok, err = installer.install_likedbox(vfs)

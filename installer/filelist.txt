@@ -69,6 +69,7 @@
 /system/icons/cfg.t2p
 /system/icons/cloud.t2p
 /system/icons/dat.t2p
+/system/icons/ebox.t2p
 /system/icons/fdd.t2p
 /system/icons/file.t2p
 /system/icons/folder.t2p
