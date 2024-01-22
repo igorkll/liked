@@ -39,6 +39,7 @@ function fontObj:draw(gpu, x, y, color, text, scale)
 
     color = color or 0xffffff
     scale = scale or 1
+    local ceilScale = math.ceil(scale)
 
     gpu.setBackground(color)
     for i = 1, unicode.len(text) do
@@ -46,7 +47,9 @@ function fontObj:draw(gpu, x, y, color, text, scale)
         local pos = x + ((i - 1) * (self.sx + 1) * scale)
         for ypos = 1, self.sy do
             for xpos = 1, self.sx do
-                gpu.set(pos + (xpos - 1), y + (ypos - 1), char:sub(xpos, xpos) == "1")
+                if char[ypos]:sub(xpos, xpos) == "1" then
+                    gpu.fill(pos + ((xpos - 1) * scale), y + ((ypos - 1) * scale), ceilScale, ceilScale, " ")
+                end
             end
         end
     end
@@ -63,15 +66,15 @@ end
 
 ----------------------------
 
-
 local bitMapFonts = {}
+bitMapFonts.defaultFontPath = system.getResourcePath("font.bin")
 
 function bitMapFonts.load()
     local obj = {}
     obj.sx = 4
     obj.sy = 6
     obj.list = {["9"] = 0, ["8"] = 1, [";"] = 2, [":"] = 3, ["="] = 4, ["<"] = 5, ["?"] = 6, [">"] = 7, ["A"] = 8, ["@"] = 9, ["C"] = 10, ["B"] = 11, ["E"] = 12, ["D"] = 13, ["G"] = 14, ["F"] = 15, ["I"] = 16, ["H"] = 17, ["K"] = 18, ["J"] = 19, ["M"] = 20, ["L"] = 21, ["O"] = 22, ["N"] = 23, ["Q"] = 24, ["P"] = 25, ["S"] = 26, ["R"] = 27, ["U"] = 28, ["T"] = 29, ["W"] = 30, ["V"] = 31, ["!"] = 32, [" "] = 33, ["#"] = 34, ["\""] = 35, ["%"] = 36, ["$"] = 37, ["'"] = 38, ["&"] = 39, [")"] = 40, ["("] = 41, ["+"] = 42, ["*"] = 43, ["-"] = 44, [","] = 45, ["/"] = 46, ["."] = 47, ["1"] = 48, ["0"] = 49, ["3"] = 50, ["2"] = 51, ["5"] = 52, ["4"] = 53, ["7"] = 54, ["6"] = 55, ["y"] = 56, ["x"] = 57, ["{"] = 58, ["z"] = 59, ["}"] = 60, ["~"] = 61, ["№"] = 62, ["Y"] = 63, ["X"] = 64, ["["] = 65, ["Z"] = 66, ["]"] = 67, ["\\"] = 68, ["_"] = 69, ["^"] = 70, ["a"] = 71, ["`"] = 72, ["c"] = 73, ["b"] = 74, ["e"] = 75, ["d"] = 76, ["g"] = 77, ["f"] = 78, ["i"] = 79, ["h"] = 80, ["k"] = 81, ["j"] = 82, ["m"] = 83, ["l"] = 84, ["o"] = 85, ["n"] = 86, ["q"] = 87, ["p"] = 88, ["s"] = 89, ["r"] = 90, ["u"] = 91, ["t"] = 92, ["w"] = 93, ["v"] = 94}
-    obj.file = fs.open(system.getResourcePath("font.bin"), "rb")
+    obj.file = fs.open(bitMapFonts.defaultFontPath, "rb")
     obj.error = {
         "1111",
         "1..1",
