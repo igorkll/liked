@@ -22,12 +22,16 @@ function sound.beep(freq, delay, blocked)
     freq = freq or 440
     delay = delay or 0.1
 
+    local function wait()
+        if blocked then
+            os.sleep(delay + 0.1)
+        end
+    end
+
     local beep = componentCoroutine("beep")
     if beep then
         component.invoke(beep, "beep", {[freq] = delay})
-        if blocked then
-            os.sleep(delay)
-        end
+        wait()
     else
         local noise = componentCoroutine("noise")
         if noise then
@@ -39,10 +43,7 @@ function sound.beep(freq, delay, blocked)
             if noiseChannelNums[noise] > 8 then
                 noiseChannelNums[noise] = 1
             end
-
-            if blocked then
-                os.sleep(delay + 0.1)
-            end
+            wait()
         else
             computer.beep(freq, delay)
         end
