@@ -125,6 +125,8 @@
 /system/lib/uix.lua
 /system/lib/vkeyboard.lua
 /system/lib/warnings.lua
+/system/lib/bitMapFonts/font.bin
+/system/lib/bitMapFonts/init.lua
 /system/liked/box.lst
 /system/liked/brick.lua
 /system/liked/market_urls_dev.txt
