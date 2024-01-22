@@ -578,8 +578,7 @@ function gui.input(screen, cx, cy, str, hidden, backgroundColor, default, disabl
 
     graphic.forceUpdate(screen)
     if registry.soundEnable and not disableStartSound then
-        computer.beep(2000)
-        computer.beep(1500)
+        sound.input()
     end
 
     local function drawOk()
@@ -1300,7 +1299,7 @@ function gui.yesno(screen, cx, cy, str, backgroundColor)
 
     graphic.forceUpdate(screen)
     if registry.soundEnable then
-        computer.beep(2000)
+        sound.question()
     end
 
     local function drawYes()

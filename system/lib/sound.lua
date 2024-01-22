@@ -1,5 +1,6 @@
 local computer = require("computer")
 local component = require("component")
+local thread = require("thread")
 local sound = {}
 
 local iters = {}
@@ -50,15 +51,44 @@ function sound.beep(freq, delay, blocked)
     end
 end
 
-function sound.warn()
+------ sounds
+
+local rawSounds = {}
+
+function rawSounds.warn()
     sound.beep(100, 0.1, true)
     sound.beep(100, 0.1)
 end
 
-function sound.done()
+function rawSounds.done()
     sound.beep(1800, 0.05, true)
     sound.beep(1800, 0.05)
 end
+
+function rawSounds.lowPower()
+    sound.beep(200, 0.1, true)
+    sound.beep(200, 0.1, true)
+    sound.beep(200, 1)
+end
+
+function rawSounds.question()
+    sound.beep(2000, 0.1)
+end
+
+function rawSounds.input()
+    sound.beep(2000, 0.1, true)
+    sound.beep(1500, 0.1)
+end
+
+
+
+for name, func in pairs(rawSounds) do
+    sound[name] = function()
+        thread.createBackground(func):resume()
+    end
+end
+
+------
 
 sound.unloadable = true
 return sound
