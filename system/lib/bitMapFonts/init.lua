@@ -100,8 +100,8 @@ function bitMapFonts.load(path)
     }
 
     local font = setmetatable(obj, {__index = fontObj})
-    bitMapFonts.loaded[self.path] = font
-    bitMapFonts.handlers[self.path] = font.file
+    bitMapFonts.loaded[font.path] = font
+    bitMapFonts.handlers[font.path] = font.file
     return font
 end
 
