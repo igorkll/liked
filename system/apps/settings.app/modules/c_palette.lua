@@ -89,7 +89,9 @@ function draw(set)
     layout:draw()
 
     if set then
-        palette.setSystemPalette(paths.concat(themesPath, themes[selected]))
+        local palPath = paths.concat(themesPath, themes[selected])
+        palette.reBaseColor(palPath)
+        palette.setSystemPalette(palPath)
         gui_container.refresh()
         event.push("redrawDesktop")
         gRedraw()

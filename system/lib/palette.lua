@@ -2,6 +2,7 @@ local fs = require("filesystem")
 local graphic = require("graphic")
 local serialization = require("serialization")
 local sysinit = require("sysinit")
+local registry = require("registry")
 local palette = {}
 
 function palette.save(screen)
@@ -35,6 +36,23 @@ function palette.setSystemPalette(path, regOnly)
     else
         pcall(fs.copy, sysinit.defaultPalettePath, sysinit.initPalPath)
         sysinit.applyPalette(sysinit.defaultPalettePath, regOnly)
+    end
+end
+
+function palette.reBaseColor(palPath)
+    if registry.wallpaperBaseColor then
+        local oldPal = require("gui_container").indexsColors
+        local newPal = serialization.load(palPath)
+
+        if newPal then
+            local index = table.find(oldPal, registry.wallpaperBaseColor)
+            if index then
+                local newColor = newPal[index]
+                if newColor then
+                    registry.wallpaperBaseColor = newColor
+                end
+            end
+        end
     end
 end
 

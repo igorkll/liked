@@ -54,7 +54,8 @@ gui_container.openVia = {
     ["xpkg"] = "xpkgInstall",
     ["box"] = "boxInstall",
     ["vbox"] = "boxInstall",
-    ["sbox"] = "boxInstall"
+    ["sbox"] = "boxInstall",
+    ["ebox"] = "boxInstall"
 }
 
 gui_container.typecolors = {
@@ -86,6 +87,7 @@ gui_container.knownExps = { --данные файлы не будет предл
     ["xpkg"] = true,
     ["box"] = true,
     ["vbox"] = true,
+    ["ebox"] = true,
     ["sbox"] = true
 }
 

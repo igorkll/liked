@@ -20,6 +20,7 @@ local path = paths.path(calls.call("getPath"))
 local modulesPath = paths.concat(path, "modules")
 
 local upTask, upRedraw = liked.drawFullUpBarTask(screen, "Settings", nil, nil, true)
+upRedraw()
 
 ------------------------------------
 
@@ -76,6 +77,8 @@ local function draw(noReload)
         local code = loadfile(paths.concat(modulesPath, modules[selected]), nil, env)
         currentModule, moduleEnd = code(screen, modulWindow.x, modulWindow.y)
     end
+
+    upRedraw()
 end
 draw()
 

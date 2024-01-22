@@ -10,9 +10,12 @@ event.timer(4, function ()
         local lowPower = system.getCharge() <= require("gui_container").criticalChargeLevel
         if lowPower ~= oldLowPower then
             if lowPower and registry.lowPowerSound then
-                computer.beep(200)
-                computer.beep(200)
-                computer.beep(200, 1)
+                require("thread").createBackground(function ()
+                    local sound = require("sound")
+                    sound.beep(200, 0.1, true)
+                    sound.beep(200, 0.1, true)
+                    sound.beep(200, 1)
+                end):resume()
             end
             oldLowPower = lowPower
         end
