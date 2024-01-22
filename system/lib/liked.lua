@@ -710,7 +710,7 @@ end
 
 function liked.getComputerScore()
     local cpuLevel = system.getCpuLevel()
-    local ram = computer.totalMemory()
+    local ram = computer.totalMemory() / 1024
     local score = 0
 
     if cpuLevel >= 3 then
