@@ -89,7 +89,9 @@ end
 
 for name, func in pairs(rawSounds) do
     sound[name] = function()
-        thread.createBackground(func):resume()
+        if not registry.fullBeepDisable then
+            thread.createBackground(func):resume()
+        end
     end
 end
 
