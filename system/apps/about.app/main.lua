@@ -26,13 +26,13 @@ layout:createText(2, ry - 1, uix.colors.black, "CPU load level")
 local cpuBar = layout:createProgress(24, ry - 1, rx - 24, uix.colors.red, uix.colors.lightGray, 0)
 
 layout:createText(2, ry - 2, uix.colors.black, "amount of used RAM")
-local ramBar = layout:createProgress(24, ry - 2, rx - 24, uix.colors.red, uix.colors.lightGray, 0)
+local ramBar = layout:createProgress(24, ry - 2, rx - 24, uix.colors.green, uix.colors.lightGray, 0)
 
 layout:createText(2, ry - 3, uix.colors.black, "amount of used ROM")
-local romBar = layout:createProgress(24, ry - 3, rx - 24, uix.colors.red, uix.colors.lightGray, 0)
+local romBar = layout:createProgress(24, ry - 3, rx - 24, uix.colors.purple, uix.colors.lightGray, 0)
 
 layout:createText(2, ry - 4, uix.colors.black, "energy reserve")
-local energyBar = layout:createProgress(24, ry - 4, rx - 24, uix.colors.red, uix.colors.lightGray, 0)
+local energyBar = layout:createProgress(24, ry - 4, rx - 24, uix.colors.orange, uix.colors.lightGray, 0)
 
 thread.create(function ()
     while true do
