@@ -1,6 +1,7 @@
 local computer = require("computer")
 local component = require("component")
 local thread = require("thread")
+local registry = require("registry")
 local sound = {}
 
 local iters = {}
@@ -20,6 +21,10 @@ local function componentCoroutine(ctype)
 end
 
 function sound.beep(freq, delay, blocked)
+    if registry.fullBeepDisable then
+        return
+    end
+
     freq = freq or 440
     delay = delay or 0.1
 
