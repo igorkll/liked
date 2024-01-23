@@ -862,6 +862,12 @@ function uix:draw()
     end
 
     for _, obj in ipairs(self.objs) do
+        if obj.draw and obj.type == "up" then
+            obj:draw()
+        end
+    end
+
+    for _, obj in ipairs(self.objs) do
         if obj.beforeRedraw then
             obj:beforeRedraw()
         end

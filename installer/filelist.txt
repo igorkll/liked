@@ -6,7 +6,6 @@
 /system/registry.dat
 /system/t3default.plt
 /system/version.cfg
-/system/apps/about.app/componentlist.lua
 /system/apps/about.app/icon.t2p
 /system/apps/about.app/main.lua
 /system/apps/market.app/actions.cfg
@@ -126,6 +125,7 @@
 /system/lib/vkeyboard.lua
 /system/lib/warnings.lua
 /system/lib/bitMapFonts/font.bin
+/system/lib/bitMapFonts/font.tbl
 /system/lib/bitMapFonts/init.lua
 /system/liked/box.lst
 /system/liked/brick.lua

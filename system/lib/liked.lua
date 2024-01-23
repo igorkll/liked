@@ -736,6 +736,18 @@ function liked.getComputerScore()
     return score
 end
 
+function liked.getScoreColor(score)
+    if score >= 10 then
+        return colors.cyan
+    elseif score >= 7 then
+        return colors.green
+    elseif score >= 5 then
+        return colors.orange
+    else
+        return colors.red
+    end
+end
+
 --------------------------------------------------------
 
 liked.unloadable = true
