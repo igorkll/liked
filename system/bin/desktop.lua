@@ -1239,7 +1239,20 @@ end)
 local lastCheckTime
 local warnPrinted
 local lolzLock
+local altLolzLock
 local accountCheckTimeout = 25 + math.random(-5, 5)
+
+event.listen("lolzLock", function ()
+    if not lolzLock then
+        altLolzLock = true
+    end
+end)
+
+event.listen("noLolzLock", function ()
+    lolzLock = nil
+    altLolzLock = nil
+end)
+
 while true do
     if redrawFlag then
         redrawFlag = false
@@ -1350,12 +1363,16 @@ while true do
         end
     end
 
-    if lolzLock then
+    if altLolzLock then
+        assert(apps.execute("/system/bin/setup.app/stub.lua", screen))
+    elseif lolzLock then
+        event.push("lolzLock")
         timerEnable = false
         account.loginWindow(screen)
         timerEnable = true
         draw()
         lolzLock = false
+        event.push("noLolzLock")
     elseif component.isPrimary(screen) and (not lastCheckTime or computer.uptime() - lastCheckTime > accountCheckTimeout) then
         lastCheckTime = computer.uptime()
         accountCheckTimeout = 25 + math.random(-5, 5)

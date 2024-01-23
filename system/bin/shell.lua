@@ -26,8 +26,11 @@ if liked.recoveryMode then
 end
 
 local function wait()
-    while doSetup or account.loginWindowOpenFlag do
-        os.sleep()
+    if doSetup or account.loginWindowOpenFlag then
+        assert(apps.execute("/system/bin/setup.app/stub.lua", screen))
+        while doSetup or account.loginWindowOpenFlag do
+            os.sleep()
+        end
     end
 end
 
