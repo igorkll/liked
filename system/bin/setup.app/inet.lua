@@ -25,12 +25,12 @@ local function addRSbuttons(layout)
     if rsButtons then
         local reboot = layout:createButton(rx - 17, 4, 16, 1, uix.colors.lightBlue, uix.colors.white, "reboot", true)
         function reboot:onClick()
-            computer.shutdown(true)
+            computer.shutdown(true, true)
         end
 
         local shutdown = layout:createButton(rx - 17, 2, 16, 1, uix.colors.lightBlue, uix.colors.white, "shutdown", true)
         function shutdown:onClick()
-            computer.shutdown()
+            computer.shutdown(nil, true)
         end
     end
 end
