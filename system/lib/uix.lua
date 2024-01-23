@@ -828,6 +828,14 @@ function uix:listen(eventType, callback)
     end)
 end
 
+function uix:thread(func, ...)
+    local th = thread.create(func, ...)
+    if th then
+        table.insert(self.threads, th)
+        return th
+    end
+end
+
 function uix:uploadEvent(eventData)
     if self.controlLock or not self.active then return end
 
@@ -901,11 +909,17 @@ function uix:fullStop()
     self.active = false
     self.bgWork = false
     self:stop()
+    for _, th in ipairs(self.threads) do
+        th:suspend()
+    end
 end
 
 function uix:fullStart()
     self.active = true
     self.bgWork = true
+    for _, th in ipairs(self.threads) do
+        th:resume()
+    end
 end
 
 function uix:select()
@@ -961,6 +975,7 @@ function uix.create(window, bgcolor, style)
     guiobj.allowAutoActive = true
     guiobj.sizeX = window.sizeX
     guiobj.sizeY = window.sizeY
+    guiobj.threads = {}
 
     return guiobj
 end
@@ -1041,6 +1056,7 @@ function manager:execute(...)
     self:fullStop()
     local result = {apps.execute(...)}
     self:fullStart()
+    self:draw()
     return table.unpack(result)
 end
 

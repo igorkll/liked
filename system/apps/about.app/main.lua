@@ -2,7 +2,6 @@ local computer = require("computer")
 local system = require("system")
 local uix = require("uix")
 local fs = require("filesystem")
-local thread = require("thread")
 local liked = require("liked")
 
 local screen = ...
@@ -52,12 +51,14 @@ local energyBar = layout:createProgress(linePoses, ry - 4, rx - linePoses - text
 local energyParam = layout:createText(paramsPoses, energyBar.y, uix.colors.black, "")
 local energyParam2 = layout:createText(paramsPoses2, energyBar.y, uix.colors.black, "")
 
-local coreLicenseButton = layout:createButton(rx - 18, 2, 16, 1, uix.colors.orange, uix.colors.lightGray, "core license")
+local coreLicenseButton = layout:createButton(rx - 18, 2, 16, 1, uix.colors.orange, uix.colors.white, "core license")
+coreLicenseButton.back2 = uix.colors.lightGray
 function coreLicenseButton:onClick(_, nickname)
     ui:execute("edit", screen, nickname, "/system/core/LICENSE", true)
 end
 
-local licenseButton = layout:createButton(rx - 18, 4, 16, 1, uix.colors.orange, uix.colors.lightGray, "liked license")
+local licenseButton = layout:createButton(rx - 18, 4, 16, 1, uix.colors.orange, uix.colors.white, "liked license")
+licenseButton.back2 = uix.colors.lightGray
 function licenseButton:onClick(_, nickname)
     ui:execute("edit", screen, nickname, "/system/LICENSE", true)
 end
@@ -95,7 +96,7 @@ function layout:onRedraw()
     updateBars(0)
 end
 
-thread.create(function ()
+layout:thread(function ()
     while true do
         updateBars(system.getCpuLoadLevel())
 
