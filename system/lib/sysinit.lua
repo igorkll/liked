@@ -182,11 +182,19 @@ function sysinit.init(box)
     local programs = require("programs")
     local component = require("component")
     local package = require("package")
+    local registry = require("registry")
 
     table.insert(package.paths, "/system/likedlib")
     table.insert(programs.paths, "/data/apps")
     table.insert(programs.paths, "/system/apps")
     table.insert(programs.paths, "/vendor/apps")
+
+    ------------------------------------
+
+    if not registry.primaryScreen or not component.isConnected(registry.primaryScreen) then
+        registry.primaryScreen = sysinit.generatePrimaryScreen()
+    end
+    component.setPrimary("screen", registry.primaryScreen)
 
     ------------------------------------
 
@@ -245,7 +253,6 @@ function sysinit.init(box)
     local thread = require("thread")
     local liked = require("liked")
     local apps = require("apps")
-    local registry = require("registry")
     local event = require("event")
     local system = require("system")
     local computer = require("computer")
