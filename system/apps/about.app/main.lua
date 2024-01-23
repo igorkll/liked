@@ -82,11 +82,11 @@ local function updateBars(cpuLoadLevel)
     cpuParam.text = tostring(math.round(cpuLoadLevel * 100)) .. "%"
     cpuParam2.text = "/ " .. tostring(100) .. "%"
 
-    ramParam.text = tostring(math.round(ramUsedValue * 100)) .. "%"
-    ramParam2.text = "/ " .. tostring(100) .. "%"
+    ramParam.text = tostring(math.round((totalMemory - freeMemory) / 1024)) .. "KB"
+    ramParam2.text = "/ " .. tostring(math.round(totalMemory / 1024)) .. "KB"
 
-    romParam.text = tostring(math.round(hddUsedValue * 100)) .. "%"
-    romParam2.text = "/ " .. tostring(100) .. "%"
+    romParam.text = tostring(math.round(hddUsedSpace / 1024)) .. "KB"
+    romParam2.text = "/ " .. tostring(math.round(hddTotalSpace / 1024)) .. "KB"
 
     energyParam.text = tostring(math.round(computer.energy()))
     energyParam2.text = "/ " .. tostring(math.round(computer.maxEnergy()))
