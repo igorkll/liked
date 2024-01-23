@@ -27,21 +27,35 @@ layout:createText(2, 6, uix.colors.black, "Processor        : tier-" .. tostring
 layout:createText(2, 7, uix.colors.black, "Computer Score   : ")
 
 local linePoses = 22
-local textSizes = 10
+local textSizes = 16
+local paramsPoses = linePoses + (rx - linePoses - textSizes) + 1
+local paramsPoses2 = linePoses + (rx - linePoses - textSizes) + 8
+
+local emptyPlane = layout:createPlane(paramsPoses, ry - 4, 16, 8, uix.colors.white)
 
 layout:createText(2, ry - 1, uix.colors.black, "CPU load level")
 local cpuBar = layout:createProgress(linePoses, ry - 1, rx - linePoses - textSizes, uix.colors.red, uix.colors.lightGray, 0)
+local cpuParam = layout:createText(paramsPoses, cpuBar.y, uix.colors.black, "")
+local cpuParam2 = layout:createText(paramsPoses2, cpuBar.y, uix.colors.black, "")
 
 layout:createText(2, ry - 2, uix.colors.black, "amount of used RAM")
 local ramBar = layout:createProgress(linePoses, ry - 2, rx - linePoses - textSizes, uix.colors.green, uix.colors.lightGray, 0)
+local ramParam = layout:createText(paramsPoses, ramBar.y, uix.colors.black, "")
+local ramParam2 = layout:createText(paramsPoses2, ramBar.y, uix.colors.black, "")
 
 layout:createText(2, ry - 3, uix.colors.black, "amount of used ROM")
 local romBar = layout:createProgress(linePoses, ry - 3, rx - linePoses - textSizes, uix.colors.purple, uix.colors.lightGray, 0)
+local romParam = layout:createText(paramsPoses, romBar.y, uix.colors.black, "")
+local romParam2 = layout:createText(paramsPoses2, romBar.y, uix.colors.black, "")
 
 layout:createText(2, ry - 4, uix.colors.black, "energy reserve")
 local energyBar = layout:createProgress(linePoses, ry - 4, rx - linePoses - textSizes, uix.colors.orange, uix.colors.lightGray, 0)
+local energyParam = layout:createText(paramsPoses, energyBar.y, uix.colors.black, "")
+local energyParam2 = layout:createText(paramsPoses2, energyBar.y, uix.colors.black, "")
 
-local function updateBars()
+
+
+local function updateBars(cpuLoadLevel)
     local totalMemory = computer.totalMemory()
     local freeMemory = computer.freeMemory()
 
@@ -52,30 +66,54 @@ local function updateBars()
     local ramUsedValue = 1 - (freeMemory / totalMemory)
     local energyVal = totalEnergy / maxEnergy
 
-
     ramBar.value = ramUsedValue
     romBar.value = hddUsedValue
     energyBar.value = energyVal
-    cpuBar.value = 0
+    cpuBar.value = cpuLoadLevel
+
+    cpuParam.text = tostring(math.round(cpuLoadLevel * 100)) .. "%"
+    cpuParam2.text = "/ " .. tostring(100) .. "%"
+
+    ramParam.text = tostring(math.round(ramUsedValue * 100)) .. "%"
+    ramParam2.text = "/ " .. tostring(100) .. "%"
+
+    romParam.text = tostring(math.round(hddUsedValue * 100)) .. "%"
+    romParam2.text = "/ " .. tostring(100) .. "%"
+
+    energyParam.text = tostring(math.round(computer.energy()))
+    energyParam2.text = "/ " .. tostring(math.round(computer.maxEnergy()))
 end
 
 function layout:onRedraw()
-    updateBars()
+    updateBars(0)
 
     local px, py = layout.window:toRealPos(21, 7)
     local score = liked.getComputerScore()
-    font:draw(screen, px, py, tostring(score), 1, liked.getScoreColor(score))
+    font:draw(screen, px, py, tostring(score) .. " / 10", 1, liked.getScoreColor(score))
 end
 
 thread.create(function ()
     while true do
-        updateBars()
-        cpuBar.value = system.getCpuLoadLevel()
+        updateBars(system.getCpuLoadLevel())
+
+        emptyPlane:draw()
 
         ramBar:draw()
         romBar:draw()
         energyBar:draw()
         cpuBar:draw()
+
+        cpuParam:draw()
+        cpuParam2:draw()
+
+        ramParam:draw()
+        ramParam2:draw()
+
+        romParam:draw()
+        romParam2:draw()
+
+        energyParam:draw()
+        energyParam2:draw()
     end
 end):resume()
 
