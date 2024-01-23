@@ -56,13 +56,13 @@ local function updateBars()
     ramBar.value = ramUsedValue
     romBar.value = hddUsedValue
     energyBar.value = energyVal
-    cpuBar.value = system.getCpuLoadLevel()
+    cpuBar.value = 0
 end
 
 function layout:onRedraw()
     updateBars()
 
-    local px, py = layout.window:toRealPos(24, 7)
+    local px, py = layout.window:toRealPos(21, 7)
     local score = liked.getComputerScore()
     font:draw(screen, px, py, tostring(score), 1, liked.getScoreColor(score))
 end
@@ -70,7 +70,8 @@ end
 thread.create(function ()
     while true do
         updateBars()
-        
+        cpuBar.value = system.getCpuLoadLevel()
+
         ramBar:draw()
         romBar:draw()
         energyBar:draw()
