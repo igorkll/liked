@@ -1,10 +1,7 @@
-local uix = require("uix")
-
+local graphic = require("graphic")
+local gui_contrainer = require("gui_contrainer")
 local screen = ...
-local ui = uix.manager(screen)
-local rx, ry = ui:size()
 
-local layout = ui:simpleCreate(uix.colors.cyan, uix.styles[2])
-layout:createText(2, 2, uix.colors.white, "configuration expectations...")
-
-ui:loop()
+graphic.clear(screen, gui_contrainer.colors.cyan)
+graphic.set(screen, 2, 2, gui_contrainer.colors.cyan, gui_contrainer.colors.white, "configuration expectations...")
+graphic.forceUpdate(screen)
