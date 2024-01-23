@@ -39,12 +39,18 @@ local funcs = {
         end
     end,
     function ()
-        if require then
-            bootloader.recoveryMode = true
-            bootloader.runShell(bootloader.defaultShellPath)
-        else
-            recoveryApi.info("first you need to initialize the kernel")
+        if not require then
+            recoveryApi.info({"Initializing The Kernel", "Please Wait"}, true)
+            local result = "Successful Kernel Initialization"
+            local ok, err = pcall(bootloader.bootstrap)
+            if not ok then
+                result = tostring(err or "Unknown Error")
+            end
+            recoveryApi.info(result)
         end
+
+        bootloader.recoveryMode = true
+        bootloader.runShell(bootloader.defaultShellPath)
     end
 }
 
