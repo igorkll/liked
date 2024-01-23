@@ -25,11 +25,15 @@ if liked.recoveryMode then
     palette.fromFile(screen, "/system/palettes/original.plt")
 end
 
+local function wait()
+    while doSetup or account.loginWindowOpenFlag do
+        os.sleep()
+    end
+end
+
 local t = thread.create(function ()
     if not liked.recoveryMode then
-        while doSetup or account.loginWindowOpenFlag do
-            os.sleep()
-        end
+        wait()
 
         account.smartLoginWindow(screen)
         if not registry.systemConfigured then
@@ -46,6 +50,7 @@ local t = thread.create(function ()
         assert(apps.execute("login", screen))
     end
 
+    wait()
     assert(apps.execute("desktop", screen))
 end)
 t:resume()
