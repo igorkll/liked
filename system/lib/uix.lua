@@ -9,6 +9,7 @@ local image = require("image")
 local system = require("system")
 local colorslib = require("colors")
 local paths = require("paths")
+local apps = require("apps")
 
 local colors = gui_container.colors
 local uix = {colors = colors}
@@ -1034,6 +1035,13 @@ function manager:fullStart()
     if self.current then
         self.current:fullStart()
     end
+end
+
+function manager:execute(...)
+    self:fullStop()
+    local result = {apps.execute(...)}
+    self:fullStart()
+    return table.unpack(result)
 end
 
 function manager:select(layout)

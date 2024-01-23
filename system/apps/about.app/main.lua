@@ -52,7 +52,15 @@ local energyBar = layout:createProgress(linePoses, ry - 4, rx - linePoses - text
 local energyParam = layout:createText(paramsPoses, energyBar.y, uix.colors.black, "")
 local energyParam2 = layout:createText(paramsPoses2, energyBar.y, uix.colors.black, "")
 
+local coreLicenseButton = layout:createButton(rx - 18, 2, 16, 1, uix.colors.orange, uix.colors.lightGray, "core license")
+function coreLicenseButton:onClick(_, nickname)
+    ui:execute("edit", screen, nickname, "/system/core/LICENSE", true)
+end
 
+local licenseButton = layout:createButton(rx - 18, 4, 16, 1, uix.colors.orange, uix.colors.lightGray, "liked license")
+function licenseButton:onClick(_, nickname)
+    ui:execute("edit", screen, nickname, "/system/LICENSE", true)
+end
 
 local function updateBars(cpuLoadLevel)
     local totalMemory = computer.totalMemory()
