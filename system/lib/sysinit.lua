@@ -91,6 +91,22 @@ function sysinit.getResolution(screen)
     return mx, my
 end
 
+function sysinit.generatePrimaryScreen()
+    local screen
+    local screenSize
+
+    for address in component.list("screen", true) do
+        local x, y = component.invoke("getAspectRatio")
+        local size = x * y
+        if not screenSize or size > screenSize then
+            screen = address
+            screenSize = size
+        end
+    end
+
+    return screen
+end
+
 function sysinit.initScreen(screen)
     local graphic = require("graphic")
     local component = require("component")
