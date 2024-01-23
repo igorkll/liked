@@ -4,8 +4,6 @@ local uix = require("uix")
 local fs = require("filesystem")
 local thread = require("thread")
 local liked = require("liked")
-local bitMapFonts = require("bitMapFonts")
-local font = bitMapFonts.load()
 
 local screen = ...
 local ui = uix.manager(screen)
@@ -16,7 +14,7 @@ local rx, ry = ui:zoneSize()
 local cpuLevel, isApu = system.getCpuLevel()
 local hddTotalSpace = fs.get("/").spaceTotal()
 local hddUsedSpace = fs.get("/").spaceUsed()
-
+local score = liked.getComputerScore()
 
 local layout = ui:create("About", uix.colors.white)
 layout:createText(2, 2, uix.colors.black, "Operating System : " .. tostring(_OSVERSION) .. " / " .. tostring(_COREVERSION))
@@ -25,6 +23,7 @@ layout:createText(2, 4, uix.colors.black, "Boot Disk        : " .. fs.bootaddres
 layout:createText(2, 5, uix.colors.black, "Device Type      : " .. system.getDeviceType())
 layout:createText(2, 6, uix.colors.black, "Processor        : tier-" .. tostring(cpuLevel) .. (isApu and " (APU)" or ""))
 layout:createText(2, 7, uix.colors.black, "Computer Score   : ")
+layout:createText(21, 7, liked.getScoreColor(score), tostring(score) .. " / 10", 1, liked.getScoreColor(score))
 
 local linePoses = 22
 local textSizes = 16
@@ -86,10 +85,6 @@ end
 
 function layout:onRedraw()
     updateBars(0)
-
-    local px, py = layout.window:toRealPos(21, 7)
-    local score = liked.getComputerScore()
-    font:draw(screen, px, py, tostring(score) .. " / 10", 1, liked.getScoreColor(score))
 end
 
 thread.create(function ()
