@@ -1364,7 +1364,13 @@ while true do
     end
 
     if altLolzLock then
+        timerEnable = false
         assert(apps.execute("/system/bin/setup.app/stub.lua", screen))
+        while altLolzLock do
+            event.yield()
+        end
+        timerEnable = true
+        draw()
     elseif lolzLock then
         event.push("lolzLock")
         timerEnable = false
