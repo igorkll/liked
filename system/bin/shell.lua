@@ -30,7 +30,8 @@ local t = thread.create(function ()
         while doSetup or account.loginWindowOpenFlag do
             os.sleep()
         end
-        
+
+        account.smartLoginWindow(screen)
         if not registry.systemConfigured then
             if isPrimaryScreen then
                 assert(apps.execute("setup", screen))
@@ -42,7 +43,6 @@ local t = thread.create(function ()
             end
         end
 
-        account.smartLoginWindow(screen)
         assert(apps.execute("login", screen))
     end
 
