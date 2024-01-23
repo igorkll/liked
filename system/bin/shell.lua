@@ -15,9 +15,10 @@ local component = require("component")
 local palette = require("palette")
 
 local screen = ...
+local isPrimaryScreen = component.isPrimary(screen)
 
 if liked.recoveryMode then
-    if not component.isPrimary(screen) then
+    if not isPrimaryScreen then
         event.wait()
     end
 
@@ -31,10 +32,17 @@ local t = thread.create(function ()
         end
         
         if not registry.systemConfigured then
-            assert(apps.execute("setup", screen))
+            if isPrimaryScreen then
+                assert(apps.execute("setup", screen))
+            else
+                assert(apps.execute("/system/bin/setup.app/stub.lua", screen))
+                while not registry.systemConfigured do
+                    event.yield()
+                end
+            end
         end
+
         account.smartLoginWindow(screen)
-        
         assert(apps.execute("login", screen))
     end
 

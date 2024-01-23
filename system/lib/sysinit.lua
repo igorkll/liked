@@ -344,8 +344,11 @@ function sysinit.init(box)
 
     ------------------------------------
 
+    sysinit.runShell(registry.primaryScreen)
     for index, address in ipairs(screens) do
-        sysinit.runShell(address)
+        if registry.primaryScreen ~= address then
+            sysinit.runShell(address)
+        end
     end
 
     event.hyperListen(function (eventType, cuuid, ctype)
