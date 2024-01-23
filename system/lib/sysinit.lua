@@ -95,8 +95,9 @@ function sysinit.generatePrimaryScreen()
     local screen
     local screenSize
 
+    local component = require("component")
     for address in component.list("screen", true) do
-        local x, y = component.invoke("getAspectRatio")
+        local x, y = component.invoke(address, "getAspectRatio")
         local size = x * y
         if not screenSize or size > screenSize then
             screen = address
