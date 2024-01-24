@@ -291,7 +291,7 @@ function account.getStorage()
     end
 
     function proxy.getLabel()
-        return request("getLabel")
+        return "cloudStorage"
     end
 
     function proxy.setLabel()
