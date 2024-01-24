@@ -12,6 +12,7 @@ local fs = require("filesystem")
 local event = require("event")
 local component = require("component")
 local unicode = require("unicode")
+local computer = require("computer")
 local account = {}
 
 local host = "http://127.0.0.1"
@@ -182,7 +183,7 @@ function account.getStorage()
     local card = internet.cardProxy()
     if not card then return end
 
-    local socket = internet.connect(host, 8723)
+    local socket = card.connect(host, 8723)
     if not socket then return end
     internet.wait(socket)
 
@@ -190,12 +191,19 @@ function account.getStorage()
         local data = json.encode({name = registry.account, token = registry.accountToken, method = name, args = {...}})
         socket.write(data)
 
+        local startTime = computer.uptime()
         local str = ""
         while true do
-            str = str .. socket.read(math.huge)
-            local result = {pcall(json.decode, str)}
-            if result[1] then
-                return table.unpack(result[2] or {})
+            local readed = socket.read(math.huge)
+            if readed then
+                str = str .. readed
+                local result = {pcall(json.decode, str)}
+                if result[1] then
+                    return table.unpack(result[2] or {})
+                end
+            end
+            if computer.uptime() - startTime > 3 then
+                error("connection error", 3)
             end
             os.sleep(0.25)
         end
