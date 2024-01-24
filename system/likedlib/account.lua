@@ -177,8 +177,12 @@ function account.isStorage()
 end
 
 function account.getStorage()
-    if not account.isStorage() then return end
-    
+    if not account.isStorage() then return end    
+    local card = internet.cardProxy()
+    if not card then return end
+    local socket = internet.connect(host, 8723)
+    if not socket then return end
+
     local function request(name, ...)
         local data = {name = registry.account, token = registry.accountToken, method = name, args = {...}}
         local state, result = post(lfsHost, data)
@@ -190,21 +194,6 @@ function account.getStorage()
     end
 
     ------------------------------------
-    
-    local existsCache = {}
-    local isDirCache = {}
-    local function cacheClr(path)
-        if path then
-            path = paths.canonical(path)
-            existsCache[path] = nil
-            isDirCache[path] = nil
-        else
-            existsCache = {}
-            isDirCache = {}            
-        end
-    end
-
-
 
     local proxy = {}
 
@@ -217,22 +206,11 @@ function account.getStorage()
     end
 
     function proxy.exists(path)
-        path = paths.canonical(path)
-        if existsCache[path] ~= nil then
-            return existsCache[path]
-        end
-
-        existsCache[path] = request("exists", path)
-        return existsCache[path]
+        return request("exists", path)
     end
 
     function proxy.isDirectory(path)
-        path = paths.canonical(path)
-        if isDirCache[path] ~= nil then
-            return isDirCache[path]
-        end
-        isDirCache[path] = request("isDirectory", path)
-        return isDirCache[path]
+        return request("isDirectory", path)
     end
 
     function proxy.lastModified(path)
@@ -240,12 +218,10 @@ function account.getStorage()
     end
 
     function proxy.remove(path)
-        cacheClr()
         return request("remove", path)
     end
 
     function proxy.rename(path, path2)
-        cacheClr()
         return request("rename", path, path2)
     end
 
@@ -254,7 +230,6 @@ function account.getStorage()
     end
 
     function proxy.makeDirectory(path)
-        cacheClr(path)
         return request("makeDirectory", path)
     end
 
@@ -342,7 +317,6 @@ function account.getStorage()
             end
         end
 
-        cacheClr(path)
         return obj
     end
 
