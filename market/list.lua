@@ -576,6 +576,22 @@ list.libs = {
         url = selfurlpart .. "/libs/glasses.lua",
         vendor = "logic",
         version = "1"
+    },
+    ["bitMapFonts"] = {
+        url = selfurlpart .. "/libs/bitMapFonts/init.lua",
+        vendor = "logic",
+        version = "1",
+        path = "/data/lib/bitMapFonts/init.lua",
+        files = {
+            {
+                url = selfurlpart .. "/libs/bitMapFonts/font.bin",
+                path = "/data/lib/bitMapFonts/font.bin"
+            },
+            {
+                url = selfurlpart .. "/libs/bitMapFonts/font.tbl",
+                path = "/data/lib/bitMapFonts/font.tbl"
+            }
+        }
     }
 }
 

@@ -145,7 +145,7 @@ local function modifyList(lst)
                     for _, name in ipairs(libs) do
                         if not installed[name] then
                             local info = glibs[name]
-                            local path = paths.concat("/data/lib", name .. ".lua")
+                            local path = info.path or paths.concat("/data/lib", name .. ".lua")
                             if not fs.exists(path) or registry.libVersions[name] ~= info.version then
                                 download(path, info.url)
                                 if info.files then
