@@ -522,7 +522,6 @@ local list = {
         name = "analyzer",
         version = "1",
         vendor = "logic",
-        libs = {"bitMapFonts"},
         description = "allows you to get information about objects via tablet using the improvements: barcode_reader (analyzer), geolyzer, sign and navigation",
         minDiskSpace = 64,
         
