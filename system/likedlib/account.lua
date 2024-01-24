@@ -216,11 +216,14 @@ function account.getStorage()
                 str = str .. readed
 
                 local function check()
+                    local firstChar = str:sub(1, 1)
+                    local lastChar = str:sub(#str, #str)
+
                     if contentLen then
                         if #str >= contentLen then
                             return {str}
                         end
-                    else
+                    elseif (firstChar == "{" and lastChar == "}") or (firstChar == "[" and lastChar == "]") then
                         local result = {pcall(json.decode, str)}
                         if result[1] then
                             return result[2] or {}
@@ -250,7 +253,6 @@ function account.getStorage()
             if computer.uptime() - startTime > 10 then
                 error("connection error", 3)
             end
-            os.sleep(0.25)
         end
     end
 
