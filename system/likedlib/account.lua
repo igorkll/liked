@@ -172,8 +172,12 @@ function account.checkToken()
     return registry.account and registry.accountToken and (post(checkTokenHost, {name = registry.account, token = registry.accountToken}))
 end
 
+function account.isStorage()
+    return (not not registry.account) and internet.check()
+end
+
 function account.getStorage()
-    if not registry.account then return end
+    if not account.isStorage() then return end
     
     local function request(name, ...)
         local data = {name = registry.account, token = registry.accountToken, method = name, args = {...}}
@@ -349,9 +353,6 @@ function account.getStorage()
     proxy.virtual = true
     proxy.cloud = true
     return proxy
-end
-
-function account.getPublicStorage()
 end
 
 function account.loginWindow(screen)

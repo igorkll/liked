@@ -17,22 +17,15 @@ if not liked.recoveryMode then
         if internet.check() then
             account.check()
             
-            local storage = account.getStorage()
-            if storage then
+            if account.isStorage() then
                 if not fs.exists(storagePath) then
-                    fs.mount(storage, storagePath)
+                    local storage = account.getStorage()
+                    if storage then
+                        fs.mount(storage, storagePath)
+                    end
                 end
             elseif fs.exists(storagePath) then
                 fs.umount(storagePath)
-            end
-
-            local publicStorage = account.getPublicStorage()
-            if publicStorage then
-                if not fs.exists(publicStoragePath) then
-                    fs.mount(publicStorage, publicStoragePath)
-                end
-            elseif fs.exists(publicStoragePath) then
-                fs.umount(publicStoragePath)
             end
 
             if account.isBricked() then
