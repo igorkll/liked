@@ -319,7 +319,7 @@ function account.getStorage()
     end
 
     local function writeFile(path, data)
-        if request("pushPath", path) then
+        if request("pushPath", {path}) then
             return request("pushContent", data)
         end
     end
