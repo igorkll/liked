@@ -178,18 +178,26 @@ end
 
 function account.getStorage()
     if not account.isStorage() then return end    
+
     local card = internet.cardProxy()
     if not card then return end
+
     local socket = internet.connect(host, 8723)
     if not socket then return end
+    internet.wait(socket)
 
     local function request(name, ...)
-        local data = {name = registry.account, token = registry.accountToken, method = name, args = {...}}
-        local state, result = post(lfsHost, data)
-        if state then
-            return table.unpack(json.decode(result))
-        else
-            return false
+        local data = json.encode({name = registry.account, token = registry.accountToken, method = name, args = {...}})
+        socket.write(data)
+
+        local str = ""
+        while true do
+            str = str .. socket.read(math.huge)
+            local result = {pcall(json.decode, str)}
+            if result[1] then
+                return table.unpack(result[2] or {})
+            end
+            os.sleep(0.25)
         end
     end
 
