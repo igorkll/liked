@@ -200,6 +200,20 @@ function account.getStorage()
             local readed = socket.read(math.huge)
             if readed then
                 str = str .. readed
+
+                local function check()
+                    if contentLen then
+                        if #str == contentLen then
+                            return str
+                        end
+                    else
+                        local result = {pcall(json.decode, str)}
+                        if result[1] then
+                            return table.unpack(result[2] or {})
+                        end
+                    end
+                end
+
                 if first and #str >= 1 then
                     if str:sub(1, 1) == "1" then
                         str = str:sub(2, #str)
@@ -210,18 +224,9 @@ function account.getStorage()
                         str = str:sub(sepPos + 1, #str)
                     end
                     first = nil
+                    check()
                 else
-                    if contentLen then
-                        event.errLog(json.encode(#str, contentLen))
-                        if #str == contentLen then
-                            return str
-                        end
-                    else
-                        local result = {pcall(json.decode, str)}
-                        if result[1] then
-                            return table.unpack(result[2] or {})
-                        end
-                    end
+                    check()
                 end
             end
             if computer.uptime() - startTime > 10 then
