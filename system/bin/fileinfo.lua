@@ -10,10 +10,7 @@ local gui = require("gui")
 local uix = require("uix")
 local registry = require("registry")
 
-local cx, cy = gui.getBigZone(screen)
-
-local window = graphic.createWindow(screen, cx, cy, 50, 16, true)
-gui.shadow(graphic.findGpu(screen), cx, cy, 50, 16)
+local window = gui.customWindow(screen)
 
 local layout = uix.create(window, nil, uix.styles[2])
 if not registry.disableHiddenFiles then

@@ -279,6 +279,18 @@ function gui.smallWindow(screen, cx, cy, str, backgroundColor, icon, sx, sy)
     return window, noShadow
 end
 
+function gui.customWindow(screen, sx, sy)
+    sx = sx or 50
+    sy = sy or 16
+
+    local cx, cy = gui.getCustomZone(screen, sx, sy)
+    local clear = graphic.screenshot(screen, cx, cy, sx, sy)
+    local window = graphic.createWindow(screen, cx, cy, sx, sy, true)
+    gui.shadow(graphic.findGpu(screen), cx, cy, sx, sy)
+
+    return window, clear
+end
+
 function gui.status(screen, cx, cy, str, backgroundColor)
     gui.smallWindow(screen, cx, cy, str, backgroundColor or colors.lightGray, function (window, color)
         window:set(2, 1, color, colors.blue, "  " .. unicode.char(0x2800+192) ..  "  ")
