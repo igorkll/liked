@@ -200,26 +200,27 @@ function account.getStorage()
             local readed = socket.read(math.huge)
             if readed then
                 str = str .. readed
-                if first then
+                if first and #str >= 1 then
                     if str:sub(1, 1) == "1" then
                         str = str:sub(2, #str)
-                    else
+                    elseif str:sub(1, 1) == "0" then
                         local sepPos = str:find(text.escapePattern(":"))
                         local lenStr = str:sub(2, sepPos - 1)
                         contentLen = tonumber(lenStr)
                         str = str:sub(sepPos + 1, #str)
                     end
                     first = nil
-                end
-
-                if contentLen then
-                    if #str == contentLen then
-                        return str
-                    end
                 else
-                    local result = {pcall(json.decode, str)}
-                    if result[1] then
-                        return table.unpack(result[2] or {})
+                    if contentLen then
+                        event.errLog(json.encode(#str, contentLen))
+                        if #str == contentLen then
+                            return str
+                        end
+                    else
+                        local result = {pcall(json.decode, str)}
+                        if result[1] then
+                            return table.unpack(result[2] or {})
+                        end
                     end
                 end
             end
