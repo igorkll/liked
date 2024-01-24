@@ -193,8 +193,10 @@ function account.getStorage()
         local addContent
         if type(args) == "string" then
             addContent = args
-        else
+        elseif type(args) == "table" then
             sendTbl.args = args
+        else
+            sendTbl.args = {}
         end
         
 
