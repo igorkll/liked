@@ -20,6 +20,7 @@ local colors = gui_container.colors
 ------------------------------------
 
 local screen, nickname, _, forceMode, mediaMode = ...
+gui.status(screen, nil, nil, "loading content list...")
 
 local installBox = mediaMode and "  download   " or "   install   "
 local installMsg = mediaMode and "download" or "install"
@@ -53,8 +54,8 @@ local rootfs = fs.get("/")
 local maxDepth = graphic.findGpu(screen).maxDepth()
 
 local statusWindow = graphic.createWindow(screen, 1, 1, rx, 1)
-statusWindow:clear(colors.gray)
 local barTh, barRedraw = liked.drawUpBarTask(screen, true, colors.gray, -2)
+barTh:suspend()
 
 local function exec(...)
     barTh:suspend()
@@ -552,6 +553,8 @@ local function checkListPos()
 end
 
 ------------------------------------
+
+barTh:resume()
 
 local oldSel
 while true do

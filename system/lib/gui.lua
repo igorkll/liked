@@ -712,7 +712,7 @@ function gui.context(screen, posX, posY, strs, active)
             if (not active or active[i]) and not isSep then
                 if selected == i then
                     color = colors.blue
-                    color2 = white
+                    color2 = colors.white
                 end
                 window:set(1, i, color, color2, str .. (string.rep(" ", sizeX - unicode.wlen(str))))
             else

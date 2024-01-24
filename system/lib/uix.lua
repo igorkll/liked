@@ -516,7 +516,7 @@ function uix:createUp(title, withoutFill, bgcolor)
         end
     end
 
-    liked.regExit(self.window.screen, onExit)
+    --liked.regExit(self.window.screen, onExit)
     upbar.close.onClick = onExit
     return upbar
 end
