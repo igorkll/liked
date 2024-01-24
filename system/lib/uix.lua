@@ -495,6 +495,7 @@ function uix:createUpBar(title, withoutFill, bgcolor) --working only in fullscre
 
     local destroy = obj.destroy
     function obj:destroy()
+        event.cancel(obj.timer)
         destroy(obj)
         obj.close:destroy()
     end
@@ -506,14 +507,17 @@ end
 function uix:createUp(title, withoutFill, bgcolor)
     local upbar = self:createUpBar(title, withoutFill, bgcolor)
 
-    function upbar.close.onClick()
+    local function onExit()
         if self.smartGuiManager and self.smartGuiManager.onExit then
             self.smartGuiManager:onExit()
         else
-            os.exit()
+            self.smartGuiManager.exitFlag = true
+            event.stub()
         end
     end
 
+    liked.regExit(self.window.screen, onExit)
+    upbar.close.onClick = onExit
     return upbar
 end
 uix.createAutoUpBar = uix.createUp --legacy
@@ -1091,6 +1095,10 @@ function manager:loop(timeout)
 
         if self.onEvent then
             self:onEvent(eventData, windowEventData)
+        end
+
+        if self.exitFlag then
+            break
         end
     end
 end

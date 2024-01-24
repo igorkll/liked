@@ -25,7 +25,7 @@ local logs = require("logs")
 local sysinit = require("sysinit")
 local lastinfo = require("lastinfo")
 local vcomponent = require("vcomponent")
-local liked = {recoveryMode = bootloader.recoveryMode}
+local liked = {recoveryMode = bootloader.recoveryMode, colors = gui_container.colors}
 
 local colors = gui_container.colors
 
@@ -476,18 +476,20 @@ function liked.regExit(screen, close, closeButton)
             end
         end
     end)
-    thread.listen("touch", function (_, uuid, px, py)
-        if uuid == screen then
-            local rx, ry = graphic.getResolution(screen)
-            if py == 1 and px >= rx - 2 then
-                if close then
-                    close()
-                else
-                    baseTh:kill()
+    if closeButton then
+        thread.listen("touch", function (_, uuid, px, py)
+            if uuid == screen then
+                local rx, ry = graphic.getResolution(screen)
+                if py == 1 and px >= rx - 2 then
+                    if close then
+                        close()
+                    else
+                        baseTh:kill()
+                    end
                 end
             end
-        end
-    end)
+        end)
+    end
 end
 
 function liked.applicationWindow(screen, title, bgcolor)
