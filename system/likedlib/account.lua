@@ -374,9 +374,9 @@ function account.getStorage()
         obj.cur = 1
 
         if obj.readMode or modeChar == "a" then
-            obj.content = readFile(path)
+            obj.content, obj.err = readFile(path)
             if not obj.content then
-                return
+                return nil, obj.err
             end
         end
 
