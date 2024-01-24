@@ -217,7 +217,7 @@ function account.getStorage()
 
                 local function check()
                     if contentLen then
-                        if #str == contentLen then
+                        if #str >= contentLen then
                             return {str}
                         end
                     else
