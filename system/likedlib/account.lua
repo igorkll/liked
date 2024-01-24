@@ -188,8 +188,20 @@ function account.getStorage()
     if not socket then return end
     internet.wait(socket)
 
-    local function request(name, ...)
-        local data = json.encode({name = registry.account, token = registry.accountToken, method = name, args = {...}})
+    local function request(name, args)
+        local sendTbl = {name = registry.account, token = registry.accountToken, method = name}
+        local addContent
+        if type(args) == "string" then
+            addContent = args
+        else
+            sendTbl.args = args
+        end
+        
+
+        local data = json.encode(sendTbl)
+        if addContent then
+            data = data .. "\n" .. addContent
+        end
         socket.write(data)
 
         local startTime = computer.uptime()
@@ -253,35 +265,35 @@ function account.getStorage()
     end
 
     function proxy.exists(path)
-        return request("exists", path)
+        return request("exists", {path})
     end
 
     function proxy.isDirectory(path)
-        return request("isDirectory", path)
+        return request("isDirectory", {path})
     end
 
     function proxy.lastModified(path)
-        return request("lastModified", path)
+        return request("lastModified", {path})
     end
 
     function proxy.remove(path)
-        return request("remove", path)
+        return request("remove", {path})
     end
 
     function proxy.rename(path, path2)
-        return request("rename", path, path2)
+        return request("rename", {path}, {path2})
     end
 
     function proxy.size(path)
-        return request("size", path)
+        return request("size", {path})
     end
 
     function proxy.makeDirectory(path)
-        return request("makeDirectory", path)
+        return request("makeDirectory", {path})
     end
 
     function proxy.list(path)
-        return request("list", path)
+        return request("list", {path})
     end
 
 
@@ -301,11 +313,13 @@ function account.getStorage()
     ------------------------------------
 
     local function readFile(path)
-        return request("readFile", path)
+        return request("readFile", {path})
     end
 
     local function writeFile(path, data)
-        return request("writeFile", path, data)
+        if request("pushPath", path) then
+            return request("pushContent", data)
+        end
     end
 
 
