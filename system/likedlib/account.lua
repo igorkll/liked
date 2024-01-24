@@ -204,16 +204,17 @@ function account.getStorage()
                 local function check()
                     if contentLen then
                         if #str == contentLen then
-                            return str
+                            return {str}
                         end
                     else
                         local result = {pcall(json.decode, str)}
                         if result[1] then
-                            return table.unpack(result[2] or {})
+                            return result[2] or {}
                         end
                     end
                 end
 
+                local result
                 if first and #str >= 1 then
                     if str:sub(1, 1) == "1" then
                         str = str:sub(2, #str)
@@ -224,9 +225,12 @@ function account.getStorage()
                         str = str:sub(sepPos + 1, #str)
                     end
                     first = nil
-                    check()
+                    result = check()
                 else
-                    check()
+                    result = check()
+                end
+                if result then
+                    return table.unpack(result)
                 end
             end
             if computer.uptime() - startTime > 10 then
