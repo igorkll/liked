@@ -13,6 +13,7 @@ local event = require("event")
 local component = require("component")
 local unicode = require("unicode")
 local computer = require("computer")
+local text = require("text")
 local account = {}
 
 local host = "http://127.0.0.1"
@@ -193,16 +194,36 @@ function account.getStorage()
 
         local startTime = computer.uptime()
         local str = ""
+        local contentLen
+        local first = true
         while true do
             local readed = socket.read(math.huge)
             if readed then
                 str = str .. readed
-                local result = {pcall(json.decode, str)}
-                if result[1] then
-                    return table.unpack(result[2] or {})
+                if first then
+                    if str:sub(1, 1) == "1" then
+                        str = str:sub(2, #str)
+                    else
+                        local sepPos = str:find(text.escapePattern(":"))
+                        local lenStr = str:sub(2, sepPos - 1)
+                        contentLen = tonumber(lenStr)
+                        str = str:sub(sepPos + 1, #str)
+                    end
+                    first = nil
+                end
+
+                if contentLen then
+                    if #str == contentLen then
+                        return str
+                    end
+                else
+                    local result = {pcall(json.decode, str)}
+                    if result[1] then
+                        return table.unpack(result[2] or {})
+                    end
                 end
             end
-            if computer.uptime() - startTime > 3 then
+            if computer.uptime() - startTime > 10 then
                 error("connection error", 3)
             end
             os.sleep(0.25)
