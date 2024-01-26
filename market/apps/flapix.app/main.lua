@@ -2,6 +2,7 @@ local graphic = require("graphic")
 local liked = require("liked")
 local thread = require("thread")
 local event = require("event")
+local gui = require("gui")
 
 --------------------------------
 
@@ -22,8 +23,10 @@ local birdPosY = 4
 local birdDelta = 0.1
 local birdDeltaTarget
 
+local score = 0
+
 local function updateKey(state)
-    birdDeltaTarget = state and -5 or 5
+    birdDeltaTarget = state and -3 or 3
 end
 updateKey(false)
 
@@ -45,10 +48,15 @@ while true do
     -- draw
     window:clear(pal.lightBlue)
     window:fill(math.round(birdPosX), math.round(birdPosY), 2, 1, pal.yellow, pal.yellow, " ")
+    window:set(2, 2, pal.lightBlue, pal.white, "score: " .. score)
 
     -- process
     birdPosY = birdPosY + birdDelta
-    birdDelta = birdDelta + ((birdDeltaTarget - birdDelta) * 0.1);
+    birdDelta = birdDelta + ((birdDeltaTarget - birdDelta) * 0.2);
+    if birdPosY >= window.sizeY or birdPosY <= 1 then
+        gui.warn(screen, nil, nil, "you're dead.\nscore: " .. score)
+        return
+    end
 
     -- delay
     os.sleep(0.05)
