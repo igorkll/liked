@@ -1,83 +1,37 @@
-local graphic = require("graphic")
-local liked = require("liked")
-local thread = require("thread")
-local event = require("event")
-local gui = require("gui")
-
---------------------------------
+local uix = require("uix")
+local system = require("system")
 
 local screen = ...
-local pal = liked.colors
-local rx, ry = graphic.getResolution(screen)
-local window = graphic.createWindow(screen, 1, 2, rx, ry - 1)
-liked.regExit(screen, nil, true)
-liked.regBar(screen, "Flapix")
+local gamePath = system.getResourcePath("game.lua")
+local ui = uix.manager(screen)
+local rx, ry = ui:zoneSize()
+local layout = ui:create("Flapix", uix.colors.brown)
 
-local sizeX, sizeY = window.sizeX, window.sizeY
-
---------------------------------
-
-local birdPosX = 15
-local birdPosY = 4
-
-local birdDelta = 0.1
-local birdDeltaTarget
-
-local score = 0
-
-local function updateKey(state)
-    birdDeltaTarget = state and -3 or 3
-end
-updateKey(false)
-
---------------------------------
-
-local function draw(altDraw)
-    local y = math.round(birdPosY)
-    if altDraw == 1 then
-        y = 2
-    elseif altDraw == 2 then
-        y = window.sizeY - 1
-    end
-
-    window:clear(pal.brown)
-    window:fill(1, 2, window.sizeX, window.sizeY - 2, pal.lightBlue, 0, " ")
-    window:fill(math.round(birdPosX), y, 2, 1, pal.yellow, 0, " ")
-    window:set(2, 2, pal.lightBlue, pal.white, "score: " .. score)
-end
-
-local function dieScreen(altDraw)
-    draw(altDraw)
-    gui.warn(screen, nil, nil, "you're dead.\nscore: " .. score)
-end
-
-thread.create(function ()
-    while true do
-        local eventData = {event.pull()}
-        local windowEventData = window:uploadEvent(eventData)
-        if eventData[1] == "touch" or eventData[1] == "key_down" then
-            updateKey(true)
-        elseif eventData[1] == "drop" or eventData[1] == "key_up" then
-            updateKey(false)
+function layout:onRedraw()
+    self.window:fill(1, 2, self.window.sizeX, self.window.sizeY - 2, uix.colors.lightBlue, 0, " ")
+    for i = 1, 3 do
+        local col = uix.colors.yellow
+        local r = math.random(1, 7)
+        if i == 2 then
+            col = uix.colors.red
+        elseif i == 3 then
+            col = uix.colors.orange
+        elseif i == 4 then
+            col = uix.colors.green
+        elseif i == 5 then
+            col = uix.colors.lime
+        elseif i == 6 then
+            col = uix.colors.blue
+        elseif i == 7 then
+            col = uix.colors.purple
         end
+        self.window:fill(math.random(3, 8), math.random(3, self.window.sizeX - 2), 2, 1, col, 0, " ")
     end
-end):resume()
-
-while true do
-    -- draw
-    draw()
-
-    -- process
-    birdPosY = birdPosY + birdDelta
-    birdDelta = birdDelta + ((birdDeltaTarget - birdDelta) * 0.2);
-    if birdPosY >= window.sizeY then
-        dieScreen(2)
-        return
-    elseif birdPosY <= 1 then
-        dieScreen(1)
-        return
-    end
-
-    -- delay
-    os.sleep(0.05)
 end
+
+local startGame = layout:createButton(math.round((rx / 2) - 7), math.round(ry / 2) - 1, 16, 3, uix.colors.lightGray, uix.black, "start game", true)
+function startGame:onClick(_, nickname)
+    ui:execute(gamePath, screen, nickname)
+end
+
+ui:loop()

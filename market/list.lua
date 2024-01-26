@@ -538,7 +538,7 @@ local list = {
         
         path = "/data/apps/flapix.app",
         urlPrimaryPart = selfurlpart .. "/apps/flapix.app/",
-        files = {"main.lua", "icon.t2p"}
+        files = {"main.lua", "game.lua", "icon.t2p"}
     }
 }
 
