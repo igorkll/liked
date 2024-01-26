@@ -22,7 +22,7 @@ local sizeX, sizeY = window.sizeX, window.sizeY
 
 --------------------------------
 
-local birdPosX = 15
+local birdPosX = 20
 local birdPosY = 4
 
 local birdDelta = 0
@@ -66,7 +66,8 @@ local function draw(altDraw)
     window:fill(1, 2, window.sizeX, window.sizeY - 2, pal.lightBlue, 0, " ")
     window:fill(math.round(birdPosX), y, 2, 1, pal.yellow, 0, " ")
     drawPipe()
-    gui.drawtext(screen, 2, 2, pal.white, "score: " .. score)
+    gui.drawtext(screen, 2, 4, pal.white, "score     : " .. score)
+    gui.drawtext(screen, 2, 5, pal.white, "best score: " .. conf.bestScore)
 end
 
 local function dieScreen(altDraw)
