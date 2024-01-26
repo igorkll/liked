@@ -4,6 +4,10 @@ local thread = require("thread")
 local event = require("event")
 local gui = require("gui")
 local computer = require("computer")
+local storage = require("storage")
+local sound = require("sound")
+
+local conf = storage.getConf({bestScore = 0})
 
 --------------------------------
 
@@ -33,6 +37,14 @@ end
 updateKey(false)
 
 --------------------------------
+
+local function addScore()
+    score = score + 1
+    if score > conf.bestScore then
+        conf.bestScore = score
+    end
+    sound.beep(2000, 0.05)
+end
 
 local function drawPipe()
     for i, v in ipairs(pipes) do
@@ -81,7 +93,7 @@ local function addPipe()
 end
 addPipe()
 
-thread.timer(1, function ()
+thread.timer(1.5, function ()
     if computer.uptime() - oldPipeTime > 3 or math.random(1, 3) == 1 then
         addPipe()
     end
@@ -108,6 +120,15 @@ while true do
             table.remove(pipes, i)
         else
             pipe[1] = pipe[1] - 0.2
+            if math.round(pipe[1]) == math.round(birdPosX) then
+                if math.abs(math.round(pipe[2]) - math.round(birdPosY)) > 1 then
+                    dieScreen()
+                    return
+                elseif not pipe[3] then
+                    addScore()
+                    pipe[3] = true
+                end
+            end
         end
     end
 
