@@ -24,6 +24,7 @@ local birdDelta = 0
 local birdDeltaTarget
 
 local score = 0
+local pipes = {}
 
 local function updateKey(state)
     birdDeltaTarget = state and -0.5 or 0.5
@@ -31,6 +32,13 @@ end
 updateKey(false)
 
 --------------------------------
+
+local function drawPipe()
+    for i, v in ipairs(pipes) do
+        window:fill(v[1], 2, 2, 1, pal.green, 0, " ")
+        window:fill(v[1], v[2] - 1, 2, 3, pal.lightBlue, 0, " ")
+    end
+end
 
 local function draw(altDraw)
     local y = math.round(birdPosY)
@@ -43,7 +51,8 @@ local function draw(altDraw)
     window:clear(pal.brown)
     window:fill(1, 2, window.sizeX, window.sizeY - 2, pal.lightBlue, 0, " ")
     window:fill(math.round(birdPosX), y, 2, 1, pal.yellow, 0, " ")
-    window:set(2, 2, pal.lightBlue, pal.white, "score: " .. score)
+    drawPipe()
+    gui.drawtext(screen, 2, 2, pal.white, "score: " .. score)
 end
 
 local function dieScreen(altDraw)
@@ -76,6 +85,14 @@ while true do
     elseif birdPosY < 2 then
         dieScreen(1)
         return
+    end
+    for i = #pipes, 1, -1 do
+        local pipe = pipes[i]
+        if pipe[1] < 1 then
+            table.remove(pipe, i)
+        else
+            pipe[1] = pipe[1] - 1
+        end
     end
 
     -- delay
