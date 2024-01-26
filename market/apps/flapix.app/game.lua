@@ -20,13 +20,13 @@ local sizeX, sizeY = window.sizeX, window.sizeY
 local birdPosX = 15
 local birdPosY = 4
 
-local birdDelta = 0.1
+local birdDelta = 0
 local birdDeltaTarget
 
 local score = 0
 
 local function updateKey(state)
-    birdDeltaTarget = state and -3 or 3
+    birdDeltaTarget = state and -0.5 or 0.5
 end
 updateKey(false)
 
@@ -69,7 +69,7 @@ while true do
 
     -- process
     birdPosY = birdPosY + birdDelta
-    birdDelta = birdDelta + ((birdDeltaTarget - birdDelta) * 0.2);
+    birdDelta = birdDelta + ((birdDeltaTarget - birdDelta) * 0.05);
     if birdPosY > window.sizeY - 1 then
         dieScreen(2)
         return
@@ -79,5 +79,5 @@ while true do
     end
 
     -- delay
-    os.sleep(0.05)
+    os.sleep(0)
 end
