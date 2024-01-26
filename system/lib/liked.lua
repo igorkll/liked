@@ -465,33 +465,6 @@ function liked.selfApplicationName()
     return paths.hideExtension(paths.name(scriptPath))
 end
 
-function liked.regExit(screen, close, closeButton)
-    local baseTh = thread.current()
-    thread.listen("close", function (_, uuid)
-        if uuid == screen then
-            if close then
-                close()
-            else
-                baseTh:kill()
-            end
-        end
-    end)
-    if closeButton then
-        thread.listen("touch", function (_, uuid, px, py)
-            if uuid == screen then
-                local rx, ry = graphic.getResolution(screen)
-                if py == 1 and px >= rx - 2 then
-                    if close then
-                        close()
-                    else
-                        baseTh:kill()
-                    end
-                end
-            end
-        end)
-    end
-end
-
 function liked.applicationWindow(screen, title, bgcolor)
     local sx, sy = graphic.getResolution(screen)
     return graphic.createWindow(screen, 1, 2, sx, sy - 1), liked.drawFullUpBarTask(screen, title, bgcolor)
@@ -747,6 +720,37 @@ function liked.getScoreColor(score)
         return colors.orange
     else
         return colors.red
+    end
+end
+
+-------------------------------------------------------- simple api
+
+liked.regBar = liked.drawFullUpBarTask
+
+function liked.regExit(screen, close, closeButton)
+    local baseTh = thread.current()
+    thread.listen("close", function (_, uuid)
+        if uuid == screen then
+            if close then
+                close()
+            else
+                baseTh:kill()
+            end
+        end
+    end)
+    if closeButton then
+        thread.listen("touch", function (_, uuid, px, py)
+            if uuid == screen then
+                local rx, ry = graphic.getResolution(screen)
+                if py == 1 and px >= rx - 2 then
+                    if close then
+                        close()
+                    else
+                        baseTh:kill()
+                    end
+                end
+            end
+        end)
     end
 end
 
