@@ -14,7 +14,7 @@ end
 
 local startGame = layout:createButton(math.round((rx / 2) - 7), math.round(ry / 2) - 1, 16, 3, uix.colors.lightGray, uix.black, "start game", true)
 function startGame:onClick(_, nickname)
-    ui:execute(gamePath, screen, nickname)
+    assert(ui:execute(gamePath, screen, nickname))
 end
 
 ui:loop()

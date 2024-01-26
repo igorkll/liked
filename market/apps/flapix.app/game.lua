@@ -35,8 +35,9 @@ updateKey(false)
 
 local function drawPipe()
     for i, v in ipairs(pipes) do
-        window:fill(v[1], 2, 2, 1, pal.green, 0, " ")
-        window:fill(v[1], v[2] - 1, 2, 3, pal.lightBlue, 0, " ")
+        local x, y = math.round(v[1]), math.round(v[2])
+        window:fill(x, 2, 2, window.sizeY - 2, pal.green, 0, " ")
+        window:fill(x, y - 1, 2, 3, pal.lightBlue, 0, " ")
     end
 end
 
@@ -72,6 +73,12 @@ thread.create(function ()
     end
 end):resume()
 
+thread.timer(2, function ()
+    if math.random(1, 5) == 1 then
+        table.insert(pipes, {window.sizeX + 5, math.random(4, window.sizeY - 3)})
+    end
+end, math.huge)
+
 while true do
     -- draw
     draw()
@@ -89,9 +96,9 @@ while true do
     for i = #pipes, 1, -1 do
         local pipe = pipes[i]
         if pipe[1] < 1 then
-            table.remove(pipe, i)
+            table.remove(pipes, i)
         else
-            pipe[1] = pipe[1] - 1
+            pipe[1] = pipe[1] - 0.2
         end
     end
 
