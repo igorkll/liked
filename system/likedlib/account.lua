@@ -186,7 +186,9 @@ function account.getStorage()
 
     local socket = card.connect(host, 8723)
     if not socket then return end
-    internet.wait(socket)
+    if not internet.wait(socket) then
+        return
+    end
 
     local function request(name, args)
         local sendTbl = {name = registry.account, token = registry.accountToken, method = name}
