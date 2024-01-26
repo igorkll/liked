@@ -528,6 +528,17 @@ local list = {
         path = "/data/apps/analyzer.app",
         urlPrimaryPart = selfurlpart .. "/apps/analyzer.app/",
         files = {"main.lua", "icon.t2p"}
+    },
+    {
+        name = "flapix",
+        version = "1",
+        vendor = "logic",
+        description = "you are a bird, fly!! don't miss the holes in the pipes",
+        minDiskSpace = 64,
+        
+        path = "/data/apps/flapix.app",
+        urlPrimaryPart = selfurlpart .. "/apps/flapix.app/",
+        files = {"main.lua", "icon.t2p"}
     }
 }
 
