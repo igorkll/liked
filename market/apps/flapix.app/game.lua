@@ -32,7 +32,7 @@ local score = 0
 local pipes = {}
 
 local function updateKey(state)
-    birdDeltaTarget = state and -0.15 or 0.15
+    birdDeltaTarget = state and -0.3 or 0.3
 end
 updateKey(false)
 

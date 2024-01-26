@@ -115,8 +115,14 @@ end
 
 ------------------------------------
 
-function gui.shadow(gpu, x, y, sx, sy, mul, full)
-    local screen = gpu.getScreen()
+function gui.shadow(screen, x, y, sx, sy, mul, full)
+    local gpu
+    if type(screen) == "table" then
+        gpu = screen
+        screen = gpu.getScreen()
+    else
+        gpu = graphic.findGpu(screen)
+    end
     local depth = gpu.getDepth()
 
     local function getPoses()
@@ -217,9 +223,8 @@ function gui.shadow(gpu, x, y, sx, sy, mul, full)
     end
 
     return function ()
-        if gpu.getScreen() ~= screen then
-            gpu.bind(screen, false)
-        end
+        local gpu = graphic.findGpu(screen)
+
         for _, obj in ipairs(origs) do
             gpu.setForeground(obj[4])
             gpu.setBackground(obj[5])
@@ -248,8 +253,6 @@ function gui.smallWindow(screen, cx, cy, str, backgroundColor, icon, sx, sy)
     sx = sx or 32
     sy = sy or 8
 
-    local gpu = graphic.findGpu(screen)
-
     if not cx or not cy then
         cx, cy = gui.getCustomZone(screen, sx, sy)
     end
@@ -259,7 +262,7 @@ function gui.smallWindow(screen, cx, cy, str, backgroundColor, icon, sx, sy)
     local color = backgroundColor or colors.lightGray
 
     --window:fill(2, 2, window.sizeX, window.sizeY, colors.gray, 0, " ")
-    local noShadow = gui.shadow(gpu, window.x, window.y, window.sizeX, window.sizeY)
+    local noShadow = gui.shadow(screen, window.x, window.y, window.sizeX, window.sizeY)
     window:clear(color)
 
     local textColor = colors.white
@@ -286,7 +289,7 @@ function gui.customWindow(screen, sx, sy)
     local cx, cy = gui.getCustomZone(screen, sx, sy)
     local clear = graphic.screenshot(screen, cx, cy, sx, sy)
     local window = graphic.createWindow(screen, cx, cy, sx, sy, true)
-    gui.shadow(graphic.findGpu(screen), cx, cy, sx, sy)
+    gui.shadow(screen, cx, cy, sx, sy)
 
     return window, clear
 end
@@ -516,7 +519,7 @@ function gui.selectcolor(screen, cx, cy, str)
     end
 
     local window = graphic.createWindow(screen, cx, cy, 24, 12, true)
-    local noShadow = gui.shadow(gpu, window.x, window.y, window.sizeX, window.sizeY)
+    local noShadow = gui.shadow(screen, window.x, window.y, window.sizeX, window.sizeY)
     window:clear(colors.gray)
     window:fill(3, 2, 20, 10, colors.brown, colors.white, "▒")
     window:set(2, 1, colors.gray, colors.white, str or "select color")
@@ -574,7 +577,7 @@ function gui.input(screen, cx, cy, str, hidden, backgroundColor, default, disabl
     local window = graphic.createWindow(screen, cx, cy, 32, 8, true)
 
     --window:fill(2, 2, window.sizeX, window.sizeY, colors.gray, 0, " ")
-    local noShadow = gui.shadow(gpu, window.x, window.y, window.sizeX, window.sizeY)
+    local noShadow = gui.shadow(screen, window.x, window.y, window.sizeX, window.sizeY)
     window:clear(backgroundColor or colors.lightGray)
 
     local pos = math.round((window.sizeX / 2) - (unicode.wlen(str) / 2)) + 1
@@ -697,7 +700,7 @@ function gui.context(screen, posX, posY, strs, active)
 
     local window = graphic.createWindow(screen, posX, posY, sizeX, sizeY)
     --window:fill(2, 2, window.sizeX, window.sizeY, colors.gray, 0, " ")
-    gui.shadow(gpu, window.x, window.y, window.sizeX, window.sizeY)
+    gui.shadow(screen, window.x, window.y, window.sizeX, window.sizeY)
 
     local function redrawStrs(selected)
         for i, str in ipairs(drawStrs) do
@@ -815,7 +818,7 @@ function gui.select(screen, cx, cy, label, actions, scroll, noCloseButton, overl
     local window = graphic.createWindow(screen, cx, cy, 50, 16, true)
     local noShadow
     if not disableShadow then
-        noShadow = gui.shadow(graphic.findGpu(screen), cx, cy, 50, 16)
+        noShadow = gui.shadow(screen, cx, cy, 50, 16)
     end
 
     --------------------------------------------
