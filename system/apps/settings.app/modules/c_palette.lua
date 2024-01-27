@@ -9,6 +9,7 @@ local palette = require("palette")
 local uix = require("uix")
 local registry = require("registry")
 local sysinit = require("sysinit")
+local thread = require("thread")
 
 local colors = gui_container.colors
 
@@ -39,8 +40,7 @@ function visionProtection:onSwitch()
     end
     sysinit.applyPalette(sysinit.initPalPath, screen)
 
-    gRedraw()
-    draw()
+    selfReload()
 end
 
 local selected = 1
@@ -94,8 +94,7 @@ function draw(set)
         palette.setSystemPalette(palPath)
         gui_container.refresh()
         event.push("redrawDesktop")
-        gRedraw()
-        draw()
+        selfReload()
     end
 end
 draw()

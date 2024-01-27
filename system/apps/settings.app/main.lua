@@ -66,14 +66,19 @@ local function draw(noReload)
         moduleEnd()
     end
 
-    local env = bootloader.createEnv()
-    env.gRedraw = function ()
-        upRedraw()
-        draw(true)
-    end
-    env.upTask = upTask
-    
     if not noReload then
+        local env = bootloader.createEnv()
+        env.gRedraw = function ()
+            upRedraw()
+            draw(true)
+        end
+        env.upTask = upTask
+        env.selfReload = function()
+            upRedraw()
+            draw()
+            event.stub()
+        end
+    
         local code = loadfile(paths.concat(modulesPath, modules[selected]), nil, env)
         currentModule, moduleEnd = code(screen, modulWindow.x, modulWindow.y)
     end
