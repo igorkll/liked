@@ -1,6 +1,7 @@
 local uix = require("uix")
 local sound = require("sound")
 local gobjs = require("gobjs")
+local gui = require("gui")
 local fs = require("filesystem")
 
 local screen = ...
@@ -59,18 +60,33 @@ end
 
 ---------------------------------
 
-local list, actions = cleanList()
-
-layout = ui:create("Cleaner", uix.colors.gray)
-
-layout.actionList = layout:createCustom(2, 2, gobjs.scrolltext, rx - 2, ry - 2)
-layout.actionList:setText(table.concat(list, "\n"))
-
-layout.cleanButton = layout:createButton(2, 2, 16, 1, uix.colors.white, uix.colors.red, "clean", true)
-function layout.cleanButton:onClick()
-    for i, v in ipairs(actions) do
-        v()
+local list, actions
+local function updateList()
+    list, actions = cleanList()
+    if #list > 0 then
+        layout.actionList:setText(table.concat(list, "\n"))
+    else
+        layout.actionList:setText("cleaning of the system is not required")
     end
 end
 
+layout = ui:create("Cleaner", uix.colors.black)
+layout.actionList = layout:createCustom(2, 4, gobjs.scrolltext, rx - 2, ry - 4)
+layout.cleanButton = layout:createButton(2, 2, 16, 1, uix.colors.white, uix.colors.red, "clean", true)
+function layout.cleanButton:onClick()
+    if #actions > 0 then
+        if gui.yesno(screen, nil, nil, "are you sure you want to start cleaning the system?") then
+            gui.status(screen, nil, nil, "cleaning the system...")
+            for i, v in ipairs(actions) do
+                v()
+            end
+            updateList()
+        end
+    else
+        gui.warn(screen, nil, nil, "cleaning of the system is not required")
+    end
+    ui:draw()
+end
+
+updateList()
 ui:loop()
