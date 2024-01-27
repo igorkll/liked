@@ -62,8 +62,10 @@ end
 local list, actions = cleanList()
 
 layout = ui:create("Cleaner", uix.colors.gray)
+
 layout.actionList = layout:createCustom(2, 2, gobjs.scrolltext, rx - 2, ry - 2)
 layout.actionList:setText(table.concat(list, "\n"))
+
 layout.cleanButton = layout:createButton(2, 2, 16, 1, uix.colors.white, uix.colors.red, "clean", true)
 function layout.cleanButton:onClick()
     for i, v in ipairs(actions) do
