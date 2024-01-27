@@ -30,6 +30,7 @@ local birdDeltaTarget
 
 local score = 0
 local pipes = {}
+local dieState
 
 local function updateKey(state)
     birdDeltaTarget = state and -0.3 or 0.3
@@ -94,48 +95,53 @@ local function addPipe()
 end
 addPipe()
 
-thread.timer(1.5, function ()
-    if computer.uptime() - oldPipeTime > 3 or math.random(1, 3) == 1 then
+thread.timer(2.5, function ()
+    if dieState then return false end
+    if computer.uptime() - oldPipeTime > 4 or math.random(1, 3) == 1 then
         addPipe()
     end
 end, math.huge)
 
-local tick = 0
-while true do
-    -- draw
-    draw()
-
-    -- process
-    birdPosY = birdPosY + birdDelta
-    birdDelta = birdDelta + ((birdDeltaTarget - birdDelta) * 0.03);
-    if birdPosY > window.sizeY - 1 then
-        dieScreen(2)
-        return
-    elseif birdPosY < 2 then
-        dieScreen(1)
-        return
-    end
-    for i = #pipes, 1, -1 do
-        local pipe = pipes[i]
-        if pipe[1] < 1 then
-            table.remove(pipes, i)
-        else
-            pipe[1] = pipe[1] - 0.2
-            if math.round(pipe[1]) == math.round(birdPosX) then
-                if math.abs(math.round(pipe[2]) - math.round(birdPosY)) > 1 then
-                    dieScreen()
-                    return
-                elseif not pipe[3] then
-                    addScore()
-                    pipe[3] = true
+thread.timer(0.2, function ()
+    if dieState then return false end
+    for i = 1, 10 do
+        birdPosY = birdPosY + birdDelta
+        birdDelta = birdDelta + ((birdDeltaTarget - birdDelta) * 0.03);
+        if birdPosY > window.sizeY - 1 then
+            dieState = 2
+            return false
+        elseif birdPosY < 2 then
+            dieState = 1
+            return false
+        end
+        for i = #pipes, 1, -1 do
+            local pipe = pipes[i]
+            if pipe[1] < 1 then
+                table.remove(pipes, i)
+            else
+                pipe[1] = pipe[1] - 0.2
+                if math.round(pipe[1]) == math.round(birdPosX) then
+                    if math.abs(math.round(pipe[2]) - math.round(birdPosY)) > 1 then
+                        dieState = true
+                        return false
+                    elseif not pipe[3] then
+                        addScore()
+                        pipe[3] = true
+                    end
                 end
             end
         end
     end
+end, math.huge)
+
+while true do
+    -- draw
+    draw()
+    if dieState then
+        dieScreen(dieState)
+        return
+    end
 
     -- delay
-    if tick % 5 == 0 then
-        os.sleep(0.05)
-    end
-    tick = tick + 1
+    os.sleep(0.1)
 end
