@@ -49,8 +49,8 @@ end
 local function drawPipe()
     for i, v in ipairs(pipes) do
         local x, y = math.round(v[1]), math.round(v[2])
-        window:fill(x, 2, 2, y - 3, pal.green, 0, " ")
-        window:fill(x, y + 2, 2, window.sizeY - y - 2, pal.green, 0, " ")
+        window:fill(x, 2, 2, y - 3, pal.lightBlue, pal.green, "█")
+        window:fill(x, y + 2, 2, window.sizeY - y - 2, pal.lightBlue, pal.green, "█")
     end
 end
 
@@ -66,8 +66,8 @@ local function draw(altDraw)
     window:fill(1, 2, window.sizeX, window.sizeY - 2, pal.lightBlue, 0, " ")
     window:fill(math.round(birdPosX), y, 2, 1, pal.yellow, 0, " ")
     drawPipe()
-    gui.drawtext(screen, 2, 4, pal.white, "score     : " .. score)
-    gui.drawtext(screen, 2, 5, pal.white, "best score: " .. conf.bestScore)
+    window:set(2, 3, pal.lightBlue, pal.white, "score     : " .. score)
+    window:set(2, 4, pal.lightBlue, pal.white, "best score: " .. conf.bestScore)
 end
 
 local function dieScreen(altDraw)
