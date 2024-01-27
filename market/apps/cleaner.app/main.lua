@@ -10,48 +10,67 @@ local rx, ry = ui:zoneSize()
 
 ---------------------------------
 
+local openOSfiles = {
+    "/dev",
+    "/mnt",
+    "/usr",
+    "/home",
+    "/etc",
+    "/boot",
+    "/lib",
+    "/bin",
+    "/autorun.lua",
+    "/.autorun.lua",
+    "/openOS.lua"
+}
+
+local mineOSfiles = {
+    "/Mounts",
+    "/MineOS",
+    "/Applications",
+    "/Extensions",
+    "/Icons",
+    "/Libraries",
+    "/Localizations",
+    "/Pictures",
+    "/Screensavers",
+    "/Temporary",
+    "/Users",
+    "/Versions.cfg",
+    "/OS.lua",
+    "/Autosave.proj",
+    "/mineOS.lua"
+}
+
+local function exists(lst)
+    for i, v in ipairs(lst) do
+        if fs.exists(v) then
+            return true
+        end
+    end
+end
+
+local function rmAll(lst)
+    for i, v in ipairs(lst) do
+        fs.remove(v)
+    end
+end
+
+
 local function cleanList()
     local list, actions = {}, {}
 
-    if not fs.exists("/vendor/apps/openOS.app.app") and fs.exists("/lib") then
+    if not fs.exists("/vendor/apps/openOS.app.app") and exists(openOSfiles) then
         table.insert(list, "residual OpenOS files")
         table.insert(actions, function ()
-            fs.remove("/dev") --я знаю что это "виртуальные" директории, но они тоже могут создасться
-            fs.remove("/mnt")
-
-            fs.remove("/usr")
-            fs.remove("/home")
-            fs.remove("/etc")
-            fs.remove("/boot")
-            fs.remove("/lib")
-            fs.remove("/bin")
-            
-            fs.remove("/autorun.lua")
-            fs.remove("/.autorun.lua")
-            fs.remove("/openOS.lua")
+            rmAll(openOSfiles)
         end)
     end
 
-    if not fs.exists("/vendor/apps/mineOS.app") and fs.exists("/OS.lua") then
+    if not fs.exists("/vendor/apps/mineOS.app") and exists(mineOSfiles) then
         table.insert(list, "residual MineOS files")
         table.insert(actions, function ()
-            fs.remove("/Mounts") --я знаю что это "виртуальные" директории, но они тоже могут создасться
-
-            fs.remove("/MineOS")
-            fs.remove("/Applications")
-            fs.remove("/Extensions")
-            fs.remove("/Icons")
-            fs.remove("/Libraries")
-            fs.remove("/Localizations")
-            fs.remove("/Pictures")
-            fs.remove("/Screensavers")
-            fs.remove("/Temporary")
-            fs.remove("/Users")
-            fs.remove("/Versions.cfg")
-            fs.remove("/OS.lua")
-
-            fs.remove("/Autosave.proj")
-            fs.remove("/mineOS.lua")
+            rmAll(mineOSfiles)
         end)
     end
 
