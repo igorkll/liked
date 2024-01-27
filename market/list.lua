@@ -539,6 +539,17 @@ local list = {
         path = "/data/apps/flapix.app",
         urlPrimaryPart = selfurlpart .. "/apps/flapix.app/",
         files = {"main.lua", "game.lua", "icon.t2p"}
+    },
+    {
+        name = "cleaner",
+        version = "1",
+        vendor = "logic",
+        description = "allows you to clean the system of garbage",
+        minDiskSpace = 64,
+        
+        path = "/data/apps/cleaner.app",
+        urlPrimaryPart = selfurlpart .. "/apps/cleaner.app/",
+        files = {"main.lua", "icon.t2p"}
     }
 }
 
