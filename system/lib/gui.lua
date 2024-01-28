@@ -1052,6 +1052,7 @@ end
 
 function gui.selectcomponent(screen, cx, cy, types, allowAutoConfirm, control, callbacks, blacklist) --=gui_selectcomponent(screen, nil, nil, {"computer"}, true)
     local advLabeling = require("advLabeling")
+    local vcomponent = require("vcomponent")
 
     if types and type(types) ~= "table" then
         types = {types}
@@ -1112,10 +1113,18 @@ function gui.selectcomponent(screen, cx, cy, types, allowAutoConfirm, control, c
                     if not blacklist or not table.exists(blacklist, addr) then
                         table.insert(addresses, addr)
 
+                        local tags = {}
+                        if fs.bootaddress == addr then
+                            table.insert(tags, "system")
+                        end
+                        if vcomponent.isVirtual(addr) then
+                            table.insert(tags, "virtual")
+                        end
+
                         local ctype = component.type(addr)
                         local clabel = advLabeling.getLabel(addr) or ""
-                        if fs.bootaddress == addr then
-                            clabel = clabel .. " (system)"
+                        if #tags > 0 then
+                            clabel = clabel .. " (" .. table.concat(tags, "/") .. ")"
                         end
                         clabel = gui_container.short(clabel, 20)
 
@@ -1208,8 +1217,12 @@ function gui.selectcomponent(screen, cx, cy, types, allowAutoConfirm, control, c
                     elseif action == 6 then
                         local format = require("format")
 
-                        local tempfile = paths.concat("/tmp", component.type(addr) .. "_" .. math.round(math.random(0, 9999)) .. ".txt")
+                        local ctype = component.type(addr)
+                        local tempfile = paths.concat("/tmp", ctype .. "_" .. math.round(math.random(0, 9999)) .. ".txt")
                         local file = fs.open(tempfile, "wb")
+                        file.write("address - " .. tostring(addr) .. "\n")
+                        file.write("ctype   - " .. tostring(ctype) .. "\n")
+                        file.write("virtual - " .. tostring(vcomponent.isVirtual(addr)) .. "\n\n")
                         local tbl = lastinfo.deviceinfo[addr] or {}
                         local maxMethodLen = 0
                         for name in pairs(tbl) do
