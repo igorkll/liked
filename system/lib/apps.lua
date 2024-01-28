@@ -408,12 +408,12 @@ function apps.install(screen, nickname, path, hide)
 
     local ok, err = archiver.unpack(path, "/data")
     if ok then
-        apps.check()
+        apps.check(screen, nickname)
     end
     return ok, err
 end
 
-function apps.check()
+function apps.check(screen, nickname)
     if liked.recoveryMode then return end
     
     local installedApps = appList(appsPath)
@@ -425,7 +425,7 @@ function apps.check()
         end
 
         if not installedInfo.data[name] then
-            apps.postInstall(nil, nil, paths.concat(appsPath, name))
+            apps.postInstall(screen, nickname, paths.concat(appsPath, name))
         end
     end
 
@@ -433,7 +433,7 @@ function apps.check()
         if not installedApps[name] then
             local lpath = paths.concat(shadowPath, name)
             if fs.isDirectory(lpath) then
-                apps.uninstall(nil, nil, lpath)
+                apps.uninstall(screen, nickname, lpath)
             end
         end
     end
