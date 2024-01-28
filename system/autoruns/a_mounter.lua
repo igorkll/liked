@@ -13,19 +13,23 @@ if not registry.doNotMoundDisks then
 
     local mountlist = {}
 
+    local function tryMount(uuid)
+        if bootloader.runlevel ~= "init" then
+            if registry.diskSound then
+                computer.beep(2000, 0.1)
+            end
+            event.push("redrawDesktop")
+        end
+        local mountpoint = require("hdd").genName(uuid)
+        if not fs.exists(mountpoint) then
+            fs.mount(uuid, mountpoint)
+        end
+        mountlist[uuid] = mountpoint
+    end
+
     event.listen("component_added", function(_, uuid, name)
         if name == "filesystem" and allowMount(uuid) then
-            if bootloader.runlevel ~= "init" then
-                if registry.diskSound then
-                    computer.beep(2000, 0.1)
-                end
-                event.push("redrawDesktop")
-            end
-            local mountpoint = require("hdd").genName(uuid)
-            if not fs.exists(mountpoint) then
-                assert(fs.mount(uuid, mountpoint))
-            end
-            mountlist[uuid] = mountpoint
+            tryMount(uuid)
         end
     end)
 
@@ -43,4 +47,10 @@ if not registry.doNotMoundDisks then
             end
         end
     end)
+
+    for address in component.list("filesystem", true) do
+        if allowMount(address) then
+            tryMount(address)
+        end
+    end
 end
