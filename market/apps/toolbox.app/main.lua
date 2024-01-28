@@ -35,7 +35,7 @@ function watchCls:onDestroy()
     self.image:destroy()
 end
 
-function watchCls:draw()
+function watchCls:onDraw()
     
 end
 
@@ -51,7 +51,7 @@ function compassCls:onDestroy()
     self.image:destroy()
 end
 
-function compassCls:draw()
+function compassCls:onDraw()
     if component.tablet then
         local x, y = self.x + (imgX / 2), self.y + (imgY / 2)
         local rad = math.rad(-(component.tablet.getYaw()))

@@ -9,9 +9,11 @@ local internet = require("internet")
 local image = require("image")
 local gui = require("gui")
 local account = require("account")
+local event = require("event")
 
 local screen, _, window, autoexit, noCaptcha, rsButtons = ...
-local ui = uix.manager(screen, window)
+local ui = uix.manager(screen)
+ui.window = window
 local rx, ry = ui:size()
 local pwx, pwy
 if window then
@@ -23,12 +25,12 @@ local function addRSbuttons(layout)
     if rsButtons then
         local reboot = layout:createButton(rx - 17, 4, 16, 1, uix.colors.lightBlue, uix.colors.white, "reboot", true)
         function reboot:onClick()
-            computer.shutdown(true)
+            computer.shutdown(true, true)
         end
 
         local shutdown = layout:createButton(rx - 17, 2, 16, 1, uix.colors.lightBlue, uix.colors.white, "shutdown", true)
         function shutdown:onClick()
-            computer.shutdown()
+            computer.shutdown(nil, true)
         end
     end
 end
@@ -94,6 +96,27 @@ if not window then
     end
 end
 
+local function doLocked(locked)
+    if locked then
+        event.push("closeSettings", screen)
+    end
+
+    if not locked then
+        locked = nil
+    end
+
+    if locked ~= registry.oldLocked then
+        if locked then
+            registry.old_disableRecovery = registry.disableRecovery
+            registry.disableRecovery = true
+        else
+            registry.disableRecovery = registry.old_disableRecovery
+            registry.old_disableRecovery = nil
+        end
+        registry.oldLocked = locked
+    end
+end
+
 function accountLayout:onSelect()
     if not accountLayout.imagePath then
         accountLayout.locked = account.getLocked()
@@ -105,21 +128,22 @@ function accountLayout:onSelect()
         passwordZone2.read.setBuffer("")
         loginZone.read.setLock(false)
 
-        registerButton.dh = true
-        loginButton.dh = true
-        accountDelButton.dh = true
-        unloginButton.dh = true
-        changePassword.dh = true
-        devicesControl.dh = true
+        registerButton.disabledHidden = true
+        loginButton.disabledHidden = true
+        accountDelButton.disabledHidden = true
+        unloginButton.disabledHidden = true
+        changePassword.disabledHidden = true
+        devicesControl.disabledHidden = true
         
         if next3 then
-            next3.dh = false
+            next3.disabledHidden = false
         end
 
         if vtext1 then vtext1:destroy() end
         if vtext2 then vtext2:destroy() end
         if accountImage then accountImage:destroy() end
 
+        local locked
         if accountLayout.login and accountLayout.tokenIsValid then
             accountLayout.imagePath = uix.getSysImgPath("accountLogin")
             accountImage = accountLayout:createImage(((rx / 2) - (image.sizeX(accountLayout.imagePath) / 2)) + 1, 2, accountLayout.imagePath)
@@ -128,11 +152,13 @@ function accountLayout:onSelect()
             loginZone.read.setBuffer(accountLayout.login)
             loginZone.read.setLock(true)
 
-            accountDelButton.dh = false
-            unloginButton.dh = false
-            changePassword.dh = false
-            devicesControl.dh = false
+            accountDelButton.disabledHidden = false
+            unloginButton.disabledHidden = false
+            changePassword.disabledHidden = false
+            devicesControl.disabledHidden = false
         elseif accountLayout.locked then
+            locked = true
+            
             accountLayout.imagePath = uix.getSysImgPath("accountLock")
             accountImage = accountLayout:createImage(((rx / 2) - (image.sizeX(accountLayout.imagePath) / 2)) + 1, 2, accountLayout.imagePath)
             accountImage.wallpaperMode = true
@@ -144,17 +170,18 @@ function accountLayout:onSelect()
             vtext2 = accountLayout:createVText(rx / 2, ry - 10, uix.colors.orange, "enter account password to confirm that you are the owner")
 
             if next3 then
-                next3.dh = true
+                next3.disabledHidden = true
             end
-            loginButton.dh = false
+            loginButton.disabledHidden = false
         else
             accountLayout.imagePath = uix.getSysImgPath("account")
             accountImage = accountLayout:createImage(((rx / 2) - (image.sizeX(accountLayout.imagePath) / 2)) + 1, 2, accountLayout.imagePath)
             accountImage.wallpaperMode = true
 
-            registerButton.dh = false
-            loginButton.dh = false
+            registerButton.disabledHidden = false
+            loginButton.disabledHidden = false
         end
+        doLocked(locked)
     end
 end
 
@@ -224,6 +251,7 @@ function loginButton:onClick()
     if pass then
         if msg(account.login(loginZone.read.getBuffer(), pass)) then
             if autoexit then
+                doLocked(false)
                 os.exit()
                 return
             end

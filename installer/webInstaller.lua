@@ -4,13 +4,25 @@ local unicode = unicode or require("unicode")
 
 --------------------------------------------
 
-local gpu = component.proxy(component.list("gpu")() or error("no gpu", 0))
 local internet = component.proxy(component.list("internet")() or error("no internet card", 0))
+local likeScreen = ...
+local gpu
+local updateScreen
+pcall(function ()
+    local graphic = require("graphic")
+    gpu = graphic.findGpu(likeScreen)
+    updateScreen = function()
+        graphic.forceUpdate(likeScreen)
+    end
+end)
+if not gpu then
+    gpu = component.proxy(component.list("gpu")() or error("no gpu", 0))
+end
 
 --------------------------------------------
 
-local screen = gpu.getScreen()
-if not screen then
+local screen = likeScreen or gpu.getScreen()
+if not updateScreen and not screen then
     screen = component.list("screen")() or error("no screen", 0)
     gpu.bind(screen)
 end
@@ -93,6 +105,7 @@ end
 local function status(text)
     clearScreen()
     centerPrint(math.floor((ry / 2) + 0.5), text)
+    if updateScreen then updateScreen() end
 end
 
 local function menu(label, lstrs, funcs, withoutBackButton, refresh)
@@ -120,6 +133,8 @@ local function menu(label, lstrs, funcs, withoutBackButton, refresh)
             centerPrint(3 + i, str)
             if i == selected then invertColor() end
         end
+
+        if updateScreen then updateScreen() end
     end
     redraw()
 
@@ -435,21 +450,18 @@ local function install(disk, branch, edition, doOpenOS, doMineOS)
     end
 
     assert(load(buildUpdater(branch, edition), "=updater", nil, _G))(disk)
-    if computer.setBootAddress then
-        pcall(computer.setBootAddress, disk)
-    else
-        local eeprom = component.proxy(component.list("eeprom")() or "")
-        if eeprom then
-            eeprom.setData(disk) --потому что в mineOS нет функции computer.setBootAddress
-        end
-    end
+    pcall(computer.setBootAddress, disk)
     pcall(computer.shutdown, "fast")
 end
 
 --------------------------------------------
 
 local function generateTitle(address)
-    return address:sub(1, 8) .. "-" .. (component.invoke(address, "getLabel") or "no label")
+    local title = address:sub(1, 8) .. "-" .. (component.invoke(address, "getLabel") or "no label")
+    if address == drive then
+        title = title .. " (self disk)"
+    end
+    return title
 end
 
 local function openOSMineOSStr(openOS, mineOS)

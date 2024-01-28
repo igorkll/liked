@@ -6,6 +6,7 @@ local calls = require("calls")
 local gui_container = require("gui_container")
 local paths = require("paths")
 local bootloader = require("bootloader")
+local thread = require("thread")
 local registry = require("registry")
 
 local colors = gui_container.colors
@@ -19,6 +20,7 @@ local path = paths.path(calls.call("getPath"))
 local modulesPath = paths.concat(path, "modules")
 
 local upTask, upRedraw = liked.drawFullUpBarTask(screen, "Settings", nil, nil, true)
+upRedraw()
 
 ------------------------------------
 
@@ -64,22 +66,41 @@ local function draw(noReload)
         moduleEnd()
     end
 
-    local env = bootloader.createEnv()
-    env.gRedraw = function ()
-        upRedraw()
-        draw(true)
-    end
-    env.upTask = upTask
-    
     if not noReload then
+        local env = bootloader.createEnv()
+        env.gRedraw = function ()
+            upRedraw()
+            draw(true)
+        end
+        env.upTask = upTask
+        env.selfReload = function()
+            upRedraw()
+            draw()
+            event.stub()
+        end
+    
         local code = loadfile(paths.concat(modulesPath, modules[selected]), nil, env)
         currentModule, moduleEnd = code(screen, modulWindow.x, modulWindow.y)
     end
+
+    upRedraw()
 end
 draw()
 
+local stopFlag
+
+thread.listen("closeSettings", function (_, uuid)
+    if uuid == screen then
+        stopFlag = true
+    end
+end)
+
 while true do
-    local eventData = {event.pull()}
+    if stopFlag then
+        os.exit()
+    end
+
+    local eventData = {event.pull(0.5)}
     local selectWindowEventData = selectWindow:uploadEvent(eventData)
     local statusWindowEventData = statusWindow:uploadEvent(eventData)
 

@@ -25,7 +25,7 @@ local rx, ry = ui:size()
 
 local blinckedHi = {}
 
-function blinckedHi:draw()
+function blinckedHi:onDraw()
     local line = self.y
     local gpu = graphic.findGpu(screen)
     if gpu then
@@ -85,12 +85,12 @@ do
 
     local reboot = helloLayout:createButton(rx - 17, 4, 16, 1, uix.colors.lightBlue, uix.colors.white, "reboot", true)
     function reboot:onClick()
-        computer.shutdown(true)
+        computer.shutdown(true, true)
     end
 
     local shutdown = helloLayout:createButton(rx - 17, 2, 16, 1, uix.colors.lightBlue, uix.colors.white, "shutdown", true)
     function shutdown:onClick()
-        computer.shutdown()
+        computer.shutdown(nil, true)
     end
 end
 

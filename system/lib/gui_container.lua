@@ -52,16 +52,19 @@ gui_container.openVia = {
     ["afpx"] = "unpackArchive",
     ["reg"] = "applyReg",
     ["xpkg"] = "xpkgInstall",
+    ["box"] = "boxInstall",
+    ["vbox"] = "boxInstall",
+    ["sbox"] = "boxInstall",
+    ["ebox"] = "boxInstall"
 }
 
-gui_container.typecolors = { --тут косяк, политра может быть изменена а тут не измениться, и могут быть сбои при присвоения цвета. нала переделать на индексы палитры
-    ["app"] = gui_container.colors.red,
-    ["afpx"] = gui_container.colors.orange,
-    ["lua"] = gui_container.colors.lime
+gui_container.typecolors = {
 }
 
 gui_container.typenames = {
+    ["t1p"] = "image",
     ["t2p"] = "image",
+    ["t3p"] = "image",
     ["txt"] = "text",
     ["afpx"] = "archive",
     ["scrsv"] = "screensaver"
@@ -71,7 +74,9 @@ gui_container.knownExps = { --данные файлы не будет предл
     ["scrsv"] = true,   
     ["lua"] = true,
     ["app"] = true,
+    ["t1p"] = true,
     ["t2p"] = true,
+    ["t3p"] = true,
     ["plt"] = true,
     ["dat"] = true,
     ["cfg"] = true,
@@ -79,7 +84,11 @@ gui_container.knownExps = { --данные файлы не будет предл
     ["afpx"] = true,
     ["txt"] = true, --текстовому документу не нужно отдельная кнопка, он по умалчанию открываеться через редактор
     ["reg"] = true,
-    ["xpkg"] = true
+    ["xpkg"] = true,
+    ["box"] = true,
+    ["vbox"] = true,
+    ["ebox"] = true,
+    ["sbox"] = true
 }
 
 gui_container.editable = { --вместо "open is text editor" будет писаться "edit"
@@ -100,10 +109,14 @@ function gui_container.getUserRoot(screen)
     return path
 end
 
-function gui_container.short(str, max)
+function gui_container.short(str, max, endcheck)
     local len = unicode.len(str)
     if len > max then
-        return gui_container.chars.threeDots .. unicode.sub(str, (len - max) + 2, len)
+        if endcheck then
+            return unicode.sub(str, 1, max - 1) .. gui_container.chars.threeDots
+        else
+            return gui_container.chars.threeDots .. unicode.sub(str, (len - max) + 2, len)
+        end
     end
     return str
 end
@@ -167,6 +180,16 @@ end
 ]]
 
 function gui_container.refresh()
+    local colors = {
+        ["app"] = gui_container.colors.red,
+        ["afpx"] = gui_container.colors.orange,
+        ["lua"] = gui_container.colors.lime
+    }
+
+    for k, v in pairs(colors) do
+        gui_container.typecolors[k] = v
+    end
+
     local registry = require("registry")
     for str, tbl in pairs(registry.gui_container or {}) do
         for key, value in pairs(tbl) do

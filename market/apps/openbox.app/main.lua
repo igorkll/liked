@@ -4,7 +4,7 @@ local openbox = require("openbox")
 --------------------------------
 
 local screen = ...
-local program = iowindows.loadfile(screen)
+local program = iowindows.selectfile(screen)
 if not program then
     return
 end

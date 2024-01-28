@@ -254,7 +254,7 @@ local function draw(old, check) --вызывает все перерисовки
         local fsProxy, localFsPath = fs.get(path)
         local isFs = paths.equals(localFsPath, "/")
 
-        local shortName, fullName = liked.getName(screen, path)
+        local shortName, fullName = liked.getName(screen, path, not not customPath)
         local icon = liked.getIcon(screen, path)
 
         local icondata = {
@@ -267,7 +267,8 @@ local function draw(old, check) --вызывает все перерисовки
             index = i,
             name = fullName,
             isAlias = not not customPath,
-            isDir = fs.isDirectory(path)
+            isDir = fs.isDirectory(path),
+            hidden = fs.getAttribute(path, "hidden")
         }
 
         if isFs then
@@ -339,12 +340,17 @@ local function draw(old, check) --вызывает все перерисовки
                 --if selectedIcons[userPath] == icon.index then
                 --    window:fill(iconX - 2, iconY - 1, iconSizeX + 4, iconSizeY + 2, colors.blue, 0, " ")
                 --end
+                local baseColor = liked.getBaseWallpaperColor()
                 local x, y = window:toRealPos(math.floor((centerIconX - (unicode.len(icon.shortName) / 2)) + 0.5), centerIconY + 2)
-                gui.drawtext(screen, x, y, colors.white, icon.shortName)
+                gui.drawtext(screen, x, y, icon.hidden and colors.lightGray or (baseColor == colors.white and colors.black or colors.white), icon.shortName)
                 --window:set(iconX - (unicode.len(icon.name) // 2), iconY + iconY - 2, colors.lightBlue, colors.white, icon.name)
                 if icon.icon then
                     local sx, sy = window:toRealPos(iconX, iconY)
-                    pcall(image.draw, screen, icon.icon, sx, sy, true)
+                    if baseColor ~= colors.lightBlue then
+                        pcall(image.draw, screen, icon.icon, sx, sy, true, nil, nil, nil, baseColor)
+                    else
+                        pcall(image.draw, screen, icon.icon, sx, sy, true)
+                    end
                 end
             end
         end
@@ -702,7 +708,9 @@ local function doIcon(windowEventData)
 
                                 if state then
                                     liked.umountAll()
-                                    v.fs.setLabel(nil)
+                                    if not pcall(v.fs.setLabel, nil) then
+                                        warn("invalid name")
+                                    end
                                     liked.mountAll()
                                     draw()
                                 else
@@ -986,7 +994,7 @@ local function doIcon(windowEventData)
                 isCut = false
             end
 
-            local readonly = fs.get(userPath).isReadOnly()
+            local readonly = fs.isReadOnly(userPath)
             local strs = {"  paste", "  mount", "  download file", true, "  new directory", "  new text-file", "  new image"}
             local actives = {not not copyObject and not readonly, true, not not component.list("internet")() and not readonly,   false,   not readonly,   not readonly,   not readonly}
 
@@ -1230,13 +1238,28 @@ end)
 
 local lastCheckTime
 local warnPrinted
+local lolzLock
+local altLolzLock
+local accountCheckTimeout = 25 + math.random(-5, 5)
+
+event.listen("lolzLock", function ()
+    if not lolzLock then
+        altLolzLock = true
+    end
+end)
+
+event.listen("noLolzLock", function ()
+    lolzLock = nil
+    altLolzLock = nil
+end)
+
 while true do
-    if redrawFlag then
+    if redrawFlag then --бля тут проблем, когда варнинги весят, не чекаеться на залоченость по аку
         redrawFlag = false
         draw()
         if not warnPrinted then
             local clear = gui.saveZone(screen)
-            for _, str in ipairs(warnings.list()) do
+            for _, str in ipairs(warnings.list(screen)) do
                 gui.warn(screen, nil, nil, str)
             end
             clear()
@@ -1340,13 +1363,30 @@ while true do
         end
     end
 
-    if component.isPrimary(screen) and (not lastCheckTime or computer.uptime() - lastCheckTime > 5) then
-        if internet.check() and account.getLocked() and not account.checkToken() then
-            timerEnable = false
-            account.loginWindow(screen)
-            timerEnable = true
-            draw()
+    if altLolzLock then
+        timerEnable = false
+        assert(apps.execute("/system/bin/setup.app/stub.lua", screen))
+        while altLolzLock do
+            event.yield()
         end
+        timerEnable = true
+        draw()
+    elseif lolzLock then
+        event.push("lolzLock")
+        timerEnable = false
+        account.loginWindow(screen)
+        timerEnable = true
+        draw()
+        lolzLock = false
+        event.push("noLolzLock")
+    elseif component.isPrimary(screen) and (not lastCheckTime or computer.uptime() - lastCheckTime > accountCheckTimeout) then
         lastCheckTime = computer.uptime()
+        accountCheckTimeout = 25 + math.random(-5, 5)
+        
+        thread.create(function ()
+            if account.isLoginWindowNeed(screen) then
+                lolzLock = true
+            end
+        end):resume()
     end
 end

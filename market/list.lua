@@ -103,7 +103,7 @@ local list = {
     },
     {
         name = "lua",
-        version = "4",
+        version = "5",
         vendor = "logic",
         description = "lua code interpreter",
         minDiskSpace = 64,
@@ -351,7 +351,7 @@ local list = {
     },
     {
         name = "calculator",
-        version = "2",
+        version = "2.1",
         vendor = "logic",
         description = "this is an engineering calculator that supports a lot of functions",
         minDiskSpace = 64,
@@ -483,7 +483,7 @@ local list = {
         
         path = "/data/apps/shooting.app",
         urlPrimaryPart = selfurlpart .. "/apps/shooting.app/",
-        files = {"main.lua", "icon.t2p"}
+        files = {"main.lua", "icon.t2p", "config.cfg"}
     },
     {
         name = "componentLog",
@@ -494,6 +494,61 @@ local list = {
         
         path = "/data/apps/componentLog.app",
         urlPrimaryPart = selfurlpart .. "/apps/componentLog.app/",
+        files = {"main.lua", "icon.t2p"}
+    },
+    {
+        name = "codeMaster",
+        version = "1",
+        vendor = "logic",
+        description = "A game for real programmers!\nthis is a virtual computer with its own API,\nhas serious limitations on the speed of code execution and capabilities",
+        minDiskSpace = 64,
+        
+        path = "/data/apps/codeMaster.app",
+        urlPrimaryPart = selfurlpart .. "/apps/codeMaster.app/",
+        files = {"main.lua", "icon.t2p", "logo.t2p", "bios.lua", "documentation_rus.txt", "documentation_eng.txt", "examples/hello.lua", "examples/dots.lua", "examples/gui.lua", "examples/keyboard.lua"}
+    },
+    {
+        name = "imageViewer",
+        version = "1",
+        vendor = "logic",
+        description = "allows you to view images in full screen",
+        minDiskSpace = 64,
+        
+        path = "/data/apps/imageViewer.app",
+        urlPrimaryPart = selfurlpart .. "/apps/imageViewer.app/",
+        files = {"main.lua", "icon.t2p", "config.cfg", "logo.t2p", "logo.t3p"}
+    },
+    {
+        name = "analyzer",
+        version = "1",
+        vendor = "logic",
+        description = "allows you to get information about objects via tablet using the improvements: barcode_reader (analyzer), geolyzer, sign and navigation",
+        minDiskSpace = 64,
+        
+        path = "/data/apps/analyzer.app",
+        urlPrimaryPart = selfurlpart .. "/apps/analyzer.app/",
+        files = {"main.lua", "icon.t2p"}
+    },
+    {
+        name = "flapix",
+        version = "1",
+        vendor = "logic",
+        description = "you are a bird, fly!! don't miss the holes in the pipes",
+        minDiskSpace = 64,
+        
+        path = "/data/apps/flapix.app",
+        urlPrimaryPart = selfurlpart .. "/apps/flapix.app/",
+        files = {"main.lua", "game.lua", "icon.t2p"}
+    },
+    {
+        name = "cleaner",
+        version = "1",
+        vendor = "logic",
+        description = "allows you to clean the system of garbage",
+        minDiskSpace = 64,
+        
+        path = "/data/apps/cleaner.app",
+        urlPrimaryPart = selfurlpart .. "/apps/cleaner.app/",
         files = {"main.lua", "icon.t2p"}
     }
 }
@@ -538,6 +593,27 @@ list.libs = {
         url = selfurlpart .. "/libs/adv.lua",
         vendor = "logic",
         version = "1"
+    },
+    ["glasses"] = {
+        url = selfurlpart .. "/libs/glasses.lua",
+        vendor = "logic",
+        version = "1"
+    },
+    ["bitMapFonts"] = {
+        url = selfurlpart .. "/libs/bitMapFonts/init.lua",
+        vendor = "logic",
+        version = "1",
+        path = "/data/lib/bitMapFonts/init.lua",
+        files = {
+            {
+                url = selfurlpart .. "/libs/bitMapFonts/font.bin",
+                path = "/data/lib/bitMapFonts/font.bin"
+            },
+            {
+                url = selfurlpart .. "/libs/bitMapFonts/font.tbl",
+                path = "/data/lib/bitMapFonts/font.tbl"
+            }
+        }
     }
 }
 

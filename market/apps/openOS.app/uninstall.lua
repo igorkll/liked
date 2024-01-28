@@ -12,4 +12,7 @@ fs.remove("/lib")
 fs.remove("/bin")
 fs.remove("/openOS.lua")
 
+fs.remove("/autorun.lua")
+fs.remove("/.autorun.lua")
+
 fs.remove(paths.path(getPath()))

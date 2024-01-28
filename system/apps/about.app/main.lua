@@ -1,80 +1,69 @@
-local graphic = require("graphic")
-local gui_container = require("gui_container")
 local computer = require("computer")
 local system = require("system")
-local unicode = require("unicode")
+local uix = require("uix")
 local fs = require("filesystem")
-local paths = require("paths")
-local programs = require("programs")
 local liked = require("liked")
-local apps = require("apps")
 
-local colors = gui_container.colors
-local screen, nickname = ...
-local gpu = graphic.findGpu(screen)
-local rx, ry = gpu.getResolution()
+local screen = ...
+local ui = uix.manager(screen)
+local rx, ry = ui:zoneSize()
 
-local title = "About"
+---------------------------------
 
-local barTh, barRedraw = liked.drawUpBarTask(screen, true, colors.gray)
-
---------------------------------------------
-
-local deviceType = system.getDeviceType()
-
+local cpuLevel, isApu = system.getCpuLevel()
 local hddTotalSpace = fs.get("/").spaceTotal()
 local hddUsedSpace = fs.get("/").spaceUsed()
+local score = liked.getComputerScore()
 
-local statusWindow = graphic.createWindow(screen, 1, 1, rx, 1, true)
-local window = graphic.createWindow(screen, 1, 2, rx, ry - 1, true)
+local layout = ui:create("About", uix.colors.white)
+layout:createText(2, 2, uix.colors.black, "Operating System : " .. tostring(_OSVERSION) .. " / " .. tostring(_COREVERSION))
+layout:createText(2, 3, uix.colors.black, "Computer Address : " .. computer.address())
+layout:createText(2, 4, uix.colors.black, "Boot Disk        : " .. fs.bootaddress)
+layout:createText(2, 5, uix.colors.black, "Device Type      : " .. system.getDeviceType())
+layout:createText(2, 6, uix.colors.black, "Processor        : tier-" .. tostring(cpuLevel) .. (isApu and " (APU)" or ""))
+layout:createText(2, 7, uix.colors.black, "Computer Score   : ")
+layout:createText(21, 7, liked.getScoreColor(score), tostring(score) .. " / 10", 1, liked.getScoreColor(score))
 
-local function progressBar(y, value, firstColor, seconderyColor)
-    local lvalue = value * (rx - 7)
-    window:fill(6, y, lvalue, 1, firstColor, 0, " ")
-    window:fill(6 + lvalue, y, (rx - 7) - lvalue, 1, seconderyColor, 0, " ")
+local linePoses = 22
+local textSizes = 16
+local paramsPoses = linePoses + (rx - linePoses - textSizes) + 1
+local paramsPoses2 = linePoses + (rx - linePoses - textSizes) + 8
+
+local emptyPlane = layout:createPlane(paramsPoses, ry - 4, 16, 8, uix.colors.white)
+
+layout:createText(2, ry - 1, uix.colors.black, "CPU load level")
+local cpuBar = layout:createProgress(linePoses, ry - 1, rx - linePoses - textSizes, uix.colors.red, uix.colors.lightGray, 0)
+local cpuParam = layout:createText(paramsPoses, cpuBar.y, uix.colors.black, "")
+local cpuParam2 = layout:createText(paramsPoses2, cpuBar.y, uix.colors.black, "")
+
+layout:createText(2, ry - 2, uix.colors.black, "amount of used RAM")
+local ramBar = layout:createProgress(linePoses, ry - 2, rx - linePoses - textSizes, uix.colors.green, uix.colors.lightGray, 0)
+local ramParam = layout:createText(paramsPoses, ramBar.y, uix.colors.black, "")
+local ramParam2 = layout:createText(paramsPoses2, ramBar.y, uix.colors.black, "")
+
+layout:createText(2, ry - 3, uix.colors.black, "amount of used ROM")
+local romBar = layout:createProgress(linePoses, ry - 3, rx - linePoses - textSizes, uix.colors.purple, uix.colors.lightGray, 0)
+local romParam = layout:createText(paramsPoses, romBar.y, uix.colors.black, "")
+local romParam2 = layout:createText(paramsPoses2, romBar.y, uix.colors.black, "")
+
+layout:createText(2, ry - 4, uix.colors.black, "energy reserve")
+local energyBar = layout:createProgress(linePoses, ry - 4, rx - linePoses - textSizes, uix.colors.orange, uix.colors.lightGray, 0)
+local energyParam = layout:createText(paramsPoses, energyBar.y, uix.colors.black, "")
+local energyParam2 = layout:createText(paramsPoses2, energyBar.y, uix.colors.black, "")
+
+local coreLicenseButton = layout:createButton(rx - 18, 2, 17, 1, uix.colors.orange, uix.colors.white, "core license", true)
+coreLicenseButton.back2 = uix.colors.lightGray
+function coreLicenseButton:onClick(_, nickname)
+    ui:execute("edit", screen, nickname, "/system/core/LICENSE", true)
 end
 
-local function draw()
-    statusWindow:clear(colors.gray)
-    statusWindow:set(2, 1, colors.gray, colors.white, title)
-    statusWindow:set(rx, 1, colors.red, colors.white, "X")
-
-    --[[
-    local strs = {
-        "------------------------------------------OS",
-        "distributive: liked",
-        "distributive version: v" .. tostring(version),
-        "------------------------------------------CORE",
-        "core: likeOS",
-        "core verion: " .. _COREVERSION,
-        "------------------------------------------HARDWARE",
-        "-----------MAIN",
-        "device type: " .. getDeviceType(),
-        "-----------MEMORY(RAM)",
-        "total memory: " .. math.round(totalMemory / 1024) .. "kb",
-        "free  memory: " .. math.round(freeMemory / 1024) .. "kb",
-        "used  memory: " .. math.round((totalMemory - freeMemory) / 1024) .. "kb",
-        "used  memory: " .. math.round(ramUsedValue * 100) .. "%",
-        "-----------MEMORY(HDD)",
-        "hdd address : " .. fs.bootaddress,
-        "total memory: " .. math.round(hddTotalSpace / 1024) .. "kb",
-        "free  memory: " .. math.round((hddTotalSpace - hddUsedSpace) / 1024) .. "kb",
-        "used  memory: " .. math.round(hddUsedSpace / 1024) .. "kb",
-        "used  memory: " .. math.round(hddUsedValue * 100) .. "%",
-    }
-    ]]
-    
-    window:clear(colors.white)
-    window:set(2, 2, colors.white, colors.black, "Operating System : " .. tostring(_OSVERSION) .. " / " .. tostring(_COREVERSION))
-    window:set(2, 3, colors.white, colors.black, "Computer Address : " .. computer.address())
-    window:set(2, 4, colors.white, colors.black, "Boot Disk        : " .. fs.bootaddress)
-    window:set(2, 5, colors.white, colors.black, "Device Type      : " .. deviceType)
-    window:set(2, 7, colors.blue, colors.white, "List Of Components")
-    window:set(2, 9, colors.orange, colors.white, "  LIKED  LICENSE  ")
-    window:set(2, 11, colors.orange, colors.white, "  likeOS LICENSE  ")
+local licenseButton = layout:createButton(rx - 18, 4, 17, 1, uix.colors.orange, uix.colors.white, "liked license", true)
+licenseButton.back2 = uix.colors.lightGray
+function licenseButton:onClick(_, nickname)
+    ui:execute("edit", screen, nickname, "/system/LICENSE", true)
 end
 
-local function update()
+local function updateBars(cpuLoadLevel)
     local totalMemory = computer.totalMemory()
     local freeMemory = computer.freeMemory()
 
@@ -85,56 +74,53 @@ local function update()
     local ramUsedValue = 1 - (freeMemory / totalMemory)
     local energyVal = totalEnergy / maxEnergy
 
-    window:set(2, window.sizeY - 3, colors.white, colors.black, "ROM")
-    progressBar(window.sizeY - 3, hddUsedValue, colors.lime, colors.green)
-    gui_drawtext(screen, 8, ry - 3, colors.white, math.round(hddUsedSpace / 1024) .. "kb / " .. math.round(hddTotalSpace / 1024) .. "kb")
+    ramBar.value = ramUsedValue
+    romBar.value = hddUsedValue
+    energyBar.value = energyVal
+    cpuBar.value = cpuLoadLevel
 
-    window:set(2, window.sizeY - 2, colors.white, colors.black, "RAM")
-    progressBar(window.sizeY - 2, ramUsedValue, colors.lightBlue, colors.blue)
-    gui_drawtext(screen, 8, ry - 2, colors.white, math.round((totalMemory - freeMemory) / 1024) .. "kb / " .. math.round(totalMemory / 1024) .. "kb")
+    cpuParam.text = tostring(math.round(cpuLoadLevel * 100)) .. "%"
+    cpuParam2.text = "/ " .. tostring(100) .. "%"
 
-    window:set(2, window.sizeY - 1, colors.white, colors.black, "PWR")
-    progressBar(window.sizeY - 1, energyVal, colors.orange, colors.red)
-    gui_drawtext(screen, 8, ry - 1, colors.white, math.round(totalEnergy) .. " / " .. math.round(maxEnergy))
+    ramParam.text = tostring(math.round((totalMemory - freeMemory) / 1024)) .. "KB"
+    ramParam2.text = "/ " .. tostring(math.round(totalMemory / 1024)) .. "KB"
+
+    romParam.text = tostring(math.round(hddUsedSpace / 1024)) .. "KB"
+    romParam2.text = "/ " .. tostring(math.round(hddTotalSpace / 1024)) .. "KB"
+
+    energyParam.text = tostring(math.round(computer.energy()))
+    energyParam2.text = "/ " .. tostring(math.round(computer.maxEnergy()))
 end
 
-draw()
-update()
-
---------------------------------------------
-
-local oldtime = computer.uptime()
-
-while true do
-    local eventData = {computer.pullSignal(0.1)}
-
-    local statusWindowEventData = statusWindow:uploadEvent(eventData)
-    if statusWindowEventData[1] == "touch" and statusWindowEventData[3] == window.sizeX and statusWindowEventData[4] == 1 then
-        break
-    end
-
-    local windowEventData = window:uploadEvent(eventData)
-    if windowEventData[1] == "touch" and windowEventData[3] >= 2 and windowEventData[3] <= 19 then
-        barTh:suspend()
-        if windowEventData[4] == 7 then
-            local result = {apps.execute(paths.concat(paths.path(system.getSelfScriptPath()), "componentlist.lua"), screen)}
-            assert(table.unpack(result))
-            if result[1] and result[2] then
-                break
-            end
-        elseif windowEventData[4] == 9 then
-            apps.execute("edit", screen, nickname, "/system/LICENSE", true)
-        elseif windowEventData[4] == 11 then
-            apps.execute("edit", screen, nickname, "/system/core/LICENSE", true)
-        end
-        barTh:resume()
-        draw()
-        update()
-        barRedraw()
-    end
-
-    if computer.uptime() - oldtime > 0.2 then
-        oldtime = computer.uptime()
-        update()
-    end
+function layout:onRedraw()
+    updateBars(0)
 end
+
+layout:thread(function ()
+    while true do
+        updateBars(system.getCpuLoadLevel())
+
+        emptyPlane:draw()
+
+        ramBar:draw()
+        romBar:draw()
+        energyBar:draw()
+        cpuBar:draw()
+
+        cpuParam:draw()
+        cpuParam2:draw()
+
+        ramParam:draw()
+        ramParam2:draw()
+
+        romParam:draw()
+        romParam2:draw()
+
+        energyParam:draw()
+        energyParam2:draw()
+    end
+end):resume()
+
+---------------------------------
+
+ui:loop()

@@ -9,6 +9,7 @@ function sysinit.applyPalette(path, screen)
     local component  = require("component")
     local graphic = require("graphic")
     local gui_container = require("gui_container")
+    local registry = require("registry")
 
     local colors = assert(serialization.load(path))
 
@@ -23,6 +24,15 @@ function sysinit.applyPalette(path, screen)
 
     local t3default = colors.t3default
     colors.t3default = nil
+
+    if registry.visionProtection then
+        local colorlib = require("colors")
+        local format = require("format")
+        
+        for i, v in ipairs(colors) do
+            colors[i] = format.visionProtectionConvert(v)
+        end
+    end
 
     movetable(gui_container.indexsColors, colors)
     movetable(gui_container.colors, {
@@ -79,6 +89,23 @@ function sysinit.getResolution(screen)
         my = 25
     end
     return mx, my
+end
+
+function sysinit.generatePrimaryScreen()
+    local screen
+    local screenSize
+
+    local component = require("component")
+    for address in component.list("screen", true) do
+        local x, y = component.invoke(address, "getAspectRatio")
+        local size = x * y
+        if not screenSize or size > screenSize then
+            screen = address
+            screenSize = size
+        end
+    end
+
+    return screen
 end
 
 function sysinit.initScreen(screen)
@@ -145,22 +172,36 @@ function sysinit.runShell(screen, customShell)
     sysinit.screenThreads[screen] = t
 end
 
-function sysinit.init(box)
+function sysinit.init(box, lscreen)
     local fs = require("filesystem")
     _G._OSVERSION = "liked-v" .. assert(fs.readFile("/system/version.cfg"))
     require("calls") --подгрузка лютай легаси дичи
     local bootloader = require("bootloader")
     bootloader.runlevel = "user"
 
+    if lscreen and bootloader.recoveryApi then
+        bootloader.recoveryApi.offScreens()
+    end
+
     local graphic = require("graphic")
     local programs = require("programs")
     local component = require("component")
     local package = require("package")
+    local registry = require("registry")
 
     table.insert(package.paths, "/system/likedlib")
     table.insert(programs.paths, "/data/apps")
     table.insert(programs.paths, "/system/apps")
     table.insert(programs.paths, "/vendor/apps")
+
+    ------------------------------------
+
+    if not lscreen then
+        if not registry.primaryScreen or not component.isConnected(registry.primaryScreen) then
+            registry.primaryScreen = sysinit.generatePrimaryScreen()
+        end
+        component.setPrimary("screen", registry.primaryScreen)
+    end
 
     ------------------------------------
 
@@ -190,8 +231,12 @@ function sysinit.init(box)
 
     ------------------------------------
 
-    if box then
-        sysinit.initPalPath = "/system/palette.plt"
+    if box or lscreen then
+        if lscreen then
+            sysinit.initPalPath = "/system/palettes/original.plt"
+        else
+            sysinit.initPalPath = "/system/palette.plt"
+        end
         sysinit.applyPalette(sysinit.initPalPath, true)
     else
         sysinit.initPalPath = "/data/palette.plt"
@@ -219,7 +264,6 @@ function sysinit.init(box)
     local thread = require("thread")
     local liked = require("liked")
     local apps = require("apps")
-    local registry = require("registry")
     local event = require("event")
     local system = require("system")
     local computer = require("computer")
@@ -294,13 +338,15 @@ function sysinit.init(box)
 
     ------------------------------------
 
-    bootloader.unittests("/vendor/unittests")
-    bootloader.unittests("/data/unittests")
+    if not liked.recoveryMode then
+        bootloader.unittests("/vendor/unittests")
+        bootloader.unittests("/data/unittests")
 
-    bootloader.autorunsIn("/vendor/autoruns")
-    bootloader.autorunsIn("/data/autoruns")
+        bootloader.autorunsIn("/vendor/autoruns")
+        bootloader.autorunsIn("/data/autoruns")
 
-    require("autorun").autorun()
+        require("autorun").autorun()
+    end
     
     if programs.find("preinit") then
         apps.execute("preinit")
@@ -308,14 +354,21 @@ function sysinit.init(box)
 
     ------------------------------------
 
-    for index, address in ipairs(screens) do
-        sysinit.runShell(address)
+    if lscreen then
+        sysinit.runShell(lscreen)
+    else
+        sysinit.runShell(registry.primaryScreen)
+        for index, address in ipairs(screens) do
+            if registry.primaryScreen ~= address then
+                sysinit.runShell(address)
+            end
+        end
     end
 
     event.hyperListen(function (eventType, cuuid, ctype)
         if ctype == "screen" then
             if eventType == "component_added" then
-                if not sysinit.screenThreads[cuuid] and graphic.findGpuAddress(cuuid) then
+                if not liked.recoveryMode and not sysinit.screenThreads[cuuid] and graphic.findGpuAddress(cuuid) then
                     sysinit.runShell(cuuid)
                 end
             elseif eventType == "component_removed" then
@@ -341,6 +394,9 @@ function sysinit.init(box)
 
     sysinit.init = nil
     sysinit.inited = true
+    event.timer(1, function ()
+        sysinit.full = true
+    end)
 end
 
 return sysinit

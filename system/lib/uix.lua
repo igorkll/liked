@@ -9,6 +9,7 @@ local image = require("image")
 local system = require("system")
 local colorslib = require("colors")
 local paths = require("paths")
+local apps = require("apps")
 
 local colors = gui_container.colors
 local uix = {colors = colors}
@@ -29,7 +30,7 @@ function canvasClass:onCreate(sx, sy, back, fore, char)
     self.sy = sy
 end
 
-function canvasClass:draw()
+function canvasClass:onDraw()
     self.drawed = true
     if self.screenshot then
         self.screenshot()
@@ -38,6 +39,8 @@ function canvasClass:draw()
         self.gui.window:fill(self.x, self.y, self.sx, self.sy, self.back, self.fore, self.char)
     end
 end
+
+
 
 function canvasClass:set(x, y, back, fore, text, vertical)
     if vertical then
@@ -121,66 +124,82 @@ function objclass:stop()
             self.th = nil
         end
     elseif self.type == "button" then
-        self.state = false
-        if self.onDrop then
-            self:onDrop()
+        if not self.toggle then
+            if self.state then
+                self.state = false
+                if self.onDrop then
+                    self:onDrop()
+                end
+            end
         end
+    elseif self.type == "input" then
+        self.read.setDrawLock(true)
     end
 end
 
 function objclass:uploadEvent(eventData)
-    if self.disabled or self.dh then return end
+    if self.disabled or self.disabledHidden then return end
     local retval
     if self.type == "button" or self.type == "context" then
-        if self.state and (eventData[1] == "touch" or eventData[1] == "drop") then
-            if self.type ~= "context" then
-                self.state = false
+        if self.toggle then
+            if eventData[1] == "touch" and eventData[3] >= self.x and eventData[4] >= self.y and eventData[3] < self.x + self.sx and eventData[4] < self.y + self.sy then
+                self.state = not self.state
                 self:draw()
-
-                if self.onDrop then
-                    retval = self:onDrop(eventData[5], eventData[6], eventData)
+                if self.onSwitch then
+                    self:onSwitch(eventData[5], eventData[6], eventData)
                 end
             end
-        elseif not self.state and eventData[1] == "touch" and eventData[3] >= self.x and eventData[4] >= self.y and eventData[3] < self.x + self.sx and eventData[4] < self.y + self.sy then
-            if self.type == "context" then
-                self.state = true
-                self:draw()
-
-                if not self.th then
-                    self.th = thread.create(function ()
-                        local x, y = self.gui.window:toRealPos(self.x + 1, self.y + 1)
-                        local px, py, sx, sy = gui.contextPos(self.gui.window.screen, x, y, gui.contextStrs(self.strs))
-                        local clear = graphic.screenshot(self.gui.window.screen, px, py, sx + 2, sy + 1)
-                        local oldControlLock = self.gui.controlLock
-                        self.gui.controlLock = true
-                        local _, num = gui.context(self.gui.window.screen, px, py, self.strs, self.actives)
-                        self.gui.controlLock = oldControlLock
-                        clear()
-                        if num and self.funcs[num] then
-                            self.funcs[num]()
-                        end
-
-                        self.state = false
-                        self:draw()
-
-                        self.th:suspend()
-                        self.th = nil
-                    end)
-                    self.th:resume()
-                end
-            else
-                self.state = true
-                self:draw()
-                graphic.forceUpdate(self.gui.window.screen)
-                if self.autoRelease then
-                    os.sleep(0.1)
+        else
+            if self.state and (eventData[1] == "touch" or eventData[1] == "drop") then
+                if self.type ~= "context" then
                     self.state = false
                     self:draw()
-                    graphic.forceUpdate(self.gui.window.screen)
+
+                    if self.onDrop then
+                        retval = self:onDrop(eventData[5], eventData[6], eventData)
+                    end
                 end
-                
-                if self.onClick then
-                    retval = self:onClick(eventData[5], eventData[6], eventData)
+            elseif not self.state and eventData[1] == "touch" and eventData[3] >= self.x and eventData[4] >= self.y and eventData[3] < self.x + self.sx and eventData[4] < self.y + self.sy then
+                if self.type == "context" then
+                    self.state = true
+                    self:draw()
+
+                    if not self.th then
+                        self.th = thread.create(function ()
+                            local x, y = self.gui.window:toRealPos(self.x + 1, self.y + 1)
+                            local px, py, sx, sy = gui.contextPos(self.gui.window.screen, x, y, gui.contextStrs(self.strs))
+                            local clear = graphic.screenshot(self.gui.window.screen, px, py, sx + 2, sy + 1)
+                            local oldControlLock = self.gui.controlLock
+                            self.gui.controlLock = true
+                            local _, num = gui.context(self.gui.window.screen, px, py, self.strs, self.actives)
+                            self.gui.controlLock = oldControlLock
+                            clear()
+                            if num and self.funcs[num] then
+                                self.funcs[num]()
+                            end
+
+                            self.state = false
+                            self:draw()
+
+                            self.th:suspend()
+                            self.th = nil
+                        end)
+                        self.th:resume()
+                    end
+                else
+                    self.state = true
+                    self:draw()
+                    graphic.forceUpdate(self.gui.window.screen)
+                    if self.autoRelease then
+                        os.sleep(0.1)
+                        self.state = false
+                        self:draw()
+                        graphic.forceUpdate(self.gui.window.screen)
+                    end
+                    
+                    if self.onClick then
+                        retval = self:onClick(eventData[5], eventData[6], eventData)
+                    end
                 end
             end
         end
@@ -222,7 +241,11 @@ function objclass:uploadEvent(eventData)
         if self.gui.returnLayout then
             local _, py = self.gui.window:toFakePos(1, 1)
             if eventData[1] == "touch" and eventData[3] >= 1 and eventData[3] <= 3 and eventData[4] == py then
-                self.gui.returnLayout:select()
+                if type(self.gui.returnLayout) == "function" then
+                    self.gui.returnLayout()
+                else
+                    self.gui.returnLayout:select()
+                end
             end
         end
     elseif self.type == "seek" then
@@ -278,9 +301,8 @@ function objclass:uploadEvent(eventData)
 end
 
 function objclass:draw()
+    if self.hidden or self.disabledHidden then return end
     local style = self.style or self.gui.style
-
-    if self.hidden or self.dh then return end
     if self.type == "label" or self.type == "button" or self.type == "context" then
         local back, fore = self.back, self.fore
         if self.state then
@@ -378,6 +400,7 @@ function objclass:draw()
             self.gui.window:set(self.x + (self.sx - 1), self.y, bg, self.back, "◗")
         end
         
+        self.read.setDrawLock(false)
         self.read.redraw()
     elseif self.type == "seek" then
         local _, _, bg = self.gui.window:get(self.x, self.y)
@@ -426,7 +449,32 @@ function objclass:draw()
     end
 end
 
----------------------------------- layout methods
+---------------------------------- base custom class
+
+local baseCustom = {}
+baseCustom.destroy = objclass.destroy
+
+function baseCustom:uploadEvent(eventData)
+    if self.disabled or self.disabledHidden then return end
+    if self.onEvent then
+        self:onEvent(eventData)
+    end
+end
+
+function baseCustom:draw()
+    if self.hidden or self.disabledHidden then return end
+    if self.onDraw then
+        self:onDraw()
+    end
+end
+
+function baseCustom:stop()
+    if self.onStop then
+        self:onStop()
+    end
+end
+
+---------------------------------- layout objects
 
 function uix:createUpBar(title, withoutFill, bgcolor) --working only in fullscreen ui
     local obj = setmetatable({gui = self, type = "up"}, {__index = objclass})
@@ -439,19 +487,15 @@ function uix:createUpBar(title, withoutFill, bgcolor) --working only in fullscre
     obj.close = self:createButton(px - 2, py, 3, 1)
     obj.close.hidden = true
 
-    --тут некоректно использовать таймер, так как он продолжит тикать даже если система приостановит программу для работы screensaver
-    obj.thread = thread.create(function ()
-        while true do
-            os.sleep(10)
-            if self.active then
-                obj:draw()
-            end
+    obj.timer = thread.timer(10, function ()
+        if self.active then
+            obj:draw()
         end
-    end)
-    obj.thread:resume()
+    end, math.huge)
 
     local destroy = obj.destroy
     function obj:destroy()
+        event.cancel(obj.timer)
         destroy(obj)
         obj.close:destroy()
     end
@@ -463,14 +507,17 @@ end
 function uix:createUp(title, withoutFill, bgcolor)
     local upbar = self:createUpBar(title, withoutFill, bgcolor)
 
-    function upbar.close.onClick()
+    local function onExit()
         if self.smartGuiManager and self.smartGuiManager.onExit then
             self.smartGuiManager:onExit()
         else
-            os.exit()
+            self.smartGuiManager.exitFlag = true
+            event.stub()
         end
     end
 
+    --liked.regExit(self.window.screen, onExit)
+    upbar.close.onClick = onExit
     return upbar
 end
 uix.createAutoUpBar = uix.createUp --legacy
@@ -504,6 +551,7 @@ function uix:createButton(x, y, sx, sy, back, fore, text, autoRelease)
     obj.fore2 = obj.back
     obj.alignment = "center"
     obj.clamp = true
+    obj.toggle = false
 
     table.insert(self.objs, obj)
     return obj
@@ -680,12 +728,21 @@ function uix:createProgress(x, y, sx, fore, back, value)
     return obj
 end
 
-function uix:createCustom(x, y, cls, ...)
-    if not cls.destroy then
-        cls.destroy = objclass.destroy
+local function makeMT(cls)
+    local mt = getmetatable(cls)
+    if mt then
+        mt.__index = baseCustom
+    else
+        setmetatable(cls, {__index = baseCustom})
     end
+    return cls
+end
 
-    local obj = setmetatable({gui = self}, {__index = cls})
+function uix:createCustom(x, y, cls, ...)
+    local obj = setmetatable({}, {__index = makeMT(cls)})
+    obj.destroy = objclass.destroy
+    obj.gui = self
+    obj.window = self.window
     obj.x = x
     obj.y = y
     obj.args = {...}
@@ -755,30 +812,33 @@ function uix:createColorpic(x, y, sx, sy, text, color, full)
     return button
 end
 
+------------------------------------ layout api
+
 function uix:setReturnLayout(returnLayout)
     self.returnLayout = returnLayout
 end
 
-
-
-
 function uix:timer(time, callback, count)
-    return thread.timer(time, function ()
+    return thread.timer(time, function (...)
         if not self.bgWork then return end
-        return callback()
+        return callback(...)
     end, count)
 end
 
 function uix:listen(eventType, callback)
-    return thread.listen(eventType, function ()
+    return thread.listen(eventType, function (...)
         if not self.bgWork then return end
-        return callback()
+        return callback(...)
     end)
 end
 
-
-
-
+function uix:thread(func, ...)
+    local th = thread.create(func, ...)
+    if th then
+        table.insert(self.threads, th)
+        return th
+    end
+end
 
 function uix:uploadEvent(eventData)
     if self.controlLock or not self.active then return end
@@ -793,7 +853,7 @@ function uix:uploadEvent(eventData)
         end
 
         for _, obj in ipairs(self.objs) do
-            if obj.uploadEvent and not obj.disabled then
+            if obj.uploadEvent then
                 if obj:uploadEvent(eventData) then
                     break
                 end
@@ -815,6 +875,12 @@ function uix:draw()
     end
 
     for _, obj in ipairs(self.objs) do
+        if obj.draw and obj.type == "up" then
+            obj:draw()
+        end
+    end
+
+    for _, obj in ipairs(self.objs) do
         if obj.beforeRedraw then
             obj:beforeRedraw()
         end
@@ -829,7 +895,7 @@ function uix:draw()
     end
 
     for _, obj in ipairs(self.objs) do
-        if obj.draw and not obj.hidden and not obj.dh then
+        if obj.draw then
             obj:draw()
         end
     end
@@ -840,6 +906,23 @@ function uix:stop()
         if obj.stop then
             obj:stop()
         end
+    end
+end
+
+function uix:fullStop()
+    self.active = false
+    self.bgWork = false
+    self:stop()
+    for _, th in ipairs(self.threads) do
+        th:suspend()
+    end
+end
+
+function uix:fullStart()
+    self.active = true
+    self.bgWork = true
+    for _, th in ipairs(self.threads) do
+        th:resume()
     end
 end
 
@@ -896,6 +979,7 @@ function uix.create(window, bgcolor, style)
     guiobj.allowAutoActive = true
     guiobj.sizeX = window.sizeX
     guiobj.sizeY = window.sizeY
+    guiobj.threads = {}
 
     return guiobj
 end
@@ -922,7 +1006,7 @@ function uix.createSimpleLayout(screen, bgcolor, style)
     return uix.create(window, bgcolor or colors.black, style)
 end
 
----------------------------------- legacy
+---------------------------------- legacy manager
 
 function uix.createAuto(screen, title, bgcolor, style) --legacy
     local rx, ry = graphic.getResolution(screen)
@@ -960,31 +1044,50 @@ end
 
 local manager = {}
 
+function manager:fullStop()
+    if self.current then
+        self.current:fullStop()
+    end
+end
+
+function manager:fullStart()
+    if self.current then
+        self.current:fullStart()
+    end
+end
+
+function manager:execute(...)
+    self:fullStop()
+    local result = {apps.execute(...)}
+    self:fullStart()
+    self:draw()
+    return table.unpack(result)
+end
+
 function manager:select(layout)
     if self.current then
-        self.current.active = false
-        self.current.bgWork = false
-        self.current:stop()
+        self.current:fullStop()
     end
 
     self.current = layout
     if self.current then
         self.current.smartGuiManager = self
         self.current.allowAutoActive = nil
-        self.current.active = true
-        self.current.bgWork = true
-        if self.current.onSelect then self.current:onSelect() end
+        self.current:fullStart()
+        if self.current.onSelect then
+            self.current:onSelect()
+        end
         self.current:draw()
     end
 end
 
-function manager:loop()
+function manager:loop(timeout)
     if self.firstLayout and not self.current then
         self:select(self.firstLayout)
     end
 
     while true do
-        local eventData = {event.pull()}
+        local eventData = {event.pull(timeout)}
         local windowEventData
         if self.current and not self.stopUpload then
             windowEventData = self.current:uploadEvent(eventData)
@@ -992,6 +1095,10 @@ function manager:loop()
 
         if self.onEvent then
             self:onEvent(eventData, windowEventData)
+        end
+
+        if self.exitFlag then
+            break
         end
     end
 end
@@ -1031,8 +1138,8 @@ function manager:draw()
     end
 end
 
-function uix.manager(screen, window)
-    return setmetatable({screen = screen, window = window}, {__index = manager})
+function uix.manager(screen)
+    return setmetatable({screen = screen}, {__index = manager})
 end
 
 ----------------------------------

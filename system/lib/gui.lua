@@ -16,10 +16,10 @@ local fs = require("filesystem")
 local programs = require("programs")
 local clipboard = require("clipboard")
 local parser = require("parser")
+local lastinfo = require("lastinfo")
 local gui = {colors = colors}
 gui.blackMode = false
-
-local smartShadowsColors = {
+gui.smartShadowsColors = {
     colorslib.lightGray, --1)  white
     colorslib.brown,     --2)  orange
     colorslib.purple,    --3)  magenta
@@ -115,8 +115,14 @@ end
 
 ------------------------------------
 
-function gui.shadow(gpu, x, y, sx, sy, mul, full)
-    local screen = gpu.getScreen()
+function gui.shadow(screen, x, y, sx, sy, mul, full)
+    local gpu
+    if type(screen) == "table" then
+        gpu = screen
+        screen = gpu.getScreen()
+    else
+        gpu = graphic.findGpu(screen)
+    end
     local depth = gpu.getDepth()
 
     local function getPoses()
@@ -164,36 +170,38 @@ function gui.shadow(gpu, x, y, sx, sy, mul, full)
                 end
             end
         elseif registry.shadowType == "smart" then
-            local shadowPosesX, shadowPosesY = getPoses()
+            if depth > 1 then
+                local shadowPosesX, shadowPosesY = getPoses()
 
-            local palcache = {}
-            local function getPalCol(source)
-                if depth > 1 then
+                local function getPalCol(source)
                     for i = 0, 15 do
-                        local col = palcache[i]
-                        if not col then
-                            col = gpu.getPaletteColor(i)
-                            palcache[i] = col
-                        end
-                        if col == source then
+                        if gui_container.indexsColors[i + 1] == source then
                             return i
                         end
                     end
                 end
-                return 0
-            end
 
-            for i = 1, #shadowPosesX do
-                local ok, char, fore, back, forePal, backPal = pcall(gpu.get, shadowPosesX[i], shadowPosesY[i])
-                if ok and char and fore and back then
-                    table.insert(origs, {shadowPosesX[i], shadowPosesY[i], char, fore, back})
+                for i = 1, #shadowPosesX do
+                    local ok, char, fore, back = pcall(gpu.get, shadowPosesX[i], shadowPosesY[i])
+                    if ok and char and fore and back then
+                        table.insert(origs, {shadowPosesX[i], shadowPosesY[i], char, fore, back})
 
-                    if not forePal then forePal = getPalCol(fore) end
-                    gpu.setForeground(smartShadowsColors[forePal + 1], depth > 1)
-                    if not backPal then backPal = getPalCol(back) end
-                    gpu.setBackground(smartShadowsColors[backPal + 1], depth > 1)
-                    
-                    gpu.set(shadowPosesX[i], shadowPosesY[i], char)
+                        local forePal = getPalCol(fore)
+                        if forePal then
+                            gpu.setForeground(gui_container.indexsColors[gui.smartShadowsColors[forePal + 1] + 1])
+                        else
+                            gpu.setForeground(colorslib.colorMul(fore, mul or 0.6))
+                        end
+                        
+                        local backPal = getPalCol(back)
+                        if backPal then
+                            gpu.setBackground(gui_container.indexsColors[gui.smartShadowsColors[backPal + 1] + 1])
+                        else
+                            gpu.setBackground(colorslib.colorMul(back, mul or 0.6))
+                        end
+
+                        gpu.set(shadowPosesX[i], shadowPosesY[i], char)
+                    end
                 end
             end
         elseif registry.shadowType == "simple" then
@@ -215,9 +223,8 @@ function gui.shadow(gpu, x, y, sx, sy, mul, full)
     end
 
     return function ()
-        if gpu.getScreen() ~= screen then
-            gpu.bind(screen, false)
-        end
+        local gpu = graphic.findGpu(screen)
+
         for _, obj in ipairs(origs) do
             gpu.setForeground(obj[4])
             gpu.setBackground(obj[5])
@@ -246,8 +253,6 @@ function gui.smallWindow(screen, cx, cy, str, backgroundColor, icon, sx, sy)
     sx = sx or 32
     sy = sy or 8
 
-    local gpu = graphic.findGpu(screen)
-
     if not cx or not cy then
         cx, cy = gui.getCustomZone(screen, sx, sy)
     end
@@ -257,7 +262,7 @@ function gui.smallWindow(screen, cx, cy, str, backgroundColor, icon, sx, sy)
     local color = backgroundColor or colors.lightGray
 
     --window:fill(2, 2, window.sizeX, window.sizeY, colors.gray, 0, " ")
-    local noShadow = gui.shadow(gpu, window.x, window.y, window.sizeX, window.sizeY)
+    local noShadow = gui.shadow(screen, window.x, window.y, window.sizeX, window.sizeY)
     window:clear(color)
 
     local textColor = colors.white
@@ -275,6 +280,18 @@ function gui.smallWindow(screen, cx, cy, str, backgroundColor, icon, sx, sy)
     end
 
     return window, noShadow
+end
+
+function gui.customWindow(screen, sx, sy)
+    sx = sx or 50
+    sy = sy or 16
+
+    local cx, cy = gui.getCustomZone(screen, sx, sy)
+    local clear = graphic.screenshot(screen, cx, cy, sx, sy)
+    local window = graphic.createWindow(screen, cx, cy, sx, sy, true)
+    gui.shadow(screen, cx, cy, sx, sy)
+
+    return window, clear
 end
 
 function gui.status(screen, cx, cy, str, backgroundColor)
@@ -502,7 +519,7 @@ function gui.selectcolor(screen, cx, cy, str)
     end
 
     local window = graphic.createWindow(screen, cx, cy, 24, 12, true)
-    local noShadow = gui.shadow(gpu, window.x, window.y, window.sizeX, window.sizeY)
+    local noShadow = gui.shadow(screen, window.x, window.y, window.sizeX, window.sizeY)
     window:clear(colors.gray)
     window:fill(3, 2, 20, 10, colors.brown, colors.white, "▒")
     window:set(2, 1, colors.gray, colors.white, str or "select color")
@@ -560,7 +577,7 @@ function gui.input(screen, cx, cy, str, hidden, backgroundColor, default, disabl
     local window = graphic.createWindow(screen, cx, cy, 32, 8, true)
 
     --window:fill(2, 2, window.sizeX, window.sizeY, colors.gray, 0, " ")
-    local noShadow = gui.shadow(gpu, window.x, window.y, window.sizeX, window.sizeY)
+    local noShadow = gui.shadow(screen, window.x, window.y, window.sizeX, window.sizeY)
     window:clear(backgroundColor or colors.lightGray)
 
     local pos = math.round((window.sizeX / 2) - (unicode.wlen(str) / 2)) + 1
@@ -576,8 +593,7 @@ function gui.input(screen, cx, cy, str, hidden, backgroundColor, default, disabl
 
     graphic.forceUpdate(screen)
     if registry.soundEnable and not disableStartSound then
-        computer.beep(2000)
-        computer.beep(1500)
+        sound.input()
     end
 
     local function drawOk()
@@ -684,7 +700,7 @@ function gui.context(screen, posX, posY, strs, active)
 
     local window = graphic.createWindow(screen, posX, posY, sizeX, sizeY)
     --window:fill(2, 2, window.sizeX, window.sizeY, colors.gray, 0, " ")
-    gui.shadow(gpu, window.x, window.y, window.sizeX, window.sizeY)
+    gui.shadow(screen, window.x, window.y, window.sizeX, window.sizeY)
 
     local function redrawStrs(selected)
         for i, str in ipairs(drawStrs) do
@@ -699,7 +715,7 @@ function gui.context(screen, posX, posY, strs, active)
             if (not active or active[i]) and not isSep then
                 if selected == i then
                     color = colors.blue
-                    color2 = white
+                    color2 = colors.white
                 end
                 window:set(1, i, color, color2, str .. (string.rep(" ", sizeX - unicode.wlen(str))))
             else
@@ -791,7 +807,7 @@ function gui.drawtext(screen, posX, posY, foreground, text)
     end
 end
 
-function gui.select(screen, cx, cy, label, actions, scroll, noCloseButton)
+function gui.select(screen, cx, cy, label, actions, scroll, noCloseButton, overlay, windowEventCallback, noCleanShadow, disableShadow, alwaysConfirm)
     --=gui_select(screen, nil, nil, "LOLZ", {"test 1", "test 2", "test 3"})
 
     local gpu = graphic.findGpu(screen)
@@ -800,6 +816,10 @@ function gui.select(screen, cx, cy, label, actions, scroll, noCloseButton)
     end
 
     local window = graphic.createWindow(screen, cx, cy, 50, 16, true)
+    local noShadow
+    if not disableShadow then
+        noShadow = gui.shadow(screen, cx, cy, 50, 16)
+    end
 
     --------------------------------------------
 
@@ -818,7 +838,7 @@ function gui.select(screen, cx, cy, label, actions, scroll, noCloseButton)
     end
 
     local function redrawButton()
-        window:set(window.sizeX - 9, window.sizeY, sel and colors.lime or colors.green, colors.white, " CONFIRM ")
+        window:set(window.sizeX - 9, window.sizeY, (sel or alwaysConfirm) and colors.lime or colors.green, colors.white, " CONFIRM ")
     end
 
     local function drawBase()
@@ -831,6 +851,12 @@ function gui.select(screen, cx, cy, label, actions, scroll, noCloseButton)
             window:set(window.sizeX - 2, 1, colors.red, colors.white, " X ")
         end
         window:fill(1, window.sizeY, window.sizeX, 1, colors.lightGray, 0, " ")
+        if overlay then
+            local ret = overlay(window)
+            if ret ~= nil then
+                alwaysConfirm = ret
+            end
+        end
         redrawButton()
     end
 
@@ -937,15 +963,28 @@ function gui.select(screen, cx, cy, label, actions, scroll, noCloseButton)
     while true do
         local eventData = {computer.pullSignal()}
         local windowEventData = window:uploadEvent(eventData)
+        if windowEventCallback then
+            local ret, lAlwaysConfirm = windowEventCallback(windowEventData, window)
+            if ret ~= nil then
+                if not noCleanShadow and noShadow then noShadow() end
+                return ret, nil, nil, nil, nil, noShadow
+            end
+            if alwaysConfirm ~= lAlwaysConfirm then
+                alwaysConfirm = lAlwaysConfirm
+                drawBase()
+            end
+        end
 
         if windowEventData[1] == "touch" then
             if windowEventData[3] >= window.sizeX - 2 and windowEventData[4] == 1 then
                 if not noCloseButton then
-                    return nil, scroll, windowEventData[5], windowEventData
+                    if not noCleanShadow and noShadow then noShadow() end
+                    return nil, scroll, windowEventData[5], windowEventData, nil, noShadow
                 end
             elseif windowEventData[3] >= window.sizeX - 9 and windowEventData[3] < window.sizeX and windowEventData[4] == window.sizeY then
-                if sel then
-                    return sel, scroll, windowEventData[5], windowEventData, true
+                if sel or alwaysConfirm then
+                    if not noCleanShadow and noShadow then noShadow() end
+                    return sel, scroll, windowEventData[5], windowEventData, true, noShadow
                 end
             end
         end
@@ -968,7 +1007,8 @@ function gui.select(screen, cx, cy, label, actions, scroll, noCloseButton)
                 if windowEventData[1] == "touch" and sel and sel == addrsIdx[windowEventData[4]] then
                     draw(sel)
                     redrawButton()
-                    return sel, scroll, windowEventData[5], windowEventData
+                    if not noCleanShadow and noShadow then noShadow() end
+                    return sel, scroll, windowEventData[5], windowEventData, nil, noShadow
                 end
                 local oldsel = sel
                 sel = addrsIdx[windowEventData[4]]
@@ -1047,6 +1087,7 @@ function gui.selectcomponent(screen, cx, cy, types, allowAutoConfirm, control, c
     end
 
     local cancel, out
+    local gNoShadow
 
     local th
     th = thread.create(function ()
@@ -1055,6 +1096,7 @@ function gui.selectcomponent(screen, cx, cy, types, allowAutoConfirm, control, c
         end
 
         local scroll
+        local shadowDrawed
 
         while true do
             local strs = {}
@@ -1088,8 +1130,25 @@ function gui.selectcomponent(screen, cx, cy, types, allowAutoConfirm, control, c
                 return
             end
 
-            local idx, lscroll, button, eventData = gui.select(screen, cx, cy, typesstr, strs, scroll, control)
+            local idx, lscroll, button, eventData, _, noShadow = gui.select(screen, cx, cy, typesstr, strs, scroll, control, nil, nil, true, shadowDrawed)
             scroll = lscroll
+            if not shadowDrawed then
+                gNoShadow = noShadow
+            end
+            shadowDrawed = true
+
+            local function openEdit(tempfile)
+                local clear = graphic.screenshot(screen)
+                if callbacks and callbacks.onEdit then
+                    callbacks.onEdit()
+                end
+                require("apps").execute("edit", screen, nil, tempfile, true)
+                if callbacks and callbacks.onCloseEdit then
+                    callbacks.onCloseEdit()
+                end
+                clear()
+                fs.remove(tempfile)
+            end
 
             if idx then
                 local addr = addresses[idx]
@@ -1103,7 +1162,8 @@ function gui.selectcomponent(screen, cx, cy, types, allowAutoConfirm, control, c
                         "copy address",
                         "set label",
                         "clear label",
-                        "view api"
+                        "view api",
+                        "device info"
                     }
                     local px, py = checkWindow:toRealPos(eventData[3], eventData[4])
                     local x, y, sx, sy = gui.contextPos(screen, px, py, strs)
@@ -1144,16 +1204,29 @@ function gui.selectcomponent(screen, cx, cy, types, allowAutoConfirm, control, c
                         end
                         file.close()
 
-                        local clear = graphic.screenshot(screen)
-                        if callbacks and callbacks.onEdit then
-                            callbacks.onEdit()
+                        openEdit(tempfile)
+                    elseif action == 6 then
+                        local format = require("format")
+
+                        local tempfile = paths.concat("/tmp", component.type(addr) .. "_" .. math.round(math.random(0, 9999)) .. ".txt")
+                        local file = fs.open(tempfile, "wb")
+                        local tbl = lastinfo.deviceinfo[addr] or {}
+                        local maxMethodLen = 0
+                        for name in pairs(tbl) do
+                            name = tostring(name)
+                            if unicode.len(name) > maxMethodLen then
+                                maxMethodLen = unicode.len(name)
+                            end
                         end
-                        require("apps").execute("edit", screen, nil, tempfile, true)
-                        if callbacks and callbacks.onCloseEdit then
-                            callbacks.onCloseEdit()
+                        for k, v in pairs(tbl) do
+                            local smart = format.smartConcat()
+                            smart.add(1, tostring(k))
+                            smart.add(maxMethodLen + 2, "-")
+                            smart.add(maxMethodLen + 4, tostring(v) .. "\n")
+                            file.write(smart.get())
                         end
-                        clear()
-                        fs.remove(tempfile)
+                        file.close()
+                        openEdit(tempfile)
                     end
                 end
             else
@@ -1169,6 +1242,7 @@ function gui.selectcomponent(screen, cx, cy, types, allowAutoConfirm, control, c
         local eventData = {computer.pullSignal(0.1)}
 
         if cancel or out then
+            if gNoShadow then gNoShadow() end
             return out
         end
 
@@ -1185,6 +1259,10 @@ function gui.selectcomponentProxy(screen, cx, cy, types, allowAutoConfirm, contr
     if addr then
         return component.proxy(addr)
     end
+end
+
+function gui.selectExternalFs(screen, cx, cy)
+    return gui.selectcomponentProxy(screen, cx, cy, {"filesystem"}, false, false, nil, {fs.bootaddress, fs.tmpaddress})
 end
 
 function gui.checkPassword(screen, cx, cy, disableStartSound, noCancel)
@@ -1236,7 +1314,7 @@ function gui.yesno(screen, cx, cy, str, backgroundColor)
 
     graphic.forceUpdate(screen)
     if registry.soundEnable then
-        computer.beep(2000)
+        sound.question()
     end
 
     local function drawYes()

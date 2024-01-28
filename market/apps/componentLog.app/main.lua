@@ -5,6 +5,7 @@ local paths = require("paths")
 local logs = require("logs")
 local hook = require("hook")
 local event = require("event")
+local advLabeling = require("advLabeling")
 
 _G.componentLog = _G.componentLog or {}
 
@@ -22,7 +23,7 @@ if obj then
 
     _G.componentLog[address] = nil
 else
-    local logPath = paths.concat("/data/userdata/componentLogs", address .. ".txt")
+    local logPath = paths.concat("/data/userdata/componentLogs", advLabeling.getNameTag(address) .. ".txt")
     local logsStrs = {}
     local function hookfunc(address, method, args)
         local strs = {}

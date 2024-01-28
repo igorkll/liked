@@ -6,6 +6,8 @@ local syntax = require("syntax")
 local liked = require("liked")
 local thread = require("thread")
 local registry = require("registry")
+local fs = require("filesystem")
+local parser = require("parser")
 
 local colors = gui_container.colors
 
@@ -78,7 +80,7 @@ if registry.interpreterSandbox then
 else
     env = setmetatable({_G = _G, screen = screen, print = function (...)
         lprint(colors.white, ...)
-    end}, {__index = function (self, key)
+    end, fs = fs}, {__index = function (self, key)
         if _G[key] then
             return _G[key]
         elseif package.loaded[key] then
@@ -114,13 +116,18 @@ while true do
 
         local code, err = load(readerData, "=lua", "t", env)
         if code then
-            local result = {pcall(code)}
+            local result = {xpcall(code, debug.traceback)}
+            window.selected = true
             if result[1] then
                 if #result > 1 then
                     lprint(colors.white, table.unpack(result, 2))
                 end
             else
-                lprint(colors.red, result[2] or "unknown error")
+                local red = true
+                for i, line in ipairs(parser.parseTraceback(tostring(result[2] or "unknown error"), sizeX - 1, sizeY - 5)) do
+                    lprint(red and colors.red or colors.yellow, line)
+                    red = false
+                end
             end
         else
             lprint(colors.red, err or "unknown error")

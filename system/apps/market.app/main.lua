@@ -13,12 +13,14 @@ local gui = require("gui")
 local format = require("format")
 local sysdata = require("sysdata")
 local apps = require("apps")
+local text = require("text")
 
 local colors = gui_container.colors
 
 ------------------------------------
 
 local screen, nickname, _, forceMode, mediaMode = ...
+gui.status(screen, nil, nil, "loading content list...")
 
 local installBox = mediaMode and "  download   " or "   install   "
 local installMsg = mediaMode and "download" or "install"
@@ -52,8 +54,8 @@ local rootfs = fs.get("/")
 local maxDepth = graphic.findGpu(screen).maxDepth()
 
 local statusWindow = graphic.createWindow(screen, 1, 1, rx, 1)
-statusWindow:clear(colors.gray)
 local barTh, barRedraw = liked.drawUpBarTask(screen, true, colors.gray, -2)
+barTh:suspend()
 
 local function exec(...)
     barTh:suspend()
@@ -139,20 +141,36 @@ local function modifyList(lst)
             if v.libs then
                 if not registry.libVersions then registry.libVersions = {} end
 
-                for _, name in ipairs(v.libs) do
-                    local info = glibs[name]
-                    local path = paths.concat("/data/lib", name .. ".lua")
-                    if not fs.exists(path) or registry.libVersions[name] ~= info.version then
-                        download(path, info.url)
-                        registry.libVersions[name] = info.version
+                local installed = {}
+                local function installLibs(libs)
+                    for _, name in ipairs(libs) do
+                        if not installed[name] then
+                            local info = glibs[name]
+                            local path = info.path or paths.concat("/data/lib", name .. ".lua")
+                            if not fs.exists(path) or registry.libVersions[name] ~= info.version then
+                                download(path, info.url)
+                                if info.files then
+                                    for _, dat in ipairs(info.files) do
+                                        download(dat.path, dat.url)
+                                    end
+                                end
+                                registry.libVersions[name] = info.version
+                            end
+
+                            if info.libs then
+                                installLibs(info.libs)
+                            end
+                            installed[name] = true
+                        end
                     end
                 end
+                installLibs(v.libs)
             end
 
             _install(self)
             if v.postInstall then v:postInstall() end
             contentVersions[self.name] = self.version
-            apps.postInstall(screen, nickname, self.path)
+            apps.postInstall(screen, nickname, self.path, self.version)
         end
     
         if not v.icon and v.urlPrimaryPart then
@@ -476,7 +494,7 @@ local function draw(clear)
     local added = {}
 
     for _, v in ipairs(list) do
-        local finding = format.escape_pattern(searchRead.getBuffer())
+        local finding = text.escapePattern(searchRead.getBuffer())
         
         local function isSearch(str)
             if not str or finding == "" then
@@ -535,6 +553,8 @@ local function checkListPos()
 end
 
 ------------------------------------
+
+barTh:resume()
 
 local oldSel
 while true do

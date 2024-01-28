@@ -6,6 +6,7 @@ import math
 from collections import Counter
 import random
 import numpy as np
+import copy
 
 """
 colors = [
@@ -28,26 +29,11 @@ colors = [
 ]
 """
 
-colors = [
-    0xffffff,
-    0xF2B233,
-    0xE57FD8,
-    0x99B2F2,
-    0xDEDE6C,
-    0x7FCC19,
-    0xF2B2CC,
-    0x4C4C4C,
-    0x999999,
-    0x4C99B2,
-    0xB266E5,
-    0x3366CC,
-    0x7F664C,
-    0x57A64E,
-    0xCC4C4C,
-    0x000000
-]
-
+colors = [0xFFFFFF, 0xFFB640, 0xCC6DBF, 0x99B6FF, 0xFFFF80, 0x66DB00, 0xFFB6BF, 0x4B4B4B, 0x969696, 0x3392BF, 0x996DFF, 0x3324FF, 0x996D40, 0x66B640, 0xFF2440, 0x000000]
 colors3t = [0x000000, 0x000040, 0x000080, 0x0000BF, 0x0000FF, 0x002400, 0x002440, 0x002480, 0x0024BF, 0x0024FF, 0x004900, 0x004940, 0x004980, 0x0049BF, 0x0049FF, 0x006D00, 0x006D40, 0x006D80, 0x006DBF, 0x006DFF, 0x009200, 0x009240, 0x009280, 0x0092BF, 0x0092FF, 0x00B600, 0x00B640, 0x00B680, 0x00B6BF, 0x00B6FF, 0x00DB00, 0x00DB40, 0x00DB80, 0x00DBBF, 0x00DBFF, 0x00FF00, 0x00FF40, 0x00FF80, 0x00FFBF, 0x00FFFF, 0x0F0F0F, 0x1E1E1E, 0x2D2D2D, 0x330000, 0x330040, 0x330080, 0x3300BF, 0x3300FF, 0x332400, 0x332440, 0x332480, 0x3324BF, 0x3324FF, 0x334900, 0x334940, 0x334980, 0x3349BF, 0x3349FF, 0x336D00, 0x336D40, 0x336D80, 0x336DBF, 0x336DFF, 0x339200, 0x339240, 0x339280, 0x3392BF, 0x3392FF, 0x33B600, 0x33B640, 0x33B680, 0x33B6BF, 0x33B6FF, 0x33DB00, 0x33DB40, 0x33DB80, 0x33DBBF, 0x33DBFF, 0x33FF00, 0x33FF40, 0x33FF80, 0x33FFBF, 0x33FFFF, 0x3C3C3C, 0x4B4B4B, 0x5A5A5A, 0x660000, 0x660040, 0x660080, 0x6600BF, 0x6600FF, 0x662400, 0x662440, 0x662480, 0x6624BF, 0x6624FF, 0x664900, 0x664940, 0x664980, 0x6649BF, 0x6649FF, 0x666D00, 0x666D40, 0x666D80, 0x666DBF, 0x666DFF, 0x669200, 0x669240, 0x669280, 0x6692BF, 0x6692FF, 0x66B600, 0x66B640, 0x66B680, 0x66B6BF, 0x66B6FF, 0x66DB00, 0x66DB40, 0x66DB80, 0x66DBBF, 0x66DBFF, 0x66FF00, 0x66FF40, 0x66FF80, 0x66FFBF, 0x66FFFF, 0x696969, 0x787878, 0x878787, 0x969696, 0x990000, 0x990040, 0x990080, 0x9900BF, 0x9900FF, 0x992400, 0x992440, 0x992480, 0x9924BF, 0x9924FF, 0x994900, 0x994940, 0x994980, 0x9949BF, 0x9949FF, 0x996D00, 0x996D40, 0x996D80, 0x996DBF, 0x996DFF, 0x999200, 0x999240, 0x999280, 0x9992BF, 0x9992FF, 0x99B600, 0x99B640, 0x99B680, 0x99B6BF, 0x99B6FF, 0x99DB00, 0x99DB40, 0x99DB80, 0x99DBBF, 0x99DBFF, 0x99FF00, 0x99FF40, 0x99FF80, 0x99FFBF, 0x99FFFF, 0xA5A5A5, 0xB4B4B4, 0xC3C3C3, 0xCC0000, 0xCC0040, 0xCC0080, 0xCC00BF, 0xCC00FF, 0xCC2400, 0xCC2440, 0xCC2480, 0xCC24BF, 0xCC24FF, 0xCC4900, 0xCC4940, 0xCC4980, 0xCC49BF, 0xCC49FF, 0xCC6D00, 0xCC6D40, 0xCC6D80, 0xCC6DBF, 0xCC6DFF, 0xCC9200, 0xCC9240, 0xCC9280, 0xCC92BF, 0xCC92FF, 0xCCB600, 0xCCB640, 0xCCB680, 0xCCB6BF, 0xCCB6FF, 0xCCDB00, 0xCCDB40, 0xCCDB80, 0xCCDBBF, 0xCCDBFF, 0xCCFF00, 0xCCFF40, 0xCCFF80, 0xCCFFBF, 0xCCFFFF, 0xD2D2D2, 0xE1E1E1, 0xF0F0F0, 0xFF0000, 0xFF0040, 0xFF0080, 0xFF00BF, 0xFF00FF, 0xFF2400, 0xFF2440, 0xFF2480, 0xFF24BF, 0xFF24FF, 0xFF4900, 0xFF4940, 0xFF4980, 0xFF49BF, 0xFF49FF, 0xFF6D00, 0xFF6D40, 0xFF6D80, 0xFF6DBF, 0xFF6DFF, 0xFF9200, 0xFF9240, 0xFF9280, 0xFF92BF, 0xFF92FF, 0xFFB600, 0xFFB640, 0xFFB680, 0xFFB6BF, 0xFFB6FF, 0xFFDB00, 0xFFDB40, 0xFFDB80, 0xFFDBBF, 0xFFDBFF, 0xFFFF00, 0xFFFF40, 0xFFFF80, 0xFFFFBF, 0xFFFFFF]
+
+def debug_print(*args):
+    pass
 
 def convert_rgb_to_24bit(r, g, b):
     # Объединение значений B, G и R в 24-битное число
@@ -57,30 +43,53 @@ def convert_rgb_to_24bit(r, g, b):
 def convert_to_24bit(col):
     return convert_rgb_to_24bit(col[2], col[1], col[0])
 
+def palette_convert(pal):
+    newpal = []
+    for c in pal:
+        newpal.append(convert_to_24bit(c[0]))
+    return newpal
+
 def make_braille(tbl):
     a, b, c, d, e, f, g, h = tbl[0][0], tbl[1][0], tbl[2][0], tbl[3][0], tbl[0][1], tbl[1][1], tbl[2][1], tbl[3][1]
     return chr(10240 + 128*h + 64*d + 32*g + 16*f + 8*e + 4*c + 2*b + a)
 
-def find_closest_color(target_color, color_array):
+def color_similarity2(color1, color2):
+    # Извлекаем компоненты цвета
+    r1, g1, b1 = color1
+    r2, g2, b2 = color2
+
+    # Вычисляем евклидово расстояние между компонентами цвета
+    distance = math.sqrt((r1 - r2)**2 + (g1 - g2)**2 + (b1 - b2)**2)
+
+    # Нормализуем расстояние к диапазону [0, 1]
+    normalized_distance = distance / math.sqrt(255**2 + 255**2 + 255**2)
+
+    # Чем меньше нормализованное расстояние, тем более похожи цвета
+    similarity = 1 - normalized_distance
+    return similarity
+
+def hex_to_rgb(hex_color):
+    # Получаем отдельные компоненты цвета
+    red = (hex_color >> 16) & 0xFF
+    green = (hex_color >> 8) & 0xFF
+    blue = hex_color & 0xFF
+
+    return red, green, blue
+
+def find_closest_color(target_color, color_array): # работает через RGB
     # Извлечение компонент цвета цели (R, G, B)
-    target_r = (target_color >> 16) & 0xFF
-    target_g = (target_color >> 8) & 0xFF
-    target_b = target_color & 0xFF
+    target_r, target_g, target_b = hex_to_rgb(target_color)
 
     closest_index = None
-    closest_distance = float('inf')
+    closest_distance = math.inf
 
     # Перебор всех цветов в массиве
     for i, color in enumerate(color_array):
         # Извлечение компонент цвета из массива (R, G, B)
-        array_r = (color >> 16) & 0xFF
-        array_g = (color >> 8) & 0xFF
-        array_b = color & 0xFF
+        array_r, array_g, array_b = hex_to_rgb(color)
 
-        # Вычисление евклидова расстояния между цветами
-        distance = ((target_r - array_r) ** 2 +
-                    (target_g - array_g) ** 2 +
-                    (target_b - array_b) ** 2) ** 0.5
+        # Вычисление разницу между цветами
+        distance = 1 - color_similarity2((target_r, target_g, target_b), (array_r, array_g, array_b))
 
         # Обновление ближайшего цвета, если найден более близкий
         if distance < closest_distance:
@@ -125,28 +134,11 @@ def color_similarity(color1, color2, target_color):
     coefficient = 1 - (distance1 / total_distance)
     return coefficient
 
-def hex_to_rgb(hex_color):
-    # Получаем отдельные компоненты цвета
-    red = (hex_color >> 16) & 0xFF
-    green = (hex_color >> 8) & 0xFF
-    blue = hex_color & 0xFF
-
-    return red, green, blue
-
-def color_similarity2(color1, color2):
-    # Извлекаем компоненты цвета
-    r1, g1, b1 = color1
-    r2, g2, b2 = color2
-
-    # Вычисляем евклидово расстояние между компонентами цвета
-    distance = math.sqrt((r1 - r2)**2 + (g1 - g2)**2 + (b1 - b2)**2)
-
-    # Нормализуем расстояние к диапазону [0, 1]
-    normalized_distance = distance / math.sqrt(255**2 + 255**2 + 255**2)
-
-    # Чем меньше нормализованное расстояние, тем более похожи цвета
-    similarity = 1 - normalized_distance
-    return similarity
+def palette_deconvert(pal):
+    newpal = []
+    for c in pal:
+        newpal.append(((hex_to_rgb(c)), 255))
+    return newpal
 
 def get_popular_colors(image_path):
     image = cv2.imread(image_path)
@@ -158,13 +150,24 @@ def get_popular_colors(image_path):
 
     return popular_colors
 
+def get_palette_colors(image_path):
+    debug_print("get_palette_colors", image_path)
+    popular_colors = get_popular_colors(image_path)
+
+    while len(popular_colors) < 16:
+        popular_colors.append(((0, 0, 0), 0))
+
+    return popular_colors
+
 def toCVcolor(color):
     r, g, b = hex_to_rgb(color)
     return [b, g, r, 0]
 
-# find_closest_color(target_color, color_array)
 def find_closest_palette_color(color):
     return toCVcolor(colors3t[find_closest_color(convert_to_24bit(color), colors3t)])
+
+def find_closest_palette_color_t2(color, customPalette):
+    return toCVcolor(colors[find_closest_color(convert_to_24bit(color), customPalette)])
 
 def clamp(n, min, max): 
     if n < min: 
@@ -174,77 +177,76 @@ def clamp(n, min, max):
     else: 
         return n 
 
+'''
 def colorDiff(c1, c2):
-    r, g, b = c1[2] / 255, c1[1] / 255, c1[0] / 255
-    r1, g1, b1 = c2[2] / 255, c2[1] / 255, c2[0] / 255
-    
-    return abs((r + g + b) - (r1 + g1 + b1)) / 3
+    return math.sqrt(((c1[0] - c2[0]) ** 2) + ((c1[1] - c2[1]) ** 2) + ((c1[2] - c2[2]) ** 2))
+'''
 
-def floyd(image):
+def floyd(image, t2mode):
     height, width, channels = image.shape
 
     for y in range(height):
         for x in range(width):
-            print("currentpixel", image[y, x])
+            #debug_print("currentpixel", image[y, x])
 
-            oldpixel = [image[y, x][0], image[y, x][1], image[y, x][2], image[y, x][3]]
-            newpixel = find_closest_palette_color(oldpixel)
-            newpixel[3] = oldpixel[3]
+            oldpixel = [image[y, x][0], image[y, x][1], image[y, x][2]]
+            if len(image[y, x]) >= 4:
+                oldpixel.append(image[y, x][3])
+
+            if t2mode:
+                newpixel = find_closest_palette_color_t2(oldpixel, t2mode)
+            else:
+                newpixel = find_closest_palette_color(oldpixel)
+
+            if len(oldpixel) >= 4:
+                newpixel[3] = oldpixel[3]
+            elif len(newpixel) >= 4:
+                del newpixel[3]
+
             image[y, x] = newpixel
 
-            print("currentpixel2", newpixel)
+            #debug_print("currentpixel2", newpixel)
 
-            # quant_error_b = (oldpixel[0] - newpixel[0]) / 1
-            # quant_error_g = (oldpixel[1] - newpixel[1]) / 1
-            # quant_error_r = (oldpixel[2] - newpixel[2]) / 1
-            quant_error = colorDiff(oldpixel, newpixel)
-            quant_error_b = quant_error
-            quant_error_g = quant_error
-            quant_error_r = quant_error
+            quant_error_b = (oldpixel[0] - newpixel[0]) / 1
+            quant_error_g = (oldpixel[1] - newpixel[1]) / 1
+            quant_error_r = (oldpixel[2] - newpixel[2]) / 1
+            # quant_error = colorDiff(oldpixel, newpixel)
+            # quant_error_b = quant_error
+            # quant_error_g = quant_error
+            # quant_error_r = quant_error
 
-            print("old data", oldpixel, oldpixel[0], oldpixel[1], oldpixel[2])
-            print("new data", newpixel, newpixel[0], newpixel[1], newpixel[2])
-            print("add", quant_error_b, quant_error_g, quant_error_r)
+            #debug_print("old data", oldpixel, oldpixel[0], oldpixel[1], oldpixel[2])
+            #debug_print("new data", newpixel, newpixel[0], newpixel[1], newpixel[2])
+            #debug_print("add", quant_error_b, quant_error_g, quant_error_r)
+            
+            def lsum(x, y, rate):
+                image[y, x][0] = clamp(image[y, x][0] + ((quant_error_b * rate) / 16), 0, 255)
+                image[y, x][1] = clamp(image[y, x][1] + ((quant_error_g * rate) / 16), 0, 255)
+                image[y, x][2] = clamp(image[y, x][2] + ((quant_error_r * rate) / 16), 0, 255)
+
+            try:
+                lsum(x + 1, y, 7)
+            except Exception as e:
+                debug_print(f"colorset error 1: {e}")
             
             try:
-                image[y    , x + 1][0] += quant_error_b * 7 / 16
-                image[y    , x + 1][1] += quant_error_g * 7 / 16
-                image[y    , x + 1][2] += quant_error_r * 7 / 16
+                lsum(x - 1, y + 1, 3)
             except Exception as e:
-                print(f"colorset error 1: {e}")
-            
-            try:
-                image[y + 1, x - 1][0] += quant_error_b * 3 / 16
-                image[y + 1, x - 1][1] += quant_error_g * 3 / 16
-                image[y + 1, x - 1][2] += quant_error_r * 3 / 16
-            except Exception as e:
-                print(f"colorset error 2: {e}")
+                debug_print(f"colorset error 2: {e}")
 
             try:
-                image[y + 1, x    ][0] += quant_error_b * 5 / 16
-                image[y + 1, x    ][1] += quant_error_g * 5 / 16
-                image[y + 1, x    ][2] += quant_error_r * 5 / 16
+                lsum(x, y + 1, 5)
             except Exception as e:
-                print(f"colorset error 3: {e}")
+                debug_print(f"colorset error 3: {e}")
 
             try:
-                image[y + 1, x + 1][0] += quant_error_b * 1 / 16
-                image[y + 1, x + 1][1] += quant_error_g * 1 / 16
-                image[y + 1, x + 1][2] += quant_error_r * 1 / 16
+                lsum(x + 1, y + 1, 1)
             except Exception as e:
-                print(f"colorset error 4: {e}")
+                debug_print(f"colorset error 4: {e}")
 
-            print("new color", image[y, x])
+            #debug_print("new color", image[y, x])
 
-    print("checking floyd")
-    for y in range(height):
-        for x in range(width):
-            pixel = image[y, x]
-            for i in range(4):
-                pixel[i] = round(clamp(pixel[i], 0, 255))
-            image[y, x] = pixel
-
-def imgToT2p(image, fullAdd, forceFull, addPal, floydUse):
+def imgToT2p(image, fullAdd, forceFull, addPal, palette=None):
     # Получение размеров изображения
     height, width, channels = image.shape
 
@@ -273,9 +275,9 @@ def imgToT2p(image, fullAdd, forceFull, addPal, floydUse):
 
     outdata += (b"\0\0\0\0\0")
 
-    if addPal:
-        for color in get_popular_colors(image_path):
-            print("palcolor", color)
+    if addPal and palette:
+        for color in palette:
+            debug_print("palcolor", color)
             outdata += (bytes([color[0][0]]))
             outdata += (bytes([color[0][1]]))
             outdata += (bytes([color[0][2]]))
@@ -284,11 +286,11 @@ def imgToT2p(image, fullAdd, forceFull, addPal, floydUse):
         for x in range(0, width - block_width + 1, block_width):
             # Извлечение блока изображения размером 4x2
             block = image[y:y + block_height, x:x + block_width]
-            # print(make_braille(outputArray), end='')
+            # debug_print(make_braille(outputArray), end='')
 
             dominant_colors = find_dominant_colors(block)
 
-            print(dominant_colors)
+            debug_print(dominant_colors)
             back, backcol, backnonused = find_closest_color(convert_to_24bit(dominant_colors[0][0]), colors), dominant_colors[0][0], False
             fore, forecol, forenonused = 0, (0, 0, 0, 255), False
             if len(dominant_colors) > 1:
@@ -344,7 +346,7 @@ def imgToT2p(image, fullAdd, forceFull, addPal, floydUse):
                         # outputArray[-1].append(random.choice((True, False)))
 
             char = make_braille(outputArray)
-            print(back, fore, char)
+            debug_print(back, fore, char)
 
             """
             if back != 15 and back != 3:
@@ -362,7 +364,25 @@ def imgToT2p(image, fullAdd, forceFull, addPal, floydUse):
 
     return outdata
 
-def parse_image_pixelwise(image_path):
+def cropSize(img, mrx, mry):
+    print("-- start crop")
+
+    height, width, channels = img.shape
+    newHeight, newWidth = height, width
+    while newHeight > mrx or newWidth > mrx or ((newHeight * newWidth) > (mrx * mry)):
+        newHeight = newHeight * 0.99
+        newWidth = newWidth * 0.99
+
+    newHeight = math.floor(newHeight)
+    newWidth = math.floor(newWidth)
+
+    print("-- crop")
+    print("max resolution", mrx, mry)
+    print("old resolution", width, height)
+    print("new resolution", newWidth, newHeight)
+    return cv2.resize(img, (newWidth, newHeight))
+
+def startConverter(image_path, out_image_path, forceAuto):
     # Загрузка изображения
     image = cv2.imread(image_path, cv2.IMREAD_UNCHANGED)
 
@@ -375,49 +395,89 @@ def parse_image_pixelwise(image_path):
 
     # Проверка на успешную загрузку изображения
     if image is None:
-        print(f"Не удалось загрузить изображение: {image_path}")
+        debug_print(f"Не удалось загрузить изображение: {image_path}")
         return
 
     # Генерация выходного пути на основе входного с изменением расширения на "t2p"
-    output_path, _ = os.path.splitext(image_path)
+    output_path, _ = os.path.splitext(out_image_path)
     output_path += ".t2p"
 
-    fullAdd = input("add full colors? y/N: ") == "y"
-    print("full palette", fullAdd)
+    autoMode = forceAuto
+    if not autoMode:
+        autoMode = input("use auto-mode? y/N: ") == "y"
+        debug_print("autoMode", autoMode)
 
-    forceFull = False
-    if fullAdd:
-        forceFull = input("use full palette force? y/N: ") == "y"
-        print("full palette", forceFull)
+    if autoMode:
+        imageT2 = cropSize(copy.deepcopy(image), 160, 100)
+        imageT3 = cropSize(copy.deepcopy(image), 320, 200)
 
-    addPal = False
-    if fullAdd:
-        addPal = input("add palette colors? y/N: ") == "y"
-        print("add palette", addPal)
+        # palette = get_palette_colors(image_path)
+        palette = colors
+        floyd(imageT2, palette)
+        outbytes = imgToT2p(imageT2, False, False, True, palette_deconvert(palette))
+        with open(output_path, 'wb') as file:
+            file.write(outbytes)
 
-    floydUse = input("use disiring? y/N: ") == "y"
-    print("floydUse", floydUse)
+        floyd(imageT3, False)
+        outbytes2 = imgToT2p(imageT3, True, True, False)
+        output_path3, _ = os.path.splitext(out_image_path)
+        output_path3 += ".t3p"
+        with open(output_path3, 'wb') as file:
+            file.write(outbytes2)
+    else:
+        fullAdd = input("add full colors? y/N: ") == "y"
+        debug_print("full palette", fullAdd)
 
-    if floydUse:
-        print("floyd start")
-        floyd(image)
-        print("floyd end")
+        forceFull = False
+        if fullAdd:
+            forceFull = input("use full palette force? y/N: ") == "y"
+            debug_print("full palette", forceFull)
 
-    outbytes = imgToT2p(image, fullAdd, forceFull, addPal, floydUse)
-    with open(output_path, 'wb') as file:
-        file.write(outbytes)
+        addPal = False
+        if fullAdd:
+            addPal = input("add palette colors? y/N: ") == "y"
+            debug_print("add palette", addPal)
+
+        floydUse = input("use disiring? y/N: ") == "y"
+        debug_print("floydUse", floydUse)
+
+        if floydUse:
+            floydT2Use = input("disiring for tier2? y/N: ") == "y"
+            debug_print("floydT2Use", floydT2Use)
+
+            if floydT2Use and fullAdd:
+                debug_print("conflicting floydT2Use and fullAdd operations")
+                while True: pass           
+
+            debug_print("floyd start")
+            floyd(image, floydT2Use)
+            debug_print("floyd end")
+
+        outbytes = imgToT2p(image, fullAdd, forceFull, addPal)
+        with open(output_path, 'wb') as file:
+            file.write(outbytes)
 
 
 if __name__ == "__main__":
     try:
         image_path = False
         if len(sys.argv) < 2:
-            image_path = "C:\\Users\\Admin\\Documents\\GitHub\\liked\\other\\tools\\1.jpg"
-            pass
+            print("specify the path to the image")
+            while True: pass
+            # image_path = "D:\\Users\\user\\Documents\\GitHub\\liked\\other\\tools\\sourse"
         else:
             image_path = sys.argv[1]
-        if parse_image_pixelwise(image_path):
-            while True: pass
+        
+        if os.path.isdir(image_path):
+            for f in os.listdir(image_path):
+                pathname = os.path.join(image_path, f)
+                if not os.path.exists(image_path + "_out"):
+                    os.mkdir(image_path + "_out")
+                if startConverter(pathname, os.path.join(image_path + "_out", f), True):
+                    while True: pass
+        else:
+            if startConverter(image_path, image_path, False):
+                while True: pass
 
     except Exception as e:
         # Обработка исключения и вывод сообщения

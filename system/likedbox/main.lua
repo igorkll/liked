@@ -1,3 +1,3 @@
 --liked
-require("sysinit").init(true)
+require("sysinit").init(true, ...)
 require("event").wait()

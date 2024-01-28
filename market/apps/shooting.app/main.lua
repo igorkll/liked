@@ -53,7 +53,7 @@ ui:createCustom(3, 3, {
     onCreate = function (self)
         self.w = self.gui.window
     end,
-    draw = function (self)
+    onDraw = function (self)
         for i, data in ipairs(gameUsers) do
             local pos = self.y + (i - 1)
             local lbg = i % 2 == 0 and uix.colors.gray or uix.colors.lightGray

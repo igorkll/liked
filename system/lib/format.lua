@@ -1,17 +1,19 @@
 local unicode = require("unicode")
 local graphic = require("graphic")
+local colorlib = require("colors")
+local text = require("text")
 local format = {}
-
-function format.escape_pattern(text)
-    return text:gsub("([^%w])", "%%%1")
-end
 
 function format.smartConcat()
     local smart = {}
     smart.buff = {}
     smart.idx = 0
 
-    function smart.add(x, text)
+    function smart.add(x, text, reverse)
+        if reverse then
+            x = x - (unicode.len(text) - 1)
+        end
+
         local len = unicode.len(text)
         local last = x + (len - 1)
         local index = 1
@@ -39,6 +41,15 @@ function format.smartConcat()
 
     return smart
 end
+
+function format.visionProtectionConvert(color)
+    local r, g, b = colorlib.unBlend(color)
+    return colorlib.blend(r * 0.8, g * 0.7, b * 0.3)
+end
+
+------ legacy
+
+format.escape_pattern = text.escapePattern
 
 function format.raw_objectPos(rx, ry, sx, sy, offsetX, offsetY)
     local cx, cy = math.round(rx / 2), math.round(ry / 2)

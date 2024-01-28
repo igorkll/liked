@@ -80,6 +80,23 @@ calls.loaded = { --тут записаны функции которые ран�
 
     screenshot = function (screen, x, y, sx, sy)
         return require("graphic").screenshot(screen, x, y, sx, sy)
+    end,
+
+    gui_filepicker = function (screen, cx, cy, dir, exp, save, dirmode, dircombine, defname)
+        local iowindows = require("iowindows")
+        if dirmode then
+            if save then
+                return iowindows.savefolder(screen, exp)
+            else
+                return iowindows.selectfolder(screen, exp)
+            end
+        else
+            if save then
+                return iowindows.savefile(screen, exp)
+            else
+                return iowindows.selectfile(screen, exp)
+            end
+        end
     end
 } --вы можете записать сюда функции которые не должны выгружаться
 calls.cache = {}
@@ -109,7 +126,10 @@ function calls.load(name)
     end
 
     local path = calls.find(name)
-    if not path then return nil, "no such call" end
+    if not path then
+        calls.cache[name] = true
+        return nil, "no such call"
+    end
 
     local file, err = fs.open(path, "rb")
     if not file then return nil, err end
@@ -119,7 +139,7 @@ function calls.load(name)
     local code, err = load(data, "=" .. path, nil, _G) --не _ENV потому что там "личьные" глобалы в _G то что нужно системным вызовам
     if not code then return nil, err end
 
-    calls.cache[name] = true
+    calls.cache[name] = code
     return code
 end
 

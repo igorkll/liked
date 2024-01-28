@@ -23,7 +23,9 @@ local screensaver = require("screensaver")
 local image = require("image")
 local logs = require("logs")
 local sysinit = require("sysinit")
-local liked = {recoveryMode = bootloader.recoveryMode}
+local lastinfo = require("lastinfo")
+local vcomponent = require("vcomponent")
+local liked = {recoveryMode = bootloader.recoveryMode, colors = gui_container.colors}
 
 local colors = gui_container.colors
 
@@ -151,11 +153,6 @@ end
 
 --------------------------------------------------------
 
-local demotitle = {
-    "a demo version is likeOS",
-    "some functions may be disabled"
-}
-
 local bufferTimerId
 function liked.applyBufferType()
     if liked.recoveryMode then
@@ -169,16 +166,10 @@ function liked.applyBufferType()
     graphic.bindCache = {}
     graphic.screensBuffers = {}
 
-    if graphic.allowHardwareBuffer or graphic.allowSoftwareBuffer or registry.demoMode then
+    if graphic.allowHardwareBuffer or graphic.allowSoftwareBuffer then
         if not bufferTimerId then
             bufferTimerId = event.timer(0.1, function ()
                 for address in component.list("screen") do
-                    if registry.demoMode then
-                        local rx, ry = graphic.getResolution(address)
-                        for i, v in ipairs(demotitle) do
-                            graphic.set(address, 2, ry - (#demotitle - i) - 1, colors.gray, colors.white, v)
-                        end
-                    end
                     graphic.update(address)
                 end
             end, math.huge)
@@ -217,8 +208,8 @@ function liked.applyPowerMode()
                     if eventData[1] and wakeupEvents[eventData[1]] then
                         event.minTime = 0.05
                         oldWakeTIme = computer.uptime()
-                    elseif computer.uptime() - oldWakeTIme > 4 then
-                        event.minTime = 5
+                    elseif computer.uptime() - oldWakeTIme > 10 then
+                        event.minTime = 4
                     end
                 end
             end)
@@ -440,9 +431,9 @@ function liked.reg(str, key, value)
 end
 ]]
 
-function liked.getName(screen, path)
+function liked.getName(screen, path, isAlias)
     local name
-    if gui_container.viewFileExps[screen] then
+    if not isAlias and gui_container.viewFileExps[screen] then
         name = paths.name(path)
     else
         name = paths.name(paths.hideExtension(path))
@@ -461,31 +452,6 @@ function liked.selfApplicationName()
         application = scriptPath
     end
     return paths.hideExtension(paths.name(scriptPath))
-end
-
-function liked.regExit(screen, close, closeButton)
-    local baseTh = thread.current()
-    thread.listen("close", function (_, uuid)
-        if uuid == screen then
-            if close then
-                close()
-            else
-                baseTh:kill()
-            end
-        end
-    end)
-    thread.listen("touch", function (_, uuid, px, py)
-        if uuid == screen then
-            local rx, ry = graphic.getResolution(screen)
-            if py == 1 and px >= rx - 2 then
-                if close then
-                    close()
-                else
-                    baseTh:kill()
-                end
-            end
-        end
-    end)
 end
 
 function liked.applicationWindow(screen, title, bgcolor)
@@ -637,18 +603,7 @@ function liked.getIcon(screen, path)
     return icon
 end
 
-function liked.drawWallpaper(screen, customFolder)
-    local gpu = graphic.findGpu(screen)
-    local rx, ry = gpu.getResolution()
-
-    if liked.recoveryMode then
-        gpu.setBackground(0x000000)
-        gpu.setForeground(0xffffff)
-        gpu.fill(1, 1, rx, ry, " ")
-        gpu.set(rx - 14, ry - 2, "Recovery mode")
-        return
-    end
-
+function liked.getBaseWallpaperColor()
     local baseColor = colors.lightBlue
     if registry.wallpaperBaseColor then
         if type(registry.wallpaperBaseColor) == "string" then
@@ -657,6 +612,36 @@ function liked.drawWallpaper(screen, customFolder)
             baseColor = registry.wallpaperBaseColor
         end
     end
+    return baseColor
+end
+
+local function demoTitle(screen, gpu)
+    if registry.demoMode then
+        local rx, ry = gpu.getResolution()
+        if liked.recoveryMode then
+            gpu.set(2, ry - 3, "a demo version is likeOS")
+            gpu.set(2, ry - 2, "some functions may be disabled")
+        else
+            gui.drawtext(screen, 2, ry - 3, liked.colors.white, "a demo version is likeOS")
+            gui.drawtext(screen, 2, ry - 2, liked.colors.white, "some functions may be disabled")
+        end
+    end
+end
+
+function liked.drawWallpaper(screen, customFolder)
+    local gpu = graphic.findGpu(screen)
+    local rx, ry = gpu.getResolution()
+
+    if liked.recoveryMode then
+        gpu.setBackground(liked.colors.black)
+        gpu.setForeground(liked.colors.white)
+        gpu.fill(1, 1, rx, ry, " ")
+        gpu.set(rx - 14, ry - 2, "Recovery mode")
+        demoTitle(screen, gpu)
+        return
+    end
+
+    local baseColor = liked.getBaseWallpaperColor()
     
     gpu.setBackground(colorlib.colorMul(baseColor, registry.wallpaperLight or 1))
     gpu.fill(1, 1, rx, ry, " ")
@@ -673,6 +658,8 @@ function liked.drawWallpaper(screen, customFolder)
     if fs.exists(wallpaperPath) then
         wdraw(wallpaperPath)
     end
+
+    demoTitle(screen, gpu)
 
     --[[ обои для папок были отключены, потому что это не совмем безопастно и в теории позволит сделать папку в которую нельзя будет зайти
     local customPath = paths.concat(customFolder or paths.path(wallpaperPath), paths.name(wallpaperPath))
@@ -691,6 +678,88 @@ function liked.minRamForDBuff()
     end
     return kb
 end
+
+function liked.isRealKeyboards(screen)
+    for i, address in ipairs(lastinfo.keyboards[screen]) do
+        if not vcomponent.isVirtual(address) then
+            return true
+        end
+    end
+    return false
+end
+
+function liked.getComputerScore()
+    local cpuLevel = system.getCpuLevel()
+    local ram = computer.totalMemory() / 1024
+    local score = 0
+
+    if cpuLevel >= 3 then
+        score = score + 5
+    elseif cpuLevel == 2 then
+        score = score + 3
+    else
+        score = score + 1
+    end
+
+    if ram >= 2048 then
+        score = score + 5
+    elseif ram >= 1024 + 512 then
+        score = score + 4
+    elseif ram >= 1024 then
+        score = score + 3
+    elseif ram >= 768 then
+        score = score + 2
+    else
+        score = score + 1
+    end
+
+    return score
+end
+
+function liked.getScoreColor(score)
+    if score >= 10 then
+        return colors.cyan
+    elseif score >= 7 then
+        return colors.green
+    elseif score >= 5 then
+        return colors.orange
+    else
+        return colors.red
+    end
+end
+
+-------------------------------------------------------- simple api
+
+liked.regBar = liked.drawFullUpBarTask
+
+function liked.regExit(screen, close, closeButton)
+    local baseTh = thread.current()
+    thread.listen("close", function (_, uuid)
+        if uuid == screen then
+            if close then
+                close()
+            else
+                baseTh:kill()
+            end
+        end
+    end)
+    if closeButton then
+        thread.listen("touch", function (_, uuid, px, py)
+            if uuid == screen then
+                local rx, ry = graphic.getResolution(screen)
+                if py == 1 and px >= rx - 2 then
+                    if close then
+                        close()
+                    else
+                        baseTh:kill()
+                    end
+                end
+            end
+        end)
+    end
+end
+
+--------------------------------------------------------
 
 liked.unloadable = true
 return liked

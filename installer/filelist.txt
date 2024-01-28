@@ -6,7 +6,6 @@
 /system/registry.dat
 /system/t3default.plt
 /system/version.cfg
-/system/apps/about.app/componentlist.lua
 /system/apps/about.app/icon.t2p
 /system/apps/about.app/main.lua
 /system/apps/market.app/actions.cfg
@@ -24,6 +23,7 @@
 /system/apps/settings.app/icon.t2p
 /system/apps/settings.app/main.lua
 /system/apps/settings.app/shadow_demo.t2p
+/system/apps/settings.app/lib/eeprom.lua
 /system/apps/settings.app/modules/a_account.lua
 /system/apps/settings.app/modules/a_lock.lua
 /system/apps/settings.app/modules/b_users.lua
@@ -42,6 +42,7 @@
 /system/autoruns/a_mounter.lua
 /system/autoruns/b_powerCheck.lua
 /system/bin/applyReg.lua
+/system/bin/boxInstall.lua
 /system/bin/desktop.lua
 /system/bin/edit.lua
 /system/bin/fileinfo.lua
@@ -54,7 +55,7 @@
 /system/bin/setup.app/end.lua
 /system/bin/setup.app/inet.lua
 /system/bin/setup.app/main.lua
-/system/calls/gui_filepicker.lua
+/system/bin/setup.app/stub.lua
 /system/firmware/likeloader/code.lua
 /system/firmware/likeloader/label.txt
 /system/firmware/luabios/code.lua
@@ -63,9 +64,11 @@
 /system/icons/app.t2p
 /system/icons/badicon.t2p
 /system/icons/bootdevice.t2p
+/system/icons/box.t2p
 /system/icons/cfg.t2p
 /system/icons/cloud.t2p
 /system/icons/dat.t2p
+/system/icons/ebox.t2p
 /system/icons/fdd.t2p
 /system/icons/file.t2p
 /system/icons/folder.t2p
@@ -79,6 +82,7 @@
 /system/icons/publicStorage.t2p
 /system/icons/raid.t2p
 /system/icons/reg.t2p
+/system/icons/sbox.t2p
 /system/icons/scrsv.t2p
 /system/icons/t1p.t2p
 /system/icons/t2p.t2p
@@ -86,6 +90,7 @@
 /system/icons/tmp.t2p
 /system/icons/txt.t2p
 /system/icons/unknown.t2p
+/system/icons/vbox.t2p
 /system/icons/xpkg.t2p
 /system/images/account.t2p
 /system/images/account.t3p
@@ -103,7 +108,6 @@
 /system/lib/apps.lua
 /system/lib/autorun.lua
 /system/lib/calls.lua
-/system/lib/eeprom.lua
 /system/lib/format.lua
 /system/lib/gobjs.lua
 /system/lib/gui.lua
@@ -121,6 +125,7 @@
 /system/lib/uix.lua
 /system/lib/vkeyboard.lua
 /system/lib/warnings.lua
+/system/liked/box.lst
 /system/liked/brick.lua
 /system/liked/market_urls_dev.txt
 /system/liked/market_urls_main.txt

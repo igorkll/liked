@@ -2,6 +2,7 @@ local fs = require("filesystem")
 local gui = require("gui")
 local paths = require("paths")
 local liked = require("liked")
+local serialization = require("serialization")
 local installer = {}
 
 local targetsys = "/mnt/tmpmount"
@@ -82,29 +83,7 @@ function installer.install_likedbox(vfs)
 
     installer.rmTarget("system")
 
-    local bl = {
-        "installer",
-        "likedbox",
-        "screenSavers",
-        "palettes",
-        "wallpapers",
-        "icons",
-        "bin",
-        "apps",
-        "autoruns",
-        "recoveryScript.lua",
-        "recoveryAccess.lua",
-        "registry.dat",
-        "liked",
-        "logo.lua",
-        "main.lua",
-        "likedlib",
-        "firmware",
-        "sysdata",
-        "branch.cfg",
-        "core/recovery.lua"
-    }
-    
+    local bl = assert(serialization.load("/system/liked/box.lst"))
     local systemFolder = installer.selfPath("system")
     local targetSystemFolder = installer.targetPath("system")
     local success, err = fs.copy(systemFolder, targetSystemFolder, function (from)
@@ -143,7 +122,62 @@ function installer.install_selfsys(vfs)
     return installer.uinit(vfs, rootfs.getLabel() or "self-sys", installer.toTarget("."))
 end
 
+function installer.install_boxfile(vfs, path, splashCallback)
+    local success, err = installer.init(vfs)
+    if not success then return nil, err end
+
+    -- format
+    if splashCallback then splashCallback("formatting...") end
+    installer.rmTarget(".")
+    
+    -- installing likedbox or core
+    local exp = paths.extension(path) 
+    local ok, err
+    if exp == "sbox" then
+        if splashCallback then splashCallback("installing core...") end
+        ok, err = installer.install_core(vfs)
+    elseif exp == "vbox" then
+        if splashCallback then splashCallback("installing liked...") end
+        ok, err = installer.install_liked(vfs)
+    elseif exp == "ebox" then
+        -- nothing
+        ok = true
+    else
+        if splashCallback then splashCallback("installing box...") end
+        ok, err = installer.install_likedbox(vfs)
+    end
+
+    local inited = installer.init(vfs)
+    if ok and inited then
+        -- unpacking archive
+        if splashCallback then splashCallback("unpacking archive...") end
+        local aok, aerr = require("archiver").unpack(path, targetsys)
+
+        -- set label
+        liked.umountAll()
+        if aok then
+            pcall(vfs.setLabel, paths.hideExtension(paths.name(path)))
+            liked.mountAll()
+        else
+            pcall(vfs.setLabel, "failed")
+            liked.mountAll()
+            return nil, aerr
+        end
+    end
+
+    return ok, err
+end
+
 ----------------------------------------------------------------------
+
+function installer.ui_install_boxfile(screen, vfs, path)
+    local clear
+    return installer.install_boxfile(vfs, path, function (str)
+        if clear then clear() end
+        clear = gui.saveZone(screen)
+        gui.status(screen, nil, nil, str)
+    end)
+end
 
 function installer.context(screen, posX, posY, vfs)
     local label, num = gui.contextAuto(screen, posX, posY, {

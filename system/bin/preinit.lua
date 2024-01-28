@@ -5,31 +5,27 @@ local programs = require("programs")
 local internet = require("internet")
 local thread = require("thread")
 local liked = require("liked")
+local apps = require("apps")
 
 if not liked.recoveryMode then
     local storagePath = "/data/userdata/cloudStorage"
     local publicStoragePath = "/data/userdata/publicStorage"
 
     local function realCheck()
+        apps.check()
+        
         if internet.check() then
             account.check()
             
-            local storage = account.getStorage()
-            if storage then
+            if account.isStorage() then
                 if not fs.exists(storagePath) then
-                    fs.mount(storage, storagePath)
+                    local storage = account.getStorage()
+                    if storage then
+                        fs.mount(storage, storagePath)
+                    end
                 end
             elseif fs.exists(storagePath) then
                 fs.umount(storagePath)
-            end
-
-            local publicStorage = account.getPublicStorage()
-            if publicStorage then
-                if not fs.exists(publicStoragePath) then
-                    fs.mount(publicStorage, publicStoragePath)
-                end
-            elseif fs.exists(publicStoragePath) then
-                fs.umount(publicStoragePath)
             end
 
             if account.isBricked() then
@@ -39,9 +35,10 @@ if not liked.recoveryMode then
     end
 
     local function check()
-        thread.createBackground(realCheck)
+        thread.createBackground(realCheck):resume()
     end
 
-    event.timer(5, check, math.huge)
     realCheck()
+    event.timer(60, check, math.huge)
+    event.listen("accountChanged", check)
 end

@@ -77,6 +77,11 @@ local function draw(set)
         if i ~= #modes then selectModeWindow:write("\n") end
     end
 
+    if graphic.getDepth(screen) < 8 then
+        selectWindow:set(2, ry - 3, colors.black, colors.white, "* It is not recommended to use advanced shadows")
+        selectWindow:set(2, ry - 2, colors.black, colors.white, "on tier2 screens")
+    end
+
     if set then
         registry.shadowType = shadows[selected]
         registry.shadowMode = modes[selectedMode]

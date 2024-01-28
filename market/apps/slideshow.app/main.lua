@@ -10,6 +10,7 @@ local computer = require("computer")
 local gui = require("gui")
 local storage = require("storage")
 local iowindows = require("iowindows")
+local palette = require("palette")
 
 local config = storage.getConf({
     interval = 4,
@@ -83,11 +84,19 @@ function startButton:onClick()
         local first = true
 
         thread.create(function ()
+            local hidden = {}
+            for _, fullpath in ipairs(fs.list(path, true)) do
+                if fs.getAttribute(fullpath, "hidden") then
+                    hidden[fullpath] = true
+                end
+            end
+
             while true do
                 for _, name in ipairs(fs.list(path)) do
                     local fullpath = paths.concat(path, name)
-                    if paths.extension(name) == "t2p" then
-                        local sx, sy = image.size(fullpath)
+                    local exp = paths.extension(name)
+                    if exp == "t2p" and not hidden[fullpath] then
+                        local sx, sy = image.size(fullpath, screen)
                         local cropped
                         if not graphic.isValidResolution(screen, sx, sy) or not pcall(graphic.setResolution, screen, sx, sy) then
                             sx, sy = graphic.maxResolution(screen)
@@ -100,17 +109,22 @@ function startButton:onClick()
                             first = false
                         end
 
+                        local customPalette
                         if graphic.getDepth(screen) == 4 then
                             if not image.applyPalette(screen, fullpath) then
-                                palette.blackWhite(screen, true)
+                                palette.fromFile(screen, "/system/palettes/light.plt", true)
+                            else
+                                customPalette = true
                             end
+                        else
+                            palette.blackWhite(screen, true)
                         end
                         local startTime = computer.uptime()
                         if cropped then
-                            local ix, iy = image.size(fullpath)
-                            image.draw(screen, fullpath, 1 - (ix / 2), 1 - (iy / 2), nil, true)
+                            local ix, iy = image.size(fullpath, screen)
+                            image.draw(screen, fullpath, 1 - (ix / 2), 1 - (iy / 2), nil, nil, nil, customPalette)
                         else
-                            image.draw(screen, fullpath, 1, 1, nil, true)
+                            image.draw(screen, fullpath, 1, 1, nil, nil, nil, customPalette)
                         end
                         if waterMark.state then
                             gui.drawtext(screen, 2, sy - 3, 0xffffff, "Operating System     : likeOS & liked")
