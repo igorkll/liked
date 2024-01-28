@@ -615,15 +615,15 @@ function liked.getBaseWallpaperColor()
     return baseColor
 end
 
-local function demoTitle(gpu)
+local function demoTitle(screen, gpu)
     if registry.demoMode then
         local rx, ry = gpu.getResolution()
         if liked.recoveryMode then
             gpu.set(2, ry - 3, "a demo version is likeOS")
             gpu.set(2, ry - 2, "some functions may be disabled")
         else
-            gui.drawtext(2, ry - 3, liked.colors.white, "a demo version is likeOS")
-            gui.drawtext(2, ry - 2, liked.colors.white, "some functions may be disabled")
+            gui.drawtext(screen, 2, ry - 3, liked.colors.white, "a demo version is likeOS")
+            gui.drawtext(screen, 2, ry - 2, liked.colors.white, "some functions may be disabled")
         end
     end
 end
@@ -637,7 +637,7 @@ function liked.drawWallpaper(screen, customFolder)
         gpu.setForeground(liked.colors.white)
         gpu.fill(1, 1, rx, ry, " ")
         gpu.set(rx - 14, ry - 2, "Recovery mode")
-        demoTitle(gpu)
+        demoTitle(screen, gpu)
         return
     end
 
@@ -659,7 +659,7 @@ function liked.drawWallpaper(screen, customFolder)
         wdraw(wallpaperPath)
     end
 
-    demoTitle(gpu)
+    demoTitle(screen, gpu)
 
     --[[ обои для папок были отключены, потому что это не совмем безопастно и в теории позволит сделать папку в которую нельзя будет зайти
     local customPath = paths.concat(customFolder or paths.path(wallpaperPath), paths.name(wallpaperPath))
