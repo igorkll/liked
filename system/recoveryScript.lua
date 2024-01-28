@@ -48,7 +48,8 @@ local funcs = {
         end
 
         bootloader.recoveryMode = true
-        bootloader.runShell(bootloader.defaultShellPath)
+        bootloader.recoveryApi = recoveryApi
+        bootloader.runShell(bootloader.defaultShellPath, recoveryApi.screen)
     end
 }
 

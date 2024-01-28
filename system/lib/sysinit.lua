@@ -172,12 +172,16 @@ function sysinit.runShell(screen, customShell)
     sysinit.screenThreads[screen] = t
 end
 
-function sysinit.init(box)
+function sysinit.init(box, lscreen)
     local fs = require("filesystem")
     _G._OSVERSION = "liked-v" .. assert(fs.readFile("/system/version.cfg"))
     require("calls") --подгрузка лютай легаси дичи
     local bootloader = require("bootloader")
     bootloader.runlevel = "user"
+
+    if lscreen and bootloader.recoveryApi then
+        bootloader.recoveryApi.offScreens()
+    end
 
     local graphic = require("graphic")
     local programs = require("programs")
@@ -192,10 +196,12 @@ function sysinit.init(box)
 
     ------------------------------------
 
-    if not registry.primaryScreen or not component.isConnected(registry.primaryScreen) then
-        registry.primaryScreen = sysinit.generatePrimaryScreen()
+    if not lscreen then
+        if not registry.primaryScreen or not component.isConnected(registry.primaryScreen) then
+            registry.primaryScreen = sysinit.generatePrimaryScreen()
+        end
+        component.setPrimary("screen", registry.primaryScreen)
     end
-    component.setPrimary("screen", registry.primaryScreen)
 
     ------------------------------------
 
@@ -344,17 +350,21 @@ function sysinit.init(box)
 
     ------------------------------------
 
-    sysinit.runShell(registry.primaryScreen)
-    for index, address in ipairs(screens) do
-        if registry.primaryScreen ~= address then
-            sysinit.runShell(address)
+    if lscreen then
+        sysinit.runShell(lscreen)
+    else
+        sysinit.runShell(registry.primaryScreen)
+        for index, address in ipairs(screens) do
+            if registry.primaryScreen ~= address then
+                sysinit.runShell(address)
+            end
         end
     end
 
     event.hyperListen(function (eventType, cuuid, ctype)
         if ctype == "screen" then
             if eventType == "component_added" then
-                if not sysinit.screenThreads[cuuid] and graphic.findGpuAddress(cuuid) then
+                if not liked.recoveryMode and not sysinit.screenThreads[cuuid] and graphic.findGpuAddress(cuuid) then
                     sysinit.runShell(cuuid)
                 end
             elseif eventType == "component_removed" then
