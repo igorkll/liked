@@ -380,7 +380,7 @@ function sysinit.init(box)
 
     sysinit.init = nil
     sysinit.inited = true
-    event.timer(3, function ()
+    event.timer(1, function ()
         sysinit.full = true
     end)
 end
