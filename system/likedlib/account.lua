@@ -193,7 +193,7 @@ function account.getStorage()
     local endproxy
 
     local function umount()
-        filesystem.umount(endproxy)
+        fs.umount(endproxy)
     end
 
     local function request(name, args)
