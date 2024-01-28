@@ -298,7 +298,7 @@ end
 
 local function bg(col)
     local gpu = graphic.findGpu(screen)
-    if gpu.getDepth() == 8 then
+    if graphic.getDepth(screen) == 8 then
         gpu.setBackground(col)
     end
 end

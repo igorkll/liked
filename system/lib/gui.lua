@@ -123,7 +123,7 @@ function gui.shadow(screen, x, y, sx, sy, mul, full)
     else
         gpu = graphic.findGpu(screen)
     end
-    local depth = gpu.getDepth()
+    local depth = graphic.getDepth(screen)
 
     local function getPoses()
         local shadowPosesX = {}

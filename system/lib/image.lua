@@ -35,8 +35,7 @@ local function imageReColor(color, blackListedColor)
 end
 
 local function repath(screen, path)
-    local gpu = graphic.findGpu(screen or component.list("screen")())
-    local depth = gpu.getDepth()
+    local depth = graphic.getDepth(screen or component.list("screen")())
     if depth == 8 then
         path = otherCheck(path, "t3p") or path
     elseif depth == 4 then
@@ -117,7 +116,7 @@ function image.draw(screen, path, x, y, wallpaperMode, forceFullColor, lightMul,
             colorByte = string.byte(read(1))
             local fullBack, fullFore
             if t3paletteSupport then
-                if forceFullColor or gpu.getDepth() == 8 then
+                if forceFullColor or graphic.getDepth(screen) == 8 then
                     fullBack = t3colors[string.byte(read(1)) + 1]
                     fullFore = t3colors[string.byte(read(1)) + 1]
                     if registry.visionProtection then

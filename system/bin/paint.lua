@@ -129,7 +129,7 @@ local function drawPixel(x, y, pixel)
     y = y + imageOffsetY
     if x < 1 or x > mainWindow.sizeX or y < 1 or y > mainWindow.sizeY then return end
 
-    local depth = gpu.getDepth()
+    local depth = graphic.getDepth(screen)
     if pixel[1] ~= 0 or pixel[2] ~= 0 then
         local bg, fg = indexsColors[pixel[1] + 1], indexsColors[pixel[2] + 1]
         if depth == 8 then

@@ -1008,7 +1008,7 @@ local screen, nickname, filename, readonly = ...
 local file_parentpath = paths.path(filename)
 
 local gpu = graphic.findGpu(screen)
-if gpu.getDepth() == 1 then
+if graphic.getDepth(screen) == 1 then
   gpu.setBackground(0)
 else
   gpu.setBackground(colors.gray)
