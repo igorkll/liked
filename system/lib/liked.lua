@@ -616,13 +616,15 @@ function liked.getBaseWallpaperColor()
 end
 
 local function demoTitle(gpu)
-    local rx, ry = gpu.getResolution()
-    if liked.recoveryMode then
-        gpu.set(2, ry - 3, "a demo version is likeOS")
-        gpu.set(2, ry - 2, "some functions may be disabled")
-    else
-        gui.drawtext(2, ry - 3, liked.colors.white, "a demo version is likeOS")
-        gui.drawtext(2, ry - 2, liked.colors.white, "some functions may be disabled")
+    if registry.demoMode then
+        local rx, ry = gpu.getResolution()
+        if liked.recoveryMode then
+            gpu.set(2, ry - 3, "a demo version is likeOS")
+            gpu.set(2, ry - 2, "some functions may be disabled")
+        else
+            gui.drawtext(2, ry - 3, liked.colors.white, "a demo version is likeOS")
+            gui.drawtext(2, ry - 2, liked.colors.white, "some functions may be disabled")
+        end
     end
 end
 
