@@ -299,7 +299,7 @@ function account.getStorage()
     end
 
     function proxy.rename(path, path2)
-        return request("rename", {path}, {path2})
+        return request("rename", {path, path2})
     end
 
     function proxy.size(path)
