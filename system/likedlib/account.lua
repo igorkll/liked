@@ -190,7 +190,18 @@ function account.getStorage()
         return
     end
 
+    local endproxy
+
+    local function umount()
+        filesystem.umount(endproxy)
+    end
+
     local function request(name, args)
+        if not registry.account then
+            umount()
+            return
+        end
+        
         local sendTbl = {name = registry.account, token = registry.accountToken, method = name}
         local addContent
         if type(args) == "string" then
@@ -253,7 +264,8 @@ function account.getStorage()
                 end
             end
             if computer.uptime() - startTime > 10 then
-                error("connection error", 3)
+                umount()
+                return
             end
         end
     end
@@ -393,6 +405,7 @@ function account.getStorage()
     proxy.address = uuid.next()
     proxy.virtual = true
     proxy.cloud = true
+    endproxy = proxy
     return proxy
 end
 
