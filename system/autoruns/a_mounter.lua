@@ -42,7 +42,7 @@ if not registry.doNotMoundDisks then
                     end
                     event.push("redrawDesktop")
                 end
-                assert(fs.umount(mountlist[uuid]))
+                fs.umount(mountlist[uuid])
                 mountlist[uuid] = nil
             end
         end
