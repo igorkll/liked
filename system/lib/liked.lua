@@ -153,11 +153,6 @@ end
 
 --------------------------------------------------------
 
-local demotitle = {
-    "a demo version is likeOS",
-    "some functions may be disabled"
-}
-
 local bufferTimerId
 function liked.applyBufferType()
     if liked.recoveryMode then
@@ -171,16 +166,10 @@ function liked.applyBufferType()
     graphic.bindCache = {}
     graphic.screensBuffers = {}
 
-    if graphic.allowHardwareBuffer or graphic.allowSoftwareBuffer or registry.demoMode then
+    if graphic.allowHardwareBuffer or graphic.allowSoftwareBuffer then
         if not bufferTimerId then
             bufferTimerId = event.timer(0.1, function ()
                 for address in component.list("screen") do
-                    if registry.demoMode then
-                        local rx, ry = graphic.getResolution(address)
-                        for i, v in ipairs(demotitle) do
-                            graphic.set(address, 2, ry - (#demotitle - i) - 1, colors.gray, colors.white, v)
-                        end
-                    end
                     graphic.update(address)
                 end
             end, math.huge)
@@ -626,15 +615,27 @@ function liked.getBaseWallpaperColor()
     return baseColor
 end
 
+local function demoTitle(gpu)
+    local rx, ry = gpu.getResolution()
+    if liked.recoveryMode then
+        gpu.set(2, ry - 3, "a demo version is likeOS")
+        gpu.set(2, ry - 2, "some functions may be disabled")
+    else
+        gui.drawtext(2, ry - 3, liked.colors.white, "a demo version is likeOS")
+        gui.drawtext(2, ry - 2, liked.colors.white, "some functions may be disabled")
+    end
+end
+
 function liked.drawWallpaper(screen, customFolder)
     local gpu = graphic.findGpu(screen)
     local rx, ry = gpu.getResolution()
 
     if liked.recoveryMode then
-        gpu.setBackground(0x000000)
-        gpu.setForeground(0xffffff)
+        gpu.setBackground(liked.colors.black)
+        gpu.setForeground(liked.colors.white)
         gpu.fill(1, 1, rx, ry, " ")
         gpu.set(rx - 14, ry - 2, "Recovery mode")
+        demoTitle(gpu)
         return
     end
 
@@ -655,6 +656,8 @@ function liked.drawWallpaper(screen, customFolder)
     if fs.exists(wallpaperPath) then
         wdraw(wallpaperPath)
     end
+
+    demoTitle(gpu)
 
     --[[ обои для папок были отключены, потому что это не совмем безопастно и в теории позволит сделать папку в которую нельзя будет зайти
     local customPath = paths.concat(customFolder or paths.path(wallpaperPath), paths.name(wallpaperPath))
