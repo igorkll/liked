@@ -45,7 +45,7 @@ local function post(lhost, data)
     local userdata = card.request(lhost, data)
     local ok, err = internet.wait(userdata)
     if not ok then
-        return err
+        return nil, tostring(err or "unknown error")
     end
 
     local code = userdata.response()
