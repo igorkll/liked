@@ -1254,7 +1254,7 @@ event.listen("noLolzLock", function ()
 end)
 
 while true do
-    if redrawFlag then
+    if redrawFlag then --бля тут проблем, когда варнинги весят, не чекаеться на залоченость по аку
         redrawFlag = false
         draw()
         if not warnPrinted then
