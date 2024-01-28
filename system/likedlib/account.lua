@@ -16,8 +16,8 @@ local computer = require("computer")
 local text = require("text")
 local account = {}
 
-local host = "http://127.0.0.1"
---local host = "http://176.53.161.98"
+--local host = "http://127.0.0.1"
+local host = "http://176.53.161.98"
 
 local regHost = host .. "/likeID/reg/"
 local unregHost = host .. "/likeID/unreg/"
