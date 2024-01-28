@@ -231,8 +231,12 @@ function sysinit.init(box, lscreen)
 
     ------------------------------------
 
-    if box then
-        sysinit.initPalPath = "/system/palette.plt"
+    if box or lscreen then
+        if lscreen then
+            sysinit.initPalPath = "/system/palettes/original.plt"
+        else
+            sysinit.initPalPath = "/system/palette.plt"
+        end
         sysinit.applyPalette(sysinit.initPalPath, true)
     else
         sysinit.initPalPath = "/data/palette.plt"

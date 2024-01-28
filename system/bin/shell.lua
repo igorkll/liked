@@ -17,19 +17,11 @@ local palette = require("palette")
 local screen = ...
 local isPrimaryScreen = component.isPrimary(screen)
 
-if liked.recoveryMode then
-    if not isPrimaryScreen then
-        event.wait()
-    end
-
-    palette.fromFile(screen, "/system/palettes/original.plt")
-end
-
 local function wait()
     if doSetup or account.loginWindowOpenFlag then
         assert(apps.execute("/system/bin/setup.app/stub.lua", screen))
         while doSetup or account.loginWindowOpenFlag do
-            os.sleep()
+            event.yield()
         end
     end
 end
