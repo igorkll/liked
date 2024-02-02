@@ -550,6 +550,17 @@ local list = {
         path = "/data/apps/cleaner.app",
         urlPrimaryPart = selfurlpart .. "/apps/cleaner.app/",
         files = {"main.lua", "icon.t2p"}
+    },
+    {
+        name = "eepacker",
+        version = "1",
+        vendor = "logic",
+        description = "compresses the code for the eeprom",
+        minDiskSpace = 64,
+        
+        path = "/data/apps/eepacker.app",
+        urlPrimaryPart = selfurlpart .. "/apps/eepacker.app/",
+        files = {"main.lua", "icon.t2p"}
     }
 }
 
