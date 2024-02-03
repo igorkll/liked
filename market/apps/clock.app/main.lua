@@ -28,6 +28,7 @@ local function addButton(num, x, y, ipath, title)
         end
 
         local px, py = self.gui.window:toRealPos(self.x, self.y)
+        graphic.fill(screen, px, py, sx, sy, uix.colors.blue, uix.colors.blue, " ")
         image.draw(screen, ipath, px, py, true, nil, nil, nil, uix.colors.white, {icol})
         gui.drawtext(screen, px + (8 - (unicode.len(self.text) / 2)), py + 9, uix.colors.white, self.text)
     end
@@ -40,8 +41,8 @@ local function addButton(num, x, y, ipath, title)
     return button
 end
 
-local dist = rx / 5
-local add = -7
+local dist = rx / 4
+local add = -17
 addButton(1, add + dist, 2, "alarm.t2p", "alarm")
 addButton(2, add + (dist * 2), 2, "clock.t2p", "clock")
 addButton(3, add + (dist * 3), 2, "timer.t2p", "timer")
