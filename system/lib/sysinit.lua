@@ -92,16 +92,20 @@ function sysinit.getResolution(screen)
 end
 
 function sysinit.generatePrimaryScreen()
+    local lastinfo = require("lastinfo")
     local screen
-    local screenSize
+    local screenValue
 
     local component = require("component")
     for address in component.list("screen", true) do
         local x, y = component.invoke(address, "getAspectRatio")
-        local size = x * y
-        if not screenSize or size > screenSize then
+        local value = x * y
+        if #lastinfo.keyboards[address] == 0 then
+            value = 0
+        end
+        if not screenValue or value > screenValue then
             screen = address
-            screenSize = size
+            screenValue = value
         end
     end
 

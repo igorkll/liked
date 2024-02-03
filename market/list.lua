@@ -428,14 +428,14 @@ local list = {
         files = {"main.lua", "icon.t2p", "config.cfg"}
     },
     {
-        name = "clock",
+        name = "bigClock",
         version = "1",
         vendor = "logic",
         description = "displays the game and real time on the screen",
         minDiskSpace = 64,
         
-        path = "/data/apps/clock.app",
-        urlPrimaryPart = selfurlpart .. "/apps/clock.app/",
+        path = "/data/apps/bigClock.app",
+        urlPrimaryPart = selfurlpart .. "/apps/bigClock.app/",
         files = {"main.lua", "icon.t2p", "config.cfg"}
     },
     {
