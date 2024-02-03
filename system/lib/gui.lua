@@ -137,27 +137,33 @@ function gui.shadow(screen, x, y, sx, sy, mul, full)
                 end
             end
         else
-            for i = x + 1, (x + sx) - 1 do
-                table.insert(shadowPosesX, i)
-                table.insert(shadowPosesY, y + sy)
-            end
-
             if registry.shadowMode == "round" then
                 for i = x, (x + sx) - 1 do
                     table.insert(shadowPosesX, i)
                     table.insert(shadowPosesY, y - 1)
                 end
-                for i = y + 1, y + sy do
-                    table.insert(shadowPosesX, x)
+                for i = x, (x + sx) - 1 do
+                    table.insert(shadowPosesX, i)
+                    table.insert(shadowPosesY, y + sy)
+                end
+                for i = y - 1, y + sy do
+                    table.insert(shadowPosesX, x - 1)
                     table.insert(shadowPosesY, i)
 
                     table.insert(shadowPosesX, x - 2)
                     table.insert(shadowPosesY, i)
 
-                    table.insert(shadowPosesX, x - 2)
+                    table.insert(shadowPosesX, x + sx)
+                    table.insert(shadowPosesY, i)
+
+                    table.insert(shadowPosesX, x + sx + 1)
                     table.insert(shadowPosesY, i)
                 end
             else
+                for i = x + 1, (x + sx) - 1 do
+                    table.insert(shadowPosesX, i)
+                    table.insert(shadowPosesY, y + sy)
+                end
                 for i = y + 1, y + sy do
                     table.insert(shadowPosesX, x + sx)
                     table.insert(shadowPosesY, i)
