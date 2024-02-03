@@ -4,6 +4,7 @@
 /system/recoveryAccess.lua
 /system/recoveryScript.lua
 /system/registry.dat
+/system/t2advanced.plt
 /system/t3default.plt
 /system/version.cfg
 /system/apps/about.app/icon.t2p

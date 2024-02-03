@@ -200,6 +200,13 @@ function apps.load(name, screen, nickname, mainEnv, exitEnv)
                 palette.fromFile(screen, paletteFile, configTbl.dontRegPalette)
             elseif configTbl.blackWhite then
                 palette.blackWhite(screen, true)
+            elseif configTbl.advancedColors then
+                local depth = graphic.getDepth(screen)
+                if depth == 4 then
+                    palette.fromFile(screen, "/system/t2advanced.plt", true)
+                elseif depth == 8 then
+                    palette.blackWhite(screen, true)
+                end
             end
 
             if configTbl.noScreenSaver then
@@ -223,7 +230,7 @@ function apps.load(name, screen, nickname, mainEnv, exitEnv)
             if configTbl.restoreGraphic then
                 log{pcall(sysinit.initScreen, screen)}
             else
-                if paletteFile or configTbl.restorePalette or configTbl.blackWhite then
+                if paletteFile or configTbl.restorePalette or configTbl.blackWhite or configTbl.advancedColors then
                     palette.system(screen)
                 end
 
