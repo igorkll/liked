@@ -20,6 +20,7 @@ local palette = require("palette")
 local warnings = require("warnings")
 local apps = require("apps")
 local account = require("account")
+local cache = require("cache")
 local internet = require("internet")
 
 local colors = gui_container.colors
@@ -530,6 +531,8 @@ local function doIcon(windowEventData)
                 listBack()
                 return
             elseif windowEventData[3] >= 6 and windowEventData[3] <= 9 then
+                cache.cache.getIcon = nil
+                cache.cache.findIcon = nil
                 draw()
                 return
             elseif windowEventData[3] >= 11 and windowEventData[3] <= 14 then
