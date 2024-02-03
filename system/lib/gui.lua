@@ -141,13 +141,32 @@ function gui.shadow(screen, x, y, sx, sy, mul, full)
                 table.insert(shadowPosesX, i)
                 table.insert(shadowPosesY, y + sy)
             end
-            for i = y + 1, y + sy do
-                table.insert(shadowPosesX, x + sx)
-                if registry.shadowMode == "full" then
-                    table.insert(shadowPosesX, x + sx + 1)
+
+            if registry.shadowMode == "round" then
+                for i = x, (x + sx) - 1 do
+                    table.insert(shadowPosesX, i)
+                    table.insert(shadowPosesY, y - 1)
+                end
+                for i = y + 1, y + sy do
+                    table.insert(shadowPosesX, x)
+                    table.insert(shadowPosesY, i)
+
+                    table.insert(shadowPosesX, x - 2)
+                    table.insert(shadowPosesY, i)
+
+                    table.insert(shadowPosesX, x - 2)
                     table.insert(shadowPosesY, i)
                 end
-                table.insert(shadowPosesY, i)
+            else
+                for i = y + 1, y + sy do
+                    table.insert(shadowPosesX, x + sx)
+                    table.insert(shadowPosesY, i)
+    
+                    if registry.shadowMode == "full" then
+                        table.insert(shadowPosesX, x + sx + 1)
+                        table.insert(shadowPosesY, i)
+                    end
+                end
             end
         end
 
@@ -217,7 +236,13 @@ function gui.shadow(screen, x, y, sx, sy, mul, full)
             if full then
                 gpu.fill(x, y, sx, sy, " ")
             else
-                gpu.fill(x + 1, y + 1, (sx + 1) + (registry.shadowMode == "compact" and -1 or 0), sy, " ")
+                if registry.shadowMode == "compact" then
+                    gpu.fill(x + 1, y + 1, sx, sy, " ")
+                elseif registry.shadowMode == "full" then
+                    gpu.fill(x + 1, y + 1, sx + 1, sy, " ")
+                elseif registry.shadowMode == "round" then
+                    gpu.fill(x - 2, y - 1, sx + 4, sy + 2, " ")
+                end
             end
         end
     end
