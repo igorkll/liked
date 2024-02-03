@@ -621,6 +621,11 @@ list.libs = {
         vendor = "logic",
         version = "1"
     },
+    ["xml"] = {
+        url = selfurlpart .. "/libs/xml.lua",
+        vendor = "logic",
+        version = "1"
+    },
     ["bitMapFonts"] = {
         url = selfurlpart .. "/libs/bitMapFonts/init.lua",
         vendor = "logic",
