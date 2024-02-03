@@ -53,6 +53,19 @@ end
 
 ------------------------------------
 
+local shot = graphic.screenshot
+function graphic.screenshot(screen, x, y, sx, sy)
+    if x and sx and y and sy and registry.shadowMode == "round" then
+        x = x - 2
+        y = y - 1
+        sx = sx + 2
+        sy = sy + 1
+    end
+    return shot(screen, x, y, sx, sy)
+end
+
+------------------------------------
+
 gui.zoneX = 32
 gui.zoneY = 8
 
