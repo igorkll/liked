@@ -158,6 +158,9 @@ function sysinit.runShell(screen, customShell)
     local bootloader = require("bootloader")
 
     sysinit.initScreen(screen)
+    if sysinit.screenThreads[screen] then
+        sysinit.screenThreads[screen]:kill()
+    end
     
     local shellName = "shell"
     if customShell then
@@ -166,12 +169,12 @@ function sysinit.runShell(screen, customShell)
         shellName = registry.data.shell[screen]
     end
 
-    if sysinit.screenThreads[screen] then sysinit.screenThreads[screen]:kill() end
     local env = bootloader.createEnv()
     env.shellMode = true
     local t = thread.create(assert(apps.load(shellName, screen, nil, env)))
     t.parentData.screen = screen
     t:resume() --поток по умалчанию спит
+
     sysinit.screenThreads[screen] = t
 end
 
