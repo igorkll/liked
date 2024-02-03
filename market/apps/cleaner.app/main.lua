@@ -2,6 +2,7 @@ local uix = require("uix")
 local sound = require("sound")
 local gobjs = require("gobjs")
 local gui = require("gui")
+local paths = require("paths")
 local fs = require("filesystem")
 
 local screen = ...
@@ -42,9 +43,13 @@ local mineOSfiles = {
     "/mineOS.lua"
 }
 
+local function rePath(path)
+    return paths.concat("/mnt/root", path)
+end
+
 local function exists(lst)
     for i, v in ipairs(lst) do
-        if fs.exists(v) then
+        if fs.exists(rePath(v)) then
             return true
         end
     end
@@ -52,7 +57,7 @@ end
 
 local function rmAll(lst)
     for i, v in ipairs(lst) do
-        fs.remove(v)
+        fs.remove(rePath(v))
     end
 end
 
