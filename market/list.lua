@@ -561,6 +561,17 @@ local list = {
         path = "/data/apps/eepacker.app",
         urlPrimaryPart = selfurlpart .. "/apps/eepacker.app/",
         files = {"main.lua", "icon.t2p"}
+    },
+    {
+        name = "clock",
+        version = "1",
+        vendor = "logic",
+        description = "clone of the clock app from android",
+        minDiskSpace = 64,
+        
+        path = "/data/apps/clock.app",
+        urlPrimaryPart = selfurlpart .. "/apps/clock.app/",
+        files = {"main.lua", "icon.t2p", "alarm.t2p", "clock.t2p", "stopwatch.t2p", "timer.t2p"}
     }
 }
 
