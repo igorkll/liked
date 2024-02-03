@@ -79,6 +79,20 @@ local function cleanList()
         end)
     end
 
+    if fs.exists("/data/errorlog.log") then
+        table.insert(list, "error log")
+        table.insert(actions, function ()
+            fs.remove("/data/errorlog.log")
+        end)
+    end
+
+    if fs.exists("/data/cache") then
+        table.insert(list, "system cache")
+        table.insert(actions, function ()
+            fs.remove("/data/cache")
+        end)
+    end
+
     return list, actions
 end
 
@@ -100,10 +114,14 @@ layout.cleanButton = layout:createButton(2, 2, 16, 1, uix.colors.white, uix.colo
 function layout.cleanButton:onClick()
     if #actions > 0 then
         if gui.yesno(screen, nil, nil, "are you sure you want to start cleaning the system?") then
+            local clear = gui.saveZone(screen)
             gui.status(screen, nil, nil, "cleaning the system...")
+            local used = fs.spaceUsed("/")
             for i, v in ipairs(actions) do
                 v()
             end
+            clear()
+            gui.done(screen, nil, nil, "It was cleaned up: " .. tostring(math.roundTo((used - fs.spaceUsed("/")) / 1024)) .. "KB")
             updateList()
         end
     else
