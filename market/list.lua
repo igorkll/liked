@@ -571,7 +571,7 @@ local list = {
         
         path = "/data/apps/clock.app",
         urlPrimaryPart = selfurlpart .. "/apps/clock.app/",
-        files = {"main.lua", "icon.t2p", "alarm.t2p", "clock.t2p", "stopwatch.t2p", "timer.t2p"}
+        files = {"main.lua", "icon.t2p", "alarm.t2p", "clock.t2p", "stopwatch.t2p", "timer.t2p", "palette.plt"}
     }
 }
 
