@@ -126,7 +126,7 @@ end
 
 --------------------------------------------
 
-function apps.load(name, screen, nickname)
+function apps.load(name, screen, nickname, mainEnv, exitEnv)
     checkArg(1, name, "string")
     checkArg(2, screen, "string", "nil")
     checkArg(3, nickname, "string", "nil")
@@ -163,12 +163,12 @@ function apps.load(name, screen, nickname)
 
     --------------------------------
 
-    local mainCode, err = programs.load(path)
+    local mainCode, err = programs.load(path, nil, mainEnv)
     if not mainCode then return nil, err end
 
     local exitCode
     if exitFile then
-        exitCode, err = programs.load(exitFile)
+        exitCode, err = programs.load(exitFile, nil, exitEnv)
         if not exitCode then return nil, err end
     end
 
