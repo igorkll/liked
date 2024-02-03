@@ -1,6 +1,7 @@
 local uix = require("uix")
 local parser = require("parser")
 local unicode = require("unicode")
+local graphic = require("graphic")
 local gobjs = {}
 
 -------------------------------- scroll text
@@ -74,6 +75,75 @@ function gobjs.scrolltext:setText(text)
     self.scroll = 0
     self.text = text
     self.lines = nil
+end
+
+-------------------------------- layout manager
+
+gobjs.manager = {}
+
+function gobjs.manager:onCreate(sizeX, sizeY)
+    self.sizeX = sizeX
+    self.sizeY = sizeY
+    self.screen = self.gui.window.screen
+    self.current = nil
+end
+
+function gobjs.manager:onDraw()
+    if self.current then
+        self.current:draw()
+    end
+end
+
+function gobjs.manager:onEvent(eventData)
+    if self.current then
+        self.current:uploadEvent(eventData)
+    end
+end
+
+
+
+function gobjs.manager:fullStop()
+    if self.current then
+        self.current:fullStop()
+    end
+end
+
+function gobjs.manager:fullStart()
+    if self.current then
+        self.current:fullStart()
+    end
+end
+
+function gobjs.manager:select(layout)
+    if self.current then
+        self.current:fullStop()
+    end
+
+    self.current = layout
+    if self.current then
+        self.current.smartGuiManager = self
+        self.current.allowAutoActive = nil
+        self.current:fullStart()
+        if self.current.onSelect then
+            self.current:onSelect()
+        end
+        self.current:draw()
+    end
+end
+
+function gobjs.manager:create(bgcolor, style)
+    local window = graphic.create(self.screen, self.x, self.y, self.sizeX, self.sizeY)
+    local layout = uix.createSimpleLayout(window, bgcolor, style)
+    layout.bgWork = false
+    layout.allowAutoActive = nil
+    if not self.current then
+        self:select(layout)
+    end
+    return layout
+end
+
+function gobjs.manager:size()
+    return self.sizeX, self.sizeY
 end
 
 --------------------------------
