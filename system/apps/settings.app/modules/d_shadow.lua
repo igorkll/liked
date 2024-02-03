@@ -6,6 +6,7 @@ local system = require("system")
 local paths = require("paths")
 local event = require("event")
 local thread = require("thread")
+local gui = require("gui")
 
 local colors = gui_container.colors
 
@@ -89,7 +90,7 @@ local function draw(set)
 
     local ix, iy = ((rx // 3) * 2) + 8, (ry // 2) - 4
     require("image").draw(screen, paths.concat(paths.path(paths.path(selfpath)), "shadow_demo.t2p"), ix, iy)
-    local th = thread.create(gui_context, screen, ix + 1, iy + 1, {"shutdown", "reboot"})
+    local th = thread.create(gui.context, screen, ix + 2, iy + 1, {"shutdown", "reboot"})
     th:resume()
     event.yield()
     th:kill()

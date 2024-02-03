@@ -61,6 +61,8 @@ function graphic.screenshot(screen, x, y, sx, sy)
         sx = sx + 2
         sy = sy + 1
     end
+    if x < 1 then x = 1 end
+    if y < 1 then y = 1 end
     return shot(screen, x, y, sx, sy)
 end
 
