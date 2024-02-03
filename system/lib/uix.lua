@@ -151,7 +151,7 @@ function objclass:uploadEvent(eventData)
             end
         else
             if self.state and (eventData[1] == "touch" or eventData[1] == "drop") then
-                if self.type ~= "context" then
+                if self.type ~= "context" and not self.autoRelease then
                     self.state = false
                     self:draw()
 
@@ -191,10 +191,14 @@ function objclass:uploadEvent(eventData)
                     self:draw()
                     graphic.forceUpdate(self.gui.window.screen)
                     if self.autoRelease then
-                        os.sleep(0.1)
-                        self.state = false
-                        self:draw()
-                        graphic.forceUpdate(self.gui.window.screen)
+                        if self.noDropDraw then
+                            self.state = false
+                        else
+                            os.sleep(0.1)
+                            self.state = false
+                            self:draw()
+                            graphic.forceUpdate(self.gui.window.screen)
+                        end
                     end
                     
                     if self.onClick then
@@ -434,7 +438,7 @@ function objclass:draw()
         self.gui.window:fill(self.x, self.y, self.sx, self.sy, self.color, 0, " ")
     elseif self.type == "image" then
         local x, y = self.gui.window:toRealPos(self.x, self.y)
-        image.draw(self.gui.window.screen, self.path, x, y, self.wallpaperMode, self.forceFullColor)
+        image.draw(self.gui.window.screen, self.path, x, y, self.wallpaperMode, self.forceFullColor, self.lightMul, self.imagePaletteUsed, self.blackListedColor, self.newColors)
     elseif self.type == "drawer" then
         self:func(self.gui.window:toRealPos(self.x, self.y))
     elseif self.type == "progress" then
@@ -700,6 +704,10 @@ function uix:createImage(x, y, path, wallpaperMode, forceFullColor)
     obj.path = system.getResourcePath(path)
     obj.wallpaperMode = not not wallpaperMode
     obj.forceFullColor = not not forceFullColor
+    obj.blackListedColor = nil
+    obj.newColors = nil
+    obj.lightMul = nil
+    obj.imagePaletteUsed = nil
 
     table.insert(self.objs, obj)
     return obj

@@ -28,7 +28,7 @@ local function imageReColor(color, blackListedColor, cols)
     if blackListedColor and color == blackListedColor then
         for i, lcolor in ipairs(gui_container.indexsColors) do
             if lcolor == blackListedColor then
-                return gui_container.indexsColors[cols[i] + 1]
+                return gui_container.indexsColors[(cols[i] or gui.smartShadowsColors[i]) + 1]
             end
         end
     end
