@@ -41,10 +41,7 @@ function visionProtection:onSwitch()
         registry.visionProtection = nil
     end
     sysinit.applyPalette(sysinit.initPalPath, screen, true)
-    selfReload(function ()
-        graphic.forceUpdate(screen)
-        screenOn()
-    end)
+    selfReload(screenOn)
 end
 
 local selected = 1
@@ -93,15 +90,20 @@ function draw(set)
     layout:draw()
 
     if set then
+        local screenOn = gui.hideScreen(screen)
         local palPath = paths.concat(themesPath, themes[selected])
         palette.reBaseColor(palPath)
-        palette.setSystemPalette(palPath)
+        palette.setSystemPalette(palPath, nil, true)
         gui_container.refresh()
         event.push("redrawDesktop")
-        selfReload()
+        selfReload(screenOn)
     end
 end
 draw()
+if afterDraw then
+    graphic.forceUpdate(screen)
+    afterDraw()
+end
 
 ------------------------------------
 

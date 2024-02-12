@@ -79,15 +79,12 @@ local function draw(noReload, afterDraw)
             event.stub()
         end
     
+        env.afterDraw = afterDraw
         local code = loadfile(paths.concat(modulesPath, modules[selected]), nil, env)
         currentModule, moduleEnd = code(screen, modulWindow.x, modulWindow.y)
     end
 
     upRedraw()
-
-    if afterDraw then
-        afterDraw()
-    end
 end
 draw()
 

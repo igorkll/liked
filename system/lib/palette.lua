@@ -30,12 +30,12 @@ function palette.blackWhite(screen, noReg)
     palette.fromFile(screen, "/system/t3default.plt", noReg)
 end
 
-function palette.setSystemPalette(path, regOnly)
-    if pcall(sysinit.applyPalette, path) then
+function palette.setSystemPalette(path, regOnly, doNotOffScreen)
+    if pcall(sysinit.applyPalette, path, regOnly, doNotOffScreen) then
         pcall(fs.copy, path, sysinit.initPalPath)
     else
         pcall(fs.copy, sysinit.defaultPalettePath, sysinit.initPalPath)
-        sysinit.applyPalette(sysinit.defaultPalettePath, regOnly)
+        sysinit.applyPalette(sysinit.defaultPalettePath, regOnly, doNotOffScreen)
     end
 end
 
