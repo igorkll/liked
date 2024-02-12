@@ -59,13 +59,16 @@ local function menu(label, strs, funcs, autoTimeout)
 
             invert(gpu)
 
-            gpu.set(2, ry - 3, "autorun of the selected system after: " .. (otherTime or getAutotime()))
+            if autoTimeout then
+                gpu.set(3, ry - 2, "autorun of the selected system after: " .. (otherTime or getAutotime()))
+            end
         end
     end
     redraw()
 
     while true do
         local eventData = {computer.pullSignal(autoTimeout and 0.5)}
+        local oldAutotimeExists = autoTimeout
         if eventData[1] == "key_down" then
             if eventData[4] == 28 then
                 if funcs[selected](strs[selected], eventData[5]) then
@@ -76,6 +79,9 @@ local function menu(label, strs, funcs, autoTimeout)
                 selected = selected - 1
                 if selected < 1 then
                     selected = 1
+                    if oldAutotimeExists then
+                        redraw()
+                    end
                 else 
                     redraw()
                 end
@@ -84,6 +90,9 @@ local function menu(label, strs, funcs, autoTimeout)
                 selected = selected + 1
                 if selected > #strs then
                     selected = #strs
+                    if oldAutotimeExists then
+                        redraw()
+                    end
                 else
                     redraw()
                 end
