@@ -102,6 +102,13 @@ end
 
 local contextMenuOpen = nil
 
+local function getBarsColor()
+    if liked.getBaseWallpaperColor() == colors.gray then
+        return colors.black
+    end
+    return colors.gray
+end
+
 local function drawStatus()
     if screensaver.current(screen) then return end
 
@@ -126,7 +133,7 @@ local function drawStatus()
     statusWindow:set(window.sizeX - unicode.len(str), 1, colors.gray, colors.white, str)
     ]]
 
-    liked.drawUpBar(screen)
+    liked.drawUpBar(screen, nil, getBarsColor())
     statusWindow:set(1, 1, contextMenuOpen == 1 and colors.blue or colors.lightGray, colors.white, " OS ")
     statusWindow:set(6, 1, contextMenuOpen == 2 and colors.blue or colors.lightGray, colors.white, " FILES ")
     statusWindow:set(14, 1, contextMenuOpen == 3 and colors.blue or colors.lightGray, colors.white, " TYPES ")
@@ -152,11 +159,12 @@ local function drawBar(lUserPath, iconsCount)
     end
     ]]
 
-    window:fill(1, window.sizeY, rx, 1, colors.gray, 0, " ")
-    window:set(16, window.sizeY, colors.gray, colors.white, "path: " .. gui_container.short(curentPath, window.sizeX - 35))
-    window:set(window.sizeX - 10, window.sizeY, colors.gray, colors.white, tostring(currentPage))
-    window:set(window.sizeX - 8, window.sizeY, colors.gray, colors.white, "/")
-    window:set(window.sizeX - 6, window.sizeY, colors.gray, colors.white, tostring(pageCount))
+    local col = getBarsColor()
+    window:fill(1, window.sizeY, rx, 1, col, 0, " ")
+    window:set(16, window.sizeY, col, colors.white, "path: " .. gui_container.short(curentPath, window.sizeX - 35))
+    window:set(window.sizeX - 10, window.sizeY, col, colors.white, tostring(currentPage))
+    window:set(window.sizeX - 8, window.sizeY, col, colors.white, "/")
+    window:set(window.sizeX - 6, window.sizeY, col, colors.white, tostring(pageCount))
 
     --window:set(1, window.sizeY - 3, colors.lightGray, colors.white, " /")
     --window:set(1, window.sizeY - 2, colors.lightGray, colors.white, "/ ")
