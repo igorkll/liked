@@ -241,11 +241,24 @@ end
 local strs = {}
 local funcs = {}
 
+---- systems on self disk
 table.insert(strs, "------ self disk (" .. bootfs.address .. ")")
 table.insert(funcs, false)
 for i, v in ipairs(findLikeosBasedSystems(true)) do
     table.insert(strs, v[1])
     table.insert(funcs, v[2])
+end
+if bootfs.exists("/openOS.lua") then
+    table.insert(strs, "OpenOS")
+    table.insert(funcs, function ()
+        bootTo(bootfs.address, "/openOS.lua")
+    end)
+end
+if bootfs.exists("/mineOS.lua") then
+    table.insert(strs, "MineOS")
+    table.insert(funcs, function ()
+        bootTo(bootfs.address, "/mineOS.lua")
+    end)
 end
 
 menu("LikeOS Boot Manager", strs, funcs, 3)
