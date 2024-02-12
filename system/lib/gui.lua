@@ -55,6 +55,11 @@ end
 
 local shot = graphic.screenshot
 function graphic.screenshot(screen, x, y, sx, sy)
+    local rx, ry = graphic.getResolution(screen)
+    x = x or 1
+    y = y or 1
+    sx = sx or rx
+    sy = sy or ry
     if x and sx and y and sy and registry.shadowMode == "round" then
         x = x - 2
         y = y - 1

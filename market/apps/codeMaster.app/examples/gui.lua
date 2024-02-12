@@ -1,6 +1,10 @@
 local rx, ry = screen.getSize()
 local red, green, blue, yellow = 0, 1, 2, 3
 
+function math.round(val)
+    return math.floor(val + 0.5)
+end
+
 local function drawtext(x, y, text, color)
     for i = 1, #text do
         screen.set(x + (i - 1), y, text:sub(i, i), color)

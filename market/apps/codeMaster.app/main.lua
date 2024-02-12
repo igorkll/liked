@@ -10,6 +10,7 @@ local computer = require("computer")
 local iowindows = require("iowindows")
 local graphic = require("graphic")
 local gui = require("gui")
+local natives = require("natives")
 
 local screen = ...
 local ui = uix.manager(screen)
@@ -47,8 +48,8 @@ local function createSandbox()
     sandbox = {
         _VERSION = _VERSION,
 
-        math = table.deepclone(math),
-        table = table.deepclone(table),
+        math = table.deepclone(natives.math),
+        table = table.deepclone(natives.table),
         string = table.deepclone(string),
         bit32 = table.deepclone(bit32),
         coroutine = table.deepclone(coroutine),
