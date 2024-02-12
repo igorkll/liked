@@ -12,10 +12,29 @@ local function getGPU(screen)
 end
 
 local function screens()
-    local tbl = {}
-    for address in component.list("gpu", true) do
-        tbl[address] = getGPU(address)
+    local iter = component.list("screen", true)
+    return function ()
+        local screen = iter()
+        if screen then
+            return getGPU(screen)
+        end
     end
-    return pairs(tbl)
+end
+
+local function invert(gpu)
+    gpu.setBackground(gpu.setForeground(gpu.getBackground()))
+end
+
+--------------------------------
+
+for gpu in screens() do
+    gpu.setBackground(0)
+    gpu.setForeground(0xffffff)
+    local mx, my = gpu.maxResolution()
+    if mx > 80 or my > 25 then
+        mx = 80
+        my = 25
+    end
+    gpu.setResolution(mx, my)
 end
 
