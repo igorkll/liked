@@ -133,9 +133,9 @@ local function readSysinfo(fs, path)
         if info[v] then
             tbl[v] = info[v]
         else
-            v = v .. "Path"
-            if fs.exists(v) then
-                tbl[v] = assert(readFile(fs, v))
+            local varpath = info[v .. "Path"]
+            if varpath and fs.exists(varpath) then
+                tbl[v] = assert(readFile(fs, varpath))
             end
         end
     end
@@ -358,6 +358,8 @@ if bootfs.exists("/mineOS.lua") then
 end
 
 ---- systems on other disks
+table.insert(strs, "------ other disks")
+table.insert(funcs, false)
 for i, v in ipairs(findSystems(false)) do
     table.insert(strs, v[1])
     table.insert(funcs, v[2])
