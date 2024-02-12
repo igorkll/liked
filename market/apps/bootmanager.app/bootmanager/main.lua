@@ -123,15 +123,42 @@ local function mineOSboot(proxy)
     computer.shutdown()
 end
 
+local function readSysinfo(fs, path)
+    local info = unserialize(assert(readFile(fs, path)))
+    local params = {"name", "version"}
+    local tbl = {}
+    for i, v in ipairs(params) do
+        if info[v] then
+            tbl[v] = info[v]
+        else
+            v = v .. "Path"
+            if fs.exists(v) then
+                tbl[v] = assert(readFile(fs, v))
+            end
+        end
+    end
+    return tbl
+end
+
 local function findSystems(selfDisk)
     if selfDisk then
         local tbl = {}
         table.insert(tbl, {
             "likeOS based system",
             function ()
-                bootTo(bootfs.address, "/system/core/bootloader.lua")
+                return true
             end
         })
+        if bootfs.exists(sysinfoFile) then
+            local info = readSysinfo(bootfs, "/system/sysinfo.cfg")
+            if info and info.name then
+                tbl[1][1] = tbl[1][1] .. " (" .. tostring(info.name)
+                if info.version then
+                    tbl[1][1] = tbl[1][1] .. " " .. tostring(info.version)
+                end
+                tbl[1][1] = tbl[1][1] .. ")"
+            end
+        end
         return tbl
     else
         local tbl = {}
