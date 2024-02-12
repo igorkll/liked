@@ -1,3 +1,9 @@
+local parser = require("parser")
+local unicode = require("unicode")
+local function lineMod(str)
+  return parser.change(unicode, str, {["\r"] = "", ["\t"] = "    "})
+end
+
 --[[
 local fs = require("filesystem")
 local unicode = require("unicode")
@@ -1687,7 +1693,7 @@ end
 do
     local f = fs.open(filename, "r")
     if f then
-        local data = require("calls").call("split", f.readAll(), "\n")
+        local data = require("calls").call("split", lineMod(f.readAll()), "\n")
         f.close()
 
         local x, y, w, h = getArea()
