@@ -82,6 +82,13 @@ gui.bigZoneY = 16
 gui.veryBigZoneX = 60
 gui.veryBigZoneY = 18
 
+function gui.hideScreen(screen)
+    pcall(component.invoke, screen, "turnOff")    
+    return function ()
+        pcall(component.invoke, screen, "turnOn")
+    end
+end
+
 function gui.bwSize(screen)
     local rx, ry = graphic.getResolution(screen)
     if rx <= 50 then

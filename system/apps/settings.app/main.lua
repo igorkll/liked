@@ -40,7 +40,7 @@ for i, file in ipairs(fs.list(modulesPath) or {}) do
 end
 
 local currentModule, moduleEnd
-local function draw(noReload)
+local function draw(noReload, afterDraw)
     modulWindow:clear(colors.black)
     lineWindows:clear(colors.brown)
 
@@ -73,9 +73,9 @@ local function draw(noReload)
             draw(true)
         end
         env.upTask = upTask
-        env.selfReload = function()
+        env.selfReload = function(func)
             upRedraw()
-            draw()
+            draw(nil, func)
             event.stub()
         end
     
@@ -84,6 +84,10 @@ local function draw(noReload)
     end
 
     upRedraw()
+
+    if afterDraw then
+        afterDraw()
+    end
 end
 draw()
 

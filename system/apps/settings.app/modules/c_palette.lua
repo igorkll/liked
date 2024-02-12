@@ -10,6 +10,7 @@ local uix = require("uix")
 local registry = require("registry")
 local sysinit = require("sysinit")
 local thread = require("thread")
+local gui = require("gui")
 
 local colors = gui_container.colors
 
@@ -33,14 +34,17 @@ local visionProtection = layout:createSwitch(2, 2, registry.visionProtection)
 layout:createText(2 + 7, 2, uix.colors.white, "vision protection")
 
 function visionProtection:onSwitch()
+    local screenOn = gui.hideScreen(screen)
     if self.state then
         registry.visionProtection = true
     else
         registry.visionProtection = nil
     end
-    sysinit.applyPalette(sysinit.initPalPath, screen)
-
-    selfReload()
+    sysinit.applyPalette(sysinit.initPalPath, screen, true)
+    selfReload(function ()
+        graphic.forceUpdate(screen)
+        screenOn()
+    end)
 end
 
 local selected = 1
