@@ -25,6 +25,24 @@ local function invert(gpu)
     gpu.setBackground(gpu.setForeground(gpu.getBackground()))
 end
 
+local function centerPrint(gpu, y, text)
+    local rx, ry = gpu.getResolution()
+    gpu.set(((rx / 2) - (unicode.len(text) / 2)) + 1, y, text)
+end
+
+local function menu(label, points, funcs)
+    for gpu in screens() do
+        local rx, ry = gpu.getResolution()
+        
+        invert(gpu)
+        gpu.fill(1, 1, rx, 1, " ")
+        centerPrint(gpu, 1, "Like Boot-Manager")
+        invert(gpu)
+    end
+
+    
+end
+
 --------------------------------
 
 for gpu in screens() do
