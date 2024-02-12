@@ -1,3 +1,6 @@
+local bootfs = component.proxy(computer.getBootAddress())
+local tmpfs = component.proxy(computer.tmpAddress())
+
 local function getGPU(screen)
     for address in component.list("gpu", true) do
         if component.invoke(address, "getScreen") == screen then
@@ -84,17 +87,28 @@ local function serialize(tbl)
     return str:sub(1, #str - 1) .. "}"
 end
 
+local bootloaderSettingsPath = "/bootloader"
 local function bootTo(address, path, args)
-    
+    if address then writeFile(tmpfs, bootloaderSettingsPath .. "/bootaddr", address) end
+    if path then writeFile(tmpfs, bootloaderSettingsPath .. "/bootfile", path) end
+    if args then writeFile(tmpfs, bootloaderSettingsPath .. "/bootargs", serialize(args)) end
+    computer.shutdown("fast")
 end
 
-local function findLikeosBasedSystems()
-    
+local function findLikeosBasedSystems(selfDisk)
+    return {}
 end
 
 local function menu(label, strs, funcs, autoTimeout)
     local selected = 1
     local startTime = computer.uptime()
+
+    if not funcs[selected] then
+        selected = selected + 1
+        if not funcs[selected] then
+            selected = nil
+        end
+    end
 
     local function getAutotime()
         local autotime = math.ceil(autoTimeout - (computer.uptime() - startTime))
@@ -117,9 +131,22 @@ local function menu(label, strs, funcs, autoTimeout)
             centerPrint(gpu, 1, label)
 
             gpu.fill(1, ry, rx, 1, " ")
-            gpu.set(2, ry, "Enter=Choose  ◢◣-UP  ◥◤-DOWN")
+            gpu.set(2, ry, "Enter=Choose    ◢◣-UP    ◥◤-DOWN")
+
+            for i, v in ipairs(strs) do
+                if i == selected then
+                    gpu.fill(2, i + 2, 16, 1, " ")
+                    gpu.set(2, i + 2, v)
+                    break
+                end
+            end
 
             invert(gpu)
+            for i, v in ipairs(strs) do
+                if i ~= selected then
+                    gpu.set(2, i + 2, v)
+                end
+            end
 
             if autoTimeout then
                 gpu.set(3, ry - 2, "autorun of the selected system after: " .. (otherTime or getAutotime()))
@@ -133,29 +160,55 @@ local function menu(label, strs, funcs, autoTimeout)
         local oldAutotimeExists = autoTimeout
         if eventData[1] == "key_down" then
             if eventData[4] == 28 then
-                if funcs[selected](strs[selected], eventData[5]) then
+                if autoTimeout then
+                    autoTimeout = nil
+                    redraw()
+                end
+                if selected and funcs[selected](strs[selected], eventData[5]) then
                     break
                 end
             elseif eventData[4] == 200 then
                 autoTimeout = nil
-                selected = selected - 1
-                if selected < 1 then
-                    selected = 1
-                    if oldAutotimeExists then
+                if selected then
+                    local oldSelect = selected
+                    selected = selected - 1
+                    if selected < 1 then
+                        selected = 1
+                        if oldAutotimeExists then
+                            redraw()
+                        end
+                    else
+                        if not funcs[selected] then
+                            selected = selected - 1
+                            if not funcs[selected] then
+                                selected = oldSelect
+                            end
+                        end
                         redraw()
                     end
-                else 
+                elseif oldAutotimeExists then
                     redraw()
                 end
             elseif eventData[4] == 208 then
                 autoTimeout = nil
-                selected = selected + 1
-                if selected > #strs then
-                    selected = #strs
-                    if oldAutotimeExists then
+                if selected then
+                    local oldSelect = selected
+                    selected = selected + 1
+                    if selected > #strs then
+                        selected = #strs
+                        if oldAutotimeExists then
+                            redraw()
+                        end
+                    else
+                        if not funcs[selected] then
+                            selected = selected + 1
+                            if not funcs[selected] then
+                                selected = oldSelect
+                            end
+                        end
                         redraw()
                     end
-                else
+                elseif oldAutotimeExists then
                     redraw()
                 end
             end
@@ -187,5 +240,12 @@ end
 
 local strs = {}
 local funcs = {}
+
+table.insert(strs, "------ self disk (" .. bootfs.address .. ")")
+table.insert(funcs, false)
+for i, v in ipairs(findLikeosBasedSystems(true)) do
+    table.insert(strs, v[1])
+    table.insert(funcs, v[2])
+end
 
 menu("LikeOS Boot Manager", strs, funcs, 3)
