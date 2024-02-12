@@ -95,8 +95,74 @@ local function bootTo(address, path, args)
     computer.shutdown("fast")
 end
 
-local function findLikeosBasedSystems(selfDisk)
-    return {}
+local function mineOSboot(proxy)
+    --mineOS получает адрес загрузочного диска из eeprom.getData
+    --если у пользователя установлен eeprom в data которого находиться не только адрес загрузочного диска, все бы пошло по бараде
+    --данный код делает так, чтобы mineOS получала фейковый eeprom-data в котором будет только адрес загрузочного диска
+    --что обеспечит совместимость с всеми прошивками eeprom
+    local invoke = component.invoke
+    local eeprom = component.list("eeprom")()
+    function component.invoke(address, method, ...)
+        if address == eeprom then
+            if method == "getData" then
+                return proxy.address
+            else
+                error("access denied", 2) --у mineOS не будет доступа к eeprom, чтобы исключить воздействия вирусов(кой таких в mineOS пално)
+            end
+        end
+
+        local result = {pcall(invoke, address, method, ...)}
+        if not result[1] then --для правильной обработки ошибок
+            error(result[2], 2)
+        else
+            return table.unpack(result, 2)
+        end
+    end
+
+    assert(load(assert(readFile(proxy, "/OS.lua")), "=init", nil, _G))()
+    computer.shutdown()
+end
+
+local function findSystems(selfDisk)
+    if selfDisk then
+        local tbl = {}
+        table.insert(tbl, {
+            "likeOS based system",
+            function ()
+                bootTo(bootfs.address, "/system/core/bootloader.lua")
+            end
+        })
+        return tbl
+    else
+        local tbl = {}
+        for address in component.list("filesystem") do
+            if address ~= bootfs.address then
+                local proxy = component.proxy(address)
+                if proxy.exists("/init.lua") then
+                    table.insert(tbl, {
+                        "unknownOS",
+                        function ()
+                            bootTo(address, "/init.lua")
+                        end,
+                        address
+                    })
+                end
+                if proxy.exists("/OS.lua") then
+                    table.insert(tbl, {
+                        "mineOS based system",
+                        function ()
+                            mineOSboot(proxy)
+                        end,
+                        address
+                    })
+                end
+            end
+        end
+        for i, v in ipairs(tbl) do
+            v[1] = v[1] .. " (" .. v[3]:sub(1, 5) .. " / " .. (component.invoke(v[3], "getLabel") or "no-label") .. ")"
+        end
+        return tbl
+    end
 end
 
 local function menu(label, strs, funcs, autoTimeout)
@@ -244,7 +310,7 @@ local funcs = {}
 ---- systems on self disk
 table.insert(strs, "------ self disk (" .. bootfs.address .. ")")
 table.insert(funcs, false)
-for i, v in ipairs(findLikeosBasedSystems(true)) do
+for i, v in ipairs(findSystems(true)) do
     table.insert(strs, v[1])
     table.insert(funcs, v[2])
 end
@@ -259,6 +325,12 @@ if bootfs.exists("/mineOS.lua") then
     table.insert(funcs, function ()
         bootTo(bootfs.address, "/mineOS.lua")
     end)
+end
+
+---- systems on other disks
+for i, v in ipairs(findSystems(false)) do
+    table.insert(strs, v[1])
+    table.insert(funcs, v[2])
 end
 
 menu("LikeOS Boot Manager", strs, funcs, 3)
