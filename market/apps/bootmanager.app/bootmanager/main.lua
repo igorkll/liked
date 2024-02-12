@@ -92,6 +92,7 @@ local function bootTo(address, path, args)
     if address then writeFile(tmpfs, bootloaderSettingsPath .. "/bootaddr", address) end
     if path then writeFile(tmpfs, bootloaderSettingsPath .. "/bootfile", path) end
     if args then writeFile(tmpfs, bootloaderSettingsPath .. "/bootargs", serialize(args)) end
+    writeFile(tmpfs, bootloaderSettingsPath .. "/nomgr", "")
     computer.shutdown("fast")
 end
 
@@ -140,6 +141,7 @@ local function readSysinfo(fs, path)
     return tbl
 end
 
+local sysinfoFile = "/system/sysinfo.cfg"
 local function findSystems(selfDisk)
     if selfDisk then
         local tbl = {}
@@ -150,7 +152,7 @@ local function findSystems(selfDisk)
             end
         })
         if bootfs.exists(sysinfoFile) then
-            local info = readSysinfo(bootfs, "/system/sysinfo.cfg")
+            local info = readSysinfo(bootfs, sysinfoFile)
             if info and info.name then
                 tbl[1][1] = tbl[1][1] .. " (" .. tostring(info.name)
                 if info.version then
