@@ -30,6 +30,68 @@ local function centerPrint(gpu, y, text)
     gpu.set(((rx / 2) - (unicode.len(text) / 2)) + 1, y, text)
 end
 
+local function unserialize(str)
+    local code = load("return " .. str, "=unserialize", "t", {math={huge=math.huge}})
+    if code then
+        local result = {pcall(code)}
+        computer.pullSignal(0)
+        if result[1] and type(result[2]) == "table" then
+            return result[2]
+        end
+    end
+end
+
+local function unserialize(str)
+    local code = load("return " .. str, "=unserialize", "t", {math={huge=math.huge}})
+    if code then
+        local result = {pcall(code)}
+        computer.pullSignal(0)
+        if result[1] and type(result[2]) == "table" then
+            return result[2]
+        end
+    end
+end
+
+local function readFile(fs, path)
+    local file, err = fs.open(path, "rb")
+    if not file then return nil, err end
+    local buffer = ""
+    repeat
+        local data = fs.read(file, math.huge)
+        buffer = buffer .. (data or "")
+    until not data
+    fs.close(file)
+    return buffer
+end
+
+local function writeFile(fs, path, data)
+    local file, err = fs.open(path, "wb")
+    if not file then return nil, err end
+    local ok, err = fs.write(file, data)
+    if not ok then
+        pcall(fs.close, file)
+        return nil, err
+    end
+    fs.close(file)
+    return true
+end
+
+local function serialize(tbl)
+    local str = "{"
+    for key, data in pairs(tbl) do
+        str = str .. "[\"" .. key .. "\"]=\"" .. data .. "\","
+    end
+    return str:sub(1, #str - 1) .. "}"
+end
+
+local function bootTo(address, path, args)
+    
+end
+
+local function findLikeosBasedSystems()
+    
+end
+
 local function menu(label, strs, funcs, autoTimeout)
     local selected = 1
     local startTime = computer.uptime()
@@ -126,4 +188,4 @@ end
 local strs = {}
 local funcs = {}
 
-menu("Like Boot-Manager", strs, funcs, 3)
+menu("LikeOS Boot Manager", strs, funcs, 3)

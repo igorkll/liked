@@ -4,6 +4,7 @@
 /system/recoveryAccess.lua
 /system/recoveryScript.lua
 /system/registry.dat
+/system/sysinfo.cfg
 /system/t2advanced.plt
 /system/t3default.plt
 /system/version.cfg
