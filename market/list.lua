@@ -579,6 +579,7 @@ local list = {
         vendor = "logic",
         description = "",
         minDiskSpace = 64,
+        executer = true,
         
         path = "/vendor/apps/bootmanager.app",
         urlPrimaryPart = selfurlpart .. "/apps/bootmanager.app/",

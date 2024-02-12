@@ -2,19 +2,22 @@ local component = component or require("component")
 local bootloader = bootloader or require("bootloader")
 local computer = computer or require("computer")
 
+local bootfs = bootloader.bootfs
+
 local startupPath = "/likeOS_startup.lua"
 local strs = {
     "Recovery From Internet",
     "Reset Settings (does not delete data)",
-    "Start The System In Recovery Mode"
+    "Start The System In Recovery Mode",
+    "Run System Web Installer"
 }
 local funcs = {
     function (str)
         if component.list("internet")() then
             if recoveryApi.yesno(str) then
                 local sysdata = {branch = "main", mode = "full"}
-                for _, file in ipairs(bootloader.bootfs.list("/system/sysdata") or {}) do
-                    sysdata[file] = bootloader.readFile(bootloader.bootfs, "/system/sysdata/" .. file)
+                for _, file in ipairs(bootfs.list("/system/sysdata") or {}) do
+                    sysdata[file] = bootloader.readFile(bootfs, "/system/sysdata/" .. file)
                 end
 
                 local sysdataStr = "{data={"
@@ -23,8 +26,8 @@ local funcs = {
                 end
                 sysdataStr = sysdataStr .. "}}"
 
-                local content = "local installdata = " .. sysdataStr .. "\n" .. bootloader.readFile(bootloader.bootfs, "/system/likedlib/update/update.lua")
-                if bootloader.writeFile(bootloader.bootfs, startupPath, content) then
+                local content = "local installdata = " .. sysdataStr .. "\n" .. bootloader.readFile(bootfs, "/system/likedlib/update/update.lua")
+                if bootloader.writeFile(bootfs, startupPath, content) then
                     computer.shutdown("fast")
                 end
             end
@@ -34,7 +37,7 @@ local funcs = {
     end,
     function (str)
         if recoveryApi.yesno(str) then
-            bootloader.dofile("/system/liked/reset.lua", _ENV, bootloader.bootfs)
+            bootloader.dofile("/system/liked/reset.lua", _ENV, bootfs)
             recoveryApi.info("Settings Successfully Reset")
         end
     end,
@@ -50,13 +53,32 @@ local funcs = {
         bootloader.recoveryMode = true
         bootloader.recoveryApi = recoveryApi
         bootloader.runShell(bootloader.defaultShellPath, recoveryApi.screen)
+    end,
+    function ()
+        if component.list("internet")() then
+            recoveryApi.info({"Downloading The Installer", "Please Wait"}, true)
+            local branch = "main"
+            local branchPath = "/system/sysdata/branch"
+            if bootfs.exists(branchPath) then
+                branch = bootloader.readFile(bootfs, branchPath)
+            end
+            local url = "https://raw.githubusercontent.com/igorkll/liked/" .. branch .. "/installer/webInstaller.lua"
+            local installer, err = recoveryApi.wget(url)
+            if not installer then
+                recoveryApi.info(tostring(err))
+                return
+            end
+            assert(load(installer, "=installer", nil, _G))()
+        else
+            recoveryApi.info("An internet card is required")
+        end
     end
 }
 
-if bootloader.bootfs.exists(startupPath) then
+if bootfs.exists(startupPath) then
     strs[1] = "Cancel Scheduled Recover"
     funcs[1] = function ()
-        bootloader.bootfs.remove(startupPath)
+        bootfs.remove(startupPath)
         computer.shutdown("fast")
     end
 end
