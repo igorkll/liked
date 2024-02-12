@@ -36,5 +36,6 @@ for gpu in screens() do
         my = 25
     end
     gpu.setResolution(mx, my)
+    gpu.fill(1, 1, mx, my, " ")
 end
 

@@ -312,7 +312,7 @@ local function applicationLabel(data, x, y)
         end
         
         local x, y = applabel:toRealPos(2, 2)
-        image.draw(screen, custImg or img, x, y, true)
+        pcall(image.draw, screen, custImg or img, x, y, true)
     end
     
     if data.icon then
@@ -320,7 +320,10 @@ local function applicationLabel(data, x, y)
         if not downloaded[img] then
             if not fs.exists(img) or cacheReg[data.name or "unknown"] ~= data.version then
                 draw("/system/icons/app.t2p")
-                fs.writeFile(img, internet.get(data.icon))
+                local imgdata = internet.get(data.icon)
+                if imgdata then
+                    fs.writeFile(img, imgdata)
+                end
                 cacheReg[data.name or "unknown"] = data.version
             end
             downloaded[img] = true
