@@ -55,7 +55,7 @@ local function menu(label, strs, funcs, autoTimeout)
             centerPrint(gpu, 1, label)
 
             gpu.fill(1, ry, rx, 1, " ")
-            gpu.set(2, ry, "Enter=Choose  ↑-UP  ↓-DOWN")
+            gpu.set(2, ry, "Enter=Choose  ◢◣-UP  ◥◤-DOWN")
 
             invert(gpu)
 
