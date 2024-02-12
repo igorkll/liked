@@ -19,7 +19,7 @@ local function screens()
     return function ()
         local screen = iter()
         if screen then
-            return getGPU(screen)
+            return getGPU(screen), screen
         end
     end
 end
@@ -143,56 +143,54 @@ local function readSysinfo(fs, path)
 end
 
 local sysinfoFile = "/system/sysinfo.cfg"
-local function findSystems(selfDisk)
-    if selfDisk then
-        local tbl = {}
-        table.insert(tbl, {
-            "likeOS based system",
-            function ()
-                return true
-            end
-        })
-        if bootfs.exists(sysinfoFile) then
-            local info = readSysinfo(bootfs, sysinfoFile)
-            if info and info.name then
-                tbl[1][1] = tbl[1][1] .. " (" .. tostring(info.name)
-                if info.version then
-                    tbl[1][1] = tbl[1][1] .. " " .. tostring(info.version)
-                end
-                tbl[1][1] = tbl[1][1] .. ")"
-            end
+local function findSystems()
+    local tbl = {}
+    for address in component.list("filesystem") do
+        local proxy = component.proxy(address)
+        if proxy.exists("/init.lua") then
+            table.insert(tbl, {
+                "unknownOS",
+                function ()
+                    bootTo(address, "/init.lua")
+                end,
+                address
+            })
         end
-        return tbl
-    else
-        local tbl = {}
-        for address in component.list("filesystem") do
-            if address ~= bootfs.address then
-                local proxy = component.proxy(address)
-                if proxy.exists("/init.lua") then
-                    table.insert(tbl, {
-                        "unknownOS",
-                        function ()
-                            bootTo(address, "/init.lua")
-                        end,
-                        address
-                    })
-                end
-                if proxy.exists("/OS.lua") then
-                    table.insert(tbl, {
-                        "mineOS based system",
-                        function ()
-                            mineOSboot(proxy)
-                        end,
-                        address
-                    })
-                end
+        if proxy.exists("/OS.lua") then
+            table.insert(tbl, {
+                "mineOS based system",
+                function ()
+                    mineOSboot(proxy)
+                end,
+                address
+            })
+        end
+        for k, path in proxy.list("/") do
+            if proxy.isDirectory(path) then
+                table.insert(tbl, {
+                    "likeOS based system",
+                    function ()
+                        return true
+                    end,
+                    bootfs.address
+                })
             end
         end
-        for i, v in ipairs(tbl) do
-            v[1] = v[1] .. " (" .. v[3]:sub(1, 5) .. " / " .. (component.invoke(v[3], "getLabel") or "no-label") .. ")"
-        end
-        return tbl
     end
+    for k, ldat in ipairs(tbl) do
+        local proxy = component.proxy(ldat[3])
+        if proxy.exists(sysinfoFile) then
+            local info = readSysinfo(proxy, sysinfoFile)
+            if info and info.name then
+                ldat[1] = ldat[1] .. " (" .. tostring(info.name)
+                if info.version then
+                    ldat[1] = ldat[1] .. " " .. tostring(info.version)
+                end
+                ldat[1] = ldat[1] .. ")"
+            end
+        end
+    end
+    return tbl
 end
 
 local function menu(label, strs, funcs, autoTimeout)
@@ -227,7 +225,7 @@ local function menu(label, strs, funcs, autoTimeout)
             centerPrint(gpu, 1, label)
 
             gpu.fill(1, ry, rx, 1, " ")
-            gpu.set(2, ry, "Enter=Choose    ◢◣-UP    ◥◤-DOWN")
+            gpu.set(2, ry, "Enter=Choose    ↑-UP    ↓-DOWN")
 
             for i, v in ipairs(strs) do
                 if i == selected then
@@ -322,7 +320,10 @@ end
 
 --------------------------------
 
-for gpu in screens() do
+for gpu, screen in screens() do
+    component.invoke(screen, "turnOn")
+    gpu.setDepth(1)
+    gpu.setDepth(gpu.maxDepth())
     gpu.setBackground(0)
     gpu.setForeground(0xffffff)
     local mx, my = gpu.maxResolution()
@@ -340,7 +341,7 @@ local funcs = {}
 ---- systems on self disk
 table.insert(strs, "------ self disk (" .. bootfs.address .. ")")
 table.insert(funcs, false)
-for i, v in ipairs(findSystems(true)) do
+for i, v in ipairs(findSystems()) do
     table.insert(strs, v[1])
     table.insert(funcs, v[2])
 end
@@ -360,7 +361,7 @@ end
 ---- systems on other disks
 table.insert(strs, "------ other disks")
 table.insert(funcs, false)
-for i, v in ipairs(findSystems(false)) do
+for i, v in ipairs(findSystems()) do
     table.insert(strs, v[1])
     table.insert(funcs, v[2])
 end
