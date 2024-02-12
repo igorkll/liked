@@ -126,36 +126,43 @@ local function mineOSboot(proxy)
 end
 
 local function readSysinfo(fs, path)
-    local info = unserialize(assert(readFile(fs, path)))
-    local params = {"name", "version"}
-    local tbl = {}
-    for i, v in ipairs(params) do
-        if info[v] then
-            tbl[v] = info[v]
-        else
-            local varpath = info[v .. "Path"]
-            if varpath and fs.exists(varpath) then
-                tbl[v] = assert(readFile(fs, varpath))
+    if fs.exists(path) then
+        local info = unserialize(assert(readFile(fs, path)))
+        local params = {"name", "version"}
+        local tbl = {}
+        for i, v in ipairs(params) do
+            if info[v] then
+                tbl[v] = info[v]
+            else
+                local varpath = info[v .. "Path"]
+                if varpath and fs.exists(varpath) then
+                    tbl[v] = assert(readFile(fs, varpath))
+                end
             end
         end
+        return tbl
     end
-    return tbl
 end
 
 local sysinfoFile = "/system/sysinfo.cfg"
+local function likeOSname(proxy)
+    local str = "likeOS based system"
+    local info = readSysinfo(proxy, sysinfoFile)
+    if info and info.name then
+        str = str .. " (" .. tostring(info.name)
+        if info.version then
+            str = str .. " " .. tostring(info.version)
+        end
+        str = str .. ")"
+    end
+    return str
+end
+
 local function findSystems()
     local tbl = {}
     for address in component.list("filesystem") do
         local proxy = component.proxy(address)
-        if proxy.exists("/init.lua") then
-            table.insert(tbl, {
-                "unknownOS",
-                function ()
-                    bootTo(address, "/init.lua")
-                end,
-                address
-            })
-        end
+
         if proxy.exists("/OS.lua") then
             table.insert(tbl, {
                 "mineOS based system",
@@ -165,29 +172,23 @@ local function findSystems()
                 address
             })
         end
-        for k, path in proxy.list("/") do
-            if proxy.isDirectory(path) then
-                table.insert(tbl, {
-                    "likeOS based system",
-                    function ()
-                        return true
-                    end,
-                    bootfs.address
-                })
-            end
-        end
-    end
-    for k, ldat in ipairs(tbl) do
-        local proxy = component.proxy(ldat[3])
-        if proxy.exists(sysinfoFile) then
-            local info = readSysinfo(proxy, sysinfoFile)
-            if info and info.name then
-                ldat[1] = ldat[1] .. " (" .. tostring(info.name)
-                if info.version then
-                    ldat[1] = ldat[1] .. " " .. tostring(info.version)
-                end
-                ldat[1] = ldat[1] .. ")"
-            end
+
+        if proxy.exists("/system/core/bootloader.lua") then
+            table.insert(tbl, {
+                likeOSname(proxy),
+                function ()
+                    bootTo(address, "/system/core/bootloader.lua")
+                end,
+                address
+            })
+        elseif proxy.exists("/init.lua") then
+            table.insert(tbl, {
+                "unknownOS",
+                function ()
+                    bootTo(address, "/init.lua")
+                end,
+                address
+            })
         end
     end
     return tbl
@@ -344,18 +345,6 @@ table.insert(funcs, false)
 for i, v in ipairs(findSystems()) do
     table.insert(strs, v[1])
     table.insert(funcs, v[2])
-end
-if bootfs.exists("/openOS.lua") then
-    table.insert(strs, "OpenOS")
-    table.insert(funcs, function ()
-        bootTo(bootfs.address, "/openOS.lua")
-    end)
-end
-if bootfs.exists("/mineOS.lua") then
-    table.insert(strs, "MineOS")
-    table.insert(funcs, function ()
-        bootTo(bootfs.address, "/mineOS.lua")
-    end)
 end
 
 ---- systems on other disks
