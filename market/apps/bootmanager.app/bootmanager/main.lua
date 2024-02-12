@@ -34,6 +34,16 @@ local function menu(label, strs, funcs, autoTimeout)
     local selected = 1
     local startTime = computer.uptime()
 
+    local function getAutotime()
+        local autotime = math.ceil(autoTimeout - (computer.uptime() - startTime))
+        if autotime > autoTimeout then
+            return autoTimeout
+        elseif autotime < 0 then
+            return 0
+        end
+        return autotime
+    end
+
     local function redraw(otherTime)
         for gpu in screens() do
             local rx, ry = gpu.getResolution()
@@ -49,7 +59,7 @@ local function menu(label, strs, funcs, autoTimeout)
 
             invert(gpu)
 
-            gpu.set(2, ry - 3, "autorun of the selected system after: " .. math.floor(otherTime or (autoTimeout - (computer.uptime() - selected))))
+            gpu.set(2, ry - 3, "autorun of the selected system after: " .. (otherTime or getAutotime()))
         end
     end
     redraw()
@@ -81,7 +91,7 @@ local function menu(label, strs, funcs, autoTimeout)
         end
 
         if autoTimeout then
-            if autoTimeout - (computer.uptime() - selected) <= 0 then
+            if getAutotime() <= 0 then
                 redraw(0)
                 return 1
             end
