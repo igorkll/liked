@@ -572,6 +572,20 @@ local list = {
         path = "/data/apps/clock.app",
         urlPrimaryPart = selfurlpart .. "/apps/clock.app/",
         files = {"main.lua", "icon.t2p", "alarm.t2p", "clock.t2p", "stopwatch.t2p", "timer.t2p", "palette.plt"}
+    },
+    {
+        name = "bootmanager",
+        version = "1",
+        vendor = "logic",
+        description = "",
+        minDiskSpace = 64,
+        
+        path = "/vendor/apps/bootmanager.app",
+        urlPrimaryPart = selfurlpart .. "/apps/bootmanager.app/",
+        files = {"main.lua", "icon.t2p", "uninstall.lua"},
+        postInstall = function()
+            download("/bootmanager/main.lua", selfurlpart .. "/apps/bootmanager.app/files/main.lua")
+        end
     }
 }
 
