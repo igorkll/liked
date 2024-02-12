@@ -585,7 +585,7 @@ local list = {
         urlPrimaryPart = selfurlpart .. "/apps/bootmanager.app/",
         files = {"main.lua", "icon.t2p", "uninstall.lua"},
         postInstall = function()
-            download("/bootmanager/main.lua", selfurlpart .. "/apps/bootmanager.app/files/main.lua")
+            download("/bootmanager/main.lua", selfurlpart .. "/apps/bootmanager.app/bootmanager/main.lua")
         end
     }
 }

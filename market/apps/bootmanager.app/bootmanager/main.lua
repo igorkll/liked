@@ -36,11 +36,13 @@ local function menu(label, points, funcs)
         
         invert(gpu)
         gpu.fill(1, 1, rx, 1, " ")
-        centerPrint(gpu, 1, "Like Boot-Manager")
+        centerPrint(gpu, 1, label)
         invert(gpu)
     end
 
-    
+    while true do
+        local eventData = {computer.pullSignal()}
+    end
 end
 
 --------------------------------
@@ -57,3 +59,7 @@ for gpu in screens() do
     gpu.fill(1, 1, mx, my, " ")
 end
 
+menu("Like Boot-Manager", {
+    "one",
+    "two"
+})
