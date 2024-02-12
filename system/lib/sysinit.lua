@@ -3,7 +3,7 @@ sysinit.screenThreads = {}
 sysinit.initedScreens = {}
 sysinit.defaultPalettePath = "/system/palettes/light.plt"
 
-function sysinit.applyPalette(path, screen)
+function sysinit.applyPalette(path, screen, doNotOffScreen)
     local fs = require("filesystem")
     local serialization = require("serialization")
     local component  = require("component")
@@ -58,6 +58,7 @@ function sysinit.applyPalette(path, screen)
         local blackWhile
         local function applyOnScreen(address)
             if graphic.maxDepth(address) ~= 1 then
+                if not doNotOffScreen then pcall(component.invoke, address, "turnOff") end
                 if t3default and graphic.getDepth(address) == 8 then
                     graphic.fakePalette = table.low(colors)
                     if not blackWhile then
@@ -68,6 +69,7 @@ function sysinit.applyPalette(path, screen)
                     graphic.fakePalette = nil
                     graphic.setPalette(address, colors)
                 end
+                if not doNotOffScreen then pcall(component.invoke, address, "turnOn") end
             end
         end
 
@@ -119,7 +121,6 @@ function sysinit.initScreen(screen)
     local lastinfo = require("lastinfo")
     
     pcall(component.invoke, screen, "turnOff")
-    
     if graphic.isAvailable(screen) then
         -- resolution & depth
         local mx, my = sysinit.getResolution(screen)
@@ -132,7 +133,7 @@ function sysinit.initScreen(screen)
         graphic.forceUpdate(screen)
 
         -- palette
-        sysinit.applyPalette(sysinit.initPalPath, screen)
+        sysinit.applyPalette(sysinit.initPalPath, screen, true)
 
         -- show
         graphic.clear(screen, 0x000000)
