@@ -84,7 +84,7 @@ end
 function sysinit.getResolution(screen)
     local graphic = require("graphic")
     local mx, my = graphic.maxResolution(screen)
-    if mx > 80 or my > 25 then
+    if mx and mx > 80 or my > 25 then
         mx = 80
         my = 25
     end
@@ -120,24 +120,25 @@ function sysinit.initScreen(screen)
     
     pcall(component.invoke, screen, "turnOff")
     
-    -- resolution & depth
-    local mx, my = sysinit.getResolution(screen)
-    graphic.setDepth(screen, graphic.maxDepth(screen))
-    graphic.setResolution(screen, mx, my)
+    if graphic.isAvailable(screen) then
+        -- resolution & depth
+        local mx, my = sysinit.getResolution(screen)
+        graphic.setDepth(screen, graphic.maxDepth(screen))
+        graphic.setResolution(screen, mx, my)
 
-    -- clear
-    graphic.setPaletteColor(15, 0)
-    graphic.clear(screen, 15, true)
-    graphic.forceUpdate(screen)
+        -- clear
+        graphic.setPaletteColor(15, 0)
+        graphic.clear(screen, 15, true)
+        graphic.forceUpdate(screen)
 
-    -- palette
-    sysinit.applyPalette(sysinit.initPalPath, screen)
+        -- palette
+        sysinit.applyPalette(sysinit.initPalPath, screen)
 
-    -- show
-    graphic.clear(screen, 0x000000)
-    graphic.forceUpdate(screen)
-    pcall(component.invoke, screen, "turnOn")
-
+        -- show
+        graphic.clear(screen, 0x000000)
+        graphic.forceUpdate(screen)
+        pcall(component.invoke, screen, "turnOn")
+    end
 
     if not sysinit.initedScreens[screen] then
         event.listen("key_down", function(_, uuid, c1, c2, nickname)
@@ -156,6 +157,11 @@ function sysinit.initScreen(screen)
 end
 
 function sysinit.runShell(screen, customShell)
+    local graphic = require("graphic")
+    if not graphic.isAvailable(screen) then
+        return
+    end
+
     local thread = require("thread")
     local registry = require("registry")
     local apps = require("apps")
@@ -378,7 +384,7 @@ function sysinit.init(box, lscreen)
     event.hyperListen(function (eventType, cuuid, ctype)
         if ctype == "screen" then
             if eventType == "component_added" then
-                if not liked.recoveryMode and not sysinit.screenThreads[cuuid] and graphic.findGpuAddress(cuuid) then
+                if not liked.recoveryMode and not sysinit.screenThreads[cuuid] then
                     sysinit.runShell(cuuid)
                 end
             elseif eventType == "component_removed" then
