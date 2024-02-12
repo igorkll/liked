@@ -89,6 +89,7 @@ end
 
 local bootloaderSettingsPath = "/bootloader"
 local function bootTo(address, path, args)
+    tmpfs.makeDirectory(bootloaderSettingsPath)
     if address then writeFile(tmpfs, bootloaderSettingsPath .. "/bootaddr", address) end
     if path then writeFile(tmpfs, bootloaderSettingsPath .. "/bootfile", path) end
     if args then writeFile(tmpfs, bootloaderSettingsPath .. "/bootargs", serialize(args)) end
