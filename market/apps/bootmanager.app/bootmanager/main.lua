@@ -312,7 +312,7 @@ local function menu(label, strs, funcs, autoTimeout)
         if autoTimeout then
             if getAutotime() <= 0 then
                 redraw(0)
-                return 1
+                funcs[selected]()
             end
             redraw()
         end

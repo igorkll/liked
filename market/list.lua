@@ -601,11 +601,6 @@ list.libs = {
         vendor = "logic",
         version = "1"
     },
-    ["openbox"] = {
-        url = selfurlpart .. "/libs/openbox.lua",
-        vendor = "logic",
-        version = "3"
-    },
     ["rsa"] = {
         url = selfurlpart .. "/libs/rsa.lua",
         vendor = "logic",
@@ -654,6 +649,18 @@ list.libs = {
             {
                 url = selfurlpart .. "/libs/bitMapFonts/font.tbl",
                 path = "/data/lib/bitMapFonts/font.tbl"
+            }
+        }
+    },
+    ["openbox"] = {
+        url = selfurlpart .. "/libs/openbox/init.lua",
+        vendor = "logic",
+        version = "4",
+        path = "/data/lib/openbox/init.lua",
+        files = {
+            {
+                url = selfurlpart .. "/libs/openbox/box/box.lua",
+                path = "/data/lib/openbox/box/box.lua"
             }
         }
     }
