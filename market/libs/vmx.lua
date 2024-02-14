@@ -308,7 +308,34 @@ function vmx.create(eepromPath)
         end
     end
 
+    function vm.bootstrap()
+        local eeprom = componentlib.list("eeprom")()
+        if eeprom then
+            local code = componentlib.invoke(eeprom, "get")
+            if code and #code > 0 then
+                local bios, reason = load(code, "=bios", "t", vm.env)
+                if bios then
+                    return coroutine.create(bios)
+                end
+                error("failed loading bios: " .. reason, 2)
+            end
+        end
+        error("no bios found; install a configured EEPROM", 2)
+    end
+
     return vm
+end
+
+function vmx.loop(co)
+    while true do
+        local result = {coroutine.resume(co)}
+        
+        if not result[1] then
+            error(tostring(result[2]), 2)
+        elseif coroutine.status(co) == "dead" then
+            error("computer halted", 2)
+        end
+    end
 end
 
 vmx.unloadable = true
