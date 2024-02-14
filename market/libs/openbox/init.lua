@@ -56,6 +56,7 @@ function openbox.run(screen, program)
                     end
                 end
             end
+            return true
         end)}
     end, debug.traceback)}
 

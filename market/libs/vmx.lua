@@ -524,14 +524,17 @@ function vmx.create(eepromPath, diskPath)
         if result[1] then
             local co = coroutine.create(result[2])
             while true do
+                local noWait
                 if callback then
-                    callback()
+                    noWait = callback()
                 end
                 local result = {coroutine.resume(co)}
                 if not result[1] then
                     return table.unpack(result)
                 end
-                os.sleep(0)
+                if not noWait then
+                    os.sleep(0)
+                end
             end
         else
             return nil, tostring(result[2])
