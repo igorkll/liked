@@ -12,10 +12,7 @@ function vmx.createBaseEnv(vm)
     local sandbox
     sandbox = {
         _VERSION = _VERSION,
-
-        computer = vm.computerlib,
-        component = vm.componentlib,
-
+        
         checkArg = checkArg,
         assert = assert,
         error = error,
@@ -508,6 +505,7 @@ end
 
 function vmx.create(eepromPath, diskPath, address)
     local vm = {}
+    vm.env = vmx.createBaseEnv()
     vm.address = address or uuid.next()
     vm.deviceinfo = {}
     
@@ -541,10 +539,6 @@ function vmx.create(eepromPath, diskPath, address)
         if eeprom then
             local code = vm.componentlib.invoke(eeprom, "get")
             if code and #code > 0 then
-                vm.env = vmx.createBaseEnv(vm)
-                if vm.envHook then
-                    vm.env = vm.envHook(vm.env)
-                end
                 local bios, reason = load(code, "=bios", "t", vm.env)
                 if bios then
                     vm.internalComputer.clearQueue()
@@ -572,7 +566,7 @@ function vmx.create(eepromPath, diskPath, address)
                 else
                     if result[2] ~= nil then
                         if result[2] then
-                            return vm.loop(callback) --оптимизация lua уберет рекунсивный вызов, стек не разожреться
+                            return true, "reboot"
                         else
                             return true
                         end
@@ -587,16 +581,14 @@ function vmx.create(eepromPath, diskPath, address)
         end
     end
 
-    function vm.setEnvHook(hook)
-        vm.envHook = hook
-    end
-
     ---- base init
     local componentlib, internalComponent = vmx.createComponentLib()
+    vm.env.component = componentlib
     vm.componentlib = componentlib
     vm.internalComponent = internalComponent
 
     local computerlib, internalComputer = vmx.createComputerLib(vm)
+    vm.env.computer = computerlib
     vm.computerlib = computerlib
     vm.internalComputer = internalComputer
 
