@@ -8,10 +8,13 @@ local uuid = require("uuid")
 local thread = require("thread")
 local vmx = {}
 
-function vmx.createBaseEnv()
+function vmx.createBaseEnv(vm)
     local sandbox
     sandbox = {
         _VERSION = _VERSION,
+
+        computer = vm.computerlib,
+        component = vm.componentlib,
 
         checkArg = checkArg,
         assert = assert,
@@ -496,7 +499,6 @@ end
 
 function vmx.create(eepromPath, diskPath, address)
     local vm = {}
-    vm.env = vmx.createBaseEnv()
     vm.address = address or uuid.next()
     vm.deviceinfo = {}
     
@@ -530,10 +532,14 @@ function vmx.create(eepromPath, diskPath, address)
         if eeprom then
             local code = vm.componentlib.invoke(eeprom, "get")
             if code and #code > 0 then
+                vm.env = vmx.createBaseEnv(vm)
+                if vm.envHook then
+                    vm.env = vm.envHook(vm.env)
+                end
                 local bios, reason = load(code, "=bios", "t", vm.env)
                 if bios then
-                    vm.startTime = computer.uptime()
                     vm.internalComputer.clearQueue()
+                    vm.startTime = computer.uptime()
                     return bios
                 end
                 error("failed loading bios: " .. reason, 2)
@@ -572,14 +578,16 @@ function vmx.create(eepromPath, diskPath, address)
         end
     end
 
+    function vm.setEnvHook(hook)
+        vm.envHook = hook
+    end
+
     ---- base init
     local componentlib, internalComponent = vmx.createComponentLib()
-    vm.env.component = componentlib
     vm.componentlib = componentlib
     vm.internalComponent = internalComponent
 
     local computerlib, internalComputer = vmx.createComputerLib(vm)
-    vm.env.computer = computerlib
     vm.computerlib = computerlib
     vm.internalComputer = internalComputer
 
