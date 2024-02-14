@@ -28,33 +28,40 @@ function openbox.run(screen, program)
         vm.bindComponent(vmx.fromReal(screen))
     end
     
-    local result = {vm.loop(function ()
-        local eventData = {event.pull(0)}
-        if not screen then
-            vm.pushSignal(table.unpack(eventData))
-        else
-            local ctype
-            pcall(function ()
-                ctype = component.type(eventData[2])
-            end)
-            if ctype == "screen" then
-                if eventData[2] == screen then
-                    vm.pushSignal(table.unpack(eventData))
-                end
-            elseif ctype == "keyboard" then
-                if table.exists(lastinfo.keyboards[screen], eventData[2]) then
-                    vm.pushSignal(table.unpack(eventData))
-                end
-            else
+    local result
+    local result2 = {pcall(function()
+        result = {vm.loop(function ()
+            local eventData = {event.pull(0)}
+            if not screen then
                 vm.pushSignal(table.unpack(eventData))
+            else
+                local ctype
+                pcall(function ()
+                    ctype = component.type(eventData[2])
+                end)
+                if ctype == "screen" then
+                    if eventData[2] == screen then
+                        vm.pushSignal(table.unpack(eventData))
+                    end
+                elseif ctype == "keyboard" then
+                    if table.exists(lastinfo.keyboards[screen], eventData[2]) then
+                        vm.pushSignal(table.unpack(eventData))
+                    end
+                else
+                    vm.pushSignal(table.unpack(eventData))
+                end
             end
-        end
+        end)}
     end)}
 
     graphic.gpuPrivateList[gpuAddress] = nil
     graphic.findGpu(gpuAddress)
     scrsvTurnOn()
-    return assert(table.unpack(result))
+
+    assert(table.unpack(result2))
+    if result then
+        return assert(table.unpack(result))
+    end
 end
 
 openbox.unloadable = true
