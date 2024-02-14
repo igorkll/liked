@@ -97,11 +97,36 @@ function vmx.createBaseEnv()
 end
 
 function vmx.createComputerLib()
-    local computer, internalComputer
+    local computerlib, internalComputer
     internalComputer = {
-        events = {}
+        maxEventsCount = 256,
+        events = {},
+        pullSignal = function(time)
+            checkArg(1, time, "number", "nil")
+            local startTime = computer.uptime()
+            while true do
+                if #internalComputer.events > 0 then
+                    return table.unpack(table.remove(internalComputer.events))
+                elseif time and computer.uptime() - startTime > time then
+                    break
+                end
+            end
+        end,
+        pushSignal = function(name, ...)
+            if type(name) == "string" then
+            elseif type(name) == "number" then
+                name = tostring(name)
+            else
+                checkArg(1, name, "string")
+            end
+            if #internalComputer.events < internalComputer.maxEventsCount then
+                table.insert(internalComputer.events, {name, ...})
+                return true
+            end
+            return false
+        end
     }
-    computer = {
+    computerlib = {
         --architecture
         getArchitectures = function()
             return {_VERSION}
@@ -125,18 +150,22 @@ function vmx.createComputerLib()
             error("user must be online", 2)
         end,
 
+        --events
+        pushSignal = internalComputer.pushSignal,
+        pullSignal = internalComputer.pullSignal,
+
         --base
         beep = function(...)
             return spcall(computer.beep, ...)
         end,
 
     }
-    return computer, internalComputer
+    return computerlib, internalComputer
 end
 
 function vmx.createComponentLib()
-    local component, internalComponent
-    component = {
+    local componentlib, internalComponent
+    componentlib = {
 
     }
     internalComponent = {
@@ -144,7 +173,7 @@ function vmx.createComponentLib()
             
         end
     }
-    return component, internalComponent
+    return componentlib, internalComponent
 end
 
 function vmx.createVirtualEeprom(eepromPath, eepromCodePath, eepromLabelPath)
@@ -259,6 +288,11 @@ function vmx.create(eepromPath)
     if eepromPath then
         vm.eeprom = vmx.createVirtualEeprom(eepromPath)
         vm.internalComponent.bind(vm.eeprom)
+    end
+
+    function vm.bindComponent(tbl)
+        vm.internalComponent.bind(tbl)
+
     end
 
     return vm
