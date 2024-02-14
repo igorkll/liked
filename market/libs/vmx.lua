@@ -106,6 +106,7 @@ function vmx.createComputerLib(vm)
             local startTime = computer.uptime()
             while true do
                 if #internalComputer.events > 0 then
+                    coroutine.yield()
                     return table.unpack(table.remove(internalComputer.events))
                 elseif time and computer.uptime() - startTime > time then
                     break
@@ -493,6 +494,10 @@ function vmx.create(eepromPath, diskPath)
         end
     end
 
+    function vm.pushSignal(...)
+        vm.internalComputer.pushSignal(...)
+    end
+
     function vm.bindTmp(address)
         vm.tmpAddress = address
     end
@@ -513,10 +518,10 @@ function vmx.create(eepromPath, diskPath)
         error("no bios found; install a configured EEPROM", 2)
     end
 
-    function vm.loop()
+    function vm.loop(callback)
         local result = {pcall(vm.bootstrap)}
         if result[1] then
-            local result = {pcall(vmx.loop, result[2])}
+            local result = {pcall(vmx.loop, result[2], callback)}
             if not result[1] then
                 return nil, tostring(result[2])
             end
@@ -562,8 +567,9 @@ function vmx.fromVirtual(fakeProxy)
     return tbl
 end
 
-function vmx.loop(co)
+function vmx.loop(co, callback)
     while true do
+        if callback then callback() end
         local result = {coroutine.resume(co)}
         
         if not result[1] then
