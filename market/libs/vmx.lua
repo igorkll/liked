@@ -394,7 +394,16 @@ function vmx.createVirtualComputer(vm)
             return true
         end,
         stop = function()
-            
+            coroutine.yield(false)
+        end,
+        beep = function(...)
+            return spcall(computer.beep, ...)
+        end,
+        getDeviceInfo = function()
+            return table.deepclone(vm.deviceinfo)
+        end,
+        getProgramLocations = function()
+            return spcall(computer.getProgramLocations)
         end
     }
     return componentComputer
