@@ -158,7 +158,13 @@ function vmx.createComputerLib(vm)
 
         --base
         beep = function(...)
-            return spcall(computer.beep, ...)
+            return vm.componentlib.invoke(vm.address, "beep", ...)
+        end,
+        getDeviceInfo = function()
+            return vm.componentlib.invoke(vm.address, "getDeviceInfo")
+        end,
+        getProgramLocations = function()
+            return vm.componentlib.invoke(vm.address, "getProgramLocations")
         end,
         uptime = function()
             if vm.startTime then
@@ -362,6 +368,17 @@ function vmx.createComponentLib()
     return componentlib, internalComponent
 end
 
+function vmx.createVirtualComputer(vm)
+    local componentComputer
+    componentComputer = {
+        type = "computer",
+        address = vm.address,
+
+
+    }
+    return componentComputer
+end
+
 function vmx.createVirtualEeprom(eepromPath, eepromCodePath, eepromLabelPath)
     eepromCodePath = eepromCodePath or (eepromPath .. ".data")
     eepromLabelPath = eepromLabelPath or (eepromPath .. ".label")
@@ -459,28 +476,12 @@ function vmx.createVirtualEeprom(eepromPath, eepromCodePath, eepromLabelPath)
     return eeprom
 end
 
-function vmx.create(eepromPath, diskPath)
+function vmx.create(eepromPath, diskPath, address)
     local vm = {}
     vm.env = vmx.createBaseEnv()
-    vm.address = uuid.next()
-
-    local componentlib, internalComponent = vmx.createComponentLib()
-    vm.env.component = componentlib
-    vm.internalComponent = internalComponent
-
-    local computerlib, internalComputer = vmx.createComputerLib(vm)
-    vm.env.computer = computerlib
-    vm.internalComputer = internalComputer
-
-    if eepromPath then
-        vm.eeprom = vmx.createVirtualEeprom(eepromPath)
-        vm.internalComponent.bind(vm.eeprom)
-    end
-
-    if diskPath then
-        vm.internalComponent.bind(vmx.fromVirtual(fs.dump(diskPath)))
-    end
-
+    vm.address = address or uuid.next()
+    vm.deviceinfo = {}
+    
     function vm.bindComponent(tbl, noEvent)
         vm.internalComponent.bind(tbl)
         if not noEvent then
@@ -500,9 +501,10 @@ function vmx.create(eepromPath, diskPath)
     end
 
     function vm.bindTmp(address)
-        vm.tmpAddress = address
+        vm.tmpAddress = address or uuid.next()
     end
 
+    local componentlib
     function vm.bootstrap()
         local eeprom = componentlib.list("eeprom")()
         if eeprom then
@@ -541,6 +543,31 @@ function vmx.create(eepromPath, diskPath)
         end
     end
 
+    ---- base init
+    local internalComponent
+    componentlib, internalComponent = vmx.createComponentLib()
+    vm.env.component = componentlib
+    vm.componentlib = componentlib
+    vm.internalComponent = internalComponent
+
+    local componentComputer = vmx.createVirtualComputer(vm)
+    vm.bindComponent(componentComputer)
+
+    local computerlib, internalComputer = vmx.createComputerLib(vm)
+    vm.env.computer = computerlib
+    vm.computerlib = computerlib
+    vm.internalComputer = internalComputer
+    
+    ---- bind components
+    if eepromPath then
+        vm.eeprom = vmx.createVirtualEeprom(eepromPath)
+        vm.bindComponent(vm.eeprom)
+    end
+
+    if diskPath then
+        vm.bindComponent(vmx.fromVirtual(fs.dump(diskPath)))
+    end
+
     return vm
 end
 
@@ -550,7 +577,7 @@ function vmx.fromReal(address)
     tbl.type = component.type(address)
     tbl.direct = {}
     tbl.docs = {}
-    tbl.slot = component.slot(address) or -1
+    tbl.slot = component.slot(address)
 
     for name, direct in pairs(component.methods(address)) do
         tbl.direct[name] = direct
