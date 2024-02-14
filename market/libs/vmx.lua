@@ -243,10 +243,15 @@ end
 function vmx.create(eepromPath)
     local vm = {}
     vm.env = vmx.createBaseEnv()
-    
-    local component, internalComponent = vmx.createComponentLib()
-    vm.env.component = component
+
+    local componentlib, internalComponent = vmx.createComponentLib()
+    vm.env.component = componentlib
     vm.internalComponent = internalComponent
+
+    if eepromPath then
+        vm.eeprom = vmx.createVirtualEeprom(eepromPath)
+        vm.internalComponent.bind(vm.eeprom)
+    end
 
     return vm
 end
