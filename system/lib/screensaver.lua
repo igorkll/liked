@@ -50,5 +50,13 @@ function screensaver.waitStart(screen, path)
     end
 end
 
+function screensaver.noScreensaver(screen)
+    local oldScreenSaverState = screensaver.isEnabled(screen)
+    screensaver.setEnabled(screen, false)
+    return function ()
+        screensaver.setEnabled(screen, oldScreenSaverState)
+    end
+end
+
 screensaver.unloadable = true
 return screensaver

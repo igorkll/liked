@@ -522,16 +522,14 @@ function vmx.create(eepromPath, diskPath)
     function vm.loop(callback)
         local result = {pcall(vm.bootstrap)}
         if result[1] then
-            if callback then
-                callback()
-            end
             local co = coroutine.create(result[2])
             while true do
-                if coroutine.status(co) == "suspended" then
-                    local result = {coroutine.resume(co)}
-                    if not result[1] then
-                        return table.unpack(result)
-                    end
+                if callback then
+                    callback()
+                end
+                local result = {coroutine.resume(co)}
+                if not result[1] then
+                    return table.unpack(result)
                 end
                 os.sleep(0)
             end

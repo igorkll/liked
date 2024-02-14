@@ -6,6 +6,7 @@ local fs = require("filesystem")
 local component = require("component")
 local event = require("event")
 local lastinfo = require("lastinfo")
+local screensaver = require("screensaver")
 
 local boxPath = system.getResourcePath("box")
 local eepromPath = system.getResourcePath("eepromImage")
@@ -16,7 +17,9 @@ function openbox.run(screen, program)
     local vm = vmx.create(eepromPath, boxPath)
     fs.copy(program, paths.concat(boxPath, "autorun.lua"))
     
+    local scrsvTurnOn
     if gpuAddress then
+        scrsvTurnOn = screensaver.noScreensaver(screen)
         graphic.gpuPrivateList[gpuAddress] = true
         component.invoke(gpuAddress, "setActiveBuffer", 0)
         vm.bindComponent(vmx.fromReal(gpuAddress))
@@ -26,7 +29,7 @@ function openbox.run(screen, program)
     end
     
     local result = {vm.loop(function ()
-        local eventData = {event.pull()}
+        local eventData = {event.pull(0)}
         if not screen then
             vm.pushSignal(table.unpack(eventData))
         else
@@ -47,8 +50,10 @@ function openbox.run(screen, program)
             end
         end
     end)}
+
     graphic.gpuPrivateList[gpuAddress] = nil
     graphic.findGpu(gpuAddress)
+    scrsvTurnOn()
     return assert(table.unpack(result))
 end
 
