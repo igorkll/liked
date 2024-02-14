@@ -41,6 +41,12 @@ function vmx.createBaseEnv()
         bit32 = table.deepclone(bit32),
         debug = table.deepclone(debug),
 
+        os = {
+            clock = os.clock,
+            date = os.date,
+            time = os.time
+        },
+
         coroutine = {
             create = coroutine.create,
             resume = function(co, ...) -- custom resume part for bubbling sysyields
@@ -90,7 +96,7 @@ function vmx.createBaseEnv()
     return sandbox
 end
 
-function vmx.createComputerLib()
+function vmx.createComputerLib(vm)
     local computerlib, internalComputer
     internalComputer = {
         maxEventsCount = 256,
@@ -152,6 +158,18 @@ function vmx.createComputerLib()
         beep = function(...)
             return spcall(computer.beep, ...)
         end,
+        uptime = function()
+            if vm.startTime then
+                return computer.uptime() - vm.startTime
+            end
+            return computer.uptime()
+        end,
+        address = function()
+            return vm.address
+        end,
+        tmpAddress = function()
+            return vm.tmpAddress
+        end
 
     }
     return computerlib, internalComputer
@@ -331,7 +349,7 @@ function vmx.createComponentLib()
             setmetatable(proxy, internalComponent.componentProxy)
             internalComponent.proxyCache[address] = proxy
             return proxy
-        end,
+        end
     }
     return componentlib, internalComponent
 end
@@ -347,7 +365,7 @@ function vmx.createVirtualEeprom(eepromPath, eepromCodePath, eepromLabelPath)
     local eeprom
     eeprom = {
         type = "eeprom",
-        address = "09fa0bce-5c9d-4193-9102-752917eddbc5",
+        address = uuid.next(),
 
         -- params
         getSize = function()
@@ -436,12 +454,13 @@ end
 function vmx.create(eepromPath, diskPath)
     local vm = {}
     vm.env = vmx.createBaseEnv()
+    vm.address = uuid.next()
 
     local componentlib, internalComponent = vmx.createComponentLib()
     vm.env.component = componentlib
     vm.internalComponent = internalComponent
 
-    local computerlib, internalComputer = vmx.createComputerLib()
+    local computerlib, internalComputer = vmx.createComputerLib(vm)
     vm.env.computer = computerlib
     vm.internalComputer = internalComputer
 
@@ -468,7 +487,12 @@ function vmx.create(eepromPath, diskPath)
         end
     end
 
+    function vm.bindTmp(address)
+        vm.tmpAddress = address
+    end
+
     function vm.bootstrap()
+        vm.startTime = computer.uptime()
         local eeprom = componentlib.list("eeprom")()
         if eeprom then
             local code = componentlib.invoke(eeprom, "get")
