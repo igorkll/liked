@@ -3,12 +3,13 @@ local computer = require("computer")
 local unicode = require("unicode")
 local natives = require("natives")
 local fs = require("filesystem")
+local text = require("text")
 local vmx = {}
 
 local function spcall(...)
     local result = table.pack(pcall(...))
     if not result[1] then
-        error(tostring(result[2]), 0)
+        error(tostring(result[2]), 3)
     else
         return table.unpack(result, 2, result.n)
     end
@@ -168,14 +169,56 @@ function vmx.createComponentLib()
     internalComponent = {
         components = {},
         bind = function(tbl)
-            table.insert(internalComponent.components, tbl)
+            internalComponent.components[tbl.address] = tbl
         end,
         unbind = function(tbl)
-            table.clear(internalComponent.components, tbl)
+            internalComponent.components[tbl.address] = nil
         end
     }
     componentlib = {
+        doc = function(address, method)
+            checkArg(1, address, "string")
+            checkArg(2, method, "string")
+            local comp = internalComponent.components[address]
+            if not comp then
+                error("no such component", 2)
+            end
+            if comp.docs and comp.docs[method] then
+                return tostring(comp.docs[method])
+            end
+        end,
+        invoke = function(address, method, ...)
+            checkArg(1, address, "string")
+            checkArg(2, method, "string")
 
+            local comp = internalComponent.components[address]
+            if not comp then
+                error("no such component", 2)
+            end
+
+            if type(comp[method]) ~= "function" then
+                error("no such method", 2)
+            end
+
+            return spcall(comp[method], ...)
+        end,
+        list = function(filter, exact)
+            checkArg(1, filter, "string", "nil")
+            local list = {}
+            for address, tbl in pairs(internalComponent.components) do
+                if not filter or tbl.type == filter or (not exact and tbl.type:find(text.escapePattern(filter))) then
+                    list[address] = tbl.type
+                end
+            end
+
+            local key = nil
+            return setmetatable(list, {__call=function()
+                key = next(list, key)
+                if key then
+                    return key, list[key]
+                end
+            end})
+        end
     }
     return componentlib, internalComponent
 end
@@ -343,6 +386,7 @@ function vmx.getComponent(address)
     tbl.address = address
     tbl.type = component.type(address)
     tbl.direct = {}
+    tbl.docs = {}
 
     for name, direct in pairs(component.methods(address)) do
         tbl.direct[name] = direct
@@ -350,6 +394,7 @@ function vmx.getComponent(address)
 
     for key, value in pairs(component.proxy(address)) do
         tbl[key] = value
+        tbl.docs[key] = tostring(value)
     end
 
     return tbl

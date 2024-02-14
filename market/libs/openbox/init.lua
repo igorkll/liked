@@ -15,8 +15,9 @@ function openbox.run(screen, program)
     graphic.gpuPrivateList[gpuAddress] = true
     vm.bindComponent(vmx.getComponent(gpuAddress))
     vm.bindComponent(vmx.getComponent(screen))
-    vm.loop()
+    local result = {vm.loop()}
     graphic.gpuPrivateList[gpuAddress] = nil
+    return assert(table.unpack(result))
 end
 
 openbox.unloadable = true
