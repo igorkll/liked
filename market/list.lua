@@ -616,6 +616,11 @@ list.libs = {
         vendor = "logic",
         version = "2"
     },
+    ["vmx"] = {
+        url = selfurlpart .. "/libs/vmx.lua",
+        vendor = "logic",
+        version = "1"
+    },
     ["draw"] = {
         url = selfurlpart .. "/libs/draw.lua",
         vendor = "logic",
@@ -657,6 +662,7 @@ list.libs = {
         vendor = "logic",
         version = "4",
         path = "/data/lib/openbox/init.lua",
+        libs = {"vmx"},
         files = (function ()
             local boxlist = {
                 "box.lua",
@@ -700,11 +706,16 @@ list.libs = {
             }
             local list = {}
 
+            table.insert(list, {
+                url = selfurlpart .. "/libs/openbox/eeprom.lua",
+                path = "/data/lib/openbox/eeprom.lua"
+            })
+
             for i, lst in ipairs(boxlist) do
-                return {
+                table.insert(list, {
                     url = selfurlpart .. "/libs/openbox/box/" .. lst,
                     path = "/data/lib/openbox/box/" .. lst
-                }
+                })
             end
 
             return list
