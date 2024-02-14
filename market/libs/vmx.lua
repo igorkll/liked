@@ -14,7 +14,7 @@ local function spcall(...)
     end
 end
 
-function vmx.createBaseEnv(extensions)
+function vmx.createBaseEnv()
     local sandbox
     sandbox = {
         _VERSION = _VERSION,
@@ -93,11 +93,6 @@ function vmx.createBaseEnv(extensions)
     end
 
     sandbox._G = sandbox
-    if extensions then
-        for k, v in pairs(extensions) do
-            sandbox[k] = v
-        end
-    end
     return sandbox
 end
 
@@ -138,7 +133,21 @@ function vmx.createComputerLib()
     return computer
 end
 
+function vmx.createComponentLib()
+    local component, internalComponent
+    component = {
+
+    }
+    internalComponent = {
+
+    }
+    return component, internalComponent
+end
+
 function vmx.createVirtualEeprom(eepromPath, eepromCodePath, eepromLabelPath)
+    eepromCodePath = eepromCodePath or (eepromPath .. ".data")
+    eepromLabelPath = eepromLabelPath or (eepromPath .. ".label")
+
     local maxCodeSize = 1024 * 4
     local maxDataSize = 256
     local maxLabelSize = 24
@@ -231,10 +240,13 @@ function vmx.createVirtualEeprom(eepromPath, eepromCodePath, eepromLabelPath)
     return eeprom
 end
 
-function vmx.create(eepromPath, extensions)
+function vmx.create(eepromPath)
     local vm = {}
-    vm.env = vmx.createBaseEnv(extensions)
-
+    vm.env = vmx.createBaseEnv()
+    
+    local component, internalComponent = vmx.createComponentLib()
+    vm.env.component = component
+    vm.internalComponent = internalComponent
 
     return vm
 end
