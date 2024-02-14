@@ -6,15 +6,6 @@ local fs = require("filesystem")
 local text = require("text")
 local vmx = {}
 
-local function spcall(...)
-    local result = table.pack(pcall(...))
-    if not result[1] then
-        error(tostring(result[2]), 3)
-    else
-        return table.unpack(result, 2, result.n)
-    end
-end
-
 function vmx.createBaseEnv()
     local sandbox
     sandbox = {
