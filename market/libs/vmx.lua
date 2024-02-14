@@ -106,7 +106,7 @@ function vmx.createComputerLib(vm)
             checkArg(1, time, "number", "nil")
             local startTime = computer.uptime()
             while true do
-                os.sleep(0)
+                coroutine.yield()
                 if #internalComputer.events > 0 then
                     return table.unpack(table.remove(internalComputer.events))
                 elseif time and computer.uptime() - startTime > time then
@@ -522,12 +522,19 @@ function vmx.create(eepromPath, diskPath)
     function vm.loop(callback)
         local result = {pcall(vm.bootstrap)}
         if result[1] then
-            local th = thread.create(result[2])
-            th:resume()
-            while th:status() ~= "dead" do
+            if callback then
+                callback()
+            end
+            local co = coroutine.create(result[2])
+            while true do
+                if coroutine.status(co) == "suspended" then
+                    local result = {coroutine.resume(co)}
+                    if not result[1] then
+                        return table.unpack(result)
+                    end
+                end
                 os.sleep(0)
             end
-            return thread.decode(th)
         else
             return nil, tostring(result[2])
         end
