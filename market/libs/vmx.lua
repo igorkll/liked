@@ -5,6 +5,7 @@ local natives = require("natives")
 local fs = require("filesystem")
 local text = require("text")
 local uuid = require("uuid")
+local thread = require("thread")
 local vmx = {}
 
 function vmx.createBaseEnv()
@@ -105,8 +106,8 @@ function vmx.createComputerLib(vm)
             checkArg(1, time, "number", "nil")
             local startTime = computer.uptime()
             while true do
+                os.sleep(0)
                 if #internalComputer.events > 0 then
-                    coroutine.yield()
                     return table.unpack(table.remove(internalComputer.events))
                 elseif time and computer.uptime() - startTime > time then
                     break
@@ -503,14 +504,14 @@ function vmx.create(eepromPath, diskPath)
     end
 
     function vm.bootstrap()
-        vm.startTime = computer.uptime()
         local eeprom = componentlib.list("eeprom")()
         if eeprom then
             local code = componentlib.invoke(eeprom, "get")
             if code and #code > 0 then
                 local bios, reason = load(code, "=bios", "t", vm.env)
                 if bios then
-                    return coroutine.create(bios)
+                    vm.startTime = computer.uptime()
+                    return bios
                 end
                 error("failed loading bios: " .. reason, 2)
             end
@@ -521,10 +522,12 @@ function vmx.create(eepromPath, diskPath)
     function vm.loop(callback)
         local result = {pcall(vm.bootstrap)}
         if result[1] then
-            local result = {pcall(vmx.loop, result[2], callback)}
-            if not result[1] then
-                return nil, tostring(result[2])
+            local th = thread.create(result[2])
+            th:resume()
+            while th:status() ~= "dead" do
+                os.sleep(0)
             end
+            return thread.decode(th)
         else
             return nil, tostring(result[2])
         end
@@ -565,19 +568,6 @@ function vmx.fromVirtual(fakeProxy)
     tbl.slot = fakeProxy.slot or -1
     tbl.virtual = nil
     return tbl
-end
-
-function vmx.loop(co, callback)
-    while true do
-        if callback then callback() end
-        local result = {coroutine.resume(co)}
-        
-        if not result[1] then
-            error(tostring(result[2]), 2)
-        elseif coroutine.status(co) == "dead" then
-            error("computer halted", 2)
-        end
-    end
 end
 
 vmx.unloadable = true
