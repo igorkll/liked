@@ -657,12 +657,58 @@ list.libs = {
         vendor = "logic",
         version = "4",
         path = "/data/lib/openbox/init.lua",
-        files = {
-            {
-                url = selfurlpart .. "/libs/openbox/box/box.lua",
-                path = "/data/lib/openbox/box/box.lua"
+        files = (function ()
+            local boxlist = {
+                "box.lua",
+                "boot/00_base.lua",
+                "boot/01_process.lua",
+                "boot/02_os.lua",
+                "boot/03_io.lua",
+                "boot/04_component.lua",
+                "boot/90_filesystem.lua",
+                "boot/91_gpu.lua",
+                "boot/92_keyboard.lua",
+                "boot/93_term.lua",
+                "boot/94_shell.lua",
+                "lib/bit32.lua",
+                "lib/buffer.lua",
+                "lib/colors.lua",
+                "lib/event.lua",
+                "lib/filesystem.lua",
+                "lib/internet.lua",
+                "lib/io.lua",
+                "lib/keyboard.lua",
+                "lib/note.lua",
+                "lib/package.lua",
+                "lib/pipe.lua",
+                "lib/process.lua",
+                "lib/serialization.lua",
+                "lib/sh.lua",
+                "lib/shell.lua",
+                "lib/sides.lua",
+                "lib/term.lua",
+                "lib/text.lua",
+                "lib/thread.lua",
+                "lib/transforms.lua",
+                "lib/tty.lua",
+                "lib/uuid.lua",
+                "lib/vt100.lua",
+                "bin/edit.lua",
+                "bin/pastebin.lua",
+                "bin/sh.lua",
+                "bin/wget.lua"
             }
-        }
+            local list = {}
+
+            for i, lst in ipairs(boxlist) do
+                return {
+                    url = selfurlpart .. "/libs/openbox/box/" .. lst,
+                    path = "/data/lib/openbox/box/" .. lst
+                }
+            end
+
+            return list
+        end)()
     }
 }
 
