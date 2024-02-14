@@ -28,6 +28,7 @@ function vmx.createBaseEnv()
         pairs = pairs,
         ipairs = ipairs,
         next = next,
+        pcall = pcall,
         xpcall = xpcall,
         rawequal = rawequal,
         rawget = rawget,
