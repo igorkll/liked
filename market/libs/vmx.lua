@@ -2,9 +2,19 @@ local component = require("component")
 local computer = require("computer")
 local unicode = require("unicode")
 local natives = require("natives")
+local fs = require("filesystem")
 local vmx = {}
 
-function vmx.createEnv(extensions)
+local function spcall(...)
+    local result = table.pack(pcall(...))
+    if not result[1] then
+        error(tostring(result[2]), 0)
+    else
+        return table.unpack(result, 2, result.n)
+    end
+end
+
+function vmx.createBaseEnv(extensions)
     local sandbox
     sandbox = {
         _VERSION = _VERSION,
@@ -74,10 +84,6 @@ function vmx.createEnv(extensions)
                 return coroutine.yield(nil, ...)
             end,
             isyieldable = coroutine.isyieldable
-        },
-
-        computer = {
-
         }
     }
 
@@ -93,6 +99,128 @@ function vmx.createEnv(extensions)
         end
     end
     return sandbox
+end
+
+function vmx.createComputerLib()
+    local events = {}
+
+    local computer
+    computer = {
+        --architecture
+        getArchitectures = function()
+            return {_VERSION}
+        end,
+        getArchitecture = function()
+            return _VERSION
+        end,
+        setArchitecture = function(architecture)
+            if architecture ~= _VERSION then
+                error("unknown architecture", 2)
+            end
+        end,
+
+        --users
+        users = function()
+        end,
+        removeUser = function()
+            return false
+        end,
+        addUser = function(name)
+            error("user must be online", 2)
+        end,
+
+        --base
+        beep = function(...)
+            return spcall(computer.beep, ...)
+        end,
+
+    }
+    return computer
+end
+
+function vmx.createVirtualEeprom(eepromPath, eepromCodePath, eepromLabelPath)
+    local maxCodeSize = 1024 * 4
+    local maxDataSize = 256
+    local maxLabelSize = 16
+
+    local eeprom
+    eeprom = {
+        type = "eeprom",
+        address = "09fa0bce-5c9d-4193-9102-752917eddbc5",
+
+        -- params
+        getSize = function()
+            return maxCodeSize
+        end,
+        getDataSize = function()
+            return maxDataSize
+        end,
+
+        -- code
+        get = function()
+            local data = fs.readFile(eepromPath)
+            if data then
+                return data
+            else
+                return ""
+            end
+        end,
+        set = function(str)
+            if str then
+                checkArg(1, str, "string")
+                if #str > maxCodeSize then
+                    error("not enough space", 2)
+                end
+                fs.writeFile(eepromPath, str)
+            else
+                fs.writeFile(eepromPath, "")
+            end
+        end,
+
+        -- data
+        getData = function()
+            local data = fs.readFile(eepromCodePath)
+            if data then
+                return data
+            else
+                return ""
+            end
+        end,
+        setData = function(str)
+            if str then
+                checkArg(1, str, "string")
+                if #str > maxDataSize then
+                    error("not enough space", 2)
+                end
+                fs.writeFile(eepromCodePath, str)
+            else
+                fs.writeFile(eepromCodePath, "")
+            end
+        end,
+
+        -- label
+        getLabel = function()
+            local data = fs.readFile(eepromCodePath)
+            if data then
+                return data
+            else
+                return ""
+            end 
+        end
+
+        getChecksum = function()
+            return "00000000"
+        end
+    }
+    return eeprom
+end
+
+function vmx.create(eepromPath, extensions)
+    local vm = {}
+    vm.env = vmx.createBaseEnv(extensions)
+
+
+    return vm
 end
 
 vmx.unloadable = true
