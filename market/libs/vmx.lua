@@ -165,13 +165,17 @@ end
 
 function vmx.createComponentLib()
     local componentlib, internalComponent
+    internalComponent = {
+        components = {},
+        bind = function(tbl)
+            table.insert(internalComponent.components, tbl)
+        end,
+        unbind = function(tbl)
+            table.clear(internalComponent.components, tbl)
+        end
+    }
     componentlib = {
 
-    }
-    internalComponent = {
-        bind = function(tbl)
-            
-        end
     }
     return componentlib, internalComponent
 end
@@ -290,9 +294,18 @@ function vmx.create(eepromPath)
         vm.internalComponent.bind(vm.eeprom)
     end
 
-    function vm.bindComponent(tbl)
+    function vm.bindComponent(tbl, noEvent)
         vm.internalComponent.bind(tbl)
+        if not noEvent then
+            vm.internalComputer.pushSignal("component_added", tbl.address, tbl.type)
+        end
+    end
 
+    function vm.unbindComponent(tbl, noEvent)
+        vm.internalComponent.unbind(tbl)
+        if not noEvent then
+            vm.internalComputer.pushSignal("component_removed", tbl.address, tbl.type)
+        end
     end
 
     return vm
