@@ -97,9 +97,10 @@ function vmx.createBaseEnv()
 end
 
 function vmx.createComputerLib()
-    local events = {}
-
-    local computer
+    local computer, internalComputer
+    internalComputer = {
+        events = {}
+    }
     computer = {
         --architecture
         getArchitectures = function()
@@ -130,7 +131,7 @@ function vmx.createComputerLib()
         end,
 
     }
-    return computer
+    return computer, internalComputer
 end
 
 function vmx.createComponentLib()
@@ -139,7 +140,9 @@ function vmx.createComponentLib()
 
     }
     internalComponent = {
-
+        bind = function(tbl)
+            
+        end
     }
     return component, internalComponent
 end
@@ -235,6 +238,7 @@ function vmx.createVirtualEeprom(eepromPath, eepromCodePath, eepromLabelPath)
             if checksum ~= eeprom.getChecksum() then
                 return nil, "incorrect checksum"
             end
+            return true
         end
     }
     return eeprom
@@ -247,6 +251,10 @@ function vmx.create(eepromPath)
     local componentlib, internalComponent = vmx.createComponentLib()
     vm.env.component = componentlib
     vm.internalComponent = internalComponent
+
+    local computerlib, internalComputer = vmx.createComputerLib()
+    vm.env.computer = computerlib
+    vm.internalComputer = internalComputer
 
     if eepromPath then
         vm.eeprom = vmx.createVirtualEeprom(eepromPath)
