@@ -563,7 +563,7 @@ function vmx.create(eepromPath, diskPath, address)
                 else
                     if result[2] ~= nil then
                         if result[2] then
-                            
+                            return vm.loop(callback) --оптимизация lua уберет рекунсивный вызов, стек не разожреться
                         else
                             return true
                         end
