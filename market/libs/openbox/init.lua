@@ -26,29 +26,34 @@ function openbox.run(screen, program)
     end
     if screen then
         vm.bindComponent(vmx.fromReal(screen))
+        for _, keyboard in ipairs(lastinfo.keyboards[screen]) do
+            vm.bindComponent(vmx.fromReal(keyboard))
+        end
     end
     
     local result
     local result2 = {xpcall(function()
         result = {vm.loop(function ()
             local eventData = {event.pull(0)}
-            if not screen then
-                vm.pushSignal(table.unpack(eventData))
-            else
-                local ctype
-                pcall(function ()
-                    ctype = component.type(eventData[2])
-                end)
-                if ctype == "screen" then
-                    if eventData[2] == screen then
-                        vm.pushSignal(table.unpack(eventData))
-                    end
-                elseif ctype == "keyboard" then
-                    if table.exists(lastinfo.keyboards[screen], eventData[2]) then
-                        vm.pushSignal(table.unpack(eventData))
-                    end
-                else
+            if #eventData > 0 then
+                if not screen then
                     vm.pushSignal(table.unpack(eventData))
+                else
+                    local ctype
+                    pcall(function ()
+                        ctype = component.type(eventData[2])
+                    end)
+                    if ctype == "screen" then
+                        if eventData[2] == screen then
+                            vm.pushSignal(table.unpack(eventData))
+                        end
+                    elseif ctype == "keyboard" then
+                        if table.exists(lastinfo.keyboards[screen], eventData[2]) then
+                            vm.pushSignal(table.unpack(eventData))
+                        end
+                    else
+                        vm.pushSignal(table.unpack(eventData))
+                    end
                 end
             end
         end)}
