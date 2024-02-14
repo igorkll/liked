@@ -45,6 +45,7 @@ local uptime = computer.uptime
 local pull = computer.pullSignal
 local last_sleep = uptime()
 local function status(msg)
+  --[[
   if gpu then
     gpu.set(1, y, msg)
     if y == h then
@@ -64,6 +65,7 @@ local function status(msg)
     end
     last_sleep = uptime()
   end
+  ]]
 end
 
 status("Booting " .. _OSVERSION .. "...")

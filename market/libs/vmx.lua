@@ -169,8 +169,14 @@ function vmx.createComputerLib(vm)
         end,
         tmpAddress = function()
             return vm.tmpAddress
-        end
+        end,
 
+        freeMemory = function()
+            return computer.freeMemory()
+        end,
+        totalMemory = function()
+            return computer.totalMemory()
+        end
     }
     return computerlib, internalComputer
 end
