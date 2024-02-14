@@ -157,6 +157,15 @@ function vmx.createComputerLib()
     return computerlib, internalComputer
 end
 
+local function isFunc(obj)
+    if type(obj) == "function" then
+        return true
+    else
+        local mt = getmetatable(obj)
+        return not not (mt and mt.__call)
+    end
+end
+
 function vmx.createComponentLib()
     local componentlib, internalComponent
     internalComponent = {
@@ -164,23 +173,23 @@ function vmx.createComponentLib()
         proxyCache = setmetatable({}, {__mode = "v"}),
         componentCallback = {
             __call = function(self, ...)
-                return libcomponent.invoke(self.address, self.name, ...)
+                return componentlib.invoke(self.address, self.name, ...)
             end,
             __tostring = function(self)
-                return libcomponent.doc(self.address, self.name) or "function"
+                return componentlib.doc(self.address, self.name) or "function"
             end
         },
         componentProxy = {
             __index = function(self, key)
               if self.fields[key] and self.fields[key].getter then
-                return libcomponent.invoke(self.address, key)
+                return componentlib.invoke(self.address, key)
               else
                 rawget(self, key)
               end
             end,
             __newindex = function(self, key, value)
               if self.fields[key] and self.fields[key].setter then
-                return libcomponent.invoke(self.address, key, value)
+                return componentlib.invoke(self.address, key, value)
               elseif self.fields[key] and self.fields[key].getter then
                 error("field is read-only")
               else
@@ -230,7 +239,7 @@ function vmx.createComponentLib()
                 error("no such component", 2)
             end
 
-            if type(comp[method]) ~= "function" and type(comp[method]) ~= "table" then
+            if not isFunc(comp[method]) then
                 error("no such method", 2)
             end
 
@@ -262,7 +271,7 @@ function vmx.createComponentLib()
 
             local list = {}
             for name, func in pairs(comp) do
-                if type(func) == "function" then
+                if isFunc(func) then
                     if comp.direct and comp.direct[name] then
                         list[name] = comp.direct[name]
                     else
@@ -302,19 +311,19 @@ function vmx.createComponentLib()
             checkArg(1, address, "string")
             local type, reason = spcall(componentlib.type, address)
             if not type then
-              return nil, reason
+                return nil, reason
             end
             local slot, reason = spcall(componentlib.slot, address)
             if not slot then
-              return nil, reason
+                return nil, reason
             end
             if internalComponent.proxyCache[address] then
-              return internalComponent.proxyCache[address]
+                return internalComponent.proxyCache[address]
             end
             local proxy = {address = address, type = type, slot = slot, fields = {}}
             local methods, reason = spcall(componentlib.methods, address)
             if not methods then
-              return nil, reason
+                return nil, reason
             end
             for method in pairs(methods) do
                 proxy[method] = setmetatable({address=address,name=method}, internalComponent.componentCallback)
