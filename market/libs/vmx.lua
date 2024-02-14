@@ -126,6 +126,9 @@ function vmx.createComputerLib(vm)
                 return true
             end
             return false
+        end,
+        clearQueue = function()
+            internalComputer.events = {}
         end
     }
     computerlib = {
@@ -184,7 +187,14 @@ function vmx.createComputerLib(vm)
         end,
         totalMemory = function()
             return computer.totalMemory()
-        end
+        end,
+
+        -- power
+        shutdown = function(reboot)
+            coroutine.yield(not not reboot)
+        end,
+        energy = computer.energy,
+        maxEnergy = computer.maxEnergy,
     }
     return computerlib, internalComputer
 end
@@ -374,7 +384,15 @@ function vmx.createVirtualComputer(vm)
         type = "computer",
         address = vm.address,
 
-
+        start = function()
+            return false
+        end,
+        isRunning = function()
+            return true
+        end,
+        stop = function()
+            
+        end
     }
     return componentComputer
 end
@@ -501,18 +519,21 @@ function vmx.create(eepromPath, diskPath, address)
     end
 
     function vm.bindTmp(address)
+        if vm.tmpAddress then return false end
         vm.tmpAddress = address or uuid.next()
+
+        return true
     end
 
-    local componentlib
     function vm.bootstrap()
-        local eeprom = componentlib.list("eeprom")()
+        local eeprom = vm.componentlib.list("eeprom")()
         if eeprom then
-            local code = componentlib.invoke(eeprom, "get")
+            local code = vm.componentlib.invoke(eeprom, "get")
             if code and #code > 0 then
                 local bios, reason = load(code, "=bios", "t", vm.env)
                 if bios then
                     vm.startTime = computer.uptime()
+                    vm.internalComputer.clearQueue()
                     return bios
                 end
                 error("failed loading bios: " .. reason, 2)
@@ -533,6 +554,14 @@ function vmx.create(eepromPath, diskPath, address)
                 local result = {coroutine.resume(co)}
                 if not result[1] then
                     return table.unpack(result)
+                else
+                    if result[2] ~= nil then
+                        if result[2] then
+                            
+                        else
+                            return true
+                        end
+                    end
                 end
                 if not noWait then
                     os.sleep(0)
@@ -544,19 +573,18 @@ function vmx.create(eepromPath, diskPath, address)
     end
 
     ---- base init
-    local internalComponent
-    componentlib, internalComponent = vmx.createComponentLib()
+    local componentlib, internalComponent = vmx.createComponentLib()
     vm.env.component = componentlib
     vm.componentlib = componentlib
     vm.internalComponent = internalComponent
-
-    local componentComputer = vmx.createVirtualComputer(vm)
-    vm.bindComponent(componentComputer)
 
     local computerlib, internalComputer = vmx.createComputerLib(vm)
     vm.env.computer = computerlib
     vm.computerlib = computerlib
     vm.internalComputer = internalComputer
+
+    local componentComputer = vmx.createVirtualComputer(vm)
+    vm.bindComponent(componentComputer)
     
     ---- bind components
     if eepromPath then
