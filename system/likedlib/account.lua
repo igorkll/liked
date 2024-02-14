@@ -401,12 +401,8 @@ function account.getStorage()
 
     ------------------------------------
 
-    proxy.type = "filesystem"
-    proxy.address = uuid.next()
-    proxy.virtual = true
-    proxy.cloud = true
-    endproxy = proxy
-    return proxy
+    endproxy = fs.mask(proxy)
+    return endproxy
 end
 
 function account.loginWindow(screen)

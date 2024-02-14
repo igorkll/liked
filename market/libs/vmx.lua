@@ -4,6 +4,7 @@ local unicode = require("unicode")
 local natives = require("natives")
 local fs = require("filesystem")
 local text = require("text")
+local uuid = require("uuid")
 local vmx = {}
 
 function vmx.createBaseEnv()
@@ -423,7 +424,7 @@ function vmx.createVirtualEeprom(eepromPath, eepromCodePath, eepromLabelPath)
     return eeprom
 end
 
-function vmx.create(eepromPath)
+function vmx.create(eepromPath, diskPath)
     local vm = {}
     vm.env = vmx.createBaseEnv()
 
@@ -438,6 +439,11 @@ function vmx.create(eepromPath)
     if eepromPath then
         vm.eeprom = vmx.createVirtualEeprom(eepromPath)
         vm.internalComponent.bind(vm.eeprom)
+    end
+
+    if diskPath then
+        vm.internalComponent.bind(vm.eeprom)
+        fs.dump(diskPath)
     end
 
     function vm.bindComponent(tbl, noEvent)
@@ -484,12 +490,13 @@ function vmx.create(eepromPath)
     return vm
 end
 
-function vmx.getComponent(address)
+function vmx.fromReal(address)
     local tbl = {}
     tbl.address = address
     tbl.type = component.type(address)
     tbl.direct = {}
     tbl.docs = {}
+    tbl.slot = component.slot(address) or -1
 
     for name, direct in pairs(component.methods(address)) do
         tbl.direct[name] = direct
@@ -500,6 +507,19 @@ function vmx.getComponent(address)
         tbl.docs[key] = tostring(value)
     end
 
+    return tbl
+end
+
+function vmx.fromVirtual(fakeProxy)
+    local tbl = {}
+    tbl.docs = {}
+    for key, value in pairs(fakeProxy) do
+        tbl[key] = value
+        tbl.docs[key] = tostring(value)
+    end
+    tbl.address = fakeProxy.address or uuid.next()
+    tbl.type = fakeProxy.type
+    tbl.slot = fakeProxy.slot or -1
     return tbl
 end
 
