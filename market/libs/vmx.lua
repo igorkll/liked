@@ -230,7 +230,7 @@ function vmx.createComponentLib()
                 error("no such component", 2)
             end
 
-            if type(comp[method]) ~= "function" then
+            if type(comp[method]) ~= "function" and type(comp[method]) ~= "table" then
                 error("no such method", 2)
             end
 

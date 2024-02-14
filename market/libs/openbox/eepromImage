@@ -23,7 +23,7 @@ do
     local screen = component.list("screen")()
     local gpu = component.list("gpu")()
     if gpu and screen then
-      boot_invoke(gpu, "bind", screen)
+      assert(boot_invoke(gpu, "bind", screen))
     end
   end
   local function tryLoadFrom(address)
