@@ -323,7 +323,36 @@ function vmx.create(eepromPath)
         error("no bios found; install a configured EEPROM", 2)
     end
 
+    function vm.loop()
+        local result = {pcall(vm.bootstrap)}
+        if result[1] then
+            local result = {pcall(vmx.loop, result[2])}
+            if not result[1] then
+                return nil, tostring(result[2])
+            end
+        else
+            return nil, tostring(result[2])
+        end
+    end
+
     return vm
+end
+
+function vmx.getComponent(address)
+    local tbl = {}
+    tbl.address = address
+    tbl.type = component.type(address)
+    tbl.direct = {}
+
+    for name, direct in pairs(component.methods(address)) do
+        tbl.direct[name] = direct
+    end
+
+    for key, value in pairs(component.proxy(address)) do
+        tbl[key] = value
+    end
+
+    return tbl
 end
 
 function vmx.loop(co)
