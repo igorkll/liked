@@ -168,6 +168,47 @@ function vmx.createComponentLib()
     local componentlib, internalComponent
     internalComponent = {
         components = {},
+        proxyCache = setmetatable({}, {__mode = "v"}),
+        componentCallback = {
+            __call = function(self, ...)
+                return libcomponent.invoke(self.address, self.name, ...)
+            end,
+            __tostring = function(self)
+                return libcomponent.doc(self.address, self.name) or "function"
+            end
+        },
+        componentProxy = {
+            __index = function(self, key)
+              if self.fields[key] and self.fields[key].getter then
+                return libcomponent.invoke(self.address, key)
+              else
+                rawget(self, key)
+              end
+            end,
+            __newindex = function(self, key, value)
+              if self.fields[key] and self.fields[key].setter then
+                return libcomponent.invoke(self.address, key, value)
+              elseif self.fields[key] and self.fields[key].getter then
+                error("field is read-only")
+              else
+                rawset(self, key, value)
+              end
+            end,
+            __pairs = function(self)
+              local keyProxy, keyField, value
+              return function()
+                if not keyField then
+                  repeat
+                    keyProxy, value = next(self, keyProxy)
+                  until not keyProxy or keyProxy ~= "fields"
+                end
+                if not keyProxy then
+                  keyField, value = next(self.fields, keyField)
+                end
+                return keyProxy or keyField, value
+              end
+            end
+        },
         bind = function(tbl)
             internalComponent.components[tbl.address] = tbl
         end,
@@ -263,7 +304,32 @@ function vmx.createComponentLib()
             if comp then
                 return {}
             end
-        end
+        end,
+        proxy = function(address)
+            checkArg(1, address, "string")
+            local type, reason = spcall(componentlib.type, address)
+            if not type then
+              return nil, reason
+            end
+            local slot, reason = spcall(componentlib.slot, address)
+            if not slot then
+              return nil, reason
+            end
+            if internalComponent.proxyCache[address] then
+              return internalComponent.proxyCache[address]
+            end
+            local proxy = {address = address, type = type, slot = slot, fields = {}}
+            local methods, reason = spcall(componentlib.methods, address)
+            if not methods then
+              return nil, reason
+            end
+            for method in pairs(methods) do
+                proxy[method] = setmetatable({address=address,name=method}, internalComponent.componentCallback)
+            end
+            setmetatable(proxy, internalComponent.componentProxy)
+            internalComponent.proxyCache[address] = proxy
+            return proxy
+        end,
     }
     return componentlib, internalComponent
 end
