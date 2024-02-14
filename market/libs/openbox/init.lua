@@ -29,7 +29,7 @@ function openbox.run(screen, program)
     end
     
     local result
-    local result2 = {pcall(function()
+    local result2 = {xpcall(function()
         result = {vm.loop(function ()
             local eventData = {event.pull(0)}
             if not screen then
@@ -52,13 +52,15 @@ function openbox.run(screen, program)
                 end
             end
         end)}
-    end)}
+    end, debug.traceback)}
 
     graphic.gpuPrivateList[gpuAddress] = nil
     graphic.findGpu(gpuAddress)
     scrsvTurnOn()
 
-    assert(table.unpack(result2))
+    if not result2[1] then
+        error(tostring(result2[2]), 2)
+    end
     if result then
         return assert(table.unpack(result))
     end
