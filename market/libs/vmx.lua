@@ -141,7 +141,7 @@ end
 function vmx.createVirtualEeprom(eepromPath, eepromCodePath, eepromLabelPath)
     local maxCodeSize = 1024 * 4
     local maxDataSize = 256
-    local maxLabelSize = 16
+    local maxLabelSize = 24
 
     local eeprom
     eeprom = {
@@ -200,16 +200,32 @@ function vmx.createVirtualEeprom(eepromPath, eepromCodePath, eepromLabelPath)
 
         -- label
         getLabel = function()
-            local data = fs.readFile(eepromCodePath)
+            local data = fs.readFile(eepromLabelPath)
             if data then
                 return data
             else
-                return ""
+                return "EEPROM"
             end 
-        end
-
+        end,
+        setLabel = function(label)
+            if label then
+                checkArg(1, label, "string")
+                label = unicode.sub(label, 1, maxLabelSize)
+            else
+                label = "EEPROM"
+            end
+            fs.writeFile(eepromLabelPath, label)
+            return label
+        end,
+        
+        -- control
         getChecksum = function()
             return "00000000"
+        end,
+        makeReadonly = function(checksum)
+            if checksum ~= eeprom.getChecksum() then
+                return nil, "incorrect checksum"
+            end
         end
     }
     return eeprom
