@@ -9,7 +9,7 @@ local eepromPath = system.getResourcePath("eepromImage")
 local openbox = {}
 
 function openbox.run(screen, program)
-    local vm = vmx.create(eepromPath)
+    local vm = vmx.create(eepromPath, boxPath)
     local gpuAddress = graphic.findGpuAddress(screen)
     fs.copy(program, paths.concat(boxPath, "autorun.lua"))
     graphic.gpuPrivateList[gpuAddress] = true

@@ -442,8 +442,7 @@ function vmx.create(eepromPath, diskPath)
     end
 
     if diskPath then
-        vm.internalComponent.bind(vm.eeprom)
-        fs.dump(diskPath)
+        vm.internalComponent.bind(vmx.fromVirtual(fs.dump(diskPath)))
     end
 
     function vm.bindComponent(tbl, noEvent)
@@ -520,6 +519,7 @@ function vmx.fromVirtual(fakeProxy)
     tbl.address = fakeProxy.address or uuid.next()
     tbl.type = fakeProxy.type
     tbl.slot = fakeProxy.slot or -1
+    tbl.virtual = nil
     return tbl
 end
 
