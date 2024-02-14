@@ -218,6 +218,51 @@ function vmx.createComponentLib()
                     return key, list[key]
                 end
             end})
+        end,
+        methods = function(address)
+            checkArg(1, address, "string")
+            local comp = internalComponent.components[address]
+            if not comp then
+                error("no such component", 2)
+            end
+
+            local list = {}
+            for name, func in pairs(comp) do
+                if type(func) == "function" then
+                    if comp.direct and comp.direct[name] then
+                        list[name] = comp.direct[name]
+                    else
+                        list[name] = true
+                    end
+                end
+            end
+            return list
+        end,
+        type = function(address)
+            checkArg(1, address, "string")
+            local comp = internalComponent.components[address]
+            if not comp then
+                error("no such component", 2)
+            end
+            return comp.type
+        end,
+        slot = function(address)
+            checkArg(1, address, "string")
+            local comp = internalComponent.components[address]
+            if not comp then
+                error("no such component", 2)
+            end
+            return comp.slot or -1
+        end,
+        fields = function(address)
+            checkArg(1, address, "string")
+            local comp = internalComponent.components[address]
+            if not comp then
+                error("no such component", 2)
+            end
+            if comp then
+                return {}
+            end
         end
     }
     return componentlib, internalComponent
