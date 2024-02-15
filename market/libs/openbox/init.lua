@@ -22,10 +22,12 @@ function openbox.run(screen, program)
         restoreGraphic = vmx.hookGraphic(screen)
     end
 
-    local result, result2
+    local result, result2, vm
+    local tunnel
     while true do
-        local vm = vmx.create(eepromPath, {boxPath, true, nil, "openos"})
+        vm = vmx.create(eepromPath, {boxPath, true, nil, "openos"})
         vm.env.os.program = paths.name(program)
+        vm.env.os.tunnel = tunnel
         local progfs = vmx.fromVirtual(fs.dump(paths.path(program), false, nil, "program"))
         vm.bindComponent(progfs)
         vm.env.os.progfs = progfs
@@ -80,8 +82,8 @@ function openbox.run(screen, program)
 
     assert(table.unpack(result2))
     assert(table.unpack(result))
-    if vm.env.os.progerror then
-        return nil, vm.env.os.progerror
+    if tunnel.progError then
+        return nil, tunnel.progError
     end
     return true
 end

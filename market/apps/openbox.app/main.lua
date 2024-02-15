@@ -9,4 +9,4 @@ if not program then
     return
 end
 
-openbox.run(screen, program)
+openbox.runWithSplash(screen, program)

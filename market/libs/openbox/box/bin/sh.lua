@@ -60,11 +60,12 @@ if #args == 0 then
     end
     fs.mount(os.progfs, "/home")
     local co = process.load(os.program, _ENV, nil, nil, function (err)
-      os.progerror = err
-      computer.shutdown()
+      os.tunnel.progError = err
     end)
     while true do
-      coroutine.resume(co)
+      if not coroutine.resume(co) then
+        computer.shutdown()
+      end
     end
   end
 else
