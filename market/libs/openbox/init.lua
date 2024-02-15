@@ -43,30 +43,26 @@ function openbox.run(screen, program)
         end
         
         result2 = {xpcall(function()
-            result = {vm.loop(function ()
-                local eventData = {event.pull(0)}
+            result = {vm.loop(function (time)
+                local eventData = {event.pull(time)}
                 if #eventData > 0 then
-                    if not screen then
-                        vm.pushSignal(table.unpack(eventData))
-                    else
+                    if screen then
                         local ctype
                         pcall(function ()
                             ctype = component.type(eventData[2])
                         end)
                         if ctype == "screen" then
                             if eventData[2] == screen then
-                                vm.pushSignal(table.unpack(eventData))
+                                return table.unpack(eventData)
                             end
                         elseif ctype == "keyboard" then
                             if table.exists(lastinfo.keyboards[screen], eventData[2]) then
-                                vm.pushSignal(table.unpack(eventData))
+                                return table.unpack(eventData)
                             end
-                        else
-                            vm.pushSignal(table.unpack(eventData))
                         end
                     end
                 end
-                return true
+                return table.unpack(eventData)
             end)}
         end, debug.traceback)}
 

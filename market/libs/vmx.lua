@@ -106,17 +106,18 @@ function vmx.createComputerLib(vm)
     internalComputer = {
         maxEventsCount = 256,
         events = {},
-        pullSignal = function(time)
-            checkArg(1, time, "number", "nil")
-            local startTime = computer.uptime()
-            while true do
-                coroutine.yield()
+        pullSignal = function(timeout)
+            local deadline = computer.uptime() + (type(timeout) == "number" and timeout or math.huge)
+            repeat
                 if #internalComputer.events > 0 then
                     return table.unpack(table.remove(internalComputer.events))
-                elseif time and computer.uptime() - startTime > time then
-                    break
+                else
+                    local signal = table.pack(coroutine.yield(deadline - computer.uptime()))
+                    if signal.n > 0 then
+                        return table.unpack(signal, 1, signal.n)
+                    end
                 end
-            end
+            until computer.uptime() >= deadline
         end,
         pushSignal = function(name, ...)
             if type(name) == "string" then
@@ -547,7 +548,7 @@ function vmx.create(eepromPath, diskSettings, address)
                 if bios then
                     vm.internalComputer.clearQueue()
                     vm.startTime = computer.uptime()
-                    return bios
+                    return bios, {n=0}
                 end
                 error("failed loading bios: " .. reason, 2)
             end
@@ -555,29 +556,27 @@ function vmx.create(eepromPath, diskSettings, address)
         error("no bios found; install a configured EEPROM", 2)
     end
 
-    function vm.loop(callback)
+    function vm.loop(pullEvent)
         local result = {pcall(vm.bootstrap)}
         if result[1] then
             local co = coroutine.create(result[2])
+            local args = result[3]
             while true do
-                local noWait
-                if callback then
-                    noWait = callback()
-                end
-                local result = {coroutine.resume(co)}
+                local result = {coroutine.resume(co, table.unpack(args, 1, args.n))}
+                args = nil
                 if not result[1] then
                     return table.unpack(result)
                 else
-                    if result[2] ~= nil then
+                    local returnType = type(result[2])
+                    if returnType == "boolean" then
                         if result[2] then
                             return true, "reboot"
                         else
                             return true
                         end
+                    elseif returnType == "number" then
+                        args = table.pack(pullEvent(result[2]))
                     end
-                end
-                if not noWait then
-                    os.sleep(0)
                 end
             end
         else
