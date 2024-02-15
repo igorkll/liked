@@ -86,7 +86,7 @@ end
 function sysinit.getResolution(screen)
     local graphic = require("graphic")
     local mx, my = graphic.maxResolution(screen)
-    if mx and mx > 80 or my > 25 then
+    if mx and (mx > 80 or my > 25) then
         mx = 80
         my = 25
     end
