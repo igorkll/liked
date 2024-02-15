@@ -30,6 +30,15 @@ function palette.blackWhite(screen, noReg)
     palette.fromFile(screen, "/system/t3default.plt", noReg)
 end
 
+function palette.setDefaultPalette(screen, noReg)
+    local depth = graphic.getDepth(screen)
+    if depth == 8 then
+        palette.fromFile(screen, "/system/t3default.plt", noReg)
+    elseif depth == 4 then
+        palette.fromFile(screen, "/system/palettes/original.plt", noReg)
+    end
+end
+
 function palette.setSystemPalette(path, regOnly, doNotOffScreen)
     if pcall(sysinit.applyPalette, path, regOnly, doNotOffScreen) then
         pcall(fs.copy, path, sysinit.initPalPath)

@@ -9,6 +9,7 @@ local thread = require("thread")
 local graphic = require("graphic")
 local screensaver = require("screensaver")
 local sysinit = require("sysinit")
+local palette = require("palette")
 local vmx = {}
 
 function vmx.createBaseEnv(vm)
@@ -616,6 +617,7 @@ function vmx.hookGraphic(screen)
     local scrsvTurnOn
     if gpuAddress then
         scrsvTurnOn = screensaver.noScreensaver(screen)
+        palette.setDefaultPalette(screen, true)
         pcall(component.invoke, gpuAddress, "setActiveBuffer", 0)
         pcall(component.invoke, gpuAddress, "freeAllBuffers")
         graphic.gpuPrivateList[gpuAddress] = true
