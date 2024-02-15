@@ -58,12 +58,14 @@ if #args == 0 then
       end
       io.write(sh.expand(os.getenv("PS1") or "$ "))
     end
+
     fs.mount(os.progfs, "/home")
     local co = process.load(os.program, _ENV, nil, nil, function (err)
       os.tunnel.progError = err
     end)
     while true do
       if not coroutine.resume(co) then
+        os.tunnel.progError = os.tunnel.progError or "unknown error"
         computer.shutdown()
       end
     end

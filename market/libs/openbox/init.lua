@@ -23,7 +23,7 @@ function openbox.run(screen, program)
     end
 
     local result, result2, vm
-    local tunnel
+    local tunnel = {}
     while true do
         vm = vmx.create(eepromPath, {boxPath, true, nil, "openos"})
         vm.env.os.program = paths.name(program)
