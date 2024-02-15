@@ -15,11 +15,9 @@ local eepromPath = system.getResourcePath("eepromImage")
 local openbox = {}
 
 function openbox.run(screen, program)
-    local gpuAddress = screen and graphic.findGpuAddress(screen)
-
-    local restoreGraphic
-    if gpuAddress then
-        restoreGraphic = vmx.hookGraphic(screen)
+    local restoreGraphic, gpuAddress
+    if screen then
+        restoreGraphic, gpuAddress = vmx.hookGraphic(screen)
     end
 
     local result, result2, vm
@@ -52,28 +50,7 @@ function openbox.run(screen, program)
         end
         
         result2 = {xpcall(function()
-            result = {vm.loop(function (time)
-                local eventData = {event.pull(time)}
-                if #eventData > 0 then
-                    if screen then
-                        local ctype
-                        pcall(function ()
-                            ctype = component.type(eventData[2])
-                        end)
-                        if ctype == "screen" then
-                            if eventData[2] == screen then
-                                return table.unpack(eventData)
-                            end
-                        elseif ctype == "keyboard" then
-                            if table.exists(lastinfo.keyboards[screen], eventData[2]) then
-                                return table.unpack(eventData)
-                            end
-                        end
-                    end
-                else
-                    return table.unpack(eventData)
-                end
-            end)}
+            result = {vm.loop(vmx.pullEvent)}
         end, debug.traceback)}
 
         if not result or (result[1] ~= true or result[2] ~= "reboot") then

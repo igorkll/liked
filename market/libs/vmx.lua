@@ -11,6 +11,7 @@ local screensaver = require("screensaver")
 local sysinit = require("sysinit")
 local palette = require("palette")
 local lastinfo = require("lastinfo")
+local event = require("event")
 local vmx = {}
 
 function vmx.createBaseEnv(vm)
@@ -583,9 +584,9 @@ function vmx.create(eepromPath, diskSettings, address)
                             return true
                         end
                     elseif returnType == "number" then
-                        args = table.pack(pullEvent(result[2]))
+                        args = table.pack(pullEvent(vm, result[2]))
                     else
-                        args = table.pack(pullEvent())
+                        args = table.pack(pullEvent(vm))
                     end
                 end
             end
@@ -638,6 +639,17 @@ function vmx.hookGraphic(screen)
         pcall(component.invoke, gpuAddress, "freeAllBuffers")
         sysinit.initScreen(screen)
         scrsvTurnOn()
+    end, gpuAddress
+end
+
+local function inVmComponentExists(vm, address)
+    return not not vm.internalComponent.components[address]
+end
+
+function vmx.pullEvent(vm, timeout)
+    local eventData = {event.pull(timeout)}
+    if #eventData > 0 and (eventData[1] == "tablet_use" or inVmComponentExists(vm, eventData[2])) then
+        return table.unpack(eventData)
     end
 end
 
