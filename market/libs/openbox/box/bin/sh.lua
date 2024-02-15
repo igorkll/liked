@@ -57,7 +57,12 @@ if #args == 0 then
       io.write(sh.expand(os.getenv("PS1") or "$ "))
     end
     fs.mount(os.progfs, "/home")
-    os.execute("cd /home && " .. os.program)
+    while true do
+      sh.execute(_ENV, "cd /home && " .. os.program)
+      io.write("Press any key to continue.\n")
+      os.sleep(0.5)
+      require("event").pull("key")
+    end
   end
 else
   -- execute command.
