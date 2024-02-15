@@ -74,11 +74,18 @@ if #args == 0 then
         )
 
         if co then
-            while true do
-                if not coroutine.resume(co, event.pull()) then
+            local result = {}
+            local args = table.pack(...)
+            while coroutine.status(co) ~= "dead" do
+                result = table.pack(coroutine.resume(co, table.unpack(args, 1, args.n)))
+                if coroutine.status(co) ~= "dead" then
+                    args = table.pack(coroutine.yield(table.unpack(result, 2, result.n)))
+                elseif not result[1] then
+                    os.tunnel.progError = tostring(os.tunnel.progError or result[2] or "unknown error")
                     computer.shutdown()
                 end
             end
+            return table.unpack(result, 2, result.n)
         else
             os.tunnel.progError = tostring(os.tunnel.progError or err or "unknown error on 'process library'")
             computer.shutdown()
