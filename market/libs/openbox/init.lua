@@ -66,7 +66,7 @@ function openbox.run(screen, program)
             end)}
         end, debug.traceback)}
 
-        if result[1] ~= true or result[2] ~= "reboot" then
+        if not result or (result[1] ~= true or result[2] ~= "reboot") then
             break
         end
     end
