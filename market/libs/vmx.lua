@@ -6,6 +6,8 @@ local fs = require("filesystem")
 local text = require("text")
 local uuid = require("uuid")
 local thread = require("thread")
+local graphic = require("graphic")
+local screensaver = require("screensaver")
 local vmx = {}
 
 function vmx.createBaseEnv(vm)
@@ -606,6 +608,25 @@ function vmx.create(eepromPath, diskPath, address)
     end
 
     return vm
+end
+
+function vmx.hookGraphic(screen)
+    local gpuAddress = graphic.findGpuAddress(screen)
+    local scrsvTurnOn
+    local restore
+    if gpuAddress then
+        scrsvTurnOn = screensaver.noScreensaver(screen)
+        graphic.gpuPrivateList[gpuAddress] = true
+        pcall(component.invoke, gpuAddress, "setActiveBuffer", 0)
+        restore = graphic.saveGpuSettings(gpuAddress)
+    end
+    
+    return function ()
+        graphic.gpuPrivateList[gpuAddress] = nil
+        graphic.findGpu(gpuAddress)
+        restore()
+        scrsvTurnOn()
+    end
 end
 
 function vmx.fromReal(address)
