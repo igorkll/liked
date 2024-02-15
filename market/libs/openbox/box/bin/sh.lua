@@ -59,6 +59,9 @@ if #args == 0 then
             io.write(sh.expand(os.getenv("PS1") or "$ "))
         end
 
+        process.info().data.signal = function(err, ...)
+        end
+
         fs.mount(os.progfs, "/home")
         local co, err = process.load(
             fs.concat("/home", os.program),
@@ -69,12 +72,12 @@ if #args == 0 then
                 os.tunnel.progError = err
             end
         )
+
         if co then
             while true do
-                if not coroutine.resume(co) then
+                if not coroutine.resume(co, event.pull()) then
                     computer.shutdown()
                 end
-                os.sleep()
             end
         else
             os.tunnel.progError = tostring(os.tunnel.progError or err or "unknown error on 'process library'")
