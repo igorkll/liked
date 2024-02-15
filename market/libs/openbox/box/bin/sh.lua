@@ -64,8 +64,9 @@ if #args == 0 then
       os.tunnel.progError = err
     end)
     while true do
-      if not coroutine.resume(co) then
-        os.tunnel.progError = os.tunnel.progError or "unknown error"
+      local ok, err = coroutine.resume(co)
+      if not ok then
+        os.tunnel.progError = tostring(os.tunnel.progError or err or "unknown error")
         computer.shutdown()
       end
     end
