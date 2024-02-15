@@ -58,6 +58,7 @@ if #args == 0 then
         end
 
         fs.mount(os.progfs, "/home")
+        shell.setWorkingDirectory("/home")
         local co, err = process.load(
             fs.concat("/home", os.program),
             _ENV,
