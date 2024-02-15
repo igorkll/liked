@@ -8,6 +8,7 @@ local event = require("event")
 local lastinfo = require("lastinfo")
 local screensaver = require("screensaver")
 local liked = require("liked")
+local vcomponent = require("vcomponent")
 
 local boxPath = system.getResourcePath("box")
 local eepromPath = system.getResourcePath("eepromImage")
@@ -38,7 +39,15 @@ function openbox.run(screen, program)
         if screen then
             vm.bindComponent(vmx.fromReal(screen))
             for _, keyboard in ipairs(lastinfo.keyboards[screen]) do
-                vm.bindComponent(vmx.fromReal(keyboard))
+                if not vcomponent.isVirtual(keyboard) then
+                    vm.bindComponent(vmx.fromReal(keyboard))
+                end
+            end
+        end
+
+        for address, ctype in component.list() do
+            if ctype ~= "screen" and ctype ~= "keyboard" and ctype ~= "filesystem" and ctype ~= "eeprom" then
+                vm.bindComponent(vmx.fromReal(address))
             end
         end
         
