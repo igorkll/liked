@@ -15,8 +15,7 @@ local openbox = {}
 
 function openbox.run(screen, program)
     local gpuAddress = screen and graphic.findGpuAddress(screen)
-    fs.copy(program, paths.concat(boxPath, "autorun.lua"))
-    
+
     local restoreGraphic
     if gpuAddress then
         restoreGraphic = vmx.hookGraphic(screen)
