@@ -61,8 +61,9 @@ function openbox.run(screen, program)
                             end
                         end
                     end
+                else
+                    return table.unpack(eventData)
                 end
-                return table.unpack(eventData)
             end)}
         end, debug.traceback)}
 

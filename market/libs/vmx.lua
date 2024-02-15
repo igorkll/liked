@@ -576,6 +576,8 @@ function vmx.create(eepromPath, diskSettings, address)
                         end
                     elseif returnType == "number" then
                         args = table.pack(pullEvent(result[2]))
+                    else
+                        args = table.pack(pullEvent())
                     end
                 end
             end
