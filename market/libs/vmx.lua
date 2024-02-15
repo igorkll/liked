@@ -10,6 +10,7 @@ local graphic = require("graphic")
 local screensaver = require("screensaver")
 local sysinit = require("sysinit")
 local palette = require("palette")
+local lastinfo = require("lastinfo")
 local vmx = {}
 
 function vmx.createBaseEnv(vm)
@@ -513,9 +514,15 @@ function vmx.create(eepromPath, diskSettings, address)
     vm.env = vmx.createBaseEnv()
     vm.address = address or uuid.next()
     vm.deviceinfo = {}
+    for address, info in pairs(lastinfo.deviceinfo) do
+        if not component.isConnected(address) then
+            vm.deviceinfo[address] = info
+        end
+    end
     
     function vm.bindComponent(tbl, noEvent)
         vm.internalComponent.bind(tbl)
+        vm.deviceinfo[tbl.address] = tbl.deviceinfo or {}
         if not noEvent then
             vm.internalComputer.pushSignal("component_added", tbl.address, tbl.type)
         end
@@ -523,6 +530,7 @@ function vmx.create(eepromPath, diskSettings, address)
 
     function vm.unbindComponent(tbl, noEvent)
         vm.internalComponent.unbind(tbl)
+        vm.deviceinfo[tbl.address] = nil
         if not noEvent then
             vm.internalComputer.pushSignal("component_removed", tbl.address, tbl.type)
         end
@@ -640,6 +648,7 @@ function vmx.fromReal(address)
     tbl.direct = {}
     tbl.docs = {}
     tbl.slot = component.slot(address)
+    tbl.deviceinfo = lastinfo.deviceinfo[address]
 
     for name, direct in pairs(component.methods(address)) do
         tbl.direct[name] = direct
