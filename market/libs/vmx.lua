@@ -8,6 +8,7 @@ local uuid = require("uuid")
 local thread = require("thread")
 local graphic = require("graphic")
 local screensaver = require("screensaver")
+local sysinit = require("sysinit")
 local vmx = {}
 
 function vmx.createBaseEnv(vm)
@@ -613,20 +614,18 @@ end
 function vmx.hookGraphic(screen)
     local gpuAddress = graphic.findGpuAddress(screen)
     local scrsvTurnOn
-    local restore
     if gpuAddress then
         scrsvTurnOn = screensaver.noScreensaver(screen)
         pcall(component.invoke, gpuAddress, "setActiveBuffer", 0)
         pcall(component.invoke, gpuAddress, "freeAllBuffers")
-        restore = graphic.saveGpuSettings(gpuAddress)
         graphic.gpuPrivateList[gpuAddress] = true
     end
     
     return function ()
         graphic.gpuPrivateList[gpuAddress] = nil
-        graphic.findGpu(gpuAddress)
-        restore()
+        pcall(component.invoke, gpuAddress, "setActiveBuffer", 0)
         pcall(component.invoke, gpuAddress, "freeAllBuffers")
+        sysinit.initScreen(screen)
         scrsvTurnOn()
     end
 end
