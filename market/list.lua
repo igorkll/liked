@@ -699,25 +699,43 @@ list.libs = {
                 "lib/tty.lua",
                 "lib/uuid.lua",
                 "lib/vt100.lua",
+                "lib/tools/programLocations.lua",
+                "lib/tools/transfer.lua",
+                "lib/core/boot.lua",
+                "lib/core/cursor.lua",
+                "lib/core/device_labeling.lua",
+                "lib/core/full_buffer.lua",
+                "lib/core/full_cursor.lua",
+                "lib/core/full_event.lua",
+                "lib/core/full_filesystem.lua",
+                "lib/core/full_keyboard.lua",
+                "lib/core/full_ls.lua",
+                "lib/core/full_sh.lua",
+                "lib/core/full_shell.lua",
+                "lib/core/full_text.lua",
+                "lib/core/full_transforms.lua",
+                "lib/core/full_vt.lua",
+                "lib/core/install_basics.lua",
+                "lib/core/install_utils.lua",
+                "lib/core/lua_shell.lua",
+                "bin/cd.lua",
                 "bin/edit.lua",
                 "bin/pastebin.lua",
                 "bin/sh.lua",
                 "bin/wget.lua"
             }
+
             local list = {}
-
             table.insert(list, {
-                url = selfurlpart .. "/libs/openbox/eeprom.lua",
-                path = "/data/lib/openbox/eeprom.lua"
+                url = selfurlpart .. "/libs/openbox/eepromImage",
+                path = "/data/lib/openbox/eepromImage"
             })
-
             for i, lst in ipairs(boxlist) do
                 table.insert(list, {
                     url = selfurlpart .. "/libs/openbox/box/" .. lst,
                     path = "/data/lib/openbox/box/" .. lst
                 })
             end
-
             return list
         end)()
     }
