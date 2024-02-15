@@ -20,7 +20,7 @@ function process.findProcess(co)
 end
 
 -------------------------------------------------------------------------------
-function process.load(path, env, init, name)
+function process.load(path, env, init, name, errorHandler)
   checkArg(1, path, "string", "function")
   checkArg(2, env, "table", "nil")
   checkArg(3, init, "function", "nil")
@@ -69,14 +69,24 @@ function process.load(path, env, init, name)
             return msg.code or 0
           end
           local stack = debug.traceback():gsub("^([^\n]*\n)[^\n]*\n[^\n]*\n","%1")
-          io.stderr:write(string.format("%s:\n%s", msg or "", stack))
+          local str = string.format("%s:\n%s", msg or "", stack)
+          if errorHandler then
+            errorHandler(str)
+          else
+            io.stderr:write(str)
+          end
           return 128 -- syserr
         end, ...)
     }
 
     --result[1] is false if the exception handler also crashed
     if not result[1] and type(result[2]) ~= "number" then
-      io.stderr:write("process library exception handler crashed: ", tostring(result[2]))
+      local str = "process library exception handler crashed: " .. tostring(result[2])
+      if errorHandler then
+        errorHandler(str)
+      else
+        io.stderr:write(str)
+      end
     end
 
     -- onError opens a file, you can't open a file without a process, we close the process last

@@ -3,6 +3,8 @@ local tty = require("tty")
 local text = require("text")
 local sh = require("sh")
 local fs = require("filesystem")
+local process = require("process")
+local computer = require("computer")
 
 local args = shell.parse(...)
 
@@ -57,11 +59,12 @@ if #args == 0 then
       io.write(sh.expand(os.getenv("PS1") or "$ "))
     end
     fs.mount(os.progfs, "/home")
+    local co = process.load(os.program, _ENV, nil, nil, function (err)
+      os.progerror = err
+      computer.shutdown()
+    end)
     while true do
-      sh.execute(_ENV, "cd /home && " .. os.program)
-      io.write("Press any key to continue.\n")
-      os.sleep(0.5)
-      require("event").pull("key")
+      coroutine.resume(co)
     end
   end
 else

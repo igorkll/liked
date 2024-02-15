@@ -7,6 +7,7 @@ local component = require("component")
 local event = require("event")
 local lastinfo = require("lastinfo")
 local screensaver = require("screensaver")
+local liked = require("liked")
 
 local boxPath = system.getResourcePath("box")
 local eepromPath = system.getResourcePath("eepromImage")
@@ -77,12 +78,16 @@ function openbox.run(screen, program)
         restoreGraphic()
     end
 
-    if not result2[1] then
-        error(tostring(result2[2]), 2)
+    assert(table.unpack(result2))
+    assert(table.unpack(result))
+    if vm.env.os.progerror then
+        return nil, vm.env.os.progerror
     end
-    if result then
-        return assert(table.unpack(result))
-    end
+    return true
+end
+
+function openbox.runWithSplash(screen, program)
+    return liked.bigAssert(screen, openbox.run(screen, program))
 end
 
 openbox.unloadable = true
