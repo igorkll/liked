@@ -507,7 +507,7 @@ function vmx.createVirtualEeprom(eepromPath, eepromCodePath, eepromLabelPath)
     return eeprom
 end
 
-function vmx.create(eepromPath, diskPath, address)
+function vmx.create(eepromPath, diskSettings, address)
     local vm = {}
     vm.env = vmx.createBaseEnv()
     vm.address = address or uuid.next()
@@ -605,8 +605,8 @@ function vmx.create(eepromPath, diskPath, address)
         vm.bindComponent(vm.eeprom)
     end
 
-    if diskPath then
-        vm.bindComponent(vmx.fromVirtual(fs.dump(diskPath)))
+    if diskSettings then
+        vm.bindComponent(vmx.fromVirtual(fs.dump(table.unpack(diskSettings))))
     end
 
     return vm

@@ -23,7 +23,7 @@ function openbox.run(screen, program)
 
     local result, result2
     while true do
-        local vm = vmx.create(eepromPath, boxPath)
+        local vm = vmx.create(eepromPath, {boxPath, true, nil, "openos"})
         if gpuAddress then
             vm.bindComponent(vmx.fromReal(gpuAddress))
         end
