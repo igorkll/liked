@@ -24,9 +24,15 @@ function openbox.run(screen, program)
     local result, result2
     while true do
         local vm = vmx.create(eepromPath, {boxPath, true, nil, "openos"})
+        vm.env.os.program = paths.name(program)
+        local progfs = vmx.fromVirtual(fs.dump(paths.path(program), false, nil, "program"))
+        vm.bindComponent(progfs)
+        vm.env.os.progfs = progfs
+
         if gpuAddress then
             vm.bindComponent(vmx.fromReal(gpuAddress))
         end
+        
         if screen then
             vm.bindComponent(vmx.fromReal(screen))
             for _, keyboard in ipairs(lastinfo.keyboards[screen]) do

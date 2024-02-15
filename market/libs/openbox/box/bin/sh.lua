@@ -56,23 +56,8 @@ if #args == 0 then
       end
       io.write(sh.expand(os.getenv("PS1") or "$ "))
     end
-    tty.window.cursor = input_handler
-    local command = io.stdin:readLine(false)
-    tty.window.cursor = nil
-    if command then
-      command = text.trim(command)
-      if command == "exit" then
-        return
-      elseif command ~= "" then
-        --luacheck: globals _ENV
-        local result, reason = sh.execute(_ENV, command)
-        if not result and reason then
-          io.stderr:write(tostring(reason), "\n")
-        end
-      end
-    elseif command == nil then -- false only means the input was interrupted
-      return -- eof
-    end
+    fs.mount(os.progfs, "/home")
+    os.execute("cd /home && " .. os.program)
   end
 else
   -- execute command.
