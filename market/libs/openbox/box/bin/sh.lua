@@ -60,16 +60,18 @@ if #args == 0 then
     end
 
     fs.mount(os.progfs, "/home")
-    local co = process.load(os.program, _ENV, nil, nil, function (err)
+    local co, err = process.load(os.program, _ENV, nil, nil, function (err)
       os.tunnel.progError = err
     end)
-    while true do
+    while co do
       local ok, err = coroutine.resume(co)
       if not ok then
         os.tunnel.progError = tostring(os.tunnel.progError or err or "unknown error")
         computer.shutdown()
       end
     end
+    os.tunnel.progError = tostring(os.tunnel.progError or err or "unknown process error")
+    computer.shutdown()
   end
 else
   -- execute command.
