@@ -60,9 +60,8 @@ if #args == 0 then
         end
 
         fs.mount(os.progfs, "/home")
-        local co, err =
-            process.load(
-            os.program,
+        local co, err = process.load(
+            fs.concat("/home", os.program),
             _ENV,
             nil,
             nil,
@@ -75,6 +74,7 @@ if #args == 0 then
                 if not coroutine.resume(co) then
                     computer.shutdown()
                 end
+                os.sleep()
             end
         else
             os.tunnel.progError = tostring(os.tunnel.progError or err or "unknown error on 'process library'")
