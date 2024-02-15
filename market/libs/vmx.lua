@@ -616,10 +616,10 @@ function vmx.hookGraphic(screen)
     local restore
     if gpuAddress then
         scrsvTurnOn = screensaver.noScreensaver(screen)
-        graphic.gpuPrivateList[gpuAddress] = true
         pcall(component.invoke, gpuAddress, "setActiveBuffer", 0)
         pcall(component.invoke, gpuAddress, "freeAllBuffers")
         restore = graphic.saveGpuSettings(gpuAddress)
+        graphic.gpuPrivateList[gpuAddress] = true
     end
     
     return function ()

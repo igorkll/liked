@@ -16,11 +16,9 @@ function openbox.run(screen, program)
     local gpuAddress = screen and graphic.findGpuAddress(screen)
     fs.copy(program, paths.concat(boxPath, "autorun.lua"))
     
-    local scrsvTurnOn
+    local restoreGraphic
     if gpuAddress then
-        scrsvTurnOn = screensaver.noScreensaver(screen)
-        graphic.gpuPrivateList[gpuAddress] = true
-        component.invoke(gpuAddress, "setActiveBuffer", 0)
+        restoreGraphic = vmx.hookGraphic(screen)
     end
 
     local result, result2
@@ -69,9 +67,9 @@ function openbox.run(screen, program)
         end
     end
     
-    graphic.gpuPrivateList[gpuAddress] = nil
-    graphic.findGpu(gpuAddress)
-    scrsvTurnOn()
+    if restoreGraphic then
+        restoreGraphic()
+    end
 
     if not result2[1] then
         error(tostring(result2[2]), 2)
