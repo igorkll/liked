@@ -50,8 +50,6 @@ if #args == 0 then
                 os.setenv("PAGER", "less")
                 os.setenv("PS1", "\27[40m\27[31m$HOSTNAME$HOSTNAME_SEPARATOR$PWD # \27[37m")
                 os.setenv("LS_COLORS", "di=0;36:fi=0:ln=0;33:*.lua=0;32")
-
-                shell.setWorkingDirectory("/")
             end
             if tty.getCursor() > 1 then
                 io.write("\n")
