@@ -129,6 +129,7 @@
 /system/lib/warnings.lua
 /system/liked/box.lst
 /system/liked/brick.lua
+/system/liked/links.lua
 /system/liked/market_urls_dev.txt
 /system/liked/market_urls_main.txt
 /system/liked/market_urls_test.txt

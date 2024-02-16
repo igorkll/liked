@@ -11,6 +11,8 @@ if not liked.recoveryMode then
     local storagePath = "/data/userdata/cloudStorage"
     local publicStoragePath = "/data/userdata/publicStorage"
 
+    assert(apps.execute("/system/liked/links.lua"))
+
     local function realCheck()
         apps.check()
         

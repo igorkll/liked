@@ -19,6 +19,7 @@ local unicode = require("unicode")
 local apps = {}
 
 local installedInfo = registry.new("/data/installedInfo.dat")
+local marketInstalledInfo = registry.new("/data/marketInstalledInfo.dat")
 local appsPath = "/data/apps/"
 local shadowPath = "/data/applicationsShadow/"
 
@@ -329,7 +330,7 @@ function apps.postInstall(screen, nickname, path, version)
 
     local regPath = paths.concat(path, "reg.reg")
     if fs.exists(regPath) and not fs.isDirectory(regPath) then
-        lassert(apps.execute("applyReg", screen, nickname, regPath, true))
+        liked.applyReg(regPath)
     end
 
     local formatsPath = paths.concat(path, "formats.cfg")
@@ -375,7 +376,7 @@ function apps.uninstall(screen, nickname, path, hide)
 
     local unregPath = paths.concat(path, "unreg.reg")
     if fs.exists(unregPath) and not fs.isDirectory(unregPath) then
-        lassert(apps.execute("applyReg", screen, nickname, unregPath, true))
+        liked.applyReg(unregPath)
     end
 
     local formatsPath = paths.concat(path, "formats.cfg")
@@ -399,6 +400,12 @@ function apps.uninstall(screen, nickname, path, hide)
         if text.startwith(unicode, path, appsPath) then
             fs.remove(paths.concat(shadowPath, paths.name(path)))
         end
+
+        if marketInstalledInfo.data.appVersions then
+            marketInstalledInfo.data.appVersions[paths.name(path)] = nil
+            marketInstalledInfo.save()
+        end
+
         installedInfo.data[paths.name(path)] = nil
         installedInfo.save()
     end

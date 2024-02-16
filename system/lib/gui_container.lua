@@ -32,70 +32,24 @@ gui_container.screenSaverPath = "/data/screenSaver.scrsv"
 ---------------------------- необходимо сканфигурировать это все, в своей програме для поддержки свого формата
 
 gui_container.newCreate = { --структура {name, exp, allowCheck(), create(path)}
-    {
-        "system-dump",
-        "afpx",
-        function (path)
-            return not fs.isReadOnly(path)
-        end,
-        function (path)
-            return require("archiver").pack("/mnt/root", path)
-        end
-    }
 }
 
 gui_container.filesExps = { --дополнительные действия к файлам
-
 }
 
 gui_container.openVia = {
-    ["afpx"] = "unpackArchive",
-    ["reg"] = "applyReg",
-    ["xpkg"] = "xpkgInstall",
-    ["box"] = "boxInstall",
-    ["vbox"] = "boxInstall",
-    ["sbox"] = "boxInstall",
-    ["ebox"] = "boxInstall"
 }
 
 gui_container.typecolors = {
 }
 
 gui_container.typenames = {
-    ["t1p"] = "image",
-    ["t2p"] = "image",
-    ["t3p"] = "image",
-    ["txt"] = "text",
-    ["afpx"] = "archive",
-    ["scrsv"] = "screensaver"
 }
 
 gui_container.knownExps = { --данные файлы не будет предложинно открыть в текстовом редакторе(если поставить editable то будет предложенно)
-    ["scrsv"] = true,   
-    ["lua"] = true,
-    ["app"] = true,
-    ["t1p"] = true,
-    ["t2p"] = true,
-    ["t3p"] = true,
-    ["plt"] = true,
-    ["dat"] = true,
-    ["cfg"] = true,
-    ["log"] = true,
-    ["afpx"] = true,
-    ["txt"] = true, --текстовому документу не нужно отдельная кнопка, он по умалчанию открываеться через редактор
-    ["reg"] = true,
-    ["xpkg"] = true,
-    ["box"] = true,
-    ["vbox"] = true,
-    ["ebox"] = true,
-    ["sbox"] = true
 }
 
 gui_container.editable = { --вместо "open is text editor" будет писаться "edit"
-    ["lua"] = true,
-    ["scrsv"] = true,
-    ["plt"] = true,
-    ["reg"] = true
 }
 
 ----------------------------
@@ -132,52 +86,6 @@ function gui_container.checkPath(screen, path) --проверяет не выш�
     end
     return path
 end
-
---[[
-function gui_container.checkPath(screen, path) --проверяет не вышел ли пользователь из своий папки
-    local disk, diskPath = fs.get(path)
-    local mountPoint = fs.mounts()[disk.address][2]
-    local userPath = gui_container.getUserRoot(screen)
-    local isUserPathRoot = paths.equals(userPath, "/")
-    local diskUserDataPath = paths.concat(mountPoint, "data/userdata")
-    local extdatPath = paths.concat(mountPoint, "external-data")
-
-    if false and disk.address ~= fs.get("/").address and not isUserPathRoot and --отправленно на дороботку
-    fs.exists(diskUserDataPath) and fs.isDirectory(diskUserDataPath) and
-    fs.exists(extdatPath) and fs.isDirectory(extdatPath) then
-        if paths.equals(diskPath, "/") then
-            return paths.concat(mountPoint, userPath)
-        elseif paths.equals(diskPath, paths.path(userPath)) then
-            return userPath
-        end
-    else
-        if unicode.sub(path, 1, unicode.len(userPath)) ~= userPath then
-            return userPath
-        end
-    end
-    return path
-end
-
-function gui_container.isDiskLocked(address) --отправленно на дороботку
-    do return false end
-
-    local regData = require("liked").getRegistry(address)
-    return not not (regData and regData.password)
-end
-
-function gui_container.isDiskAccess(address)
-    if not gui_container.isDiskLocked(address) then return true end
-    return not not gui_container.unlockedDisks[address]
-end
-
-function gui_container.getDiskAccess(screen, address)
-    if gui_container.isDiskLocked(address) then
-        if require("gui").checkPasswordLoop(screen, nil, nil, nil, address) then
-            gui_container.unlockedDisks[address] = true
-        end
-    end
-end
-]]
 
 function gui_container.refresh()
     local colors = {

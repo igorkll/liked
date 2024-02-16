@@ -153,6 +153,20 @@ end
 
 --------------------------------------------------------
 
+function liked.applyReg(path, screen)
+    if screen then
+        if liked.assert(screen, registry.apply(path)) then
+            gui_container.refresh()
+            registry.save()
+        end
+    else
+        if registry.apply(path) then
+            gui_container.refresh()
+            registry.save()
+        end
+    end
+end
+
 local bufferTimerId
 function liked.applyBufferType()
     if liked.recoveryMode then

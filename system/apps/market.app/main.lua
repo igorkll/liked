@@ -22,6 +22,8 @@ local colors = gui_container.colors
 local screen, nickname, _, forceMode, mediaMode = ...
 gui.status(screen, nil, nil, "loading content list...")
 
+local title = "Market"
+local urlsBase = "market_"
 local installBox = mediaMode and "  download   " or "   install   "
 local installMsg = mediaMode and "download" or "install"
 local uninstallBox = mediaMode and "   delete    " or "  uninstall  "
@@ -29,19 +31,18 @@ local uninstallMsg = mediaMode and "delete" or "uninstall"
 
 local cachePath = mediaMode and "/data/cache/mediastore" or "/data/cache/market"
 local cacheReg = registry.new(paths.concat(cachePath, "versions.dat"))
+local installedInfo = registry.new("/data/marketInstalledInfo.dat")
 
-local title = "Market"
-local urlsBase = "market_"
+local saveContentVersion = installedInfo.save
 local contentVersions
 if mediaMode then
-    if not registry.mediaVersions then registry.mediaVersions = {} end
-
+    if not installedInfo.mediaVersions then installedInfo.mediaVersions = {} end
     title = "Media Store"
     urlsBase = "media_"
-    contentVersions = registry.mediaVersions
+    contentVersions = installedInfo.mediaVersions
 else
-    if not registry.appVersions then registry.appVersions = {} end
-    contentVersions = registry.appVersions
+    if not installedInfo.appVersions then installedInfo.appVersions = {} end
+    contentVersions = installedInfo.appVersions
 end
 
 local rx, ry
@@ -171,6 +172,7 @@ local function modifyList(lst)
             if v.postInstall then v:postInstall() end
             contentVersions[self.name] = self.version
             apps.postInstall(screen, nickname, self.path, self.version)
+            saveContentVersion()
         end
     
         if not v.icon and v.urlPrimaryPart then
