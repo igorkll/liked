@@ -402,7 +402,7 @@ function apps.uninstall(screen, nickname, path, hide)
         end
 
         if marketInstalledInfo.data.appVersions then
-            marketInstalledInfo.data.appVersions[paths.name(path)] = nil
+            marketInstalledInfo.data.appVersions[paths.hideExtension(paths.name(path))] = nil
             marketInstalledInfo.save()
         end
 
