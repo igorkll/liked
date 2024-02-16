@@ -100,11 +100,11 @@ end
 
 local contextMenuOpen = nil
 
-local function getBarsColor()
-    if liked.getBaseWallpaperColor() == colors.gray then
-        return colors.black
+local function getBarsColor(baseColor, toColor)
+    if liked.getBaseWallpaperColor() == (baseColor or colors.gray) then
+        return toColor or colors.black
     end
-    return colors.gray
+    return baseColor or colors.gray
 end
 
 local function drawStatus()
@@ -349,7 +349,7 @@ local function draw(old, check) --вызывает все перерисовки
                 --end
                 local baseColor = liked.getBaseWallpaperColor()
                 local x, y = window:toRealPos(math.floor((centerIconX - (unicode.len(icon.shortName) / 2)) + 0.5), centerIconY + 2)
-                gui.drawtext(screen, x, y, icon.hidden and colors.lightGray or (baseColor == colors.white and colors.black or colors.white), icon.shortName)
+                gui.drawtext(screen, x, y, icon.hidden and getBarsColor(colors.lightGray, colors.gray) or (baseColor == colors.white and colors.black or colors.white), icon.shortName)
                 --window:set(iconX - (unicode.len(icon.name) // 2), iconY + iconY - 2, colors.lightBlue, colors.white, icon.name)
                 if icon.icon then
                     local sx, sy = window:toRealPos(iconX, iconY)
