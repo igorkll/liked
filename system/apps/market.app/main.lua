@@ -98,6 +98,10 @@ local urls = {}
 local list = {}
 local glibs = {}
 
+local function getAppFolderName(path)
+    return paths.hideExtension(paths.name(path))
+end
+
 local function modifyList(lst)
     if lst.libs then
         for name, info in pairs(lst.libs) do
@@ -116,7 +120,7 @@ local function modifyList(lst)
     for i, v in ipairs(lst) do
         if not v.getVersion then
             function v:getVersion()
-                return contentVersions[self.name] or "unknown"
+                return contentVersions[getAppFolderName(self.path)] or "unknown"
             end
         end
     
@@ -170,7 +174,7 @@ local function modifyList(lst)
 
             _install(self)
             if v.postInstall then v:postInstall() end
-            contentVersions[self.name] = self.version
+            contentVersions[getAppFolderName(self.path)] = self.version
             apps.postInstall(screen, nickname, self.path, self.version)
             saveContentVersion()
         end

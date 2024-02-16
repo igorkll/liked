@@ -30,7 +30,6 @@ local t = thread.create(function ()
     if not liked.recoveryMode then
         wait()
 
-        account.smartLoginWindow(screen)
         if not registry.systemConfigured then
             if isPrimaryScreen then
                 assert(apps.execute("setup", screen))
@@ -40,6 +39,8 @@ local t = thread.create(function ()
                     event.yield()
                 end
             end
+        else
+            account.smartLoginWindow(screen)
         end
 
         assert(apps.execute("login", screen))
