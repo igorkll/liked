@@ -19,7 +19,6 @@ local unicode = require("unicode")
 local apps = {}
 
 local installedInfo = registry.new("/data/installedInfo.dat")
-local marketInstalledInfo = registry.new("/data/marketInstalledInfo.dat")
 local appsPath = "/data/apps/"
 local shadowPath = "/data/applicationsShadow/"
 
@@ -397,16 +396,13 @@ function apps.uninstall(screen, nickname, path, hide)
     end
 
     if not fs.exists(path) then
+        local pname = paths.name(path)
+        
         if text.startwith(unicode, path, appsPath) then
-            fs.remove(paths.concat(shadowPath, paths.name(path)))
+            fs.remove(paths.concat(shadowPath, pname))
         end
 
-        if marketInstalledInfo.data.appVersions then
-            marketInstalledInfo.data.appVersions[paths.hideExtension(paths.name(path))] = nil
-            marketInstalledInfo.save()
-        end
-
-        installedInfo.data[paths.name(path)] = nil
+        installedInfo.data[pname] = nil
         installedInfo.save()
     end
     registry.save()

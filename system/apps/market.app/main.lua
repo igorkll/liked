@@ -31,18 +31,10 @@ local uninstallMsg = mediaMode and "delete" or "uninstall"
 
 local cachePath = mediaMode and "/data/cache/mediastore" or "/data/cache/market"
 local cacheReg = registry.new(paths.concat(cachePath, "versions.dat"))
-local installedInfo = registry.new("/data/marketInstalledInfo.dat")
 
-local saveContentVersion = installedInfo.save
-local contentVersions
 if mediaMode then
-    if not installedInfo.mediaVersions then installedInfo.mediaVersions = {} end
     title = "Media Store"
     urlsBase = "media_"
-    contentVersions = installedInfo.mediaVersions
-else
-    if not installedInfo.appVersions then installedInfo.appVersions = {} end
-    contentVersions = installedInfo.appVersions
 end
 
 local rx, ry
@@ -98,8 +90,23 @@ local urls = {}
 local list = {}
 local glibs = {}
 
-local function getAppFolderName(path)
-    return paths.hideExtension(paths.name(path))
+local function getAppVersion(path)
+    local versionPath = paths.concat(path, "info", "version.cfg")
+    if fs.exists(versionPath) then
+        return fs.readFile(versionPath)
+    else
+        return "unknown"
+    end
+end
+
+local function setAppVersion(path, version)
+    local versionPath = paths.concat(path, "info", "version.cfg")
+    local folderPath = paths.path(versionPath)
+    fs.makeDirectory(folderPath)
+    if mediaMode then --к файлам из mediastore есть прямой доступ у пользователя, и папку с инфой нужно скрыть чтобы не мазолила глаза
+        fs.setAttribute(folderPath, "hidden", true)
+    end
+    fs.writeFile(versionPath, version)
 end
 
 local function modifyList(lst)
@@ -120,7 +127,7 @@ local function modifyList(lst)
     for i, v in ipairs(lst) do
         if not v.getVersion then
             function v:getVersion()
-                return contentVersions[getAppFolderName(self.path)] or "unknown"
+                return getAppVersion(self.path)
             end
         end
     
@@ -173,10 +180,11 @@ local function modifyList(lst)
             end
 
             _install(self)
-            if v.postInstall then v:postInstall() end
-            contentVersions[getAppFolderName(self.path)] = self.version
+            setAppVersion(self.path, self.version)
             apps.postInstall(screen, nickname, self.path, self.version)
-            saveContentVersion()
+            if v.postInstall then
+                v:postInstall()
+            end
         end
     
         if not v.icon and v.urlPrimaryPart then
