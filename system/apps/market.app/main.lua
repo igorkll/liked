@@ -14,6 +14,7 @@ local format = require("format")
 local sysdata = require("sysdata")
 local apps = require("apps")
 local text = require("text")
+local screensaver = require("screensaver")
 
 local colors = gui_container.colors
 
@@ -133,7 +134,9 @@ local function modifyList(lst)
     
         if not v.uninstall then
             function v:uninstall()
+                local turnBack = screensaver.noScreensaver(screen)
                 apps.uninstall(screen, nickname, self.path, true)
+                turnBack()
             end
         end
     
@@ -179,12 +182,14 @@ local function modifyList(lst)
                 installLibs(v.libs)
             end
 
+            local turnBack = screensaver.noScreensaver(screen)
             _install(self)
             setAppVersion(self.path, self.version)
             apps.postInstall(screen, nickname, self.path, self.version)
             if v.postInstall then
                 v:postInstall()
             end
+            turnBack()
         end
     
         if not v.icon and v.urlPrimaryPart then
