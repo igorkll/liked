@@ -153,6 +153,8 @@ local function modifyList(lst)
             end
         end
         function v.install(self)
+            local turnBack = screensaver.noScreensaver(screen)
+            
             if v.libs then
                 if not registry.libVersions then registry.libVersions = {} end
 
@@ -182,13 +184,13 @@ local function modifyList(lst)
                 installLibs(v.libs)
             end
 
-            local turnBack = screensaver.noScreensaver(screen)
             _install(self)
             setAppVersion(self.path, self.version)
             apps.postInstall(screen, nickname, self.path, self.version)
             if v.postInstall then
                 v:postInstall()
             end
+
             turnBack()
         end
     
