@@ -106,7 +106,7 @@ function liked.umountAll()
 
     for address in component.list("filesystem") do
         if address ~= computer.tmpAddress() and address ~= fs.bootaddress then
-            fs.umount(hdd.genName(address))
+            fs.umount(component.proxy(address))
         end
     end
 end

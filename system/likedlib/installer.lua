@@ -205,7 +205,7 @@ function installer.context(screen, posX, posY, vfs)
     }
 
     local name = paths.name(require("hdd").genName(vfs.address))
-    local clear = saveZone(screen)
+    local clear = gui.saveZone(screen)
     if gui.yesno(screen, nil, nil, "install \"" .. label .. "\" to \"" .. name .. "\"?") then
         gui.status(screen, nil, nil, "installing \"" .. label .. "\" to \"" .. name .. "\"...")
         local result = {liked.assert(screen, installers[num](vfs))}
