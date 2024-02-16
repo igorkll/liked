@@ -402,6 +402,7 @@ function account.getStorage()
     ------------------------------------
 
     endproxy = fs.mask(proxy)
+    endproxy.cloud = true
     return endproxy
 end
 
