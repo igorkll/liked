@@ -163,7 +163,7 @@ function gui.shadow(screen, x, y, sx, sy, mul, full)
     end
     local depth = graphic.getDepth(screen)
 
-    if registry.shadowMode == "screen" then
+    if not full and registry.shadowMode == "screen" then
         local rx, ry = gpu.getResolution()
         x = 1
         y = 1
@@ -765,7 +765,7 @@ function gui.blackCall(func, ...)
     gui.blackMode = oldBlackState
 end
 
-function gui.context(screen, posX, posY, strs, active)
+function gui.context(screen, posX, posY, strs, active, disShadow)
     local white, black = colors.white, colors.black
     if gui.blackMode then
         white, black = black, white
@@ -778,7 +778,9 @@ function gui.context(screen, posX, posY, strs, active)
 
     local window = graphic.createWindow(screen, posX, posY, sizeX, sizeY)
     --window:fill(2, 2, window.sizeX, window.sizeY, colors.gray, 0, " ")
-    gui.shadow(screen, window.x, window.y, window.sizeX, window.sizeY)
+    if not disShadow then
+        gui.shadow(screen, window.x, window.y, window.sizeX, window.sizeY)
+    end
 
     local function redrawStrs(selected)
         for i, str in ipairs(drawStrs) do
