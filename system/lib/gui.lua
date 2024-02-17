@@ -163,6 +163,7 @@ function gui.shadow(screen, x, y, sx, sy, mul, full)
     end
     local depth = graphic.getDepth(screen)
 
+    mul = mul or 0.4
     if not full and registry.shadowMode == "screen" then
         local rx, ry = gpu.getResolution()
         x = 1
@@ -244,8 +245,8 @@ function gui.shadow(screen, x, y, sx, sy, mul, full)
                     table.insert(origsF, fore)
                     table.insert(origsB, back)
 
-                    gpu.setForeground(colorslib.colorMul(fore, mul or 0.6))
-                    gpu.setBackground(colorslib.colorMul(back, mul or 0.6))
+                    gpu.setForeground(colorslib.colorMul(fore, mul))
+                    gpu.setBackground(colorslib.colorMul(back, mul))
                     gpu.set(shadowPosesX[i], shadowPosesY[i], char)
                 end
             end
@@ -274,14 +275,14 @@ function gui.shadow(screen, x, y, sx, sy, mul, full)
                         if forePal then
                             gpu.setForeground(gui_container.indexsColors[gui.smartShadowsColors[forePal + 1] + 1])
                         else
-                            gpu.setForeground(colorslib.colorMul(fore, mul or 0.6))
+                            gpu.setForeground(colorslib.colorMul(fore, mul))
                         end
                         
                         local backPal = getPalCol(back)
                         if backPal then
                             gpu.setBackground(gui_container.indexsColors[gui.smartShadowsColors[backPal + 1] + 1])
                         else
-                            gpu.setBackground(colorslib.colorMul(back, mul or 0.6))
+                            gpu.setBackground(colorslib.colorMul(back, mul))
                         end
 
                         gpu.set(shadowPosesX[i], shadowPosesY[i], char)
