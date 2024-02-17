@@ -226,7 +226,11 @@ function gui.shadow(screen, x, y, sx, sy, mul, full)
         return shadowPosesX, shadowPosesY
     end
 
-    local origs = {}
+    local origsX = {}
+    local origsY = {}
+    local origsC = {}
+    local origsF = {}
+    local origsB = {}
     if not require("liked").recoveryMode then
         if registry.shadowType == "advanced" then
             local shadowPosesX, shadowPosesY = getPoses()
@@ -234,7 +238,11 @@ function gui.shadow(screen, x, y, sx, sy, mul, full)
             for i = 1, #shadowPosesX do
                 local ok, char, fore, back = pcall(gpu.get, shadowPosesX[i], shadowPosesY[i])
                 if ok and char and fore and back then
-                    table.insert(origs, {shadowPosesX[i], shadowPosesY[i], char, fore, back})
+                    table.insert(origsX, shadowPosesX[i])
+                    table.insert(origsY, shadowPosesY[i])
+                    table.insert(origsC, char)
+                    table.insert(origsF, fore)
+                    table.insert(origsB, back)
 
                     gpu.setForeground(colorslib.colorMul(fore, mul or 0.6))
                     gpu.setBackground(colorslib.colorMul(back, mul or 0.6))
@@ -256,7 +264,11 @@ function gui.shadow(screen, x, y, sx, sy, mul, full)
                 for i = 1, #shadowPosesX do
                     local ok, char, fore, back = pcall(gpu.get, shadowPosesX[i], shadowPosesY[i])
                     if ok and char and fore and back then
-                        table.insert(origs, {shadowPosesX[i], shadowPosesY[i], char, fore, back})
+                        table.insert(origsX, shadowPosesX[i])
+                        table.insert(origsY, shadowPosesY[i])
+                        table.insert(origsC, char)
+                        table.insert(origsF, fore)
+                        table.insert(origsB, back)
 
                         local forePal = getPalCol(fore)
                         if forePal then
@@ -281,7 +293,11 @@ function gui.shadow(screen, x, y, sx, sy, mul, full)
             for i = 1, #shadowPosesX do
                 local ok, char, fore, back, forePal, backPal = pcall(gpu.get, shadowPosesX[i], shadowPosesY[i])
                 if ok and char and fore and back then
-                    table.insert(origs, {shadowPosesX[i], shadowPosesY[i], char, fore, back})
+                    table.insert(origsX, shadowPosesX[i])
+                    table.insert(origsY, shadowPosesY[i])
+                    table.insert(origsC, char)
+                    table.insert(origsF, fore)
+                    table.insert(origsB, back)
                 end
             end
 
@@ -303,10 +319,10 @@ function gui.shadow(screen, x, y, sx, sy, mul, full)
     return function ()
         local gpu = graphic.findGpu(screen)
 
-        for _, obj in ipairs(origs) do
-            gpu.setForeground(obj[4])
-            gpu.setBackground(obj[5])
-            gpu.set(obj[1], obj[2], obj[3])
+        for i, x in ipairs(origsX) do
+            gpu.setForeground(origsF[i])
+            gpu.setBackground(origsB[i])
+            gpu.set(x, origsY[i], origsC[i])
         end
     end
 end
