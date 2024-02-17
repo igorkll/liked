@@ -32,7 +32,7 @@ for index, value in ipairs(shadows) do
     end
 end
 
-local modes = {"full", "compact", "round"}
+local modes = {"full", "compact", "round", "screen"}
 local selectedMode = 1
 for index, value in ipairs(modes) do
     if value == registry.shadowMode then

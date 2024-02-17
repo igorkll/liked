@@ -64,11 +64,18 @@ function graphic.screenshot(screen, x, y, sx, sy)
     y = y or 1
     sx = sx or rx
     sy = sy or ry
-    if x and sx and y and sy and registry.shadowMode == "round" then
-        x = x - 2
-        y = y - 1
-        sx = sx + 2
-        sy = sy + 1
+    if x and sx and y and sy and screen then
+        if registry.shadowMode == "round" then
+            x = x - 2
+            y = y - 1
+            sx = sx + 2
+            sy = sy + 1
+        elseif registry.shadowMode == "screen" then
+            x = 1
+            y = 1
+            sx = rx
+            sy = ry
+        end
     end
     if x < 1 then x = 1 end
     if y < 1 then y = 1 end
@@ -155,6 +162,15 @@ function gui.shadow(screen, x, y, sx, sy, mul, full)
         gpu = graphic.findGpu(screen)
     end
     local depth = graphic.getDepth(screen)
+
+    if registry.shadowMode == "screen" then
+        local rx, ry = gpu.getResolution()
+        x = 1
+        y = 1
+        sx = rx
+        sy = ry
+        full = true
+    end
 
     local function getPoses()
         local shadowPosesX = {}
