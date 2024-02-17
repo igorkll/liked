@@ -686,7 +686,7 @@ function liked.drawWallpaper(screen, customFolder)
 end
 
 function liked.minRamForDBuff()
-    local kb = 512
+    local kb = 512 + 256
     for _ in component.list("screen") do
         kb = kb + 256
     end
