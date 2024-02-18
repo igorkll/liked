@@ -20,6 +20,40 @@ local attributes = reader.read(768)
 reader.close()
 
 
+
+
+
+
+
+local function braille(b)
+    local result = 0x2800;
+    local b1 = (b & tonumber(00000001, 2)) << 7;
+    local b2 = (b & tonumber(00000010, 2)) << 5;
+    local b3 = (b & tonumber(00000100, 2)) << 3;
+    local b4 = (b & tonumber(00001000, 2)) >> 1;
+    local b5 = (b & tonumber(00010000, 2));
+    local b6 = (b & tonumber(00100000, 2)) >> 4;
+    local b7 = (b & tonumber(01000000, 2)) >> 3;
+    local b8 = (b & tonumber(10000000, 2)) >> 7;
+    return result + b1 + b2 + b3 + b4 + b5 + b6 + b7 + b8;
+end
+
+local function addr(y)
+    local Y1 = y & tonumber(11000000, 2);
+    local Y2 = (y & tonumber(00111000, 2)) >> 3;
+    local Y3 = (y & tonumber(00000111, 2)) << 3;
+    return Y1 + Y2 + Y3;
+end
+
+
+
+
+
+
+
+
+
+
 local backColors = {}
 local foreColors = {}
 local spectrumColorCodes = table.low{ 0, 1, 4, 5, 2, 3, 6, 7 }
@@ -41,31 +75,25 @@ for i = 0, 191 do
 end
 
 for l = 0, 47 do
-    byte[] buffer = new byte[128]
-    for (int y = 0 y < 4 y++)
-    {
-        for (int x = 0 x < 32 x++)
-        {
-            byte b = pixels[y + l * 4][x]
-            for (int i = 3 i >= 0 i--)
-            {
-                buffer[i + x * 4] += (byte)(b & 0b11)
-                b >>= 2
-                if (y < 3)
-                    buffer[i + x * 4] <<= 2
-            }
-        }
-    }
+    local buffer = {}
+    for y = 0, 3 do
+        for x = 0, 31 do
+            local b = pixels[y + l * 4][x]
+            for i = 3, 0, -1 do
+                buffer[i + x * 4] = buffer[i + x * 4] + (b & 3)
+                b = b >> 2
+                if y < 3 then
+                    buffer[i + x * 4] = buffer[i + x * 4] << 2
+                end
+            end
+        end
+    end
 
-    for (int i = 0 i < 128 i++)
-    {
-        Console.BackgroundColor = (ConsoleColor)backColors[i / 4 + l / 2 * 32]
-        Console.ForegroundColor = (ConsoleColor)foreColors[i / 4 + l / 2 * 32]
-        Console.Write(braille(buffer[i]))
-    }
-    Console.BackgroundColor = ConsoleColor.Black
-    Console.ForegroundColor = ConsoleColor.White
-    Console.WriteLine()
+    for i = 0, 127 do
+        local BackgroundColor = backColors[i / 4 + l / 2 * 32]
+        local ForegroundColor = foreColors[i / 4 + l / 2 * 32]
+        graphic.set(screen, i + 1, l + 1, BackgroundColor, ForegroundColor, braille(buffer[i]))
+    end
 end
 
 graphic.forceUpdate()
