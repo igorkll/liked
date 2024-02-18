@@ -599,6 +599,17 @@ local list = {
         path = "/data/apps/zxViewer.app",
         urlPrimaryPart = selfurlpart .. "/apps/zxViewer.app/",
         files = {"main.lua", "icon.t2p", "formats.cfg"}
+    },
+    {
+        name = "browser",
+        version = "1",
+        vendor = "logic",
+        description = "a simple web browser for opencomputers. allows you to open html files",
+        minDiskSpace = 64,
+        
+        path = "/data/apps/browser.app",
+        urlPrimaryPart = selfurlpart .. "/apps/browser.app/",
+        files = {"main.lua", "icon.t2p", "formats.cfg"}
     }
 }
 
