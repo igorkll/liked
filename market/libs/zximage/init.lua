@@ -5,9 +5,10 @@ local graphic = require("graphic")
 local zximage = {}
 zximage.sizeX = 128
 zximage.sizeY = 48
+zximage.palettePath = system.getResourcePath("palette.plt")
 
 function zximage.pallete()
-    return serialization.load(system.getResourcePath("palette.plt"))
+    return serialization.load(zximage.palettePath)
 end
 
 function zximage.check(path)
