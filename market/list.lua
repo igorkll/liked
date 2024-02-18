@@ -657,6 +657,18 @@ list.libs = {
             }
         }
     },
+    ["zximage"] = {
+        url = selfurlpart .. "/libs/zximageinit.lua",
+        vendor = "logic",
+        version = "1",
+        path = "/data/lib/zximage/init.lua",
+        files = {
+            {
+                url = selfurlpart .. "/libs/zximage/palette.plt",
+                path = "/data/lib/zximage/palette.plt"
+            }
+        }
+    },
     ["openbox"] = {
         url = selfurlpart .. "/libs/openbox/init.lua",
         vendor = "logic",
