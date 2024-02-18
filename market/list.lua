@@ -598,7 +598,7 @@ local list = {
         
         path = "/data/apps/zxViewer.app",
         urlPrimaryPart = selfurlpart .. "/apps/zxViewer.app/",
-        files = {"main.lua", "icon.t2p", "config.cfg"}
+        files = {"main.lua", "icon.t2p"}
     }
 }
 

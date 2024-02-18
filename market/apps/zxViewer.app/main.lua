@@ -3,6 +3,7 @@ local iowindows = require("iowindows")
 local gui = require("gui")
 local liked = require("liked")
 local graphic = require("graphic")
+local sysinit = require("sysinit")
 
 local screen = ...
 local path = iowindows.selectfile(screen, "scr")
@@ -21,3 +22,4 @@ zximage.applyResolution(screen, crop)
 zximage.applyPalette(screen)
 zximage.draw(screen, path, crop)
 liked.wait()
+pcall(sysinit.initScreen, screen)
