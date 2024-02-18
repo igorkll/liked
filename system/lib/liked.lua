@@ -49,7 +49,9 @@ function liked.isUserdata(path)
     return path:sub(1, #data) == data
 end
     
---------------------------------------------------------
+function liked.wait()
+    event.pull("close")
+end
 
 function liked.isUninstallScript(path)
     return fs.exists(paths.concat(path, "uninstall.lua"))
