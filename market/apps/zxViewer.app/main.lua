@@ -5,8 +5,8 @@ local liked = require("liked")
 local graphic = require("graphic")
 local sysinit = require("sysinit")
 
-local screen = ...
-local path = iowindows.selectfile(screen, "scr")
+local screen, _, path = ...
+path = path or iowindows.selectfile(screen, "scr")
 if not path then
     return
 end
