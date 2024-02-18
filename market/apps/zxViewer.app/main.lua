@@ -3,6 +3,9 @@ local liked = require("liked")
 local iowindows = require("iowindows")
 local fs = require("filesystem")
 local unicode = require("unicode")
+local palette = require("palette")
+local system = require("system")
+
 local screen = ...
 local path = iowindows.selectfile(screen, "scr")
 if not path then
@@ -14,6 +17,7 @@ if fs.size(path) ~= 6912 then
 end
 
 graphic.setResolution(screen, 128, 48)
+palette.fromFile(screen, system.getResourcePath("zx.plt"), true)
 
 local function lolzAlloc(count)
     local tbl = {}
@@ -77,8 +81,8 @@ end
 
 
 
-local backColors = {}
-local foreColors = {}
+local backColors = lolzAlloc(768)
+local foreColors = lolzAlloc(768)
 local spectrumColorCodes = table.low{ 0, 1, 4, 5, 2, 3, 6, 7 }
 
 for i = 0, 767 do
@@ -113,9 +117,14 @@ for l = 0, 47 do
     end
 
     for i = 0, 127 do
-        local BackgroundColor = backColors[i / 4 + l / 2 * 32]
-        local ForegroundColor = foreColors[i / 4 + l / 2 * 32]
-        graphic.set(screen, i + 1, l + 1, BackgroundColor, ForegroundColor, unicode.char(braille(buffer[i])))
+        local index = i // 4 + l // 2 * 32
+        local BackgroundColor = backColors[index] or error(index)
+        local ForegroundColor = foreColors[index] or error(index)
+        graphic.set(screen, i + 1, l + 1, BackgroundColor, ForegroundColor, unicode.char(braille(buffer[i])), nil, true)
+    end
+
+    if l % 8 == 0 then
+        os.sleep(0)
     end
 end
 
