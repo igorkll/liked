@@ -10,9 +10,18 @@ function zximage.pallete()
     return serialization.load(system.getResourcePath("palette.plt"))
 end
 
-function zximage.parse(path, callback)
+function zximage.check(path)
     if fs.size(path) ~= 6912 then
         return nil, "this file is not a picture from the ZX spectrum"
+    end
+
+    return true
+end
+
+function zximage.parse(path, callback)
+    local ok, err = zximage.check(path)
+    if not ok then
+        return nil, err
     end
 
     local function lolzAlloc(count)
@@ -110,11 +119,25 @@ function zximage.applyPalette(screen)
 end
 
 function zximage.applyResolution(screen, crop)
-    graphic.setResolution(screen, zximage.sizeX, 48)
+    if crop then
+        graphic.setResolution(screen, zximage.sizeX / 2, zximage.sizeY / 2)
+    else
+        graphic.setResolution(screen, zximage.sizeX, zximage.sizeY)
+    end
 end
 
-function zximage.draw(screen)
-    graphic.setPalette(screen, zximage.pallete(), true)
+function zximage.draw(screen, path, crop)
+    return zximage.parse(path, function (x, y, back, fore, char)
+        if crop then
+            graphic.set(screen, ((x - 1) // 2) + 1, ((y - 1) // 2) + 1, back, fore, char, nil, true)
+        else
+            graphic.set(screen, x, y, back, fore, char, nil, true)
+        end
+
+        if x == 1 and y % 8 == 1 then
+            os.sleep(0)
+        end
+    end)
 end
 
 return zximage

@@ -587,6 +587,17 @@ local list = {
         postInstall = function()
             download("/bootmanager/main.lua", selfurlpart .. "/apps/bootmanager.app/bootmanager/main.lua")
         end
+    },
+    {
+        name = "zxViewer",
+        version = "1",
+        vendor = "_Andrew_Ryan_",
+        description = "allows you to display images in the .scr format (ZX spectrum image format)",
+        minDiskSpace = 64,
+        
+        path = "/data/apps/zxViewer.app",
+        urlPrimaryPart = selfurlpart .. "/apps/zxViewer.app/",
+        files = {"main.lua", "icon.t2p", "config.cfg"}
     }
 }
 
@@ -658,7 +669,7 @@ list.libs = {
         }
     },
     ["zximage"] = {
-        url = selfurlpart .. "/libs/zximageinit.lua",
+        url = selfurlpart .. "/libs/zximage/init.lua",
         vendor = "logic",
         version = "1",
         path = "/data/lib/zximage/init.lua",
