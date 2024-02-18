@@ -91,7 +91,7 @@ local list = {
         urlPrimaryPart = selfurlpart .. "/media/zx_images/",
         files = (function()
             local list = {"icon.t2p"}
-            for i = 1, 7 do
+            for i = 1, 12 do
                 table.insert(list, tostring(math.round(i)) .. ".scr")
             end
             return list
