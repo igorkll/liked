@@ -594,6 +594,7 @@ local list = {
         vendor = "_Andrew_Ryan_",
         description = "allows you to display images in the .scr format (ZX spectrum image format)",
         minDiskSpace = 64,
+        libs = {"zximage"},
         
         path = "/data/apps/zxViewer.app",
         urlPrimaryPart = selfurlpart .. "/apps/zxViewer.app/",

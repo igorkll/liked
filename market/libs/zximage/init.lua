@@ -2,6 +2,7 @@ local serialization = require("serialization")
 local system = require("system")
 local fs = require("filesystem")
 local graphic = require("graphic")
+local unicode = require("unicode")
 local zximage = {}
 zximage.sizeX = 128
 zximage.sizeY = 48
@@ -106,8 +107,8 @@ function zximage.parse(path, callback)
     
         for i = 0, 127 do
             local index = i // 4 + l // 2 * 32
-            local BackgroundColor = backColors[index] or error(index)
-            local ForegroundColor = foreColors[index] or error(index)
+            local BackgroundColor = backColors[index]
+            local ForegroundColor = foreColors[index]
             callback(i + 1, l + 1, BackgroundColor, ForegroundColor, unicode.char(braille(buffer[i])))
         end
     end
