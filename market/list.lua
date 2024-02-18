@@ -671,7 +671,7 @@ list.libs = {
     },
     ["zximage"] = {
         url = selfurlpart .. "/libs/zximage/init.lua",
-        vendor = "logic",
+        vendor = "veeford",
         version = "1",
         path = "/data/lib/zximage/init.lua",
         files = {
