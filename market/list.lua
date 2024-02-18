@@ -591,7 +591,7 @@ local list = {
     {
         name = "zxViewer",
         version = "1",
-        vendor = "_Andrew_Ryan_",
+        vendor = "veeford",
         description = "allows you to display images in the .scr format (ZX spectrum image format)",
         minDiskSpace = 64,
         libs = {"zximage"},
