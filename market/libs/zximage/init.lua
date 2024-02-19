@@ -36,7 +36,7 @@ function zximage.parse(path, callback)
         return tbl
     end
     
-    local reader = fs.open(path, "rb")
+    local reader = fs.open(path, "rb", true)
     local rawPixels = {}
     for y = 0, 191 do
         rawPixels[y] = {reader.read(32):byte(1, -1)}
