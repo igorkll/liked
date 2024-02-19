@@ -105,17 +105,18 @@ function zximage.applyResolution(screen, crop)
 end
 
 function zximage.draw(screen, path, crop)
-    return zximage.parse(path, function (x, y, back, fore, char)
-        if x == 1 and y % 8 == 0 then
-            os.sleep(0)
-        end
-        
-        if crop then
-            graphic.set(screen, ((x - 1) // 2) + 1, ((y - 1) // 2) + 1, back, fore, char, nil, true)
-        else
-            graphic.set(screen, x, y, back, fore, char, nil, true)
-        end
-    end)
+    local sleep = os.sleep
+    local set = graphic.set
+    if crop then
+        return zximage.parse(path, function (x, y, back, fore, char)
+            set(screen, ((x - 1) // 2) + 1, ((y - 1) // 2) + 1, back, fore, char, nil, true)
+        end)
+    else
+        return zximage.parse(path, function (x, y, back, fore, char)
+            if x == 1 and y % 8 == 0 then sleep(0) end
+            set(screen, x, y, back, fore, char, nil, true)
+        end)
+    end
 end
 
 return zximage
