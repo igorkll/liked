@@ -38,7 +38,6 @@ function zximage.parse(path, callback)
     
     local reader = fs.open(path, "rb")
     local rawPixels = {}
-    local pixels = {}
     for y = 0, 191 do
         rawPixels[y] = {reader.read(32):byte(1, -1)}
     end
@@ -68,16 +67,12 @@ function zximage.parse(path, callback)
         end
     end
     
-    for i = 0, 191 do
-        pixels[i] = rawPixels[addr(i)]
-    end
-    
     local index, b, buffer
     for l = 0, 47 do
         buffer = lolzAlloc(128, buffer)
         for y = 0, 3 do
             for x = 0, 31 do
-                b = pixels[y + l * 4][x + 1]
+                b = rawPixels[addr(y + l * 4)][x + 1]
                 for i = 3, 0, -1 do
                     buffer[i + x * 4] = buffer[i + x * 4] + (b & 3)
                     b = b >> 2
