@@ -8,6 +8,8 @@ zximage.sizeX = 128
 zximage.sizeY = 48
 zximage.palettePath = system.getResourcePath("palette.plt")
 
+local byte = string.byte
+
 function zximage.pallete()
     return serialization.load(zximage.palettePath)
 end
@@ -26,18 +28,10 @@ function zximage.parse(path, callback)
         return nil, err
     end
 
-    local function lolzAlloc(count)
-        local tbl = {}
+    local function lolzAlloc(count, tbl)
+        tbl = tbl or {}
         for i = 0, count - 1 do
             tbl[i] = 0
-        end
-        return tbl
-    end
-    
-    local function strToLolz(str)
-        local tbl = {}
-        for i = 1, #str do
-            tbl[i - 1] = str:byte(i)
         end
         return tbl
     end
@@ -46,29 +40,17 @@ function zximage.parse(path, callback)
     local rawPixels = {}
     local pixels = {}
     for y = 0, 191 do
-        rawPixels[y] = strToLolz(reader.read(32))
+        rawPixels[y] = {reader.read(32):byte(1, -1)}
     end
     local attributes = reader.read(768)
     reader.close()    
     
     local function braille(b)
-        local result = 0x2800;
-        local b1 = (b & tonumber("00000001", 2)) << 7;
-        local b2 = (b & tonumber("00000010", 2)) << 5;
-        local b3 = (b & tonumber("00000100", 2)) << 3;
-        local b4 = (b & tonumber("00001000", 2)) >> 1;
-        local b5 = (b & tonumber("00010000", 2));
-        local b6 = (b & tonumber("00100000", 2)) >> 4;
-        local b7 = (b & tonumber("01000000", 2)) >> 3;
-        local b8 = (b & tonumber("10000000", 2)) >> 7;
-        return result + b1 + b2 + b3 + b4 + b5 + b6 + b7 + b8;
+        return 0x2800 + ((b & 1) << 7) + ((b & 2) << 5) + ((b & 4) << 3) + ((b & 8) >> 1) + ((b & 16)) + ((b & 32) >> 4) + ((b & 64) >> 3) + ((b & 128) >> 7);
     end
     
     local function addr(y)
-        local Y1 = y & tonumber("11000000", 2);
-        local Y2 = (y & tonumber("00111000", 2)) >> 3;
-        local Y3 = (y & tonumber("00000111", 2)) << 3;
-        return Y1 + Y2 + Y3;
+        return (y & 192) + ((y & 56) >> 3) + ((y & 7) << 3)
     end
     
     local backColors = lolzAlloc(768)
@@ -90,11 +72,12 @@ function zximage.parse(path, callback)
         pixels[i] = rawPixels[addr(i)]
     end
     
+    local index, b, buffer
     for l = 0, 47 do
-        local buffer = lolzAlloc(128)
+        buffer = lolzAlloc(128, buffer)
         for y = 0, 3 do
             for x = 0, 31 do
-                local b = pixels[y + l * 4][x]
+                b = pixels[y + l * 4][x + 1]
                 for i = 3, 0, -1 do
                     buffer[i + x * 4] = buffer[i + x * 4] + (b & 3)
                     b = b >> 2
@@ -106,10 +89,8 @@ function zximage.parse(path, callback)
         end
     
         for i = 0, 127 do
-            local index = i // 4 + l // 2 * 32
-            local BackgroundColor = backColors[index]
-            local ForegroundColor = foreColors[index]
-            callback(i + 1, l + 1, BackgroundColor, ForegroundColor, unicode.char(braille(buffer[i])))
+            index = i // 4 + l // 2 * 32
+            callback(i + 1, l + 1, backColors[index], foreColors[index], unicode.char(braille(buffer[i])))
         end
     end
 
@@ -130,14 +111,14 @@ end
 
 function zximage.draw(screen, path, crop)
     return zximage.parse(path, function (x, y, back, fore, char)
+        if x == 1 and y % 8 == 0 then
+            os.sleep(0)
+        end
+        
         if crop then
             graphic.set(screen, ((x - 1) // 2) + 1, ((y - 1) // 2) + 1, back, fore, char, nil, true)
         else
             graphic.set(screen, x, y, back, fore, char, nil, true)
-        end
-
-        if x == 1 and y % 8 == 1 then
-            os.sleep(0)
         end
     end)
 end
