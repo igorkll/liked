@@ -107,15 +107,40 @@ end
 function zximage.draw(screen, path, crop)
     local sleep = os.sleep
     local set = graphic.set
-    if crop then
-        return zximage.parse(path, function (x, y, back, fore, char)
-            set(screen, ((x - 1) // 2) + 1, ((y - 1) // 2) + 1, back, fore, char, nil, true)
-        end)
+    local gpu = graphic.findGpu(screen)
+    if gpu.getBuffers then
+        local chars, fores, backs = gpu.getBuffers()
+        local pal = graphic.getPalette(screen, true)
+        local rx = graphic.getResolution(screen)
+        local index
+        gpu.updateFlag()
+        graphic.updateFlag(screen)
+        if crop then
+            return zximage.parse(path, function (x, y, back, fore, char)
+                index = ((x - 1) // 2) + 1 + (((y - 1) // 2) * rx)
+                chars[index] = char
+                fores[index] = pal[fore]
+                backs[index] = pal[back]
+            end)
+        else
+            return zximage.parse(path, function (x, y, back, fore, char)
+                index = x + ((y - 1) * rx)
+                chars[index] = char
+                fores[index] = pal[fore]
+                backs[index] = pal[back]
+            end)
+        end
     else
-        return zximage.parse(path, function (x, y, back, fore, char)
-            if x == 1 and y % 8 == 0 then sleep(0) end
-            set(screen, x, y, back, fore, char, nil, true)
-        end)
+        if crop then
+            return zximage.parse(path, function (x, y, back, fore, char)
+                set(screen, ((x - 1) // 2) + 1, ((y - 1) // 2) + 1, back, fore, char, nil, true)
+            end)
+        else
+            return zximage.parse(path, function (x, y, back, fore, char)
+                if x == 1 and y % 8 == 0 then sleep(0) end
+                set(screen, x, y, back, fore, char, nil, true)
+            end)
+        end
     end
 end
 
