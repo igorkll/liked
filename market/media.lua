@@ -81,14 +81,14 @@ local list = {
         end
     },
     {
-        name = "zx_images",
+        name = "zxImages",
         version = "1",
         vendor = "logic",
         description = "images from zx spectrum",
         minDiskSpace = 64,
         
-        path = "/data/userdata/zx_images",
-        urlPrimaryPart = selfurlpart .. "/media/zx_images/",
+        path = "/data/userdata/zxImages",
+        urlPrimaryPart = selfurlpart .. "/media/zxImages/",
         files = (function()
             local list = {"icon.t2p"}
             for i = 1, 12 do
