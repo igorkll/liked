@@ -118,7 +118,9 @@ function image.draw(screen, path, x, y, wallpaperMode, forceFullColor, lightMul,
         local colorByte, countCharBytes
         local isEmptyBuff = true
         local index
-        
+
+        gpu.updateFlag()
+
         for cy = 1, sy do
             for cx = 1, sx do
                 colorByte = string.byte(read(1))
@@ -148,25 +150,31 @@ function image.draw(screen, path, x, y, wallpaperMode, forceFullColor, lightMul,
                 ((readbit(colorByte, 6) and 1 or 0) * 4) + 
                 ((readbit(colorByte, 7) and 1 or 0) * 8)
                 char = read(countCharBytes)
+                isEmptyBuff = char == " "
                 index = (x - 1) + cx + (((cy + y) - 2) * rx)
 
                 if background ~= 0 or foreground ~= 0 then
-                    col, col2 = nil, nil
-                    if wallpaperMode then
-                        if background == colorslib.lightBlue then col = backs[index] end
-                        if foreground == colorslib.lightBlue then col2 = backs[index] end
-                    end
-                    if col then
-                        backs[index] = col
+                    if (background == foreground or isEmptyBuff) and not fullBack then
+                        backs[index] = imageReColor(colorslib.colorMul(llcolors[background + 1], lightMul), blackListedColor, newColors)
+                        chars[index] = " "
                     else
-                        backs[index] = imageReColor(colorslib.colorMul(fullBack or llcolors[background + 1], lightMul), blackListedColor, newColors)
+                        col, col2 = nil, nil
+                        if wallpaperMode then
+                            if background == colorslib.lightBlue then col = backs[index] end
+                            if foreground == colorslib.lightBlue then col2 = backs[index] end
+                        end
+                        if col then
+                            backs[index] = col
+                        else
+                            backs[index] = imageReColor(colorslib.colorMul(fullBack or llcolors[background + 1], lightMul), blackListedColor, newColors)
+                        end
+                        if col2 then
+                            fores[index] = col2
+                        else
+                            fores[index] = imageReColor(colorslib.colorMul(fullFore or llcolors[foreground + 1], lightMul), blackListedColor, newColors)
+                        end
+                        chars[index] = char
                     end
-                    if col2 then
-                        fores[index] = col2
-                    else
-                        fores[index] = imageReColor(colorslib.colorMul(fullFore or llcolors[foreground + 1], lightMul), blackListedColor, newColors)
-                    end
-                    chars[index] = char
                 end
             end
         end
@@ -220,7 +228,7 @@ function image.draw(screen, path, x, y, wallpaperMode, forceFullColor, lightMul,
                         else
                             col, col2 = nil, nil
                             if wallpaperMode then
-                                local _, c, f, b = pcall(gpu.get, oldX + (x - 1), oldY + (y - 1))
+                                _, c, f, b = pcall(gpu.get, oldX + (x - 1), oldY + (y - 1))
                                 if oldBack == colorslib.lightBlue then col = b end
                                 if oldFore == colorslib.lightBlue then col2 = b end
                             end
