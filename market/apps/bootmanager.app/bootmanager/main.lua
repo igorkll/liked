@@ -1,5 +1,6 @@
-local bootfs = component.proxy(computer.getBootAddress())
 local tmpfs = component.proxy(computer.tmpAddress())
+if tmpfs.exists("/bootloader") then return end
+local bootfs = component.proxy(computer.getBootAddress())
 
 local function getGPU(screen)
     for address in component.list("gpu", true) do
@@ -31,17 +32,6 @@ end
 local function centerPrint(gpu, y, text)
     local rx, ry = gpu.getResolution()
     gpu.set(((rx / 2) - (unicode.len(text) / 2)) + 1, y, text)
-end
-
-local function unserialize(str)
-    local code = load("return " .. str, "=unserialize", "t", {math={huge=math.huge}})
-    if code then
-        local result = {pcall(code)}
-        computer.pullSignal(0)
-        if result[1] and type(result[2]) == "table" then
-            return result[2]
-        end
-    end
 end
 
 local function unserialize(str)
