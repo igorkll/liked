@@ -1458,14 +1458,14 @@ end
 
 
 function gui.clearRun(func, screen, ...)
-    local clear = saveZone(screen)
+    local clear = gui.saveZone(screen)
     local result = {func(screen, ...)}
     clear()
     return table.unpack(result)
 end
 
 function gui.clearBigRun(func, screen, ...)
-    local clear = saveBigZone(screen)
+    local clear = gui.saveBigZone(screen)
     local result = {func(screen, ...)}
     clear()
     return table.unpack(result)
