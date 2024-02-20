@@ -108,8 +108,8 @@ function zximage.draw(screen, path, crop)
     local sleep = os.sleep
     local set = graphic.set
     local gpu = graphic.findGpu(screen)
-    if gpu.getBuffers then
-        local chars, fores, backs = gpu.getBuffers()
+    if gpu.getSoftwareBuffers then
+        local chars, fores, backs = gpu.getSoftwareBuffers()
         local pal = graphic.getPalette(screen, true)
         local rx = graphic.getResolution(screen)
         local index
