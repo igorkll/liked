@@ -154,6 +154,11 @@ end
 ------------------------------------
 
 function gui.shadow(screen, x, y, sx, sy, mul, full)
+    if gui.skipShadow then
+        gui.skipShadow = nil
+        return
+    end
+
     local gpu
     if type(screen) == "table" then
         gpu = screen
