@@ -384,7 +384,7 @@ function liked.raw_drawFullUpBarTask(method, screen, title, withoutFill, bgcolor
     return th, redraw, callbacks
 end
 
-function liked.drawFullUpBarTask(...)
+function liked.drawFullUpBarTask(...) --main
     return liked.raw_drawFullUpBarTask(thread.create, ...)
 end
 
