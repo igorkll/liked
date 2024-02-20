@@ -151,37 +151,6 @@ local list = {
         end
     },
     {
-        name = "mineOS",
-        version = "3",
-        vendor = "IgorTimofeev",
-        icon = selfurlpart .. "/apps/mineOS.app/icon.t2p",
-        license = selfurlpart .. "/apps/mineOS.app/LICENSE",
-        description = "configures dualboot between mineOS and liked\nATTENTION. if you have \"MineOS EFI\" installed, then you will not be able to use liked after installing MineOS. in order to boot into liked, delete the /OS.lua file in the MineOS explorer",
-        minDiskSpace = 1024 + 512,
-        minColorDepth = 8,
-        dualboot = true,
-
-        path = "/vendor/apps/mineOS.app",
-        install = function(self)
-            local afpxPath = self.path .. "/mineOS.afpx"
-
-            fs.makeDirectory(self.path)
-            download(self.path .. "/main.lua", selfurlpart .. "/apps/mineOS.app/main.lua")
-            download(self.path .. "/uninstall.lua", selfurlpart .. "/apps/mineOS.app/uninstall.lua")
-            download(self.path .. "/icon.t2p", self.icon)
-            download("/mineOS.lua", selfurlpart .. "/apps/mineOS.app/mineOS.lua")
-            
-            download(self.path .. "/lua5_2.lua", selfurlpart .. "/apps/mineOS.app/lua5_2.lua")
-            download(self.path .. "/actions.cfg", selfurlpart .. "/apps/mineOS.app/actions.cfg")
-            download(self.path .. "/LICENSE", self.license)
-
-            download(afpxPath, selfurlpart .. "/apps/mineOS.app/mineOS.afpx")
-
-            require("archiver").unpack(afpxPath, "/")
-            fs.remove(afpxPath)
-        end
-    },
-    {
         name = "explode",
         version = "2",
         vendor = "logic",
