@@ -1,34 +1,31 @@
 local uix = require("uix")
 local fs = require("filesystem")
+local gobjs = require("gobjs")
 local viewer = {}
 
-function viewer.license(path)
-    local licenseLayout = ui:simpleCreate(uix.colors.cyan, uix.styles[2])
-    licenseLayout:createCustom(3, 2, gobjs.scrolltext, rx - 4, ry - 4, assert(fs.readFile("/system/LICENSE")):gsub("\r", ""))
+function viewer.license(screen, path)
+    local ui = uix.manager(screen)
+    local rx, ry = ui:size()
+    local ret
 
-    back1 = licenseLayout:createButton(3, ry - 1, 8, 1, uix.colors.lightBlue, uix.colors.white, " ← back", true)
+    local licenseLayout = ui:simpleCreate(uix.colors.cyan, uix.styles[2])
+    licenseLayout:createCustom(3, 2, gobjs.scrolltext, rx - 4, ry - 4, assert(fs.readFile(path)):gsub("\r", ""))
+
+    local back1 = licenseLayout:createButton(3, ry - 1, 8, 1, uix.colors.lightBlue, uix.colors.white, " ← back", true)
     back1.alignment = "left"
     function back1:onClick()
-        ui:select(helloLayout)
+        ret = false
+        ui.exitFlag = true
     end
 
-    next2 = licenseLayout:createButton(rx - 17, ry - 1, 16, 1, uix.colors.lightBlue, uix.colors.white, "accept & next", true)
+    local next2 = licenseLayout:createButton(rx - 17, ry - 1, 16, 1, uix.colors.lightBlue, uix.colors.white, "accept & next", true)
     function next2:onClick()
-        doSetup("inet")
-        if registry.systemConfigured then
-            os.exit()
-        else
-            ui:draw()
-        end
+        ret = true
+        ui.exitFlag = true
     end
-
-    function licenseLayout:onSelect()
-        sysinit.initScreen(screen)
-    end
-
-    --------------------------------
 
     ui:loop()
+    return ret
 end
 
 viewer.unloadable = true
