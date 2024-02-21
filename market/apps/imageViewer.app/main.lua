@@ -23,7 +23,7 @@ local layout = manager:create("Image Viewer")
 
 layout:createImage(rx - 29, 1, "logo.t2p")
 
-layout:createText(2, ry - 5, nil, "Press 'Enter' key to exit from viewer")
+layout:createText(2, ry - 5, nil, "Press 'Enter' key or 'ctrl+w' to exit from viewer")
 layout:createText(2, 2, nil, "likeOS water-mark: ")
 local startButton = layout:createButton(2, ry - 3, rx - 2, 3, nil, nil, "Start View", true)
 local waterMark = layout:createSwitch(21, 2, config.water)
@@ -102,10 +102,6 @@ function startButton:onClick()
     end
 end
 
-function manager:onEvent(eventData)
-    if eventData[1] == "key_down" and table.exists(lastinfo.keyboards[screen], eventData[2]) and eventData[3] == 13 and eventData[4] == 28 then
-        os.exit()
-    end
-end
-
+manager:setExit_ctrlW()
+manager:setExit_enter()
 manager:loop()

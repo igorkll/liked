@@ -10,6 +10,7 @@ local system = require("system")
 local colorslib = require("colors")
 local paths = require("paths")
 local apps = require("apps")
+local lastinfo = require("lastinfo")
 
 local colors = gui_container.colors
 local uix = {colors = colors}
@@ -1090,6 +1091,14 @@ function manager:select(layout)
     end
 end
 
+function manager:setExit_ctrlW()
+    self.exit_ctrlW = true
+end
+
+function manager:setExit_enter()
+    self.exit_enter = true
+end
+
 function manager:loop(timeout)
     if self.firstLayout and not self.current then
         self:select(self.firstLayout)
@@ -1106,7 +1115,11 @@ function manager:loop(timeout)
             self:onEvent(eventData, windowEventData)
         end
 
-        if self.exitFlag then
+        if self.exit_ctrlW and eventData[1] == "close" then
+            break
+        elseif self.exit_enter and (eventData[1] == "key_down" and table.exists(lastinfo.keyboards[self.screen], eventData[2]) and eventData[3] == 13 and eventData[4] == 28) then
+            break
+        elseif self.exitFlag then
             break
         end
     end

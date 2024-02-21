@@ -763,7 +763,7 @@ end
 
 liked.regBar = liked.drawFullUpBarTask
 
-function liked.regExit(screen, close, closeButton)
+function liked.regExit(screen, close, closeButton, enterAlias)
     local baseTh = thread.current()
     thread.listen("close", function (_, uuid)
         if uuid == screen then
