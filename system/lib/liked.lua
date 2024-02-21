@@ -51,7 +51,7 @@ end
     
 function liked.wait(screen)
     while true do
-        local eventData = event.pull()
+        local eventData = {event.pull()}
         if eventData[1] == "close" and eventData[2] == screen then
             break
         elseif eventData[1] == "key_down" and table.exists(lastinfo.keyboards[screen], eventData[2]) and eventData[3] == 13 and eventData[4] == 28 then

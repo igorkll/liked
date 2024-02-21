@@ -21,7 +21,7 @@ local manager = uix.manager(screen)
 local rx, ry = manager:zoneSize()
 local layout = manager:create("Image Viewer")
 
-layout:createImage(rx - 29, 1, "logo.t2p")
+layout:createImage(rx - 31, 1, "logo.t2p")
 
 layout:createText(2, ry - 5, nil, "Press 'Enter' key or 'ctrl+w' to exit from viewer")
 layout:createText(2, 2, nil, "likeOS water-mark: ")
