@@ -1175,7 +1175,7 @@ function gui.select(screen, cx, cy, label, actions, scroll, noCloseButton, overl
     end
 end
 
-function gui.selectcomponent(screen, cx, cy, types, allowAutoConfirm, control, callbacks, blacklist) --=gui_selectcomponent(screen, nil, nil, {"computer"}, true)
+function gui.selectcomponent(screen, cx, cy, types, allowAutoConfirm, control, callbacks, blacklist, disableShadow) --=gui_selectcomponent(screen, nil, nil, {"computer"}, true)
     local advLabeling = require("advLabeling")
     local vcomponent = require("vcomponent")
 
@@ -1223,6 +1223,9 @@ function gui.selectcomponent(screen, cx, cy, types, allowAutoConfirm, control, c
 
         local scroll
         local shadowDrawed
+        if disableShadow then
+            shadowDrawed = true
+        end
 
         while true do
             local strs = {}
