@@ -125,7 +125,7 @@ function liked.mountAll()
 
     for address in component.list("filesystem") do
         if address ~= computer.tmpAddress() and address ~= fs.bootaddress then
-            assert(fs.mount(address, hdd.genName(address)))
+            fs.mount(address, hdd.genName(address))
         end
     end
 end

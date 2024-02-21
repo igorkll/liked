@@ -1312,13 +1312,23 @@ function gui.selectcomponent(screen, cx, cy, types, allowAutoConfirm, control, c
                     elseif action == 2 then
                         clipboard.set(eventData[6], addr)
                     elseif action == 3 then
+                        local liked = require("liked")
+                        liked.umountAll()
                         local str = gui.input(screen, (cx + 25) - 16, cy + 4, "new name", nil, nil, advLabeling.getLabel(addr))
                         if type(str) == "string" then
                             advLabeling.setLabel(addr, str)
                         end
+                        liked.mountAll()
                     elseif action == 4 then
                         if gui.yesno(screen, (cx + 25) - 16, cy + 4, "clear label on \"" .. (advLabeling.getLabel(addr) or component.type(addr)) .. "\"?") then
-                            advLabeling.setLabel(addr, nil)
+                            local liked = require("liked")
+                            liked.umountAll()
+                            if not pcall(advLabeling.setLabel, addr, nil) then
+                                local clear = gui.saveZone(screen)
+                                gui.warn(screen, nil, nil, "invalid name")
+                                clear()
+                            end
+                            liked.mountAll()
                         end
                     elseif action == 5 then
                         local format = require("format")
