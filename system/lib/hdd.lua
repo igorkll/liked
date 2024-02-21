@@ -29,7 +29,7 @@ end
 
 function hdd.genName(uuid)
     local label = component.invoke(uuid, "getLabel")
-    if #label == 0 then
+    if label and #label == 0 then
         label = nil
     end
     return paths.concat("/data/userdata", (label or "disk"):sub(1, 8) .. "-" .. uuid:sub(1, 5))
