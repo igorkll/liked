@@ -49,8 +49,15 @@ function liked.isUserdata(path)
     return path:sub(1, #data) == data
 end
     
-function liked.wait()
-    event.pull("close")
+function liked.wait(screen)
+    while true do
+        local eventData = event.pull()
+        if eventData[1] == "close" and eventData[2] == screen then
+            break
+        elseif eventData[1] == "key_down" and table.exists(lastinfo.keyboards[screen], eventData[2]) and eventData[3] == 13 and eventData[4] == 28 then
+            break
+        end
+    end
 end
 
 function liked.isUninstallScript(path)
@@ -765,6 +772,7 @@ liked.regBar = liked.drawFullUpBarTask
 
 function liked.regExit(screen, close, closeButton, enterAlias)
     local baseTh = thread.current()
+    
     thread.listen("close", function (_, uuid)
         if uuid == screen then
             if close then
@@ -774,6 +782,19 @@ function liked.regExit(screen, close, closeButton, enterAlias)
             end
         end
     end)
+
+    if enterAlias then
+        thread.listen("key_down", function (_, uuid, code1, code2)
+            if table.exists(lastinfo.keyboards[screen], uuid) and code1 == 13 and code2 == 28 then
+                if close then
+                    close()
+                else
+                    baseTh:kill()
+                end
+            end
+        end)
+    end
+
     if closeButton then
         thread.listen("touch", function (_, uuid, px, py)
             if uuid == screen then

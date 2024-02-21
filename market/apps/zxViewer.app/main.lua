@@ -21,5 +21,5 @@ local crop = graphic.getDepth(screen) < 8
 zximage.applyResolution(screen, crop)
 zximage.applyPalette(screen)
 zximage.draw(screen, path, crop)
-liked.wait()
+liked.wait(screen)
 pcall(sysinit.initScreen, screen)
