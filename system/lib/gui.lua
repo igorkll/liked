@@ -180,7 +180,7 @@ function gui.shadow(screen, x, y, sx, sy, mul, full, noSaveShadowState)
 
     mul = mul or 0.4
     local scr
-    if not full and not noSaveShadowState and registry.shadowMode == "screen" then
+    if not full and registry.shadowMode == "screen" then
         local rx, ry = gpu.getResolution()
         x = 1
         y = 1
@@ -188,8 +188,10 @@ function gui.shadow(screen, x, y, sx, sy, mul, full, noSaveShadowState)
         sy = ry
         full = true
 
-        scr = true
-        gui.scrShadow = gui.scrShadow + 1
+        if not noSaveShadowState then
+            scr = true
+            gui.scrShadow = gui.scrShadow + 1
+        end
     end
 
     local function getPoses()
@@ -417,7 +419,7 @@ function gui.status(screen, cx, cy, str, backgroundColor)
         window:set(2, 2, color, colors.blue, " ◢█◣ ")
         window:set(2, 3, color, colors.blue, "◢███◣")
         window:set(4, 2, colors.blue, colors.white, "P")
-    end, true)
+    end, nil, nil, true)
     graphic.forceUpdate(screen)
     event.yield()
 end
