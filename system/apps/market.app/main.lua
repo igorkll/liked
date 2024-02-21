@@ -91,8 +91,8 @@ local urls = {}
 local list = {}
 local glibs = {}
 
-local function getAppVersion(path)
-    local versionPath = paths.concat(path, "info", "version.cfg")
+local function getContentVersion(path)
+    local versionPath = paths.concat(path, "info_version.cfg")
     if fs.exists(versionPath) then
         return fs.readFile(versionPath)
     else
@@ -100,14 +100,12 @@ local function getAppVersion(path)
     end
 end
 
-local function setAppVersion(path, version)
-    local versionPath = paths.concat(path, "info", "version.cfg")
-    local folderPath = paths.path(versionPath)
-    fs.makeDirectory(folderPath)
-    if mediaMode then --к файлам из mediastore есть прямой доступ у пользователя, и папку с инфой нужно скрыть чтобы не мазолила глаза
-        fs.setAttribute(folderPath, "hidden", true)
-    end
+local function setContentVersion(path, version)
+    local versionPath = paths.concat(path, "info_version.cfg")
     fs.writeFile(versionPath, version)
+    if mediaMode then --к файлам из mediastore есть прямой доступ у пользователя и файл инфы нужно скрыть. чтобы не мешал
+        fs.setAttribute(versionPath, "hidden", true)
+    end
 end
 
 local function modifyList(lst)
@@ -128,7 +126,7 @@ local function modifyList(lst)
     for i, v in ipairs(lst) do
         if not v.getVersion then
             function v:getVersion()
-                return getAppVersion(self.path)
+                return getContentVersion(self.path)
             end
         end
     
@@ -185,8 +183,10 @@ local function modifyList(lst)
             end
 
             _install(self)
-            setAppVersion(self.path, self.version)
-            apps.postInstall(screen, nickname, self.path, self.version)
+            setContentVersion(self.path, self.version)
+            if not mediaMode then
+                apps.postInstall(screen, nickname, self.path, self.version)
+            end
             if v.postInstall then
                 v:postInstall()
             end
