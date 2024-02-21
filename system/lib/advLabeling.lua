@@ -8,6 +8,9 @@ function advLabeling.setLabel(address, label)
         if not registry.advLabeling then registry.advLabeling = {} end
         registry.advLabeling[address] = label
         registry.save()
+        return 2
+    elseif result[1] then
+        return 1
     end
 end
 

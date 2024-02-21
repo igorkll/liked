@@ -1323,10 +1323,14 @@ function gui.selectcomponent(screen, cx, cy, types, allowAutoConfirm, control, c
                         if gui.yesno(screen, (cx + 25) - 16, cy + 4, "clear label on \"" .. (advLabeling.getLabel(addr) or component.type(addr)) .. "\"?") then
                             local liked = require("liked")
                             liked.umountAll()
-                            if not pcall(advLabeling.setLabel, addr, nil) then
-                                local clear = gui.saveZone(screen)
-                                gui.warn(screen, nil, nil, "invalid name")
-                                clear()
+                            if component.type(addr) == "filesystem" then
+                                if not pcall(component.invoke, addr, "setLabel", nil) then
+                                    local clear = gui.saveZone(screen)
+                                    gui.warn(screen, nil, nil, "invalid name")
+                                    clear()
+                                end
+                            else
+                                advLabeling.setLabel(addr, nil)
                             end
                             liked.mountAll()
                         end
