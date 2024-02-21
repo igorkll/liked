@@ -93,6 +93,8 @@ gui.bigZoneY = 16
 gui.veryBigZoneX = 60
 gui.veryBigZoneY = 18
 
+gui.scrShadow = 0
+
 function gui.hideScreen(screen)
     pcall(component.invoke, screen, "turnOff")    
     return function ()
@@ -169,6 +171,7 @@ function gui.shadow(screen, x, y, sx, sy, mul, full)
     local depth = graphic.getDepth(screen)
 
     mul = mul or 0.4
+    local scr
     if not full and registry.shadowMode == "screen" then
         local rx, ry = gpu.getResolution()
         x = 1
@@ -177,7 +180,8 @@ function gui.shadow(screen, x, y, sx, sy, mul, full)
         sy = ry
         full = true
 
-        gui.scrShadow = true
+        scr = true
+        gui.scrShadow = gui.scrShadow + 1
     end
 
     local function getPoses()
@@ -325,7 +329,9 @@ function gui.shadow(screen, x, y, sx, sy, mul, full)
     end
 
     return function ()
-        gui.scrShadow = nil
+        if scr then
+            gui.scrShadow = gui.scrShadow - 1
+        end
 
         local gpu = graphic.findGpu(screen)
         for i, x in ipairs(origsX) do
@@ -803,8 +809,9 @@ function gui.context(screen, posX, posY, strs, active, disShadow)
 
     local window = graphic.createWindow(screen, posX, posY, sizeX, sizeY)
     --window:fill(2, 2, window.sizeX, window.sizeY, colors.gray, 0, " ")
+    local clearShadow
     if not disShadow then
-        gui.shadow(screen, window.x, window.y, window.sizeX, window.sizeY)
+        clearShadow = gui.shadow(screen, window.x, window.y, window.sizeX, window.sizeY)
     end
 
     local function redrawStrs(selected)
@@ -840,12 +847,14 @@ function gui.context(screen, posX, posY, strs, active, disShadow)
                 local num = windowEventData[4]
                 if not active or active[num] then
                     event.sleep(0.05)
+                    if clearShadow then clearShadow() end
                     return strs[num], num
                 end
             elseif (windowEventData[1] == "touch" or windowEventData[1] == "drag") and windowEventData[5] == 0 then
                 if windowEventData[1] == "touch" and selectedNum and selectedNum == windowEventData[4] then
                     if not active or active[selectedNum] then
                         event.sleep(0.05)
+                        if clearShadow then clearShadow() end
                         return strs[selectedNum], selectedNum
                     end
                 end
@@ -856,6 +865,7 @@ function gui.context(screen, posX, posY, strs, active, disShadow)
                 redrawStrs()
             elseif eventData[1] == "touch" or eventData[1] == "scroll" then
                 event.push(table.unpack(eventData))
+                if clearShadow then clearShadow() end
                 return nil, nil
             end
         end

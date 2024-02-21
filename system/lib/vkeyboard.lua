@@ -21,7 +21,7 @@ end
 function vkeyboard.input(screen, splash, allowActions)
     local rx, ry = graphic.getResolution(screen)
     local window = graphic.createWindow(screen, 5, ry - 18, rx - 8, 18)
-    gui.shadow(graphic.findGpu(screen), 5, ry - 18, rx - 8, 18)
+    gui.shadow(screen, 5, ry - 18, rx - 8, 18)
 
     local layout1 = uix.create(window, uix.colors.lightGray, "square")
     local layout2 = uix.create(window, uix.colors.lightGray, "square")
