@@ -163,7 +163,7 @@ end
 
 ------------------------------------
 
-function gui.shadow(screen, x, y, sx, sy, mul, full)
+function gui.shadow(screen, x, y, sx, sy, mul, full, noSaveShadowState)
     if gui.skipShadow then
         gui.skipShadow = nil
         return
@@ -180,7 +180,7 @@ function gui.shadow(screen, x, y, sx, sy, mul, full)
 
     mul = mul or 0.4
     local scr
-    if not full and registry.shadowMode == "screen" then
+    if not full and not noSaveShadowState and registry.shadowMode == "screen" then
         local rx, ry = gpu.getResolution()
         x = 1
         y = 1
@@ -366,7 +366,7 @@ function gui.pleaseType(screen, str, tostr)
     end
 end
 
-function gui.smallWindow(screen, cx, cy, str, backgroundColor, icon, sx, sy)
+function gui.smallWindow(screen, cx, cy, str, backgroundColor, icon, sx, sy, noSaveShadowState)
     sx = sx or 32
     sy = sy or 8
 
@@ -379,7 +379,7 @@ function gui.smallWindow(screen, cx, cy, str, backgroundColor, icon, sx, sy)
     local color = backgroundColor or colors.lightGray
 
     --window:fill(2, 2, window.sizeX, window.sizeY, colors.gray, 0, " ")
-    local noShadow = gui.shadow(screen, window.x, window.y, window.sizeX, window.sizeY)
+    local noShadow = gui.shadow(screen, window.x, window.y, window.sizeX, window.sizeY, nil, nil, noSaveShadowState)
     window:clear(color)
 
     local textColor = colors.white
@@ -417,7 +417,7 @@ function gui.status(screen, cx, cy, str, backgroundColor)
         window:set(2, 2, color, colors.blue, " ◢█◣ ")
         window:set(2, 3, color, colors.blue, "◢███◣")
         window:set(4, 2, colors.blue, colors.white, "P")
-    end)
+    end, true)
     graphic.forceUpdate(screen)
     event.yield()
 end
