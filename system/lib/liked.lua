@@ -281,7 +281,7 @@ local function raw_drawUpBarTask(method, screen, ...)
 end
 
 function liked.upBarShadow(screen)
-    if gui.scrShadow > 0 then
+    if gui.scrShadow[screen] and gui.scrShadow[screen] > 0 then
         local rx = graphic.getResolution(screen)
         gui.shadow(screen, 1, 1, rx, 1, nil, true)
     end

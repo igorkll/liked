@@ -193,6 +193,8 @@ local function drawBar(lUserPath, iconsCount)
 end
 
 local function draw(old, check) --вызывает все перерисовки
+    gui.scrShadow[screen] = nil
+
     checkData()
     if not fs.exists(userPath) or not fs.isDirectory(userPath) then
         userPath = defaultUserPath

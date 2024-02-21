@@ -101,7 +101,7 @@ gui.bigZoneY = 16
 gui.veryBigZoneX = 60
 gui.veryBigZoneY = 18
 
-gui.scrShadow = 0
+gui.scrShadow = {}
 
 function gui.hideScreen(screen)
     pcall(component.invoke, screen, "turnOff")    
@@ -190,7 +190,7 @@ function gui.shadow(screen, x, y, sx, sy, mul, full, noSaveShadowState)
 
         if not noSaveShadowState then
             scr = true
-            gui.scrShadow = gui.scrShadow + 1
+            gui.scrShadow[screen] = (gui.scrShadow[screen] or 0) + 1
         end
     end
 
@@ -340,7 +340,7 @@ function gui.shadow(screen, x, y, sx, sy, mul, full, noSaveShadowState)
 
     return function ()
         if scr then
-            gui.scrShadow = gui.scrShadow - 1
+            gui.scrShadow[screen] = gui.scrShadow[screen] - 1
         end
 
         local gpu = graphic.findGpu(screen)
