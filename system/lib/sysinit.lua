@@ -225,6 +225,7 @@ function sysinit.init(box, lscreen)
     local screens = {}
     local minDepth = math.huge
     local maxDepth = 0
+    local screensCount = 0
     local hardwareBufferAvailable = false
     for address in component.list("screen") do
         local gpu = graphic.findGpu(address)
@@ -241,6 +242,7 @@ function sysinit.init(box, lscreen)
                 maxDepth = math.max(maxDepth, depth)
                 minDepth = math.min(minDepth, depth)
             end
+            screensCount = screensCount + 1
         end
     end
     minDepth = math.round(minDepth)
@@ -311,13 +313,16 @@ function sysinit.init(box, lscreen)
 
     ------------------------------------
 
+    local minDbuffRam = liked.minRamForDBuff() * 1024
     if not registry.bufferType then
-        if hardwareBufferAvailable and not box then
+        if not box and screensCount <= 2 and computer.totalMemory() >= minDbuffRam then
+            registry.bufferType = "software"
+        elseif not box and hardwareBufferAvailable then
             registry.bufferType = "hardware"
         else
             registry.bufferType = "none"
         end
-    elseif registry.bufferType == "software" and computer.totalMemory() < (liked.minRamForDBuff() * 1024) then
+    elseif registry.bufferType == "software" and computer.totalMemory() < minDbuffRam then
         registry.bufferType = "none"
     end
     liked.applyBufferType()
