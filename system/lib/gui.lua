@@ -1287,6 +1287,7 @@ function gui.selectcomponent(screen, cx, cy, types, allowAutoConfirm, control, c
                 fs.remove(tempfile)
             end
 
+            local subWindowX, subWindowY = (cx + 25) - 16, cy + 4
             if idx then
                 local addr = addresses[idx]
                 if button == 0 and not control then
@@ -1314,19 +1315,19 @@ function gui.selectcomponent(screen, cx, cy, types, allowAutoConfirm, control, c
                     elseif action == 3 then
                         local liked = require("liked")
                         liked.umountAll()
-                        local str = gui.input(screen, (cx + 25) - 16, cy + 4, "new name", nil, nil, advLabeling.getLabel(addr))
+                        local str = gui.input(screen, subWindowX, subWindowY, "new name", nil, nil, advLabeling.getLabel(addr))
                         if type(str) == "string" then
                             advLabeling.setLabel(addr, str)
                         end
                         liked.mountAll()
                     elseif action == 4 then
-                        if gui.yesno(screen, (cx + 25) - 16, cy + 4, "clear label on \"" .. (advLabeling.getLabel(addr) or component.type(addr)) .. "\"?") then
+                        if gui.yesno(screen, subWindowX, subWindowY, "clear label on \"" .. (advLabeling.getLabel(addr) or component.type(addr)) .. "\"?") then
                             local liked = require("liked")
                             liked.umountAll()
                             if component.type(addr) == "filesystem" then
                                 if not pcall(component.invoke, addr, "setLabel", nil) then
                                     local clear = gui.saveZone(screen)
-                                    gui.warn(screen, nil, nil, "invalid name")
+                                    gui.warn(screen, subWindowX, subWindowY, "invalid name")
                                     clear()
                                 end
                             else
