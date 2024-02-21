@@ -42,7 +42,7 @@ local componentSelector = thread.createBackground(function ()
         end, onCloseEdit = function()
             base:resume()
             upTask:resume()
-        end}, true)
+        end}, nil, true)
     end
 end)
 componentSelector.parentData.screen = screen
