@@ -623,8 +623,6 @@ function vmx.create(eepromPath, diskSettings, address)
 end
 
 function vmx.hookGraphic(screen)
-    graphic.unloadBuffer(screen)
-    
     local gpuAddress = graphic.findGpuAddress(screen)
     local scrsvTurnOn
     if gpuAddress then
@@ -632,6 +630,7 @@ function vmx.hookGraphic(screen)
         palette.setDefaultPalette(screen, true)
         pcall(component.invoke, gpuAddress, "setActiveBuffer", 0)
         pcall(component.invoke, gpuAddress, "freeAllBuffers")
+        graphic.unloadBuffer(screen)
         graphic.gpuPrivateList[gpuAddress] = true
     end
     
