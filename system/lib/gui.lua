@@ -176,6 +176,8 @@ function gui.shadow(screen, x, y, sx, sy, mul, full)
         sx = rx
         sy = ry
         full = true
+
+        gui.scrShadow = true
     end
 
     local function getPoses()
@@ -323,8 +325,9 @@ function gui.shadow(screen, x, y, sx, sy, mul, full)
     end
 
     return function ()
-        local gpu = graphic.findGpu(screen)
+        gui.scrShadow = nil
 
+        local gpu = graphic.findGpu(screen)
         for i, x in ipairs(origsX) do
             gpu.setForeground(origsF[i])
             gpu.setBackground(origsB[i])

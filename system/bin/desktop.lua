@@ -131,10 +131,11 @@ local function drawStatus()
     statusWindow:set(window.sizeX - unicode.len(str), 1, colors.gray, colors.white, str)
     ]]
 
-    liked.drawUpBar(screen, nil, getBarsColor())
+    liked.drawUpBar(screen, nil, getBarsColor(), nil, true)
     statusWindow:set(1, 1, contextMenuOpen == 1 and colors.blue or colors.lightGray, colors.white, " OS ")
     statusWindow:set(6, 1, contextMenuOpen == 2 and colors.blue or colors.lightGray, colors.white, " FILES ")
     statusWindow:set(14, 1, contextMenuOpen == 3 and colors.blue or colors.lightGray, colors.white, " TYPES ")
+    liked.upBarShadow(screen)
 end
 
 local function drawWallpaper()

@@ -257,7 +257,7 @@ end
 
 --------------------------------------------------------
 
-function liked.raw_drawUpBarTask(method, screen, ...)
+local function raw_drawUpBarTask(method, screen, ...)
     local tbl = {...}
     local function redraw()
         liked.drawUpBar(screen, table.unpack(tbl))
@@ -273,16 +273,23 @@ function liked.raw_drawUpBarTask(method, screen, ...)
     return th, redraw
 end
 
+function liked.upBarShadow(screen)
+    if gui.scrShadow then
+        local rx = graphic.getResolution(screen)
+        gui.shadow(screen, 1, 1, rx, 1, nil, true)
+    end
+end
+
 function liked.drawUpBarTask(...)
-    return liked.raw_drawUpBarTask(require("thread").create, ...)
+    return raw_drawUpBarTask(require("thread").create, ...)
 end
 
 function liked.drawUpBarTaskBg(...)
-    return liked.raw_drawUpBarTask(require("thread").createBackground, ...)
+    return raw_drawUpBarTask(require("thread").createBackground, ...)
 end
 
 
-function liked.drawUpBar(screen, withoutFill, bgcolor, guiOffset)
+function liked.drawUpBar(screen, withoutFill, bgcolor, guiOffset, noShadow)
     local rtc = "RTC-" .. time.formatTime(time.addTimeZone(time.getRealTime(), registry.timeZone or 0))
     local gtc = "GTC-" .. time.formatTime(time.getGameTime())
     local charge = system.getCharge()
@@ -340,12 +347,16 @@ function liked.drawUpBar(screen, withoutFill, bgcolor, guiOffset)
         gpu.set((rx - offset) + (i - 1), 1, char)
     end
 
+    if not noShadow then
+        liked.upBarShadow(screen)
+    end
+
     graphic.updateFlag(screen)
 end
 
 --------------------------------------------------------
 
-function liked.raw_drawFullUpBarTask(method, screen, title, withoutFill, bgcolor, wideExit)
+local function raw_drawFullUpBarTask(method, screen, title, withoutFill, bgcolor, wideExit)
     if wideExit == nil then wideExit = true end
     local function redraw()
         liked.drawFullUpBar(screen, title, withoutFill, bgcolor, wideExit)
@@ -384,16 +395,16 @@ function liked.raw_drawFullUpBarTask(method, screen, title, withoutFill, bgcolor
     return th, redraw, callbacks
 end
 
-function liked.drawFullUpBarTask(...) --main
-    return liked.raw_drawFullUpBarTask(thread.create, ...)
+function liked.drawFullUpBarTask(...)
+    return raw_drawFullUpBarTask(thread.create, ...)
 end
 
 function liked.drawFullUpBarTaskBg(...)
-    return liked.raw_drawFullUpBarTask(thread.createBackground, ...)
+    return raw_drawFullUpBarTask(thread.createBackground, ...)
 end
 
-function liked.drawFullUpBar(screen, title, withoutFill, bgcolor, wideExit)
-    liked.drawUpBar(screen, withoutFill, bgcolor, wideExit and -2)
+function liked.drawFullUpBar(screen, title, withoutFill, bgcolor, wideExit, noShadow)
+    liked.drawUpBar(screen, withoutFill, bgcolor, wideExit and -2, true)
     local gpu = graphic.findGpu(screen)
     local rx, ry = gpu.getResolution()
 
@@ -406,6 +417,10 @@ function liked.drawFullUpBar(screen, title, withoutFill, bgcolor, wideExit)
         gpu.set(rx - 2, 1, " X ")
     else
         gpu.set(rx, 1, "X")
+    end
+
+    if not noShadow then
+        liked.upBarShadow(screen)
     end
 end
 

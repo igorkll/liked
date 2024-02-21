@@ -429,11 +429,12 @@ function objclass:draw()
             end
         end
     elseif self.type == "up" then
-        liked.drawFullUpBar(self.gui.window.screen, (self.gui.returnLayout and "   " or "") .. self.title, self.withoutFill, self.bgcolor, self.wide)
+        liked.drawFullUpBar(self.gui.window.screen, (self.gui.returnLayout and "   " or "") .. self.title, self.withoutFill, self.bgcolor, self.wide, true)
         if self.gui.returnLayout then
             local px, py = self.gui.window:toFakePos(1, 1)
             self.gui.window:set(px, py, colors.red, colors.white, " < ")
         end
+        liked.upBarShadow(self.gui.window.screen)
     elseif self.type == "plane" then
         self.gui.window:fill(self.x, self.y, self.sx, self.sy, self.color, 0, " ")
     elseif self.type == "image" then
