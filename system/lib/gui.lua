@@ -47,8 +47,16 @@ function gui.hideExtension(screen, path)
     end
 end
 
+function gui.hideExtensionPath(screen, path)
+    if gui_container.viewFileExps[screen] then
+        return path
+    else
+        return paths.hideExtension(path)
+    end
+end
+
 function gui.fpath(screen, path)
-    return gui.hideExtension(screen, gui_container.toUserPath(screen, path))
+    return gui.hideExtensionPath(screen, gui_container.toUserPath(screen, path))
 end
 
 function gui.isVisible(screen, path)

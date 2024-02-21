@@ -894,15 +894,13 @@ local function doIcon(windowEventData)
                             elseif str == "  info" then
                                 execute("fileinfo", windowEventData[6], v.path)
                             elseif str == "  pack to archive" then
-                                local packFolder = v.path
-                                local clear = saveBigZone(screen)
-                                local outPath = gui_filepicker(screen, nil, nil, nil, "afpx", true)
+                                local clear = gui.saveBigZone(screen)
+                                local outPath = require("iowindows").savefile(screen, "afpx")
                                 clear()
 
                                 if outPath then
-                                    local archiver = require("archiver")
-                                    gui_status(screen, nil, nil, "packaging \"" .. gui_container.toUserPath(screen, packFolder) .. "\" to \"" .. gui_container.toUserPath(screen, outPath) .. "\"")
-                                    liked.assertNoClear(screen, archiver.pack(packFolder, outPath))
+                                    gui.status(screen, nil, nil, "packaging \"" .. gui.fpath(screen, v.path) .. "\" to \"" .. gui.fpath(screen, outPath) .. "\"")
+                                    liked.assertNoClear(screen, require("archiver").pack(v.path, outPath))
                                     draw()
                                 end
                             elseif str == "  remove" then
