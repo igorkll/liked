@@ -623,6 +623,8 @@ function vmx.create(eepromPath, diskSettings, address)
 end
 
 function vmx.hookGraphic(screen)
+    graphic.unloadBuffer(screen)
+    
     local gpuAddress = graphic.findGpuAddress(screen)
     local scrsvTurnOn
     if gpuAddress then
