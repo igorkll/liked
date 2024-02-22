@@ -54,6 +54,7 @@ local function doFormats(appPath, path, delete)
     if not registry.data.gui_container.typenames then registry.data.gui_container.typenames = {} end
     if not registry.data.gui_container.editable then registry.data.gui_container.editable = {} end
     if not registry.data.gui_container.openVia then registry.data.gui_container.openVia = {} end
+    if not registry.data.icons then registry.data.icons = {} end
     
     local function rmData(extension, key)
         registry.data.gui_container[key][extension] = nil
@@ -67,56 +68,34 @@ local function doFormats(appPath, path, delete)
             registry.data.gui_container.knownExps[extension] = true
         end
 
-        if formatInfo.color then
-            if delete then
-                rmData(extension, "typecolors")
-            else
-                registry.data.gui_container.typecolors[extension] = formatInfo.color
-            end
+        if formatInfo.color and not delete then
+            registry.data.gui_container.typecolors[extension] = formatInfo.color
         else
             rmData(extension, "typecolors")
         end
 
-        if formatInfo.name then
-            if delete then
-                rmData(extension, "typenames")
-            else
-                registry.data.gui_container.typenames[extension] = formatInfo.name
-            end
+        if formatInfo.name and not delete then
+            registry.data.gui_container.typenames[extension] = formatInfo.name
         else
             rmData(extension, "typenames")
         end
 
-        if formatInfo.editable then
-            if delete then
-                rmData(extension, "editable")
-            else
-                registry.data.gui_container.editable[extension] = true
-            end
+        if formatInfo.editable and not delete then
+            registry.data.gui_container.editable[extension] = true
         else
             rmData(extension, "editable")
         end
 
-        if formatInfo.program then
-            if delete then
-                rmData(extension, "openVia")
-            else
-                registry.data.gui_container.openVia[extension] = paths.xconcat(appPath, formatInfo.program)
-            end
+        if formatInfo.program and not delete then
+            registry.data.gui_container.openVia[extension] = paths.xconcat(appPath, formatInfo.program)
         else
             rmData(extension, "openVia")
         end
 
-        if formatInfo.icon then
-            if not registry.data.icons then
-                registry.data.icons = {}
-            end
-
-            if delete then
-                registry.data.icons[extension] = nil
-            else
-                registry.data.icons[extension] = paths.xconcat(appPath, formatInfo.icon)
-            end
+        if formatInfo.icon and not delete then
+            registry.data.icons[extension] = paths.xconcat(appPath, formatInfo.icon)
+        else
+            registry.data.icons[extension] = nil
         end
     end
 
