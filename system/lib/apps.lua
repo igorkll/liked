@@ -328,24 +328,24 @@ function apps.postInstall(screen, nickname, path, version)
     end
 
     local regPath = paths.concat(path, "reg.reg")
-    if fs.exists(regPath) and not fs.isDirectory(regPath) then
+    if fs.exists(regPath) then
         liked.applyReg(regPath)
     end
 
     local formatsPath = paths.concat(path, "formats.cfg")
-    if fs.exists(formatsPath) and not fs.isDirectory(formatsPath) then
+    if fs.exists(formatsPath) then
         doFormats(path, formatsPath)
     end
 
     local installPath = paths.concat(path, "install.lua")
-    if fs.exists(installPath) and not fs.isDirectory(installPath) then
+    if fs.exists(installPath) then
         lassert(apps.execute(installPath, screen, nickname))
     end
 
     local autorunPath = paths.concat(path, "autorun.lua")
-    if fs.exists(autorunPath) and not fs.isDirectory(autorunPath) then
+    if fs.exists(autorunPath) then
         require("autorun").reg("system", autorunPath)
-        apps.execute(autorunPath, screen, nickname)
+        lassert(apps.execute(autorunPath, screen, nickname))
     end
 
     createShadow(pname)
@@ -356,55 +356,55 @@ function apps.postInstall(screen, nickname, path, version)
 end
 
 function apps.uninstall(screen, nickname, path, hide)
+    local pname = paths.name(path)
+
     local function lassert(...)
         if screen then
             liked.assert(screen, ...)
         end
     end
-
+    
     if fs.get(path).address ~= fs.bootaddress then
         if screen then
             gui.warn(screen, nil, nil, "it is not possible to uninstall the application from another disk.\nuse the \"remove\" operation")
         end
         return
-    end
-
-    if not hide and screen then
+    elseif not text.startwith(unicode, path, appsPath) and not text.startwith(unicode, path, shadowPath) then
+        if screen then
+            gui.warn(screen, nil, nil, "it is not possible to uninstall applications from here.\nuse the \"remove\" operation")
+        end
+        return
+    elseif not hide and screen then
         gui.status(screen, nil, nil, "uninstalling \"" .. gui.hideExtension(screen, path) .. "\"...")
     end
 
+    --------------------------------
+
     local unregPath = paths.concat(path, "unreg.reg")
-    if fs.exists(unregPath) and not fs.isDirectory(unregPath) then
+    if fs.exists(unregPath) then
         liked.applyReg(unregPath)
     end
 
     local formatsPath = paths.concat(path, "formats.cfg")
-    if fs.exists(formatsPath) and not fs.isDirectory(formatsPath) then
+    if fs.exists(formatsPath) then
         doFormats(path, formatsPath, true)
     end
 
-    local uninstallPath = paths.concat(path, "uninstall.lua")
-    if fs.exists(uninstallPath) and not fs.isDirectory(uninstallPath) then
-        lassert(apps.execute(uninstallPath, screen, nickname))
-    else
-        lassert(fs.remove(path))
-    end
-
     local autorunPath = paths.concat(path, "autorun.lua")
-    if fs.exists(autorunPath) and not fs.isDirectory(autorunPath) then
+    if fs.exists(autorunPath) then
         require("autorun").reg("system", autorunPath, true)
     end
 
-    if not fs.exists(path) then
-        local pname = paths.name(path)
-        
-        if text.startwith(unicode, path, appsPath) then
-            fs.remove(paths.concat(shadowPath, pname))
-        end
-
-        installedInfo.data[pname] = nil
-        installedInfo.save()
+    local uninstallPath = paths.concat(path, "uninstall.lua")
+    if fs.exists(uninstallPath) then
+        lassert(apps.execute(uninstallPath, screen, nickname))
     end
+
+    fs.remove(paths.concat(shadowPath, pname))
+    fs.remove(paths.concat(appsPath, pname))
+
+    installedInfo.data[pname] = nil
+    installedInfo.save()
     registry.save()
     return true
 end
