@@ -356,6 +356,7 @@ function apps.postInstall(screen, nickname, path, version)
 end
 
 function apps.uninstall(screen, nickname, path, hide)
+    apps.check(screen, nickname)
     local pname = paths.name(path)
 
     local function lassert(...)
