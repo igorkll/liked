@@ -20,6 +20,7 @@ local apps = {}
 
 local installedInfo = registry.new("/data/installedInfo.dat")
 local appsPath = "/data/apps/"
+local vendorAppsPath = "/vendor/apps/"
 local shadowPath = "/data/applicationsShadow/"
 
 local function appList(folder)
@@ -344,12 +345,13 @@ function apps.uninstall(screen, nickname, path, hide)
         end
     end
     
+    local vendorApp = text.startwith(unicode, path, vendorAppsPath)
     if fs.get(path).address ~= fs.bootaddress then
         if screen then
             gui.warn(screen, nil, nil, "it is not possible to uninstall the application from another disk.\nuse the \"remove\" operation")
         end
         return
-    elseif not text.startwith(unicode, path, appsPath) and not text.startwith(unicode, path, shadowPath) then
+    elseif not text.startwith(unicode, path, appsPath) and not text.startwith(unicode, path, shadowPath) and not vendorApp then
         if screen then
             gui.warn(screen, nil, nil, "it is not possible to uninstall applications from here.\nuse the \"remove\" operation")
         end
@@ -380,11 +382,15 @@ function apps.uninstall(screen, nickname, path, hide)
         lassert(apps.execute(uninstallPath, screen, nickname))
     end
 
-    fs.remove(paths.concat(shadowPath, pname))
-    fs.remove(paths.concat(appsPath, pname))
+    if vendorApp then
+        fs.remove(path)
+    else
+        fs.remove(paths.concat(shadowPath, pname))
+        fs.remove(paths.concat(appsPath, pname))
+        installedInfo.data[pname] = nil
+        installedInfo.save()
+    end
 
-    installedInfo.data[pname] = nil
-    installedInfo.save()
     registry.save()
     return true
 end
