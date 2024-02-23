@@ -295,6 +295,8 @@ function apps.executeWithWarn(name, screen, nickname, ...)
 end
 
 function apps.postInstall(screen, nickname, path, version)
+    local normalAppPath = text.startwith(unicode, path, appsPath)
+
     local function lassert(...)
         if screen then
             liked.assert(screen, ...)
@@ -328,9 +330,12 @@ function apps.postInstall(screen, nickname, path, version)
         lassert(apps.execute(autorunPath, screen, nickname))
     end
 
-    createShadow(pname)
-    installedInfo.data[pname] = version
-    installedInfo.save()
+    if normalAppPath then
+        createShadow(pname)
+        installedInfo.data[pname] = version
+        installedInfo.save()
+    end
+
     registry.save()
     return true
 end
