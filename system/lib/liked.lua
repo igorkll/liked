@@ -178,29 +178,33 @@ end
 
 local bufferTimerId
 function liked.applyBufferType()
+    graphic.unloadBuffers()
+
     if liked.recoveryMode then
         graphic.allowSoftwareBuffer = false
         graphic.allowHardwareBuffer = false
-    else
-        graphic.allowSoftwareBuffer = registry.bufferType == "software"
-        graphic.allowHardwareBuffer = registry.bufferType == "hardware"
-    end
-    graphic.vgpus = {}
-    graphic.bindCache = {}
-    graphic.screensBuffers = {}
 
-    if graphic.allowHardwareBuffer or graphic.allowSoftwareBuffer then
-        if not bufferTimerId then
-            bufferTimerId = event.timer(0.1, function ()
-                for address in component.list("screen") do
-                    graphic.update(address)
-                end
-            end, math.huge)
-        end
-    else
         if bufferTimerId then
             event.cancel(bufferTimerId)
             bufferTimerId = nil
+        end
+    else
+        graphic.allowSoftwareBuffer = registry.bufferType == "software"
+        graphic.allowHardwareBuffer = registry.bufferType == "hardware"
+
+        if graphic.allowHardwareBuffer or graphic.allowSoftwareBuffer then
+            if not bufferTimerId then
+                bufferTimerId = event.timer(0.1, function ()
+                    for address in component.list("screen") do
+                        graphic.update(address)
+                    end
+                end, math.huge)
+            end
+        else
+            if bufferTimerId then
+                event.cancel(bufferTimerId)
+                bufferTimerId = nil
+            end
         end
     end
 end
