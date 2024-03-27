@@ -33,7 +33,7 @@ local env = {}
 
 local code, err = loadfile("/liked/init.lua", nil, env)
 if code then
-    
+    code()
 else
     print("failed to load liked: ", err)
 end
