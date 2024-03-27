@@ -37,12 +37,64 @@ end
 
 ---------------------------------------
 
+local function printResult(title, ...)
+    local ok, err = ...
+    if ok then
+        print(title, ">", "successfully")
+    else
+        print(title, ">", "error: ", tostring(err or "unknown error"))
+    end
+    return ...
+end
+
+local function wget(url)
+    local ok, err = printResult("http.checkURL", http.checkURL(url))
+    if not ok then
+        return nil, tostring(err or "unknown error")
+    end
+
+    local response, err = printResult("http.get", http.get(url))
+    if not response then
+        return nil, tostring(err or "unknown error")
+    end
+
+    local data = response.readAll()
+    response.close()
+    return data
+end
+
+local baseUrl = "https://raw.githubusercontent.com/igorkll/liked/"
+local function download(path, cc)
+    local url
+    if cc then
+        url = baseUrl .. "computercraft" .. path
+    else
+        url = baseUrl .. path
+    end
+
+    local str, err = printResult("wget", wget(url))
+    if not str then
+        return nil, tostring(err or "unknown error")
+    end
+
+    local file = fs.open(url, "wb")
+    file.write(str)
+    file.close()
+
+    return true
+end
+
+---------------------------------------
+
 term.setBackgroundColor(colors.blue)
 print("do you really want to install liked (likeOS based system)?")
 print("type 'YES' to start installation")
 
 if io.read() == "YES" then
     print("start of installation")
+
+
+
     os.reboot()
 else
     clear(colors.black)
