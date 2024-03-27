@@ -58,10 +58,12 @@ local function wget(url)
     return data
 end
 
-local function download(path, dpath, cc)
+local function download(path, dpath, mode)
     local url
-    if cc then
+    if mode == "cc" then
         url = baseUrl .. branch .. "/computercraft" .. path
+    elseif mode == "core" then
+        url = baseCoreUrl .. branch .. path
     else
         url = baseUrl .. branch .. path
     end
@@ -107,16 +109,16 @@ local function processList(data)
     return tbl
 end
 
-local function downloadList(listUrl, cc)
+local function downloadList(listUrl, mode)
     print("start downloading from list: ", listUrl)
     local lst = processList(assert(wget(listUrl)))
     for i, path in ipairs(lst) do
         local fullPath = path
-        if not cc then
+        if mode ~= "cc" then
             fullPath = "/liked" .. path
         end
         print("downloading: ", fullPath)
-        assert(download(path, fullPath, cc))
+        assert(download(path, fullPath, mode))
     end
 end
 
@@ -129,8 +131,8 @@ print("type 'YES' to start installation")
 if io.read() == "YES" then
     print("start of installation")
     downloadList(baseUrl .. branch .. "/installer/filelist.txt")
-    downloadList(baseCoreUrl .. branch .. "/installer/filelist.txt")
-    downloadList(baseUrl .. branch .. "/installer/cc_filelist.txt", true)
+    downloadList(baseCoreUrl .. branch .. "/installer/filelist.txt", "core")
+    downloadList(baseUrl .. branch .. "/installer/cc_filelist.txt", "cc")
     os.reboot()
 else
     clear(colors.black)
