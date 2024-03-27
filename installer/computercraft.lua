@@ -41,23 +41,14 @@ local baseUrl = "https://raw.githubusercontent.com/igorkll/liked/"
 local baseCoreUrl = "https://raw.githubusercontent.com/igorkll/likeOS/"
 local branch = "dev"
 
-local function printResult(title, ...)
-    local ok, err = ...
-    if ok then
-        print(title, ">", "successfully")
-    else
-        print(title, ">", "error: ", tostring(err or "unknown error"))
-    end
-    return ...
-end
 
 local function wget(url)
-    local ok, err = printResult("http.checkURL", http.checkURL(url))
+    local ok, err = assert(http.checkURL(url))
     if not ok then
         return nil, tostring(err or "unknown error")
     end
 
-    local response, err = printResult("http.get", http.get(url))
+    local response, err = assert(http.get(url))
     if not response then
         return nil, tostring(err or "unknown error")
     end
@@ -67,7 +58,7 @@ local function wget(url)
     return data
 end
 
-local function download(path, cc)
+local function download(path, dpath, cc)
     local url
     if cc then
         url = baseUrl .. branch .. "/computercraft" .. path
@@ -75,13 +66,13 @@ local function download(path, cc)
         url = baseUrl .. branch .. path
     end
 
-    local str, err = printResult("wget", wget(url))
+    local str, err = assert(wget(url))
     if not str then
         return nil, tostring(err or "unknown error")
     end
 
-    fs.makeDir("/" .. fs.getDir(path))
-    local file = fs.open(path, "wb")
+    fs.makeDir("/" .. fs.getDir(dpath))
+    local file = fs.open(dpath, "wb")
     file.write(str)
     file.close()
 
@@ -118,14 +109,14 @@ end
 
 local function downloadList(listUrl, cc)
     print("start downloading from list: ", listUrl)
-    local lst = processList(printResult("wget", wget(listUrl)))
+    local lst = processList(assert(wget(listUrl)))
     for i, path in ipairs(lst) do
         local fullPath = path
         if not cc then
             fullPath = "/liked" .. path
         end
         print("downloading: ", fullPath)
-        printResult("download", download(fullPath, cc))
+        assert(download(path, fullPath, cc))
     end
 end
 
@@ -137,9 +128,9 @@ print("type 'YES' to start installation")
 
 if io.read() == "YES" then
     print("start of installation")
-    downloadList(baseUrl .. branch .. "/installer/cc_filelist.txt", true)
     downloadList(baseUrl .. branch .. "/installer/filelist.txt")
     downloadList(baseCoreUrl .. branch .. "/installer/filelist.txt")
+    downloadList(baseUrl .. branch .. "/installer/cc_filelist.txt", true)
     os.reboot()
 else
     clear(colors.black)
