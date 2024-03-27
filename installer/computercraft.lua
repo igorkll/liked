@@ -38,7 +38,8 @@ end
 ---------------------------------------
 
 local baseUrl = "https://raw.githubusercontent.com/igorkll/liked/"
-local branch = "main"
+local baseCoreUrl = "https://raw.githubusercontent.com/igorkll/likeOS/"
+local branch = "dev"
 
 local function printResult(title, ...)
     local ok, err = ...
@@ -119,8 +120,12 @@ local function downloadList(listUrl, cc)
     print("start downloading from list: ", listUrl)
     local lst = processList(printResult("wget", wget(listUrl)))
     for i, path in ipairs(lst) do
-        print("downloading: ", path)
-        printResult("download", download(path, cc))
+        local fullPath = path
+        if not cc then
+            fullPath = "/liked" .. path
+        end
+        print("downloading: ", fullPath)
+        printResult("download", download(fullPath, cc))
     end
 end
 
@@ -134,6 +139,7 @@ if io.read() == "YES" then
     print("start of installation")
     downloadList(baseUrl .. branch .. "/installer/cc_filelist.txt", true)
     downloadList(baseUrl .. branch .. "/installer/filelist.txt")
+    downloadList(baseCoreUrl .. branch .. "/installer/filelist.txt")
     os.reboot()
 else
     clear(colors.black)
