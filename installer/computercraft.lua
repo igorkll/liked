@@ -85,8 +85,17 @@ local function download(path, cc)
     return true
 end
 
-local function downloadList(listUrl, cc)
+local function processList(data)
     
+end
+
+local function downloadList(listUrl, cc)
+    print("start downloading from list: ", listUrl)
+    local lst = processList(printResult("wget", wget(listUrl)))
+    for i, path in ipairs(lst) do
+        print("downloading: ", path)
+        printResult("download", download(path, cc))
+    end
 end
 
 ---------------------------------------
@@ -97,9 +106,8 @@ print("type 'YES' to start installation")
 
 if io.read() == "YES" then
     print("start of installation")
-
-
-
+    downloadList(baseUrl .. "installer/cc_filelist.txt", true)
+    downloadList(baseUrl .. "installer/filelist.txt")
     os.reboot()
 else
     clear(colors.black)
