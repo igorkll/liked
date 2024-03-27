@@ -37,6 +37,9 @@ end
 
 ---------------------------------------
 
+local baseUrl = "https://raw.githubusercontent.com/igorkll/liked/"
+local branch = "main"
+
 local function printResult(title, ...)
     local ok, err = ...
     if ok then
@@ -63,13 +66,12 @@ local function wget(url)
     return data
 end
 
-local baseUrl = "https://raw.githubusercontent.com/igorkll/liked/"
 local function download(path, cc)
     local url
     if cc then
-        url = baseUrl .. "computercraft" .. path
+        url = baseUrl .. branch .. "/computercraft" .. path
     else
-        url = baseUrl .. path
+        url = baseUrl .. branch .. path
     end
 
     local str, err = printResult("wget", wget(url))
@@ -85,8 +87,32 @@ local function download(path, cc)
     return true
 end
 
+local function split(str, sep)
+    local parts, count, i = {}, 1, 1
+    while 1 do
+        if i > #str then break end
+        local char = str:sub(i, #sep + (i - 1))
+        if not parts[count] then parts[count] = "" end
+        if char == sep then
+            count = count + 1
+            i = i + #sep
+        else
+            parts[count] = parts[count] .. str:sub(i, i)
+            i = i + 1
+        end
+    end
+    if str:sub(#str - (#sep - 1), #str) == sep then table.insert(parts, "") end
+    return parts
+end
+
 local function processList(data)
-    
+    local tbl = split(data, "\n")
+    for i = #tbl, 1, -1 do
+        if tbl[i] == "" then
+            table.remove(tbl, i)
+        end
+    end
+    return tbl
 end
 
 local function downloadList(listUrl, cc)
@@ -106,8 +132,8 @@ print("type 'YES' to start installation")
 
 if io.read() == "YES" then
     print("start of installation")
-    downloadList(baseUrl .. "installer/cc_filelist.txt", true)
-    downloadList(baseUrl .. "installer/filelist.txt")
+    downloadList(baseUrl .. branch .. "/installer/cc_filelist.txt", true)
+    downloadList(baseUrl .. branch .. "/installer/filelist.txt")
     os.reboot()
 else
     clear(colors.black)
