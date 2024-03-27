@@ -77,11 +77,16 @@ local function download(path, cc)
         return nil, tostring(err or "unknown error")
     end
 
-    local file = fs.open(url, "wb")
+    fs.makeDir("/" .. fs.getDir(path))
+    local file = fs.open(path, "wb")
     file.write(str)
     file.close()
 
     return true
+end
+
+local function downloadList(listUrl, cc)
+    
 end
 
 ---------------------------------------
