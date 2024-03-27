@@ -15,8 +15,8 @@ def write_paths_to_file(file_paths, output_file):
 
 if __name__ == "__main__":
     current_directory = os.path.dirname(os.path.abspath(__file__))
-    sys_directory = os.path.join(current_directory, 'system')
-    out_file_path = os.path.join(current_directory, 'installer/filelist.txt')
+    system_directory = os.path.join(current_directory, 'system')
+    computercraft_directory = os.path.join(current_directory, 'computercraft')
 
-    file_paths = recursive_file_paths(sys_directory)
-    write_paths_to_file(file_paths, out_file_path)
+    write_paths_to_file(recursive_file_paths(system_directory), os.path.join(current_directory, 'installer/filelist.txt'))
+    write_paths_to_file(recursive_file_paths(computercraft_directory), os.path.join(current_directory, 'installer/computercraft_filelist.txt'))
