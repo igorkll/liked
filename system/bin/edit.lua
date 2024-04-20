@@ -1,7 +1,7 @@
 local parser = require("parser")
 local unicode = require("unicode")
 local function lineMod(str)
-  return parser.change(unicode, str, {["\r"] = "", ["\t"] = "    "})
+  return parser.fastChange(str, {["\r"] = "", ["\t"] = "  "})
 end
 
 --[[
