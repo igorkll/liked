@@ -345,4 +345,4 @@ for i, v in ipairs(findSystems()) do
     table.insert(funcs, v[2])
 end
 
-menu("LikeOS/liked Boot Manager", strs, funcs, 3)
+menu("likeOS/liked Boot Manager", strs, funcs, 3)
