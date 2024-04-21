@@ -104,8 +104,8 @@ local function mineOSboot(proxy)
         end
 
         local result = {pcall(invoke, address, method, ...)}
-        if not result[1] then --для правильной обработки ошибок
-            error(result[2], 2)
+        if not result[1] then
+            error(result[2], 2) --для правильной обработки ошибок стоит error level 2
         else
             return table.unpack(result, 2)
         end
@@ -345,4 +345,4 @@ for i, v in ipairs(findSystems()) do
     table.insert(funcs, v[2])
 end
 
-menu("LikeOS Boot Manager", strs, funcs, 3)
+menu("LikeOS/liked Boot Manager", strs, funcs, 3)
