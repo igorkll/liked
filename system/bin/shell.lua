@@ -47,7 +47,10 @@ local t = thread.create(function ()
     end
 
     wait()
-    assert(apps.execute("desktop", screen))
+    while true do
+        local _, result = assert(apps.execute("desktop", screen))
+        result()
+    end
 end)
 t:resume()
 
