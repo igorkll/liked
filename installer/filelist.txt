@@ -118,7 +118,6 @@
 /system/lib/image.lua
 /system/lib/iowindows.lua
 /system/lib/json.lua
-/system/lib/liked.lua
 /system/lib/palette.lua
 /system/lib/screensaver.lua
 /system/lib/sound.lua
@@ -128,6 +127,9 @@
 /system/lib/viewer.lua
 /system/lib/vkeyboard.lua
 /system/lib/warnings.lua
+/system/lib/liked/init.lua
+/system/lib/liked/funcs/getComputerScore.lua
+/system/lib/liked/funcs/getScoreColor.lua
 /system/liked/box.lst
 /system/liked/brick.lua
 /system/liked/links.lua
