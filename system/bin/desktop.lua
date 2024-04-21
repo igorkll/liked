@@ -42,9 +42,8 @@ local window = graphic.createWindow(screen, 1, 2, rx, ry - 1)
 
 ------------------------------------------------------------------------ paths
 
-local defaultUserPath = "/data/userdata/"
+local iconsPath = gui_container.defaultUserRoot
 local userPath = desktopData[screen][1] or gui_container.getUserRoot(screen)
-local iconsPath = userPath
 
 local iconAliases = {
 }
@@ -207,7 +206,7 @@ local function draw(old, check) --вызывает все перерисовки
 
     checkData()
     if not fs.exists(userPath) or not fs.isDirectory(userPath) then
-        userPath = defaultUserPath
+        userPath = gui_container.defaultUserRoot
         desktopData[screen][1] = userPath
     end
 
@@ -241,7 +240,7 @@ local function draw(old, check) --вызывает все перерисовки
         local isFs = paths.equals(localFsPath, "/")
 
         if gui.isVisible(screen, path) then
-            if iconmode == 0 or not paths.equals(userPath, defaultUserPath) then
+            if iconmode == 0 or not paths.equals(userPath, gui_container.defaultUserRoot) then
                 return true
             elseif iconmode == 3 then
                 if isFs then
@@ -592,7 +591,7 @@ local function doIcon(windowEventData)
                 draw()
                 return
             elseif windowEventData[3] >= 11 and windowEventData[3] <= 14 then
-                local root = defaultUserPath
+                local root = gui_container.defaultUserRoot
                 if windowEventData[5] == 1 then
                     root = gui_container.getUserRoot(screen)
                 end
@@ -617,7 +616,7 @@ local function doIcon(windowEventData)
                         --if v.isFs and gui_container.isDiskLocked(v.fs.address) and not gui_container.isDiskAccess(v.fs.address) then
                         --    gui_container.getDiskAccess(screen, v.fs.address)
                         --else
-                        if openAsCurrent() then
+                        if openAsCurrent(v, nil, windowEventData[6]) then
                             fileDescriptor(v, nil, windowEventData[6])
                         else
                             return function ()
@@ -667,7 +666,7 @@ local function doIcon(windowEventData)
                             clear()
 
                             if str == "  open" then
-                                if openAsCurrent() then
+                                if openAsCurrent(v, nil, windowEventData[6]) then
                                     fileDescriptor(v, nil, windowEventData[6])
                                 else
                                     return function ()
@@ -821,7 +820,7 @@ local function doIcon(windowEventData)
                             clear()
 
                             if str == "  open" then
-                                if openAsCurrent() then
+                                if openAsCurrent(v, nil, windowEventData[6]) then
                                     fileDescriptor(v, nil, windowEventData[6])
                                 else
                                     return function ()
@@ -960,7 +959,7 @@ local function doIcon(windowEventData)
                             clear()
 
                             if str == "  open" then
-                                if openAsCurrent() then
+                                if openAsCurrent(v, nil, windowEventData[6]) then
                                     fileDescriptor(v, nil, windowEventData[6])
                                 else
                                     return function ()
