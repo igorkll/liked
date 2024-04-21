@@ -1331,7 +1331,6 @@ table.insert(listens, event.listen("redrawDesktop", function()
 end))
 
 local lastCheckTime
-local warnPrinted
 local lolzLock
 local altLolzLock
 local accountCheckTimeout = 25 + math.random(-5, 5)
@@ -1351,14 +1350,14 @@ while true do
     if redrawFlag then --бля тут проблем, когда варнинги весят, не чекаеться на залоченость по аку
         redrawFlag = false
         draw()
-        if not warnPrinted then
+        if not desktopData[screen][3] then
             local clear = gui.saveZone(screen)
             for _, str in ipairs(require("warnings").list(screen)) do
                 gui.warn(screen, nil, nil, str)
             end
             clear()
 
-            warnPrinted = true
+            desktopData[screen][3] = true
         end
     end
 
