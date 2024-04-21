@@ -123,9 +123,8 @@ function sysinit.initScreen(screen)
     pcall(component.invoke, screen, "turnOff")
     if graphic.isAvailable(screen) then
         -- resolution & depth
-        local mx, my = sysinit.getResolution(screen)
         graphic.setDepth(screen, graphic.maxDepth(screen))
-        graphic.setResolution(screen, mx, my)
+        graphic.setResolution(screen, sysinit.getResolution(screen))
 
         -- clear
         graphic.setPaletteColor(15, 0)

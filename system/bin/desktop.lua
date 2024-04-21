@@ -18,6 +18,7 @@ local palette = require("palette")
 local apps = require("apps")
 local account = require("account")
 local cache = require("cache")
+local sysinit = require("sysinit")
 
 ------------------------------------------------------------------------ init
 
@@ -424,17 +425,19 @@ local function warnNoClear(str)
     gui.warn(screen, nil, nil, str or "unknown error")
 end
 
+local function simpleExecute(name, nickname, ...)
+    liked.bigAssert(screen, apps.execute(name, screen, nickname, ...))
+    graphic.setDepth(screen, graphic.maxDepth(screen))
+    graphic.setResolution(screen, sysinit.getResolution(screen))
+end
+
 local function execute(name, nickname, ...)
     timerEnable = false
     --gui.status(screen, nil, nil, "loading...")
-    liked.bigAssert(screen, apps.execute(name, screen, nickname, ...))
+    simpleExecute(name, nickname, ...)
     draw()
     timerEnable = true
     redrawFlag = nil
-end
-
-local function simpleExecute(name, nickname, ...)
-    liked.bigAssert(screen, apps.execute(name, screen, nickname, ...))
 end
 
 local function fexecute(simple, ...)
