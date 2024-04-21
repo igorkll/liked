@@ -32,8 +32,8 @@ local function desktopUnload()
 end
 
 gui_container.desktopData = gui_container.desktopData or {}
-local desktopData = gui_container.desktopData
-desktopData[screen] = desktopData[screen] or {}
+gui_container.desktopData[screen] = gui_container.desktopData[screen] or {}
+local desktopData = gui_container.desktopData[screen]
 
 local rx, ry = graphic.getResolution(screen)
 
@@ -43,7 +43,7 @@ local window = graphic.createWindow(screen, 1, 2, rx, ry - 1)
 ------------------------------------------------------------------------ paths
 
 local iconsPath = gui_container.defaultUserRoot
-local userPath = desktopData[screen][1] or gui_container.getUserRoot(screen)
+local userPath = desktopData[1] or gui_container.getUserRoot(screen)
 
 local iconAliases = {
 }
@@ -89,8 +89,8 @@ end
 local iconSizeX = 8
 local iconSizeY = 4
 
-local startIconsPoss = desktopData[screen][2] or {} --тут храниться страница выбраная на конкретном пути
-desktopData[screen][2] = startIconsPoss
+local startIconsPoss = desktopData[2] or {} --тут храниться страница выбраная на конкретном пути
+desktopData[2] = startIconsPoss
 --local selectedIcons = {}
 local icons
 
@@ -207,13 +207,13 @@ local function draw(old, check) --вызывает все перерисовки
     checkData()
     if not fs.exists(userPath) or not fs.isDirectory(userPath) then
         userPath = gui_container.defaultUserRoot
-        desktopData[screen][1] = userPath
+        desktopData[1] = userPath
     end
 
     local tbl = fs.list(userPath)
     if not tbl then
         userPath = gui_container.getUserRoot(screen)
-        desktopData[screen][1] = userPath
+        desktopData[1] = userPath
         return draw()
     end
 
@@ -402,7 +402,7 @@ end
 local function folderBack()
     local oldPath = userPath
     userPath = gui_container.checkPath(screen, paths.path(userPath))
-    desktopData[screen][1] = userPath
+    desktopData[1] = userPath
     if userPath ~= oldPath then
         draw()
     end
@@ -453,7 +453,7 @@ local function fileDescriptor(icon, alternative, nickname, simple) --откры�
     if alternative then
         if fs.isDirectory(icon.path) then
             userPath = icon.path
-            desktopData[screen][1] = userPath
+            desktopData[1] = userPath
             draw()
             return true
         elseif icon.exp == "lua" or icon.exp == "scrsv" then
@@ -473,7 +473,7 @@ local function fileDescriptor(icon, alternative, nickname, simple) --откры�
         return true
     elseif fs.isDirectory(icon.path) then
         userPath = gui_container.checkPath(screen, icon.path)
-        desktopData[screen][1] = userPath
+        desktopData[1] = userPath
         draw()
         return true
     elseif isImage(icon.exp) then
@@ -597,7 +597,7 @@ local function doIcon(windowEventData)
                 end
                 if not paths.equals(userPath, root) then
                     userPath = root
-                    desktopData[screen][1] = userPath
+                    desktopData[1] = userPath
                     draw()
                 end
                 return
@@ -1350,14 +1350,14 @@ while true do
     if redrawFlag then --бля тут проблем, когда варнинги весят, не чекаеться на залоченость по аку
         redrawFlag = false
         draw()
-        if not desktopData[screen][3] then
+        if not desktopData[3] then
             local clear = gui.saveZone(screen)
             for _, str in ipairs(require("warnings").list(screen)) do
                 gui.warn(screen, nil, nil, str)
             end
             clear()
 
-            desktopData[screen][3] = true
+            desktopData[3] = true
         end
     end
 
@@ -1420,7 +1420,7 @@ while true do
                     gui_container.userRoot[screen] = "/"
                 end
                 userPath = gui_container.checkPath(screen, userPath)
-                desktopData[screen][1] = userPath
+                desktopData[1] = userPath
                 draw()
             elseif num == 3 then
                 gui_container.hiddenFiles[screen] = not gui_container.hiddenFiles[screen]

@@ -2,8 +2,8 @@
 ## liked - операционная система для компьтеров из мода opencomputers основанная на ядре likeOS
 ## для установки данной операционной системы запустите на компьтере файл онлайн установщика:
 ```
-комманда для openOS: wget https://raw.githubusercontent.com/igorkll/liked/dev/installer/webInstaller.lua /tmp/webInstaller && /tmp/webInstaller
-ссылка для использования в BIOS: https://raw.githubusercontent.com/igorkll/liked/dev/installer/webInstaller.lua
+комманда для openOS: wget https://raw.githubusercontent.com/igorkll/liked/main/installer/webInstaller.lua /tmp/webInstaller && /tmp/webInstaller
+ссылка для использования в BIOS: https://raw.githubusercontent.com/igorkll/liked/main/installer/webInstaller.lua
 ```
 
 ### минимальные системные требования:
