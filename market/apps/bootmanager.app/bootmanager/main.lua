@@ -220,7 +220,7 @@ local function menu(label, strs, funcs, autoTimeout)
 
             for i, v in ipairs(strs) do
                 if i == selected then
-                    gpu.fill(2, i + 2, 16, 1, " ")
+                    gpu.fill(2, i + 2, rx - 2, 1, " ")
                     gpu.set(2, i + 2, v)
                     break
                 end
