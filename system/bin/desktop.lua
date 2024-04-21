@@ -1377,17 +1377,17 @@ while true do
             if str == "  about" then
                 desktopUnload()
                 return function()
-                    execute("about", statusWindowEventData[6])
+                    simpleExecute("about", statusWindowEventData[6])
                 end
             elseif str == "  settings" then
                 desktopUnload()
                 return function()
-                    execute("settings", statusWindowEventData[6])
+                    simpleExecute("settings", statusWindowEventData[6])
                 end
             elseif str == "  market" then
                 desktopUnload()
                 return function()
-                    execute("market", statusWindowEventData[6])
+                    simpleExecute("market", statusWindowEventData[6])
                 end
             elseif str == "  lock screen" then
                 clear()
