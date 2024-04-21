@@ -1376,11 +1376,20 @@ while true do
             contextMenuOpen = nil
 
             if str == "  about" then
-                execute("about", statusWindowEventData[6])
+                desktopUnload()
+                return function()
+                    execute("about", statusWindowEventData[6])
+                end
             elseif str == "  settings" then
-                execute("settings", statusWindowEventData[6])
+                desktopUnload()
+                return function()
+                    execute("settings", statusWindowEventData[6])
+                end
             elseif str == "  market" then
-                execute("market", statusWindowEventData[6])
+                desktopUnload()
+                return function()
+                    execute("market", statusWindowEventData[6])
+                end
             elseif str == "  lock screen" then
                 clear()
                 drawStatus()
