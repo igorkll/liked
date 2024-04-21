@@ -110,8 +110,8 @@ local function writeFile(path)
         label = "unknown"
     end
 
-    if gui_yesno(screen, nil, nil, "are you sure you want to write \'" .. paths.hideExtension(paths.name(path)) .. "\' to \'" .. label .. "\' tape?") then
-        if gui_yesno(screen, nil, nil, "rewind the tape?") then
+    if gui.yesno(screen, nil, nil, "are you sure you want to write \'" .. paths.hideExtension(paths.name(path)) .. "\' to \'" .. label .. "\' tape?") then
+        if gui.yesno(screen, nil, nil, "rewind the tape?") then
             tape.stop()
             tape.seek(-tape.getSize())
         else
@@ -194,8 +194,8 @@ function writeUrlButton:onClick()
         label = "unknown"
     end
 
-    if gui_yesno(screen, nil, nil, "are you sure you want to write \'" .. url .. "\' to \'" .. label .. "\' tape?") then
-        if gui_yesno(screen, nil, nil, "rewind the tape?") then
+    if gui.yesno(screen, nil, nil, "are you sure you want to write \'" .. url .. "\' to \'" .. label .. "\' tape?") then
+        if gui.yesno(screen, nil, nil, "rewind the tape?") then
             tape.stop()
             tape.seek(-tape.getSize())
         else
@@ -234,7 +234,7 @@ end
 function wipeButton:onClick()
     if tapeCheck() then return end
 
-    if gui_yesno(screen, nil, nil, "Are you sure you want to wipe this tape?") then
+    if gui.yesno(screen, nil, nil, "Are you sure you want to wipe this tape?") then
         gui.status(screen, nil, nil, "Cleaning The Tape...")
         local k = tape.getSize()
         tape.stop()

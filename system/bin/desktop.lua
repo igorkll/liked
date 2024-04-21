@@ -494,7 +494,7 @@ local function fileDescriptor(icon, alternative, nickname, simple) --откры�
     elseif icon.exp == "plt" then
         if liked.publicMode(screen) then
             local clear = saveZone(screen)
-            local state = gui_yesno(screen, nil, nil, "apply this palette?")
+            local state = gui.yesno(screen, nil, nil, "apply this palette?")
             clear()
 
             if state then
@@ -712,7 +712,7 @@ local function doIcon(windowEventData)
                                 
                                 if archivePath then
                                     clear()
-                                    if gui_yesno(screen, nil, nil, "are you sure you want to flash the \"" .. gui.hideExtension(screen, archivePath) .. "\" archive to the \"" .. v.name .. "\"?") then
+                                    if gui.yesno(screen, nil, nil, "are you sure you want to flash the \"" .. gui.hideExtension(screen, archivePath) .. "\" archive to the \"" .. v.name .. "\"?") then
                                         gui_status(screen, nil, nil, "archive flashing...")
                                         local ok, err = archiver.unpack(archivePath, v.path)
                                         if not ok then
@@ -735,7 +735,7 @@ local function doIcon(windowEventData)
                             --[[
                             elseif str == "  make a disk" then
                                 local clear2 = saveZone(screen)
-                                local state = gui_yesno(screen, nil, nil, "wipe data?")
+                                local state = gui.yesno(screen, nil, nil, "wipe data?")
                                 
                                 if state then
                                     gui_status(screen, nil, nil, "wiping...")
@@ -746,7 +746,7 @@ local function doIcon(windowEventData)
                                 end
                             elseif str == "  erase data" then
                                 local clear2 = saveZone(screen)
-                                local state = gui_yesno(screen, nil, nil, "wipe data?")
+                                local state = gui.yesno(screen, nil, nil, "wipe data?")
                                 
                                 if state then
                                     gui_status(screen, nil, nil, "wiping...")
@@ -778,7 +778,7 @@ local function doIcon(windowEventData)
                                 end
                             elseif str == "  clear label" then
                                 local clear2 = saveZone(screen)
-                                local state = gui_yesno(screen, nil, nil, "clear label on \"" .. (v.name or "disk") .. "\"?")
+                                local state = gui.yesno(screen, nil, nil, "clear label on \"" .. (v.name or "disk") .. "\"?")
 
                                 if state then
                                     liked.umountAll()
@@ -832,7 +832,7 @@ local function doIcon(windowEventData)
                                 end
                             elseif str == "  uninstall" then
                                 local clear = saveZone(screen)
-                                local ok = gui_yesno(screen, nil, nil, "uninstall \"" .. v.name .. "\"?")
+                                local ok = gui.yesno(screen, nil, nil, "uninstall \"" .. v.name .. "\"?")
 
                                 if ok then
                                     if not uninstallApp(v.path, windowEventData[6]) then
@@ -985,7 +985,7 @@ local function doIcon(windowEventData)
                                 end
                             elseif str == "  remove" then
                                 local clear2 = saveZone(screen)
-                                local state = gui_yesno(screen, nil, nil, "remove \"" .. v.name .. "\"?")
+                                local state = gui.yesno(screen, nil, nil, "remove \"" .. v.name .. "\"?")
                                 clear2()
                                 if state then
                                     gui.status(screen, nil, nil, "removing \"" .. v.name .. "\"...")
@@ -994,7 +994,7 @@ local function doIcon(windowEventData)
                                 end
                             elseif str == "  uninstall" then
                                 local clear2 = saveZone(screen)
-                                local state = gui_yesno(screen, nil, nil, "uninstall \"" .. v.name .. "\"?")
+                                local state = gui.yesno(screen, nil, nil, "uninstall \"" .. v.name .. "\"?")
                                 clear2()
                                 if state then
                                     if not uninstallApp(v.path, windowEventData[6]) then
@@ -1222,7 +1222,7 @@ local function doIcon(windowEventData)
                         copyFlag = false
                     else
                         local clear = saveZone(screen)
-                        local replaseAllow = gui_yesno(screen, nil, nil, isDir and "merge directories?" or "overwrite the file?")
+                        local replaseAllow = gui.yesno(screen, nil, nil, isDir and "merge directories?" or "overwrite the file?")
                         if not replaseAllow then
                             clear()
                             copyFlag = false

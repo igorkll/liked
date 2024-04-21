@@ -1,6 +1,7 @@
 local graphic = require("graphic")
 local gui_container = require("gui_container")
 local computer = require("computer")
+local gui = require("gui")
 
 local colors = gui_container.colors
 
@@ -43,24 +44,24 @@ return function(eventData)
         local posY = selectWindowEventData[4] - 3
 
         if users[posY] then
-            if gui_yesno(screen, nil, nil, "remove user \"" .. users[posY] .. "\"?") and selectWindowEventData[3] >= 1 and selectWindowEventData[3] <= 18 then
+            if gui.yesno(screen, nil, nil, "remove user \"" .. users[posY] .. "\"?") and selectWindowEventData[3] >= 1 and selectWindowEventData[3] <= 18 then
                 computer.removeUser(users[posY])
             end
             draw()
         elseif selectWindowEventData[4] == 1 and selectWindowEventData[3] >= 1 and selectWindowEventData[3] <= 18 then
-            local name = gui_input(screen, nil, nil, "user name")
+            local name = gui.input(screen, nil, nil, "user name")
             if name then
                 local ok, err = computer.addUser(name)
                 if not ok then
-                    gui_warn(screen, nil, nil, err or "unknown")
+                    gui.warn(screen, nil, nil, err or "unknown")
                 end
             end
             draw()
         elseif selectWindowEventData[4] == 2 and selectWindowEventData[3] >= 1 and selectWindowEventData[3] <= 18 then
-            if gui_yesno(screen, nil, nil, "add user \"" .. selectWindowEventData[6] .. "\"?") then
+            if gui.yesno(screen, nil, nil, "add user \"" .. selectWindowEventData[6] .. "\"?") then
                 local ok, err = computer.addUser(selectWindowEventData[6])
                 if not ok then
-                    gui_warn(screen, nil, nil, err or "unknown")
+                    gui.warn(screen, nil, nil, err or "unknown")
                 end
             end
             draw()

@@ -9,6 +9,7 @@ local unicode = require("unicode")
 local thread = require("thread")
 local serialization = require("serialization")
 local liked = require("liked")
+local gui = require("gui")
 
 local path = paths.path(getPath())
 fs.makeDirectory(paths.concat(path, "profiles"))
@@ -62,7 +63,7 @@ end
 ------------------------------------ methods
 
 function yesno_reconnect()
-    return gui_yesno(screen, nil, nil, "no connection to nanomachines, try again?")
+    return gui.yesno(screen, nil, nil, "no connection to nanomachines, try again?")
 end
 
 function connectToNano()
@@ -377,7 +378,7 @@ while true do
         end
         if windowEventData[4] == 2 then
             if windowEventData[3] >= 1 and windowEventData[3] <= 14 then
-                if gui_yesno(screen, nil, nil, "are you sure you want to delete your profile and exit the app?") then
+                if gui.yesno(screen, nil, nil, "are you sure you want to delete your profile and exit the app?") then
                     fs.remove(paths.concat(path, "profiles", nickname))
                     break
                 end

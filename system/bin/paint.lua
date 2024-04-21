@@ -306,7 +306,7 @@ end
 local function exitAllow()
     if not noSaved then return true end
     local clear = saveZone(screen)
-    local ok = calls.call("gui_yesno", screen, nil, nil, "image do not saved!\nare you sure you want to get out?")
+    local ok = gui.yesno(screen, nil, nil, "image do not saved!\nare you sure you want to get out?")
     clear()
     return ok
 end
@@ -316,7 +316,7 @@ local function resize(newx, newy)
     newy = math.floor(newy + 0.5)
     if newx <= 0 or newy <= 0 then
         local clear = saveZone(screen)
-        calls.call("gui_warn", screen, nil, nil, "incorrent input", colors.white)
+        gui.warn(screen, nil, nil, "incorrent input", colors.white)
         clear()
         return
     end
