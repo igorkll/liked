@@ -40,7 +40,7 @@ local altBranch = branch == "main" and "dev" or "main"
 
 local function update(newBranch)
     if not lastVersion then
-        gui_warn(screen, nil, nil, "connection problems\ntry again later")
+        gui.warn(screen, nil, nil, "connection problems\ntry again later")
     elseif gui.pleaseCharge(screen, 80, "update") and gui.pleaseSpace(screen, 512, "update") and gui.checkPasswordLoop(screen) and gui.yesno(screen, nil, nil, newBranch and "ATTENTION, changing the branch can break the system! are you sure?" or (currentVersion ~= lastVersion and "start updating now?" or "you have the latest version installed. do you still want to start updating?")) then
         require("update").run(newBranch or branch, currentMode)
     end
@@ -59,9 +59,11 @@ if not registry.disableChangeBranch then
 end
 
 if not registry.disableSystemSettings then
-    local hidePlane = layout:createPlane(2, 10, layout.sizeX - 2, 5, colors.red)
-    local show = layout:createButton(layout.sizeX - 9, 11, 8, 1, colors.orange, colors.white, "show")
-    local showText = layout:createText(3, 11, colors.white, "dangerous settings")
+    local planeSize = 7
+    local planePos = layout.sizeY - planeSize
+    local hidePlane = layout:createPlane(2, planePos, layout.sizeX - 2, planeSize, colors.red)
+    local show = layout:createButton(layout.sizeX - 9, planePos+1, 8, 1, colors.orange, colors.white, "show")
+    local showText = layout:createText(3, planePos+1, colors.white, "dangerous settings")
 
     function show:onDrop()
         if gui.checkPasswordLoop(screen) and gui.pleaseType(screen, "DNGRUS") then
@@ -69,16 +71,16 @@ if not registry.disableSystemSettings then
             show.disabledHidden = true
             showText.disabledHidden = true
 
-            layout:createPlane(2, 10, layout.sizeX - 2, 5, colors.lightGray)
-            layout:createText(layout.sizeX - 18, 10, colors.black, "dangerous settings")
+            layout:createPlane(2, planePos, layout.sizeX - 2, planeSize, colors.lightGray)
+            layout:createText(layout.sizeX - 18, planePos, colors.black, "dangerous settings")
 
-            local disableRecoverySwitch = layout:createSwitch(2, 10, registry.disableRecovery)
-            local disableLogoSwitch = layout:createSwitch(2, 12, registry.disableLogo)
-            local disableAutoReboot = layout:createSwitch(2, 14, registry.disableAutoReboot)
+            local disableRecoverySwitch = layout:createSwitch(3, planePos+1, registry.disableRecovery)
+            local disableLogoSwitch = layout:createSwitch(3, planePos+3, registry.disableLogo)
+            local disableAutoReboot = layout:createSwitch(3, planePos+5, registry.disableAutoReboot)
 
-            layout:createText(9, 10, colors.white, "disable system recovery menu")
-            layout:createText(9, 12, colors.white, "disable startup logo")
-            layout:createText(9, 14, colors.white, "disable auto-reboot on system error")
+            layout:createText(10, planePos+1, colors.white, "disable system recovery menu")
+            layout:createText(10, planePos+3, colors.white, "disable startup logo")
+            layout:createText(10, planePos+5, colors.white, "disable auto-reboot on system error")
             
             function disableRecoverySwitch:onSwitch()
                 registry.disableRecovery = self.state
