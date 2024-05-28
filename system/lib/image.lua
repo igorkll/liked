@@ -58,8 +58,8 @@ function image.draw(screen, path, x, y, wallpaperMode, forceFullColor, lightMul,
         llcolors = image.readPalette(path, false, screen) or colors
     end
 
-    x = math.floor(x)
-    y = math.floor(y)
+    x = math.floor(x + 0.5)
+    y = math.floor(y + 0.5)
     
     lightMul = lightMul or 1
     path = repath(screen, path)
