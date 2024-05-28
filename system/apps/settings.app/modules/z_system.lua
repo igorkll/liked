@@ -40,7 +40,7 @@ local currentMode = sysdata.get("mode")
 local function update(newBranch)
     if not lastVersion then
         gui.warn(screen, nil, nil, "connection problems\ntry again later")
-    elseif gui.pleaseCharge(screen, 80, "update") and gui.pleaseSpace(screen, 512, "update") and gui.checkPasswordLoop(screen) and gui.yesno(screen, nil, nil, newBranch and "ATTENTION, changing the branch can break the system! are you sure?" or (currentVersion ~= lastVersion and "start updating now?" or "you have the latest version installed. do you still want to start updating?")) then
+    elseif gui.pleaseCharge(screen, 80, "update") and gui.pleaseSpace(screen, 512, "update") and gui.checkPasswordLoop(screen) and gui.yesno(screen, nil, nil, newBranch and "ATTENTION, changing the branch to \"" .. newBranch .."\" can break the system! are you sure?" or (currentVersion ~= lastVersion and "start updating now?" or "you have the latest version installed. do you still want to start updating?")) then
         require("update").run(newBranch or branch, currentMode)
     end
     layout:draw()
@@ -72,10 +72,21 @@ if not registry.disableSystemSettings then
             if not registry.disableChangeBranch then
                 local changeBranchButton = layout:createButton(3, planePos+7, nil, 1, nil, nil, "upgrade to another branch of the system", true)
                 function changeBranchButton:onClick()
-                    local newBranch = gui.select(screen, nil, nil, "select a new branch", {"main", "test", "dev"})
+                    local branchs = {"main", "test", "dev"}
+                    for i = #branchs, 1, -1 do
+                        if branchs[i] == branch then
+                            table.remove(branchs, i)
+                            break
+                        end
+                    end
+                    local newBranch = gui.select(screen, nil, nil, "select a new branch", branchs)
                     if newBranch then
+                        newBranch = branchs[newBranch]
+                        gRedraw()
+                        layout:draw()
                         update(newBranch)
                     end
+                    gRedraw()
                     layout:draw()
                 end
             end
