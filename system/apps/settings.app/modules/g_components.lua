@@ -26,7 +26,8 @@ local function drawInfo()
     end
     currentCount = currentCount - 3
     window:set(2, 2, colors.black, colors.white, "component count: " .. math.roundTo(system.getCurrentComponentCount(), 2) .. "/" .. system.getMaxComponentCount() .. "    ")
-    window:set(2, window.sizeY - 1, colors.black, colors.white, "note: filesystems consume 0.25 of the component budget")
+    window:set(2, window.sizeY - 2, colors.black, colors.white, "note: filesystems consume 0.25 of the component budget")
+    window:set(2, window.sizeY - 1, colors.black, colors.white, "note: self component does not spend the budget")
 end
 
 local base = thread.current()

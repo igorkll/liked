@@ -1214,6 +1214,7 @@ function gui.selectcomponent(screen, cx, cy, types, allowAutoConfirm, control, c
 
     local cancel, out
     local gNoShadow
+    local selfAddress = computer.address()
 
     local th
     th = thread.create(function ()
@@ -1244,6 +1245,8 @@ function gui.selectcomponent(screen, cx, cy, types, allowAutoConfirm, control, c
                         local tags = {}
                         if fs.bootaddress == addr then
                             table.insert(tags, "system")
+                        elseif selfAddress == addr then
+                            table.insert(tags, "self")
                         end
                         if vcomponent.isVirtual(addr) then
                             table.insert(tags, "virtual")
