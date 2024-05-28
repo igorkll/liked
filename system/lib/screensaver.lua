@@ -35,6 +35,8 @@ function screensaver.start(screen, path)
             if uuid == screen and (eventName == "touch" or eventName == "drag" or eventName == "scroll") then
                 cache.static.screensaver_current[screen] = nil
                 th:kill()
+                local gpu = graphic.findGpu(screen)
+                if gpu.applyForce then gpu.applyForce() end
                 clear()
                 return false
             end
