@@ -36,7 +36,6 @@ end
 
 local branch = sysdata.get("branch")
 local currentMode = sysdata.get("mode")
-local altBranch = branch == "main" and "dev" or "main"
 
 local function update(newBranch)
     if not lastVersion then
@@ -51,15 +50,8 @@ layout:createButton(20, 8, 16, 1, nil, nil, "UPDATE SYSTEM", true).onClick = fun
     update()
 end
 
-if not registry.disableChangeBranch then
-    local changeBranchButton = layout:createButton(25, 4, 16, 1, nil, nil, "UPDATE TO " .. altBranch:upper(), true)
-    function changeBranchButton:onClick()
-        update(altBranch)
-    end
-end
-
 if not registry.disableSystemSettings then
-    local planeSize = 7
+    local planeSize = 9
     local planePos = layout.sizeY - planeSize
     local hidePlane = layout:createPlane(2, planePos, layout.sizeX - 2, planeSize, colors.red)
     local show = layout:createButton(layout.sizeX - 9, planePos+1, 8, 1, colors.orange, colors.white, "show")
@@ -77,6 +69,16 @@ if not registry.disableSystemSettings then
             local disableRecoverySwitch = layout:createSwitch(3, planePos+1, registry.disableRecovery)
             local disableLogoSwitch = layout:createSwitch(3, planePos+3, registry.disableLogo)
             local disableAutoReboot = layout:createSwitch(3, planePos+5, registry.disableAutoReboot)
+            if not registry.disableChangeBranch then
+                local changeBranchButton = layout:createButton(3, planePos+7, nil, 1, nil, nil, "upgrade to another branch of the system", true)
+                function changeBranchButton:onClick()
+                    local newBranch = gui.select(screen, nil, nil, "select a new branch", {"main", "test", "dev"})
+                    if newBranch then
+                        update(newBranch)
+                    end
+                    layout:draw()
+                end
+            end
 
             layout:createText(10, planePos+1, colors.white, "disable system recovery menu")
             layout:createText(10, planePos+3, colors.white, "disable startup logo")

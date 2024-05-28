@@ -547,7 +547,7 @@ function uix:createButton(x, y, sx, sy, back, fore, text, autoRelease)
     local obj = setmetatable({gui = self, type = "button"}, {__index = objclass})
     obj.x = x
     obj.y = y
-    obj.sx = sx
+    obj.sx = sx or (unicode.len(text) + 2)
     obj.sy = sy
     obj.text = text
     obj.state = false

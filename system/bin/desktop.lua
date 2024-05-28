@@ -723,7 +723,7 @@ local function doIcon(windowEventData)
                                 draw()
                             elseif str == "  format" then
                                 local clear2 = saveZone(screen)
-                                local state = gui.pleaseType(screen, "FORMAT")
+                                local state = gui.pleaseType(screen, v.fs.address == fs.bootaddress and "FRMT_SYSROOT" or "FORMAT")
                                 
                                 if state then
                                     gui_status(screen, nil, nil, "formatting...")
