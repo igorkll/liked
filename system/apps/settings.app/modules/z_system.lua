@@ -70,7 +70,7 @@ if not registry.disableSystemSettings then
             local disableLogoSwitch = layout:createSwitch(3, planePos+3, registry.disableLogo)
             local disableAutoReboot = layout:createSwitch(3, planePos+5, registry.disableAutoReboot)
             if not registry.disableChangeBranch then
-                local changeBranchButton = layout:createButton(3, planePos+7, nil, 1, nil, nil, "upgrade to another branch of the system", true)
+                local changeBranchButton = layout:createButton(3, planePos+7, nil, 1, nil, nil, "update to another branch", true)
                 function changeBranchButton:onClick()
                     local branchs = {"main", "test", "dev"}
                     for i = #branchs, 1, -1 do
