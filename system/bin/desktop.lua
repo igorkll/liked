@@ -914,6 +914,8 @@ local function doIcon(windowEventData)
                                 table.insert(active, true)
                                 if v.isDir then
                                     table.insert(strs, "  inside the package")
+                                elseif v.readonly then
+                                    table.insert(strs, "  view")
                                 else
                                     table.insert(strs, "  edit")
                                 end
@@ -922,7 +924,11 @@ local function doIcon(windowEventData)
                             if gui_container.editable[v.exp] and not v.isDir then
                                 addLine()
 
-                                table.insert(strs, "  edit")
+                                if v.readonly then
+                                    table.insert(strs, "  view")
+                                else
+                                    table.insert(strs, "  edit")
+                                end
                                 table.insert(active, true)
                             elseif not v.isDir and not gui_container.knownExps[v.exp] then
                                 addLine()
@@ -1049,7 +1055,7 @@ local function doIcon(windowEventData)
                                 end
                             elseif str == "  inside the package" then
                                 fileDescriptor(v, true)
-                            elseif str == "  edit" or str == "  open is text editor" then
+                            elseif str == "  edit" or str == "  view" or str == "  open is text editor" then
                                 --execute("edit", windowEventData[6], v.path, str == "  open is text editor" and not isDev())
                                 return function ()
                                     simpleExecute("edit", windowEventData[6], v.path)

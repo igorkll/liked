@@ -160,9 +160,25 @@ local function findSystems(address)
             end,
             address
         })
+    elseif proxy.exists("/boot/kernel/pipes") then
+        table.insert(tbl, {
+            "plan9k",
+            function ()
+                bootTo(proxy, "/boot/kernel/pipes")
+            end,
+            address
+        })
+    elseif proxy.exists("/lib/core/full_event.lua") then --I hope this file will not be found in other operating systems to avoid conflicts.
+        table.insert(tbl, {
+            "openOS",
+            function ()
+                bootTo(proxy, "/init.lua")
+            end,
+            address
+        })
     elseif proxy.exists("/init.lua") then
         table.insert(tbl, {
-            "unknownOS",
+            "unknown",
             function ()
                 bootTo(proxy, "/init.lua")
             end,
@@ -172,7 +188,7 @@ local function findSystems(address)
 
     if proxy.exists("/OS.lua") then
         table.insert(tbl, {
-            "mineOS based system",
+            "mineOS",
             function ()
                 mineOSboot(proxy)
             end,
