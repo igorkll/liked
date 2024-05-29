@@ -13,5 +13,6 @@
     disableCustomPackages = true,
     settingsBlackList = {"eeprom", "buffer", "power", "libraries", "autorun"},
     filesBlackList = {"/system/firmware/luabios", "/system/firmware/luabios/code.lua", "/system/firmware/luabios/label.txt", "/system/recoveryAccess.lua", "/system/recoveryScript.lua", "/system/core/recovery.lua"},
+    
     sysmodeVersion = 1
 }
