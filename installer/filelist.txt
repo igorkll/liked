@@ -144,6 +144,7 @@
 /system/likedbox/main.lua
 /system/likedbox/palette.plt
 /system/likedbox/registry.dat
+/system/likedbox/sysinfo.cfg
 /system/likedbox/bin/shell.lua
 /system/likedlib/account.lua
 /system/likedlib/installer.lua
