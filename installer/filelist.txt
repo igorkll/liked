@@ -37,6 +37,7 @@
 /system/apps/settings.app/modules/g_components.lua
 /system/apps/settings.app/modules/h_screen_saver.lua
 /system/apps/settings.app/modules/k_libraries.lua
+/system/apps/settings.app/modules/v_autorun.lua
 /system/apps/settings.app/modules/w_eeprom.lua
 /system/apps/settings.app/modules/x_buffer.lua
 /system/apps/settings.app/modules/y_power.lua
