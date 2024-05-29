@@ -10,7 +10,7 @@ local rx, ry = ui:zoneSize()
 
 ---------------------------------
 
-local cpuLevel, isApu = system.getCpuLevel()
+local cpuLevel, isApu, isCreative = system.getCpuLevel()
 local hddTotalSpace = fs.get("/").spaceTotal()
 local hddUsedSpace = fs.get("/").spaceUsed()
 local score = liked.getComputerScore()
@@ -20,7 +20,7 @@ layout:createText(2, 2, uix.colors.black, "Operating System : " .. tostring(_OSV
 layout:createText(2, 3, uix.colors.black, "Computer Address : " .. computer.address())
 layout:createText(2, 4, uix.colors.black, "Boot Disk        : " .. fs.bootaddress)
 layout:createText(2, 5, uix.colors.black, "Device Type      : " .. system.getDeviceType())
-layout:createText(2, 6, uix.colors.black, "Processor        : tier-" .. tostring(cpuLevel) .. (isApu and " (APU)" or ""))
+layout:createText(2, 6, uix.colors.black, "Processor        : tier-" .. tostring(cpuLevel) .. (isApu and " (APU)" or "") .. (isCreative and " (Creative)" or ""))
 layout:createText(2, 7, uix.colors.black, "Computer Score   : ")
 layout:createText(21, 7, liked.getScoreColor(score), tostring(score) .. " / 10", 1, liked.getScoreColor(score))
 

@@ -1,6 +1,8 @@
 local graphic = require("graphic")
 local gui_container = require("gui_container")
 local registry = require("registry")
+local uuid = require("uuid")
+local gui = require("gui")
 
 local colors = gui_container.colors
 
@@ -29,26 +31,26 @@ return function(eventData)
     if windowEventData[1] == "touch" then
         if windowEventData[4] == 3 and windowEventData[3] >= 1 and windowEventData[3] <= 15 then
             if registry.password then
-                if gui_checkPassword(screen) then
+                if gui.checkPassword(screen) then
                     registry.password = nil
                     registry.passwordSalt = nil
                 end
             else
-                gui_warn(screen, nil, nil, "the password is not set")
+                gui.warn(screen, nil, nil, "the password is not set")
             end
             draw()
         elseif windowEventData[4] == 4 and windowEventData[3] >= 1 and windowEventData[3] <= 15 then
-            if gui_checkPassword(screen) then
-                local password1 = gui_input(screen, nil, nil, "enter new password", true)
+            if gui.checkPassword(screen) then
+                local password1 = gui.input(screen, nil, nil, "enter new password", true)
                 if password1 then
-                    local password2 = gui_input(screen, nil, nil, "comfurm new password", true)
+                    local password2 = gui.input(screen, nil, nil, "comfurm new password", true)
                     if password2 then
                         if password1 == password2 then
-                            local salt = uuid()
+                            local salt = uuid.next()
                             registry.password = sha256(password1 .. salt)
                             registry.passwordSalt = salt
                         else
-                            gui_warn(screen, nil, nil, "passwords don't match")
+                            gui.warn(screen, nil, nil, "passwords don't match")
                         end
                     end
                 end

@@ -28,7 +28,11 @@ function hdd.move(from, to)
 end
 
 function hdd.genName(uuid)
-    return paths.concat("/data/userdata", (component.invoke(uuid, "getLabel") or "disk"):sub(1, 8) .. "-" .. uuid:sub(1, 5))
+    local label = component.invoke(uuid, "getLabel")
+    if label and #label == 0 then
+        label = nil
+    end
+    return paths.concat("/data/userdata", (label or "disk"):sub(1, 8) .. "-" .. uuid:sub(1, 5))
 end
 
 function hdd.clone(screen, proxy, selectFrom)

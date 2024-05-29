@@ -11,6 +11,7 @@ local computer = require("computer")
 local screensaver = require("screensaver")
 local thread = require("thread")
 local image = require("image")
+local serialization = require("serialization")
 
 local colors = gui_container.colors
 local indexsColors = gui_container.indexsColors
@@ -85,7 +86,7 @@ local function updateHistory()
     
         history = {}
         for i, v in ipairs(split(data, "\n")) do
-            local tbl = unserialization(v)
+            local tbl = serialization.unserialization(v)
             if tbl then
                 table.insert(history, tbl)
                 addNullStrs(tbl)

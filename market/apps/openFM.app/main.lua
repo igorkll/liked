@@ -1,16 +1,14 @@
-local graphic = require("graphic")
 local uix = require("uix")
-local event = require("event")
-local liked = require("liked")
 local gui = require("gui")
 local component = require("component")
-local colors = require("gui_container").colors
 local colorlib = require("colors")
 local system = require("system")
 local paths = require("paths")
 local fs = require("filesystem")
 local parser = require("parser")
 local unicode = require("unicode")
+
+local colors = uix.colors
 
 local selffolder = paths.path(system.getSelfScriptPath())
 local stationsStrs = parser.split(unicode, assert(fs.readFile(paths.concat(selffolder, "list.txt"))), "\n")
@@ -32,14 +30,12 @@ else
     fm = component.proxy(fm)
 end
 
-local rx, ry = graphic.getResolution(screen)
+local ui = uix.manager(screen)
+local rx, ry = ui:zoneSize()
 local cx, cy = math.round(rx / 2), math.round(ry / 2)
-local window = graphic.createWindow(screen, 1, 1, rx, ry)
-local layout = uix.create(window, colors.black)
+local layout = ui:create("OpenFM", colors.black)
 
-local _, upRedraw = liked.drawFullUpBarTask(screen, "OpenFM")
-
-local selectColor = layout:createButton(cx + 8, 3, 16, 1, colors.green, colors.gray, "Screen Color", true)
+local selectColor = layout:createButton(cx + 8, 2, 16, 1, colors.green, colors.gray, "Screen Color", true)
 selectColor.fore = fm.getScreenColor()
 if selectColor.fore == selectColor.back then
     if selectColor.back == colors.lime then
@@ -49,22 +45,26 @@ if selectColor.fore == selectColor.back then
     end
 end
 
-local volDown = layout:createButton(cx - 4, 3, 3, 1, nil, nil, "<")
-local currentVol = layout:createLabel(cx - 1, 3, 3, 1, nil, nil, tostring(math.round(fm.getVol() * 10)))
-local volUp = layout:createButton(cx + 2, 3, 3, 1, nil, nil, ">")
+local volDown = layout:createButton(cx - 6, 2, 3, 1, nil, nil, "<")
+local currentVol = layout:createLabel(cx - 2, 2, 5, 1, nil, nil, tostring(math.round(fm.getVol() * 10)))
+local volUp = layout:createButton(cx + 4, 2, 3, 1, nil, nil, ">")
 
-local statOld = layout:createButton(cx - 28, 7, 3, 1, nil, nil, "<")
-local statNext = layout:createButton(cx + 25, 7, 3, 1, nil, nil, ">")
+local statOld = layout:createButton(cx - 28, 6, 3, 1, nil, nil, "<")
+local statNext = layout:createButton(cx + 25, 6, 3, 1, nil, nil, ">")
 
-local fmLabel = layout:createInput(cx - 24, 5, 48, nil, nil, false, settings[fm.address].label, nil, 32, "label: ")
-local urlLabel = layout:createInput(cx - 24, 7, 48, nil, nil, false, settings[fm.address].url, nil, 256, "url: ")
+local fmLabel = layout:createInput(cx - 24, 4, 48, nil, nil, false, settings[fm.address].label, nil, 32, "label: ")
+local urlLabel = layout:createInput(cx - 24, 6, 48, nil, nil, false, settings[fm.address].url, nil, 256, "url: ")
 
 fm.setScreenText(settings[fm.address].label)
 fm.setURL(settings[fm.address].url)
 
-local isPlayingLed = layout:createLabel(cx - 1, 9, 3, 1)
-local startButton = layout:createButton(cx - 8, 9, 7, 1, nil, nil, "start")
-local stopButton = layout:createButton(cx + 2, 9, 7, 1, nil, nil, "stop")
+local isPlayingLed = layout:createLabel(cx - 1, 8, 3, 1)
+local startButton = layout:createButton(cx - 8, 8, 7, 1, nil, nil, "start")
+local stopButton = layout:createButton(cx + 2, 8, 7, 1, nil, nil, "stop")
+
+function isPlayingLed:beforeRedraw()
+    isPlayingLed.back = fm.isPlaying() and colors.yellow or colors.gray
+end
 
 function statOld:onClick()
     local index = settings[fm.address].index - 1
@@ -133,18 +133,18 @@ function selectColor:onClick()
             fm.setScreenColor(selectColor.fore + 0.0)
         end
     end
-    redraw()
+    ui:draw()
 end
 
 function startButton:onClick()
     fm.start()
-    isPlayingLed.back = fm.isPlaying() and colors.yellow or colors.gray
+    isPlayingLed:beforeRedraw()
     isPlayingLed:draw()
 end
 
 function stopButton:onClick()
     fm.stop()
-    isPlayingLed.back = fm.isPlaying() and colors.yellow or colors.gray
+    isPlayingLed:beforeRedraw()
     isPlayingLed:draw()
 end
 
@@ -172,23 +172,4 @@ function volUp:onClick()
     currentVol:draw()
 end
 
---------------------------------------------------------
-
-function redraw()
-    isPlayingLed.back = fm.isPlaying() and colors.yellow or colors.gray
-    layout:draw()
-    upRedraw()
-end
-redraw()
-
-while true do
-    local eventData = {event.pull()}
-    local windowEventData = window:uploadEvent(eventData)
-    layout:uploadEvent(eventData)
-
-    if windowEventData[1] == "touch" then
-        if windowEventData[3] == rx and windowEventData[4] == 1 then
-            break
-        end
-    end
-end
+ui:loop()

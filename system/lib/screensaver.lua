@@ -35,6 +35,8 @@ function screensaver.start(screen, path)
             if uuid == screen and (eventName == "touch" or eventName == "drag" or eventName == "scroll") then
                 cache.static.screensaver_current[screen] = nil
                 th:kill()
+                local gpu = graphic.findGpu(screen)
+                if gpu.applyForce then gpu.applyForce() end
                 clear()
                 return false
             end
@@ -47,6 +49,14 @@ function screensaver.waitStart(screen, path)
     screensaver.start(screen, path)
     while screensaver.current(screen) do
         event.sleep()
+    end
+end
+
+function screensaver.noScreensaver(screen)
+    local oldScreenSaverState = screensaver.isEnabled(screen)
+    screensaver.setEnabled(screen, false)
+    return function ()
+        screensaver.setEnabled(screen, oldScreenSaverState)
     end
 end
 

@@ -50,7 +50,7 @@ local function draw(set)
 
         selectWindow:write("╔" .. string.rep("═", unicode.len(str)) .. "╗\n", background, foreground)
         selectWindow:write("║", background, foreground)
-        selectWindow:write(str, background, foreground)
+        selectWindow:write(str:gsub("_", " "), background, foreground)
         selectWindow:write("║" .. "\n", background, foreground)
         selectWindow:write("╚" .. string.rep("═", unicode.len(str)) .. "╝", background, foreground)
 

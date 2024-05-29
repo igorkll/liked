@@ -79,6 +79,27 @@ local list = {
         postInstall = function (self)
             fs.setAttribute(paths.concat(self.path, "icon.t2p"), "hidden", true)
         end
+    },
+    {
+        name = "zxImages",
+        version = "1",
+        vendor = "logic",
+        description = "images from zx spectrum",
+        minDiskSpace = 64,
+        
+        path = "/data/userdata/zxImages",
+        urlPrimaryPart = selfurlpart .. "/media/zxImages/",
+        files = (function()
+            local list = {"icon.t2p"}
+            for i = 1, 12 do
+                table.insert(list, tostring(math.round(i)) .. ".scr")
+            end
+            return list
+        end)(),
+        
+        postInstall = function (self)
+            fs.setAttribute(paths.concat(self.path, "icon.t2p"), "hidden", true)
+        end
     }
 }
 

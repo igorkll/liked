@@ -23,11 +23,12 @@ local function otherCheck(path, exp)
     return fs.exists(path) and path
 end
 
-local function imageReColor(color, blackListedColor)
+local function imageReColor(color, blackListedColor, cols)
+    cols = cols or gui.smartShadowsColors
     if blackListedColor and color == blackListedColor then
         for i, lcolor in ipairs(gui_container.indexsColors) do
             if lcolor == blackListedColor then
-                return gui_container.indexsColors[gui.smartShadowsColors[i] + 1]
+                return gui_container.indexsColors[(cols[i] or gui.smartShadowsColors[i]) + 1]
             end
         end
     end
@@ -35,8 +36,7 @@ local function imageReColor(color, blackListedColor)
 end
 
 local function repath(screen, path)
-    local gpu = graphic.findGpu(screen or component.list("screen")())
-    local depth = gpu.getDepth()
+    local depth = graphic.getDepth(screen or component.list("screen")())
     if depth == 8 then
         path = otherCheck(path, "t3p") or path
     elseif depth == 4 then
@@ -48,7 +48,7 @@ local function repath(screen, path)
 end
 
 --wallpaperMode заставляет считать цвет lightBlue как прозрачность
-function image.draw(screen, path, x, y, wallpaperMode, forceFullColor, lightMul, imagePaletteUsed, blackListedColor)
+function image.draw(screen, path, x, y, wallpaperMode, forceFullColor, lightMul, imagePaletteUsed, blackListedColor, newColors)
     if liked.recoveryMode then
         return
     end
@@ -58,6 +58,8 @@ function image.draw(screen, path, x, y, wallpaperMode, forceFullColor, lightMul,
         llcolors = image.readPalette(path, false, screen) or colors
     end
 
+    x = math.floor(x + 0.5)
+    y = math.floor(y + 0.5)
     
     lightMul = lightMul or 1
     path = repath(screen, path)
@@ -107,112 +109,185 @@ function image.draw(screen, path, x, y, wallpaperMode, forceFullColor, lightMul,
         return x, y, text
     end
 
-    local colorByte, countCharBytes
-    local oldX, oldY = 1, 1
-    local oldFore, oldBack, oldForeFull, oldBackFull
-    local buff = ""
-    local isEmptyBuff = true
-    for cy = 1, sy do
-        for cx = 1, sx do
-            colorByte = string.byte(read(1))
-            local fullBack, fullFore
-            if t3paletteSupport then
-                if forceFullColor or gpu.getDepth() == 8 then
-                    fullBack = t3colors[string.byte(read(1)) + 1]
-                    fullFore = t3colors[string.byte(read(1)) + 1]
-                    if registry.visionProtection then
-                        fullBack = format.visionProtectionConvert(fullBack)
-                        fullFore = format.visionProtectionConvert(fullFore)
-                    end
-                else
-                    read(2)
-                end
-            end
-            countCharBytes = string.byte(read(1))
+    local background, foreground
+    local fullBack, fullFore
+    local char
+    local col, col2
+    local _, c, f, b
+    if gpu.getSoftwareBuffers then
+        local chars, fores, backs = gpu.getSoftwareBuffers()
+        local rx = graphic.getResolution(screen)
+        local colorByte, countCharBytes
+        local isEmptyBuff = true
+        local index
 
-            local background = 
-            ((readbit(colorByte, 0) and 1 or 0) * 1) + 
-            ((readbit(colorByte, 1) and 1 or 0) * 2) + 
-            ((readbit(colorByte, 2) and 1 or 0) * 4) + 
-            ((readbit(colorByte, 3) and 1 or 0) * 8)
-            local foreground = 
-            ((readbit(colorByte, 4) and 1 or 0) * 1) + 
-            ((readbit(colorByte, 5) and 1 or 0) * 2) + 
-            ((readbit(colorByte, 6) and 1 or 0) * 4) + 
-            ((readbit(colorByte, 7) and 1 or 0) * 8)
+        gpu.updateFlag()
 
-            if not oldFore then oldFore = foreground end
-            if not oldBack then oldBack = background end
-            if not oldForeFull then oldForeFull = fullFore end
-            if not oldBackFull then oldBackFull = fullBack end
-
-            local char = read(countCharBytes)
-
-            if foreground ~= oldFore or background ~= oldBack or fullBack ~= oldBackFull or fullFore ~= oldForeFull or oldY ~= cy then
-                if oldBack ~= 0 or oldFore ~= 0 then --прозрачность, в реальной картинке такого не будет потому что если paint замечает оба нуля то он меняет одной значения чтобы пиксель не мог просто так стать прозрачным
-                    if (oldBack == oldFore or isEmptyBuff) and not oldBackFull then --по избежании визуальных артефактов при отображении unicode символов от лица сматряшего на монитор со стороны
-                        gpu.setBackground(imageReColor(colorslib.colorMul(llcolors[oldBack + 1], lightMul), blackListedColor))
-                        gpu.set(norm(oldX + (x - 1), oldY + (y - 1), string.rep(" ", unicode.len(buff))))
+        for cy = 1, sy do
+            for cx = 1, sx do
+                colorByte = string.byte(read(1))
+                fullBack, fullFore = nil, nil
+                if t3paletteSupport then
+                    if forceFullColor or graphic.getDepth(screen) == 8 then
+                        fullBack = t3colors[string.byte(read(1)) + 1]
+                        fullFore = t3colors[string.byte(read(1)) + 1]
+                        if registry.visionProtection then
+                            fullBack = format.visionProtectionConvert(fullBack)
+                            fullFore = format.visionProtectionConvert(fullFore)
+                        end
                     else
-                        local col, col2
+                        read(2)
+                    end
+                end
+                countCharBytes = string.byte(read(1))
+
+                background = 
+                ((readbit(colorByte, 0) and 1 or 0) * 1) + 
+                ((readbit(colorByte, 1) and 1 or 0) * 2) + 
+                ((readbit(colorByte, 2) and 1 or 0) * 4) + 
+                ((readbit(colorByte, 3) and 1 or 0) * 8)
+                foreground = 
+                ((readbit(colorByte, 4) and 1 or 0) * 1) + 
+                ((readbit(colorByte, 5) and 1 or 0) * 2) + 
+                ((readbit(colorByte, 6) and 1 or 0) * 4) + 
+                ((readbit(colorByte, 7) and 1 or 0) * 8)
+                char = read(countCharBytes)
+                isEmptyBuff = char == " "
+                index = (x - 1) + cx + (((cy + y) - 2) * rx)
+
+                if background ~= 0 or foreground ~= 0 then
+                    if (background == foreground or isEmptyBuff) and not fullBack then
+                        backs[index] = imageReColor(colorslib.colorMul(llcolors[background + 1], lightMul), blackListedColor, newColors)
+                        chars[index] = " "
+                    else
+                        col, col2 = nil, nil
                         if wallpaperMode then
-                            local _, c, f, b = pcall(gpu.get, oldX + (x - 1), oldY + (y - 1))
-                            if oldBack == colorslib.lightBlue then col = b end
-                            if oldFore == colorslib.lightBlue then col2 = b end
+                            if background == colorslib.lightBlue then col = backs[index] end
+                            if foreground == colorslib.lightBlue then col2 = backs[index] end
                         end
                         if col then
-                            gpu.setBackground(col)
+                            backs[index] = col
                         else
-                            gpu.setBackground(imageReColor(colorslib.colorMul(oldBackFull or llcolors[oldBack + 1], lightMul), blackListedColor))
+                            backs[index] = imageReColor(colorslib.colorMul(fullBack or llcolors[background + 1], lightMul), blackListedColor, newColors)
                         end
                         if col2 then
-                            gpu.setForeground(col2)
+                            fores[index] = col2
                         else
-                            gpu.setForeground(imageReColor(colorslib.colorMul(oldForeFull or llcolors[oldFore + 1], lightMul), blackListedColor))
+                            fores[index] = imageReColor(colorslib.colorMul(fullFore or llcolors[foreground + 1], lightMul), blackListedColor, newColors)
                         end
-                        gpu.set(norm(oldX + (x - 1), oldY + (y - 1), buff))
+                        chars[index] = char
                     end
-                end
-
-                oldFore = foreground
-                oldBack = background
-                oldForeFull = fullFore
-                oldBackFull = fullBack
-                oldX = cx
-                oldY = cy
-                buff = char
-                isEmptyBuff = char == " "
-            else
-                buff = buff .. char
-                if char ~= " " then
-                    isEmptyBuff = false
                 end
             end
         end
-    end
+    else
+        local colorByte, countCharBytes
+        local oldX, oldY = 1, 1
+        local oldFore, oldBack, oldForeFull, oldBackFull
+        local buff = ""
+        local isEmptyBuff = true
+        for cy = 1, sy do
+            for cx = 1, sx do
+                colorByte = string.byte(read(1))
+                fullBack, fullFore = nil, nil
+                if t3paletteSupport then
+                    if forceFullColor or graphic.getDepth(screen) == 8 then
+                        fullBack = t3colors[string.byte(read(1)) + 1]
+                        fullFore = t3colors[string.byte(read(1)) + 1]
+                        if registry.visionProtection then
+                            fullBack = format.visionProtectionConvert(fullBack)
+                            fullFore = format.visionProtectionConvert(fullFore)
+                        end
+                    else
+                        read(2)
+                    end
+                end
+                countCharBytes = string.byte(read(1))
 
-    if oldBack ~= 0 or oldFore ~= 0 then --прозрачность, в реальной картинке такого не будет потому что если paint замечает оба нуля то он меняет одной значения чтобы пиксель не мог просто так стать прозрачным
-        if (oldBack == oldFore or isEmptyBuff) and not oldBackFull then --по избежании визуальных артефактов при отображении unicode символов от лица сматряшего на монитор со стороны
-            gpu.setBackground(imageReColor(colorslib.colorMul(llcolors[oldBack + 1], lightMul), blackListedColor))
-            gpu.set(norm(oldX + (x - 1), oldY + (y - 1), string.rep(" ", unicode.len(buff))))
-        else
-            local col, col2
-            if wallpaperMode then
-                local _, c, f, b = pcall(gpu.get, oldX + (x - 1), oldY + (y - 1))
-                if oldBack == colorslib.lightBlue then col = b end
-                if oldFore == colorslib.lightBlue then col2 = b end
+                background = 
+                ((readbit(colorByte, 0) and 1 or 0) * 1) + 
+                ((readbit(colorByte, 1) and 1 or 0) * 2) + 
+                ((readbit(colorByte, 2) and 1 or 0) * 4) + 
+                ((readbit(colorByte, 3) and 1 or 0) * 8)
+                foreground = 
+                ((readbit(colorByte, 4) and 1 or 0) * 1) + 
+                ((readbit(colorByte, 5) and 1 or 0) * 2) + 
+                ((readbit(colorByte, 6) and 1 or 0) * 4) + 
+                ((readbit(colorByte, 7) and 1 or 0) * 8)
+
+                if not oldFore then oldFore = foreground end
+                if not oldBack then oldBack = background end
+                if not oldForeFull then oldForeFull = fullFore end
+                if not oldBackFull then oldBackFull = fullBack end
+
+                char = read(countCharBytes)
+
+                if foreground ~= oldFore or background ~= oldBack or fullBack ~= oldBackFull or fullFore ~= oldForeFull or oldY ~= cy then
+                    if oldBack ~= 0 or oldFore ~= 0 then --прозрачность, в реальной картинке такого не будет потому что если paint замечает оба нуля то он меняет одной значения чтобы пиксель не мог просто так стать прозрачным
+                        if (oldBack == oldFore or isEmptyBuff) and not oldBackFull then --по избежании визуальных артефактов при отображении unicode символов от лица сматряшего на монитор со стороны
+                            gpu.setBackground(imageReColor(colorslib.colorMul(llcolors[oldBack + 1], lightMul), blackListedColor, newColors))
+                            gpu.set(norm(oldX + (x - 1), oldY + (y - 1), string.rep(" ", unicode.len(buff))))
+                        else
+                            col, col2 = nil, nil
+                            if wallpaperMode then
+                                _, c, f, b = pcall(gpu.get, oldX + (x - 1), oldY + (y - 1))
+                                if oldBack == colorslib.lightBlue then col = b end
+                                if oldFore == colorslib.lightBlue then col2 = b end
+                            end
+                            if col then
+                                gpu.setBackground(col)
+                            else
+                                gpu.setBackground(imageReColor(colorslib.colorMul(oldBackFull or llcolors[oldBack + 1], lightMul), blackListedColor, newColors))
+                            end
+                            if col2 then
+                                gpu.setForeground(col2)
+                            else
+                                gpu.setForeground(imageReColor(colorslib.colorMul(oldForeFull or llcolors[oldFore + 1], lightMul), blackListedColor, newColors))
+                            end
+                            gpu.set(norm(oldX + (x - 1), oldY + (y - 1), buff))
+                        end
+                    end
+
+                    oldFore = foreground
+                    oldBack = background
+                    oldForeFull = fullFore
+                    oldBackFull = fullBack
+                    oldX = cx
+                    oldY = cy
+                    buff = char
+                    isEmptyBuff = char == " "
+                else
+                    buff = buff .. char
+                    if char ~= " " then
+                        isEmptyBuff = false
+                    end
+                end
             end
-            if col then
-                gpu.setBackground(col)
+        end
+
+        if oldBack ~= 0 or oldFore ~= 0 then --прозрачность, в реальной картинке такого не будет потому что если paint замечает оба нуля то он меняет одной значения чтобы пиксель не мог просто так стать прозрачным
+            if (oldBack == oldFore or isEmptyBuff) and not oldBackFull then --по избежании визуальных артефактов при отображении unicode символов от лица сматряшего на монитор со стороны
+                gpu.setBackground(imageReColor(colorslib.colorMul(llcolors[oldBack + 1], lightMul), blackListedColor, newColors))
+                gpu.set(norm(oldX + (x - 1), oldY + (y - 1), string.rep(" ", unicode.len(buff))))
             else
-                gpu.setBackground(imageReColor(colorslib.colorMul(oldBackFull or llcolors[oldBack + 1], lightMul), blackListedColor))
+                col, col2 = nil, nil
+                if wallpaperMode then
+                    _, c, f, b = pcall(gpu.get, oldX + (x - 1), oldY + (y - 1))
+                    if oldBack == colorslib.lightBlue then col = b end
+                    if oldFore == colorslib.lightBlue then col2 = b end
+                end
+                if col then
+                    gpu.setBackground(col)
+                else
+                    gpu.setBackground(imageReColor(colorslib.colorMul(oldBackFull or llcolors[oldBack + 1], lightMul), blackListedColor, newColors))
+                end
+                if col2 then
+                    gpu.setForeground(col2)
+                else
+                    gpu.setForeground(imageReColor(colorslib.colorMul(oldForeFull or llcolors[oldFore + 1], lightMul), blackListedColor, newColors))
+                end
+                gpu.set(norm(oldX + (x - 1), oldY + (y - 1), buff))
             end
-            if col2 then
-                gpu.setForeground(col2)
-            else
-                gpu.setForeground(imageReColor(colorslib.colorMul(oldForeFull or llcolors[oldFore + 1], lightMul), blackListedColor))
-            end
-            gpu.set(norm(oldX + (x - 1), oldY + (y - 1), buff))
         end
     end
 

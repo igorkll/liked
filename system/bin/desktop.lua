@@ -2,7 +2,6 @@ local graphic = require("graphic")
 local computer = require("computer")
 local event = require("event")
 local unicode = require("unicode")
-local programs = require("programs")
 local gui_container = require("gui_container")
 local fs = require("filesystem")
 local paths = require("paths")
@@ -13,20 +12,30 @@ local gui = require("gui")
 local lastinfo = require("lastinfo")
 local system = require("system")
 local liked = require("liked")
-local parser = require("parser")
 local screensaver = require("screensaver")
 local image = require("image")
 local palette = require("palette")
-local warnings = require("warnings")
 local apps = require("apps")
 local account = require("account")
-local internet = require("internet")
-
-local colors = gui_container.colors
+local cache = require("cache")
+local sysinit = require("sysinit")
 
 ------------------------------------------------------------------------ init
 
 local screen = ...
+local colors = gui_container.colors
+
+local listens = {}
+local function desktopUnload()
+    for i, v in ipairs(listens) do
+        event.cancel(v)
+    end
+end
+
+gui_container.desktopData = gui_container.desktopData or {}
+gui_container.desktopData[screen] = gui_container.desktopData[screen] or {}
+local desktopData = gui_container.desktopData[screen]
+
 local rx, ry = graphic.getResolution(screen)
 
 local statusWindow = graphic.createWindow(screen, 1, 1, rx, 1)
@@ -34,9 +43,8 @@ local window = graphic.createWindow(screen, 1, 2, rx, ry - 1)
 
 ------------------------------------------------------------------------ paths
 
-local defaultUserPath = "/data/userdata/"
-local userPath = gui_container.getUserRoot(screen)
-local iconsPath = userPath
+local iconsPath = gui_container.defaultUserRoot
+local userPath = desktopData[1] or gui_container.getUserRoot(screen)
 
 local iconAliases = {
 }
@@ -82,7 +90,8 @@ end
 local iconSizeX = 8
 local iconSizeY = 4
 
-local startIconsPoss = {} --тут храниться страница выбраная на конкретном пути
+local startIconsPoss = desktopData[2] or {} --тут храниться страница выбраная на конкретном пути
+desktopData[2] = startIconsPoss
 --local selectedIcons = {}
 local icons
 
@@ -100,6 +109,13 @@ end
 ------------------------------------------------------------------------ draw
 
 local contextMenuOpen = nil
+
+local function getBarsColor(baseColor, toColor)
+    if liked.getBaseWallpaperColor() == (baseColor or colors.gray) then
+        return toColor or colors.black
+    end
+    return baseColor or colors.gray
+end
 
 local function drawStatus()
     if screensaver.current(screen) then return end
@@ -125,10 +141,11 @@ local function drawStatus()
     statusWindow:set(window.sizeX - unicode.len(str), 1, colors.gray, colors.white, str)
     ]]
 
-    liked.drawUpBar(screen)
+    liked.drawUpBar(screen, nil, getBarsColor(), nil, true)
     statusWindow:set(1, 1, contextMenuOpen == 1 and colors.blue or colors.lightGray, colors.white, " OS ")
     statusWindow:set(6, 1, contextMenuOpen == 2 and colors.blue or colors.lightGray, colors.white, " FILES ")
     statusWindow:set(14, 1, contextMenuOpen == 3 and colors.blue or colors.lightGray, colors.white, " TYPES ")
+    liked.upBarShadow(screen)
 end
 
 local function drawWallpaper()
@@ -151,11 +168,12 @@ local function drawBar(lUserPath, iconsCount)
     end
     ]]
 
-    window:fill(1, window.sizeY, rx, 1, colors.gray, 0, " ")
-    window:set(16, window.sizeY, colors.gray, colors.white, "path: " .. gui_container.short(curentPath, window.sizeX - 35))
-    window:set(window.sizeX - 10, window.sizeY, colors.gray, colors.white, tostring(currentPage))
-    window:set(window.sizeX - 8, window.sizeY, colors.gray, colors.white, "/")
-    window:set(window.sizeX - 6, window.sizeY, colors.gray, colors.white, tostring(pageCount))
+    local col = getBarsColor()
+    window:fill(1, window.sizeY, rx, 1, col, 0, " ")
+    window:set(16, window.sizeY, col, colors.white, "path: " .. gui_container.short(curentPath, window.sizeX - 35))
+    window:set(window.sizeX - 10, window.sizeY, col, colors.white, tostring(currentPage))
+    window:set(window.sizeX - 8, window.sizeY, col, colors.white, "/")
+    window:set(window.sizeX - 6, window.sizeY, col, colors.white, tostring(pageCount))
 
     --window:set(1, window.sizeY - 3, colors.lightGray, colors.white, " /")
     --window:set(1, window.sizeY - 2, colors.lightGray, colors.white, "/ ")
@@ -185,14 +203,18 @@ local function drawBar(lUserPath, iconsCount)
 end
 
 local function draw(old, check) --вызывает все перерисовки
+    gui.scrShadow[screen] = nil
+
     checkData()
     if not fs.exists(userPath) or not fs.isDirectory(userPath) then
-        userPath = defaultUserPath
+        userPath = gui_container.defaultUserRoot
+        desktopData[1] = userPath
     end
 
     local tbl = fs.list(userPath)
     if not tbl then
         userPath = gui_container.getUserRoot(screen)
+        desktopData[1] = userPath
         return draw()
     end
 
@@ -219,7 +241,7 @@ local function draw(old, check) --вызывает все перерисовки
         local isFs = paths.equals(localFsPath, "/")
 
         if gui.isVisible(screen, path) then
-            if iconmode == 0 or not paths.equals(userPath, defaultUserPath) then
+            if iconmode == 0 or not paths.equals(userPath, gui_container.defaultUserRoot) then
                 return true
             elseif iconmode == 3 then
                 if isFs then
@@ -342,7 +364,7 @@ local function draw(old, check) --вызывает все перерисовки
                 --end
                 local baseColor = liked.getBaseWallpaperColor()
                 local x, y = window:toRealPos(math.floor((centerIconX - (unicode.len(icon.shortName) / 2)) + 0.5), centerIconY + 2)
-                gui.drawtext(screen, x, y, icon.hidden and colors.lightGray or (baseColor == colors.white and colors.black or colors.white), icon.shortName)
+                gui.drawtext(screen, x, y, icon.hidden and getBarsColor(colors.lightGray, colors.gray) or (baseColor == colors.white and colors.black or colors.white), icon.shortName)
                 --window:set(iconX - (unicode.len(icon.name) // 2), iconY + iconY - 2, colors.lightBlue, colors.white, icon.name)
                 if icon.icon then
                     local sx, sy = window:toRealPos(iconX, iconY)
@@ -381,16 +403,17 @@ end
 local function folderBack()
     local oldPath = userPath
     userPath = gui_container.checkPath(screen, paths.path(userPath))
+    desktopData[1] = userPath
     if userPath ~= oldPath then
         draw()
     end
 end
 
 local timerEnable = true
-event.timer(10, function()
+table.insert(listens, event.timer(10, function()
     if not timerEnable then return end
     drawStatus()
-end, math.huge)
+end, math.huge))
 
 local function warn(str)
     local clear = gui.saveZone(screen)
@@ -402,49 +425,65 @@ local function warnNoClear(str)
     gui.warn(screen, nil, nil, str or "unknown error")
 end
 
+local function simpleExecute(name, nickname, ...)
+    liked.bigAssert(screen, apps.execute(name, screen, nickname, ...))
+    graphic.setDepth(screen, graphic.maxDepth(screen))
+    graphic.setResolution(screen, sysinit.getResolution(screen))
+end
+
 local function execute(name, nickname, ...)
     timerEnable = false
     --gui.status(screen, nil, nil, "loading...")
-    liked.bigAssert(screen, apps.execute(name, screen, nickname, ...))
+    simpleExecute(name, nickname, ...)
     draw()
     timerEnable = true
     redrawFlag = nil
+end
+
+local function fexecute(simple, ...)
+    if simple then
+        return simpleExecute(...)
+    else
+        return execute(...)
+    end
 end
 
 local function uninstallApp(path, nickname)
     apps.uninstall(screen, nickname, path)
 end
 
-local function fileDescriptor(icon, alternative, nickname) --открывает файл, сам решает через какую программу это сделать
+local function fileDescriptor(icon, alternative, nickname, simple) --открывает файл, сам решает через какую программу это сделать
     if alternative then
         if fs.isDirectory(icon.path) then
             userPath = icon.path
+            desktopData[1] = userPath
             draw()
             return true
         elseif icon.exp == "lua" or icon.exp == "scrsv" then
-            execute("edit", nickname, icon.path)
+            fexecute(simple, "edit", nickname, icon.path)
             return true
         end
     end
 
     if gui_container.openVia[icon.exp] then
-        execute(gui_container.openVia[icon.exp], nickname, icon.path)
+        fexecute(simple, gui_container.openVia[icon.exp], nickname, icon.path)
     elseif icon.exp == "app" then
         if fs.isDirectory(icon.path) then
-            execute(paths.concat(icon.path, "main.lua"), nickname)
+            fexecute(simple, paths.concat(icon.path, "main.lua"), nickname)
         else
-            execute(icon.path, nickname)
+            fexecute(simple, icon.path, nickname)
         end
         return true
     elseif fs.isDirectory(icon.path) then
         userPath = gui_container.checkPath(screen, icon.path)
+        desktopData[1] = userPath
         draw()
         return true
     elseif isImage(icon.exp) then
-        execute("paint", nickname, icon.path)
+        fexecute(simple, "paint", nickname, icon.path)
         return true
     elseif icon.exp == "lua" then
-        execute(icon.path, nickname)
+        fexecute(simple, icon.path, nickname)
         return true
     elseif icon.exp == "scrsv" then
         if liked.publicMode(screen) then
@@ -455,7 +494,7 @@ local function fileDescriptor(icon, alternative, nickname) --открывает 
     elseif icon.exp == "plt" then
         if liked.publicMode(screen) then
             local clear = saveZone(screen)
-            local state = gui_yesno(screen, nil, nil, "apply this palette?")
+            local state = gui.yesno(screen, nil, nil, "apply this palette?")
             clear()
 
             if state then
@@ -464,10 +503,30 @@ local function fileDescriptor(icon, alternative, nickname) --открывает 
             end
         end
     elseif icon.exp == "txt" or icon.exp == "log" or icon.exp == "cfg" or icon.exp == "dat" then
-        execute("edit", nickname, icon.path, icon.exp == "log")
+        fexecute(simple, "edit", nickname, icon.path, icon.exp == "log")
     else
         warn("file is not supported")
     end
+end
+
+local function openAsCurrent(icon, alternative, nickname)
+    if alternative then
+        if fs.isDirectory(icon.path) then
+            return true
+        elseif icon.exp == "lua" or icon.exp == "scrsv" then
+            return false
+        end
+    end
+
+    if gui_container.openVia[icon.exp] then
+        return false
+    elseif icon.exp == "app" then
+        return false
+    elseif fs.isDirectory(icon.path) then
+        return true
+    end
+
+    return false
 end
 
 local function runFunc(func, ...)
@@ -530,15 +589,18 @@ local function doIcon(windowEventData)
                 listBack()
                 return
             elseif windowEventData[3] >= 6 and windowEventData[3] <= 9 then
+                cache.cache.getIcon = nil
+                cache.cache.findIcon = nil
                 draw()
                 return
             elseif windowEventData[3] >= 11 and windowEventData[3] <= 14 then
-                local root = defaultUserPath
+                local root = gui_container.defaultUserRoot
                 if windowEventData[5] == 1 then
                     root = gui_container.getUserRoot(screen)
                 end
                 if not paths.equals(userPath, root) then
                     userPath = root
+                    desktopData[1] = userPath
                     draw()
                 end
                 return
@@ -557,7 +619,13 @@ local function doIcon(windowEventData)
                         --if v.isFs and gui_container.isDiskLocked(v.fs.address) and not gui_container.isDiskAccess(v.fs.address) then
                         --    gui_container.getDiskAccess(screen, v.fs.address)
                         --else
-                        fileDescriptor(v, nil, windowEventData[6])
+                        if openAsCurrent(v, nil, windowEventData[6]) then
+                            fileDescriptor(v, nil, windowEventData[6])
+                        else
+                            return function ()
+                                fileDescriptor(v, nil, windowEventData[6], true)
+                            end
+                        end
                         --end
                     else
                         if v.isFs then
@@ -601,7 +669,13 @@ local function doIcon(windowEventData)
                             clear()
 
                             if str == "  open" then
-                                fileDescriptor(v, nil, windowEventData[6])
+                                if openAsCurrent(v, nil, windowEventData[6]) then
+                                    fileDescriptor(v, nil, windowEventData[6])
+                                else
+                                    return function ()
+                                        fileDescriptor(v, nil, windowEventData[6], true)
+                                    end
+                                end
                             elseif str == "  clone to" then
                                 require("hdd").clone(screen, v.fs)
                                 draw()
@@ -638,7 +712,7 @@ local function doIcon(windowEventData)
                                 
                                 if archivePath then
                                     clear()
-                                    if gui_yesno(screen, nil, nil, "are you sure you want to flash the \"" .. gui.hideExtension(screen, archivePath) .. "\" archive to the \"" .. v.name .. "\"?") then
+                                    if gui.yesno(screen, nil, nil, "are you sure you want to flash the \"" .. gui.hideExtension(screen, archivePath) .. "\" archive to the \"" .. v.name .. "\"?") then
                                         gui_status(screen, nil, nil, "archive flashing...")
                                         local ok, err = archiver.unpack(archivePath, v.path)
                                         if not ok then
@@ -649,7 +723,7 @@ local function doIcon(windowEventData)
                                 draw()
                             elseif str == "  format" then
                                 local clear2 = saveZone(screen)
-                                local state = gui.pleaseType(screen, "FORMAT")
+                                local state = gui.pleaseType(screen, v.fs.address == fs.bootaddress and "FRMT_SYSROOT" or "FORMAT")
                                 
                                 if state then
                                     gui_status(screen, nil, nil, "formatting...")
@@ -661,7 +735,7 @@ local function doIcon(windowEventData)
                             --[[
                             elseif str == "  make a disk" then
                                 local clear2 = saveZone(screen)
-                                local state = gui_yesno(screen, nil, nil, "wipe data?")
+                                local state = gui.yesno(screen, nil, nil, "wipe data?")
                                 
                                 if state then
                                     gui_status(screen, nil, nil, "wiping...")
@@ -672,7 +746,7 @@ local function doIcon(windowEventData)
                                 end
                             elseif str == "  erase data" then
                                 local clear2 = saveZone(screen)
-                                local state = gui_yesno(screen, nil, nil, "wipe data?")
+                                local state = gui.yesno(screen, nil, nil, "wipe data?")
                                 
                                 if state then
                                     gui_status(screen, nil, nil, "wiping...")
@@ -704,7 +778,7 @@ local function doIcon(windowEventData)
                                 end
                             elseif str == "  clear label" then
                                 local clear2 = saveZone(screen)
-                                local state = gui_yesno(screen, nil, nil, "clear label on \"" .. (v.name or "disk") .. "\"?")
+                                local state = gui.yesno(screen, nil, nil, "clear label on \"" .. (v.name or "disk") .. "\"?")
 
                                 if state then
                                     liked.umountAll()
@@ -749,10 +823,16 @@ local function doIcon(windowEventData)
                             clear()
 
                             if str == "  open" then
-                                fileDescriptor(v, nil, windowEventData[6])
+                                if openAsCurrent(v, nil, windowEventData[6]) then
+                                    fileDescriptor(v, nil, windowEventData[6])
+                                else
+                                    return function ()
+                                        fileDescriptor(v, nil, windowEventData[6], true)
+                                    end
+                                end
                             elseif str == "  uninstall" then
                                 local clear = saveZone(screen)
-                                local ok = gui_yesno(screen, nil, nil, "uninstall \"" .. v.name .. "\"?")
+                                local ok = gui.yesno(screen, nil, nil, "uninstall \"" .. v.name .. "\"?")
 
                                 if ok then
                                     if not uninstallApp(v.path, windowEventData[6]) then
@@ -762,7 +842,9 @@ local function doIcon(windowEventData)
                                     clear()
                                 end
                             elseif str == "  license" then
-                                execute("edit", windowEventData[6], licensePath, true)
+                                return function ()
+                                    simpleExecute("edit", windowEventData[6], licensePath, true)
+                                end
                             elseif actions and actions[num] then
                                 runFunc(actions[num])
                             end
@@ -880,24 +962,30 @@ local function doIcon(windowEventData)
                             clear()
 
                             if str == "  open" then
-                                fileDescriptor(v, nil, windowEventData[6])
+                                if openAsCurrent(v, nil, windowEventData[6]) then
+                                    fileDescriptor(v, nil, windowEventData[6])
+                                else
+                                    return function ()
+                                        fileDescriptor(v, nil, windowEventData[6], true)
+                                    end
+                                end
                             elseif str == "  info" then
-                                execute("fileinfo", windowEventData[6], v.path)
+                                return function ()
+                                    simpleExecute("fileinfo", windowEventData[6], v.path)
+                                end
                             elseif str == "  pack to archive" then
-                                local packFolder = v.path
-                                local clear = saveBigZone(screen)
-                                local outPath = gui_filepicker(screen, nil, nil, nil, "afpx", true)
+                                local clear = gui.saveBigZone(screen)
+                                local outPath = require("iowindows").savefile(screen, "afpx")
                                 clear()
 
                                 if outPath then
-                                    local archiver = require("archiver")
-                                    gui_status(screen, nil, nil, "packaging \"" .. gui_container.toUserPath(screen, packFolder) .. "\" to \"" .. gui_container.toUserPath(screen, outPath) .. "\"")
-                                    liked.assertNoClear(screen, archiver.pack(packFolder, outPath))
+                                    gui.status(screen, nil, nil, "packaging \"" .. gui.fpath(screen, v.path) .. "\" to \"" .. gui.fpath(screen, outPath) .. "\"")
+                                    liked.assertNoClear(screen, require("archiver").pack(v.path, outPath))
                                     draw()
                                 end
                             elseif str == "  remove" then
                                 local clear2 = saveZone(screen)
-                                local state = gui_yesno(screen, nil, nil, "remove \"" .. v.name .. "\"?")
+                                local state = gui.yesno(screen, nil, nil, "remove \"" .. v.name .. "\"?")
                                 clear2()
                                 if state then
                                     gui.status(screen, nil, nil, "removing \"" .. v.name .. "\"...")
@@ -906,7 +994,7 @@ local function doIcon(windowEventData)
                                 end
                             elseif str == "  uninstall" then
                                 local clear2 = saveZone(screen)
-                                local state = gui_yesno(screen, nil, nil, "uninstall \"" .. v.name .. "\"?")
+                                local state = gui.yesno(screen, nil, nil, "uninstall \"" .. v.name .. "\"?")
                                 clear2()
                                 if state then
                                     if not uninstallApp(v.path, windowEventData[6]) then
@@ -963,16 +1051,21 @@ local function doIcon(windowEventData)
                                 fileDescriptor(v, true)
                             elseif str == "  edit" or str == "  open is text editor" then
                                 --execute("edit", windowEventData[6], v.path, str == "  open is text editor" and not isDev())
-                                execute("edit", windowEventData[6], v.path)
+                                return function ()
+                                    simpleExecute("edit", windowEventData[6], v.path)
+                                end
                             elseif str == "  license" then
-                                execute("edit", windowEventData[6], licensePath, true)
+                                return function ()
+                                    simpleExecute("edit", windowEventData[6], licensePath, true)
+                                end
                             elseif actions and actions[num] then
                                 runFunc(actions[num])
                             else
                                 for i, v2 in ipairs(gui_container.filesExps) do
                                     if "  " .. v2[3] == str then
-                                        execute(v2[2], windowEventData[6], v.path .. (v2[6] or ""))
-                                        break
+                                        return function ()
+                                            simpleExecute(v2[2], windowEventData[6], v.path .. (v2[6] or ""))
+                                        end
                                     end
                                 end
                             end
@@ -1036,7 +1129,9 @@ local function doIcon(windowEventData)
                         if #name == 0 or name:find("%.") or name:find("%/") or name:find("%\\") then
                             warn("invalid name")
                         else
-                            execute("paint", windowEventData[6], path)
+                            return function ()
+                                simpleExecute("paint", windowEventData[6], path)
+                            end
                         end
                     else
                         warn("this name is occupied")
@@ -1093,7 +1188,9 @@ local function doIcon(windowEventData)
                         if #name == 0 or name:find("%/") or name:find("%\\") then
                             warn("invalid name")
                         else
-                            execute("edit", windowEventData[6], path)
+                            return function ()
+                                simpleExecute("edit", windowEventData[6], path)
+                            end
                         end
                     else
                         warn("this name is occupied")
@@ -1125,7 +1222,7 @@ local function doIcon(windowEventData)
                         copyFlag = false
                     else
                         local clear = saveZone(screen)
-                        local replaseAllow = gui_yesno(screen, nil, nil, isDir and "merge directories?" or "overwrite the file?")
+                        local replaseAllow = gui.yesno(screen, nil, nil, isDir and "merge directories?" or "overwrite the file?")
                         if not replaseAllow then
                             clear()
                             copyFlag = false
@@ -1232,39 +1329,38 @@ end
 
 ------------------------------------------------------------------------ desktop
 
-event.listen("redrawDesktop", function()
+table.insert(listens, event.listen("redrawDesktop", function()
     redrawFlag = true
-end)
+end))
 
 local lastCheckTime
-local warnPrinted
 local lolzLock
 local altLolzLock
 local accountCheckTimeout = 25 + math.random(-5, 5)
 
-event.listen("lolzLock", function ()
+table.insert(listens, event.listen("lolzLock", function ()
     if not lolzLock then
         altLolzLock = true
     end
-end)
+end))
 
-event.listen("noLolzLock", function ()
+table.insert(listens, event.listen("noLolzLock", function ()
     lolzLock = nil
     altLolzLock = nil
-end)
+end))
 
 while true do
     if redrawFlag then --бля тут проблем, когда варнинги весят, не чекаеться на залоченость по аку
         redrawFlag = false
         draw()
-        if not warnPrinted then
+        if not desktopData[3] then
             local clear = gui.saveZone(screen)
-            for _, str in ipairs(warnings.list(screen)) do
+            for _, str in ipairs(require("warnings").list(screen)) do
                 gui.warn(screen, nil, nil, str)
             end
             clear()
 
-            warnPrinted = true
+            desktopData[3] = true
         end
     end
 
@@ -1275,18 +1371,27 @@ while true do
         if statusWindowEventData[4] == 1 and statusWindowEventData[3] >= 1 and statusWindowEventData[3] <= 4 then
             contextMenuOpen = 1
             drawStatus()
-            local clear = screenshot(screen, 2, 2, 28, 7 + 4)
+            local clear = graphic.screenshot(screen, 2, 2, 28, 7 + 4)
             local str, num = gui.context(screen, 2, 2,
             {"  lock screen", true, "  about", "  settings", "  market", true, "  shutdown", "  reboot"},
             {not not registry.password, false, true, true, true, false, not not computer.shutdown, not not computer.shutdown})
             contextMenuOpen = nil
 
             if str == "  about" then
-                execute("about", statusWindowEventData[6])
+                desktopUnload()
+                return function()
+                    simpleExecute("about", statusWindowEventData[6])
+                end
             elseif str == "  settings" then
-                execute("settings", statusWindowEventData[6])
+                desktopUnload()
+                return function()
+                    simpleExecute("settings", statusWindowEventData[6])
+                end
             elseif str == "  market" then
-                execute("market", statusWindowEventData[6])
+                desktopUnload()
+                return function()
+                    simpleExecute("market", statusWindowEventData[6])
+                end
             elseif str == "  lock screen" then
                 clear()
                 drawStatus()
@@ -1318,6 +1423,7 @@ while true do
                     gui_container.userRoot[screen] = "/"
                 end
                 userPath = gui_container.checkPath(screen, userPath)
+                desktopData[1] = userPath
                 draw()
             elseif num == 3 then
                 gui_container.hiddenFiles[screen] = not gui_container.hiddenFiles[screen]
@@ -1343,7 +1449,11 @@ while true do
         end
     end
 
-    doIcon(windowEventData)
+    local ret = doIcon(windowEventData)
+    if ret then
+        desktopUnload()
+        return ret
+    end
 
     if eventData[1] == "key_down" then
         local ok

@@ -2,6 +2,7 @@ local uix = require("uix")
 local sound = require("sound")
 local gobjs = require("gobjs")
 local gui = require("gui")
+local paths = require("paths")
 local fs = require("filesystem")
 
 local screen = ...
@@ -42,9 +43,13 @@ local mineOSfiles = {
     "/mineOS.lua"
 }
 
+local function rePath(path)
+    return paths.concat("/mnt/root", path)
+end
+
 local function exists(lst)
     for i, v in ipairs(lst) do
-        if fs.exists(v) then
+        if fs.exists(rePath(v)) then
             return true
         end
     end
@@ -52,7 +57,7 @@ end
 
 local function rmAll(lst)
     for i, v in ipairs(lst) do
-        fs.remove(v)
+        fs.remove(rePath(v))
     end
 end
 
@@ -71,6 +76,20 @@ local function cleanList()
         table.insert(list, "residual MineOS files")
         table.insert(actions, function ()
             rmAll(mineOSfiles)
+        end)
+    end
+
+    if fs.exists("/data/errorlog.log") then
+        table.insert(list, "error log")
+        table.insert(actions, function ()
+            fs.remove("/data/errorlog.log")
+        end)
+    end
+
+    if fs.exists("/data/cache") then
+        table.insert(list, "system cache")
+        table.insert(actions, function ()
+            fs.remove("/data/cache")
         end)
     end
 
@@ -95,10 +114,14 @@ layout.cleanButton = layout:createButton(2, 2, 16, 1, uix.colors.white, uix.colo
 function layout.cleanButton:onClick()
     if #actions > 0 then
         if gui.yesno(screen, nil, nil, "are you sure you want to start cleaning the system?") then
+            local clear = gui.saveZone(screen)
             gui.status(screen, nil, nil, "cleaning the system...")
+            local used = fs.spaceUsed("/")
             for i, v in ipairs(actions) do
                 v()
             end
+            clear()
+            gui.done(screen, nil, nil, "It was cleaned up: " .. tostring(math.roundTo((used - fs.spaceUsed("/")) / 1024)) .. "KB")
             updateList()
         end
     else

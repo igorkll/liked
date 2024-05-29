@@ -6,6 +6,8 @@ local system = require("system")
 local paths = require("paths")
 local event = require("event")
 local thread = require("thread")
+local gui = require("gui")
+local image = require("image")
 
 local colors = gui_container.colors
 
@@ -31,7 +33,7 @@ for index, value in ipairs(shadows) do
     end
 end
 
-local modes = {"full", "compact"}
+local modes = {"full", "compact", "round", "screen"}
 local selectedMode = 1
 for index, value in ipairs(modes) do
     if value == registry.shadowMode then
@@ -88,8 +90,13 @@ local function draw(set)
     end
 
     local ix, iy = ((rx // 3) * 2) + 8, (ry // 2) - 4
-    require("image").draw(screen, paths.concat(paths.path(paths.path(selfpath)), "shadow_demo.t2p"), ix, iy)
-    local th = thread.create(gui_context, screen, ix + 1, iy + 1, {"shutdown", "reboot"})
+    local imagePath = paths.concat(paths.path(paths.path(selfpath)), "shadow_demo.t2p")
+    image.draw(screen, imagePath, ix, iy)
+    local isx, isy = image.size(imagePath)
+    if registry.shadowMode == "screen" then
+        gui.shadow(screen, ix, iy, isx, isy, nil, true)
+    end
+    local th = thread.create(gui.context, screen, ix + 2, iy + 1, {"shutdown", "reboot"}, nil, registry.shadowMode == "screen")
     th:resume()
     event.yield()
     th:kill()

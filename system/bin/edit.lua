@@ -1,3 +1,9 @@
+local parser = require("parser")
+local unicode = require("unicode")
+local function lineMod(str)
+  return parser.fastChange(str, {["\r"] = "", ["\t"] = "  "})
+end
+
 --[[
 local fs = require("filesystem")
 local unicode = require("unicode")
@@ -1008,7 +1014,7 @@ local screen, nickname, filename, readonly = ...
 local file_parentpath = paths.path(filename)
 
 local gpu = graphic.findGpu(screen)
-if gpu.getDepth() == 1 then
+if graphic.getDepth(screen) == 1 then
   gpu.setBackground(0)
 else
   gpu.setBackground(colors.gray)
@@ -1687,7 +1693,7 @@ end
 do
     local f = fs.open(filename, "r")
     if f then
-        local data = require("calls").call("split", f.readAll(), "\n")
+        local data = require("calls").call("split", lineMod(f.readAll()), "\n")
         f.close()
 
         local x, y, w, h = getArea()

@@ -49,7 +49,16 @@ function liked.isUserdata(path)
     return path:sub(1, #data) == data
 end
     
---------------------------------------------------------
+function liked.wait(screen)
+    while true do
+        local eventData = {event.pull()}
+        if eventData[1] == "close" and eventData[2] == screen then
+            break
+        elseif eventData[1] == "key_down" and table.exists(lastinfo.keyboards[screen], eventData[2]) and eventData[3] == 13 and eventData[4] == 28 then
+            break
+        end
+    end
+end
 
 function liked.isUninstallScript(path)
     return fs.exists(paths.concat(path, "uninstall.lua"))
@@ -106,7 +115,7 @@ function liked.umountAll()
 
     for address in component.list("filesystem") do
         if address ~= computer.tmpAddress() and address ~= fs.bootaddress then
-            fs.umount(hdd.genName(address))
+            fs.umount(component.proxy(address))
         end
     end
 end
@@ -116,7 +125,7 @@ function liked.mountAll()
 
     for address in component.list("filesystem") do
         if address ~= computer.tmpAddress() and address ~= fs.bootaddress then
-            assert(fs.mount(address, hdd.genName(address)))
+            fs.mount(address, hdd.genName(address))
         end
     end
 end
@@ -153,31 +162,49 @@ end
 
 --------------------------------------------------------
 
+function liked.applyReg(path, screen)
+    if screen then
+        if liked.assert(screen, registry.apply(path)) then
+            gui_container.refresh()
+            registry.save()
+        end
+    else
+        if registry.apply(path) then
+            gui_container.refresh()
+            registry.save()
+        end
+    end
+end
+
 local bufferTimerId
 function liked.applyBufferType()
+    graphic.unloadBuffers()
+
     if liked.recoveryMode then
         graphic.allowSoftwareBuffer = false
         graphic.allowHardwareBuffer = false
-    else
-        graphic.allowSoftwareBuffer = registry.bufferType == "software"
-        graphic.allowHardwareBuffer = registry.bufferType == "hardware"
-    end
-    graphic.vgpus = {}
-    graphic.bindCache = {}
-    graphic.screensBuffers = {}
 
-    if graphic.allowHardwareBuffer or graphic.allowSoftwareBuffer then
-        if not bufferTimerId then
-            bufferTimerId = event.timer(0.1, function ()
-                for address in component.list("screen") do
-                    graphic.update(address)
-                end
-            end, math.huge)
-        end
-    else
         if bufferTimerId then
             event.cancel(bufferTimerId)
             bufferTimerId = nil
+        end
+    else
+        graphic.allowSoftwareBuffer = registry.bufferType == "software"
+        graphic.allowHardwareBuffer = registry.bufferType == "hardware"
+
+        if graphic.allowHardwareBuffer or graphic.allowSoftwareBuffer then
+            if not bufferTimerId then
+                bufferTimerId = event.timer(0.1, function ()
+                    for address in component.list("screen") do
+                        graphic.update(address)
+                    end
+                end, math.huge)
+            end
+        else
+            if bufferTimerId then
+                event.cancel(bufferTimerId)
+                bufferTimerId = nil
+            end
         end
     end
 end
@@ -241,7 +268,7 @@ end
 
 --------------------------------------------------------
 
-function liked.raw_drawUpBarTask(method, screen, ...)
+local function raw_drawUpBarTask(method, screen, ...)
     local tbl = {...}
     local function redraw()
         liked.drawUpBar(screen, table.unpack(tbl))
@@ -257,16 +284,23 @@ function liked.raw_drawUpBarTask(method, screen, ...)
     return th, redraw
 end
 
+function liked.upBarShadow(screen)
+    if gui.scrShadow[screen] and gui.scrShadow[screen] > 0 then
+        local rx = graphic.getResolution(screen)
+        gui.shadow(screen, 1, 1, rx, 1, nil, true)
+    end
+end
+
 function liked.drawUpBarTask(...)
-    return liked.raw_drawUpBarTask(require("thread").create, ...)
+    return raw_drawUpBarTask(require("thread").create, ...)
 end
 
 function liked.drawUpBarTaskBg(...)
-    return liked.raw_drawUpBarTask(require("thread").createBackground, ...)
+    return raw_drawUpBarTask(require("thread").createBackground, ...)
 end
 
 
-function liked.drawUpBar(screen, withoutFill, bgcolor, guiOffset)
+function liked.drawUpBar(screen, withoutFill, bgcolor, guiOffset, noShadow)
     local rtc = "RTC-" .. time.formatTime(time.addTimeZone(time.getRealTime(), registry.timeZone or 0))
     local gtc = "GTC-" .. time.formatTime(time.getGameTime())
     local charge = system.getCharge()
@@ -324,12 +358,16 @@ function liked.drawUpBar(screen, withoutFill, bgcolor, guiOffset)
         gpu.set((rx - offset) + (i - 1), 1, char)
     end
 
+    if not noShadow then
+        liked.upBarShadow(screen)
+    end
+
     graphic.updateFlag(screen)
 end
 
 --------------------------------------------------------
 
-function liked.raw_drawFullUpBarTask(method, screen, title, withoutFill, bgcolor, wideExit)
+local function raw_drawFullUpBarTask(method, screen, title, withoutFill, bgcolor, wideExit)
     if wideExit == nil then wideExit = true end
     local function redraw()
         liked.drawFullUpBar(screen, title, withoutFill, bgcolor, wideExit)
@@ -369,15 +407,15 @@ function liked.raw_drawFullUpBarTask(method, screen, title, withoutFill, bgcolor
 end
 
 function liked.drawFullUpBarTask(...)
-    return liked.raw_drawFullUpBarTask(thread.create, ...)
+    return raw_drawFullUpBarTask(thread.create, ...)
 end
 
 function liked.drawFullUpBarTaskBg(...)
-    return liked.raw_drawFullUpBarTask(thread.createBackground, ...)
+    return raw_drawFullUpBarTask(thread.createBackground, ...)
 end
 
-function liked.drawFullUpBar(screen, title, withoutFill, bgcolor, wideExit)
-    liked.drawUpBar(screen, withoutFill, bgcolor, wideExit and -2)
+function liked.drawFullUpBar(screen, title, withoutFill, bgcolor, wideExit, noShadow)
+    liked.drawUpBar(screen, withoutFill, bgcolor, wideExit and -2, true)
     local gpu = graphic.findGpu(screen)
     local rx, ry = gpu.getResolution()
 
@@ -390,6 +428,10 @@ function liked.drawFullUpBar(screen, title, withoutFill, bgcolor, wideExit)
         gpu.set(rx - 2, 1, " X ")
     else
         gpu.set(rx, 1, "X")
+    end
+
+    if not noShadow then
+        liked.upBarShadow(screen)
     end
 end
 
@@ -674,7 +716,7 @@ end
 function liked.minRamForDBuff()
     local kb = 512
     for _ in component.list("screen") do
-        kb = kb + 256
+        kb = kb + 512
     end
     return kb
 end
@@ -688,52 +730,13 @@ function liked.isRealKeyboards(screen)
     return false
 end
 
-function liked.getComputerScore()
-    local cpuLevel = system.getCpuLevel()
-    local ram = computer.totalMemory() / 1024
-    local score = 0
-
-    if cpuLevel >= 3 then
-        score = score + 5
-    elseif cpuLevel == 2 then
-        score = score + 3
-    else
-        score = score + 1
-    end
-
-    if ram >= 2048 then
-        score = score + 5
-    elseif ram >= 1024 + 512 then
-        score = score + 4
-    elseif ram >= 1024 then
-        score = score + 3
-    elseif ram >= 768 then
-        score = score + 2
-    else
-        score = score + 1
-    end
-
-    return score
-end
-
-function liked.getScoreColor(score)
-    if score >= 10 then
-        return colors.cyan
-    elseif score >= 7 then
-        return colors.green
-    elseif score >= 5 then
-        return colors.orange
-    else
-        return colors.red
-    end
-end
-
 -------------------------------------------------------- simple api
 
 liked.regBar = liked.drawFullUpBarTask
 
-function liked.regExit(screen, close, closeButton)
+function liked.regExit(screen, close, closeButton, enterAlias)
     local baseTh = thread.current()
+    
     thread.listen("close", function (_, uuid)
         if uuid == screen then
             if close then
@@ -743,6 +746,19 @@ function liked.regExit(screen, close, closeButton)
             end
         end
     end)
+
+    if enterAlias then
+        thread.listen("key_down", function (_, uuid, code1, code2)
+            if table.exists(lastinfo.keyboards[screen], uuid) and code1 == 13 and code2 == 28 then
+                if close then
+                    close()
+                else
+                    baseTh:kill()
+                end
+            end
+        end)
+    end
+
     if closeButton then
         thread.listen("touch", function (_, uuid, px, py)
             if uuid == screen then
@@ -761,5 +777,6 @@ end
 
 --------------------------------------------------------
 
+package.attachFunctionFolder(liked, "funcs")
 liked.unloadable = true
 return liked

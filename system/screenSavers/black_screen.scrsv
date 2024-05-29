@@ -1,11 +1,12 @@
 local graphic = require("graphic")
 local thread = require("thread")
 local component = require("component")
+local graphic = require("graphic")
 local screen = ...
 
 local gpu = graphic.findNativeGpu(screen)
 local mx, my = gpu.getResolution()
-local depth = gpu.getDepth()
+local depth = graphic.getDepth(screen)
 
 local oldPaletteColor
 if depth > 1 then

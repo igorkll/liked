@@ -10,6 +10,7 @@ local advLabeling = require("advLabeling")
 local gui_container = require("gui_container")
 local uix = require("uix")
 local palette = require("palette")
+local gui = require("gui")
 
 local oldPalete = palette.save(screen)
 
@@ -86,7 +87,7 @@ local camera = component.proxy(component.list("camera")() or "")
 
 function warn(str)
     local clear = saveZone(screen)
-    gui_warn(screen, nil, nil, str or "unknown error")
+    gui.warn(screen, nil, nil, str or "unknown error")
     clear()
 end
 
@@ -95,7 +96,7 @@ local function makePhoto(withoutStatus)
         local clear
         if not withoutStatus then
             clear = saveZone(screen)
-            gui_status(screen, nil, nil, "generating a photo...")
+            gui.status(screen, nil, nil, "generating a photo...")
         end
 
         photo = {}
@@ -298,7 +299,7 @@ end
 
 local function bg(col)
     local gpu = graphic.findGpu(screen)
-    if gpu.getDepth() == 8 then
+    if graphic.getDepth(screen) == 8 then
         gpu.setBackground(col)
     end
 end

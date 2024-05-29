@@ -14,6 +14,7 @@ local format = require("format")
 local sysdata = require("sysdata")
 local apps = require("apps")
 local text = require("text")
+local screensaver = require("screensaver")
 
 local colors = gui_container.colors
 
@@ -22,6 +23,8 @@ local colors = gui_container.colors
 local screen, nickname, _, forceMode, mediaMode = ...
 gui.status(screen, nil, nil, "loading content list...")
 
+local title = "Market"
+local urlsBase = "market_"
 local installBox = mediaMode and "  download   " or "   install   "
 local installMsg = mediaMode and "download" or "install"
 local uninstallBox = mediaMode and "   delete    " or "  uninstall  "
@@ -30,18 +33,9 @@ local uninstallMsg = mediaMode and "delete" or "uninstall"
 local cachePath = mediaMode and "/data/cache/mediastore" or "/data/cache/market"
 local cacheReg = registry.new(paths.concat(cachePath, "versions.dat"))
 
-local title = "Market"
-local urlsBase = "market_"
-local contentVersions
 if mediaMode then
-    if not registry.mediaVersions then registry.mediaVersions = {} end
-
     title = "Media Store"
     urlsBase = "media_"
-    contentVersions = registry.mediaVersions
-else
-    if not registry.appVersions then registry.appVersions = {} end
-    contentVersions = registry.appVersions
 end
 
 local rx, ry
@@ -97,6 +91,23 @@ local urls = {}
 local list = {}
 local glibs = {}
 
+local function getContentVersion(path)
+    local versionPath = paths.concat(path, "info_version.cfg")
+    if fs.exists(versionPath) then
+        return fs.readFile(versionPath)
+    else
+        return "unknown"
+    end
+end
+
+local function setContentVersion(path, version)
+    local versionPath = paths.concat(path, "info_version.cfg")
+    fs.writeFile(versionPath, version)
+    if mediaMode then --к файлам из mediastore есть прямой доступ у пользователя и файл инфы нужно скрыть. чтобы не мешал
+        fs.setAttribute(versionPath, "hidden", true)
+    end
+end
+
 local function modifyList(lst)
     if lst.libs then
         for name, info in pairs(lst.libs) do
@@ -115,13 +126,15 @@ local function modifyList(lst)
     for i, v in ipairs(lst) do
         if not v.getVersion then
             function v:getVersion()
-                return contentVersions[self.name] or "unknown"
+                return getContentVersion(self.path)
             end
         end
     
         if not v.uninstall then
             function v:uninstall()
+                local turnBack = screensaver.noScreensaver(screen)
                 apps.uninstall(screen, nickname, self.path, true)
+                turnBack()
             end
         end
     
@@ -138,6 +151,8 @@ local function modifyList(lst)
             end
         end
         function v.install(self)
+            local turnBack = screensaver.noScreensaver(screen)
+            
             if v.libs then
                 if not registry.libVersions then registry.libVersions = {} end
 
@@ -168,9 +183,15 @@ local function modifyList(lst)
             end
 
             _install(self)
-            if v.postInstall then v:postInstall() end
-            contentVersions[self.name] = self.version
-            apps.postInstall(screen, nickname, self.path, self.version)
+            setContentVersion(self.path, self.version)
+            if not mediaMode then
+                apps.postInstall(screen, nickname, self.path, self.version)
+            end
+            if v.postInstall then
+                v:postInstall()
+            end
+
+            turnBack()
         end
     
         if not v.icon and v.urlPrimaryPart then
@@ -312,7 +333,7 @@ local function applicationLabel(data, x, y)
         end
         
         local x, y = applabel:toRealPos(2, 2)
-        image.draw(screen, custImg or img, x, y, true)
+        pcall(image.draw, screen, custImg or img, x, y, true)
     end
     
     if data.icon then
@@ -320,7 +341,10 @@ local function applicationLabel(data, x, y)
         if not downloaded[img] then
             if not fs.exists(img) or cacheReg[data.name or "unknown"] ~= data.version then
                 draw("/system/icons/app.t2p")
-                fs.writeFile(img, internet.get(data.icon))
+                local imgdata = internet.get(data.icon)
+                if imgdata then
+                    fs.writeFile(img, imgdata)
+                end
                 cacheReg[data.name or "unknown"] = data.version
             end
             downloaded[img] = true

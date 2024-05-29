@@ -3,7 +3,7 @@ sysinit.screenThreads = {}
 sysinit.initedScreens = {}
 sysinit.defaultPalettePath = "/system/palettes/light.plt"
 
-function sysinit.applyPalette(path, screen)
+function sysinit.applyPalette(path, screen, doNotOffScreen)
     local fs = require("filesystem")
     local serialization = require("serialization")
     local component  = require("component")
@@ -58,6 +58,7 @@ function sysinit.applyPalette(path, screen)
         local blackWhile
         local function applyOnScreen(address)
             if graphic.maxDepth(address) ~= 1 then
+                if not doNotOffScreen then pcall(component.invoke, address, "turnOff") end
                 if t3default and graphic.getDepth(address) == 8 then
                     graphic.fakePalette = table.low(colors)
                     if not blackWhile then
@@ -68,6 +69,7 @@ function sysinit.applyPalette(path, screen)
                     graphic.fakePalette = nil
                     graphic.setPalette(address, colors)
                 end
+                if not doNotOffScreen then pcall(component.invoke, address, "turnOn") end
             end
         end
 
@@ -84,7 +86,7 @@ end
 function sysinit.getResolution(screen)
     local graphic = require("graphic")
     local mx, my = graphic.maxResolution(screen)
-    if mx > 80 or my > 25 then
+    if mx and (mx > 80 or my > 25) then
         mx = 80
         my = 25
     end
@@ -92,16 +94,20 @@ function sysinit.getResolution(screen)
 end
 
 function sysinit.generatePrimaryScreen()
+    local lastinfo = require("lastinfo")
     local screen
-    local screenSize
+    local screenValue
 
     local component = require("component")
     for address in component.list("screen", true) do
         local x, y = component.invoke(address, "getAspectRatio")
-        local size = x * y
-        if not screenSize or size > screenSize then
+        local value = x * y
+        if #lastinfo.keyboards[address] == 0 then
+            value = 0
+        end
+        if not screenValue or value > screenValue then
             screen = address
-            screenSize = size
+            screenValue = value
         end
     end
 
@@ -115,25 +121,24 @@ function sysinit.initScreen(screen)
     local lastinfo = require("lastinfo")
     
     pcall(component.invoke, screen, "turnOff")
-    
-    -- resolution & depth
-    local mx, my = sysinit.getResolution(screen)
-    graphic.setDepth(screen, graphic.maxDepth(screen))
-    graphic.setResolution(screen, mx, my)
+    if graphic.isAvailable(screen) then
+        -- resolution & depth
+        graphic.setDepth(screen, graphic.maxDepth(screen))
+        graphic.setResolution(screen, sysinit.getResolution(screen))
 
-    -- clear
-    graphic.setPaletteColor(15, 0)
-    graphic.clear(screen, 15, true)
-    graphic.forceUpdate(screen)
+        -- clear
+        graphic.setPaletteColor(15, 0)
+        graphic.clear(screen, 15, true)
+        graphic.forceUpdate(screen)
 
-    -- palette
-    sysinit.applyPalette(sysinit.initPalPath, screen)
+        -- palette
+        sysinit.applyPalette(sysinit.initPalPath, screen, true)
 
-    -- show
-    graphic.clear(screen, 0x000000)
-    graphic.forceUpdate(screen)
-    pcall(component.invoke, screen, "turnOn")
-
+        -- show
+        graphic.clear(screen, 0x000000)
+        graphic.forceUpdate(screen)
+        pcall(component.invoke, screen, "turnOn")
+    end
 
     if not sysinit.initedScreens[screen] then
         event.listen("key_down", function(_, uuid, c1, c2, nickname)
@@ -152,11 +157,20 @@ function sysinit.initScreen(screen)
 end
 
 function sysinit.runShell(screen, customShell)
+    local graphic = require("graphic")
+    if not graphic.isAvailable(screen) then
+        return
+    end
+
     local thread = require("thread")
     local registry = require("registry")
     local apps = require("apps")
+    local bootloader = require("bootloader")
 
     sysinit.initScreen(screen)
+    if sysinit.screenThreads[screen] then
+        sysinit.screenThreads[screen]:kill()
+    end
     
     local shellName = "shell"
     if customShell then
@@ -165,10 +179,12 @@ function sysinit.runShell(screen, customShell)
         shellName = registry.data.shell[screen]
     end
 
-    if sysinit.screenThreads[screen] then sysinit.screenThreads[screen]:kill() end
-    local t = thread.create(assert(apps.load(shellName, screen)))
+    local env = bootloader.createEnv()
+    env.shellMode = true
+    local t = thread.create(assert(apps.load(shellName, screen, nil, env)))
     t.parentData.screen = screen
     t:resume() --поток по умалчанию спит
+
     sysinit.screenThreads[screen] = t
 end
 
@@ -208,6 +224,7 @@ function sysinit.init(box, lscreen)
     local screens = {}
     local minDepth = math.huge
     local maxDepth = 0
+    local screensCount = 0
     local hardwareBufferAvailable = false
     for address in component.list("screen") do
         local gpu = graphic.findGpu(address)
@@ -224,6 +241,7 @@ function sysinit.init(box, lscreen)
                 maxDepth = math.max(maxDepth, depth)
                 minDepth = math.min(minDepth, depth)
             end
+            screensCount = screensCount + 1
         end
     end
     minDepth = math.round(minDepth)
@@ -294,13 +312,16 @@ function sysinit.init(box, lscreen)
 
     ------------------------------------
 
+    local minDbuffRam = liked.minRamForDBuff() * 1024
     if not registry.bufferType then
-        if hardwareBufferAvailable and not box then
+        if not box and screensCount <= 2 and computer.totalMemory() >= minDbuffRam then
+            registry.bufferType = "software"
+        elseif not box and hardwareBufferAvailable then
             registry.bufferType = "hardware"
         else
             registry.bufferType = "none"
         end
-    elseif registry.bufferType == "software" and computer.totalMemory() < (liked.minRamForDBuff() * 1024) then
+    elseif registry.bufferType == "software" and computer.totalMemory() < minDbuffRam then
         registry.bufferType = "none"
     end
     liked.applyBufferType()
@@ -368,7 +389,7 @@ function sysinit.init(box, lscreen)
     event.hyperListen(function (eventType, cuuid, ctype)
         if ctype == "screen" then
             if eventType == "component_added" then
-                if not liked.recoveryMode and not sysinit.screenThreads[cuuid] and graphic.findGpuAddress(cuuid) then
+                if not liked.recoveryMode and not sysinit.screenThreads[cuuid] then
                     sysinit.runShell(cuuid)
                 end
             elseif eventType == "component_removed" then

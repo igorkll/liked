@@ -47,8 +47,47 @@ function gui.hideExtension(screen, path)
     end
 end
 
+function gui.hideExtensionPath(screen, path)
+    if gui_container.viewFileExps[screen] then
+        return path
+    else
+        return paths.hideExtension(path)
+    end
+end
+
+function gui.fpath(screen, path)
+    return gui.hideExtensionPath(screen, gui_container.toUserPath(screen, path))
+end
+
 function gui.isVisible(screen, path)
     return gui_container.hiddenFiles[screen] or not fs.getAttribute(path, "hidden")
+end
+
+------------------------------------
+
+local shot = graphic.screenshot
+function graphic.screenshot(screen, x, y, sx, sy)
+    local rx, ry = graphic.getResolution(screen)
+    x = x or 1
+    y = y or 1
+    sx = sx or rx
+    sy = sy or ry
+    if x and sx and y and sy and screen then
+        if registry.shadowMode == "round" then
+            x = x - 2
+            y = y - 1
+            sx = sx + 2
+            sy = sy + 1
+        elseif registry.shadowMode == "screen" then
+            x = 1
+            y = 1
+            sx = rx
+            sy = ry
+        end
+    end
+    if x < 1 then x = 1 end
+    if y < 1 then y = 1 end
+    return shot(screen, x, y, sx, sy)
 end
 
 ------------------------------------
@@ -61,6 +100,15 @@ gui.bigZoneY = 16
 
 gui.veryBigZoneX = 60
 gui.veryBigZoneY = 18
+
+gui.scrShadow = {}
+
+function gui.hideScreen(screen)
+    pcall(component.invoke, screen, "turnOff")    
+    return function ()
+        pcall(component.invoke, screen, "turnOn")
+    end
+end
 
 function gui.bwSize(screen)
     local rx, ry = graphic.getResolution(screen)
@@ -115,7 +163,12 @@ end
 
 ------------------------------------
 
-function gui.shadow(screen, x, y, sx, sy, mul, full)
+function gui.shadow(screen, x, y, sx, sy, mul, full, noSaveShadowState)
+    if gui.skipShadow then
+        gui.skipShadow = nil
+        return
+    end
+
     local gpu
     if type(screen) == "table" then
         gpu = screen
@@ -123,7 +176,23 @@ function gui.shadow(screen, x, y, sx, sy, mul, full)
     else
         gpu = graphic.findGpu(screen)
     end
-    local depth = gpu.getDepth()
+    local depth = graphic.getDepth(screen)
+
+    mul = mul or 0.4
+    local scr
+    if not full and registry.shadowMode == "screen" then
+        local rx, ry = gpu.getResolution()
+        x = 1
+        y = 1
+        sx = rx
+        sy = ry
+        full = true
+
+        if not noSaveShadowState then
+            scr = true
+            gui.scrShadow[screen] = (gui.scrShadow[screen] or 0) + 1
+        end
+    end
 
     local function getPoses()
         local shadowPosesX = {}
@@ -137,24 +206,53 @@ function gui.shadow(screen, x, y, sx, sy, mul, full)
                 end
             end
         else
-            for i = x + 1, (x + sx) - 1 do
-                table.insert(shadowPosesX, i)
-                table.insert(shadowPosesY, y + sy)
-            end
-            for i = y + 1, y + sy do
-                table.insert(shadowPosesX, x + sx)
-                if registry.shadowMode == "full" then
+            if registry.shadowMode == "round" then
+                for i = x, (x + sx) - 1 do
+                    table.insert(shadowPosesX, i)
+                    table.insert(shadowPosesY, y - 1)
+                end
+                for i = x, (x + sx) - 1 do
+                    table.insert(shadowPosesX, i)
+                    table.insert(shadowPosesY, y + sy)
+                end
+                for i = y - 1, y + sy do
+                    table.insert(shadowPosesX, x - 1)
+                    table.insert(shadowPosesY, i)
+
+                    table.insert(shadowPosesX, x - 2)
+                    table.insert(shadowPosesY, i)
+
+                    table.insert(shadowPosesX, x + sx)
+                    table.insert(shadowPosesY, i)
+
                     table.insert(shadowPosesX, x + sx + 1)
                     table.insert(shadowPosesY, i)
                 end
-                table.insert(shadowPosesY, i)
+            else
+                for i = x + 1, (x + sx) - 1 do
+                    table.insert(shadowPosesX, i)
+                    table.insert(shadowPosesY, y + sy)
+                end
+                for i = y + 1, y + sy do
+                    table.insert(shadowPosesX, x + sx)
+                    table.insert(shadowPosesY, i)
+    
+                    if registry.shadowMode == "full" then
+                        table.insert(shadowPosesX, x + sx + 1)
+                        table.insert(shadowPosesY, i)
+                    end
+                end
             end
         end
 
         return shadowPosesX, shadowPosesY
     end
 
-    local origs = {}
+    local origsX = {}
+    local origsY = {}
+    local origsC = {}
+    local origsF = {}
+    local origsB = {}
     if not require("liked").recoveryMode then
         if registry.shadowType == "advanced" then
             local shadowPosesX, shadowPosesY = getPoses()
@@ -162,10 +260,14 @@ function gui.shadow(screen, x, y, sx, sy, mul, full)
             for i = 1, #shadowPosesX do
                 local ok, char, fore, back = pcall(gpu.get, shadowPosesX[i], shadowPosesY[i])
                 if ok and char and fore and back then
-                    table.insert(origs, {shadowPosesX[i], shadowPosesY[i], char, fore, back})
+                    table.insert(origsX, shadowPosesX[i])
+                    table.insert(origsY, shadowPosesY[i])
+                    table.insert(origsC, char)
+                    table.insert(origsF, fore)
+                    table.insert(origsB, back)
 
-                    gpu.setForeground(colorslib.colorMul(fore, mul or 0.6))
-                    gpu.setBackground(colorslib.colorMul(back, mul or 0.6))
+                    gpu.setForeground(colorslib.colorMul(fore, mul))
+                    gpu.setBackground(colorslib.colorMul(back, mul))
                     gpu.set(shadowPosesX[i], shadowPosesY[i], char)
                 end
             end
@@ -184,20 +286,24 @@ function gui.shadow(screen, x, y, sx, sy, mul, full)
                 for i = 1, #shadowPosesX do
                     local ok, char, fore, back = pcall(gpu.get, shadowPosesX[i], shadowPosesY[i])
                     if ok and char and fore and back then
-                        table.insert(origs, {shadowPosesX[i], shadowPosesY[i], char, fore, back})
+                        table.insert(origsX, shadowPosesX[i])
+                        table.insert(origsY, shadowPosesY[i])
+                        table.insert(origsC, char)
+                        table.insert(origsF, fore)
+                        table.insert(origsB, back)
 
                         local forePal = getPalCol(fore)
                         if forePal then
                             gpu.setForeground(gui_container.indexsColors[gui.smartShadowsColors[forePal + 1] + 1])
                         else
-                            gpu.setForeground(colorslib.colorMul(fore, mul or 0.6))
+                            gpu.setForeground(colorslib.colorMul(fore, mul))
                         end
                         
                         local backPal = getPalCol(back)
                         if backPal then
                             gpu.setBackground(gui_container.indexsColors[gui.smartShadowsColors[backPal + 1] + 1])
                         else
-                            gpu.setBackground(colorslib.colorMul(back, mul or 0.6))
+                            gpu.setBackground(colorslib.colorMul(back, mul))
                         end
 
                         gpu.set(shadowPosesX[i], shadowPosesY[i], char)
@@ -209,7 +315,11 @@ function gui.shadow(screen, x, y, sx, sy, mul, full)
             for i = 1, #shadowPosesX do
                 local ok, char, fore, back, forePal, backPal = pcall(gpu.get, shadowPosesX[i], shadowPosesY[i])
                 if ok and char and fore and back then
-                    table.insert(origs, {shadowPosesX[i], shadowPosesY[i], char, fore, back})
+                    table.insert(origsX, shadowPosesX[i])
+                    table.insert(origsY, shadowPosesY[i])
+                    table.insert(origsC, char)
+                    table.insert(origsF, fore)
+                    table.insert(origsB, back)
                 end
             end
 
@@ -217,18 +327,27 @@ function gui.shadow(screen, x, y, sx, sy, mul, full)
             if full then
                 gpu.fill(x, y, sx, sy, " ")
             else
-                gpu.fill(x + 1, y + 1, (sx + 1) + (registry.shadowMode == "compact" and -1 or 0), sy, " ")
+                if registry.shadowMode == "compact" then
+                    gpu.fill(x + 1, y + 1, sx, sy, " ")
+                elseif registry.shadowMode == "full" then
+                    gpu.fill(x + 1, y + 1, sx + 1, sy, " ")
+                elseif registry.shadowMode == "round" then
+                    gpu.fill(x - 2, y - 1, sx + 4, sy + 2, " ")
+                end
             end
         end
     end
 
     return function ()
-        local gpu = graphic.findGpu(screen)
+        if scr then
+            gui.scrShadow[screen] = gui.scrShadow[screen] - 1
+        end
 
-        for _, obj in ipairs(origs) do
-            gpu.setForeground(obj[4])
-            gpu.setBackground(obj[5])
-            gpu.set(obj[1], obj[2], obj[3])
+        local gpu = graphic.findGpu(screen)
+        for i, x in ipairs(origsX) do
+            gpu.setForeground(origsF[i])
+            gpu.setBackground(origsB[i])
+            gpu.set(x, origsY[i], origsC[i])
         end
     end
 end
@@ -249,7 +368,7 @@ function gui.pleaseType(screen, str, tostr)
     end
 end
 
-function gui.smallWindow(screen, cx, cy, str, backgroundColor, icon, sx, sy)
+function gui.smallWindow(screen, cx, cy, str, backgroundColor, icon, sx, sy, noSaveShadowState)
     sx = sx or 32
     sy = sy or 8
 
@@ -262,7 +381,7 @@ function gui.smallWindow(screen, cx, cy, str, backgroundColor, icon, sx, sy)
     local color = backgroundColor or colors.lightGray
 
     --window:fill(2, 2, window.sizeX, window.sizeY, colors.gray, 0, " ")
-    local noShadow = gui.shadow(screen, window.x, window.y, window.sizeX, window.sizeY)
+    local noShadow = gui.shadow(screen, window.x, window.y, window.sizeX, window.sizeY, nil, nil, noSaveShadowState)
     window:clear(color)
 
     local textColor = colors.white
@@ -300,7 +419,7 @@ function gui.status(screen, cx, cy, str, backgroundColor)
         window:set(2, 2, color, colors.blue, " ◢█◣ ")
         window:set(2, 3, color, colors.blue, "◢███◣")
         window:set(4, 2, colors.blue, colors.white, "P")
-    end)
+    end, nil, nil, true)
     graphic.forceUpdate(screen)
     event.yield()
 end
@@ -687,7 +806,7 @@ function gui.blackCall(func, ...)
     gui.blackMode = oldBlackState
 end
 
-function gui.context(screen, posX, posY, strs, active)
+function gui.context(screen, posX, posY, strs, active, disShadow)
     local white, black = colors.white, colors.black
     if gui.blackMode then
         white, black = black, white
@@ -700,7 +819,10 @@ function gui.context(screen, posX, posY, strs, active)
 
     local window = graphic.createWindow(screen, posX, posY, sizeX, sizeY)
     --window:fill(2, 2, window.sizeX, window.sizeY, colors.gray, 0, " ")
-    gui.shadow(screen, window.x, window.y, window.sizeX, window.sizeY)
+    local clearShadow
+    if not disShadow then
+        clearShadow = gui.shadow(screen, window.x, window.y, window.sizeX, window.sizeY)
+    end
 
     local function redrawStrs(selected)
         for i, str in ipairs(drawStrs) do
@@ -735,12 +857,14 @@ function gui.context(screen, posX, posY, strs, active)
                 local num = windowEventData[4]
                 if not active or active[num] then
                     event.sleep(0.05)
+                    if clearShadow then clearShadow() end
                     return strs[num], num
                 end
             elseif (windowEventData[1] == "touch" or windowEventData[1] == "drag") and windowEventData[5] == 0 then
                 if windowEventData[1] == "touch" and selectedNum and selectedNum == windowEventData[4] then
                     if not active or active[selectedNum] then
                         event.sleep(0.05)
+                        if clearShadow then clearShadow() end
                         return strs[selectedNum], selectedNum
                     end
                 end
@@ -751,6 +875,7 @@ function gui.context(screen, posX, posY, strs, active)
                 redrawStrs()
             elseif eventData[1] == "touch" or eventData[1] == "scroll" then
                 event.push(table.unpack(eventData))
+                if clearShadow then clearShadow() end
                 return nil, nil
             end
         end
@@ -1050,8 +1175,9 @@ function gui.select(screen, cx, cy, label, actions, scroll, noCloseButton, overl
     end
 end
 
-function gui.selectcomponent(screen, cx, cy, types, allowAutoConfirm, control, callbacks, blacklist) --=gui_selectcomponent(screen, nil, nil, {"computer"}, true)
+function gui.selectcomponent(screen, cx, cy, types, allowAutoConfirm, control, callbacks, blacklist, disableShadow) --=gui_selectcomponent(screen, nil, nil, {"computer"}, true)
     local advLabeling = require("advLabeling")
+    local vcomponent = require("vcomponent")
 
     if types and type(types) ~= "table" then
         types = {types}
@@ -1088,6 +1214,7 @@ function gui.selectcomponent(screen, cx, cy, types, allowAutoConfirm, control, c
 
     local cancel, out
     local gNoShadow
+    local selfAddress = computer.address()
 
     local th
     th = thread.create(function ()
@@ -1097,6 +1224,9 @@ function gui.selectcomponent(screen, cx, cy, types, allowAutoConfirm, control, c
 
         local scroll
         local shadowDrawed
+        if disableShadow then
+            shadowDrawed = true
+        end
 
         while true do
             local strs = {}
@@ -1112,10 +1242,20 @@ function gui.selectcomponent(screen, cx, cy, types, allowAutoConfirm, control, c
                     if not blacklist or not table.exists(blacklist, addr) then
                         table.insert(addresses, addr)
 
+                        local tags = {}
+                        if fs.bootaddress == addr then
+                            table.insert(tags, "system")
+                        elseif selfAddress == addr then
+                            table.insert(tags, "self")
+                        end
+                        if vcomponent.isVirtual(addr) then
+                            table.insert(tags, "virtual")
+                        end
+
                         local ctype = component.type(addr)
                         local clabel = advLabeling.getLabel(addr) or ""
-                        if fs.bootaddress == addr then
-                            clabel = clabel .. " (system)"
+                        if #tags > 0 then
+                            clabel = clabel .. " (" .. table.concat(tags, "/") .. ")"
                         end
                         clabel = gui_container.short(clabel, 20)
 
@@ -1150,6 +1290,7 @@ function gui.selectcomponent(screen, cx, cy, types, allowAutoConfirm, control, c
                 fs.remove(tempfile)
             end
 
+            local subWindowX, subWindowY = (cx + 25) - 16, cy + 4
             if idx then
                 local addr = addresses[idx]
                 if button == 0 and not control then
@@ -1175,13 +1316,27 @@ function gui.selectcomponent(screen, cx, cy, types, allowAutoConfirm, control, c
                     elseif action == 2 then
                         clipboard.set(eventData[6], addr)
                     elseif action == 3 then
-                        local str = gui.input(screen, (cx + 25) - 16, cy + 4, "new name", nil, nil, advLabeling.getLabel(addr))
+                        local liked = require("liked")
+                        liked.umountAll()
+                        local str = gui.input(screen, subWindowX, subWindowY, "new name", nil, nil, advLabeling.getLabel(addr))
                         if type(str) == "string" then
                             advLabeling.setLabel(addr, str)
                         end
+                        liked.mountAll()
                     elseif action == 4 then
-                        if gui.yesno(screen, (cx + 25) - 16, cy + 4, "clear label on \"" .. (advLabeling.getLabel(addr) or component.type(addr)) .. "\"?") then
-                            advLabeling.setLabel(addr, nil)
+                        if gui.yesno(screen, subWindowX, subWindowY, "clear label on \"" .. (advLabeling.getLabel(addr) or component.type(addr)) .. "\"?") then
+                            local liked = require("liked")
+                            liked.umountAll()
+                            if component.type(addr) == "filesystem" then
+                                if not pcall(component.invoke, addr, "setLabel", nil) then
+                                    local clear = gui.saveZone(screen)
+                                    gui.warn(screen, subWindowX, subWindowY, "invalid name")
+                                    clear()
+                                end
+                            else
+                                advLabeling.setLabel(addr, nil)
+                            end
+                            liked.mountAll()
                         end
                     elseif action == 5 then
                         local format = require("format")
@@ -1208,8 +1363,12 @@ function gui.selectcomponent(screen, cx, cy, types, allowAutoConfirm, control, c
                     elseif action == 6 then
                         local format = require("format")
 
-                        local tempfile = paths.concat("/tmp", component.type(addr) .. "_" .. math.round(math.random(0, 9999)) .. ".txt")
+                        local ctype = component.type(addr)
+                        local tempfile = paths.concat("/tmp", ctype .. "_" .. math.round(math.random(0, 9999)) .. ".txt")
                         local file = fs.open(tempfile, "wb")
+                        file.write("address - " .. tostring(addr) .. "\n")
+                        file.write("ctype   - " .. tostring(ctype) .. "\n")
+                        file.write("virtual - " .. tostring(vcomponent.isVirtual(addr)) .. "\n\n")
                         local tbl = lastinfo.deviceinfo[addr] or {}
                         local maxMethodLen = 0
                         for name in pairs(tbl) do
@@ -1348,14 +1507,14 @@ end
 
 
 function gui.clearRun(func, screen, ...)
-    local clear = saveZone(screen)
+    local clear = gui.saveZone(screen)
     local result = {func(screen, ...)}
     clear()
     return table.unpack(result)
 end
 
 function gui.clearBigRun(func, screen, ...)
-    local clear = saveBigZone(screen)
+    local clear = gui.saveBigZone(screen)
     local result = {func(screen, ...)}
     clear()
     return table.unpack(result)

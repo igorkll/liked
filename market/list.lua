@@ -152,7 +152,7 @@ local list = {
     },
     {
         name = "mineOS",
-        version = "3",
+        version = "4",
         vendor = "IgorTimofeev",
         icon = selfurlpart .. "/apps/mineOS.app/icon.t2p",
         license = selfurlpart .. "/apps/mineOS.app/LICENSE",
@@ -177,9 +177,60 @@ local list = {
 
             download(afpxPath, selfurlpart .. "/apps/mineOS.app/mineOS.afpx")
 
-            require("archiver").unpack(afpxPath, "/")
-            fs.remove(afpxPath)
+            if require("archiver").unpack(afpxPath, "/") then
+                fs.remove(afpxPath)
+            else
+                fs.remove(self.path)
+                local clear = gui.saveZone(screen)
+                gui.skipShadow = true
+                gui.warn(screen, nil, nil, "failed to install MineOS, make sure there is enough disk space")
+                clear()
+            end
         end
+    },
+    {
+        name = "VychVyzhProm",
+        version = "1",
+        vendor = "Bs0Dd",
+        libs = {"openbox"},
+        icon = selfurlpart .. "/apps/VychVyzhProm.app/icon.t2p",
+        license = selfurlpart .. "/apps/VychVyzhProm.app/LICENSE",
+        description = "I came across the game Vychvyzhprom, written in Java by one group. In a week, I almost completely transferred it to Lua (a couple of points had to be simplified due to the feeble power of computers). The goal of this game is simple: we have a scorcher, a controller and a number of tasks. You need to program the controller to burn out the pattern shown in the task, with a small set of Assembler commands.",
+        minDiskSpace = 64,
+        minColorDepth = 8,
+
+        path = "/data/apps/VychVyzhProm.app",
+        urlPrimaryPart = selfurlpart .. "/apps/VychVyzhProm.app/",
+        files = (function ()
+            local tbl = {
+                "LICENSE",
+                "main.lua",
+                "icon.t2p",
+                "actions.cfg",
+                "taskedit.lua",
+                "vvprom/vvprom.lua",
+                "vvprom/vvptask.lua",
+                "vvprom/Languages/English.lng",
+                "vvprom/Languages/Russian.lng",
+                "vvprom/NyaDraw/init.lua",
+                "vvprom/Pictures/bcontr.pic",
+                "vvprom/Pictures/cidlogo.pic",
+                "vvprom/Pictures/comlogo.pic",
+                "vvprom/Pictures/controls.pic",
+                "vvprom/Pictures/editor.pic",
+                "vvprom/Pictures/exit.pic",
+                "vvprom/Pictures/help.pic",
+                "vvprom/Pictures/info.pic",
+                "vvprom/Pictures/task.pic",
+                "vvprom/Pictures/vvprom.pic"
+            }
+
+            for i = 1, 8 do
+                table.insert(tbl, "vvprom/Tasks/task" .. tostring(i) .. ".vtf")
+            end
+
+            return tbl
+        end)()
     },
     {
         name = "explode",
@@ -428,14 +479,14 @@ local list = {
         files = {"main.lua", "icon.t2p", "config.cfg"}
     },
     {
-        name = "clock",
+        name = "bigClock",
         version = "1",
         vendor = "logic",
         description = "displays the game and real time on the screen",
         minDiskSpace = 64,
         
-        path = "/data/apps/clock.app",
-        urlPrimaryPart = selfurlpart .. "/apps/clock.app/",
+        path = "/data/apps/bigClock.app",
+        urlPrimaryPart = selfurlpart .. "/apps/bigClock.app/",
         files = {"main.lua", "icon.t2p", "config.cfg"}
     },
     {
@@ -550,6 +601,66 @@ local list = {
         path = "/data/apps/cleaner.app",
         urlPrimaryPart = selfurlpart .. "/apps/cleaner.app/",
         files = {"main.lua", "icon.t2p"}
+    },
+    {
+        name = "eepacker",
+        version = "1",
+        vendor = "logic",
+        description = "compresses the code for the eeprom",
+        minDiskSpace = 64,
+        
+        path = "/data/apps/eepacker.app",
+        urlPrimaryPart = selfurlpart .. "/apps/eepacker.app/",
+        files = {"main.lua", "icon.t2p"}
+    },
+    {
+        name = "clock",
+        version = "1",
+        vendor = "logic",
+        description = "clone of the clock app from android",
+        minDiskSpace = 64,
+        
+        path = "/data/apps/clock.app",
+        urlPrimaryPart = selfurlpart .. "/apps/clock.app/",
+        files = {"main.lua", "icon.t2p", "alarm.t2p", "clock.t2p", "stopwatch.t2p", "timer.t2p", "palette.plt"}
+    },
+    {
+        name = "bootmanager",
+        version = "1",
+        vendor = "logic",
+        description = "",
+        minDiskSpace = 64,
+        executer = true,
+        
+        path = "/vendor/apps/bootmanager.app",
+        urlPrimaryPart = selfurlpart .. "/apps/bootmanager.app/",
+        files = {"main.lua", "icon.t2p", "uninstall.lua"},
+        postInstall = function()
+            download("/bootmanager/main.lua", selfurlpart .. "/apps/bootmanager.app/bootmanager/main.lua")
+        end
+    },
+    {
+        name = "zxViewer",
+        version = "1",
+        vendor = "veeford",
+        description = "allows you to display images in the .scr format (ZX spectrum image format)\nmore images: https://zxart.ee/rus/grafika/",
+        minDiskSpace = 64,
+        libs = {"zximage"},
+        
+        path = "/data/apps/zxViewer.app",
+        urlPrimaryPart = selfurlpart .. "/apps/zxViewer.app/",
+        files = {"main.lua", "icon.t2p", "formats.cfg"}
+    },
+    {
+        name = "browser",
+        version = "1",
+        vendor = "logic",
+        description = "a simple web browser for opencomputers. allows you to open html files",
+        minDiskSpace = 64,
+        
+        path = "/data/apps/browser.app",
+        urlPrimaryPart = selfurlpart .. "/apps/browser.app/",
+        files = {"main.lua", "icon.t2p", "formats.cfg"}
     }
 }
 
@@ -563,11 +674,6 @@ list.libs = {
         url = selfurlpart .. "/libs/brainfuck.lua",
         vendor = "logic",
         version = "1"
-    },
-    ["openbox"] = {
-        url = selfurlpart .. "/libs/openbox.lua",
-        vendor = "logic",
-        version = "3"
     },
     ["rsa"] = {
         url = selfurlpart .. "/libs/rsa.lua",
@@ -584,6 +690,11 @@ list.libs = {
         vendor = "logic",
         version = "2"
     },
+    ["vmx"] = {
+        url = selfurlpart .. "/libs/vmx.lua",
+        vendor = "logic",
+        version = "1"
+    },
     ["draw"] = {
         url = selfurlpart .. "/libs/draw.lua",
         vendor = "logic",
@@ -596,6 +707,11 @@ list.libs = {
     },
     ["glasses"] = {
         url = selfurlpart .. "/libs/glasses.lua",
+        vendor = "logic",
+        version = "1"
+    },
+    ["xml"] = {
+        url = selfurlpart .. "/libs/xml.lua",
         vendor = "logic",
         version = "1"
     },
@@ -614,6 +730,100 @@ list.libs = {
                 path = "/data/lib/bitMapFonts/font.tbl"
             }
         }
+    },
+    ["zximage"] = {
+        url = selfurlpart .. "/libs/zximage/init.lua",
+        vendor = "veeford",
+        version = "1",
+        path = "/data/lib/zximage/init.lua",
+        files = {
+            {
+                url = selfurlpart .. "/libs/zximage/palette.plt",
+                path = "/data/lib/zximage/palette.plt"
+            }
+        }
+    },
+    ["openbox"] = {
+        url = selfurlpart .. "/libs/openbox/init.lua",
+        vendor = "logic",
+        version = "4",
+        path = "/data/lib/openbox/init.lua",
+        libs = {"vmx"},
+        files = (function ()
+            local boxlist = {
+                "box.lua",
+                "boot/00_base.lua",
+                "boot/01_process.lua",
+                "boot/02_os.lua",
+                "boot/03_io.lua",
+                "boot/04_component.lua",
+                "boot/90_filesystem.lua",
+                "boot/91_gpu.lua",
+                "boot/92_keyboard.lua",
+                "boot/93_term.lua",
+                "boot/94_shell.lua",
+                "lib/bit32.lua",
+                "lib/buffer.lua",
+                "lib/colors.lua",
+                "lib/event.lua",
+                "lib/filesystem.lua",
+                "lib/internet.lua",
+                "lib/io.lua",
+                "lib/keyboard.lua",
+                "lib/note.lua",
+                "lib/package.lua",
+                "lib/pipe.lua",
+                "lib/process.lua",
+                "lib/serialization.lua",
+                "lib/sh.lua",
+                "lib/shell.lua",
+                "lib/sides.lua",
+                "lib/term.lua",
+                "lib/text.lua",
+                "lib/thread.lua",
+                "lib/transforms.lua",
+                "lib/tty.lua",
+                "lib/uuid.lua",
+                "lib/vt100.lua",
+                "lib/tools/programLocations.lua",
+                "lib/tools/transfer.lua",
+                "lib/core/boot.lua",
+                "lib/core/cursor.lua",
+                "lib/core/device_labeling.lua",
+                "lib/core/full_buffer.lua",
+                "lib/core/full_cursor.lua",
+                "lib/core/full_event.lua",
+                "lib/core/full_filesystem.lua",
+                "lib/core/full_keyboard.lua",
+                "lib/core/full_ls.lua",
+                "lib/core/full_sh.lua",
+                "lib/core/full_shell.lua",
+                "lib/core/full_text.lua",
+                "lib/core/full_transforms.lua",
+                "lib/core/full_vt.lua",
+                "lib/core/install_basics.lua",
+                "lib/core/install_utils.lua",
+                "lib/core/lua_shell.lua",
+                "bin/cd.lua",
+                "bin/edit.lua",
+                "bin/pastebin.lua",
+                "bin/sh.lua",
+                "bin/wget.lua"
+            }
+
+            local list = {}
+            table.insert(list, {
+                url = selfurlpart .. "/libs/openbox/eepromImage",
+                path = "/data/lib/openbox/eepromImage"
+            })
+            for i, lst in ipairs(boxlist) do
+                table.insert(list, {
+                    url = selfurlpart .. "/libs/openbox/box/" .. lst,
+                    path = "/data/lib/openbox/box/" .. lst
+                })
+            end
+            return list
+        end)()
     }
 }
 

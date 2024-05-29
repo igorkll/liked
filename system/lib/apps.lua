@@ -20,6 +20,7 @@ local apps = {}
 
 local installedInfo = registry.new("/data/installedInfo.dat")
 local appsPath = "/data/apps/"
+local vendorAppsPath = "/vendor/apps/"
 local shadowPath = "/data/applicationsShadow/"
 
 local function appList(folder)
@@ -54,6 +55,7 @@ local function doFormats(appPath, path, delete)
     if not registry.data.gui_container.typenames then registry.data.gui_container.typenames = {} end
     if not registry.data.gui_container.editable then registry.data.gui_container.editable = {} end
     if not registry.data.gui_container.openVia then registry.data.gui_container.openVia = {} end
+    if not registry.data.icons then registry.data.icons = {} end
     
     local function rmData(extension, key)
         registry.data.gui_container[key][extension] = nil
@@ -67,56 +69,34 @@ local function doFormats(appPath, path, delete)
             registry.data.gui_container.knownExps[extension] = true
         end
 
-        if formatInfo.color then
-            if delete then
-                rmData(extension, "typecolors")
-            else
-                registry.data.gui_container.typecolors[extension] = formatInfo.color
-            end
+        if formatInfo.color and not delete then
+            registry.data.gui_container.typecolors[extension] = formatInfo.color
         else
             rmData(extension, "typecolors")
         end
 
-        if formatInfo.name then
-            if delete then
-                rmData(extension, "typenames")
-            else
-                registry.data.gui_container.typenames[extension] = formatInfo.name
-            end
+        if formatInfo.name and not delete then
+            registry.data.gui_container.typenames[extension] = formatInfo.name
         else
             rmData(extension, "typenames")
         end
 
-        if formatInfo.editable then
-            if delete then
-                rmData(extension, "editable")
-            else
-                registry.data.gui_container.editable[extension] = true
-            end
+        if formatInfo.editable and not delete then
+            registry.data.gui_container.editable[extension] = true
         else
             rmData(extension, "editable")
         end
 
-        if formatInfo.program then
-            if delete then
-                rmData(extension, "openVia")
-            else
-                registry.data.gui_container.openVia[extension] = paths.xconcat(appPath, formatInfo.program)
-            end
+        if formatInfo.program and not delete then
+            registry.data.gui_container.openVia[extension] = paths.xconcat(appPath, formatInfo.program)
         else
             rmData(extension, "openVia")
         end
 
-        if formatInfo.icon then
-            if not registry.data.icons then
-                registry.data.icons = {}
-            end
-
-            if delete then
-                registry.data.icons[extension] = nil
-            else
-                registry.data.icons[extension] = paths.xconcat(appPath, formatInfo.icon)
-            end
+        if formatInfo.icon and not delete then
+            registry.data.icons[extension] = paths.xconcat(appPath, formatInfo.icon)
+        else
+            registry.data.icons[extension] = nil
         end
     end
 
@@ -126,7 +106,7 @@ end
 
 --------------------------------------------
 
-function apps.load(name, screen, nickname)
+function apps.load(name, screen, nickname, mainEnv, exitEnv)
     checkArg(1, name, "string")
     checkArg(2, screen, "string", "nil")
     checkArg(3, nickname, "string", "nil")
@@ -163,12 +143,12 @@ function apps.load(name, screen, nickname)
 
     --------------------------------
 
-    local mainCode, err = programs.load(path)
+    local mainCode, err = programs.load(path, nil, mainEnv)
     if not mainCode then return nil, err end
 
     local exitCode
     if exitFile then
-        exitCode, err = programs.load(exitFile)
+        exitCode, err = programs.load(exitFile, nil, exitEnv)
         if not exitCode then return nil, err end
     end
 
@@ -200,6 +180,13 @@ function apps.load(name, screen, nickname)
                 palette.fromFile(screen, paletteFile, configTbl.dontRegPalette)
             elseif configTbl.blackWhite then
                 palette.blackWhite(screen, true)
+            elseif configTbl.advancedColors then
+                local depth = graphic.getDepth(screen)
+                if depth == 4 then
+                    palette.fromFile(screen, "/system/t2advanced.plt", true)
+                elseif depth == 8 then
+                    palette.blackWhite(screen, true)
+                end
             end
 
             if configTbl.noScreenSaver then
@@ -223,7 +210,7 @@ function apps.load(name, screen, nickname)
             if configTbl.restoreGraphic then
                 log{pcall(sysinit.initScreen, screen)}
             else
-                if paletteFile or configTbl.restorePalette or configTbl.blackWhite then
+                if paletteFile or configTbl.restorePalette or configTbl.blackWhite or configTbl.advancedColors then
                     palette.system(screen)
                 end
 
@@ -308,6 +295,8 @@ function apps.executeWithWarn(name, screen, nickname, ...)
 end
 
 function apps.postInstall(screen, nickname, path, version)
+    local normalAppPath = text.startwith(unicode, path, appsPath)
+
     local function lassert(...)
         if screen then
             liked.assert(screen, ...)
@@ -321,80 +310,92 @@ function apps.postInstall(screen, nickname, path, version)
     end
 
     local regPath = paths.concat(path, "reg.reg")
-    if fs.exists(regPath) and not fs.isDirectory(regPath) then
-        lassert(apps.execute("applyReg", screen, nickname, regPath, true))
+    if fs.exists(regPath) then
+        liked.applyReg(regPath)
     end
 
     local formatsPath = paths.concat(path, "formats.cfg")
-    if fs.exists(formatsPath) and not fs.isDirectory(formatsPath) then
+    if fs.exists(formatsPath) then
         doFormats(path, formatsPath)
     end
 
     local installPath = paths.concat(path, "install.lua")
-    if fs.exists(installPath) and not fs.isDirectory(installPath) then
+    if fs.exists(installPath) then
         lassert(apps.execute(installPath, screen, nickname))
     end
 
     local autorunPath = paths.concat(path, "autorun.lua")
-    if fs.exists(autorunPath) and not fs.isDirectory(autorunPath) then
+    if fs.exists(autorunPath) then
         require("autorun").reg("system", autorunPath)
-        apps.execute(autorunPath, screen, nickname)
+        lassert(apps.execute(autorunPath, screen, nickname))
     end
 
-    createShadow(pname)
-    installedInfo.data[pname] = version
-    installedInfo.save()
+    if normalAppPath then
+        createShadow(pname)
+        installedInfo.data[pname] = version
+        installedInfo.save()
+    end
+
     registry.save()
     return true
 end
 
 function apps.uninstall(screen, nickname, path, hide)
+    apps.check(screen, nickname)
+    local pname = paths.name(path)
+
     local function lassert(...)
         if screen then
             liked.assert(screen, ...)
         end
     end
-
+    
+    local vendorApp = text.startwith(unicode, path, vendorAppsPath)
     if fs.get(path).address ~= fs.bootaddress then
         if screen then
             gui.warn(screen, nil, nil, "it is not possible to uninstall the application from another disk.\nuse the \"remove\" operation")
         end
         return
-    end
-
-    if not hide and screen then
+    elseif not text.startwith(unicode, path, appsPath) and not text.startwith(unicode, path, shadowPath) and not vendorApp then
+        if screen then
+            gui.warn(screen, nil, nil, "it is not possible to uninstall applications from here.\nuse the \"remove\" operation")
+        end
+        return
+    elseif not hide and screen then
         gui.status(screen, nil, nil, "uninstalling \"" .. gui.hideExtension(screen, path) .. "\"...")
     end
 
+    --------------------------------
+
     local unregPath = paths.concat(path, "unreg.reg")
-    if fs.exists(unregPath) and not fs.isDirectory(unregPath) then
-        lassert(apps.execute("applyReg", screen, nickname, unregPath, true))
+    if fs.exists(unregPath) then
+        liked.applyReg(unregPath)
     end
 
     local formatsPath = paths.concat(path, "formats.cfg")
-    if fs.exists(formatsPath) and not fs.isDirectory(formatsPath) then
+    if fs.exists(formatsPath) then
         doFormats(path, formatsPath, true)
     end
 
-    local uninstallPath = paths.concat(path, "uninstall.lua")
-    if fs.exists(uninstallPath) and not fs.isDirectory(uninstallPath) then
-        lassert(apps.execute(uninstallPath, screen, nickname))
-    else
-        lassert(fs.remove(path))
-    end
-
     local autorunPath = paths.concat(path, "autorun.lua")
-    if fs.exists(autorunPath) and not fs.isDirectory(autorunPath) then
+    if fs.exists(autorunPath) then
         require("autorun").reg("system", autorunPath, true)
     end
 
-    if not fs.exists(path) then
-        if text.startwith(unicode, path, appsPath) then
-            fs.remove(paths.concat(shadowPath, paths.name(path)))
-        end
-        installedInfo.data[paths.name(path)] = nil
+    local uninstallPath = paths.concat(path, "uninstall.lua")
+    if fs.exists(uninstallPath) then
+        lassert(apps.execute(uninstallPath, screen, nickname))
+    end
+
+    if vendorApp then
+        fs.remove(path)
+    else
+        fs.remove(paths.concat(shadowPath, pname))
+        fs.remove(paths.concat(appsPath, pname))
+        installedInfo.data[pname] = nil
         installedInfo.save()
     end
+
     registry.save()
     return true
 end
@@ -408,12 +409,12 @@ function apps.install(screen, nickname, path, hide)
 
     local ok, err = archiver.unpack(path, "/data")
     if ok then
-        apps.check()
+        apps.check(screen, nickname)
     end
     return ok, err
 end
 
-function apps.check()
+function apps.check(screen, nickname)
     if liked.recoveryMode then return end
     
     local installedApps = appList(appsPath)
@@ -425,7 +426,7 @@ function apps.check()
         end
 
         if not installedInfo.data[name] then
-            apps.postInstall(nil, nil, paths.concat(appsPath, name))
+            apps.postInstall(screen, nickname, paths.concat(appsPath, name))
         end
     end
 
@@ -433,7 +434,7 @@ function apps.check()
         if not installedApps[name] then
             local lpath = paths.concat(shadowPath, name)
             if fs.isDirectory(lpath) then
-                apps.uninstall(nil, nil, lpath)
+                apps.uninstall(screen, nickname, lpath)
             end
         end
     end

@@ -10,6 +10,7 @@ local system = require("system")
 local colorslib = require("colors")
 local paths = require("paths")
 local apps = require("apps")
+local lastinfo = require("lastinfo")
 
 local colors = gui_container.colors
 local uix = {colors = colors}
@@ -151,7 +152,7 @@ function objclass:uploadEvent(eventData)
             end
         else
             if self.state and (eventData[1] == "touch" or eventData[1] == "drop") then
-                if self.type ~= "context" then
+                if self.type ~= "context" and not self.autoRelease then
                     self.state = false
                     self:draw()
 
@@ -191,10 +192,14 @@ function objclass:uploadEvent(eventData)
                     self:draw()
                     graphic.forceUpdate(self.gui.window.screen)
                     if self.autoRelease then
-                        os.sleep(0.1)
-                        self.state = false
-                        self:draw()
-                        graphic.forceUpdate(self.gui.window.screen)
+                        if self.noDropDraw then
+                            self.state = false
+                        else
+                            os.sleep(0.1)
+                            self.state = false
+                            self:draw()
+                            graphic.forceUpdate(self.gui.window.screen)
+                        end
                     end
                     
                     if self.onClick then
@@ -425,16 +430,17 @@ function objclass:draw()
             end
         end
     elseif self.type == "up" then
-        liked.drawFullUpBar(self.gui.window.screen, (self.gui.returnLayout and "   " or "") .. self.title, self.withoutFill, self.bgcolor, self.wide)
+        liked.drawFullUpBar(self.gui.window.screen, (self.gui.returnLayout and "   " or "") .. self.title, self.withoutFill, self.bgcolor, self.wide, true)
         if self.gui.returnLayout then
             local px, py = self.gui.window:toFakePos(1, 1)
             self.gui.window:set(px, py, colors.red, colors.white, " < ")
         end
+        liked.upBarShadow(self.gui.window.screen)
     elseif self.type == "plane" then
         self.gui.window:fill(self.x, self.y, self.sx, self.sy, self.color, 0, " ")
     elseif self.type == "image" then
         local x, y = self.gui.window:toRealPos(self.x, self.y)
-        image.draw(self.gui.window.screen, self.path, x, y, self.wallpaperMode, self.forceFullColor)
+        image.draw(self.gui.window.screen, self.path, x, y, self.wallpaperMode, self.forceFullColor, self.lightMul, self.imagePaletteUsed, self.blackListedColor, self.newColors)
     elseif self.type == "drawer" then
         self:func(self.gui.window:toRealPos(self.x, self.y))
     elseif self.type == "progress" then
@@ -541,7 +547,7 @@ function uix:createButton(x, y, sx, sy, back, fore, text, autoRelease)
     local obj = setmetatable({gui = self, type = "button"}, {__index = objclass})
     obj.x = x
     obj.y = y
-    obj.sx = sx
+    obj.sx = sx or (unicode.len(text) + 2)
     obj.sy = sy
     obj.text = text
     obj.state = false
@@ -700,6 +706,10 @@ function uix:createImage(x, y, path, wallpaperMode, forceFullColor)
     obj.path = system.getResourcePath(path)
     obj.wallpaperMode = not not wallpaperMode
     obj.forceFullColor = not not forceFullColor
+    obj.blackListedColor = nil
+    obj.newColors = nil
+    obj.lightMul = nil
+    obj.imagePaletteUsed = nil
 
     table.insert(self.objs, obj)
     return obj
@@ -1081,6 +1091,14 @@ function manager:select(layout)
     end
 end
 
+function manager:setExit_ctrlW()
+    self.exit_ctrlW = true
+end
+
+function manager:setExit_enter()
+    self.exit_enter = true
+end
+
 function manager:loop(timeout)
     if self.firstLayout and not self.current then
         self:select(self.firstLayout)
@@ -1097,7 +1115,11 @@ function manager:loop(timeout)
             self:onEvent(eventData, windowEventData)
         end
 
-        if self.exitFlag then
+        if self.exit_ctrlW and eventData[1] == "close" then
+            break
+        elseif self.exit_enter and (eventData[1] == "key_down" and table.exists(lastinfo.keyboards[self.screen], eventData[2]) and eventData[3] == 13 and eventData[4] == 28) then
+            break
+        elseif self.exitFlag then
             break
         end
     end
