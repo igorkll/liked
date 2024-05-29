@@ -1,3 +1,5 @@
+local computer = computer
+local component = component
 local tmpfs = component.proxy(computer.tmpAddress())
 if tmpfs.exists("/bootloader") then return end
 local bootfs = component.proxy(computer.getBootAddress())
@@ -77,14 +79,13 @@ local function serialize(tbl)
     return str:sub(1, #str - 1) .. "}"
 end
 
-local bootloaderSettingsPath = "/bootloader"
-local function bootTo(address, path, args)
-    tmpfs.makeDirectory(bootloaderSettingsPath)
-    if address then writeFile(tmpfs, bootloaderSettingsPath .. "/bootaddr", address) end
-    if path then writeFile(tmpfs, bootloaderSettingsPath .. "/bootfile", path) end
-    if args then writeFile(tmpfs, bootloaderSettingsPath .. "/bootargs", serialize(args)) end
-    writeFile(tmpfs, bootloaderSettingsPath .. "/nomgr", "")
-    computer.shutdown("fast")
+local function bootTo(proxy, path, ...)
+    local address = proxy.address
+    computer.getBootAddress = function()
+        return address
+    end
+    assert(load(assert(readFile(proxy, path)), "=init", nil, _G))(...)
+    computer.shutdown()
 end
 
 local function mineOSboot(proxy)
@@ -167,7 +168,7 @@ local function findSystems()
             table.insert(tbl, {
                 likeOSname(proxy),
                 function ()
-                    bootTo(address, "/system/core/bootloader.lua")
+                    bootTo(proxy, "/system/core/bootloader.lua")
                 end,
                 address
             })
@@ -175,7 +176,7 @@ local function findSystems()
             table.insert(tbl, {
                 "unknownOS",
                 function ()
-                    bootTo(address, "/init.lua")
+                    bootTo(proxy, "/init.lua")
                 end,
                 address
             })
