@@ -227,12 +227,12 @@ if installdata.self then
     proxy.remove(installdata.self)
 end
 
---отображаем 100% в течении двух секунд
+--отображаем 100% в течении секунды
 if printState(1) then
     if computer.getBootAddress and computer.setBootAddress and computer.getBootAddress() ~= proxy.address then
         computer.setBootAddress(proxy.address)
     elseif not installdata.noWait then
-        sleep(2)
+        sleep(1)
     end
 elseif computer.getBootAddress and computer.setBootAddress and computer.getBootAddress() ~= proxy.address then
     computer.setBootAddress(proxy.address)

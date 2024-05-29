@@ -1,7 +1,6 @@
 local computer = computer
 local component = component
 local tmpfs = component.proxy(computer.tmpAddress())
-if tmpfs.exists("/bootloader") then return end
 local bootfs = component.proxy(computer.getBootAddress())
 
 local function getGPU(screen)
