@@ -148,39 +148,48 @@ local function likeOSname(proxy)
     return str
 end
 
-local function findSystems()
+local function findSystems(address)
     local tbl = {}
-    for address in component.list("filesystem") do
-        local proxy = component.proxy(address)
+    local proxy = component.proxy(address)
 
-        if proxy.exists("/OS.lua") then
-            table.insert(tbl, {
-                "mineOS based system",
-                function ()
-                    mineOSboot(proxy)
-                end,
-                address
-            })
-        end
-
-        if proxy.exists("/system/core/bootloader.lua") then
-            table.insert(tbl, {
-                likeOSname(proxy),
-                function ()
-                    bootTo(proxy, "/system/core/bootloader.lua")
-                end,
-                address
-            })
-        elseif proxy.exists("/init.lua") then
-            table.insert(tbl, {
-                "unknownOS",
-                function ()
-                    bootTo(proxy, "/init.lua")
-                end,
-                address
-            })
-        end
+    if proxy.exists("/system/core/bootloader.lua") then
+        table.insert(tbl, {
+            likeOSname(proxy),
+            function ()
+                bootTo(proxy, "/system/core/bootloader.lua")
+            end,
+            address
+        })
+    elseif proxy.exists("/init.lua") then
+        table.insert(tbl, {
+            "unknownOS",
+            function ()
+                bootTo(proxy, "/init.lua")
+            end,
+            address
+        })
     end
+
+    if proxy.exists("/OS.lua") then
+        table.insert(tbl, {
+            "mineOS based system",
+            function ()
+                mineOSboot(proxy)
+            end,
+            address
+        })
+    end
+
+    if proxy.exists("/openOS.lua") then
+        table.insert(tbl, {
+            "openOS dualboot",
+            function ()
+                bootTo(proxy, "/openOS.lua")
+            end,
+            address
+        })
+    end
+
     return tbl
 end
 
@@ -329,20 +338,36 @@ end
 local strs = {}
 local funcs = {}
 
+local function getTitle(address)
+    return "disk \"" .. (component.invoke(address, "getLabel") or "no-label") .. "\" (" .. address:sub(1, 8) .. ")"
+end
+
 ---- systems on self disk
-table.insert(strs, "------ self disk (" .. bootfs.address .. ")")
+table.insert(strs, "------ self " .. getTitle(bootfs.address))
 table.insert(funcs, false)
-for i, v in ipairs(findSystems()) do
+for i, v in ipairs(findSystems(bootfs.address)) do
     table.insert(strs, v[1])
     table.insert(funcs, v[2])
 end
 
 ---- systems on other disks
-table.insert(strs, "------ other disks")
-table.insert(funcs, false)
-for i, v in ipairs(findSystems()) do
-    table.insert(strs, v[1])
-    table.insert(funcs, v[2])
+local addresses = {}
+for address in component.list("filesystem", true) do
+    if address ~= bootfs.address then
+        table.insert(addresses, address)
+    end
+end
+table.sort(addresses)
+for _, address in ipairs(addresses) do
+    local tbl = findSystems(address)
+    if #tbl > 0 then
+        table.insert(strs, "------ " .. getTitle(address))
+        table.insert(funcs, false)
+        for i, v in ipairs(tbl) do
+            table.insert(strs, v[1])
+            table.insert(funcs, v[2])
+        end
+    end
 end
 
 menu("likeOS/liked Boot Manager", strs, funcs, 3)
