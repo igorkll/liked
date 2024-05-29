@@ -20,6 +20,7 @@ if window then
     rx, ry = window.sizeX, window.sizeY
     pwx, pwy = (window.sizeX / 2) - (gui.zoneX / 2), (window.sizeY / 2) - (gui.zoneY / 2)
 end
+local tier1 = graphic.getDepth(screen) == 1
 
 local function addRSbuttons(layout)
     if rsButtons then
@@ -40,7 +41,9 @@ end
 local inetLayout = ui:simpleCreate(uix.colors.cyan, uix.styles[2])
 inetLayout.imagePath = uix.getSysImgPath("noInternet")
 inetLayout:createLabel(2, 2, inetLayout.window.sizeX - 2, 1, uix.colors.cyan, uix.colors.white, "there is no internet connection")
-inetLayout:createImage((rx / 2) - (image.sizeX(inetLayout.imagePath) / 2), 4, inetLayout.imagePath)
+if not tier1 then
+    inetLayout:createImage((rx / 2) - (image.sizeX(inetLayout.imagePath) / 2), 4, inetLayout.imagePath)
+end
 
 addRSbuttons(inetLayout)
 
@@ -69,19 +72,23 @@ end
 
 --------------------------------
 
-local loginInputPos = math.ceil((rx / 2) - 20)
-local bpos = math.ceil((rx / 2) - 8)
+local loginInputPos = math.ceil((rx / 2) - 20) + 1
+local bpos = math.ceil((rx / 2) - 8) + 1
+local offset = 0
+if tier1 then
+    offset = 3
+end
 
 accountLayout = ui:simpleCreate(uix.colors.cyan, uix.styles[2])
-loginZone = accountLayout:createInput(loginInputPos, ry - 8, 40, uix.colors.white, uix.colors.black, false, nil, nil, nil,    "login   : ")
-passwordZone = accountLayout:createInput(loginInputPos, ry - 6, 40, uix.colors.white, uix.colors.black, true, nil, nil, nil,  "password: ")
-passwordZone2 = accountLayout:createInput(loginInputPos, ry - 4, 40, uix.colors.white, uix.colors.black, true, nil, nil, nil, "password: ")
+loginZone = accountLayout:createInput(loginInputPos, ry - 8 - offset, 40, uix.colors.white, uix.colors.black, false, nil, nil, nil,    "login   : ")
+passwordZone = accountLayout:createInput(loginInputPos, ry - 6 - offset, 40, uix.colors.white, uix.colors.black, true, nil, nil, nil,  "password: ")
+passwordZone2 = accountLayout:createInput(loginInputPos, ry - 4 - offset, 40, uix.colors.white, uix.colors.black, true, nil, nil, nil, "password: ")
 
-registerButton = accountLayout:createButton(bpos - 10, ry - 2, 16, 1, uix.colors.lightBlue, uix.colors.white, "register", true)
-loginButton = accountLayout:createButton(bpos + 10, ry - 2, 16, 1, uix.colors.lightBlue, uix.colors.white, "login", true)
+registerButton = accountLayout:createButton(bpos - 10, ry - 2 - offset, 16, 1, uix.colors.lightBlue, uix.colors.white, "register", true)
+loginButton = accountLayout:createButton(bpos + 10, ry - 2 - offset, 16, 1, uix.colors.lightBlue, uix.colors.white, "login", true)
 
-accountDelButton = accountLayout:createButton(bpos - 10, ry - 2, 16, 1, uix.colors.lightBlue, uix.colors.white, "delete account", true)
-unloginButton = accountLayout:createButton(bpos + 10, ry - 2, 16, 1, uix.colors.lightBlue, uix.colors.white, "logout", true)
+accountDelButton = accountLayout:createButton(bpos - 10, ry - 2 - offset, 16, 1, uix.colors.lightBlue, uix.colors.white, "delete account", true)
+unloginButton = accountLayout:createButton(bpos + 10, ry - 2 - offset, 16, 1, uix.colors.lightBlue, uix.colors.white, "logout", true)
 
 changePassword = accountLayout:createButton(3, 2, 17, 1, uix.colors.lightBlue, uix.colors.white, "change password", true)
 devicesControl = accountLayout:createButton(3, 4, 17, 1, uix.colors.lightBlue, uix.colors.white, "devices control", true)
@@ -146,8 +153,10 @@ function accountLayout:onSelect()
         local locked
         if accountLayout.login and accountLayout.tokenIsValid then
             accountLayout.imagePath = uix.getSysImgPath("accountLogin")
-            accountImage = accountLayout:createImage(((rx / 2) - (image.sizeX(accountLayout.imagePath) / 2)) + 1, 2, accountLayout.imagePath)
-            accountImage.wallpaperMode = true
+            if not tier1 then
+                accountImage = accountLayout:createImage(((rx / 2) - (image.sizeX(accountLayout.imagePath) / 2)) + 1, 2, accountLayout.imagePath)
+                accountImage.wallpaperMode = true
+            end
 
             loginZone.read.setBuffer(accountLayout.login)
             loginZone.read.setLock(true)
@@ -160,8 +169,10 @@ function accountLayout:onSelect()
             locked = true
             
             accountLayout.imagePath = uix.getSysImgPath("accountLock")
-            accountImage = accountLayout:createImage(((rx / 2) - (image.sizeX(accountLayout.imagePath) / 2)) + 1, 2, accountLayout.imagePath)
-            accountImage.wallpaperMode = true
+            if not tier1 then
+                accountImage = accountLayout:createImage(((rx / 2) - (image.sizeX(accountLayout.imagePath) / 2)) + 1, 2, accountLayout.imagePath)
+                accountImage.wallpaperMode = true
+            end
 
             loginZone.read.setBuffer(accountLayout.locked)
             loginZone.read.setLock(true)
@@ -175,8 +186,10 @@ function accountLayout:onSelect()
             loginButton.disabledHidden = false
         else
             accountLayout.imagePath = uix.getSysImgPath("account")
-            accountImage = accountLayout:createImage(((rx / 2) - (image.sizeX(accountLayout.imagePath) / 2)) + 1, 2, accountLayout.imagePath)
-            accountImage.wallpaperMode = true
+            if not tier1 then
+                accountImage = accountLayout:createImage(((rx / 2) - (image.sizeX(accountLayout.imagePath) / 2)) + 1, 2, accountLayout.imagePath)
+                accountImage.wallpaperMode = true
+            end
 
             registerButton.disabledHidden = false
             loginButton.disabledHidden = false

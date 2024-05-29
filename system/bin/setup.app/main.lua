@@ -55,27 +55,38 @@ end
 --------------------------------
 
 helloLayout = ui:simpleCreate(uix.colors.cyan, uix.styles[2])
---helloLayout:createText(2, 1, uix.colors.white, "liked & likeOS")
 
-hiObj = helloLayout:createCustom((rx / 2) - 11, (ry / 2) - 6, blinckedHi)
-
---graphic.setPaletteColor(screen, colorlib.red, 0xffffff)
-local function blink()
-    hiObj:draw()
-
-    local tick = 90
-    helloLayout:timer(0.1, function ()
-        local value = math.abs(math.sin(math.rad(tick)))
-        graphic.setPaletteColor(screen, colorlib.red, colorlib.blend(value * 255, value * 255, value * 255))
-        tick = (tick + 12) % 360
-
-        if tick > 180 + 90 then
-            return false
-        end
-    end, math.huge)
+local hiPos
+local tier1 = graphic.getDepth(screen) == 1
+if tier1 then
+    hiPos = 3
+else
+    hiPos = (rx / 2) - 11
 end
+hiObj = helloLayout:createCustom(hiPos, (ry / 2) - 6, blinckedHi)
 
-helloLayout:timer(4, blink, math.huge)
+if not tier1 then
+    local function blink()
+        hiObj:draw()
+
+        local tick = 90
+        helloLayout:timer(0.1, function ()
+            local value = math.abs(math.sin(math.rad(tick)))
+            graphic.setPaletteColor(screen, colorlib.red, colorlib.blend(value * 255, value * 255, value * 255))
+            tick = (tick + 12) % 360
+
+            if tick > 180 + 90 then
+                return false
+            end
+        end, math.huge)
+    end
+
+    helloLayout:timer(4, blink, math.huge)
+
+    function helloLayout:onSelect()
+        blink()
+    end
+end
 
 do
     local next1 = helloLayout:createButton((rx / 2) - 7, ry - 1, 16, 1, uix.colors.lightBlue, uix.colors.white, "next", true)
@@ -92,10 +103,6 @@ do
     function shutdown:onClick()
         computer.shutdown(nil, true)
     end
-end
-
-function helloLayout:onSelect()
-    blink()
 end
 
 --------------------------------

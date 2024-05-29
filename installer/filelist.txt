@@ -124,6 +124,7 @@
 /system/lib/storage.lua
 /system/lib/sysinit.lua
 /system/lib/uix.lua
+/system/lib/vcursor.lua
 /system/lib/viewer.lua
 /system/lib/vkeyboard.lua
 /system/lib/warnings.lua
