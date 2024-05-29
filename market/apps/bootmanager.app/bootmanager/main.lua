@@ -152,6 +152,8 @@ local function findSystems(address)
     local tbl = {}
     local proxy = component.proxy(address)
 
+    local isPipes = proxy.exists("/boot/kernel/pipes")
+
     if proxy.exists("/system/core/bootloader.lua") then
         table.insert(tbl, {
             likeOSname(proxy),
@@ -160,27 +162,31 @@ local function findSystems(address)
             end,
             address
         })
-    elseif proxy.exists("/boot/kernel/pipes") then
+    elseif not isPipes then
+        if proxy.exists("/lib/core/full_event.lua") then --I hope this file will not be found in other operating systems to avoid conflicts.
+            table.insert(tbl, {
+                "openOS",
+                function ()
+                    bootTo(proxy, "/init.lua")
+                end,
+                address
+            })
+        elseif proxy.exists("/init.lua") then
+            table.insert(tbl, {
+                "unknown",
+                function ()
+                    bootTo(proxy, "/init.lua")
+                end,
+                address
+            })
+        end
+    end
+
+    if isPipes then
         table.insert(tbl, {
             "plan9k",
             function ()
                 bootTo(proxy, "/boot/kernel/pipes")
-            end,
-            address
-        })
-    elseif proxy.exists("/lib/core/full_event.lua") then --I hope this file will not be found in other operating systems to avoid conflicts.
-        table.insert(tbl, {
-            "openOS",
-            function ()
-                bootTo(proxy, "/init.lua")
-            end,
-            address
-        })
-    elseif proxy.exists("/init.lua") then
-        table.insert(tbl, {
-            "unknown",
-            function ()
-                bootTo(proxy, "/init.lua")
             end,
             address
         })
@@ -205,6 +211,21 @@ local function findSystems(address)
             address
         })
     end
+
+    local function addBootOption(path)
+        for _, name in ipairs(proxy.list(path) or {}) do
+            if name ~= "pipes" then
+                table.insert(tbl, {
+                    name,
+                    function ()
+                        bootTo(proxy, path .. name)
+                    end,
+                    address
+                })
+            end
+        end
+    end
+    addBootOption("/boot/kernel/")
 
     return tbl
 end
