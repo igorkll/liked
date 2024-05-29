@@ -1,1 +1,1 @@
-require("computer").shutdown("fast")
+require("computer").shutdown("faster")
