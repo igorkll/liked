@@ -3,8 +3,8 @@ local component = require("component")
 local event = require("event")
 local gui_container = require("gui_container")
 local gui = require("gui")
-local unicode = require("unicode")
 local liked = require("liked")
+local thread = require("thread")
 local colors = gui_container.colors
 
 local screen = ...
@@ -19,13 +19,16 @@ local title = "Magnet"
 
 local placeAt = (rx // 2) - 4
 
-liked.drawUpBarTask(screen, true, colors.gray)
+local upTh, upRedraw, upCallbacks = liked.drawFullUpBarTask(screen, "Magnet")
+local baseTh = thread.current()
+upCallbacks.exit = function ()
+    baseTh:kill()
+end
 
 local function updateAll()
     window:clear(colors.black)
     window:fill(1, 1, rx, 1, colors.gray, 0, " ")
-    window:set((window.sizeX / 2) - (unicode.len(title) / 2), 1, colors.gray, colors.white, title)
-    window:set(rx, 1, colors.red, colors.white, "X")
+    upRedraw()
 
     window:set(placeAt, 3, colors.red, colors.white, "           ")
     window:set(placeAt, 4, colors.red, colors.white, "   SUCK    ")
@@ -54,9 +57,7 @@ while true do
     local windowEventData = window:uploadEvent(eventData)
 
     if windowEventData[1] == "touch" then
-        if windowEventData[3] == rx and windowEventData[4] == 1 then
-            break
-        elseif checkButton(windowEventData, 3) then
+        if checkButton(windowEventData, 3) then
             magnet.suck()
         elseif checkButton(windowEventData, 7) then
             gui_status(screen, nil, nil, "sucking...")

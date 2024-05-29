@@ -3,6 +3,7 @@ local graphic = require("graphic")
 local computer = require("computer")
 local component = require("component")
 local gui_container = require("gui_container")
+local gui = require("gui")
 local colors = gui_container.colors
 local advLabeling = require("advLabeling")
 local thread = require("thread")
@@ -48,7 +49,6 @@ local function bgTime(destruct, time, tbl)
 end
 
 local function timer(destruct, getTimeTbl)
-    gui_container.noScreenSaver[screen] = true
     rx, ry = 8, 4
     graphic.setResolution(screen, rx, ry)
 
@@ -77,7 +77,6 @@ local function timer(destruct, getTimeTbl)
     end
 
     graphic.setResolution(screen, orx, ory)
-    gui_container.noScreenSaver[screen] = nil
 end
 
 ----------------------------
@@ -109,19 +108,19 @@ if destructUuid then
 
         local num
         while true do
-            num = gui_input(screen, nil, nil, "timer")
+            num = gui.input(screen, nil, nil, "timer")
             if not num then
                 return
             end
             num = tonumber(num)
             if num then
                 if num < 0 or (num > 100000 and not isRed) then
-                    gui_warn(screen, nil, nil, "the number must be in the range 0/" .. (isRed and "huge" or "100000"))
+                    gui.warn(screen, nil, nil, "the number must be in the range 0/" .. (isRed and "huge" or "100000"))
                 else
                     break
                 end
             else
-                gui_warn(screen, nil, nil, "enter a number")
+                gui.warn(screen, nil, nil, "enter a number")
             end
         end
         
@@ -129,7 +128,7 @@ if destructUuid then
         local label = advLabeling.getLabel(destructUuid)
         if label then name = name .. ":" .. label end
 
-        if gui_yesno(screen, nil, nil, "do you really want to explode " .. name .. "? the timer cannot be stopped!") then
+        if gui.yesno(screen, nil, nil, "do you really want to explode " .. name .. "? the timer cannot be stopped!") then
             if not isRed then
                 destruct.start(num)
                 timer(destruct)

@@ -1,0 +1,39 @@
+This game creates a virtual computer inside your virtual computer inside Minecraft!
+This computer has serious performance and resource limitations.
+the screen of this computer is textual, and has a resolution of 36 by 18.
+it can display 4 colors of characters on a white black background.
+
+the color palette:
+0 - red
+1 - blue
+2 - green
+3 - yellow
+
+api - debug:
+debug.traceback is a function from the debug library
+
+api - screen:
+screen.clear() - clears the screen
+screen.set(x, y, char:" ", color:0) - sets 1 character on the screen
+screen.getSize():number, number - returns screen resolutions
+
+api - storage:
+storage.getData():string - returns the saved data string
+storage.setData(string) - sets the data string(maximum size 4kb)
+storage.getCode():string - returns the computer code
+storage.setCode(string) - sets the computer code, and it will start executing after reboot (maximum size 16kb)
+
+api - device:
+device.beep(freq, time) - causes a blocking beep
+device.shutdown() - turns off the device
+device.reboot() - reboots the device
+device.uptime() - returns the device's operating time in seconds
+
+api - keyboard:
+keyboard.get():string - returns a string from the user's input string
+keyboard.set(string) - writes a string to the user input string
+keyboard.isAction():boolean - returns the states of the action button
+keyboard.isUp():boolean - returns the button states up
+keyboard.isDown():boolean - returns the button states down
+keyboard.isLeft():boolean - returns the button states to the left
+keyboard.isRight():boolean - returns the button states to the right

@@ -1,13 +1,12 @@
 local graphic = require("graphic")
 local thread = require("thread")
 local component = require("component")
+local graphic = require("graphic")
 local screen = ...
 
-component.invoke(screen, "turnOff") --energy saving
-
-local gpu = graphic.findGpu(screen)
+local gpu = graphic.findNativeGpu(screen)
 local mx, my = gpu.getResolution()
-local depth = gpu.getDepth()
+local depth = graphic.getDepth(screen)
 
 local oldPaletteColor
 if depth > 1 then
@@ -15,15 +14,23 @@ if depth > 1 then
     gpu.setPaletteColor(0, 0)
 end
 
-gpu.setBackground(0)
-gpu.setForeground(0)
+component.invoke(screen, "turnOff")
+gpu.setBackground(0, depth > 1)
+gpu.setForeground(0, depth > 1)
 gpu.fill(1, 1, mx, my, " ")
 
 local current = thread.current()
 current.kill = function (self)
+    gpu = graphic.findNativeGpu(screen)
+
     if oldPaletteColor then
         gpu.setPaletteColor(0, oldPaletteColor)
     end
+    
+    gpu.setBackground(0x000000)
+    gpu.setForeground(0x000000)
+    gpu.fill(1, 1, mx, my, " ")
+
     component.invoke(screen, "turnOn")
     self:raw_kill()
 end

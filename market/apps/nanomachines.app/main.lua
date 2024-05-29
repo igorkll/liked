@@ -9,14 +9,13 @@ local unicode = require("unicode")
 local thread = require("thread")
 local serialization = require("serialization")
 local liked = require("liked")
+local gui = require("gui")
 
 local path = paths.path(getPath())
 fs.makeDirectory(paths.concat(path, "profiles"))
 
 local port = math.floor(math.random(1, 65535))
 local range = 3
-
-local title = "Nanomachines"
 
 ------------------------------------ init
 
@@ -27,7 +26,7 @@ do
     rx, ry = gpu.getResolution()
 end
 
-local upth, upRedraw = liked.drawUpBarTask(screen, true, colors.lightGray)
+local upth, upRedraw = liked.drawFullUpBarTask(screen, "Nanomachines")
 upth:suspend()
 
 local function noUpBar()
@@ -45,8 +44,8 @@ local function status(str)
     gpu.setForeground(colors.white)
     gpu.fill(1, 1, rx, ry, " ")
     gpu.set(math.floor(((rx / 2) - (unicode.len(str) / 2)) + 0.5) + 1, math.floor((ry / 2) + 0.5) - 1, str)
-    graphic.forceUpdate()
-    --gui_status(screen, nil, nil, str)
+    graphic.forceUpdate(screen)
+    os.sleep(0.1)
 end
 
 local modem
@@ -64,7 +63,7 @@ end
 ------------------------------------ methods
 
 function yesno_reconnect()
-    return gui_yesno(screen, nil, nil, "no connection to nanomachines, try again?")
+    return gui.yesno(screen, nil, nil, "no connection to nanomachines, try again?")
 end
 
 function connectToNano()
@@ -312,12 +311,8 @@ local function draw()
     end
 
     window:clear(colors.black)
-    
-    window:fill(1, 1, rx, 1, colors.lightGray, 0, " ")
-    window:set(2, 1, colors.lightGray, colors.white, title)
     upBar()
 
-    window:set(rx, 1, colors.red, colors.white, "X")
     window:set(1, 2, colors.red, colors.white, "delete profile")
     window:set(16, 2, colors.orange, colors.white, "push all")
     window:set(25, 2, colors.green, colors.white, "pull all")
@@ -378,14 +373,12 @@ while true do
     end
 
     if windowEventData[1] == "touch" then
-        if windowEventData[4] == 1 then
-            if windowEventData[3] == rx then
-                tryClose = true
-            end
+        if windowEventData[4] == 1 and windowEventData[3] >= rx - 2 then
+            tryClose = true
         end
         if windowEventData[4] == 2 then
             if windowEventData[3] >= 1 and windowEventData[3] <= 14 then
-                if gui_yesno(screen, nil, nil, "are you sure you want to delete your profile and exit the app?") then
+                if gui.yesno(screen, nil, nil, "are you sure you want to delete your profile and exit the app?") then
                     fs.remove(paths.concat(path, "profiles", nickname))
                     break
                 end

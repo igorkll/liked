@@ -10,9 +10,11 @@ local paths = require("paths")
 local programs = require("programs")
 local internet = require("internet")
 local unicode = require("unicode")
+local registry = require("registry")
+local liked = require("liked")
 
-local function download(url)
-    return assert(internet.getInternetFile(url))
+local function download(path, url)
+    assert(internet.download(url, path))
 end
 
 local function save(path, data)
@@ -32,184 +34,94 @@ end
 local list = {
     {
         name = "nanomachines",
-        version = "2.1",
+        version = "2.2",
         vendor = "logic",
-        icon = selfurlpart .. "/apps/nanomachines.app/icon.t2p",
         description = "allows you to control nanobots using a wireless modem",
         minDiskSpace = 64,
 
-        path = "/data/bin/nanomachines.app",
-        install = function(self)
-            fs.makeDirectory("/data/bin/nanomachines.app")
-            save("/data/bin/nanomachines.app/main.lua", download(selfurlpart .. "/apps/nanomachines.app/main.lua"))
-            save("/data/bin/nanomachines.app/icon.t2p", download(self.icon))
-        end
+        path = "/data/apps/nanomachines.app",
+        urlPrimaryPart = selfurlpart .. "/apps/nanomachines.app/",
+        files = {"main.lua", "icon.t2p"}
     },
     {
         name = "worm",
         version = "1",
         vendor = "computercraft",
-        icon = selfurlpart .. "/apps/worm.app/icon.t2p",
         description = "classic snake ported from computercraft",
         minDiskSpace = 64,
 
-        path = "/data/bin/worm.app",
-        install = function(self)
-            fs.makeDirectory("/data/bin/worm.app")
-            save("/data/bin/worm.app/main.lua", download(selfurlpart .. "/apps/worm.app/main.lua"))
-            save("/data/bin/worm.app/icon.t2p", download(self.icon))
-        end
+        path = "/data/apps/worm.app",
+        urlPrimaryPart = selfurlpart .. "/apps/worm.app/",
+        files = {"main.lua", "icon.t2p"}
     },
     {
         name = "chat",
-        version = "2",
+        version = "2.6",
         vendor = "logic",
         icon = selfurlpart .. "/apps/chat.app/icon.t2p",
         description = "allows you to exchange messages, pictures and files between computers via a network card",
         minDiskSpace = 64,
 
-        path = "/data/bin/chat.app",
+        path = "/data/apps/chat.app",
         install = function(self)
-            fs.makeDirectory("/data/bin/chat.app")
-            save("/data/bin/chat.app/main.lua", download(selfurlpart .. "/apps/chat.app/main.lua"))
-            save("/data/bin/chat.app/icon.t2p", download(self.icon))
-            save("/data/bin/chat.app/uninstall.lua", download(selfurlpart .. "/apps/chat.app/uninstall.lua"))
-            save("/data/bin/chat.app/exit.lua", download(selfurlpart .. "/apps/chat.app/exit.lua"))
+            fs.makeDirectory("/data/apps/chat.app")
+            download("/data/apps/chat.app/main.lua", selfurlpart .. "/apps/chat.app/main.lua")
+            download("/data/apps/chat.app/icon.t2p", self.icon)
+            download("/data/apps/chat.app/uninstall.lua", selfurlpart .. "/apps/chat.app/uninstall.lua")
 
             fs.makeDirectory("/data/autoruns")
-            save("/data/autoruns/chat_demon.lua", download(selfurlpart .. "/apps/chat.app/autorun.lua"))
+            download("/data/autoruns/chat_demon.lua", selfurlpart .. "/apps/chat.app/autorun.lua")
 
             fs.makeDirectory("/data/lib")
-            save("/data/lib/chat_lib.lua", download(selfurlpart .. "/apps/chat.app/chat_lib.lua"))
-            save("/data/lib/modem_chat_lib.lua", download(selfurlpart .. "/apps/chat.app/modem_chat_lib.lua"))
+            download("/data/lib/chat_lib.lua", selfurlpart .. "/apps/chat.app/chat_lib.lua")
+            download("/data/lib/modem_chat_lib.lua", selfurlpart .. "/apps/chat.app/modem_chat_lib.lua")
         
             assert(programs.execute("/data/autoruns/chat_demon.lua"))
         end
     },
-    --[[
-    {
-        path = "/data/bin/spaceshot.app",
-        install = function()
-            fs.makeDirectory("/data/bin/spaceshoter.app")
-            save("/data/bin/spaceshoter.app/main.lua", download(selfurlpart .. "/apps/spaceshoter.app/main.lua")))
-            save("/data/bin/spaceshoter.app/icon.t2p", download(selfurlpart .. "/apps/spaceshoter.app/icon.t2p")))
-        end
-    }
-    ]]
     {
         name = "irc",
         version = "1",
         vendor = "Nathan Flynn",
-        icon = selfurlpart .. "/apps/irc.app/icon.t2p",
         description = "allows you to connect to IRC chats via an Internet card.\nprogram ported from openOS",
         minDiskSpace = 64,
 
-        path = "/data/bin/irc.app",
-        install = function(self)
-            fs.makeDirectory("/data/bin/irc.app")
-            save("/data/bin/irc.app/main.lua", download(selfurlpart .. "/apps/irc.app/main.lua"))
-            save("/data/bin/irc.app/icon.t2p", download(self.icon))
-        end
-    },
-    {
-        name = "archiver",
-        version = "3",
-        vendor = "logic",
-        icon = selfurlpart .. "/apps/archiver.app/icon.t2p",
-        description = "allows you to unpack and package archives",
-        minDiskSpace = 64,
-
-        path = "/data/bin/archiver.app",
-        install = function(self)
-            fs.makeDirectory("/data/bin/archiver.app")
-            save("/data/bin/archiver.app/main.lua", download(selfurlpart .. "/apps/archiver.app/main.lua"))
-            save("/data/bin/archiver.app/icon.t2p", download(self.icon))
-            save("/data/bin/archiver.app/uninstall.lua", download(selfurlpart .. "/apps/archiver.app/uninstall.lua"))
-            save("/data/autoruns/archiver.lua", download(selfurlpart .. "/apps/archiver.app/autorun.lua"))
-            save("/data/icons/afpx.t2p", download(selfurlpart .. "/apps/archiver.app/afpx.t2p"))
-        
-            assert(programs.execute("/data/autoruns/archiver.lua"))
-        end
+        path = "/data/apps/irc.app",
+        urlPrimaryPart = selfurlpart .. "/apps/irc.app/",
+        files = {"main.lua", "icon.t2p"}
     },
     {
         name = "brainfuck",
-        version = "1",
+        version = "2",
         vendor = "logic",
-        icon = selfurlpart .. "/apps/brainfuck.app/icon.t2p",
         description = "brainfuck code interpreter",
         minDiskSpace = 64,
+        libs = {"brainfuck"},
 
-        path = "/data/bin/brainfuck.app",
-        install = function(self)
-            fs.makeDirectory("/data/bin/brainfuck.app")
-            fs.makeDirectory("/data/lib")
-            save("/data/bin/brainfuck.app/main.lua", download(selfurlpart .. "/apps/brainfuck.app/main.lua"))
-            save("/data/bin/brainfuck.app/icon.t2p", download(self.icon))
-            save("/data/bin/brainfuck.app/uninstall.lua", download(selfurlpart .. "/apps/brainfuck.app/uninstall.lua"))
-            save("/data/lib/brainfuck.lua", download(selfurlpart .. "/apps/brainfuck.app/lib.lua"))
-        end
+        path = "/data/apps/brainfuck.app",
+        urlPrimaryPart = selfurlpart .. "/apps/brainfuck.app/"
     },
-    --[[
-    eeprom = {
-        path = "/data/bin/eeprom.app",
-        install = function()
-            fs.makeDirectory("/data/bin/eeprom.app")
-            save("/data/bin/eeprom.app/main.lua", download(selfurlpart .. "/apps/eeprom.app/main.lua")))
-            save("/data/bin/eeprom.app/icon.t2p", download(selfurlpart .. "/apps/eeprom.app/icon.t2p")))
-        end
-    },
-    ]]
-    --[[
-    {
-        name = "legacy render",
-        version = "1",
-        vendor = "logic",
-        icon = selfurlpart .. "/apps/legacyRender.app/icon.t2p",
-        description = "allows you to switch between rendering options",
-
-        path = "/data/bin/legacyRender.app",
-        install = function(self)
-            fs.makeDirectory("/data/autoruns")
-            fs.makeDirectory("/data/bin/legacyRender.app")
-
-            save("/data/bin/legacyRender.app/main.lua", download(selfurlpart .. "/apps/legacyRender.app/main.lua")))
-            save("/data/bin/legacyRender.app/icon.t2p", download(self.icon)))
-            save("/data/bin/legacyRender.app/uninstall.lua", download(selfurlpart .. "/apps/legacyRender.app/uninstall.lua")))
-            save("/data/autoruns/legacyRender.lua", download(selfurlpart .. "/apps/legacyRender.app/autorun.lua")))
-            
-            programs.execute("/data/autoruns/legacyRender.lua")
-        end
-    },
-    ]]
     {
         name = "lua",
-        version = "3",
+        version = "5",
         vendor = "logic",
-        icon = selfurlpart .. "/apps/lua.app/icon.t2p",
         description = "lua code interpreter",
         minDiskSpace = 64,
 
-        path = "/data/bin/lua.app",
-        install = function(self)
-            fs.makeDirectory("/data/bin/lua.app")
-            save("/data/bin/lua.app/main.lua", download(selfurlpart .. "/apps/lua.app/main.lua"))
-            save("/data/bin/lua.app/icon.t2p", download(self.icon))
-        end
+        path = "/data/apps/lua.app",
+        urlPrimaryPart = selfurlpart .. "/apps/lua.app/",
+        files = {"main.lua", "icon.t2p"}
     },
     {
         name = "events",
-        version = "2",
+        version = "3",
         vendor = "logic",
-        icon = selfurlpart .. "/apps/events.app/icon.t2p",
         description = "allows you to view computer events",
         minDiskSpace = 64,
 
-        path = "/data/bin/events.app",
-        install = function(self)
-            fs.makeDirectory("/data/bin/events.app")
-            save("/data/bin/events.app/main.lua", download(selfurlpart .. "/apps/events.app/main.lua"))
-            save("/data/bin/events.app/icon.t2p", download(self.icon))
-        end
+        path = "/data/apps/events.app",
+        urlPrimaryPart = selfurlpart .. "/apps/events.app/",
+        files = {"main.lua", "icon.t2p"}
     },
     {
         name = "openOS",
@@ -218,111 +130,146 @@ local list = {
         icon = selfurlpart .. "/apps/openOS.app/icon.t2p",
         description = "configures dualboot between openOS and liked",
         minDiskSpace = 1024,
+        dualboot = true,
 
-        path = "/vendor/bin/openOS.app",
+        path = "/vendor/apps/openOS.app",
         install = function(self)
             local afpxPath = self.path .. "/openOS.afpx"
 
             fs.makeDirectory(self.path)
-            save(self.path .. "/main.lua", download(selfurlpart .. "/apps/openOS.app/main.lua"))
-            save(self.path .. "/uninstall.lua", download(selfurlpart .. "/apps/openOS.app/uninstall.lua"))
-            save(self.path .. "/icon.t2p", download(self.icon))
+            download(self.path .. "/main.lua", selfurlpart .. "/apps/openOS.app/main.lua")
+            download(self.path .. "/uninstall.lua", selfurlpart .. "/apps/openOS.app/uninstall.lua")
+            download(self.path .. "/icon.t2p", self.icon)
 
-            save(self.path .. "/lua5_2.lua", download(selfurlpart .. "/apps/openOS.app/lua5_2.lua"))
-            save(self.path .. "/actions.cfg", download(selfurlpart .. "/apps/openOS.app/actions.cfg"))
+            download(self.path .. "/lua5_2.lua", selfurlpart .. "/apps/openOS.app/lua5_2.lua")
+            download(self.path .. "/actions.cfg", selfurlpart .. "/apps/openOS.app/actions.cfg")
             
-            save(afpxPath, download(selfurlpart .. "/apps/openOS.app/openOS.afpx"))
+            download(afpxPath, selfurlpart .. "/apps/openOS.app/openOS.afpx")
+
             require("archiver").unpack(afpxPath, "/")
             fs.remove(afpxPath)
         end
     },
     {
         name = "mineOS",
-        version = "3",
+        version = "4",
         vendor = "IgorTimofeev",
         icon = selfurlpart .. "/apps/mineOS.app/icon.t2p",
         license = selfurlpart .. "/apps/mineOS.app/LICENSE",
-        description = "configures dualboot between mineOS and liked",
+        description = "configures dualboot between mineOS and liked\nATTENTION. if you have \"MineOS EFI\" installed, then you will not be able to use liked after installing MineOS. in order to boot into liked, delete the /OS.lua file in the MineOS explorer",
         minDiskSpace = 1024 + 512,
         minColorDepth = 8,
+        dualboot = true,
 
-        path = "/vendor/bin/mineOS.app",
+        path = "/vendor/apps/mineOS.app",
         install = function(self)
             local afpxPath = self.path .. "/mineOS.afpx"
 
             fs.makeDirectory(self.path)
-            save(self.path .. "/main.lua", download(selfurlpart .. "/apps/mineOS.app/main.lua"))
-            save(self.path .. "/uninstall.lua", download(selfurlpart .. "/apps/mineOS.app/uninstall.lua"))
-            save(self.path .. "/icon.t2p", download(self.icon))
-            save("/mineOS.lua", download(selfurlpart .. "/apps/mineOS.app/mineOS.lua"))
+            download(self.path .. "/main.lua", selfurlpart .. "/apps/mineOS.app/main.lua")
+            download(self.path .. "/uninstall.lua", selfurlpart .. "/apps/mineOS.app/uninstall.lua")
+            download(self.path .. "/icon.t2p", self.icon)
+            download("/mineOS.lua", selfurlpart .. "/apps/mineOS.app/mineOS.lua")
             
-            save(self.path .. "/lua5_2.lua", download(selfurlpart .. "/apps/mineOS.app/lua5_2.lua"))
-            save(self.path .. "/actions.cfg", download(selfurlpart .. "/apps/mineOS.app/actions.cfg"))
-            save(self.path .. "/LICENSE", download(self.license))
+            download(self.path .. "/lua5_2.lua", selfurlpart .. "/apps/mineOS.app/lua5_2.lua")
+            download(self.path .. "/actions.cfg", selfurlpart .. "/apps/mineOS.app/actions.cfg")
+            download(self.path .. "/LICENSE", self.license)
 
-            save(afpxPath, download(selfurlpart .. "/apps/mineOS.app/mineOS.afpx"))
-            require("archiver").unpack(afpxPath, "/")
-            fs.remove(afpxPath)
+            download(afpxPath, selfurlpart .. "/apps/mineOS.app/mineOS.afpx")
+
+            if require("archiver").unpack(afpxPath, "/") then
+                fs.remove(afpxPath)
+            else
+                fs.remove(self.path)
+                local clear = gui.saveZone(screen)
+                gui.skipShadow = true
+                gui.warn(screen, nil, nil, "failed to install MineOS, make sure there is enough disk space")
+                clear()
+            end
         end
+    },
+    {
+        name = "VychVyzhProm",
+        version = "1",
+        vendor = "Bs0Dd",
+        libs = {"openbox"},
+        icon = selfurlpart .. "/apps/VychVyzhProm.app/icon.t2p",
+        license = selfurlpart .. "/apps/VychVyzhProm.app/LICENSE",
+        description = "I came across the game Vychvyzhprom, written in Java by one group. In a week, I almost completely transferred it to Lua (a couple of points had to be simplified due to the feeble power of computers). The goal of this game is simple: we have a scorcher, a controller and a number of tasks. You need to program the controller to burn out the pattern shown in the task, with a small set of Assembler commands.",
+        minDiskSpace = 64,
+        minColorDepth = 8,
+
+        path = "/data/apps/VychVyzhProm.app",
+        urlPrimaryPart = selfurlpart .. "/apps/VychVyzhProm.app/",
+        files = (function ()
+            local tbl = {
+                "LICENSE",
+                "main.lua",
+                "icon.t2p",
+                "actions.cfg",
+                "taskedit.lua",
+                "vvprom/vvprom.lua",
+                "vvprom/vvptask.lua",
+                "vvprom/Languages/English.lng",
+                "vvprom/Languages/Russian.lng",
+                "vvprom/NyaDraw/init.lua",
+                "vvprom/Pictures/bcontr.pic",
+                "vvprom/Pictures/cidlogo.pic",
+                "vvprom/Pictures/comlogo.pic",
+                "vvprom/Pictures/controls.pic",
+                "vvprom/Pictures/editor.pic",
+                "vvprom/Pictures/exit.pic",
+                "vvprom/Pictures/help.pic",
+                "vvprom/Pictures/info.pic",
+                "vvprom/Pictures/task.pic",
+                "vvprom/Pictures/vvprom.pic"
+            }
+
+            for i = 1, 8 do
+                table.insert(tbl, "vvprom/Tasks/task" .. tostring(i) .. ".vtf")
+            end
+
+            return tbl
+        end)()
     },
     {
         name = "explode",
         version = "2",
         vendor = "logic",
-        icon = selfurlpart .. "/apps/explode.app/icon.t2p",
         description = "blow up your computer!",
         minDiskSpace = 64,
 
-        path = "/data/bin/explode.app",
-        install = function(self)
-            fs.makeDirectory(self.path)
-            save(self.path .. "/main.lua", download(selfurlpart .. "/apps/explode.app/main.lua"))
-            save(self.path .. "/icon.t2p", download(self.icon))
-        end
+        path = "/data/apps/explode.app",
+        urlPrimaryPart = selfurlpart .. "/apps/explode.app/",
+        files = {"main.lua", "icon.t2p", "config.cfg"}
     },
     {
         name = "camera",
-        version = "1",
+        version = "1.3",
         vendor = "logic",
-        icon = selfurlpart .. "/apps/camera.app/icon.t2p",
         description = "allows you to take pictures on the camera from the computronix addon.\n* allows you to select a camera from several\n* allows you to save a photo for loading on another computer",
         minDiskSpace = 64,
-        minColorDepth = 4,
 
-        path = "/data/bin/camera.app",
-        install = function(self)
-            fs.makeDirectory(self.path)
-            save(self.path .. "/uninstall.lua", download(selfurlpart .. "/apps/camera.app/uninstall.lua"))
-            save(self.path .. "/main.lua", download(selfurlpart .. "/apps/camera.app/main.lua"))
-            
-            local icon = download(self.icon)
-            save(self.path .. "/icon.t2p", icon)
-            save("/data/icons/cam.t2p", icon)
-
-            save("/data/autoruns/camera.lua", download(selfurlpart .. "/apps/camera.app/autorun.lua"))
-            assert(programs.execute("/data/autoruns/camera.lua"))
-        end
+        path = "/data/apps/camera.app",
+        urlPrimaryPart = selfurlpart .. "/apps/camera.app/",
+        files = {"main.lua", "icon.t2p", "formats.cfg", "config.cfg"}
     },
     {
         name = "redirection",
-        version = "1",
+        version = "3",
         vendor = "computercraft",
-        icon = selfurlpart .. "/apps/redirection.app/icon.t2p",
         description = "the game was ported from computercraft",
         minDiskSpace = 64,
 
-        path = "/data/bin/redirection.app",
-        install = function(self)
-            fs.makeDirectory(self.path)
-            save(self.path .. "/main.lua", download(selfurlpart .. "/apps/redirection.app/main.lua"))
-            save(self.path .. "/icon.t2p", download(self.icon))
-
-            fs.makeDirectory(paths.concat(self.path, "levels"))
+        path = "/data/apps/redirection.app",
+        urlPrimaryPart = selfurlpart .. "/apps/redirection.app/",
+        files = (function ()
+            local files = {"main.lua", "icon.t2p", "select.lua", "actions.cfg"}
             for i = 0, 12 do
-                local name = tostring(i) .. ".dat"
-                save(paths.concat(self.path, "levels", name), download(selfurlpart .. "/apps/redirection.app/levels/" .. name))
+                table.insert(files, "levels/" .. tostring(math.round(i)) .. ".dat")
             end
-        end
+            return files
+        end)()
     },
     {
         name = "adventure",
@@ -331,42 +278,553 @@ local list = {
         description = "the game was ported from computercraft",
         minDiskSpace = 64,
 
-        path = "/data/bin/adventure.app",
+        path = "/data/apps/adventure.app",
         urlPrimaryPart = selfurlpart .. "/apps/adventure.app/" --часть url к которой будут присираться разные имена файлов для скачивания(обязателен / на конце)
     },
     {
         name = "magnet",
-        version = "2",
+        version = "4",
         vendor = "logic",
         description = "a program for controlling a magnet that attracts resources(tractor_beam-upgrade)",
         minDiskSpace = 64,
 
-        path = "/data/bin/magnet.app",
+        path = "/data/apps/magnet.app",
         urlPrimaryPart = selfurlpart .. "/apps/magnet.app/", --часть url к которой будут присираться разные имена файлов для скачивания(обязателен / на конце)
         files = {"main.lua", "icon.t2p", "uninstall.lua"}
     },
     {
         name = "piston",
-        version = "3",
+        version = "4",
         vendor = "logic",
         description = "a program for controlling a piston(piston-upgrade)",
         minDiskSpace = 64,
 
-        path = "/data/bin/piston.app",
+        path = "/data/apps/piston.app",
         urlPrimaryPart = selfurlpart .. "/apps/piston.app/", --часть url к которой будут присираться разные имена файлов для скачивания(обязателен / на конце)
         files = {"main.lua", "icon.t2p", "uninstall.lua"}
-    }
-    --[[
-    openbox = {
-        hided = true,
-        path = "/data/bin/openbox.app",
-        install = function()
-            fs.makeDirectory("/data/bin/openbox.app")
-            save("/data/bin/openbox.app/main.lua", download(selfurlpart .. "/apps/openbox.app/main.lua")))
-            save("/data/bin/openbox.app/icon.t2p", download(selfurlpart .. "/apps/openbox.app/icon.t2p")))
+    },
+    {
+        name = "commandBlock",
+        version = "3",
+        vendor = "logic",
+        description = "allows you to control the command block and debug card from the computer\nto work, you need to activate \"enableCommandBlockDriver\" in the mod config, then re-enter the game\nthe command block must be connected to the computer by means of an adapter\nit also allows you to run cbs scripts (text files with a queue of commands)",
+        minDiskSpace = 64,
+
+        path = "/data/apps/commandBlock.app",
+        urlPrimaryPart = selfurlpart .. "/apps/commandBlock.app/",
+        files = {"main.lua", "icon.t2p", "formats.cfg"},
+    },
+    {
+        name = "openFM",
+        version = "1",
+        vendor = "logic",
+        description = "the program for the radio from the OpenFM addon\nit has a number of built-in radio stations",
+        minDiskSpace = 64,
+
+        path = "/data/apps/openFM.app",
+        urlPrimaryPart = selfurlpart .. "/apps/openFM.app/",
+        files = {"main.lua", "icon.t2p", "list.txt"}
+    },
+    {
+        name = "tape",
+        version = "1",
+        vendor = "logic",
+        description = "allows you to record music in dfpwm format to tapes from computronics\nallows you to dump the tape to dfpwm file\nyou can also record music directly over the Internet",
+        minDiskSpace = 64,
+
+        path = "/data/apps/tape.app",
+        urlPrimaryPart = selfurlpart .. "/apps/tape.app/",
+        files = {"main.lua", "icon.t2p", "formats.cfg"}
+    },
+    {
+        name = "hologram",
+        version = "4",
+        vendor = "logic",
+        description = "this program allows you to display various effects on a holographic projector\nLevel 1 and 2 holographic projectors are supported\neffects can work in the background and on multiple projectors at the same time",
+        minDiskSpace = 64,
+        libs = {"vec"},
+
+        path = "/data/apps/hologram.app",
+        urlPrimaryPart = selfurlpart .. "/apps/hologram.app/",
+        files = {"main.lua", "icon.t2p", "unreg.reg", "autorun.lua", "holograms/fireworks.lua", "holograms/fullbox.lua", "holograms/tree.lua", "holograms/christmasTree.lua"}
+    },
+    {
+        name = "printer3d",
+        version = "1",
+        vendor = "logic",
+        description = "allows you to open/edit/save and print 3D models in 3dm format.\nThe model format is fully compatible with the \"3D Print\" program in MineOS.\nalso, models in this format can be found on the Internet without any problems.\nvisualization on a holographic projector is supported",
+        minDiskSpace = 64,
+
+        path = "/data/apps/printer3d.app",
+        urlPrimaryPart = selfurlpart .. "/apps/printer3d.app/"
+    },
+    {
+        name = "toolbox",
+        version = "1",
+        vendor = "logic",
+        description = "contains a minecraft-style watch and compass\nthe compass points north and only works on a tablet",
+        minDiskSpace = 64,
+        libs = {"draw"},
+
+        path = "/data/apps/toolbox.app",
+        urlPrimaryPart = selfurlpart .. "/apps/toolbox.app/",
+        files = {"compass.t2p", "watch.t2p", "icon.t2p", "main.lua"}
+    },
+    {
+        name = "chunkloader",
+        version = "1",
+        vendor = "logic",
+        description = "the program for managing the chunkloader",
+        minDiskSpace = 64,
+
+        path = "/data/apps/chunkloader.app",
+        urlPrimaryPart = selfurlpart .. "/apps/chunkloader.app/"
+    },
+    {
+        name = "assembler",
+        version = "1",
+        vendor = "logic",
+        description = "the program for managing the assembler",
+        minDiskSpace = 64,
+
+        path = "/data/apps/assembler.app",
+        urlPrimaryPart = selfurlpart .. "/apps/assembler.app/"
+    },
+    {
+        name = "cardwriter",
+        version = "2",
+        vendor = "logic",
+        description = "program for write cards and EEPROM's via card writer",
+        minDiskSpace = 64,
+
+        path = "/data/apps/cardwriter.app",
+        urlPrimaryPart = selfurlpart .. "/apps/cardwriter.app/"
+    },
+    {
+        name = "calculator",
+        version = "2.1",
+        vendor = "logic",
+        description = "this is an engineering calculator that supports a lot of functions",
+        minDiskSpace = 64,
+
+        path = "/data/apps/calculator.app",
+        urlPrimaryPart = selfurlpart .. "/apps/calculator.app/"
+    },
+    {
+        name = "openbox",
+        version = "1",
+        vendor = "logic",
+        description = "this program allows you to run software from openOS on liked in compatibility mode",
+        minDiskSpace = 64,
+        executer = true,
+        libs = {"openbox"},
+
+        path = "/data/apps/openbox.app",
+        urlPrimaryPart = selfurlpart .. "/apps/openbox.app/"
+    },
+    {
+        name = "navigation",
+        version = "1",
+        vendor = "logic",
+        description = "navigation apps. requires upgrade \"navigation\"",
+        minDiskSpace = 64,
+
+        path = "/data/apps/navigation.app",
+        urlPrimaryPart = selfurlpart .. "/apps/navigation.app/"
+    },
+    {
+        name = "TQueST",
+        version = "1",
+        vendor = "MineCR",
+        description = "quest ported from hipOS.\ndeveloped by MineCR.\nyoutube - Max Play`n",
+        minDiskSpace = 64,
+        libs = {"openbox"},
+
+        path = "/data/apps/TQueST.app",
+        urlPrimaryPart = selfurlpart .. "/apps/TQueST.app/",
+        files = {"main.lua", "icon.t2p", "program.lua"}
+    },
+    {
+        name = "slideshow",
+        version = "1",
+        vendor = "logic",
+        description = "allows you to select a folder with images in .t2p format and display them at a specified interval\nit works in black and white mode on the monitors of the second shooting range. It is recommended to use it only on third-tier monitors",
+        minDiskSpace = 64,
+        
+        path = "/data/apps/slideshow.app",
+        urlPrimaryPart = selfurlpart .. "/apps/slideshow.app/",
+        files = {"main.lua", "icon.t2p", "config.cfg", "hue.t2p"}
+    },
+    {
+        name = "videoplayer",
+        version = "1",
+        vendor = "logic",
+        description = "",
+        minDiskSpace = 64,
+        
+        path = "/data/apps/videoplayer.app",
+        urlPrimaryPart = selfurlpart .. "/apps/videoplayer.app/",
+        files = {"main.lua", "icon.t2p", "config.cfg"}
+    },
+    {
+        name = "TPSmonitor",
+        version = "1",
+        vendor = "logic",
+        description = "allows you to view changes in TPS dynamics on the server",
+        minDiskSpace = 64,
+        libs = {"host"},
+        
+        path = "/data/apps/TPSmonitor.app",
+        urlPrimaryPart = selfurlpart .. "/apps/TPSmonitor.app/",
+        files = {"main.lua", "icon.t2p", "config.cfg"}
+    },
+    {
+        name = "bigClock",
+        version = "1",
+        vendor = "logic",
+        description = "displays the game and real time on the screen",
+        minDiskSpace = 64,
+        
+        path = "/data/apps/bigClock.app",
+        urlPrimaryPart = selfurlpart .. "/apps/bigClock.app/",
+        files = {"main.lua", "icon.t2p", "config.cfg"}
+    },
+    {
+        name = "guidemo",
+        version = "1",
+        vendor = "logic",
+        description = "demonstrates how the gui works in liked",
+        minDiskSpace = 64,
+        
+        path = "/data/apps/guidemo.app",
+        urlPrimaryPart = selfurlpart .. "/apps/guidemo.app/",
+        files = {"main.lua", "icon.t2p", "demo/Switches.lua"}
+    },
+    {
+        name = "midi",
+        version = "1",
+        vendor = "logic",
+        description = "allows to play midi files",
+        minDiskSpace = 64,
+        libs = {"midi"},
+        
+        path = "/data/apps/midi.app",
+        urlPrimaryPart = selfurlpart .. "/apps/midi.app/",
+        files = {"main.lua", "icon.t2p", "icon_1.t2p", "formats.cfg"}
+    },
+    {
+        name = "drawtest",
+        version = "1",
+        vendor = "logic",
+        description = "an application demonstrating the \"liked\" graphical mode",
+        minDiskSpace = 64,
+        libs = {"draw", "adv"},
+        
+        path = "/data/apps/drawtest.app",
+        urlPrimaryPart = selfurlpart .. "/apps/drawtest.app/",
+        files = {"main.lua", "icon.t2p", "config.cfg"}
+    },
+    {
+        name = "shooting",
+        version = "1",
+        vendor = "logic",
+        description = "shoot at the target with your friends!",
+        minDiskSpace = 64,
+        libs = {"draw", "adv"},
+        
+        path = "/data/apps/shooting.app",
+        urlPrimaryPart = selfurlpart .. "/apps/shooting.app/",
+        files = {"main.lua", "icon.t2p", "config.cfg"}
+    },
+    {
+        name = "componentLog",
+        version = "1",
+        vendor = "logic",
+        description = "allows you to log component accesses",
+        minDiskSpace = 64,
+        
+        path = "/data/apps/componentLog.app",
+        urlPrimaryPart = selfurlpart .. "/apps/componentLog.app/",
+        files = {"main.lua", "icon.t2p"}
+    },
+    {
+        name = "codeMaster",
+        version = "1",
+        vendor = "logic",
+        description = "A game for real programmers!\nthis is a virtual computer with its own API,\nhas serious limitations on the speed of code execution and capabilities",
+        minDiskSpace = 64,
+        
+        path = "/data/apps/codeMaster.app",
+        urlPrimaryPart = selfurlpart .. "/apps/codeMaster.app/",
+        files = {"main.lua", "icon.t2p", "logo.t2p", "bios.lua", "documentation_rus.txt", "documentation_eng.txt", "examples/hello.lua", "examples/dots.lua", "examples/gui.lua", "examples/keyboard.lua"}
+    },
+    {
+        name = "imageViewer",
+        version = "1",
+        vendor = "logic",
+        description = "allows you to view images in full screen",
+        minDiskSpace = 64,
+        
+        path = "/data/apps/imageViewer.app",
+        urlPrimaryPart = selfurlpart .. "/apps/imageViewer.app/",
+        files = {"main.lua", "icon.t2p", "config.cfg", "logo.t2p", "logo.t3p"}
+    },
+    {
+        name = "analyzer",
+        version = "1",
+        vendor = "logic",
+        description = "allows you to get information about objects via tablet using the improvements: barcode_reader (analyzer), geolyzer, sign and navigation",
+        minDiskSpace = 64,
+        
+        path = "/data/apps/analyzer.app",
+        urlPrimaryPart = selfurlpart .. "/apps/analyzer.app/",
+        files = {"main.lua", "icon.t2p"}
+    },
+    {
+        name = "flapix",
+        version = "1",
+        vendor = "logic",
+        description = "you are a bird, fly!! don't miss the holes in the pipes",
+        minDiskSpace = 64,
+        
+        path = "/data/apps/flapix.app",
+        urlPrimaryPart = selfurlpart .. "/apps/flapix.app/",
+        files = {"main.lua", "game.lua", "icon.t2p"}
+    },
+    {
+        name = "cleaner",
+        version = "1",
+        vendor = "logic",
+        description = "allows you to clean the system of garbage",
+        minDiskSpace = 64,
+        
+        path = "/data/apps/cleaner.app",
+        urlPrimaryPart = selfurlpart .. "/apps/cleaner.app/",
+        files = {"main.lua", "icon.t2p"}
+    },
+    {
+        name = "eepacker",
+        version = "1",
+        vendor = "logic",
+        description = "compresses the code for the eeprom",
+        minDiskSpace = 64,
+        
+        path = "/data/apps/eepacker.app",
+        urlPrimaryPart = selfurlpart .. "/apps/eepacker.app/",
+        files = {"main.lua", "icon.t2p"}
+    },
+    {
+        name = "clock",
+        version = "1",
+        vendor = "logic",
+        description = "clone of the clock app from android",
+        minDiskSpace = 64,
+        
+        path = "/data/apps/clock.app",
+        urlPrimaryPart = selfurlpart .. "/apps/clock.app/",
+        files = {"main.lua", "icon.t2p", "alarm.t2p", "clock.t2p", "stopwatch.t2p", "timer.t2p", "palette.plt"}
+    },
+    {
+        name = "bootmanager",
+        version = "1",
+        vendor = "logic",
+        description = "",
+        minDiskSpace = 64,
+        executer = true,
+        
+        path = "/vendor/apps/bootmanager.app",
+        urlPrimaryPart = selfurlpart .. "/apps/bootmanager.app/",
+        files = {"main.lua", "icon.t2p", "uninstall.lua"},
+        postInstall = function()
+            download("/bootmanager/main.lua", selfurlpart .. "/apps/bootmanager.app/bootmanager/main.lua")
         end
+    },
+    {
+        name = "zxViewer",
+        version = "1",
+        vendor = "veeford",
+        description = "allows you to display images in the .scr format (ZX spectrum image format)\nmore images: https://zxart.ee/rus/grafika/",
+        minDiskSpace = 64,
+        libs = {"zximage"},
+        
+        path = "/data/apps/zxViewer.app",
+        urlPrimaryPart = selfurlpart .. "/apps/zxViewer.app/",
+        files = {"main.lua", "icon.t2p", "formats.cfg"}
+    },
+    {
+        name = "browser",
+        version = "1",
+        vendor = "logic",
+        description = "a simple web browser for opencomputers. allows you to open html files",
+        minDiskSpace = 64,
+        
+        path = "/data/apps/browser.app",
+        urlPrimaryPart = selfurlpart .. "/apps/browser.app/",
+        files = {"main.lua", "icon.t2p", "formats.cfg"}
     }
-    ]]
+}
+
+list.libs = {
+    ["vec"] = {
+        url = selfurlpart .. "/libs/vec.lua",
+        vendor = "logic",
+        version = "2"
+    },
+    ["brainfuck"] = {
+        url = selfurlpart .. "/libs/brainfuck.lua",
+        vendor = "logic",
+        version = "1"
+    },
+    ["rsa"] = {
+        url = selfurlpart .. "/libs/rsa.lua",
+        vendor = "logic",
+        version = "1"
+    },
+    ["host"] = {
+        url = selfurlpart .. "/libs/host.lua",
+        vendor = "logic",
+        version = "3"
+    },
+    ["midi"] = {
+        url = selfurlpart .. "/libs/midi.lua",
+        vendor = "logic",
+        version = "2"
+    },
+    ["vmx"] = {
+        url = selfurlpart .. "/libs/vmx.lua",
+        vendor = "logic",
+        version = "1"
+    },
+    ["draw"] = {
+        url = selfurlpart .. "/libs/draw.lua",
+        vendor = "logic",
+        version = "1"
+    },
+    ["adv"] = {
+        url = selfurlpart .. "/libs/adv.lua",
+        vendor = "logic",
+        version = "1"
+    },
+    ["glasses"] = {
+        url = selfurlpart .. "/libs/glasses.lua",
+        vendor = "logic",
+        version = "1"
+    },
+    ["xml"] = {
+        url = selfurlpart .. "/libs/xml.lua",
+        vendor = "logic",
+        version = "1"
+    },
+    ["bitMapFonts"] = {
+        url = selfurlpart .. "/libs/bitMapFonts/init.lua",
+        vendor = "logic",
+        version = "1",
+        path = "/data/lib/bitMapFonts/init.lua",
+        files = {
+            {
+                url = selfurlpart .. "/libs/bitMapFonts/font.bin",
+                path = "/data/lib/bitMapFonts/font.bin"
+            },
+            {
+                url = selfurlpart .. "/libs/bitMapFonts/font.tbl",
+                path = "/data/lib/bitMapFonts/font.tbl"
+            }
+        }
+    },
+    ["zximage"] = {
+        url = selfurlpart .. "/libs/zximage/init.lua",
+        vendor = "veeford",
+        version = "1",
+        path = "/data/lib/zximage/init.lua",
+        files = {
+            {
+                url = selfurlpart .. "/libs/zximage/palette.plt",
+                path = "/data/lib/zximage/palette.plt"
+            }
+        }
+    },
+    ["openbox"] = {
+        url = selfurlpart .. "/libs/openbox/init.lua",
+        vendor = "logic",
+        version = "4",
+        path = "/data/lib/openbox/init.lua",
+        libs = {"vmx"},
+        files = (function ()
+            local boxlist = {
+                "box.lua",
+                "boot/00_base.lua",
+                "boot/01_process.lua",
+                "boot/02_os.lua",
+                "boot/03_io.lua",
+                "boot/04_component.lua",
+                "boot/90_filesystem.lua",
+                "boot/91_gpu.lua",
+                "boot/92_keyboard.lua",
+                "boot/93_term.lua",
+                "boot/94_shell.lua",
+                "lib/bit32.lua",
+                "lib/buffer.lua",
+                "lib/colors.lua",
+                "lib/event.lua",
+                "lib/filesystem.lua",
+                "lib/internet.lua",
+                "lib/io.lua",
+                "lib/keyboard.lua",
+                "lib/note.lua",
+                "lib/package.lua",
+                "lib/pipe.lua",
+                "lib/process.lua",
+                "lib/serialization.lua",
+                "lib/sh.lua",
+                "lib/shell.lua",
+                "lib/sides.lua",
+                "lib/term.lua",
+                "lib/text.lua",
+                "lib/thread.lua",
+                "lib/transforms.lua",
+                "lib/tty.lua",
+                "lib/uuid.lua",
+                "lib/vt100.lua",
+                "lib/tools/programLocations.lua",
+                "lib/tools/transfer.lua",
+                "lib/core/boot.lua",
+                "lib/core/cursor.lua",
+                "lib/core/device_labeling.lua",
+                "lib/core/full_buffer.lua",
+                "lib/core/full_cursor.lua",
+                "lib/core/full_event.lua",
+                "lib/core/full_filesystem.lua",
+                "lib/core/full_keyboard.lua",
+                "lib/core/full_ls.lua",
+                "lib/core/full_sh.lua",
+                "lib/core/full_shell.lua",
+                "lib/core/full_text.lua",
+                "lib/core/full_transforms.lua",
+                "lib/core/full_vt.lua",
+                "lib/core/install_basics.lua",
+                "lib/core/install_utils.lua",
+                "lib/core/lua_shell.lua",
+                "bin/cd.lua",
+                "bin/edit.lua",
+                "bin/pastebin.lua",
+                "bin/sh.lua",
+                "bin/wget.lua"
+            }
+
+            local list = {}
+            table.insert(list, {
+                url = selfurlpart .. "/libs/openbox/eepromImage",
+                path = "/data/lib/openbox/eepromImage"
+            })
+            for i, lst in ipairs(boxlist) do
+                table.insert(list, {
+                    url = selfurlpart .. "/libs/openbox/box/" .. lst,
+                    path = "/data/lib/openbox/box/" .. lst
+                })
+            end
+            return list
+        end)()
+    }
 }
 
 return list

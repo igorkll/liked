@@ -1,10 +1,20 @@
 import os
+import pathlib
 
 def recursive_file_paths(folder_path):
     file_paths = []
     for dirpath, _, filenames in os.walk(folder_path):
         for filename in filenames:
             file_paths.append(os.path.join(dirpath, filename))
+    return file_paths
+
+def recursive_file_paths_without_folder(folder_path):
+    file_paths = []
+    for dirpath, _, filenames in os.walk(folder_path):
+        for filename in filenames:
+            p = os.path.join(dirpath, filename)
+            p = p[len(folder_path) + 1:len(p)]
+            file_paths.append(p)
     return file_paths
 
 def write_paths_to_file(file_paths, output_file):
@@ -15,8 +25,8 @@ def write_paths_to_file(file_paths, output_file):
 
 if __name__ == "__main__":
     current_directory = os.path.dirname(os.path.abspath(__file__))
-    sys_directory = os.path.join(current_directory, 'system')
-    out_file_path = os.path.join(current_directory, 'installer/filelist.txt')
+    system_directory = os.path.join(current_directory, 'system')
+    cc_directory = os.path.join(current_directory, 'computercraft')
 
-    file_paths = recursive_file_paths(sys_directory)
-    write_paths_to_file(file_paths, out_file_path)
+    write_paths_to_file(recursive_file_paths(system_directory), os.path.join(current_directory, 'installer/filelist.txt'))
+    write_paths_to_file(recursive_file_paths_without_folder(cc_directory), os.path.join(current_directory, 'installer/cc_filelist.txt'))

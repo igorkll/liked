@@ -58,6 +58,7 @@ local programmData = [[
     local cR4 = colors.yellow
     
     local tArgs = { ... }
+    local sStartLevel = tArgs[1]
     
     --Functions--
     local function printCentred( yc, stg )
@@ -1359,7 +1360,8 @@ env._G = env
 
 local func = assert(load(programmData, nil, nil, env))
 
-local ok, err = pcall(func, ...)
+local _, _, lvl = ...
+local ok, err = pcall(func, lvl)
 if not ok then
     if err == "interrupted" then
         return

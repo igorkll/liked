@@ -1,3 +1,9 @@
+local parser = require("parser")
+local unicode = require("unicode")
+local function lineMod(str)
+  return parser.fastChange(str, {["\r"] = "", ["\t"] = "  "})
+end
+
 --[[
 local fs = require("filesystem")
 local unicode = require("unicode")
@@ -1008,7 +1014,7 @@ local screen, nickname, filename, readonly = ...
 local file_parentpath = paths.path(filename)
 
 local gpu = graphic.findGpu(screen)
-if gpu.getDepth() == 1 then
+if graphic.getDepth(screen) == 1 then
   gpu.setBackground(0)
 else
   gpu.setBackground(colors.gray)
@@ -1024,7 +1030,7 @@ term = {clear = function()
     local rx, ry = gpu.getResolution()
     gpu.fill(1, 1, rx, ry, " ")
 end, pull = function(...)
-      graphic.update(screen)
+      graphic.updateFlag(screen)
 
     if blinkingTerm then
         local gpu = graphic.findGpu(screen)
@@ -1045,7 +1051,7 @@ end, pull = function(...)
       gpu.set(cx, cy, char)
     end
 
-      graphic.update(screen)
+      graphic.updateFlag(screen)
 
     return table.unpack(eventData)
 end, setCursor = function(x, y)
@@ -1687,7 +1693,7 @@ end
 do
     local f = fs.open(filename, "r")
     if f then
-        local data = require("calls").call("split", f.readAll(), "\n")
+        local data = require("calls").call("split", lineMod(f.readAll()), "\n")
         f.close()
 
         local x, y, w, h = getArea()

@@ -1,6 +1,8 @@
 local graphic = require("graphic")
 local event = require("event")
 local gui_container = require("gui_container")
+local liked = require("liked")
+local thread = require("thread")
 
 local colors = gui_container.colors
 
@@ -11,13 +13,15 @@ local screen = ...
 local sizeX, sizeY = graphic.getResolution(screen)
 local window = graphic.createWindow(screen, 1, 1, sizeX, sizeY)
 
-local function update()
-    local title = "Events"
+local upTh, upRedraw, upCallbacks = liked.drawFullUpBarTask(screen, "Events")
+local baseTh = thread.current()
+upCallbacks.exit = function ()
+    baseTh:kill()
+end
 
+local function update()
     window:clear(colors.black)
-    window:set(1, 1, colors.gray, 0, string.rep(" ", sizeX))
-    window:set(math.floor(((sizeX / 2) - (#title / 2)) + 0.5), 1, colors.gray, colors.lightGray, title)
-    window:set(sizeX, 1, colors.blue, colors.white, "X")
+    upRedraw()
 end
 
 update()
@@ -32,15 +36,8 @@ while true do
     for k, v in pairs(eventData) do
         eventData[k] = tostring(v)
     end
-    output = table.concat(eventData, "  ")
 
     window:copy(1, 3, sizeX, sizeY - 2, 0, -1)
-    window:set(1, sizeY, colors.black, colors.blue, string.rep(" ", sizeX))
-    window:set(1, sizeY, colors.black, colors.blue, output)
-
-    if windowEventData[1] == "touch" then
-        if windowEventData[3] == sizeX and windowEventData[4] == 1 then
-            break
-        end
-    end
+    window:fill(1, sizeY, sizeX, 1, colors.black, colors.white, " ")
+    window:set(1, sizeY, colors.black, colors.white, table.concat(eventData, "  "))
 end

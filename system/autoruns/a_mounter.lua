@@ -6,10 +6,6 @@ local computer = require("computer")
 local registry = require("registry")
 local bootloader = require("bootloader")
 
-function fs.genName(uuid)
-    return paths.concat("/data/userdata", (component.invoke(uuid, "getLabel") or "disk"):sub(1, 8) .. "-" .. uuid:sub(1, 5))
-end
-
 if not registry.doNotMoundDisks then
     local function allowMount(address)
         return address ~= computer.tmpAddress() and address ~= fs.bootaddress
@@ -17,17 +13,23 @@ if not registry.doNotMoundDisks then
 
     local mountlist = {}
 
+    local function tryMount(uuid)
+        if bootloader.runlevel ~= "init" then
+            if registry.diskSound then
+                computer.beep(2000, 0.1)
+            end
+            event.push("redrawDesktop")
+        end
+        local mountpoint = require("hdd").genName(uuid)
+        if not fs.exists(mountpoint) then
+            fs.mount(uuid, mountpoint)
+        end
+        mountlist[uuid] = mountpoint
+    end
+
     event.listen("component_added", function(_, uuid, name)
         if name == "filesystem" and allowMount(uuid) then
-            if bootloader.runlevel ~= "init" then
-                if registry.soundEnable then
-                    computer.beep(2000, 0.1)
-                end
-                event.push("redrawDesktop")
-            end
-            local mountpoint = fs.genName(uuid)
-            assert(fs.mount(uuid, mountpoint))
-            mountlist[uuid] = mountpoint
+            tryMount(uuid)
         end
     end)
 
@@ -35,14 +37,20 @@ if not registry.doNotMoundDisks then
         if name == "filesystem" and allowMount(uuid) then
             if mountlist[uuid] then
                 if bootloader.runlevel ~= "init" then
-                    if registry.soundEnable then
+                    if registry.diskSound then
                         computer.beep(1000, 0.1)
                     end
                     event.push("redrawDesktop")
                 end
-                assert(fs.umount(mountlist[uuid]))
+                fs.umount(mountlist[uuid])
                 mountlist[uuid] = nil
             end
         end
     end)
+
+    for address in component.list("filesystem", true) do
+        if allowMount(address) then
+            tryMount(address)
+        end
+    end
 end
