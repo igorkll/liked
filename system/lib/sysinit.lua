@@ -249,15 +249,17 @@ function sysinit.init(box, lscreen)
 
     ------------------------------------
 
-    if box or lscreen then
+    if box or lscreen then --likedbox or recovery mode
         if lscreen then
-            sysinit.initPalPath = "/system/palettes/original.plt"
+            sysinit.initPalPath = "/system/palettes/original.plt" --recovery mode
+            sysinit.savePalPath = "/data/palette.plt"
         else
-            sysinit.initPalPath = "/system/palette.plt"
+            sysinit.initPalPath = "/system/palette.plt" --likedbox
         end
         sysinit.applyPalette(sysinit.initPalPath, true)
     else
         sysinit.initPalPath = "/data/palette.plt"
+        sysinit.savePalPath = "/data/palette.plt"
 
         if fs.exists(sysinit.initPalPath) then
             sysinit.applyPalette(sysinit.initPalPath, true)
