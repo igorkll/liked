@@ -198,7 +198,7 @@ local function findSystems(address)
 
     if proxy.exists("/openOS.lua") then
         table.insert(tbl, {
-            "openOS dualboot",
+            "openOS",
             function ()
                 bootTo(proxy, "/openOS.lua")
             end,
