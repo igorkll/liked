@@ -151,6 +151,88 @@ local list = {
         end
     },
     {
+        name = "mineOS",
+        version = "4",
+        vendor = "IgorTimofeev",
+        icon = selfurlpart .. "/apps/mineOS.app/icon.t2p",
+        license = selfurlpart .. "/apps/mineOS.app/LICENSE",
+        description = "configures dualboot between mineOS and liked\nATTENTION. if you have \"MineOS EFI\" installed, then you will not be able to use liked after installing MineOS. in order to boot into liked, delete the /OS.lua file in the MineOS explorer",
+        minDiskSpace = 1024 + 512,
+        minColorDepth = 8,
+        dualboot = true,
+
+        path = "/vendor/apps/mineOS.app",
+        install = function(self)
+            local afpxPath = self.path .. "/mineOS.afpx"
+
+            fs.makeDirectory(self.path)
+            download(self.path .. "/main.lua", selfurlpart .. "/apps/mineOS.app/main.lua")
+            download(self.path .. "/uninstall.lua", selfurlpart .. "/apps/mineOS.app/uninstall.lua")
+            download(self.path .. "/icon.t2p", self.icon)
+            download("/mineOS.lua", selfurlpart .. "/apps/mineOS.app/mineOS.lua")
+            
+            download(self.path .. "/lua5_2.lua", selfurlpart .. "/apps/mineOS.app/lua5_2.lua")
+            download(self.path .. "/actions.cfg", selfurlpart .. "/apps/mineOS.app/actions.cfg")
+            download(self.path .. "/LICENSE", self.license)
+
+            download(afpxPath, selfurlpart .. "/apps/mineOS.app/mineOS.afpx")
+
+            if require("archiver").unpack(afpxPath, "/") then
+                fs.remove(afpxPath)
+            else
+                fs.remove(self.path)
+                local clear = gui.saveZone(screen)
+                gui.skipShadow = true
+                gui.warn(screen, nil, nil, "failed to install MineOS, make sure there is enough disk space")
+                clear()
+            end
+        end
+    },
+    {
+        name = "VychVyzhProm",
+        version = "1",
+        vendor = "Bs0Dd",
+        libs = {"openbox"},
+        icon = selfurlpart .. "/apps/VychVyzhProm.app/icon.t2p",
+        license = selfurlpart .. "/apps/VychVyzhProm.app/LICENSE",
+        description = "I came across the game Vychvyzhprom, written in Java by one group. In a week, I almost completely transferred it to Lua (a couple of points had to be simplified due to the feeble power of computers). The goal of this game is simple: we have a scorcher, a controller and a number of tasks. You need to program the controller to burn out the pattern shown in the task, with a small set of Assembler commands.",
+        minDiskSpace = 64,
+        minColorDepth = 8,
+
+        path = "/data/apps/VychVyzhProm.app",
+        urlPrimaryPart = selfurlpart .. "/apps/VychVyzhProm.app/",
+        files = (function ()
+            local tbl = {
+                "LICENSE",
+                "main.lua",
+                "icon.t2p",
+                "actions.cfg",
+                "taskedit.lua",
+                "vvprom/vvprom.lua",
+                "vvprom/vvptask.lua",
+                "vvprom/Languages/English.lng",
+                "vvprom/Languages/Russian.lng",
+                "vvprom/NyaDraw/init.lua",
+                "vvprom/Pictures/bcontr.pic",
+                "vvprom/Pictures/cidlogo.pic",
+                "vvprom/Pictures/comlogo.pic",
+                "vvprom/Pictures/controls.pic",
+                "vvprom/Pictures/editor.pic",
+                "vvprom/Pictures/exit.pic",
+                "vvprom/Pictures/help.pic",
+                "vvprom/Pictures/info.pic",
+                "vvprom/Pictures/task.pic",
+                "vvprom/Pictures/vvprom.pic"
+            }
+
+            for i = 1, 8 do
+                table.insert(tbl, "vvprom/Tasks/task" .. tostring(i) .. ".vtf")
+            end
+
+            return tbl
+        end)()
+    },
+    {
         name = "explode",
         version = "2",
         vendor = "logic",
