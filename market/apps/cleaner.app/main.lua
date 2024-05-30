@@ -33,6 +33,7 @@ local mineOSfiles = {
     "/Pictures",
     "/Screensavers",
     "/Temporary",
+    "/Wallpapers",
     "/Users",
     "/Versions.cfg",
     "/OS.lua",
