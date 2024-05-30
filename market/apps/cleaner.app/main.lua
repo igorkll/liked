@@ -12,8 +12,6 @@ local rx, ry = ui:zoneSize()
 ---------------------------------
 
 local openOSfiles = {
-    "/dev",
-    "/mnt",
     "/usr",
     "/home",
     "/etc",
@@ -26,7 +24,6 @@ local openOSfiles = {
 }
 
 local mineOSfiles = {
-    "/Mounts",
     "/MineOS",
     "/Applications",
     "/Extensions",
@@ -41,6 +38,20 @@ local mineOSfiles = {
     "/OS.lua",
     "/Autosave.proj",
     "/mineOS.lua"
+}
+
+local normalRootFiles = {
+    "/init.lua",
+    "/vendor",
+    "/system",
+    "/data",
+    "/bootmanager"
+}
+
+local trashRootFiles = {
+    "/dev",
+    "/mnt",
+    "/Mounts"
 }
 
 local function rePath(path)
@@ -65,17 +76,34 @@ end
 local function cleanList()
     local list, actions = {}, {}
 
-    if not fs.exists("/vendor/apps/openOS.app.app") and exists(openOSfiles) then
+    local isOpenOS = fs.exists("/vendor/apps/openOS.app")
+    local isMineOS = fs.exists("/vendor/apps/mineOS.app")
+
+    if not isOpenOS and exists(openOSfiles) then
         table.insert(list, "residual OpenOS files")
         table.insert(actions, function ()
             rmAll(openOSfiles)
         end)
     end
 
-    if not fs.exists("/vendor/apps/mineOS.app") and exists(mineOSfiles) then
+    if not isMineOS and exists(mineOSfiles) then
         table.insert(list, "residual MineOS files")
         table.insert(actions, function ()
             rmAll(mineOSfiles)
+        end)
+    end
+
+    local ltrash = table.clone(trashRootFiles)
+    if not isOpenOS then
+        table.clone(openOSfiles, ltrash)
+    end
+    if not isMineOS then
+        table.clone(mineOSfiles, ltrash)
+    end
+    if exists(ltrash) then
+        table.insert(list, "junk files of the root directory")
+        table.insert(actions, function ()
+            rmAll(ltrash)
         end)
     end
 
