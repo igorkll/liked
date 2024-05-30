@@ -25,7 +25,10 @@ function gobjs.scrolltext:onEvent(eventData)
     eventData = uix.objEvent(self, eventData)
     if eventData and eventData[1] == "scroll" then
         self:reLines()
-        local max = (#self.lines - self.sizeY) + 2
+        local max = #self.lines - self.sizeY
+        if self.padding then
+            max = max + 2
+        end
 
         local oldScroll = self.scroll
         self.scroll = self.scroll - eventData[5]
@@ -81,6 +84,27 @@ end
 
 gobjs.checkboxgroup = {}
 
+function gobjs.checkboxgroup:onCreate(sizeX, sizeY)
+    self.sizeX = sizeX
+    self.sizeY = sizeY
+
+    self.bg = uix.colors.white
+    self.fg = uix.colors.gray
+
+    self.list = {}
+    self.scroll = 0
+
+    self.w = uix.regDrawZone(self, sizeX, sizeY)
+end
+
+function gobjs.checkboxgroup:onDraw()
+    self.w:clear(self.bg)
+    for i, item in ipairs(self.list) do
+        local linePos = i - self.scroll
+        self.w:set(2, linePos, 0xff0000, 0x00ff00, "⠰⠆")
+        self.w:set(4, linePos, self.bg, self.fg, item[1])
+    end
+end
 
 -------------------------------- layout manager
 
