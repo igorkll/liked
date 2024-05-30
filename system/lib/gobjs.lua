@@ -4,6 +4,8 @@ local unicode = require("unicode")
 local graphic = require("graphic")
 local gobjs = {}
 
+local colors = uix.colors
+
 -------------------------------- scroll text
 
 gobjs.scrolltext = {}
@@ -15,8 +17,8 @@ function gobjs.scrolltext:onCreate(sizeX, sizeY, text)
     self.scroll = 0
     self.w = self.gui.window
 
-    self.bg = uix.colors.white
-    self.fg = uix.colors.gray
+    self.bg = colors.white
+    self.fg = colors.gray
     self.padding = true
     self.scrollBar = false
 end
@@ -88,8 +90,8 @@ function gobjs.checkboxgroup:onCreate(sizeX, sizeY)
     self.sizeX = sizeX
     self.sizeY = sizeY
 
-    self.bg = uix.colors.white
-    self.fg = uix.colors.gray
+    self.bg = colors.white
+    self.fg = colors.gray
 
     self.list = {}
     self.scroll = 0
@@ -99,11 +101,59 @@ end
 
 function gobjs.checkboxgroup:onDraw()
     self.w:clear(self.bg)
+    self.itemsPos = {}
     for i, item in ipairs(self.list) do
         local linePos = i - self.scroll
-        self.w:set(2, linePos, 0xff0000, 0x00ff00, "⠰⠆")
-        self.w:set(4, linePos, self.bg, self.fg, item[1])
+        if linePos >= 1 and linePos <= self.sizeY then
+            self.itemsPos[linePos] = {i, item}
+            self:redrawPoint(linePos, item)
+        end
     end
+end
+
+function gobjs.checkboxgroup:onEvent(eventData)
+    eventData = uix.objEvent(self, eventData)
+    if eventData then
+        if eventData[1] == "scroll" then
+            local max = #self.list - self.sizeY
+            local oldScroll = self.scroll
+            self.scroll = self.scroll - eventData[5]
+            if self.scroll < 0 then self.scroll = 0 end
+            if self.scroll > max then self.scroll = math.max(max, 0) end
+            if self.scroll ~= oldScroll then
+                self:draw()
+            end
+        elseif eventData[1] == "touch" then
+            if eventData[3] <= 2 and self.itemsPos then
+                local item = self.itemsPos[eventData[4]]
+                if item then
+                    item[2][2] = not item[2][2]
+                    self:redrawPoint(eventData[4], item[2])
+                    if self.callback then
+                        self.callback(item[1], item[2][1], item[2][2])
+                    end
+                end
+            end
+        end
+    end
+end
+
+function gobjs.checkboxgroup:redrawPoint(linePos, item)
+    local color
+    if item[2] then
+        color = colors.white
+        if color == self.bg then
+            color = colors.lightGray
+        end
+    else
+        color = colors.black
+        if color == self.bg then
+            color = colors.gray
+        end
+    end
+
+    self.w:set(1, linePos, self.bg, color, "⠰⠆")
+    self.w:set(3, linePos, self.bg, self.fg, item[1])
 end
 
 function gobjs.checkboxgroup:attachCallback(callback)
