@@ -270,7 +270,12 @@ end
 
 local function raw_drawUpBarTask(method, screen, ...)
     local tbl = {...}
-    local function redraw()
+    local localBeforeCallback
+    local function redraw(beforeCallback)
+        localBeforeCallback = beforeCallback or localBeforeCallback
+        if localBeforeCallback and localBeforeCallback ~= true then
+            localBeforeCallback()
+        end
         liked.drawUpBar(screen, table.unpack(tbl))
         graphic.updateFlag(screen)
     end
@@ -369,7 +374,12 @@ end
 
 local function raw_drawFullUpBarTask(method, screen, title, withoutFill, bgcolor, wideExit)
     if wideExit == nil then wideExit = true end
-    local function redraw()
+    local localBeforeCallback
+    local function redraw(beforeCallback)
+        localBeforeCallback = beforeCallback or localBeforeCallback
+        if localBeforeCallback and localBeforeCallback ~= true then
+            localBeforeCallback()
+        end
         liked.drawFullUpBar(screen, title, withoutFill, bgcolor, wideExit)
         graphic.updateFlag(screen)
     end
