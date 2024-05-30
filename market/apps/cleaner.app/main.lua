@@ -133,19 +133,25 @@ end
 
 ---------------------------------
 
+local notEnables = {
+    "system cache"
+}
+
 local list, actions
 local function updateList()
     list, actions = cleanList()
+    layout.actionList.list = {}
     if #list > 0 then
-        layout.actionList:setText(table.concat(list, "\n"))
-    else
-        layout.actionList:setText("cleaning of the system is not required")
+        layout.actionList.list = {}
+        for i, title in ipairs(list) do
+            layout.actionList.list[i] = {title, not table.exists(notEnables, title)}
+        end
     end
 end
 
 layout = ui:create("Cleaner", uix.colors.black)
-layout.actionList = layout:createCustom(2, 4, gobjs.scrolltext, rx - 2, ry - 4)
-layout.cleanButton = layout:createButton(2, 2, 16, 1, uix.colors.white, uix.colors.red, "clean", true)
+layout.actionList = layout:createCustom(2, 2, gobjs.checkboxgroup, rx - 2, ry - 4)
+layout.cleanButton = layout:createButton(2, ry - 1, 16, 1, uix.colors.white, uix.colors.red, "clean", true)
 function layout.cleanButton:onClick()
     if #actions > 0 then
         if gui.yesno(screen, nil, nil, "are you sure you want to start cleaning the system?") then
@@ -153,11 +159,14 @@ function layout.cleanButton:onClick()
             gui.status(screen, nil, nil, "cleaning the system...")
             local used = fs.spaceUsed("/")
             for i, v in ipairs(actions) do
-                v()
+                if layout.actionList.list[i][2] then
+                    v()
+                end
             end
             clear()
-            gui.done(screen, nil, nil, "It was cleaned up: " .. tostring(math.roundTo((used - fs.spaceUsed("/")) / 1024)) .. "KB")
             updateList()
+            layout.actionList:draw()
+            gui.done(screen, nil, nil, "cleaned: " .. tostring(math.roundTo((used - fs.spaceUsed("/")) / 1024)) .. "KB")
         end
     else
         gui.warn(screen, nil, nil, "cleaning of the system is not required")

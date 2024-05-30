@@ -7,7 +7,7 @@ local rx, ry = ui:zoneSize()
 local layout = ui:create("checkboxgroup test", uix.colors.black)
 
 local checkboxgroup = layout:createCustom(2, 2, gobjs.checkboxgroup, rx - 2, ry - 2)
-checkboxgroup.bg = uix.colors.lightGray
+checkboxgroup.bg = uix.colors.white
 checkboxgroup.fg = uix.colors.black
 
 for i = 100, 2000, 100 do

@@ -141,9 +141,9 @@ end
 function gobjs.checkboxgroup:redrawPoint(linePos, item)
     local color
     if item[2] then
-        color = colors.white
+        color = colors.lime
         if color == self.bg then
-            color = colors.lightGray
+            color = colors.green
         end
     else
         color = colors.black
