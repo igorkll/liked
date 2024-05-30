@@ -14,8 +14,8 @@ for i = 100, 2000, 100 do
     table.insert(checkboxgroup.list, {"freq " .. i, false})
 end
 
-checkboxgroup:attachCallback(function (i, title, state)
+function checkboxgroup:onSwitch(i, title, state)
     sound.beep(tonumber(title:sub(6, #title)) + (state and 0 or -50))
-end)
+end
 
 ui:loop()

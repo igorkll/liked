@@ -129,8 +129,8 @@ function gobjs.checkboxgroup:onEvent(eventData)
                 if item then
                     item[2][2] = not item[2][2]
                     self:redrawPoint(eventData[4], item[2])
-                    if self.callback then
-                        self.callback(item[1], item[2][1], item[2][2])
+                    if self.onSwitch then
+                        self:onSwitch(item[1], item[2][1], item[2][2])
                     end
                 end
             end
@@ -154,10 +154,6 @@ function gobjs.checkboxgroup:redrawPoint(linePos, item)
 
     self.w:set(1, linePos, self.bg, color, "⠰⠆")
     self.w:set(3, linePos, self.bg, self.fg, item[1])
-end
-
-function gobjs.checkboxgroup:attachCallback(callback)
-    self.callback = callback
 end
 
 -------------------------------- layout manager

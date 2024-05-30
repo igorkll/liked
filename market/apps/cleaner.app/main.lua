@@ -137,6 +137,7 @@ local notEnables = {
     "system cache"
 }
 
+local states = {}
 local list, actions
 local function updateList()
     list, actions = cleanList()
@@ -144,7 +145,10 @@ local function updateList()
     if #list > 0 then
         layout.actionList.list = {}
         for i, title in ipairs(list) do
-            layout.actionList.list[i] = {title, not table.exists(notEnables, title)}
+            if states[title] == nil then
+                states[title] = not table.exists(notEnables, title)
+            end
+            layout.actionList.list[i] = {title, states[title]}
         end
     end
 end
@@ -152,6 +156,11 @@ end
 layout = ui:create("Cleaner", uix.colors.black)
 layout.actionList = layout:createCustom(2, 2, gobjs.checkboxgroup, rx - 2, ry - 4)
 layout.cleanButton = layout:createButton(2, ry - 1, 16, 1, uix.colors.white, uix.colors.red, "clean", true)
+
+function layout.actionList:onSwitch(_, title, state)
+    states[title] = state
+end
+
 function layout.cleanButton:onClick()
     if #actions > 0 then
         if gui.yesno(screen, nil, nil, "are you sure you want to start cleaning the system?") then
