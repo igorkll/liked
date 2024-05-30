@@ -1,5 +1,4 @@
 local uix = require("uix")
-local gobjs = require("gobjs")
 local fs = require("filesystem")
 local graphic = require("graphic")
 local colorlib = require("colors")

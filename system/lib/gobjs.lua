@@ -77,6 +77,11 @@ function gobjs.scrolltext:setText(text)
     self.lines = nil
 end
 
+-------------------------------- checkbox group
+
+gobjs.checkboxgroup = {}
+
+
 -------------------------------- layout manager
 
 gobjs.manager = {}
