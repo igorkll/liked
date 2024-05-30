@@ -95,12 +95,8 @@ local function cleanList()
 
     local ltrash = table.clone(trashRootFiles)
     local lnorm = table.clone(normalRootFiles)
-    if isOpenOS then
-        table.add(lnorm, openOSfiles)
-    end
-    if isMineOS then
-        table.add(lnorm, mineOSfiles)
-    end
+    table.add(lnorm, openOSfiles)
+    table.add(lnorm, mineOSfiles)
     for _, name in ipairs(fs.list("/mnt/root")) do
         local path = paths.concat("/", name)
         if not table.exists(lnorm, path) then
