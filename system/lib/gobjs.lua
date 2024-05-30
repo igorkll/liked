@@ -25,12 +25,12 @@ function gobjs.scrolltext:onEvent(eventData)
     eventData = uix.objEvent(self, eventData)
     if eventData and eventData[1] == "scroll" then
         self:reLines()
-        local max = #self.lines
+        local max = (#self.lines - self.sizeY) + 2
 
         local oldScroll = self.scroll
         self.scroll = self.scroll - eventData[5]
         if self.scroll < 0 then self.scroll = 0 end
-        if self.scroll >= max then self.scroll = max - 1 end
+        if self.scroll > max then self.scroll = math.max(max, 0) end
         if self.scroll ~= oldScroll then
             self:draw()
         end
