@@ -94,11 +94,18 @@ local function cleanList()
     end
 
     local ltrash = table.clone(trashRootFiles)
-    if not isOpenOS then
-        table.clone(openOSfiles, ltrash)
+    local lnorm = table.clone(normalRootFiles)
+    if isOpenOS then
+        table.clone(openOSfiles, lnorm)
     end
-    if not isMineOS then
-        table.clone(mineOSfiles, ltrash)
+    if isMineOS then
+        table.clone(mineOSfiles, lnorm)
+    end
+    for _, name in ipairs(fs.list("/mnt/root")) do
+        local path = paths.concat("/", name)
+        if not table.exists(lnorm, path) then
+            table.insert(ltrash, path)
+        end
     end
     if exists(ltrash) then
         table.insert(list, "junk files of the root directory")
