@@ -28,7 +28,13 @@ function hdd.move(from, to)
 end
 
 function hdd.genName(uuid)
-    local label = component.invoke(uuid, "getLabel")
+    local label
+    if type(uuid) == "table" then
+        label = uuid.getLabel()
+        uuid = uuid.address
+    else
+        label = component.invoke(uuid, "getLabel")
+    end
     if label and #label == 0 then
         label = nil
     end
@@ -69,8 +75,8 @@ function hdd.clone(screen, proxy, selectFrom)
         return
     end
 
-    local fromname = paths.name(hdd.genName(from.address))
-    local toname = paths.name(hdd.genName(to.address))
+    local fromname = paths.name(hdd.genName(from))
+    local toname = paths.name(hdd.genName(to))
 
     if (not isRoot or gui.pleaseType(screen, "TOROOT", "clone to root")) and gui.yesno(screen, nil, nil, "are you sure you want to clone an \"" .. fromname .. "\" drive to a \"" .. toname .. "\" drive?") then
         gui.status(screen, nil, nil, "cloning the \"" .. fromname .. "\" disk to \"" .. toname .. "\"")
