@@ -106,6 +106,10 @@ function gobjs.checkboxgroup:onDraw()
     end
 end
 
+function gobjs.checkboxgroup:attachCallback(callback)
+    self.callback = callback
+end
+
 -------------------------------- layout manager
 
 gobjs.manager = {}
