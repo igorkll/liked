@@ -5,6 +5,11 @@ local function clear(col)
 end
 clear(colors.blue)
 
+local function cancel()
+    clear(colors.black)
+    print("the installation was canceled")
+end
+
 ---------------------------------------
 
 local logo = {
@@ -39,8 +44,19 @@ end
 
 local baseUrl = "https://raw.githubusercontent.com/igorkll/liked/"
 local baseCoreUrl = "https://raw.githubusercontent.com/igorkll/likeOS/"
-local branch = "dev"
-
+local branchs = {"main", "test", "dev"}
+term.setBackgroundColor(colors.blue)
+print("select branch: ")
+for i, v in ipairs(branchs) do
+    print(i .. ". " .. v)
+end
+local branch = branchs[tonumber(io.read())]
+if branch then
+    print("you select branch: " .. branch)
+else
+    cancel()
+    return
+end
 
 local function wget(url)
     local ok, err = assert(http.checkURL(url))
@@ -130,11 +146,11 @@ print("type 'YES' to start installation")
 
 if io.read() == "YES" then
     print("start of installation")
+    fs.delete("/liked")
     downloadList(baseUrl .. branch .. "/installer/filelist.txt")
     downloadList(baseCoreUrl .. branch .. "/installer/filelist.txt", "core")
     downloadList(baseUrl .. branch .. "/installer/cc_filelist.txt", "cc")
     os.reboot()
 else
-    clear(colors.black)
-    print("the installation was canceled")
+    cancel()
 end
