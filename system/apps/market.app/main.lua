@@ -398,6 +398,8 @@ local function applicationLabel(data, x, y)
                         end
                         data:uninstall()
                     end
+                elseif supportErr then
+                    lwarn(screen, nil, nil, supportErr)
                 else
                     local licenseAccept
                     if data.license then
@@ -410,17 +412,13 @@ local function applicationLabel(data, x, y)
                     else
                         licenseAccept = true
                     end
-                    if licenseAccept then
-                        if supportErr then
-                            lwarn(screen, nil, nil, supportErr)
-                        elseif gui.yesno(screen, nil, nil, installMsg .. formattedName) then
-                            if mediaMode then
-                                gui.status(screen, nil, nil, "downloading" .. formattedName2)
-                            else
-                                gui.status(screen, nil, nil, "installation" .. formattedName2)
-                            end
-                            data:install()
+                    if licenseAccept and gui.yesno(screen, nil, nil, installMsg .. formattedName) then
+                        if mediaMode then
+                            gui.status(screen, nil, nil, "downloading" .. formattedName2)
+                        else
+                            gui.status(screen, nil, nil, "installation" .. formattedName2)
                         end
+                        data:install()
                     end
                 end
 
