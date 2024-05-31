@@ -843,7 +843,9 @@ local function doIcon(windowEventData)
                                 end
                             elseif str == "  license" then
                                 return function ()
-                                    require("viewer").license(screen, licensePath, nil, window, nil, true)
+                                    timerEnable = false
+                                    require("viewer").license(screen, licensePath, nil, nil, nil, true)
+                                    timerEnable = true
                                 end
                             elseif actions and actions[num] then
                                 runFunc(actions[num])
