@@ -135,7 +135,7 @@ local function readSysinfo(fs, path)
 end
 
 local sysinfoFile = "/system/sysinfo.cfg"
-local function likeOSname(proxy)
+local function likeOSname(proxy, modeTitle)
     local str = "likeOS based system"
     local info = readSysinfo(proxy, sysinfoFile)
     if info and info.name then
@@ -144,6 +144,9 @@ local function likeOSname(proxy)
             str = str .. " " .. tostring(info.version)
         end
         str = str .. ")"
+    end
+    if modeTitle then
+        str = str .. " (" .. modeTitle .. ")"
     end
     return str
 end
@@ -159,6 +162,25 @@ local function findSystems(address)
             likeOSname(proxy),
             function ()
                 bootTo(proxy, "/system/core/bootloader.lua")
+            end,
+            address
+        })
+
+        table.insert(tbl, {
+            likeOSname(proxy, "recovery"),
+            function (_, _, keyboard)
+                for address in component.list("screen", true) do
+                    local find = false
+                    for i, lkeys in ipairs(component.invoke(address, "getKeyboards")) do
+                        if lkeys == keyboard then
+                            find = true
+                            break
+                        end
+                    end
+                    if find then
+                        bootTo(proxy, "/system/core/bootloader.lua", {forceRecovery = address})
+                    end
+                end
             end,
             address
         })
@@ -295,7 +317,7 @@ local function menu(label, strs, funcs, autoTimeout)
                     autoTimeout = nil
                     redraw()
                 end
-                if selected and funcs[selected](strs[selected], eventData[5]) then
+                if selected and funcs[selected](strs[selected], eventData[5], eventData[2]) then
                     break
                 end
             elseif eventData[4] == 200 then
