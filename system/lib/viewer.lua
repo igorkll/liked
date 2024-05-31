@@ -2,6 +2,7 @@ local uix = require("uix")
 local fs = require("filesystem")
 local gobjs = require("gobjs")
 local parser = require("parser")
+local unicode = require("unicode")
 local viewer = {}
 
 function viewer.license(screen, path, isText, window, backTitle, nextTitle)
@@ -18,7 +19,7 @@ function viewer.license(screen, path, isText, window, backTitle, nextTitle)
 
     local licenseLayout = ui:createCustom(window or ui.screen, uix.colors.cyan, uix.styles[2])
     local rx, ry = licenseLayout.sizeX, licenseLayout.sizeY
-    licenseLayout:createCustom(3, 2, gobjs.scrolltext, rx - 4, ry - 4, text)
+    licenseLayout:createCustom(3, 2, gobjs.scrolltext, rx - 4, ry - 4, table.concat(parser.toLinesLn(text, rx - 6), "\n"))
 
     if backTitle ~= true then
         local back1 = licenseLayout:createButton(3, ry - 1, 8, 1, uix.colors.lightBlue, uix.colors.white, backTitle or " ← back", true)

@@ -843,7 +843,7 @@ local function doIcon(windowEventData)
                                 end
                             elseif str == "  license" then
                                 return function ()
-                                    simpleExecute("edit", windowEventData[6], licensePath, true)
+                                    require("viewer").license(screen, licensePath, nil, window, nil, true)
                                 end
                             elseif actions and actions[num] then
                                 runFunc(actions[num])
