@@ -69,6 +69,7 @@ hiObj = helloLayout:createCustom(hiPos, (ry / 2) - 6, blinckedHi)
 if not tier1 then
     local function blink()
         hiObj:draw()
+        graphic.forceUpdate(screen)
 
         local tick = 90
         helloLayout:timer(0.1, function ()
@@ -89,21 +90,19 @@ if not tier1 then
     end
 end
 
-do
-    local next1 = helloLayout:createButton((rx / 2) - 7, ry - 1, 16, 1, uix.colors.lightBlue, uix.colors.white, "next", true)
-    function next1:onClick()
-        ui:select(licenseLayout)
-    end
+local next1 = helloLayout:createButton((rx / 2) - 7, ry - 1, 16, 1, uix.colors.lightBlue, uix.colors.white, "next", true)
+function next1:onClick()
+    ui:select(licenseLayout)
+end
 
-    local reboot = helloLayout:createButton(rx - 17, 4, 16, 1, uix.colors.lightBlue, uix.colors.white, "reboot", true)
-    function reboot:onClick()
-        computer.shutdown(true, true)
-    end
+local reboot = helloLayout:createButton(rx - 17, 4, 16, 1, uix.colors.lightBlue, uix.colors.white, "reboot", true)
+function reboot:onClick()
+    computer.shutdown(true, true)
+end
 
-    local shutdown = helloLayout:createButton(rx - 17, 2, 16, 1, uix.colors.lightBlue, uix.colors.white, "shutdown", true)
-    function shutdown:onClick()
-        computer.shutdown(nil, true)
-    end
+local shutdown = helloLayout:createButton(rx - 17, 2, 16, 1, uix.colors.lightBlue, uix.colors.white, "shutdown", true)
+function shutdown:onClick()
+    computer.shutdown(nil, true)
 end
 
 --------------------------------
