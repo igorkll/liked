@@ -143,6 +143,7 @@ local list = {
 
             download(self.path .. "/lua5_2.lua", selfurlpart .. "/apps/openOS.app/lua5_2.lua")
             download(self.path .. "/actions.cfg", selfurlpart .. "/apps/openOS.app/actions.cfg")
+            download(self.path .. "/autorun.lua", selfurlpart .. "/apps/openOS.app/autorun.lua")
             
             download(afpxPath, selfurlpart .. "/apps/openOS.app/openOS.afpx")
 
@@ -173,6 +174,7 @@ local list = {
             
             download(self.path .. "/lua5_2.lua", selfurlpart .. "/apps/mineOS.app/lua5_2.lua")
             download(self.path .. "/actions.cfg", selfurlpart .. "/apps/mineOS.app/actions.cfg")
+            download(self.path .. "/autorun.lua", selfurlpart .. "/apps/mineOS.app/autorun.lua")
             download(self.path .. "/LICENSE", self.license)
 
             download(afpxPath, selfurlpart .. "/apps/mineOS.app/mineOS.afpx")

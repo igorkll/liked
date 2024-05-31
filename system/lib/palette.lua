@@ -41,9 +41,13 @@ end
 
 function palette.setSystemPalette(path, regOnly, doNotOffScreen)
     if pcall(sysinit.applyPalette, path, regOnly, doNotOffScreen) then
-        pcall(fs.copy, path, sysinit.initPalPath)
+        if sysinit.savePalPath then
+            pcall(fs.copy, path, sysinit.savePalPath)
+        end
     else
-        pcall(fs.copy, sysinit.defaultPalettePath, sysinit.initPalPath)
+        if sysinit.savePalPath then
+            pcall(fs.copy, sysinit.defaultPalettePath, sysinit.savePalPath)
+        end
         sysinit.applyPalette(sysinit.defaultPalettePath, regOnly, doNotOffScreen)
     end
 end

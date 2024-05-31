@@ -135,7 +135,7 @@ local function readSysinfo(fs, path)
 end
 
 local sysinfoFile = "/system/sysinfo.cfg"
-local function likeOSname(proxy)
+local function likeOSname(proxy, modeTitle)
     local str = "likeOS based system"
     local info = readSysinfo(proxy, sysinfoFile)
     if info and info.name then
@@ -145,12 +145,17 @@ local function likeOSname(proxy)
         end
         str = str .. ")"
     end
+    if modeTitle then
+        str = str .. " (" .. modeTitle .. ")"
+    end
     return str
 end
 
 local function findSystems(address)
     local tbl = {}
     local proxy = component.proxy(address)
+
+    local isPipes = proxy.exists("/boot/kernel/pipes")
 
     if proxy.exists("/system/core/bootloader.lua") then
         table.insert(tbl, {
@@ -160,11 +165,50 @@ local function findSystems(address)
             end,
             address
         })
-    elseif proxy.exists("/init.lua") then
+
         table.insert(tbl, {
-            "unknownOS",
+            likeOSname(proxy, "recovery"),
+            function (_, _, keyboard)
+                for address in component.list("screen", true) do
+                    local find = false
+                    for i, lkeys in ipairs(component.invoke(address, "getKeyboards")) do
+                        if lkeys == keyboard then
+                            find = true
+                            break
+                        end
+                    end
+                    if find then
+                        bootTo(proxy, "/system/core/bootloader.lua", {forceRecovery = address})
+                    end
+                end
+            end,
+            address
+        })
+    elseif not isPipes then
+        if proxy.exists("/lib/core/full_event.lua") then --I hope this file will not be found in other operating systems to avoid conflicts.
+            table.insert(tbl, {
+                "openOS",
+                function ()
+                    bootTo(proxy, "/init.lua")
+                end,
+                address
+            })
+        elseif proxy.exists("/init.lua") then
+            table.insert(tbl, {
+                "unknown",
+                function ()
+                    bootTo(proxy, "/init.lua")
+                end,
+                address
+            })
+        end
+    end
+
+    if isPipes then
+        table.insert(tbl, {
+            "plan9k",
             function ()
-                bootTo(proxy, "/init.lua")
+                bootTo(proxy, "/boot/kernel/pipes")
             end,
             address
         })
@@ -172,7 +216,7 @@ local function findSystems(address)
 
     if proxy.exists("/OS.lua") then
         table.insert(tbl, {
-            "mineOS based system",
+            "mineOS",
             function ()
                 mineOSboot(proxy)
             end,
@@ -182,13 +226,28 @@ local function findSystems(address)
 
     if proxy.exists("/openOS.lua") then
         table.insert(tbl, {
-            "openOS dualboot",
+            "openOS",
             function ()
                 bootTo(proxy, "/openOS.lua")
             end,
             address
         })
     end
+
+    local function addBootOption(path)
+        for _, name in ipairs(proxy.list(path) or {}) do
+            if name ~= "pipes" then
+                table.insert(tbl, {
+                    name,
+                    function ()
+                        bootTo(proxy, path .. name)
+                    end,
+                    address
+                })
+            end
+        end
+    end
+    addBootOption("/boot/kernel/")
 
     return tbl
 end
@@ -258,7 +317,7 @@ local function menu(label, strs, funcs, autoTimeout)
                     autoTimeout = nil
                     redraw()
                 end
-                if selected and funcs[selected](strs[selected], eventData[5]) then
+                if selected and funcs[selected](strs[selected], eventData[5], eventData[2]) then
                     break
                 end
             elseif eventData[4] == 200 then

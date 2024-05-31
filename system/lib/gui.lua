@@ -338,7 +338,13 @@ function gui.shadow(screen, x, y, sx, sy, mul, full, noSaveShadowState)
         end
     end
 
+    local cleared
     return function ()
+        if cleared then
+            return
+        end
+        cleared = true
+
         if scr then
             gui.scrShadow[screen] = gui.scrShadow[screen] - 1
         end
@@ -349,6 +355,12 @@ function gui.shadow(screen, x, y, sx, sy, mul, full, noSaveShadowState)
             gpu.setBackground(origsB[i])
             gpu.set(x, origsY[i], origsC[i])
         end
+        
+        origsX = nil
+        origsY = nil
+        origsC = nil
+        origsF = nil
+        origsB = nil
     end
 end
 
@@ -414,7 +426,7 @@ function gui.customWindow(screen, sx, sy)
 end
 
 function gui.status(screen, cx, cy, str, backgroundColor)
-    gui.smallWindow(screen, cx, cy, str, backgroundColor or colors.lightGray, function (window, color)
+    local window, noShadow = gui.smallWindow(screen, cx, cy, str, backgroundColor or colors.lightGray, function (window, color)
         window:set(2, 1, color, colors.blue, "  " .. unicode.char(0x2800+192) ..  "  ")
         window:set(2, 2, color, colors.blue, " ◢█◣ ")
         window:set(2, 3, color, colors.blue, "◢███◣")
@@ -422,6 +434,7 @@ function gui.status(screen, cx, cy, str, backgroundColor)
     end, nil, nil, true)
     graphic.forceUpdate(screen)
     event.yield()
+    return window, noShadow
 end
 
 function gui.warn(screen, cx, cy, str, backgroundColor)
