@@ -123,7 +123,7 @@ local function cleanList()
 end
 
 local function formatSize(size)
-    return tostring(math.roundTo(size / 1024), 1) .. "KB"
+    return tostring(math.roundTo(size / 1024, 1)) .. "KB"
 end
 
 local layout = ui:create("Cleaner", uix.colors.black)
