@@ -10,8 +10,6 @@ local function cancel()
     print("the installation was canceled")
 end
 
----------------------------------------
-
 local logo = {
     [[]],
     [[  G       G  G   G   GGGGGG   WWWWWWWWW  WWWWWWWWW]],
@@ -39,21 +37,30 @@ for _, str in ipairs(logo) do
     end
     io.write("\n")
 end
+term.setBackgroundColor(colors.blue)
 
 ---------------------------------------
 
 local baseUrl = "https://raw.githubusercontent.com/igorkll/liked/"
 local baseCoreUrl = "https://raw.githubusercontent.com/igorkll/likeOS/"
-local branchs = {"main", "test", "dev"}
-term.setBackgroundColor(colors.blue)
-print("select branch: ")
-for i, v in ipairs(branchs) do
-    print(i .. ". " .. v)
+
+local function selectPoint(name, points)
+    print("select " .. name .. ": ")
+    for i, v in ipairs(points) do
+        print(i .. ". " .. v)
+    end
+    local readed = io.read()
+    local point = points[tonumber(readed)]
+    if point then
+        local _, y = term.getCursorPos()
+        term.setCursorPos(#readed + 2, y - 1)
+        print("- " .. point)
+        return point
+    end
 end
-local branch = branchs[tonumber(io.read())]
-if branch then
-    print("you select branch: " .. branch)
-else
+
+local branch = selectPoint("branch", {"main", "test", "dev"})
+if not branch then
     cancel()
     return
 end
