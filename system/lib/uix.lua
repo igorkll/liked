@@ -1007,8 +1007,11 @@ function uix.createLayout(screen, title, bgcolor, style)
     if type(screen) == "string" then
         local rx, ry = graphic.getResolution(screen)
         window = graphic.createWindow(screen, 1, 2, rx, ry - 1)
-        window.outsideEvents = true
+    else
+        window.y = window.y + 1
+        window.sizeY = window.sizeY - 1
     end
+    window.outsideEvents = true
 
     local layout = uix.create(window, bgcolor or colors.black, style)
     layout:createUp(title or liked.selfApplicationName())
@@ -1133,20 +1136,23 @@ function manager:loop(timeout)
     end
 end
 
-function manager:create(title, bgcolor, style)
-    local layout = uix.createLayout(self.window or self.screen, title, bgcolor, style)
+local function doLayout(self, layout)
     layout.bgWork = false
     layout.allowAutoActive = nil
     if not self.firstLayout then self.firstLayout = layout end
     return layout
 end
 
+function manager:create(title, bgcolor, style)
+    return doLayout(self, uix.createLayout(self.window or self.screen, title, bgcolor, style))
+end
+
 function manager:simpleCreate(bgcolor, style)
-    local layout = uix.createSimpleLayout(self.window or self.screen, bgcolor, style)
-    layout.bgWork = false
-    layout.allowAutoActive = nil
-    if not self.firstLayout then self.firstLayout = layout end
-    return layout
+    return doLayout(self, uix.createSimpleLayout(self.window or self.screen, bgcolor, style))
+end
+
+function manager:createCustom(window, bgcolor, style)
+    return doLayout(self, uix.createSimpleLayout(window, bgcolor, style))
 end
 
 function manager:size()

@@ -371,13 +371,10 @@ local function applicationLabel(data, x, y)
         local windowEventData = applabel:uploadEvent(eventData)
         if windowEventData[1] == "touch" then
             if windowEventData[3] >= (applabel.sizeX - 13) and windowEventData[3] < ((applabel.sizeX - 13) + 13) and windowEventData[4] == 3 and data.license then
-                local license = "/tmp/market/" .. (data.name or "unknown") .. ".txt"
-
                 gui.status(screen, nil, nil, "license loading...")
-                assert(fs.writeFile(license, assert(internet.get(data.license))))
-                exec("edit", screen, nickname, license, true)
-                fs.remove(license)
-
+                barTh:suspend()
+                require("viewer").license(screen, assert(internet.get(data.license)), true, nil, nil, true)
+                barTh:resume()
                 return true
             elseif windowEventData[3] >= (applabel.sizeX - 13) and windowEventData[3] < ((applabel.sizeX - 13) + 13) and windowEventData[4] == 2 then
                 local formattedName = " \"" .. (data.name or "unknown") .. "\"?"
@@ -402,15 +399,28 @@ local function applicationLabel(data, x, y)
                         data:uninstall()
                     end
                 else
-                    if supportErr then
-                        lwarn(screen, nil, nil, supportErr)
-                    elseif gui.yesno(screen, nil, nil, installMsg .. formattedName) then
-                        if mediaMode then
-                            gui.status(screen, nil, nil, "downloading" .. formattedName2)
-                        else
-                            gui.status(screen, nil, nil, "installation" .. formattedName2)
+                    local licenseAccept
+                    if data.license then
+                        gui.status(screen, nil, nil, "license loading...")
+                        barTh:suspend()
+                        local clear = graphic.screenshot(screen)
+                        licenseAccept = require("viewer").license(screen, assert(internet.get(data.license)), true)
+                        clear()
+                        barTh:resume()
+                    else
+                        licenseAccept = true
+                    end
+                    if licenseAccept then
+                        if supportErr then
+                            lwarn(screen, nil, nil, supportErr)
+                        elseif gui.yesno(screen, nil, nil, installMsg .. formattedName) then
+                            if mediaMode then
+                                gui.status(screen, nil, nil, "downloading" .. formattedName2)
+                            else
+                                gui.status(screen, nil, nil, "installation" .. formattedName2)
+                            end
+                            data:install()
                         end
-                        data:install()
                     end
                 end
 
