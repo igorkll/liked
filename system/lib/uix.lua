@@ -517,7 +517,11 @@ function uix:createUp(title, withoutFill, bgcolor)
         if self.smartGuiManager and self.smartGuiManager.onExit then
             self.smartGuiManager:onExit()
         else
-            self.smartGuiManager.exitFlag = true
+            if self.smartGuiManager then
+                self.smartGuiManager.exitFlag = true
+            else
+                os.exit()
+            end
             event.stub()
         end
     end
