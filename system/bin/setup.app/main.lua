@@ -9,6 +9,7 @@ local apps = require("apps")
 local system = require("system")
 local event = require("event")
 local sysinit = require("sysinit")
+local viewer = require("viewer")
 
 --------------------------------
 
@@ -68,6 +69,7 @@ hiObj = helloLayout:createCustom(hiPos, (ry / 2) - 6, blinckedHi)
 if not tier1 then
     local function blink()
         hiObj:draw()
+        graphic.forceUpdate(screen)
 
         local tick = 90
         helloLayout:timer(0.1, function ()
@@ -88,46 +90,38 @@ if not tier1 then
     end
 end
 
-do
-    local next1 = helloLayout:createButton((rx / 2) - 7, ry - 1, 16, 1, uix.colors.lightBlue, uix.colors.white, "next", true)
-    function next1:onClick()
-        ui:select(licenseLayout)
-    end
+local next1 = helloLayout:createButton((rx / 2) - 7, ry - 1, 16, 1, uix.colors.lightBlue, uix.colors.white, "next", true)
+function next1:onClick()
+    ui:select(licenseLayout)
+end
 
-    local reboot = helloLayout:createButton(rx - 17, 4, 16, 1, uix.colors.lightBlue, uix.colors.white, "reboot", true)
-    function reboot:onClick()
-        computer.shutdown(true, true)
-    end
+local reboot = helloLayout:createButton(rx - 17, 4, 16, 1, uix.colors.lightBlue, uix.colors.white, "reboot", true)
+function reboot:onClick()
+    computer.shutdown(true, true)
+end
 
-    local shutdown = helloLayout:createButton(rx - 17, 2, 16, 1, uix.colors.lightBlue, uix.colors.white, "shutdown", true)
-    function shutdown:onClick()
-        computer.shutdown(nil, true)
-    end
+local shutdown = helloLayout:createButton(rx - 17, 2, 16, 1, uix.colors.lightBlue, uix.colors.white, "shutdown", true)
+function shutdown:onClick()
+    computer.shutdown(nil, true)
 end
 
 --------------------------------
 
 licenseLayout = ui:simpleCreate(uix.colors.cyan, uix.styles[2])
-licenseLayout:createCustom(3, 2, gobjs.scrolltext, rx - 4, ry - 4, assert(fs.readFile("/system/LICENSE")):gsub("\r", ""))
-
-back1 = licenseLayout:createButton(3, ry - 1, 8, 1, uix.colors.lightBlue, uix.colors.white, " ← back", true)
-back1.alignment = "left"
-function back1:onClick()
-    ui:select(helloLayout)
-end
-
-next2 = licenseLayout:createButton(rx - 17, ry - 1, 16, 1, uix.colors.lightBlue, uix.colors.white, "accept & next", true)
-function next2:onClick()
-    doSetup("inet")
-    if registry.systemConfigured then
-        os.exit()
-    else
-        ui:draw()
-    end
-end
 
 function licenseLayout:onSelect()
     sysinit.initScreen(screen)
+    while true do
+        if viewer.license(screen, "/system/LICENSE") then
+            doSetup("inet")
+            if registry.systemConfigured then
+                os.exit()
+            end
+        else
+            break
+        end
+    end
+    ui:select(helloLayout)
 end
 
 --------------------------------

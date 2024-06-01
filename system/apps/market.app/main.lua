@@ -21,7 +21,7 @@ local colors = gui_container.colors
 ------------------------------------
 
 local screen, nickname, _, forceMode, mediaMode = ...
-gui.status(screen, nil, nil, "loading content list...")
+local _, noShadow = gui.status(screen, nil, nil, "loading content list...")
 
 local title = "Market"
 local urlsBase = "market_"
@@ -60,15 +60,20 @@ end
 
 ------------------------------------
 
+local function lwarn(...)
+    noShadow()
+    gui.warn(...)
+end
+
 local netver = liked.lastVersion()
 
 if not netver then
-    gui.warn(screen, nil, nil, "connection error")
+    lwarn(screen, nil, nil, "connection error")
     return
 end
 
 if netver > liked.version() then
-    gui.warn(screen, nil, nil, "please update the system, until the system is updated, the market will not work")
+    lwarn(screen, nil, nil, "please update the system, until the system is updated, the market will not work")
     return
 end
 
@@ -213,13 +218,13 @@ local function doList(path)
                         end
                     end
                 else
-                    gui.warn(screen, nil, nil, "list-type-err: " .. (type(result2[2]) or "unknown"))
+                    lwarn(screen, nil, nil, "list-type-err: " .. (type(result2[2]) or "unknown"))
                 end
             else
-                gui.warn(screen, nil, nil, "fail to parse list: " .. (result2[2] or "unknown"))
+                lwarn(screen, nil, nil, "fail to parse list: " .. (result2[2] or "unknown"))
             end
         else
-            gui.warn(screen, nil, nil, "fail to read list: " .. (result[2] or "unknown"))
+            lwarn(screen, nil, nil, "fail to read list: " .. (result[2] or "unknown"))
         end
     end
 end
@@ -252,16 +257,16 @@ local function reList()
                             table.insert(list, app)
                         end
                     else
-                        gui.warn(screen, nil, nil, id .. "list-type-err: " .. (type(result[2]) or "unknown"))
+                        lwarn(screen, nil, nil, id .. "list-type-err: " .. (type(result[2]) or "unknown"))
                     end
                 else
-                    gui.warn(screen, nil, nil, id .. "list-err: " .. (result[2] or "unknown"))
+                    lwarn(screen, nil, nil, id .. "list-err: " .. (result[2] or "unknown"))
                 end
             else
-                gui.warn(screen, nil, nil, id .. "list-err: " .. (err or "unknown"))
+                lwarn(screen, nil, nil, id .. "list-err: " .. (err or "unknown"))
             end
         else
-            gui.warn(screen, nil, nil, id .. "list-err: " .. (err or "unknown"))
+            lwarn(screen, nil, nil, id .. "list-err: " .. (err or "unknown"))
         end
     end
 end
@@ -366,20 +371,17 @@ local function applicationLabel(data, x, y)
         local windowEventData = applabel:uploadEvent(eventData)
         if windowEventData[1] == "touch" then
             if windowEventData[3] >= (applabel.sizeX - 13) and windowEventData[3] < ((applabel.sizeX - 13) + 13) and windowEventData[4] == 3 and data.license then
-                local license = "/tmp/market/" .. (data.name or "unknown") .. ".txt"
-
                 gui.status(screen, nil, nil, "license loading...")
-                assert(fs.writeFile(license, assert(internet.get(data.license))))
-                exec("edit", screen, nickname, license, true)
-                fs.remove(license)
-
+                barTh:suspend()
+                require("viewer").license(screen, assert(internet.get(data.license)), true, nil, nil, true)
+                barTh:resume()
                 return true
             elseif windowEventData[3] >= (applabel.sizeX - 13) and windowEventData[3] < ((applabel.sizeX - 13) + 13) and windowEventData[4] == 2 then
                 local formattedName = " \"" .. (data.name or "unknown") .. "\"?"
                 local formattedName2 = " \"" .. (data.name or "unknown") .. "\"..."
                 if instCache[data] and verCache[data] ~= data.version then
                     if supportErr then
-                        gui.warn(screen, nil, nil, supportErr)
+                        lwarn(screen, nil, nil, supportErr)
                     elseif gui.yesno(screen, nil, nil, "update" .. formattedName) then
                         gui.status(screen, nil, nil, "updating" .. formattedName2)
                         if data.uninstallOnUpdate then
@@ -396,10 +398,21 @@ local function applicationLabel(data, x, y)
                         end
                         data:uninstall()
                     end
+                elseif supportErr then
+                    lwarn(screen, nil, nil, supportErr)
                 else
-                    if supportErr then
-                        gui.warn(screen, nil, nil, supportErr)
-                    elseif gui.yesno(screen, nil, nil, installMsg .. formattedName) then
+                    local licenseAccept
+                    if data.license then
+                        gui.status(screen, nil, nil, "license loading...")
+                        barTh:suspend()
+                        local clear = graphic.screenshot(screen)
+                        licenseAccept = require("viewer").license(screen, assert(internet.get(data.license)), true)
+                        clear()
+                        barTh:resume()
+                    else
+                        licenseAccept = true
+                    end
+                    if licenseAccept and gui.yesno(screen, nil, nil, installMsg .. formattedName) then
                         if mediaMode then
                             gui.status(screen, nil, nil, "downloading" .. formattedName2)
                         else
@@ -430,11 +443,12 @@ local function appInfo(data)
 
     local appLabel
     local function ldraw()
-        statusWindow:clear(colors.gray)
-        statusWindow:set(5, 1, colors.gray, colors.white, title)
-        statusWindow:set(statusWindow.sizeX - 2, statusWindow.sizeY, colors.red, colors.white, " X ")
-        statusWindow:set(1, statusWindow.sizeY, colors.red, colors.white, " < ")
-        barRedraw()
+        barRedraw(function ()
+            statusWindow:clear(colors.gray)
+            statusWindow:set(5, 1, colors.gray, colors.white, title)
+            statusWindow:set(statusWindow.sizeX - 2, statusWindow.sizeY, colors.red, colors.white, " X ")
+            statusWindow:set(1, statusWindow.sizeY, colors.red, colors.white, " < ")
+        end)
 
         window:clear(colors.white)
 
@@ -493,11 +507,12 @@ end
 local appLabels = {}
 
 local function drawStatus()
-    statusWindow:clear(colors.gray)
-    statusWindow:set(statusWindow.sizeX - 2, statusWindow.sizeY, colors.red, colors.white, " X ")
-    statusWindow:set(1, statusWindow.sizeY, colors.lightGray, colors.gray, "...")
-    statusWindow:set(5, 1, colors.gray, colors.white, title)
-    barRedraw()
+    barRedraw(function ()
+        statusWindow:clear(colors.gray)
+        statusWindow:set(statusWindow.sizeX - 2, statusWindow.sizeY, colors.red, colors.white, " X ")
+        statusWindow:set(1, statusWindow.sizeY, colors.lightGray, colors.gray, "...")
+        statusWindow:set(5, 1, colors.gray, colors.white, title)
+    end)
 end
 
 local function imitateLine(y)

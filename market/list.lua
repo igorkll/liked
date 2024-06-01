@@ -143,49 +143,12 @@ local list = {
 
             download(self.path .. "/lua5_2.lua", selfurlpart .. "/apps/openOS.app/lua5_2.lua")
             download(self.path .. "/actions.cfg", selfurlpart .. "/apps/openOS.app/actions.cfg")
+            download(self.path .. "/autorun.lua", selfurlpart .. "/apps/openOS.app/autorun.lua")
             
             download(afpxPath, selfurlpart .. "/apps/openOS.app/openOS.afpx")
 
             require("archiver").unpack(afpxPath, "/")
             fs.remove(afpxPath)
-        end
-    },
-    {
-        name = "mineOS",
-        version = "4",
-        vendor = "IgorTimofeev",
-        icon = selfurlpart .. "/apps/mineOS.app/icon.t2p",
-        license = selfurlpart .. "/apps/mineOS.app/LICENSE",
-        description = "configures dualboot between mineOS and liked\nATTENTION. if you have \"MineOS EFI\" installed, then you will not be able to use liked after installing MineOS. in order to boot into liked, delete the /OS.lua file in the MineOS explorer",
-        minDiskSpace = 1024 + 512,
-        minColorDepth = 8,
-        dualboot = true,
-
-        path = "/vendor/apps/mineOS.app",
-        install = function(self)
-            local afpxPath = self.path .. "/mineOS.afpx"
-
-            fs.makeDirectory(self.path)
-            download(self.path .. "/main.lua", selfurlpart .. "/apps/mineOS.app/main.lua")
-            download(self.path .. "/uninstall.lua", selfurlpart .. "/apps/mineOS.app/uninstall.lua")
-            download(self.path .. "/icon.t2p", self.icon)
-            download("/mineOS.lua", selfurlpart .. "/apps/mineOS.app/mineOS.lua")
-            
-            download(self.path .. "/lua5_2.lua", selfurlpart .. "/apps/mineOS.app/lua5_2.lua")
-            download(self.path .. "/actions.cfg", selfurlpart .. "/apps/mineOS.app/actions.cfg")
-            download(self.path .. "/LICENSE", self.license)
-
-            download(afpxPath, selfurlpart .. "/apps/mineOS.app/mineOS.afpx")
-
-            if require("archiver").unpack(afpxPath, "/") then
-                fs.remove(afpxPath)
-            else
-                fs.remove(self.path)
-                local clear = gui.saveZone(screen)
-                gui.skipShadow = true
-                gui.warn(screen, nil, nil, "failed to install MineOS, make sure there is enough disk space")
-                clear()
-            end
         end
     },
     {

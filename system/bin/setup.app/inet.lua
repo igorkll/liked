@@ -1,5 +1,4 @@
 local uix = require("uix")
-local gobjs = require("gobjs")
 local fs = require("filesystem")
 local graphic = require("graphic")
 local colorlib = require("colors")
@@ -126,6 +125,7 @@ end
 
 function accountLayout:onSelect()
     if not accountLayout.imagePath then
+        gui.status(screen, nil, nil, "internet connection...")
         accountLayout.locked = account.getLocked()
         accountLayout.login = account.getLogin()
         accountLayout.tokenIsValid = account.checkToken()
