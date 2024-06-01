@@ -29,8 +29,8 @@ settings.save()
 
 --------------------------------------- try start OS
 
-local env = {}
-
+os.loadAPI("/ocvm.lua")
+local env = ocvm.create("/liked")
 local code, err = loadfile("/liked/init.lua", nil, env)
 if code then
     code()
