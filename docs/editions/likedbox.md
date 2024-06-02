@@ -1,30 +1,30 @@
 # likedbox
 
-## это встраиваемая операционная система liked (аналог windowsCE)
-по сути это полноценный liked, но он не содержит рабочего стола, и каких-либо предустановленых приложений.
-после загрузку запускает приложение с именем "shell".
-по умалчанию в папке "/system/bin" лежит пример "shell.lua" который будет запушен если запустить не сконфигурированый likedbox.
+## this is an embedded operating system liked (similar to windowsCE)
+in fact, this is a full-fledged liked one, but it does not contain a desktop or any pre-installed applications.
+after loading, it launches an application named "shell".
+by default, in the "/system/bin" folder there is an example "shell.lua" which will be launched if you run an unconfigured likedbox.
 
-## конфигурации likedbox:
-для конфигурации likedbox нужно изменять содержимое папки "/system"
-можно изменить логотип загрузки, палитру, содержимое реестра по умалчанию.
-так-же требуеться заменить приложение "shell.lua" на свое.
-вместо "shell.lua" можно использовать "shell.app" тоесть пакетное приложение.
-однако так-как установку likedbox лучше проводить при помощи архива "box", а через архив файл удалить нельзя,
-будет лучше назвать свое приложение не "shell.app" а по названию своего проекта (так будет правильнее),
-и поместить это приложение в папку "/system/apps/exampleProject.app", а в файл "/system/bin/shell.lua" поместить простой код, который запустит ваше приложение:
+## likedbox configurations:
+to configure likedbox you need to change the contents of the "/system" folder
+you can change the boot logo, palette, default registry contents.
+you also need to replace the "shell.lua" application with your own.
+instead of "shell.lua" you can use "shell.app" that is a package application.
+however, since it is better to install likedbox using the "box" archive, and the file cannot be deleted through the archive,
+it would be better to name your application not “shell.app” but by the name of your project (this would be more correct),
+and place this application in the folder "/system/apps/exampleProject.app", and in the file "/system/bin/shell.lua" place a simple code that will launch your application:
 ```lua
 local screen = ...
 assert(require("apps").execute("exampleProject", screen))
 ```
 
-## сфера применения likedbox
-likedbox может использоваться для обменьников, навигаторов, фотоаппаратов, игравых автоматов.
-и прочего где не требуеться рабочий стол, и какой либо контроль над устройтсвом, кроме того которой предусмотрет стандартным установленым приложением
+## scope of application likedbox
+likedbox can be used for exchangers, navigators, cameras, slot machines.
+and other things where a desktop is not required, and any control over the device, in addition to that provided by the standard installed application
 
-## надержность
-likedbox имеет повышеную надержность.
-если ваша программа крашнеться,
-то она не вылетет на рабочий стол(рабочего стола или консоли в likedbox нет, оболочка установленая вами единсвенная существущая в этой ОС)
-likedbox запишет ошибку в файл "/data/errorlog.log" и перезапустит ваше приложение.
-если по какой-то причине крашнеться сам likedbox то он с вероятностью 90% (зависит от причины краша) просто перезапустит компьютер.
+## impertinence
+likedbox has increased assertiveness.
+if your program crashes,
+then it will not crash to the desktop (there is no desktop or console in likedbox, the shell you installed is the only one existing in this OS)
+likedbox will log the error to the file "/data/errorlog.log" and restart your application.
+If for some reason likedbox itself crashes, then with a 90% probability (depending on the cause of the crash) it will simply restart the computer.
