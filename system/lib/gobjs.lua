@@ -124,13 +124,17 @@ function gobjs.checkboxgroup:onEvent(eventData)
                 self:draw()
             end
         elseif eventData[1] == "touch" then
-            if eventData[3] <= 2 and self.itemsPos then
+            if self.itemsPos then
                 local item = self.itemsPos[eventData[4]]
                 if item then
-                    item[2][2] = not item[2][2]
-                    self:redrawPoint(eventData[4], item[2])
-                    if self.onSwitch then
-                        self:onSwitch(item[1], item[2][1], item[2][2])
+                    if eventData[3] <= 2 then
+                        item[2][2] = not item[2][2]
+                        self:redrawPoint(eventData[4], item[2])
+                        if self.onSwitch then
+                            self:onSwitch(item[1], item[2][1], item[2][2], item[2]) --index, title, state, usertbl
+                        end
+                    elseif self.onTextClick then
+                        self:onTextClick(item[1], item[2][1], item[2][2], item[2])
                     end
                 end
             end

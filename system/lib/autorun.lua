@@ -28,7 +28,7 @@ if not cache.static.aexec then
                     local path, enable, disk = table.unpack(tbl[i])
                     if path and fs.exists(path) then
                         if enable then
-                            logs.assert(programs.execute(path))
+                            logs.checkWithTag("autorun error", programs.xexecute(path))
                         end
                     elseif component.isConnected(disk) then --если диск с файлом существует, а файл нет значит нужно удалять запись. если нет самого диска значит возможно просто кто-то выташил сьемный наситель и запись удалять не нужно
                         removePath(tbl, path)
