@@ -1,5 +1,5 @@
 # uix - library
-## пример простой gui программы
+## an example of a simple gui program
 ```lua
 local uix = require("uix")
 local sound = require("sound")
@@ -10,7 +10,7 @@ local rx, ry = ui:zoneSize()
 
 --------------------------------- layout 1
 
-layout1 = ui:create("layout 1", uix.colors.black) --не глобальная переменная, она создаеться в _ENV в а likeOS _ENV это личная таблица для ващей программы, а глобалы находяться в _G
+layout1 = ui:create("layout 1", uix.colors.black) --not a global variable, it is created in _ENV, but like OS _ENV is a personal table for your program, and globals are located in _G
 
 layout1.button1 = layout1:createButton(2, 2, 16, 1, uix.colors.white, uix.colors.red, "BEEP")
 function layout1.button1:onClick()
