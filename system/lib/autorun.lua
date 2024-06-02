@@ -17,20 +17,22 @@ if not cache.static.aexec then
     function autorun.autorun()
         if registry.autorun then
             local function doAutorun(tbl)
-                local needSave
+                local needSave = false
                 for i = #tbl, 1, -1 do
-                    local path = tbl[i]
-                    if path and fs.exists(path) then
-                        logs.assert(programs.execute(path))
-                    else
-                        removePath(tbl, path)
-                        needSave = true
+                    local path, enable = table.unpack(tbl[i])
+                    if enable then
+                        if path and fs.exists(path) then
+                            logs.assert(programs.execute(path))
+                        else
+                            removePath(tbl, path)
+                            needSave = true
+                        end
                     end
                 end
                 return needSave
             end
 
-            local needSave
+            local needSave = false
             if registry.autorun.system then
                 needSave = doAutorun(registry.autorun.system)
             end

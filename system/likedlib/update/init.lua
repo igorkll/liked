@@ -5,6 +5,7 @@ local computer = require("computer")
 local serialization = require("serialization")
 local sysdata = require("sysdata")
 local registry = require("registry")
+local liked = require("liked")
 local update = {}
 update.updaterPath = paths.concat(paths.path(system.getSelfScriptPath()), "update.lua")
 
@@ -17,6 +18,10 @@ end
 function update._write(data)
     data.self = "/likeOS_startup.lua"
     assert(fs.writeFile(data.self, update._generate(data)))
+end
+
+function update.needWipe(branch, mode)
+    return liked.getFileFromRepo("/system/dataVersion.cfg", branch) ~= fs.readFile("/system/dataVersion.cfg")
 end
 
 function update.run(branch, mode)

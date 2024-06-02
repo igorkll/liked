@@ -41,7 +41,15 @@ local function update(newBranch)
     if not lastVersion then
         gui.warn(screen, nil, nil, "connection problems\ntry again later")
     elseif gui.pleaseCharge(screen, 80, "update") and gui.pleaseSpace(screen, 512, "update") and gui.checkPasswordLoop(screen) and gui.yesno(screen, nil, nil, newBranch and "ATTENTION, changing the branch to \"" .. newBranch .."\" can break the system! are you sure?" or (currentVersion ~= lastVersion and "start updating now?" or "you have the latest version installed. do you still want to start updating?")) then
-        require("update").run(newBranch or branch, currentMode)
+        if update.needWipe(newBranch or branch, currentMode) then
+            gui.warn(screen, nil, nil, "to upgrade to this version, you need to erase the data")
+            if gui.pleaseType(screen, "WIPE") then
+                fs.remove("/data")
+                require("update").run(newBranch or branch, currentMode)
+            end
+        else
+            require("update").run(newBranch or branch, currentMode)
+        end
     end
     layout:draw()
 end

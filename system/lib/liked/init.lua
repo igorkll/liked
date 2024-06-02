@@ -96,12 +96,22 @@ function liked.publicMode(screen, path)
     return true
 end
 
-function liked.lastVersion()
-    local branch = "main"
-    if package.isInstalled("sysdata") then
-        branch = require("sysdata").get("branch")
+function liked.getFileFromRepo(path, branch)
+    if not branch then
+        if package.isInstalled("sysdata") then
+            branch = require("sysdata").get("branch")
+        else
+            branch = "main"
+        end
     end
-    local lastVersion, err = require("internet").getInternetFile("https://raw.githubusercontent.com/igorkll/liked/" .. branch .. "/system/version.cfg")
+    if path:sub(1, 1) ~= "/" then
+        path = "/" .. path
+    end
+    return require("internet").getInternetFile("https://raw.githubusercontent.com/igorkll/liked/" .. branch .. path)
+end
+
+function liked.lastVersion()
+    local lastVersion, err = liked.getFileFromRepo("/system/version.cfg")
     if not lastVersion then return nil, err end
     return tonumber(lastVersion) or -1
 end

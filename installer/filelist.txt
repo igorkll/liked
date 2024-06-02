@@ -1,3 +1,4 @@
+/system/dataVersion.cfg
 /system/LICENSE
 /system/logo.lua
 /system/main.lua
