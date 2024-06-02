@@ -55,8 +55,12 @@ function gui.hideExtensionPath(screen, path)
     end
 end
 
-function gui.fpath(screen, path)
-    return gui.hideExtensionPath(screen, gui_container.toUserPath(screen, path))
+function gui.fpath(screen, path, maxlen, endcheck)
+    local lpath = gui.hideExtensionPath(screen, gui_container.toUserPath(screen, path))
+    if maxlen then
+        return gui_container.short(lpath, maxlen, endcheck)
+    end
+    return lpath
 end
 
 function gui.isVisible(screen, path)
