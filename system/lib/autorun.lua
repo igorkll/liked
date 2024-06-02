@@ -5,6 +5,11 @@ local logs = require("logs")
 local cache = require("cache")
 local autorun = {}
 
+local groudList = {
+    ["system"] = true,
+    ["user"] = true
+}
+
 local function removePath(tbl, path)
     for i = #tbl, 1, -1 do
         if tbl[i][1] == path then
@@ -51,9 +56,11 @@ if not cache.static.aexec then
 end
 
 function autorun.reg(group, path, rm, enable)
+    if not groudList[group] then return end
     if not registry.data.autorun then registry.data.autorun = {} end
     if not registry.data.autorun[group] then registry.data.autorun[group] = {} end
     if enable == nil then enable = true end
+    
     removePath(registry.data.autorun[group], path)
     if not rm then
         table.insert(registry.data.autorun[group], {path, enable})
