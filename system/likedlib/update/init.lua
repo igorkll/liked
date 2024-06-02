@@ -25,12 +25,15 @@ function update.needWipe(branch, mode)
     return liked.getFileFromRepo("/system/dataVersion.cfg", branch) ~= fs.readFile("/system/dataVersion.cfg")
 end
 
-function update.run(branch, mode)
+function update.run(branch, mode, wipedata)
     local data = {}
     data.branch = branch or sysdata.get("branch")
     data.mode = mode or sysdata.get("mode")
     
     update._write({data = data, filesBlackList = registry.filesBlackList})
+    if wipedata then
+        fs.remove("/data")
+    end
     computer.shutdown("fast")
 end
 

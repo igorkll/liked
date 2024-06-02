@@ -45,8 +45,7 @@ local function update(newBranch)
         if updatelib.needWipe(newBranch or branch, currentMode) then
             gui.warn(screen, nil, nil, "to upgrade to this version, you need to erase the data")
             if gui.pleaseType(screen, "WIPE") then
-                fs.remove("/data")
-                updatelib.run(newBranch or branch, currentMode)
+                updatelib.run(newBranch or branch, currentMode, true)
             end
         elseif gui.yesno(screen, nil, nil, currentVersion ~= lastVersion and "start updating now?" or "you have the latest version installed. do you still want to start updating?") then
             updatelib.run(newBranch or branch, currentMode)
