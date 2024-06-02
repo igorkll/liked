@@ -21,6 +21,7 @@ function update._write(data)
 end
 
 function update.needWipe(branch, mode)
+    if sysdata.get("branch") ~= branch then return true end
     return liked.getFileFromRepo("/system/dataVersion.cfg", branch) ~= fs.readFile("/system/dataVersion.cfg")
 end
 
