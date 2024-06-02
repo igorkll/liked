@@ -964,7 +964,7 @@ function uix.objEvent(self, eventData)
 end
 
 function uix.regDrawZone(self, sizeX, sizeY)
-    return graphic.createWindow(self.gui.screen, self.x, self.y + (self.gui.window.y - 1), sizeX, sizeY)
+    return graphic.createWindow(self.gui.screen, self.gui.window.x + (self.x - 1), self.gui.window.y + (self.y - 1), sizeX, sizeY)
 end
 
 function uix.doColor(obj, back, fore)

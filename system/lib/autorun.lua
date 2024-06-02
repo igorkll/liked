@@ -5,6 +5,14 @@ local logs = require("logs")
 local cache = require("cache")
 local autorun = {}
 
+local function removePath(tbl, path)
+    for i = #tbl, 1, -1 do
+        if tbl[i][1] == path then
+            table.remove(tbl, i)
+        end
+    end
+end
+
 if not cache.static.aexec then
     function autorun.autorun()
         if registry.autorun then
@@ -15,7 +23,7 @@ if not cache.static.aexec then
                     if path and fs.exists(path) then
                         logs.assert(programs.execute(path))
                     else
-                        table.clear(tbl, path)
+                        removePath(tbl, path)
                         needSave = true
                     end
                 end
@@ -40,14 +48,22 @@ if not cache.static.aexec then
     end
 end
 
-function autorun.reg(group, path, rm)
+function autorun.reg(group, path, rm, enable)
     if not registry.data.autorun then registry.data.autorun = {} end
     if not registry.data.autorun[group] then registry.data.autorun[group] = {} end
-    table.clear(registry.data.autorun[group], path)
+    if enable == nil then enable = true end
+    removePath(registry.data.autorun[group], path)
     if not rm then
-        table.insert(registry.data.autorun[group], path)
+        table.insert(registry.data.autorun[group], {path, enable})
     end
     registry.save()
+end
+
+function autorun.list(group)
+    if registry.data.autorun and registry.data.autorun[group] then
+        return table.deepclone(registry.data.autorun[group])
+    end
+    return {}
 end
 
 autorun.unloadable = true
