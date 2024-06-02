@@ -25,8 +25,10 @@ local function redraw()
 end
 
 layout:createText(2, 2, colors.white, "autorun scripts:")
+layout:createText(2, window.sizeY - 2, colors.white, "in case of failure, use the system recovery mode:")
+layout:createText(2, window.sizeY - 1, colors.white, "Run System Recovery Script > Start The System In Recovery Mode")
 local autorunScriptsListSizeX = window.sizeX - 25
-local autorunList = layout:createCustom(2, 4, gobjs.checkboxgroup, autorunScriptsListSizeX, window.sizeY - 6)
+local autorunList = layout:createCustom(2, 4, gobjs.checkboxgroup, autorunScriptsListSizeX, window.sizeY - 9)
 local function refreshList()
     autorun.check()
     autorunList.list = {}
@@ -49,7 +51,7 @@ function autorunList:onSwitch(_, _, state, usertbl)
     refreshList()
 end
 
-local addScriptButton = layout:createButton(2, window.sizeY - 1, autorunScriptsListSizeX, 1, nil, nil, "add script to autorun")
+local addScriptButton = layout:createButton(2, window.sizeY - 4, autorunScriptsListSizeX, 1, nil, nil, "add script to autorun")
 function addScriptButton:onDrop()
     local scriptPath = iowindows.selectfile(screen, "lua")
     if scriptPath then
