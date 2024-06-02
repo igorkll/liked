@@ -4,7 +4,6 @@ local gobjs = require("gobjs")
 local autorun = require("autorun")
 local paths = require("paths")
 local iowindows = require("iowindows")
-local guic = require("gui_container")
 local gui = require("gui")
 
 local colors = uix.colors
@@ -29,6 +28,7 @@ layout:createText(2, 2, colors.white, "autorun scripts:")
 local autorunScriptsListSizeX = window.sizeX - 25
 local autorunList = layout:createCustom(2, 4, gobjs.checkboxgroup, autorunScriptsListSizeX, window.sizeY - 6)
 local function refreshList()
+    autorun.check()
     autorunList.list = {}
     for _, item in ipairs(autorun.list("user")) do
         table.insert(autorunList.list, 1, {gui.fpath(screen, item[1], autorunList.sizeX - 3), item[2]})
