@@ -131,10 +131,10 @@ function gobjs.checkboxgroup:onEvent(eventData)
                         item[2][2] = not item[2][2]
                         self:redrawPoint(eventData[4], item[2])
                         if self.onSwitch then
-                            self:onSwitch(item[1], item[2][1], item[2][2], item[2]) --index, title, state, usertbl
+                            self:onSwitch(item[1], item[2][1], item[2][2], item[2], eventData) --index, title, state, usertbl, event
                         end
                     elseif self.onTextClick then
-                        self:onTextClick(item[1], item[2][1], item[2][2], item[2])
+                        self:onTextClick(item[1], item[2][1], item[2][2], item[2], eventData)
                     end
                 end
             end

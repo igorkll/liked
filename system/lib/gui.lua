@@ -917,6 +917,151 @@ function gui.contextFunc(screen, posX, posY, strs, active, funcs)
     end
 end
 
+--[[
+{
+    clear = true,
+    redrawCallback = function() end, --the context menu may ask you to redraw everything that is under it
+    {
+        title = "title",
+        active = true,
+        callback = function()
+
+            return true --return from context
+        end
+    },
+    true, --break line
+    {
+        title = "menu",
+        active = true,
+        menu = {
+            {
+                title = "1",
+                active = true,
+                callback = function() end
+            },
+            {
+                title = "2",
+                active = true,
+                callback = function() end
+            },
+            {
+                title = "3",
+                active = true,
+                callback = function() end
+            }
+        }
+    }
+}
+]]
+
+function gui.actionContext(screen, x, y, actions)
+    local gpu = graphic.findGpu(screen)
+    
+    local selected
+    local sizeX = 0
+    local sizeY = #actions
+    for i, action in ipairs(actions) do
+        if type(action) == "table" then
+            local title = action.title
+            if #title > sizeX then
+                sizeX = #title
+            end
+        end
+    end
+    sizeX = sizeX + 2
+
+    local rx, ry = gpu.getResolution()
+    x = math.min(x, (rx - sizeX) + 1)
+    y = math.min(y, (ry - sizeY) + 1)
+
+    local window = graphic.createWindow(screen, x, y, sizeX, sizeY)
+
+    for i, action in ipairs(actions) do
+        if type(action) == "table" and action.active == nil then
+            action.active = true
+        end
+    end
+
+    local function redraw(noRedrawShadow)
+        if not noRedrawShadow then
+            gui.shadow(screen, x, y, sizeX, sizeY)
+        end
+        for i, action in ipairs(actions) do
+            if action == true then
+                window:fill(1, i, sizeX, 1, colors.white, colors.lightGray, gui_container.chars.splitLine)
+            else
+                if i == selected then
+                    window:fill(1, i, sizeX, 1, colors.blue, 0, " ")
+                    window:set(2, i, colors.blue, colors.white, action.title)
+                    if action.menu then
+                        window:set(sizeX, i, colors.blue, colors.white, ">")
+                    end
+                else
+                    local col = action.active and colors.black or colors.lightGray
+                    window:fill(1, i, sizeX, 1, colors.white, 0, " ")
+                    window:set(2, i, colors.white, col, action.title)
+                    if action.menu then
+                        window:set(sizeX, i, colors.white, col, ">")
+                    end
+                end
+            end
+        end
+    end
+    redraw()
+
+    while true do
+        local eventData = {event.pull()}
+        local isClick = eventData[1] == "touch"
+        if isClick or eventData[1] == "drag" then
+            selected = nil
+            local newSelected = (eventData[4] - y) + 1
+            if eventData[3] >= x and eventData[3] < x + sizeX then
+                if newSelected >= 1 and newSelected <= #actions then
+                    if eventData[5] == 0 then
+                        if type(actions[newSelected]) == "table" and actions[newSelected].active then
+                            selected = newSelected
+                        end
+                    elseif isClick then
+                        event.push(table.unpack(eventData))
+                        break
+                    end
+                elseif isClick then
+                    event.push(table.unpack(eventData))
+                    break
+                end
+            elseif isClick then
+                event.push(table.unpack(eventData))
+                break
+            end
+            redraw(true)
+        elseif eventData[1] == "drop" then
+            if selected then
+                local action = actions[selected]
+                if type(action) == "table" and action.callback then
+                    if action:callback() then
+                        return selected
+                    end
+                    selected = nil
+                    redraw()
+                elseif action.menu then
+                    if actions.redrawCallback then
+                        actions.redrawCallback()
+                        redraw()
+                        if not action.menu.redrawCallback then
+                            action.menu.redrawCallback = actions.redrawCallback
+                        end
+                    end
+                    if gui.actionContext(x + sizeX, eventData[4], action.menu) then
+                        return selected
+                    end
+                else
+                    return selected
+                end
+            end
+        end
+    end
+end
+
 function gui.drawtext(screen, posX, posY, foreground, text)
     local gpu = graphic.findGpu(screen)
 

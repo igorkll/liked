@@ -38,10 +38,12 @@ local function refreshList()
 end
 refreshList()
 
-function autorunList:onTextClick(_, _, _, usertbl)
-    if gui.yesno(screen, nil, nil, "are you sure you want to remove the script from autorun?") then
-        autorun.reg("user", usertbl[3], true)
-        refreshList()
+function autorunList:onTextClick(_, _, _, usertbl, eventData)
+    if eventData[5] then
+        if gui.yesno(screen, nil, nil, "are you sure you want to remove the script from autorun?") then
+            autorun.reg("user", usertbl[3], true)
+            refreshList()
+        end
     end
     redraw()
 end
