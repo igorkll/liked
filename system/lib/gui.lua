@@ -167,9 +167,33 @@ end
 
 ------------------------------------
 
-function gui.getShadowWindow(x, y, sx, sy, withWindow)
+function gui.getShadowWindow(screen, x, y, sx, sy, withWindow)
     local shadowMode = registry.shadowMode
-    if == "full" then
+    local gpu = graphic.findGpu(screen)
+    local rx, ry = gpu.getResolution()
+    local x2, y2, sx2, sy2
+    if shadowMode == "screen" then
+        x2, y2, sx2, sy2 = 1, 1, rx, ry
+    elseif shadowMode == "round" then
+        x2, y2, sx2, sy2 = x - 2, y - 1, sx + 4, sy + 2
+    elseif shadowMode == "full" then
+        if withWindow then
+            x2, y2, sx2, sy2 = x, y, sx + 2, sy + 1
+        else
+            x2, y2, sx2, sy2 = x + 2, y + 1, sx, sy
+        end
+    else
+        if withWindow then
+            x2, y2, sx2, sy2 = x, y, sx + 1, sy + 1
+        else
+            x2, y2, sx2, sy2 = x + 1, y + 1, sx, sy
+        end
+    end
+    if x2 < 1 then x2 = 1 end
+    if y2 < 1 then y2 = 1 end
+    if sx2 > rx then sx2 = rx end
+    if sy2 > ry then sy2 = ry end
+    return x2, y2, sx2, sy2
 end
 
 function gui.shadow(screen, x, y, sx, sy, mul, full, noSaveShadowState)
@@ -978,6 +1002,7 @@ function gui.actionContext(screen, x, y, actions)
     y = math.min(y, (ry - sizeY) + 1)
 
     local window = graphic.createWindow(screen, x, y, sizeX, sizeY)
+    local clear = graphic.screenshot(screen, gui.getShadowWindow(screen, x, y, sizeX, sizeY, true))
     gui.shadow(screen, x, y, sizeX, sizeY)
 
     for i, action in ipairs(actions) do
@@ -1040,6 +1065,7 @@ function gui.actionContext(screen, x, y, actions)
                 local action = actions[selected]
                 if type(action) == "table" and action.callback then
                     if action:callback() then
+                        clear()
                         return selected
                     end
                     selected = nil
@@ -1053,14 +1079,17 @@ function gui.actionContext(screen, x, y, actions)
                         end
                     end
                     if gui.actionContext(screen, x + sizeX, eventData[4], action.menu) then
+                        clear()
                         return selected
                     end
                 else
+                    clear()
                     return selected
                 end
             end
         end
     end
+    clear()
 end
 
 function gui.drawtext(screen, posX, posY, foreground, text)
