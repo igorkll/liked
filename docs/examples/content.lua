@@ -4,14 +4,19 @@ local computer = require("computer")
 local screen = ...
 
 gui.actionContext(screen, 8, 8, {
-    clear = true,
-    redrawCallback = function() end, --the context menu may ask you to redraw everything that is under it
     {
-        title = "title",
+        title = "test with exit",
         active = true,
         callback = function()
             computer.beep(2000, 1)
             return true --return from context
+        end
+    },
+    {
+        title = "test without exit",
+        active = true,
+        callback = function()
+            computer.beep(1800, 1)
         end
     },
     true, --break line
