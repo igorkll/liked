@@ -46,5 +46,32 @@ gui.actionContext(screen, 8, 8, {
                 end
             }
         }
+    },
+    {
+        title = "menu 2",
+        active = true,
+        menu = {
+            {
+                title = "1",
+                active = true,
+                callback = function()
+                    computer.beep(100, 0.1)
+                end
+            },
+            {
+                title = "2",
+                active = true,
+                callback = function()
+                    computer.beep(200, 0.1)
+                end
+            },
+            {
+                title = "3",
+                active = true,
+                callback = function()
+                    computer.beep(300, 0.1)
+                end
+            }
+        }
     }
 })
