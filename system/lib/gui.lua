@@ -167,6 +167,11 @@ end
 
 ------------------------------------
 
+function gui.getShadowWindow(x, y, sx, sy, withWindow)
+    local shadowMode = registry.shadowMode
+    if == "full" then
+end
+
 function gui.shadow(screen, x, y, sx, sy, mul, full, noSaveShadowState)
     if gui.skipShadow then
         gui.skipShadow = nil
@@ -973,6 +978,7 @@ function gui.actionContext(screen, x, y, actions)
     y = math.min(y, (ry - sizeY) + 1)
 
     local window = graphic.createWindow(screen, x, y, sizeX, sizeY)
+    gui.shadow(screen, x, y, sizeX, sizeY)
 
     for i, action in ipairs(actions) do
         if type(action) == "table" and action.active == nil then
@@ -981,9 +987,6 @@ function gui.actionContext(screen, x, y, actions)
     end
 
     local function redraw(noRedrawShadow)
-        if not noRedrawShadow then
-            --gui.shadow(screen, x, y, sizeX, sizeY)
-        end
         for i, action in ipairs(actions) do
             if action == true then
                 window:fill(1, i, sizeX, 1, colors.white, colors.lightGray, gui_container.chars.splitLine)
@@ -1031,7 +1034,7 @@ function gui.actionContext(screen, x, y, actions)
                 event.push(table.unpack(eventData))
                 break
             end
-            redraw(true)
+            redraw()
         elseif eventData[1] == "drop" then
             if selected then
                 local action = actions[selected]
