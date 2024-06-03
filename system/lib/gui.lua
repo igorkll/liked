@@ -981,7 +981,7 @@ end
 }
 ]]
 
-function gui.actionContext(screen, x, y, actions)
+function gui.actionContext(screen, x, y, actions, isParent)
     local gpu = graphic.findGpu(screen)
     
     local selected
@@ -1002,8 +1002,13 @@ function gui.actionContext(screen, x, y, actions)
     y = math.min(y, (ry - sizeY) + 1)
 
     local window = graphic.createWindow(screen, x, y, sizeX, sizeY)
-    local clear = graphic.screenshot(screen, gui.getShadowWindow(screen, x, y, sizeX, sizeY, true))
-    gui.shadow(screen, x, y, sizeX, sizeY)
+    local clear
+    if not isParent or registry.shadowMode ~= "screen" then
+        clear = graphic.screenshot(screen, gui.getShadowWindow(screen, x, y, sizeX, sizeY, true))
+        gui.shadow(screen, x, y, sizeX, sizeY)
+    else
+        clear = graphic.screenshot(screen, x, y, sizeX, sizeY)
+    end
 
     for i, action in ipairs(actions) do
         if type(action) == "table" and action.active == nil then
@@ -1032,6 +1037,7 @@ function gui.actionContext(screen, x, y, actions)
                 end
             end
         end
+        graphic.update(screen)
     end
     redraw()
 
@@ -1078,7 +1084,7 @@ function gui.actionContext(screen, x, y, actions)
                             action.menu.redrawCallback = actions.redrawCallback
                         end
                     end
-                    if gui.actionContext(screen, x + sizeX, eventData[4], action.menu) then
+                    if gui.actionContext(screen, x + sizeX, eventData[4], action.menu, true) then
                         clear()
                         return selected
                     end
