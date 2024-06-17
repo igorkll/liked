@@ -86,7 +86,7 @@ function hdd.clone(screen, proxy, selectFrom)
         if ok then
             local fromlabel = from.getLabel()
             if fromlabel then
-                to.setLabel(fromlabel)
+                pcall(to.setLabel, fromlabel)
             end
         end
         liked.mountAll()
