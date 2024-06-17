@@ -54,13 +54,19 @@ local energyParam2 = layout:createText(paramsPoses2, energyBar.y, uix.colors.bla
 local coreLicenseButton = layout:createButton(rx - 18, 2, 17, 1, uix.colors.orange, uix.colors.white, "core license", true)
 coreLicenseButton.back2 = uix.colors.lightGray
 function coreLicenseButton:onClick(_, nickname)
-    ui:execute("edit", screen, nickname, "/system/core/LICENSE", true)
+    ui:fullStop()
+    require("viewer").license(screen, "/system/core/LICENSE", nil, nil, nil, true)
+    ui:fullStart()
+    ui:draw()
 end
 
 local licenseButton = layout:createButton(rx - 18, 4, 17, 1, uix.colors.orange, uix.colors.white, "liked license", true)
 licenseButton.back2 = uix.colors.lightGray
 function licenseButton:onClick(_, nickname)
-    ui:execute("edit", screen, nickname, "/system/LICENSE", true)
+    ui:fullStop()
+    require("viewer").license(screen, "/system/LICENSE", nil, nil, nil, true)
+    ui:fullStart()
+    ui:draw()
 end
 
 local function updateBars(cpuLoadLevel)

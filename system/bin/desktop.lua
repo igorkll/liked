@@ -782,7 +782,7 @@ local function doIcon(windowEventData)
 
                                 if state then
                                     liked.umountAll()
-                                    if not pcall(v.fs.setLabel, nil) then
+                                    if not pcall(v.fs.setLabel, nil) and not pcall(v.fs.setLabel, "") then
                                         warn("invalid name")
                                     end
                                     liked.mountAll()
