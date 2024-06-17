@@ -1,4 +1,5 @@
 {
+    forceLikedLoader = true,
     interpreterSandbox = true,
     disableCustomMarketUrls = true,
     disableRootAccess = true,

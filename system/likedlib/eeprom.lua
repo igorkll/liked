@@ -37,6 +37,15 @@ function eeprom.list(screen)
     return labels, list
 end
 
+function eeprom.find(label, screen)
+    local _, list = eeprom.list(screen)
+    for i, v in ipairs(list) do
+        if v.label == label then
+            return v
+        end
+    end
+end
+
 function eeprom.menu(screen)
     local labels, list = eeprom.list(screen)
     local clear = gui.saveBigZone(screen)
@@ -47,8 +56,12 @@ function eeprom.menu(screen)
     end
 end
 
+function eeprom.makeData(firmware)
+    return (firmware.makeData and firmware.makeData()) or firmware.data or ""
+end
+
 function eeprom.flash(screen, firmware, force)
-    local data = firmware.makeData() or firmware.data or ""
+    local data = eeprom.makeData(firmware)
     if data ~= true and (force or gui.pleaseType(screen, "FLASH", "flash eeprom")) then
         local eeprom = component.eeprom
 
@@ -57,6 +70,12 @@ function eeprom.flash(screen, firmware, force)
         eeprom.setData(data)
         eeprom.setLabel(firmware.label or "UNKNOWN")
     end
+end
+
+function eeprom.hiddenFlash(firmware)
+    eeprom.set(assert(fs.readFile(firmware.code)))
+    eeprom.setData(eeprom.makeData(firmware))
+    eeprom.setLabel(firmware.label or "UNKNOWN")
 end
 
 eeprom.unloadable = true

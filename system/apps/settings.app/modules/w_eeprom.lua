@@ -8,7 +8,7 @@ local liked = require("liked")
 local bootloader = require("bootloader")
 local programs = require("programs")
 local system = require("system")
-local eepromlib = assert(loadfile(system.getResourcePath("../lib/eeprom.lua")))()
+local eepromlib = require("eeprom")
 local apps = require("apps")
 
 local colors = gui_container.colors

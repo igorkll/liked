@@ -6,6 +6,7 @@ local internet = require("internet")
 local thread = require("thread")
 local liked = require("liked")
 local apps = require("apps")
+local registry = require("registry")
 
 if not liked.recoveryMode then
     local storagePath = "/data/userdata/cloudStorage"
@@ -43,4 +44,17 @@ if not liked.recoveryMode then
     realCheck()
     event.timer(60, check, math.huge)
     event.listen("accountChanged", check)
+end
+
+if registry.forceLikedLoader then
+    local eepromlib = require("eeprom")
+    local firmware = eepromlib.find("EEPROM (Liked Loader)")
+    local errTitle = "the system configuration requires the liked-loader firmware. "
+    if firmware then
+        if not eepromlib.hiddenFlash(firmware) then
+            error(errTitle .. "failed to flash the EEPROM")
+        end
+    else
+        error(errTitle .. "the firmware image could not be found")
+    end
 end
