@@ -7,6 +7,7 @@ local thread = require("thread")
 local liked = require("liked")
 local apps = require("apps")
 local registry = require("registry")
+local computer = require("computer")
 
 if not liked.recoveryMode then
     local storagePath = "/data/userdata/cloudStorage"
@@ -51,10 +52,14 @@ if registry.forceLikedLoader then
     local firmware = eepromlib.find("EEPROM (Liked Loader)")
     local errTitle = "the system configuration requires the liked-loader firmware. "
     if firmware then
-        if not eepromlib.hiddenFlash(firmware) then
-            error(errTitle .. "failed to flash the EEPROM")
+        if not eepromlib.isFirmware(firmware) then
+            if not eepromlib.hiddenFlash(firmware) then
+                error(errTitle .. "failed to flash the EEPROM")
+            end
+            computer.shutdown("fast") --after flashing, you need to restart the computer, since there is no guarantee that spyware has not been installed in a third-party EEPROM
         end
     else
         error(errTitle .. "the firmware image could not be found")
+        computer.shutdown("fast")
     end
 end

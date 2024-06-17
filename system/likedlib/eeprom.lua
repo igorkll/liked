@@ -63,19 +63,25 @@ end
 function eeprom.flash(screen, firmware, force)
     local data = eeprom.makeData(firmware)
     if data ~= true and (force or gui.pleaseType(screen, "FLASH", "flash eeprom")) then
-        local eeprom = component.eeprom
-
         gui.status(screen, nil, nil, "flashing...")
-        eeprom.set(assert(fs.readFile(firmware.code)))
-        eeprom.setData(data)
-        eeprom.setLabel(firmware.label or "UNKNOWN")
+        return eeprom.hiddenFlash(firmware)
     end
 end
 
+function eeprom.isFirmware(firmware)
+    local componentEeprom = component.eeprom
+    return componentEeprom.get() == (firmware.rawCode or assert(fs.readFile(firmware.code))) and componentEeprom.getLabel() == (firmware.label or "UNKNOWN")
+end
+
 function eeprom.hiddenFlash(firmware)
-    eeprom.set(assert(fs.readFile(firmware.code)))
-    eeprom.setData(eeprom.makeData(firmware))
-    eeprom.setLabel(firmware.label or "UNKNOWN")
+    local componentEeprom = component.eeprom
+    local _, err = componentEeprom.set(firmware.rawCode or assert(fs.readFile(firmware.code)))
+    componentEeprom.setData(eeprom.makeData(firmware))
+    componentEeprom.setLabel(firmware.label or "UNKNOWN")
+    if err then
+        return nil, err
+    end
+    return true
 end
 
 eeprom.unloadable = true

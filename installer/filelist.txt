@@ -26,7 +26,6 @@
 /system/apps/settings.app/icon.t2p
 /system/apps/settings.app/main.lua
 /system/apps/settings.app/shadow_demo.t2p
-/system/apps/settings.app/lib/eeprom.lua
 /system/apps/settings.app/modules/a_account.lua
 /system/apps/settings.app/modules/a_lock.lua
 /system/apps/settings.app/modules/b_users.lua
@@ -150,6 +149,7 @@
 /system/likedbox/sysinfo.cfg
 /system/likedbox/bin/shell.lua
 /system/likedlib/account.lua
+/system/likedlib/eeprom.lua
 /system/likedlib/installer.lua
 /system/likedlib/sysdata.lua
 /system/likedlib/sysmode/classic.reg
