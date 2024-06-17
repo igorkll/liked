@@ -792,8 +792,8 @@ local function doIcon(windowEventData)
                                 end
                             elseif str == "  boot from this disk" then
                                 if not registry.disableExternalBoot then
-                                    pcall(computer.setBootAddress, v.fs.address)
-                                    pcall(computer.setBootFile, "/init.lua")
+                                    fs.writeFile("/tmp/bootloader/bootaddr", v.fs.address)
+                                    fs.writeFile("/tmp/bootloader/bootfile", "/init.lua")
                                     pcall(computer.shutdown, "fast")
                                 end
                             end
