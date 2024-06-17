@@ -45,7 +45,10 @@ function hdd.clone(screen, proxy, selectFrom)
     local gui = require("gui")
 
     local from, to
-    local blacklist = {proxy.address}
+    local blacklist = {proxy.address, fs.tmpaddress}
+    if registry.disableRootAccess then
+        table.insert(blacklist, fs.bootaddress)
+    end
 
     local clear = saveBigZone(screen)
 
