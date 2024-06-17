@@ -60,8 +60,8 @@
 /system/bin/setup.app/inet.lua
 /system/bin/setup.app/main.lua
 /system/bin/setup.app/stub.lua
-/system/firmware/likeloader/code.lua
-/system/firmware/likeloader/label.txt
+/system/firmware/likedloader/code.lua
+/system/firmware/likedloader/label.txt
 /system/firmware/luabios/code.lua
 /system/firmware/luabios/label.txt
 /system/icons/afpx.t2p

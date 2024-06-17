@@ -444,8 +444,8 @@ local function install(disk, branch, edition, doOpenOS, doMineOS)
         local eeprom = component.proxy(component.list("eeprom")() or "")
         if eeprom then
             eeprom.setData("")
-            eeprom.setLabel(assert(wget(baseUrl .. branch .. "/system/firmware/likeloader/label.txt")))
-            eeprom.set(assert(wget(baseUrl .. branch .. "/system/firmware/likeloader/code.lua")))
+            eeprom.setLabel(assert(wget(baseUrl .. branch .. "/system/firmware/likedloader/label.txt")))
+            eeprom.set(assert(wget(baseUrl .. branch .. "/system/firmware/likedloader/code.lua")))
         end
     end
 
