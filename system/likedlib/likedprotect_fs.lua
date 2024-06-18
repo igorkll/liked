@@ -65,10 +65,7 @@ local function reg(password)
         lastRegPassword = password
 
         if not cache.static[2] then
-            local hookBusy = false
             fs.openHooks[function(path)
-                if hookBusy then return end
-                hookBusy = true
                 if registry.encrypt then
                     path = fs.mntPath(path)
                     for _, listpath in ipairs(loadlist()) do
@@ -81,14 +78,13 @@ local function reg(password)
                         end
                     end
                 end
-                hookBusy = false
             end] = true
             cache.static[2] = true
         end
 
         for _, path in ipairs(loadlist()) do
             for _, lpath in fs.recursion(fs.mntPath(path)) do
-                if fs.isDirectory(lpath) then
+                if not fs.isDirectory(lpath) then
                     local datakey = fs.getAttribute(lpath, "datakey")
                     if datakey then
                         fs.regXor(lpath, xorfs.xorcode(datakey, password))
@@ -103,7 +99,7 @@ local function reg(password)
 
         for _, path in ipairs(loadlist()) do
             for _, lpath in fs.recursion(fs.mntPath(path)) do
-                if fs.isDirectory(lpath) then
+                if not fs.isDirectory(lpath) then
                     fs.regXor(lpath)
                 end
             end
