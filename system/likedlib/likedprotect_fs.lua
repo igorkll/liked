@@ -4,6 +4,7 @@ local serialization = require("serialization")
 local xorfs = require("xorfs")
 local uuid = require("uuid")
 local paths = require("paths")
+local cache = require("cache")
 local likedprotect_fs = {}
 
 local function toggleFile(path, password, state)
@@ -78,6 +79,9 @@ function likedprotect_fs.decrypt(password)
 end
 
 function likedprotect_fs.init(password)
+    if cache.static[0] then return false end
+    cache.static[0] = true
+
     if not likedprotect_fs.isEncrypt() then return false end
     reg(password)
     return true

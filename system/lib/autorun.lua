@@ -19,7 +19,7 @@ local function removePath(tbl, path)
     end
 end
 
-if not cache.static.aexec then
+if not cache.static[1] then
     function autorun.autorun()
         if registry.autorun then
             local function doAutorun(tbl)
@@ -52,7 +52,7 @@ if not cache.static.aexec then
             end
         end
         autorun.autorun = nil
-        cache.static.aexec = true
+        cache.static[1] = true
     end
 end
 
