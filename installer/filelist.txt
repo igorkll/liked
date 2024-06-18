@@ -134,6 +134,7 @@
 /system/lib/liked/funcs/getScoreColor.lua
 /system/liked/box.lst
 /system/liked/brick.lua
+/system/liked/encrypt.lst
 /system/liked/links.lua
 /system/liked/market_urls_dev.txt
 /system/liked/market_urls_main.txt
@@ -151,6 +152,7 @@
 /system/likedlib/account.lua
 /system/likedlib/eeprom.lua
 /system/likedlib/installer.lua
+/system/likedlib/likedprotect_fs.lua
 /system/likedlib/sysdata.lua
 /system/likedlib/sysmode/classic.reg
 /system/likedlib/sysmode/demo.reg
