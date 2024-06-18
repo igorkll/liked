@@ -7,6 +7,13 @@ local paths = require("paths")
 local cache = require("cache")
 local likedprotect_fs = {}
 
+local lList
+local function loadlist()
+    if lList then return lList end
+    lList = serialization.load("/system/liked/encrypt.lst")
+    return lList
+end
+
 local function getDatakey(path, password, state)
     path = fs.mntPath(path)
     local datakey = fs.getAttribute(path, "datakey")
@@ -32,19 +39,16 @@ local function toggleFile(path, password, state)
 end
 
 local function toggleFolder(path, password, state)
-    local datakey = getDatakey(path, password, state)
-    if datakey ~= true then
-        for i, lpath in fs.recursion(fs.mntPath(path)) do
-            if not fs.isDirectory(lpath) then
-                xorfs.toggleFile(lpath, datakey)
-            end
+    for _, lpath in fs.recursion(fs.mntPath(path)) do
+        if not fs.isDirectory(lpath) then
+            toggleFile(lpath, password, state)
         end
     end
 end
 
 local function toggleAll(password) --the password must be correct when decrypting files, otherwise the keys will overlap
     local newState = not registry.encrypt
-    for _, path in ipairs(serialization.load("/system/liked/encrypt.lst")) do
+    for _, path in ipairs(loadlist()) do
         if fs.isDirectory(path) then
             toggleFolder(path, password, newState)
         else
@@ -56,17 +60,36 @@ end
 
 local function reg(password)
     if registry.encrypt then
-        for _, path in ipairs(serialization.load("/system/liked/encrypt.lst")) do
-            local datakey = fs.getAttribute(path, "datakey")
-            if datakey then
-                fs.regXor(path, xorfs.xorcode(datakey, password))
-            else
-                fs.regXor(path)
+        if not cache.static[2] then
+            fs.openHooks[function(path)
+                if registry.encrypt then
+                    for _, listpath in ipairs(loadlist()) do
+                        
+                    end
+                end
+            end] = true
+            cache.static[2] = true
+        end
+
+        for _, path in ipairs(loadlist()) do
+            for _, lpath in fs.recursion(fs.mntPath(path)) do
+                if fs.isDirectory(lpath) then
+                    local datakey = fs.getAttribute(lpath, "datakey")
+                    if datakey then
+                        fs.regXor(lpath, xorfs.xorcode(datakey, password))
+                    else
+                        fs.regXor(lpath)
+                    end
+                end
             end
         end
     else
-        for _, path in ipairs(serialization.load("/system/liked/encrypt.lst")) do
-            fs.regXor(path)
+        for _, path in ipairs(loadlist()) do
+            for _, lpath in fs.recursion(fs.mntPath(path)) do
+                if fs.isDirectory(lpath) then
+                    fs.regXor(lpath)
+                end
+            end
         end
     end
 end
