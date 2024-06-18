@@ -8,6 +8,7 @@ local cache = require("cache")
 local likedprotect_fs = {}
 
 local function toggleFile(path, password, state)
+    path = fs.mntPath(path)
     local datakey = fs.getAttribute(path, "datakey")
     if (not not datakey) == (not not state) then
         return
@@ -25,8 +26,10 @@ local function toggleFile(path, password, state)
 end
 
 local function toggleFolder(path, password, state)
-    for i, lpath in fs.recursion(path) do
-        toggleFile(lpath, password, state)
+    for i, lpath in fs.recursion(fs.mntPath(path)) do
+        if not fs.isDirectory(lpath) then
+            toggleFile(lpath, password, state)
+        end
     end
 end
 
