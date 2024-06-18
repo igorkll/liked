@@ -65,7 +65,7 @@ local function reg(password)
         lastRegPassword = password
 
         if not cache.static[2] then
-            fs.openHooks[function(path, mode)
+            fs.openHooks[function(path, mode, ...)
                 if mode and registry.encrypt then
                     local chr = mode:sub(1, 1)
                     if (chr == "w" or chr == "a") and not fs.exists(path) then
@@ -75,7 +75,9 @@ local function reg(password)
                             if paths.equals(path, listpath) or (fs.isDirectory(listpath) and text.startwith(unicode, path .. "/", listpath .. "/")) then
                                 local datakey = getDatakey(path, lastRegPassword, true)
                                 if datakey ~= true then
+                                    local file, err = fs.open(path, mode, ...)
                                     fs.regXor(path, datakey)
+                                    return {file, err}
                                 end
                             end
                         end
