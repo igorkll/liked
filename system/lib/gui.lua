@@ -1633,7 +1633,7 @@ function gui.checkPassword(screen, cx, cy, disableStartSound, noCancel)
             if password then
                 if require("sha256").sha256(password .. (regData.passwordSalt or "")) == regData.password then
                     if regData.encrypt then
-                        require("likedprotect_fs").init(password)
+                        require("likedCryptoFs").init(password)
                     end
                     return true, password
                 else
