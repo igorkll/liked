@@ -1,22 +1,39 @@
 local registry = require("registry")
 local fs = require("filesystem")
 local serialization = require("serialization")
+local xorfs = require("xorfs")
+local uuid = require("uuid")
 local likedprotect_fs = {}
 
-local function toggleFolder(path, state)
-    local xorfs = require("xorfs")
+local function getFileKey(path, password)
+    local datakey = fs.getAttribute(path, "datakey")
+    if not datakey then
+        datakey = uuid.next()
+        fs.setAttribute(path, "datakey", datakey)
+    end
+    return xorfs.xorcode(datakey, password)
+end
+
+local function toggleFile(path, password, state)
+    
+end
+
+local function toggleFolder(path, password, state)
     for i, lpath in ipairs(fs.recursion(path)) do
-        xorfs.toggleFile(path, )
+        toggleFile(lpath, password, state)
     end
 end
 
-local function toggleAll()
+local function toggleAll(password)
+    local newState = not registry.encrypt
     for _, path in ipairs(serialization.load("/system/liked/encrypt.lst")) do
         if fs.isDirectory(path) then
-            toggleFolder(path, xorcode)
+            toggleFolder(path, password, newState)
+        else
+            toggleFile(path, password, newState)
         end
     end
-    registry.encrypt = not registry.encrypt
+    registry.encrypt = newState
 end
 
 
