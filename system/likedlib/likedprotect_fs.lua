@@ -50,14 +50,14 @@ local function reg(password)
         for _, path in ipairs(serialization.load("/system/liked/encrypt.lst")) do
             local datakey = fs.getAttribute(path, "datakey")
             if datakey then
-                fs.xorfs[paths.absolute(path)] = xorfs.xorcode(datakey, password)
+                fs.regXor(path, xorfs.xorcode(datakey, password))
             else
-                fs.xorfs[paths.absolute(path)] = nil
+                fs.regXor(path)
             end
         end
     else
         for _, path in ipairs(serialization.load("/system/liked/encrypt.lst")) do
-            fs.xorfs[paths.absolute(path)] = nil
+            fs.regXor(path)
         end
     end
 end
