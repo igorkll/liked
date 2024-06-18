@@ -3,19 +3,24 @@ local fs = require("filesystem")
 local serialization = require("serialization")
 local xorfs = require("xorfs")
 local uuid = require("uuid")
+local paths = require("paths")
 local likedprotect_fs = {}
 
-local function getFileKey(path, password)
+local function toggleFile(path, password, state)
     local datakey = fs.getAttribute(path, "datakey")
+    if (not not datakey) == (not not state) then
+        return
+    end
+
     if not datakey then
         datakey = uuid.next()
         fs.setAttribute(path, "datakey", datakey)
+    else
+        fs.setAttribute(path, "datakey")
     end
-    return xorfs.xorcode(datakey, password)
-end
 
-local function toggleFile(path, password, state)
-    
+    local xordata = xorfs.xorcode(datakey, password)
+    xorfs.toggleFile(path, xordata)
 end
 
 local function toggleFolder(path, password, state)
@@ -24,7 +29,7 @@ local function toggleFolder(path, password, state)
     end
 end
 
-local function toggleAll(password)
+local function toggleAll(password) --the password must be correct when decrypting files, otherwise the keys will overlap
     local newState = not registry.encrypt
     for _, path in ipairs(serialization.load("/system/liked/encrypt.lst")) do
         if fs.isDirectory(path) then
@@ -36,19 +41,46 @@ local function toggleAll(password)
     registry.encrypt = newState
 end
 
+local function reg(password)
+    if registry.encrypt then
+        for _, path in ipairs(serialization.load("/system/liked/encrypt.lst")) do
+            local datakey = fs.getAttribute(path, "datakey")
+            if datakey then
+                fs.xorfs[paths.absolute(path)] = xorfs.xorcode(datakey, password)
+            else
+                fs.xorfs[paths.absolute(path)] = nil
+            end
+        end
+    else
+        for _, path in ipairs(serialization.load("/system/liked/encrypt.lst")) do
+            fs.xorfs[paths.absolute(path)] = nil
+        end
+    end
+end
+
 
 function likedprotect_fs.isEncrypt()
     return not not registry.encrypt
 end
 
-function likedprotect_fs.encrypt()
-
+function likedprotect_fs.encrypt(password)
+    if not likedprotect_fs.isEncrypt() then return false end
+    toggleAll(password)
+    reg(password)
+    return true
 end
 
-function likedprotect_fs.init()
-    if not likedprotect_fs.isEncrypt() then return end
+function likedprotect_fs.decrypt(password)
+    if likedprotect_fs.isEncrypt() then return false end
+    toggleAll(password)
+    reg()
+    return true
+end
 
-
+function likedprotect_fs.init(password)
+    if not likedprotect_fs.isEncrypt() then return false end
+    reg(password)
+    return true
 end
 
 likedprotect_fs.unloadable = true
