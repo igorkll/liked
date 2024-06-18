@@ -5,6 +5,7 @@ local xorfs = require("xorfs")
 local uuid = require("uuid")
 local paths = require("paths")
 local cache = require("cache")
+local text = require("text")
 local likedprotect_fs = {}
 
 local lList
@@ -15,7 +16,6 @@ local function loadlist()
 end
 
 local function getDatakey(path, password, state)
-    path = fs.mntPath(path)
     local datakey = fs.getAttribute(path, "datakey")
     if (not not datakey) == (not not state) then
         return true
@@ -58,15 +58,28 @@ local function toggleAll(password) --the password must be correct when decryptin
     registry.encrypt = newState
 end
 
+local lastRegPassword
 local function reg(password)
     if registry.encrypt then
+        lastRegPassword = password
+
         if not cache.static[2] then
+            local hookBusy = false
             fs.openHooks[function(path)
+                if hookBusy then return end
+                hookBusy = true
                 if registry.encrypt then
+                    path = fs.mntPath(path)
                     for _, listpath in ipairs(loadlist()) do
-                        
+                        listpath = fs.mntPath(listpath)
+                        if fs.isDirectory(listpath) then
+                            
+                        elseif paths.equals(path, listpath) then
+                            fs.regXor(listpath, xorfs.xorcode(getDatakey(listpath, lastRegPassword, true), lastRegPassword))
+                        end
                     end
                 end
+                hookBusy = false
             end] = true
             cache.static[2] = true
         end
@@ -84,6 +97,8 @@ local function reg(password)
             end
         end
     else
+        lastRegPassword = nil
+
         for _, path in ipairs(loadlist()) do
             for _, lpath in fs.recursion(fs.mntPath(path)) do
                 if fs.isDirectory(lpath) then
