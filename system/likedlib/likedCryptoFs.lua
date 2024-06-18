@@ -59,33 +59,28 @@ local function toggleAll(password) --the password must be correct when decryptin
     registry.encrypt = newState
 end
 
-local lastRegPassword
 local function reg(password)
     if registry.encrypt then
-        lastRegPassword = password
-
-        if not cache.static[2] then
-            fs.openHooks[function(path, mode, ...)
-                if mode and registry.encrypt then
-                    local chr = mode:sub(1, 1)
-                    if (chr == "w" or chr == "a") and not fs.exists(path) then
-                        path = fs.mntPath(path)
-                        for _, listpath in ipairs(loadlist()) do
-                            listpath = fs.mntPath(listpath)
-                            if paths.equals(path, listpath) or (fs.isDirectory(listpath) and text.startwith(unicode, path .. "/", listpath .. "/")) then
-                                local file, err = fs.open(path, mode, ...)
-                                local datakey = getDatakey(path, lastRegPassword, true)
-                                if datakey ~= true then
-                                    fs.regXor(path, datakey)
-                                end
-                                return {file, err}
+        fs.openHooks[function(path, mode, ...)
+            if mode and registry.encrypt then
+                local chr = mode:sub(1, 1)
+                if (chr == "w" or chr == "a") and not fs.exists(path) then
+                    path = fs.mntPath(path)
+                    for _, listpath in ipairs(loadlist()) do
+                        listpath = fs.mntPath(listpath)
+                        if paths.equals(path, listpath) or (fs.isDirectory(listpath) and text.startwith(unicode, path .. "/", listpath .. "/")) then
+                            local file, err = fs.open(path, mode, ...)
+                            local datakey = getDatakey(path, password, true)
+                            if datakey ~= true then
+                                fs.regXor(path, datakey)
                             end
+                            return {file, err}
                         end
                     end
                 end
-            end] = true
-            cache.static[2] = true
-        end
+            end
+        end] = 774
+        cache.static[2] = true
 
         for _, path in ipairs(loadlist()) do
             for _, lpath in fs.recursion(fs.mntPath(path)) do
@@ -100,8 +95,7 @@ local function reg(password)
             end
         end
     else
-        lastRegPassword = nil
-
+        table.clear(fs.openHooks, 774)
         for _, path in ipairs(loadlist()) do
             for _, lpath in fs.recursion(fs.mntPath(path)) do
                 if not fs.isDirectory(lpath) then
