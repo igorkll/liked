@@ -65,15 +65,18 @@ local function reg(password)
         lastRegPassword = password
 
         if not cache.static[2] then
-            fs.openHooks[function(path)
-                if registry.encrypt then
-                    path = fs.mntPath(path)
-                    for _, listpath in ipairs(loadlist()) do
-                        listpath = fs.mntPath(listpath)
-                        if paths.equals(path, listpath) or (fs.isDirectory(listpath) and text.startwith(unicode, path .. "/", listpath .. "/")) then
-                            local datakey = getDatakey(listpath, lastRegPassword, true)
-                            if datakey ~= true then
-                                fs.regXor(listpath, xorfs.xorcode(datakey, lastRegPassword))
+            fs.openHooks[function(path, mode)
+                if mode and registry.encrypt then
+                    local chr = mode:sub(1, 1)
+                    if (chr == "w" or chr == "a") and not fs.exists(path) then
+                        path = fs.mntPath(path)
+                        for _, listpath in ipairs(loadlist()) do
+                            listpath = fs.mntPath(listpath)
+                            if paths.equals(path, listpath) or (fs.isDirectory(listpath) and text.startwith(unicode, path .. "/", listpath .. "/")) then
+                                local datakey = getDatakey(listpath, lastRegPassword, true)
+                                if datakey ~= true then
+                                    fs.regXor(listpath, datakey)
+                                end
                             end
                         end
                     end
