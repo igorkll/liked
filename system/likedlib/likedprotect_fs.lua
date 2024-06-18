@@ -7,11 +7,11 @@ local paths = require("paths")
 local cache = require("cache")
 local likedprotect_fs = {}
 
-local function toggleFile(path, password, state)
+local function getDatakey(path, password, state)
     path = fs.mntPath(path)
     local datakey = fs.getAttribute(path, "datakey")
     if (not not datakey) == (not not state) then
-        return
+        return true
     end
 
     if not datakey then
@@ -21,14 +21,23 @@ local function toggleFile(path, password, state)
         fs.setAttribute(path, "datakey")
     end
 
-    local xordata = xorfs.xorcode(datakey, password)
-    xorfs.toggleFile(path, xordata)
+    return xorfs.xorcode(datakey, password)
+end
+
+local function toggleFile(path, password, state)
+    local datakey = getDatakey(path, password, state)
+    if datakey ~= true then
+        xorfs.toggleFile(path, datakey)
+    end
 end
 
 local function toggleFolder(path, password, state)
-    for i, lpath in fs.recursion(fs.mntPath(path)) do
-        if not fs.isDirectory(lpath) then
-            toggleFile(lpath, password, state)
+    local datakey = getDatakey(path, password, state)
+    if datakey ~= true then
+        for i, lpath in fs.recursion(fs.mntPath(path)) do
+            if not fs.isDirectory(lpath) then
+                xorfs.toggleFile(lpath, datakey)
+            end
         end
     end
 end
