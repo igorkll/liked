@@ -6,6 +6,7 @@ local uuid = require("uuid")
 local paths = require("paths")
 local cache = require("cache")
 local text = require("text")
+local unicode = require("unicode")
 local likedprotect_fs = {}
 
 local lList
@@ -72,9 +73,7 @@ local function reg(password)
                     path = fs.mntPath(path)
                     for _, listpath in ipairs(loadlist()) do
                         listpath = fs.mntPath(listpath)
-                        if fs.isDirectory(listpath) then
-                            
-                        elseif paths.equals(path, listpath) then
+                        if paths.equals(path, listpath) or (fs.isDirectory(listpath) and text.startwith(unicode, path .. "/", listpath .. "/")) then
                             fs.regXor(listpath, xorfs.xorcode(getDatakey(listpath, lastRegPassword, true), lastRegPassword))
                         end
                     end
