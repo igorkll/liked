@@ -7,7 +7,7 @@ local paths = require("paths")
 local cache = require("cache")
 local text = require("text")
 local unicode = require("unicode")
-local likedprotect_fs = {}
+local likedCryptoFs = {}
 
 local lList
 local function loadlist()
@@ -73,12 +73,12 @@ local function reg(password)
                         for _, listpath in ipairs(loadlist()) do
                             listpath = fs.mntPath(listpath)
                             if paths.equals(path, listpath) or (fs.isDirectory(listpath) and text.startwith(unicode, path .. "/", listpath .. "/")) then
+                                local file, err = fs.open(path, mode, ...)
                                 local datakey = getDatakey(path, lastRegPassword, true)
                                 if datakey ~= true then
-                                    local file, err = fs.open(path, mode, ...)
                                     fs.regXor(path, datakey)
-                                    return {file, err}
                                 end
+                                return {file, err}
                             end
                         end
                     end
@@ -113,32 +113,32 @@ local function reg(password)
 end
 
 
-function likedprotect_fs.isEncrypt()
+function likedCryptoFs.isEncrypt()
     return not not registry.encrypt
 end
 
-function likedprotect_fs.encrypt(password)
-    if likedprotect_fs.isEncrypt() then return false end
+function likedCryptoFs.encrypt(password)
+    if likedCryptoFs.isEncrypt() then return false end
     toggleAll(password)
     reg(password)
     return true
 end
 
-function likedprotect_fs.decrypt(password)
-    if not likedprotect_fs.isEncrypt() then return false end
+function likedCryptoFs.decrypt(password)
+    if not likedCryptoFs.isEncrypt() then return false end
     toggleAll(password)
     reg()
     return true
 end
 
-function likedprotect_fs.init(password)
+function likedCryptoFs.init(password)
     if cache.static[0] then return false end
     cache.static[0] = true
 
-    if not likedprotect_fs.isEncrypt() then return false end
+    if not likedCryptoFs.isEncrypt() then return false end
     reg(password)
     return true
 end
 
-likedprotect_fs.unloadable = true
-return likedprotect_fs
+likedCryptoFs.unloadable = true
+return likedCryptoFs

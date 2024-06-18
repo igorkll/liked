@@ -35,7 +35,7 @@ return function(eventData)
                 if ok then
                     registry.password = nil
                     registry.passwordSalt = nil
-                    require("likedprotect_fs").decrypt(rawPassword)
+                    require("likedCryptoFs").decrypt(rawPassword)
                 end
             else
                 gui.warn(screen, nil, nil, "the password is not set")
@@ -51,7 +51,7 @@ return function(eventData)
                             local salt = uuid.next()
                             registry.password = sha256(password1 .. salt)
                             registry.passwordSalt = salt
-                            require("likedprotect_fs").encrypt(password1)
+                            require("likedCryptoFs").encrypt(password1)
                         else
                             gui.warn(screen, nil, nil, "passwords don't match")
                         end
