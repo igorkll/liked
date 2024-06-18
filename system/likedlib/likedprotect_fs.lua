@@ -25,7 +25,7 @@ local function toggleFile(path, password, state)
 end
 
 local function toggleFolder(path, password, state)
-    for i, lpath in ipairs(fs.recursion(path)) do
+    for i, lpath in fs.recursion(path) do
         toggleFile(lpath, password, state)
     end
 end
@@ -65,14 +65,14 @@ function likedprotect_fs.isEncrypt()
 end
 
 function likedprotect_fs.encrypt(password)
-    if not likedprotect_fs.isEncrypt() then return false end
+    if likedprotect_fs.isEncrypt() then return false end
     toggleAll(password)
     reg(password)
     return true
 end
 
 function likedprotect_fs.decrypt(password)
-    if likedprotect_fs.isEncrypt() then return false end
+    if not likedprotect_fs.isEncrypt() then return false end
     toggleAll(password)
     reg()
     return true
