@@ -31,9 +31,11 @@ return function(eventData)
     if windowEventData[1] == "touch" then
         if windowEventData[4] == 3 and windowEventData[3] >= 1 and windowEventData[3] <= 15 then
             if registry.password then
-                if gui.checkPassword(screen) then
+                local ok, rawPassword = gui.checkPassword(screen)
+                if ok then
                     registry.password = nil
                     registry.passwordSalt = nil
+                    require("likedprotect_fs").decrypt(rawPassword)
                 end
             else
                 gui.warn(screen, nil, nil, "the password is not set")
@@ -49,6 +51,7 @@ return function(eventData)
                             local salt = uuid.next()
                             registry.password = sha256(password1 .. salt)
                             registry.passwordSalt = salt
+                            require("likedprotect_fs").encrypt(password1)
                         else
                             gui.warn(screen, nil, nil, "passwords don't match")
                         end

@@ -1635,14 +1635,14 @@ function gui.checkPassword(screen, cx, cy, disableStartSound, noCancel)
                     if regData.encrypt then
                         require("likedprotect_fs").init(password)
                     end
-                    return true
+                    return true, password
                 else
                     local clear = gui.saveZone(screen)
                     gui.warn(screen, cx, cy, "invalid password")
                     clear()
                 end
             else
-                return false --false означает что пользователь отказался от ввода пароля
+                return false, password --false означает что пользователь отказался от ввода пароля
             end
         else
             return true

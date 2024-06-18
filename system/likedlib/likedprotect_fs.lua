@@ -74,7 +74,10 @@ local function reg(password)
                     for _, listpath in ipairs(loadlist()) do
                         listpath = fs.mntPath(listpath)
                         if paths.equals(path, listpath) or (fs.isDirectory(listpath) and text.startwith(unicode, path .. "/", listpath .. "/")) then
-                            fs.regXor(listpath, xorfs.xorcode(getDatakey(listpath, lastRegPassword, true), lastRegPassword))
+                            local datakey = getDatakey(listpath, lastRegPassword, true)
+                            if datakey ~= true then
+                                fs.regXor(listpath, xorfs.xorcode(datakey, lastRegPassword))
+                            end
                         end
                     end
                 end
