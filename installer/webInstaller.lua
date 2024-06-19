@@ -344,6 +344,10 @@ local baseUrl = "https://raw.githubusercontent.com/igorkll/liked/"
 local branches = {"main", "test", "dev"}
 local editions = {"full", "classic", "demo"}
 
+local allowSaveOS = {
+    ["full"] = true
+}
+
 --------------------------------------------
 
 local function segments(path)
@@ -483,8 +487,11 @@ local function generateFunction(address)
                 local funcs = {}
                 for _, edition in ipairs(editions) do
                     table.insert(funcs, function ()
-                        local openOS, mineOS = isOpenOS(address), isMineOS(address)
-                        local omStr = openOSMineOSStr(openOS, mineOS)
+                        local openOS, mineOS, omStr
+                        if allowSaveOS[edition] then
+                            openOS, mineOS = isOpenOS(address), isMineOS(address)
+                            omStr = openOSMineOSStr(openOS, mineOS)
+                        end
 
                         local strs, funcs = {"format disk"}, {function ()
                             status("installation...")

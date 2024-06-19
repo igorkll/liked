@@ -305,7 +305,8 @@ function apps.postInstall(screen, nickname, path, version)
 
     version = tostring(version or "unknown")
     local pname = paths.name(path)
-    if installedInfo.data[pname] and installedInfo.data[pname] == version then
+    local sname = paths.hideExtension(pname)
+    if installedInfo.data[sname] and installedInfo.data[sname] == version then
         return false
     end
 
@@ -332,7 +333,7 @@ function apps.postInstall(screen, nickname, path, version)
 
     if normalAppPath then
         createShadow(pname)
-        installedInfo.data[pname] = version
+        installedInfo.data[sname] = version
         installedInfo.save()
     end
 
@@ -392,7 +393,7 @@ function apps.uninstall(screen, nickname, path, hide)
     else
         fs.remove(paths.concat(shadowPath, pname))
         fs.remove(paths.concat(appsPath, pname))
-        installedInfo.data[pname] = nil
+        installedInfo.data[paths.hideExtension(pname)] = nil
         installedInfo.save()
     end
 
@@ -425,12 +426,13 @@ function apps.check(screen, nickname)
             createShadow(name)
         end
 
-        if not installedInfo.data[name] then
+        if not installedInfo.data[paths.hideExtension(name)] then
             apps.postInstall(screen, nickname, paths.concat(appsPath, name))
         end
     end
 
     for name in pairs(installedInfo.data) do
+        name = name .. ".app"
         if not installedApps[name] then
             local lpath = paths.concat(shadowPath, name)
             if fs.isDirectory(lpath) then
@@ -438,6 +440,31 @@ function apps.check(screen, nickname)
             end
         end
     end
+end
+
+function apps.list()
+    local list = {}
+    
+    local function addToList(path)
+        for _, rawAppName in ipairs(fs.list(path, true)) do
+            local appName = paths.hideExtension(paths.name(rawAppName))
+            local obj = {}
+            local externCfg = paths.concat(rawAppName, "extern.cfg")
+            if fs.exists(externCfg) then
+                obj.extern = serialization.load(externCfg)
+            end
+            list[appName] = obj
+        end
+    end
+
+    for i = #programs.paths, 1, -1 do
+        local path = programs.paths[i]
+        if text.endwith(unicode, path, "apps") or text.endwith(unicode, path, "apps/") then
+            addToList(path)
+        end
+    end
+
+    return list
 end
 
 apps.unloadable = true
