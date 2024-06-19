@@ -14,7 +14,7 @@ infoLayout:createText(2, 2, uix.colors.white, gui_container.chars.dot .. " to us
 infoLayout:createText(2, 4, uix.colors.white, gui_container.chars.dot .. " if the robot has a screen and a video card, a random 8-character password will be set on it and it will be displayed on the screen", rx - 2)
 infoLayout:createText(2, 6, uix.colors.white, gui_container.chars.dot .. " if the robot does not have a screen and/or a video card, then by default it will not have a password", rx - 2)
 infoLayout:createText(2, 8, uix.colors.white, gui_container.chars.dot .. " there is always a screen on the drone and therefore a password will be set for the drone in any case", rx - 2)
-infoLayout:createText(2, 8, uix.colors.white, gui_container.chars.dot .. " after that, you can hide the password display", rx - 2)
+infoLayout:createText(2, 10, uix.colors.white, gui_container.chars.dot .. " after that, you can hide the password display", rx - 2)
 layout:setReturnLayout(infoLayout, uix.colors.green, " INFO ")
 infoLayout:setReturnLayout(layout)
 
