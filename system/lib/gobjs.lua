@@ -147,6 +147,7 @@ function gobjs.checkboxgroup:onEvent(eventData)
                         if self.onSwitch then
                             self:onSwitch(item[1], item[2][1], item[2][2], item[2], eventData) --index, title, state, usertbl, event
                         end
+                        self.lastInteraction = item[2]
                     elseif self.onTextClick then
                         self:onTextClick(item[1], item[2][1], item[2][2], item[2], eventData)
                     end
