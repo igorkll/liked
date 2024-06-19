@@ -396,7 +396,19 @@ function objclass:draw()
     elseif self.type == "text" then
         if self.text then
             local _, _, bg = self.gui.window:get(self.x, self.y)
-            self.gui.window:set(self.x, self.y, bg, self.color, self.text)
+            if self.autoLn then
+                local maxPart
+                if self.autoLn == true then
+                    maxPart = self.gui.window.sizeX - (self.gui.window.x - 1)
+                else
+                    maxPart = self.autoLn
+                end
+                for i, textpart in ipairs(require("parser").toLinesLn(self.text, maxPart)) do
+                    self.gui.window:set(self.x, self.y + (i - 1), bg, self.color, textpart)
+                end
+            else
+                self.gui.window:set(self.x, self.y, bg, self.color, self.text)
+            end
         end
     elseif self.type == "input" then
         local _, _, bg = self.gui.window:get(self.x, self.y)
@@ -599,12 +611,17 @@ function uix:createBigSwitch(x, y, state, color)
     return obj
 end
 
-function uix:createText(x, y, color, text)
+function uix:createText(x, y, color, text, autoLn)
     local obj = setmetatable({gui = self, type = "text"}, {__index = objclass})
     obj.x = x
     obj.y = y
     obj.color = color or colors.white
     obj.text = text
+    if type(autoLn) == "number" then
+        obj.autoLn = autoLn
+    else
+        obj.autoLn = not not autoLn
+    end
 
     table.insert(self.objs, obj)
     return obj
