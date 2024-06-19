@@ -399,7 +399,7 @@ function objclass:draw()
             if self.autoLn then
                 local maxPart
                 if self.autoLn == true then
-                    maxPart = self.gui.window.sizeX - (self.gui.window.x - 1)
+                    maxPart = self.gui.window.sizeX - self.gui.window.x
                 else
                     maxPart = self.autoLn
                 end
@@ -1158,6 +1158,7 @@ end
 local function doLayout(self, layout)
     layout.bgWork = false
     layout.allowAutoActive = nil
+    layout.smartGuiManager = self
     if not self.firstLayout then self.firstLayout = layout end
     return layout
 end
