@@ -848,6 +848,11 @@ function uix:center(offsetX, offsetY, sizeX, sizeY, ...)
     return x, y, sizeX, sizeY, ...
 end
 
+function uix:customCenter(offsetX, offsetY, cls, sizeX, sizeY, ...)
+    local x, y = math.round((self.window.sizeX / 2) - (sizeX / 2)) + offsetX + 1, math.round((self.window.sizeY / 2) - (sizeY / 2)) + offsetY + 1
+    return x, y, cls, sizeX, sizeY, ...
+end
+
 ------------------------------------ layout api
 
 function uix:setReturnLayout(returnLayout, color, char)

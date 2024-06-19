@@ -152,7 +152,7 @@
 /system/likedlib/account.lua
 /system/likedlib/eeprom.lua
 /system/likedlib/installer.lua
-/system/likedlib/likedprotect_fs.lua
+/system/likedlib/likedCryptoFs.lua
 /system/likedlib/sysdata.lua
 /system/likedlib/sysmode/classic.reg
 /system/likedlib/sysmode/demo.reg
