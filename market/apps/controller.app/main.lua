@@ -1,4 +1,5 @@
 local uix = require("uix")
+local gobjs = require("gobjs")
 local gui_container = require("gui_container")
 
 local screen = ...
@@ -8,7 +9,7 @@ local rx, ry = ui:zoneSize()
 ----------------------------- ui
 
 layout = ui:create("controller", uix.colors.black)
-layout:createButton(uix:center(0, 0, 16, 3, uix.colors.white, uix.colors.black, "connect"))
+layout:createButton(layout:center(0, 0, 16, 3, uix.colors.white, uix.colors.gray, "connect"))
 
 infoLayout = ui:create("controller [INFO]", uix.colors.black)
 infoLayout:createText(2, 2, uix.colors.white, gui_container.chars.dot .. " to use, flash the EEPROM of the robot/drone with the \"RC Control\" firmware through the settings>eeprom", rx - 2)

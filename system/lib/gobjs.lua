@@ -128,6 +128,18 @@ function gobjs.checkboxgroup:onEvent(eventData)
                 local item = self.itemsPos[eventData[4]]
                 if item then
                     if eventData[3] <= 2 then
+                        if self.oneSelect not item[2][2] then
+                            for i, lstobj in ipairs(self.list) do
+                                if lstobj[2] then
+                                    local redrawPos = i
+                                    self:redrawPoint(redrawPos, lstobj)
+                                    if self.onSwitch then
+                                        self:onSwitch(i, lstobj[1], lstobj[2], lstobj, eventData) --index, title, state, usertbl, event
+                                    end
+                                    lstobj[2] = false
+                                end
+                            end
+                        end
                         item[2][2] = not item[2][2]
                         self:redrawPoint(eventData[4], item[2])
                         if self.onSwitch then

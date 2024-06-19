@@ -844,7 +844,7 @@ function uix:createColorpic(x, y, sx, sy, text, color, full)
 end
 
 function uix:center(offsetX, offsetY, sizeX, sizeY, ...)
-    local x, y = math.round((self.window.sizeX / 2) - (sizeX / 2)) + offsetX, math.round((self.window.sizeY / 2) - (sizeY / 2)) + offsetY
+    local x, y = math.round((self.window.sizeX / 2) - (sizeX / 2)) + offsetX + 1, math.round((self.window.sizeY / 2) - (sizeY / 2)) + offsetY + 1
     return x, y, sizeX, sizeY, ...
 end
 
