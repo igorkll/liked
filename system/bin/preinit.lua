@@ -63,3 +63,5 @@ if registry.forceLikedLoader then
         computer.shutdown("fast")
     end
 end
+
+--need to add an auto-update "likedloader" that will check the label and if it matches the liked loader and the firmware is different, then it will be updated
