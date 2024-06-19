@@ -1,5 +1,10 @@
 # likedbox
 
+## installation
+the installation of this version of liked is performed only through a computer with already installed liked.
+this is done because this liked version does not have a shell or desktop, so you still would not be able to use it without configuration from another device.
+to install, right-click on the target hard drive on the desktop and select "flash os > likedbox".
+
 ## this is an embedded operating system liked (similar to windowsCE)
 in fact, this is a full-fledged liked one, but it does not contain a desktop or any pre-installed applications.
 after loading, it launches an application named "shell".
