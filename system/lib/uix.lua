@@ -245,7 +245,7 @@ function objclass:uploadEvent(eventData)
     elseif self.type == "up" then
         if self.gui.returnLayout then
             local _, py = self.gui.window:toFakePos(1, 1)
-            if eventData[1] == "touch" and eventData[3] >= 1 and eventData[3] <= 3 and eventData[4] == py then
+            if eventData[1] == "touch" and eventData[3] >= 1 and eventData[3] <= #self.gui.returnTitle and eventData[4] == py then
                 if type(self.gui.returnLayout) == "function" then
                     self.gui.returnLayout()
                 else
@@ -430,10 +430,10 @@ function objclass:draw()
             end
         end
     elseif self.type == "up" then
-        liked.drawFullUpBar(self.gui.window.screen, (self.gui.returnLayout and "   " or "") .. self.title, self.withoutFill, self.bgcolor, self.wide, true)
+        liked.drawFullUpBar(self.gui.window.screen, (self.gui.returnLayout and string.rep(" ", #self.gui.returnTitle) or "") .. self.title, self.withoutFill, self.bgcolor, self.wide, true)
         if self.gui.returnLayout then
             local px, py = self.gui.window:toFakePos(1, 1)
-            self.gui.window:set(px, py, colors.red, colors.white, " < ")
+            self.gui.window:set(px, py, self.gui.returnColor, colors.white, self.gui.returnTitle)
         end
         liked.upBarShadow(self.gui.window.screen)
     elseif self.type == "plane" then
@@ -828,8 +828,10 @@ end
 
 ------------------------------------ layout api
 
-function uix:setReturnLayout(returnLayout)
+function uix:setReturnLayout(returnLayout, color, char)
     self.returnLayout = returnLayout
+    self.returnColor = color or colors.red
+    self.returnTitle = char or " < "
 end
 
 function uix:timer(time, callback, count)
