@@ -22,7 +22,7 @@ layout:createText(2, 4, uix.colors.black, "Boot Disk        : " .. fs.bootaddres
 layout:createText(2, 5, uix.colors.black, "Device Type      : " .. system.getDeviceType())
 layout:createText(2, 6, uix.colors.black, "Processor        : tier-" .. tostring(cpuLevel) .. (isApu and " (APU)" or "") .. (isCreative and " (Creative)" or ""))
 layout:createText(2, 7, uix.colors.black, "Computer Score   : ")
-layout:createText(21, 7, liked.getScoreColor(score), tostring(score) .. " / 10", 1, liked.getScoreColor(score))
+layout:createText(21, 7, liked.getScoreColor(score), tostring(score) .. " / 10")
 
 local linePoses = 22
 local textSizes = 16

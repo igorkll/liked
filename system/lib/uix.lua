@@ -843,6 +843,11 @@ function uix:createColorpic(x, y, sx, sy, text, color, full)
     return button
 end
 
+function uix:center(offsetX, offsetY, sizeX, sizeY, ...)
+    local x, y = math.round((self.window.sizeX / 2) - (sizeX / 2)) + offsetX, math.round((self.window.sizeY / 2) - (sizeY / 2)) + offsetY
+    return x, y, sizeX, sizeY, ...
+end
+
 ------------------------------------ layout api
 
 function uix:setReturnLayout(returnLayout, color, char)
