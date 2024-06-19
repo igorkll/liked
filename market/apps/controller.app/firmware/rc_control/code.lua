@@ -1,0 +1,5 @@
+computer.beep()
+computer.beep()
+computer.beep()
+computer.beep()
+computer.beep()

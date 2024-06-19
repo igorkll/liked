@@ -453,6 +453,8 @@ function apps.list()
             if fs.exists(externCfg) then
                 obj.extern = serialization.load(externCfg)
             end
+            obj.version = installedInfo.data[appName]
+            obj.path = rawAppName
             list[appName] = obj
         end
     end
