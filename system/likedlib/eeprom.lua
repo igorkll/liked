@@ -8,13 +8,13 @@ eeprom.paths = {"/data/firmware", "/vendor/firmware", "/system/firmware"}
 
 function eeprom.list(screen)
     local labels, list = {}, {}
-    local paths = table.clone(eeprom.paths)
-    for _, app in ipairs(apps.list()) do
+    local pathsList = table.clone(eeprom.paths)
+    for _, app in pairs(apps.list()) do
         if app.extern and app.extern.firmwares then
-            table.insert(paths, paths.concat(app.path, "firmware"))
+            table.insert(pathsList, paths.concat(app.path, "firmware"))
         end
     end
-    for _, path in ipairs(paths) do
+    for _, path in ipairs(pathsList) do
         for _, file in ipairs(fs.list(path)) do
             local fullpath = paths.concat(path, file)
 
