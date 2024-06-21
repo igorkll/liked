@@ -6,9 +6,12 @@ local system = require("system")
 local component = require("component")
 
 local screen = ...
+local port = 38710
 local ui = uix.manager(screen)
 local rx, ry = ui:zoneSize()
 local modem = component.proxy(utils.findModem(true))
+
+utils.openPort(modem, port)
 
 -----------------------------
 
