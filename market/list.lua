@@ -44,6 +44,17 @@ local list = {
         files = {"main.lua", "icon.t2p"}
     },
     {
+        name = "controller",
+        version = "1.0",
+        vendor = "logic",
+        description = "allows you to remotely control robots and drones",
+        minDiskSpace = 64,
+
+        path = "/data/apps/controller.app",
+        urlPrimaryPart = selfurlpart .. "/apps/controller.app/",
+        files = {"main.lua", "icon.t2p", "logic.lua", "extern.cfg", "firmware/rc_control/code.lua", "firmware/rc_control/label.txt"}
+    },
+    {
         name = "worm",
         version = "1",
         vendor = "computercraft",
@@ -54,7 +65,7 @@ local list = {
         urlPrimaryPart = selfurlpart .. "/apps/worm.app/",
         files = {"main.lua", "icon.t2p"}
     },
-    {
+    { --need rewrite
         name = "chat",
         version = "2.6",
         vendor = "logic",
@@ -79,7 +90,7 @@ local list = {
             assert(programs.execute("/data/autoruns/chat_demon.lua"))
         end
     },
-    {
+    { --need rewrite
         name = "irc",
         version = "1",
         vendor = "Nathan Flynn",
@@ -90,7 +101,7 @@ local list = {
         urlPrimaryPart = selfurlpart .. "/apps/irc.app/",
         files = {"main.lua", "icon.t2p"}
     },
-    {
+    { --need rewrite
         name = "brainfuck",
         version = "2",
         vendor = "logic",
@@ -206,7 +217,7 @@ local list = {
         urlPrimaryPart = selfurlpart .. "/apps/explode.app/",
         files = {"main.lua", "icon.t2p", "config.cfg"}
     },
-    {
+    { --need rewrite
         name = "camera",
         version = "1.3",
         vendor = "logic",
@@ -311,7 +322,7 @@ local list = {
         urlPrimaryPart = selfurlpart .. "/apps/hologram.app/",
         files = {"main.lua", "icon.t2p", "unreg.reg", "autorun.lua", "holograms/fireworks.lua", "holograms/fullbox.lua", "holograms/tree.lua", "holograms/christmasTree.lua"}
     },
-    {
+    { --has no implementation (needs to be implemented)
         name = "printer3d",
         version = "1",
         vendor = "logic",
@@ -321,7 +332,7 @@ local list = {
         path = "/data/apps/printer3d.app",
         urlPrimaryPart = selfurlpart .. "/apps/printer3d.app/"
     },
-    {
+    { --need rewrite
         name = "toolbox",
         version = "1",
         vendor = "logic",
@@ -353,7 +364,7 @@ local list = {
         path = "/data/apps/assembler.app",
         urlPrimaryPart = selfurlpart .. "/apps/assembler.app/"
     },
-    {
+    { --need rewrite
         name = "cardwriter",
         version = "2",
         vendor = "logic",
@@ -363,7 +374,7 @@ local list = {
         path = "/data/apps/cardwriter.app",
         urlPrimaryPart = selfurlpart .. "/apps/cardwriter.app/"
     },
-    {
+    { --requires further development
         name = "calculator",
         version = "2.1",
         vendor = "logic",
@@ -373,7 +384,7 @@ local list = {
         path = "/data/apps/calculator.app",
         urlPrimaryPart = selfurlpart .. "/apps/calculator.app/"
     },
-    {
+    { --requires further development
         name = "openbox",
         version = "1",
         vendor = "logic",
@@ -385,7 +396,7 @@ local list = {
         path = "/data/apps/openbox.app",
         urlPrimaryPart = selfurlpart .. "/apps/openbox.app/"
     },
-    {
+    { --requires further development
         name = "navigation",
         version = "1",
         vendor = "logic",
@@ -418,7 +429,7 @@ local list = {
         urlPrimaryPart = selfurlpart .. "/apps/slideshow.app/",
         files = {"main.lua", "icon.t2p", "config.cfg", "hue.t2p"}
     },
-    {
+    { --has no implementation (needs to be implemented)
         name = "videoplayer",
         version = "1",
         vendor = "logic",
@@ -429,7 +440,7 @@ local list = {
         urlPrimaryPart = selfurlpart .. "/apps/videoplayer.app/",
         files = {"main.lua", "icon.t2p", "config.cfg"}
     },
-    {
+    { --need rewrite
         name = "TPSmonitor",
         version = "1",
         vendor = "logic",
@@ -441,7 +452,7 @@ local list = {
         urlPrimaryPart = selfurlpart .. "/apps/TPSmonitor.app/",
         files = {"main.lua", "icon.t2p", "config.cfg"}
     },
-    {
+    { --requires further development
         name = "bigClock",
         version = "1",
         vendor = "logic",
@@ -452,7 +463,7 @@ local list = {
         urlPrimaryPart = selfurlpart .. "/apps/bigClock.app/",
         files = {"main.lua", "icon.t2p", "config.cfg"}
     },
-    {
+    { --requires further development
         name = "guidemo",
         version = "1",
         vendor = "logic",
@@ -463,7 +474,7 @@ local list = {
         urlPrimaryPart = selfurlpart .. "/apps/guidemo.app/",
         files = {"main.lua", "icon.t2p", "demo/Switches.lua"}
     },
-    {
+    { --requires further development
         name = "midi",
         version = "1",
         vendor = "logic",
@@ -475,7 +486,7 @@ local list = {
         urlPrimaryPart = selfurlpart .. "/apps/midi.app/",
         files = {"main.lua", "icon.t2p", "icon_1.t2p", "formats.cfg"}
     },
-    {
+    { --requires further development
         name = "drawtest",
         version = "1",
         vendor = "logic",
@@ -521,7 +532,7 @@ local list = {
         urlPrimaryPart = selfurlpart .. "/apps/codeMaster.app/",
         files = {"main.lua", "icon.t2p", "logo.t2p", "bios.lua", "documentation_rus.txt", "documentation_eng.txt", "examples/hello.lua", "examples/dots.lua", "examples/gui.lua", "examples/keyboard.lua"}
     },
-    {
+    { --requires further development
         name = "imageViewer",
         version = "1",
         vendor = "logic",
@@ -532,7 +543,7 @@ local list = {
         urlPrimaryPart = selfurlpart .. "/apps/imageViewer.app/",
         files = {"main.lua", "icon.t2p", "config.cfg", "logo.t2p", "logo.t3p"}
     },
-    {
+    { --requires further development
         name = "analyzer",
         version = "1",
         vendor = "logic",
@@ -543,7 +554,7 @@ local list = {
         urlPrimaryPart = selfurlpart .. "/apps/analyzer.app/",
         files = {"main.lua", "icon.t2p"}
     },
-    {
+    { --requires further development
         name = "flapix",
         version = "1",
         vendor = "logic",
@@ -565,7 +576,7 @@ local list = {
         urlPrimaryPart = selfurlpart .. "/apps/cleaner.app/",
         files = {"main.lua", "icon.t2p"}
     },
-    {
+    { --has no implementation (needs to be implemented)
         name = "eepacker",
         version = "1",
         vendor = "logic",
@@ -576,7 +587,7 @@ local list = {
         urlPrimaryPart = selfurlpart .. "/apps/eepacker.app/",
         files = {"main.lua", "icon.t2p"}
     },
-    {
+    { --has no implementation (needs to be implemented)
         name = "clock",
         version = "1",
         vendor = "logic",
@@ -587,7 +598,7 @@ local list = {
         urlPrimaryPart = selfurlpart .. "/apps/clock.app/",
         files = {"main.lua", "icon.t2p", "alarm.t2p", "clock.t2p", "stopwatch.t2p", "timer.t2p", "palette.plt"}
     },
-    {
+    { --requires further development
         name = "bootmanager",
         version = "1",
         vendor = "logic",
@@ -614,7 +625,7 @@ local list = {
         urlPrimaryPart = selfurlpart .. "/apps/zxViewer.app/",
         files = {"main.lua", "icon.t2p", "formats.cfg"}
     },
-    {
+    { --has no implementation (needs to be implemented)
         name = "browser",
         version = "1",
         vendor = "logic",

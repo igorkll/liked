@@ -1,6 +1,9 @@
 local uix = require("uix")
 local gobjs = require("gobjs")
 local gui_container = require("gui_container")
+local utils = require("utils")
+local system = require("system")
+local logic = loadfile(system.getResourcePath("logic.lua"), nil, _ENV)
 
 local screen = ...
 local ui = uix.manager(screen)
