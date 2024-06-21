@@ -9,14 +9,15 @@ local rx, ry = ui:zoneSize()
 ----------------------------- ui
 
 layout = ui:create("controller", uix.colors.black)
-layout:createButton(layout:center(0, 4, 16, 3, uix.colors.white, uix.colors.gray, "connect"))
-local connectlist = layout:createCustom(layout:customCenter(0, -4, gobjs.checkboxgroup, 32, 10))
-layout:createVText(layout.sizeX / 2, connectlist.y - 1, uix.colors.white, "list of devices")
-connectlist.list = {}
+local connectList = layout:createCustom(layout:customCenter(0, -4, gobjs.checkboxgroup, 32, 10))
+local passwordInput = layout:createInput(layout:centerOneSize(0, 2, 32, nil, nil, "*"))
+local connactButton layout:createButton(layout:center(0, 5, 16, 3, uix.colors.white, uix.colors.gray, "connect"))
+layout:createVText(layout.sizeX / 2, connectList.y - 1, uix.colors.white, "list of devices")
+connectList.list = {}
 for i = 1, 32 do
-    table.insert(connectlist.list, {"TEST " .. i, false})
+    table.insert(connectList.list, {"TEST " .. i, false})
 end
-connectlist.oneSelect = true
+connectList.oneSelect = true
 
 infoLayout = ui:create("controller [INFO]", uix.colors.black)
 infoLayout:createText(2, 2, uix.colors.white, gui_container.chars.dot .. " to use, flash the EEPROM of the robot/drone with the \"RC Control\" firmware through the settings>eeprom", rx - 2)
