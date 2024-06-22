@@ -7,6 +7,7 @@ local component = require("component")
 local gui = require("gui")
 local computer = require("computer")
 local event = require("event")
+local unicode = require("unicode")
 
 local screen = ...
 local port = 38710
@@ -116,7 +117,7 @@ local function connect()
         local ret = deviceRequest(obj[3], "rc_connect", passwordInput.read.getBuffer())
         if ret == true then
             passwordInput.read.setBuffer("")
-            rcLayout:select()
+            rcLayout:select(obj[3])
         else
             ui:forceDraw()
             gui.warn(screen, nil, nil, "incorrect password")
@@ -209,7 +210,7 @@ rcLayout = ui:create("controller [Remote Control]", uix.colors.black)
 rcLayout:setReturnLayout(layout)
 
 local switchTitle = rcLayout:createText(2, rcLayout.sizeY - 1, uix.colors.white, "allow remote wake-up")
-local wakeUpSwitch = rcLayout:createSwitch(switchTitle.x + switchTitle.sizeX + 1, rcLayout.sizeY - 1)
+local wakeUpSwitch = rcLayout:createSwitch(switchTitle.x + unicode.len(switchTitle.text) + 1, rcLayout.sizeY - 1)
 
 function rcLayout:onSelect(controlAddress)
     self.controlAddress = controlAddress
