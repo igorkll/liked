@@ -136,7 +136,11 @@ local function checkPassword(password)
 end
 
 local function send(isTunnel, address, ...)
-    
+    if isTunnel then
+        tunnel.send(...)
+    else
+        modem.send(address, port, ...)
+    end
 end
 
 local oldAdvTime = -math.huge
@@ -157,6 +161,7 @@ while true do
     local eventData = {computer.pullSignal(0.5)}
     if eventData[1] == "modem_message" then
         local sender = eventData[3]
+        local isTunnel = tunnel and eventData[2] == tunnel.address
         if eventData[6] == "rc_radv" then
             if modem then
                 modem.send(sender, port, "rc_adv", devicetype, devicename)
@@ -170,14 +175,14 @@ while true do
                 computer.beep(1800, 0.05)
                 computer.beep(1800, 0.05)
                 setColor(currentColor)
-                modem.send(sender, port, true)
+                send(isTunnel, sender, true)
                 currentUser = sender
             else
                 setColor(0xff0000)
                 computer.beep(100, 0.1)
                 computer.beep(100, 0.1)
                 setColor(currentColor)
-                modem.send(sender, port, false)
+                send(isTunnel, sender, false)
             end
         end
     end
