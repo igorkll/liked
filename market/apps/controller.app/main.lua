@@ -256,6 +256,7 @@ function shutdownButton:onDrop()
         deviceSend(controlAddress, "rc_exec", "computer.shutdown()")
         controlAddress = nil
         layout:select()
+        return
     end
     self.gui:fullStart()
     ui:draw()
