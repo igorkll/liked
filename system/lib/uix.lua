@@ -1144,10 +1144,10 @@ end
 
 function manager:select(layout, ...)
     if self.current then
-        self.current:fullStop()
         if self.current.onUnselect then
             self.current:onUnselect()
         end
+        self.current:fullStop()
     end
 
     self.current = layout
