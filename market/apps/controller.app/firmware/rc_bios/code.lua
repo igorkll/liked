@@ -25,6 +25,7 @@ gpu = component.proxy(component.list("gpu")() or "")
 screen = component.list("screen")()
 if gpu and screen then
     gpu.bind(screen)
+    gpu.setResolution(10, 2)
 else
     gpu = nil
 end
@@ -32,10 +33,12 @@ end
 local function setColor(color)
     (drone or robot).setLightColor(color)
 end
+setColor(0xffffff)
 
 local function setText(text)
     if drone then
         drone.setStatusText(text)
+        return 1
     elseif gpu then
         local rx, ry = gpu.getResolution()
         gpu.setBackground(0)
@@ -53,10 +56,13 @@ local function setText(text)
                 index = index + 1
             end
         end
+        return 1
     end
 end
+local screenOk = setText("")
 
-local function getDeviceType()
+local devicetype
+do
     local deviceinfo = computer.getDeviceInfo()
 
     local function isType(ctype)
@@ -70,12 +76,25 @@ local function getDeviceType()
         end
     end
     
-    return isType("tablet") or isType("microcontroller") or isType("drone") or isType("robot") or isServer() or isType("computer") or "unknown"
+    devicetype = isType("tablet") or isType("microcontroller") or isType("drone") or isType("robot") or isServer() or isType("computer") or "unknown"
 end
 
 ----------------------------------------------
 
 local randomPassword
+local passwordHash
+
+if screenOk then
+    if passwordHash then
+        setText("password\nchanged")
+    else
+        randomPassword = ""
+        for i = 1, 8 do
+            randomPassword = randomPassword .. string.char(math.random(33, 126))
+        end
+        setText("password:\n" .. randomPassword)
+    end
+end
 
 while true do
     local eventData = {computer.pullSignal(0.5)}
