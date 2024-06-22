@@ -136,22 +136,20 @@ local function checkPassword(password)
 end
 
 local function advSend()
-    modem.broadcast(port, "rc_adv", devicetype)
+    modem.broadcast(port, "rc_adv", devicetype, devicename)
 end
 
 local oldAdvTime = -math.huge
 local currentUser
 while true do
-    if not currentUser then
+    if not currentUser and modem then
         local uptime = computer.uptime()
         if uptime - oldAdvTime > 3 then
-            if modem then
-                if not randomPassword and not passwordHash then
-                    pcall(modem.setStrength, 8)
-                end
-                advSend()
-                pcall(modem.setStrength, math.huge)
+            if not randomPassword and not passwordHash then
+                pcall(modem.setStrength, 8)
             end
+            advSend()
+            pcall(modem.setStrength, math.huge)
             oldAdvTime = uptime
         end
     end
@@ -159,6 +157,9 @@ while true do
     if eventData[1] == "modem_message" and eventData[2] == modem.address then
         if eventData[6] == "rc_radv" then
             advSend()
+            if tunnel then
+                tunnel.send()
+            end
         elseif not currentUser and eventData[6] == "rc_connect" and (randomPassword or passwordHash or eventData[5] <= 8) then
             if checkPassword(eventData[7]) then
                 setColor(0x00ff00)
