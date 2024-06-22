@@ -44,6 +44,25 @@ local function advRequest()
     sendAll("rc_radv")
 end
 
+local function hash(str)
+    local values = {}
+    for i = 1, 16 do
+        values[i] = ((8 * i * #str) + #str) % 256
+    end
+    for i = 0, #str - 1 do
+        local previous = str:byte(((i - 1) % #str) + 1)
+        local byte = str:byte(i + 1)
+        local next = str:byte(((i + 1) % #str) + 1)
+        local index = ((i + previous + next) % 16) + 1
+        values[index] = (((values[index] + byte + 13) * 3 * next) + (next * previous) + ((i + 1) * 6)) % 256
+    end
+    local hashStr = ""
+    for i = 1, #values do
+        hashStr = hashStr .. string.char(values[i])
+    end
+    return hashStr
+end
+
 -----------------------------
 
 local layout = ui:create("controller", uix.colors.black)
@@ -216,6 +235,19 @@ rcLayout:setReturnLayout(layout)
 local switchTitle = rcLayout:createText(2, rcLayout.sizeY - 1, uix.colors.white, "allow remote wake-up")
 local wakeUpSwitch = rcLayout:createSwitch(switchTitle.x + unicode.len(switchTitle.text) + 1, rcLayout.sizeY - 1)
 local colorpic = rcLayout:createColorpic(2, rcLayout.sizeY - 3, 13, 1, "light color", 0xffffff, true)
+local randPass = rcLayout:createButton(2, rcLayout.sizeY - 7, 21, 1, "use random password", 0xffffff, true)
+local customPass = rcLayout:createButton(2, rcLayout.sizeY - 5, 21, 1, "use custom password", 0xffffff, true)
+
+function randPass:onClick()
+    deviceRequest(controlAddress, "rc_exec", "component.invoke(component.list('eeprom')(), 'set', '')")
+end
+
+function customPass:onClick()
+    if password1 == password2 then
+        deviceRequest(controlAddress, "rc_exec", "component.invoke(component.list('eeprom')(), 'set', ...)", hash(password1))
+    end
+    ui:draw()
+end
 
 function colorpic:onColor(_, color)
     deviceRequest(controlAddress, "rc_exec", "setColor(" .. color .. ")")

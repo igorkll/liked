@@ -146,10 +146,10 @@ local function hash(str)
 end
 
 local function checkPassword(password)
-    if randomPassword then
-        return password == randomPassword
-    elseif passwordHash then
+    if passwordHash then
         return hash(password) == passwordHash
+    elseif randomPassword then
+        return password == randomPassword
     else
         return true
     end
