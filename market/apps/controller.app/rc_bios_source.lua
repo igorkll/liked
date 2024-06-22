@@ -106,10 +106,11 @@ local function hash(str)
         values[i] = ((8 * i * #str) + #str) % 256
     end
     for i = 0, #str - 1 do
+        local previous = str:byte(((i - 1) % #str) + 1)
         local byte = str:byte(i + 1)
         local next = str:byte(((i + 1) % #str) + 1)
-        local index = (i % 16) + 1
-        values[index] = (((values[index] + byte + 13) * 3 * next) + next + ((i + 1) * 6)) % 256
+        local index = ((i + previous + next) % 16) + 1
+        values[index] = (((values[index] + byte + 13) * 3 * next) + (next * previous) + ((i + 1) * 6)) % 256
     end
     local hashStr = ""
     for i = 1, #values do
@@ -122,7 +123,7 @@ local function checkPassword(password)
     if randomPassword then
         return password == randomPassword
     elseif passwordHash then
-        
+        return hash(password) == passwordHash
     else
         return true
     end
