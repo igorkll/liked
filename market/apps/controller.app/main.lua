@@ -79,6 +79,13 @@ function layout:onSelect()
     connectList.list = {}
 end
 
+function layout:onFullStart()
+    local uptime = computer.uptime()
+    for i = 1, #connectList.list do
+        connectList.list[i][4] = uptime
+    end
+end
+
 layout:listen("modem_message", function (_, localAddress, sender, senderPort, dist, v1, v2)
     if localAddress == modem.address and senderPort == port and v1 == "rc_adv" then
         local tbl = {v2 .. " " .. sender:sub(1, 6) .. " dist:" .. math.roundTo(dist, 1), false, sender, computer.uptime()}
