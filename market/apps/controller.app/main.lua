@@ -6,6 +6,7 @@ local system = require("system")
 local component = require("component")
 local gui = require("gui")
 local computer = require("computer")
+local event = require("event")
 
 local screen = ...
 local port = 38710
@@ -35,6 +36,20 @@ connectList.oneSelect = true
 local passwordInput = layout:createInput(layout:centerOneSize(0, 2, 32, nil, nil, "*", nil, nil, nil, "password: "))
 local connectButton = layout:createButton(layout:center(-6, 5, 16, 3, uix.colors.white, uix.colors.gray, "connect"))
 local refreshButton = layout:createButton(layout:center(8, 5, 9, 3, uix.colors.orange, uix.colors.white, "refresh"))
+
+local function deviceRequest(address, method, ...)
+    if not modem.send(address, port, method, ...) then
+        return nil, "the message could not be sent"
+    end
+    local startWaitTime = computer.uptime()
+    while computer.uptime() - startWaitTime > 5 do
+        local eventData = {event.pull(0.5, "modem_message", modem.address, address, port)}
+        if eventData[1] and eventData[6] ~= "rc_adv" then
+            return table.unpack(eventData, 6)
+        end
+    end
+    return nil, "no response was received"
+end
 
 function connectButton:onClick()
     local obj
