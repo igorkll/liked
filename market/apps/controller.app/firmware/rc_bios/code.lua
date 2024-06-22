@@ -37,7 +37,22 @@ local function setText(text)
     if drone then
         drone.setStatusText(text)
     elseif gpu then
-        
+        local rx, ry = gpu.getResolution()
+        gpu.setBackground(0)
+        gpu.setForeground(0xffffff)
+        gpu.fill(1, 1, rx, ry, " ")
+        local line = 1
+        local index = 1
+        for i = 1, #text do
+            local char = text:sub(i, i)
+            if char == "\n" then
+                line = line + 1
+                index = 1
+            else
+                gpu.set(index, line, text)
+                index = index + 1
+            end
+        end
     end
 end
 
