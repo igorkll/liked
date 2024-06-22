@@ -14,10 +14,13 @@ if not modem then
     end
 end
 modem = component.proxy(modem)
+local tunnel = component.proxy(component.list("tunnel")() or "")
+tunnel.setWakeMessage("wake")
 
 local port = 38710
 modem.close()
 modem.open(port)
+modem.setWakeMessage("wake")
 pcall(modem.setStrength, math.huge)
 
 drone = component.proxy(component.list("drone")() or "")
