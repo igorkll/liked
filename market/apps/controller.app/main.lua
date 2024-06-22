@@ -27,8 +27,8 @@ for i = 1, 32 do
 end
 
 local passwordInput = layout:createInput(layout:centerOneSize(0, 2, 32, nil, nil, "*", nil, nil, nil, "password: "))
-local connectButton = layout:createButton(layout:center(-5, 5, 16, 3, uix.colors.white, uix.colors.gray, "connect"))
-local refreshButton = layout:createButton(layout:center(9, 5, 9, 3, uix.colors.orange, uix.colors.white, "refresh"))
+local connectButton = layout:createButton(layout:center(-6, 5, 16, 3, uix.colors.white, uix.colors.gray, "connect"))
+local refreshButton = layout:createButton(layout:center(8, 5, 9, 3, uix.colors.orange, uix.colors.white, "refresh"))
 
 function connectButton:onClick()
     rcLayout:select()
