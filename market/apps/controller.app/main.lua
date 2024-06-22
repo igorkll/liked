@@ -252,7 +252,7 @@ local shutdownButton = rcLayout:createButton(colorpic.x + colorpic.sx + 1, rcLay
 
 function shutdownButton:onDrop()
     self.gui:fullStop()
-    if gui.yesno(screen, nil, nil, "are you sure you want to turn off the device? if you do not have physical access to the device, make sure that the wake-up option is enabled!") then
+    if gui.yesno(screen, nil, nil, "are you sure you want to turn off the device?") then
         deviceSend(controlAddress, "rc_exec", "computer.shutdown()")
         controlAddress = nil
         layout:select()
