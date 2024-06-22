@@ -99,6 +99,7 @@ end
 
 function wakeAllButton:onClick()
     sendAll("rc_wake")
+    layout:timer(1, advRequest, 1)
 end
 
 function connectButton:onClick()

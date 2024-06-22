@@ -16,7 +16,7 @@ end
 
 drone = component.proxy(component.list("drone")() or "")
 robot = component.proxy(component.list("robot")() or "")
-local devicename = "unknown"
+local devicename
 local gpu = component.proxy(component.list("gpu")() or "")
 local eeprom = component.proxy(component.list("eeprom")() or "")
 local screen = component.list("screen")()
@@ -137,7 +137,7 @@ end
 
 local function send(isTunnel, address, ...)
     if isTunnel then
-        tunnel.send(...)
+        tunnel.send("rc_tunnel", ...)
     else
         modem.send(address, port, ...)
     end
