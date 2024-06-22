@@ -4,13 +4,13 @@ local tunnel = component.proxy(component.list("tunnel")() or "")
 local port = 38710
 
 if tunnel then
-    tunnel.setWakeMessage("wake")
+    tunnel.setWakeMessage("rc_wake")
 end
 
 if modem then
     modem.close()
     modem.open(port)
-    modem.setWakeMessage("wake")
+    modem.setWakeMessage("rc_wake")
     pcall(modem.setStrength, math.huge)
 end
 

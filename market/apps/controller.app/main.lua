@@ -36,6 +36,7 @@ connectList.oneSelect = true
 local passwordInput = layout:createInput(layout:centerOneSize(0, 2, 32, nil, nil, "*", nil, nil, nil, "password: "))
 local connectButton = layout:createButton(layout:center(-6, 5, 16, 3, uix.colors.white, uix.colors.gray, "connect"))
 local refreshButton = layout:createButton(layout:center(8, 5, 9, 3, uix.colors.orange, uix.colors.white, "refresh"))
+local wakeAllButton = layout:createButton(2, layout.sizeY - 1, 10, 1, uix.colors.orange, uix.colors.white, "wake all")
 
 local function deviceRequest(address, ...)
     if not modem.send(address, port, ...) then
@@ -49,6 +50,13 @@ local function deviceRequest(address, ...)
         end
     end
     return nil, "no response was received"
+end
+
+function wakeAllButton:onClick()
+    modem.broadcast(port, "rc_wake")
+    for tunnel in component.list("tunnel") do
+        component.invoke(tunnel, "send", "rc_wake")
+    end
 end
 
 function connectButton:onClick()
