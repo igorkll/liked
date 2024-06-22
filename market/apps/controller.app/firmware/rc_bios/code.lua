@@ -18,3 +18,13 @@ modem = component.proxy(modem)
 local port = 38710
 modem.close()
 modem.open(port)
+
+----------------------------------------------
+
+local currentPassword
+while true do
+    local eventData = {computer.pullSignal(0.5)}
+    if eventData[1] == "modem_message" and eventData[2] == modem.address then
+        
+    end
+end
