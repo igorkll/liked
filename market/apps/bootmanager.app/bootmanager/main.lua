@@ -191,9 +191,19 @@ local function findSystems(address)
 
                 table.insert(tbl, {
                     likeOSname(proxy, "recovery script"),
-                    function ()
-                        writeFile(tmpfs, "/bootloader/unpack", "{recoveryScript=true}")
-                        bootTo(proxy, "/init.lua")
+                    function (_, _, keyboard)
+                        for address in component.list("screen", true) do
+                            local find = false
+                            for i, lkeys in ipairs(component.invoke(address, "getKeyboards")) do
+                                if lkeys == keyboard then
+                                    find = true
+                                    break
+                                end
+                            end
+                            if find then
+                                bootTo(proxy, "/system/core/bootloader.lua", {forceRecovery = address, recoveryScript=true})
+                            end
+                        end
                     end,
                     address
                 })
@@ -201,8 +211,7 @@ local function findSystems(address)
                 table.insert(tbl, {
                     likeOSname(proxy, "recovery mode"),
                     function ()
-                        writeFile(tmpfs, "/bootloader/unpackBootloader", "{recoveryMode=true}")
-                        bootTo(proxy, "/init.lua")
+                        bootTo(proxy, "/system/core/bootloader.lua", {unpackBootloader={recoveryMode=true}, noRecovery = address})
                     end,
                     address
                 })
