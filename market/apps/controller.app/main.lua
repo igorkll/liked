@@ -13,6 +13,15 @@ local port = 38710
 local ui = uix.manager(screen)
 local rx, ry = ui:zoneSize()
 local modem = component.proxy(utils.findModem(true) or "")
+local tunnels = {}
+local allModems = {}
+if modem then
+    allModems[modem] = true
+end
+for tunnel in component.list("tunnel") do
+    tunnels[tunnel] = true
+    allModems[tunnel] = true
+end
 
 if modem then
     utils.openPort(modem, port)
@@ -22,7 +31,7 @@ local function sendAll(...)
     if modem then
         modem.broadcast(port, ...)
     end
-    for tunnel in component.list("tunnel") do
+    for tunnel in pairs(tunnels) do
         component.invoke(tunnel, "send", ...)
     end
 end
@@ -55,7 +64,7 @@ local wakeAllButton = layout:createButton(2, layout.sizeY - 1, 10, 1, uix.colors
 if warnMsg then
     wakeAllButton.y = wakeAllButton.y - 1
 end
-for tunnel in component.list("tunnel") do
+for tunnel in pairs(tunnels) do
     if warnMsg then
         warnMsg.y = warnMsg.y - 1
     end
@@ -65,14 +74,24 @@ for tunnel in component.list("tunnel") do
 end
 
 local function deviceRequest(address, ...)
-    if not modem.send(address, port, ...) then
-        return nil, "the message could not be sent"
-    end
     local startWaitTime = computer.uptime()
-    while computer.uptime() - startWaitTime < 5 do
-        local eventData = {event.pull(0.5, "modem_message", modem.address, address, port)}
-        if eventData[1] and eventData[6] ~= "rc_adv" then
-            return table.unpack(eventData, 6)
+    if tunnels[address] then
+        component.invoke(address, "send", ...)
+        while computer.uptime() - startWaitTime < 5 do
+            local eventData = {event.pull(0.5, "modem_message", address, nil, nil, nil, "rc_tunnel")}
+            if eventData[1] then
+                return table.unpack(eventData, 7)
+            end
+        end
+    else
+        if modem then
+            modem.send(address, port, ...)
+        end
+        while computer.uptime() - startWaitTime < 5 do
+            local eventData = {event.pull(0.5, "modem_message", modem.address, address, port)}
+            if eventData[1] and eventData[6] ~= "rc_adv" then
+                return table.unpack(eventData, 6)
+            end
         end
     end
     return nil, "no response was received"
@@ -125,11 +144,13 @@ function layout:onFullStart()
 end
 
 layout:listen("modem_message", function (_, localAddress, sender, senderPort, dist, v1, v2, v3)
-    if localAddress == modem.address and senderPort == port and v1 == "rc_adv" then
-        local tbl = {v2 .. " " .. v3 .. " " .. sender:sub(1, 6) .. " | distance: " .. math.roundTo(dist, 1), false, sender, computer.uptime()}
+    local isTunnel = tunnels[localAddress]
+    if allModems[localAddress] and (senderPort == port or isTunnel) and v1 == "rc_adv" then
+        local writeAddr = isTunnel and localAddress or sender
+        local tbl = {v2 .. " " .. v3 .. " " .. sender:sub(1, 6) .. " | distance: " .. math.roundTo(dist, 1), false, writeAddr, computer.uptime()}
         for i = 1, #connectList.list do
             local oldTbl = connectList.list[i]
-            if oldTbl[3] == sender then
+            if oldTbl[3] == writeAddr then
                 tbl[2] = oldTbl[2]
                 connectList.list[i] = tbl
                 tbl = nil
