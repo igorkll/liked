@@ -64,7 +64,9 @@ layout:listen("modem_message", function (_, localAddress, sender, senderPort, di
     if localAddress == modem.address and senderPort == port and v1 == "rc_adv" then
         local tbl = {v2 .. " " .. sender:sub(1, 6) .. " dist:" .. math.roundTo(dist, 1), false, sender, computer.uptime()}
         for i = 1, #connectList.list do
-            if connectList.list[i][3] == sender then
+            local oldTbl = connectList.list[i]
+            if oldTbl[3] == sender then
+                tbl[2] = oldTbl[2]
                 connectList.list[i] = tbl
                 tbl = nil
                 break
