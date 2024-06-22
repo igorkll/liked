@@ -1,30 +1,22 @@
-local modem
-for address in component.list("modem", true) do
-    if component.invoke(address, "isWireless") then
-        if component.invoke(address, "setStrength", math.huge) >= 400 then
-            modem = address
-            break
-        end
-    end
-end
-if not modem then
-    modem = component.list("modem", true)()
-    if not modem then
-        error("the modem was not found", 0)
-    end
-end
-modem = component.proxy(modem)
+local modem = component.proxy(component.list("modem")() or "")
 local tunnel = component.proxy(component.list("tunnel")() or "")
-tunnel.setWakeMessage("wake")
 
 local port = 38710
-modem.close()
-modem.open(port)
-modem.setWakeMessage("wake")
-pcall(modem.setStrength, math.huge)
+
+if tunnel then
+    tunnel.setWakeMessage("wake")
+end
+
+if modem then
+    modem.close()
+    modem.open(port)
+    modem.setWakeMessage("wake")
+    pcall(modem.setStrength, math.huge)
+end
 
 drone = component.proxy(component.list("drone")() or "")
 robot = component.proxy(component.list("robot")() or "")
+local devicename = "unknown"
 local gpu = component.proxy(component.list("gpu")() or "")
 local eeprom = component.proxy(component.list("eeprom")() or "")
 local screen = component.list("screen")()
@@ -33,6 +25,12 @@ if gpu and screen then
     gpu.setResolution(10, 2)
 else
     gpu = nil
+end
+
+if drone then
+    devicename = drone.name()
+elseif robot then
+    devicename = robot.name()
 end
 
 local function setColor(color)
@@ -137,23 +135,31 @@ local function checkPassword(password)
     end
 end
 
+local function advSend()
+    modem.broadcast(port, "rc_adv", devicetype)
+end
+
 local oldAdvTime = -math.huge
 local currentUser
 while true do
     if not currentUser then
         local uptime = computer.uptime()
         if uptime - oldAdvTime > 3 then
-            if not randomPassword and not passwordHash then
-                pcall(modem.setStrength, 8)
+            if modem then
+                if not randomPassword and not passwordHash then
+                    pcall(modem.setStrength, 8)
+                end
+                advSend()
+                pcall(modem.setStrength, math.huge)
             end
-            modem.broadcast(port, "rc_adv", devicetype)
-            pcall(modem.setStrength, math.huge)
             oldAdvTime = uptime
         end
     end
     local eventData = {computer.pullSignal(0.5)}
     if eventData[1] == "modem_message" and eventData[2] == modem.address then
-        if not currentUser and eventData[6] == "rc_connect" and (randomPassword or passwordHash or eventData[5] <= 8) then
+        if eventData[6] == "rc_radv" then
+            advSend()
+        elseif not currentUser and eventData[6] == "rc_connect" and (randomPassword or passwordHash or eventData[5] <= 8) then
             if checkPassword(eventData[7]) then
                 setColor(0x00ff00)
                 computer.beep(1800, 0.05)
