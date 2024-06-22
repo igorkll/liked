@@ -26,7 +26,7 @@ elseif not modem.isWireless() then
     warnMsg = layout:createText(2, layout.sizeY - 1, uix.colors.orange, "only a wired modem was found")
 end
 
-local connectList = layout:createCustom(layout:customCenter(0, -4, gobjs.checkboxgroup, 32, 10))
+local connectList = layout:createCustom(layout:customCenter(0, -4, gobjs.checkboxgroup, 50, 10))
 layout:createVText(layout.sizeX / 2, connectList.y - 1, uix.colors.white, "list of devices")
 connectList.oneSelect = true
 
@@ -45,9 +45,9 @@ end
 
 layout:listen("modem_message", function (_, localAddress, sender, senderPort, dist, v1, v2)
     if localAddress == modem.address and senderPort == port and v1 == "rc_adv" then
-        local tbl = {v2 .. " " .. sender:sub(1, 6) .. " " .. math.roundTo(dist), false, sender}
+        local tbl = {v2 .. " " .. sender:sub(1, 6) .. " dist:" .. math.roundTo(dist, 1), false, sender}
         for i = 1, #connectList.list do
-            if tbl[i][3] == sender then
+            if connectList.list[i][3] == sender then
                 connectList.list[i] = tbl
                 tbl = nil
                 break
