@@ -84,6 +84,9 @@ end
 
 local randomPassword
 local passwordHash = eeprom.getData()
+if #passwordHash == 0 then
+    passwordHash = nil
+end
 
 if screenOk then
     if passwordHash then
