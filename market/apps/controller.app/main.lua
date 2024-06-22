@@ -210,7 +210,7 @@ rcLayout:setReturnLayout(layout)
 
 function rcLayout:onSelect(controlAddress)
     self.controlAddress = controlAddress
-    self.wakeState = deviceRequest(controlAddress, "")
+    self.wakeState = deviceRequest(controlAddress, "rc_exec", "return (tunnel and tunnel.getWakeMessage() == wakeMsg) or (modem and modem.getWakeMessage() == wakeMsg)")
 end
 
 ui:loop()

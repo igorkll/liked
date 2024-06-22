@@ -50,10 +50,6 @@ function setWake(state)
     end
 end
 
-function isWake()
-    return (tunnel and tunnel.getWakeMessage() == wakeMsg) or (modem and modem.getWakeMessage() == wakeMsg)
-end
-
 function setColor(color)
     local obj = drone or robot
     if obj then
