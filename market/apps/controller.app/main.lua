@@ -94,7 +94,7 @@ local function deviceRequest(address, ...)
             end
         end
     end
-    return nil, "no response was received"
+    ui:func(gui.warn, screen, nil, nil, "no response was received")
 end
 
 function wakeAllButton:onClick()
@@ -113,12 +113,13 @@ local function connect()
     if obj then
         ui:fullStop()
         gui.status(screen, nil, nil, "connection attempt...")
-        if deviceRequest(obj[3], "rc_connect", passwordInput.read.getBuffer()) then
+        local ret = deviceRequest(obj[3], "rc_connect", passwordInput.read.getBuffer())
+        if ret == true then
             passwordInput.read.setBuffer("")
             rcLayout:select()
         else
             ui:forceDraw()
-            gui.warn(screen, nil, nil, "failed to connect. check that the password is entered correctly")
+            gui.warn(screen, nil, nil, "incorrect password")
         end
         ui:fullStart()
         ui:draw()
@@ -206,5 +207,10 @@ infoLayout:setReturnLayout(layout)
 
 rcLayout = ui:create("controller [Remote Control]", uix.colors.black)
 rcLayout:setReturnLayout(layout)
+
+function rcLayout:onSelect(controlAddress)
+    self.controlAddress = controlAddress
+    self.wakeState = deviceRequest(controlAddress, "")
+end
 
 ui:loop()

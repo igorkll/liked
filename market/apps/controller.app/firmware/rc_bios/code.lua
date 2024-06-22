@@ -1,17 +1,14 @@
+local computer, component = computer, component
 local modem = component.proxy(component.list("modem")() or "")
 local tunnel = component.proxy(component.list("tunnel")() or "")
 
 local port = 38710
-
-if tunnel then
-    tunnel.setWakeMessage("rc_wake")
-end
+local wakeMsg = "rc_wake"
 
 if modem then
+    pcall(modem.setStrength, math.huge)
     modem.close()
     modem.open(port)
-    modem.setWakeMessage("rc_wake")
-    pcall(modem.setStrength, math.huge)
 end
 
 drone = component.proxy(component.list("drone")() or "")
@@ -33,7 +30,31 @@ elseif robot then
     devicename = robot.name()
 end
 
-local function setColor(color)
+function setWake(state)
+    if state then
+        if tunnel then
+            tunnel.setWakeMessage(wakeMsg)
+        end
+        
+        if modem then
+            modem.setWakeMessage(wakeMsg)
+        end
+    else
+        if tunnel then
+            tunnel.setWakeMessage()
+        end
+        
+        if modem then
+            modem.setWakeMessage()
+        end
+    end
+end
+
+function isWake()
+    return (tunnel and tunnel.getWakeMessage() == wakeMsg) or (modem and modem.getWakeMessage() == wakeMsg)
+end
+
+function setColor(color)
     local obj = drone or robot
     if obj then
         obj.setLightColor(color)
@@ -42,7 +63,7 @@ end
 local currentColor = 0xffffff
 setColor(currentColor)
 
-local function setText(text)
+function setText(text)
     if drone then
         drone.setStatusText(text)
         return 1
@@ -143,46 +164,71 @@ local function send(isTunnel, address, ...)
     end
 end
 
+if tunnel then
+    tunnel.send("rc_adv", devicetype, devicename)
+end
+
 local oldAdvTime = -math.huge
 local currentUser
+local isTunnel
 while true do
-    if not currentUser and modem then
-        local uptime = computer.uptime()
-        if uptime - oldAdvTime > 3 then
-            if not randomPassword and not passwordHash then
-                pcall(modem.setStrength, 8)
-            end
-            modem.broadcast(port, "rc_adv", devicetype, devicename)
-            pcall(modem.setStrength, math.huge)
-            oldAdvTime = uptime
-        end
-    end
-
     local eventData = {computer.pullSignal(0.5)}
-    if not currentUser and eventData[1] == "modem_message" then
-        local sender = eventData[3]
-        local isTunnel = tunnel and eventData[2] == tunnel.address
-        if eventData[6] == "rc_radv" then
-            if modem then
-                modem.send(sender, port, "rc_adv", devicetype, devicename)
+
+    if currentUser then
+        if eventData[1] == "modem_message" and eventData[3] == currentUser then
+            local cmd, arg = eventData[6], eventData[7]
+            if cmd == "rc_exec" then
+                local code, err = load(arg)
+                if code then
+                    send(isTunnel, pcall(code))
+                else
+                    send(isTunnel, false, err)
+                end
+            elseif cmd == "rc_color" then
+                setColor(arg)
+            elseif cmd == "rc_title" then
+                setText(arg)
             end
-            if tunnel then
-                tunnel.send("rc_adv", devicetype, devicename)
+        end
+    else
+        if eventData[1] == "modem_message" then
+            local sender = eventData[3]
+            isTunnel = tunnel and eventData[2] == tunnel.address
+            if eventData[6] == "rc_radv" then
+                if modem then
+                    modem.send(sender, port, "rc_adv", devicetype, devicename)
+                end
+                if tunnel then
+                    tunnel.send("rc_adv", devicetype, devicename)
+                end
+            elseif eventData[6] == "rc_connect" and (randomPassword or passwordHash or eventData[5] <= 8) then
+                if checkPassword(eventData[7]) then
+                    setColor(0x00ff00)
+                    computer.beep(1800, 0.05)
+                    computer.beep(1800, 0.05)
+                    setColor(currentColor)
+                    send(isTunnel, sender, true)
+                    currentUser = sender
+                    setText("")
+                else
+                    setColor(0xff0000)
+                    computer.beep(100, 0.1)
+                    computer.beep(100, 0.1)
+                    setColor(currentColor)
+                    send(isTunnel, sender, false)
+                end
             end
-        elseif eventData[6] == "rc_connect" and (randomPassword or passwordHash or eventData[5] <= 8) then
-            if checkPassword(eventData[7]) then
-                setColor(0x00ff00)
-                computer.beep(1800, 0.05)
-                computer.beep(1800, 0.05)
-                setColor(currentColor)
-                send(isTunnel, sender, true)
-                currentUser = sender
-            else
-                setColor(0xff0000)
-                computer.beep(100, 0.1)
-                computer.beep(100, 0.1)
-                setColor(currentColor)
-                send(isTunnel, sender, false)
+        end
+
+        if modem then
+            local uptime = computer.uptime()
+            if uptime - oldAdvTime > 3 then
+                if not randomPassword and not passwordHash then
+                    pcall(modem.setStrength, 8)
+                end
+                modem.broadcast(port, "rc_adv", devicetype, devicename)
+                pcall(modem.setStrength, math.huge)
+                oldAdvTime = uptime
             end
         end
     end

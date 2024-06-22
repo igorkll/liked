@@ -6,9 +6,9 @@ local port = 38710
 local wakeMsg = "rc_wake"
 
 if modem then
+    pcall(modem.setStrength, math.huge)
     modem.close()
     modem.open(port)
-    pcall(modem.setStrength, math.huge)
 end
 
 drone = component.proxy(component.list("drone")() or "")
@@ -178,17 +178,16 @@ while true do
         if eventData[1] == "modem_message" and eventData[3] == currentUser then
             local cmd, arg = eventData[6], eventData[7]
             if cmd == "rc_exec" then
-                local code, err, ok = load(arg)
+                local code, err = load(arg)
                 if code then
-                    ok, err = pcall(code)
-                    if ok then
-                        send(isTunnel, true)
-                    else
-                        send(isTunnel, false, err)
-                    end
+                    send(isTunnel, pcall(code))
                 else
                     send(isTunnel, false, err)
                 end
+            elseif cmd == "rc_color" then
+                setColor(arg)
+            elseif cmd == "rc_title" then
+                setText(arg)
             end
         end
     else

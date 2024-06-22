@@ -989,9 +989,9 @@ function uix:fullStart()
     end
 end
 
-function uix:select()
+function uix:select(...)
     if self.smartGuiManager then
-        self.smartGuiManager:select(self)
+        self.smartGuiManager:select(self, ...)
     end
 end
 
@@ -1142,7 +1142,7 @@ function manager:func(func, ...)
     return table.unpack(result)
 end
 
-function manager:select(layout)
+function manager:select(layout, ...)
     if self.current then
         self.current:fullStop()
     end
@@ -1153,7 +1153,7 @@ function manager:select(layout)
         self.current.allowAutoActive = nil
         self.current:fullStart()
         if self.current.onSelect then
-            self.current:onSelect()
+            self.current:onSelect(...)
         end
         self.current:draw()
     end
