@@ -38,7 +38,8 @@ local function setColor(color)
         obj.setLightColor(color)
     end
 end
-setColor(0xffffff)
+local currentColor = 0xffffff
+setColor(currentColor)
 
 local function setText(text)
     if drone then
@@ -150,11 +151,19 @@ while true do
     local eventData = {computer.pullSignal(0.5)}
     if eventData[1] == "modem_message" and eventData[2] == modem.address then
         if not currentUser and eventData[6] == "rc_connect" and (randomPassword or passwordHash or eventData[5] <= 8) then
-            currentUser = eventData[3]
             if checkPassword(eventData[7]) then
-                modem.send(currentUser, port, true)
+                setColor(0x00ff00)
+                computer.beep(1800, 0.05)
+                computer.beep(1800, 0.05)
+                setColor(currentColor)
+                modem.send(eventData[3], port, true)
+                currentUser = eventData[3]
             else
-                modem.send(currentUser, port, false)
+                setColor(0xff0000)
+                computer.beep(100, 0.1)
+                computer.beep(100, 0.1)
+                setColor(currentColor)
+                modem.send(eventData[3], port, false)
             end
         end
     end
