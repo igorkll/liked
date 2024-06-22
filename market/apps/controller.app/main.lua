@@ -139,7 +139,7 @@ local function connect()
         if ret == true then
             passwordInput.read.setBuffer("")
             controlAddress = obj[3]
-            rcLayout:select(obj[3])
+            rcLayout:select()
         else
             ui:forceDraw()
             gui.warn(screen, nil, nil, "incorrect password")
@@ -151,7 +151,7 @@ local function connect()
     end
 end
 
-connectButton.onClick = connect
+connectButton.onDrop = connect
 passwordInput.onTextAcceptedCheck = connect
 
 function refreshButton:onClick()
@@ -235,20 +235,20 @@ rcLayout:setReturnLayout(layout)
 local switchTitle = rcLayout:createText(2, rcLayout.sizeY - 1, uix.colors.white, "allow remote wake-up")
 local wakeUpSwitch = rcLayout:createSwitch(switchTitle.x + unicode.len(switchTitle.text) + 1, rcLayout.sizeY - 1)
 local colorpic = rcLayout:createColorpic(2, rcLayout.sizeY - 3, 13, 1, "light color", 0xffffff, true)
-local randPass = rcLayout:createButton(2, rcLayout.sizeY - 7, 21, 1, "use random password", 0xffffff, true)
-local customPass = rcLayout:createButton(2, rcLayout.sizeY - 5, 21, 1, "use custom password", 0xffffff, true)
+local randPass = rcLayout:createButton(2, rcLayout.sizeY - 7, 21, 1, uix.colors.purple, uix.colors.white, "use random password")
+local customPass = rcLayout:createButton(2, rcLayout.sizeY - 5, 21, 1, uix.colors.purple, uix.colors.white, "use custom password")
 
-function randPass:onClick()
+function randPass:onDrop()
     deviceRequest(controlAddress, "rc_exec", "component.invoke(component.list('eeprom')(), 'set', '')")
 end
 
-function customPass:onClick()
-    self:fullStop()
+function customPass:onDrop()
+    self.gui:fullStop()
     local password = gui.comfurmPassword(screen)
     if password then
         deviceRequest(controlAddress, "rc_exec", "component.invoke(component.list('eeprom')(), 'set', ...)", hash(password))
     end
-    self:fullStart()
+    self.gui:fullStart()
     ui:draw()
 end
 
@@ -262,8 +262,11 @@ function rcLayout:onUnselect()
 end
 
 function rcLayout:onSelect()
-    deviceRequest(controlAddress, "rc_exec", [[
+    assert(deviceRequest(controlAddress, "rc_exec", [[
         local code = ...
+        if #code < 2048 or not load(code) then
+            return false, "received firmware is damaged"
+        end
         local eeprom = component.proxy(component.list("eeprom")() or "")
         if eeprom and code ~= eeprom.get() then
             setColor(0xef9700)
@@ -275,7 +278,8 @@ function rcLayout:onSelect()
             setColor(currentColor)
             setText("")
         end
-    ]], assert(fs.readFile(firmwarePath)))
+        return true
+    ]], assert(fs.readFile(firmwarePath))))
     wakeUpSwitch.state = not not select(2, assert(deviceRequest(controlAddress, "rc_exec", "return (tunnel and tunnel.getWakeMessage() == \"rc_wake\") or (modem and modem.getWakeMessage() == \"rc_wake\")")))
 end
 
