@@ -60,7 +60,11 @@ function connectButton:onClick()
     end
 
     if obj then
-        rcLayout:select()
+        if deviceRequest(obj[3], "rc_connect", passwordInput.read.getBuffer()) then
+            rcLayout:select()
+        else
+            ui:func(gui.warn, screen, nil, nil, "failed to connect. check that the password is entered correctly")
+        end
     else
         ui:func(gui.warn, screen, nil, nil, "first, select the device you want to control from the list")
     end

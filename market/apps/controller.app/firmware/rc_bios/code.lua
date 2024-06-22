@@ -152,9 +152,9 @@ while true do
         if not currentUser and eventData[6] == "rc_connect" and (randomPassword or passwordHash or eventData[5] <= 8) then
             currentUser = eventData[3]
             if checkPassword(eventData[7]) then
-                modem.send(currentUser, port, "rc_ok")
+                modem.send(currentUser, port, true)
             else
-                modem.send(currentUser, port, "rc_err")
+                modem.send(currentUser, port, false)
             end
         end
     end
