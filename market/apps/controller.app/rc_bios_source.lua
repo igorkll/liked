@@ -18,6 +18,7 @@ modem = component.proxy(modem)
 local port = 38710
 modem.close()
 modem.open(port)
+pcall(modem.setStrength, math.huge)
 
 drone = component.proxy(component.list("drone")() or "")
 robot = component.proxy(component.list("robot")() or "")
@@ -135,12 +136,23 @@ while true do
     if not currentUser then
         local uptime = computer.uptime()
         if uptime - oldAdvTime > 3 then
+            if not randomPassword and not passwordHash then
+                pcall(modem.setStrength, 8)
+            end
             modem.broadcast(port, "rc_adv")
+            pcall(modem.setStrength, math.huge)
             oldAdvTime = uptime
         end
     end
     local eventData = {computer.pullSignal(0.5)}
     if eventData[1] == "modem_message" and eventData[2] == modem.address then
-        
+        if not currentUser and eventData[6] == "rc_connect" and (randomPassword or passwordHash or eventData[5] <= 8) then
+            currentUser = eventData[3]
+            if checkPassword(eventData[7]) then
+                modem.send(currentUser, port, "rc_ok")
+            else
+                modem.send(currentUser, port, "rc_err")
+            end
+        end
     end
 end
