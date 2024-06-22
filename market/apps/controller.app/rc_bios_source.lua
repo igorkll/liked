@@ -59,7 +59,7 @@ local function setText(text)
                 line = line + 1
                 index = 1
             else
-                gpu.set(index, line, text)
+                gpu.set(index, line, char)
                 index = index + 1
             end
         end

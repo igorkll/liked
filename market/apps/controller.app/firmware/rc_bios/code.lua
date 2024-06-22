@@ -59,7 +59,7 @@ local function setText(text)
                 line = line + 1
                 index = 1
             else
-                gpu.set(index, line, text)
+                gpu.set(index, line, char)
                 index = index + 1
             end
         end
@@ -159,7 +159,7 @@ while true do
     end
 
     local eventData = {computer.pullSignal(0.5)}
-    if eventData[1] == "modem_message" then
+    if not currentUser and eventData[1] == "modem_message" then
         local sender = eventData[3]
         local isTunnel = tunnel and eventData[2] == tunnel.address
         if eventData[6] == "rc_radv" then
@@ -169,7 +169,7 @@ while true do
             if tunnel then
                 tunnel.send("rc_adv", devicetype, devicename)
             end
-        elseif not currentUser and eventData[6] == "rc_connect" and (randomPassword or passwordHash or eventData[5] <= 8) then
+        elseif eventData[6] == "rc_connect" and (randomPassword or passwordHash or eventData[5] <= 8) then
             if checkPassword(eventData[7]) then
                 setColor(0x00ff00)
                 computer.beep(1800, 0.05)
