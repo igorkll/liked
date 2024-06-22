@@ -211,6 +211,15 @@ rcLayout:setReturnLayout(layout)
 
 local switchTitle = rcLayout:createText(2, rcLayout.sizeY - 1, uix.colors.white, "allow remote wake-up")
 local wakeUpSwitch = rcLayout:createSwitch(switchTitle.x + unicode.len(switchTitle.text) + 1, rcLayout.sizeY - 1)
+local colorpic = rcLayout:createColorpic(2, rcLayout.sizeY - 3, 13, 1, "light color", 0xffffff, true)
+
+function colorpic:onColor(_, color)
+    deviceRequest(self.gui.controlAddress, "rc_exec", "setColor(" .. color .. ")")
+end
+
+function rcLayout:onUnselect()
+    deviceRequest(self.gui.controlAddress, "rc_out")
+end
 
 function rcLayout:onSelect(controlAddress)
     self.controlAddress = controlAddress

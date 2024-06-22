@@ -181,9 +181,17 @@ while true do
                     send(isTunnel, currentUser, false, err)
                 end
             elseif cmd == "rc_color" then
-                setColor(arg)
+                currentColor = arg
+                setColor(currentColor)
             elseif cmd == "rc_title" then
                 setText(arg)
+            elseif cmd == "rc_out" then
+                currentColor = 0xffffff
+                setColor(currentColor)
+                computer.beep(200, 0.2)
+                computer.beep(150, 0.2)
+                computer.beep(100, 0.8)
+                currentUser = nil
             end
         end
     else
