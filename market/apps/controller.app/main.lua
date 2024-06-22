@@ -243,10 +243,12 @@ function randPass:onClick()
 end
 
 function customPass:onClick()
+    self:fullStop()
     local password = gui.comfurmPassword(screen)
     if password then
         deviceRequest(controlAddress, "rc_exec", "component.invoke(component.list('eeprom')(), 'set', ...)", hash(password))
     end
+    self:fullStart()
     ui:draw()
 end
 
