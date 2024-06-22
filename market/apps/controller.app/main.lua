@@ -43,11 +43,11 @@ function refreshButton:onClick()
     connectList:draw()
 end
 
-layout:listen("modem_message", function (eventData)
-    if eventData[2] == modem.address and eventData[4] == port and eventData[6] == "rc_adv" then
-        local tbl = {eventData[7] .. " " .. eventData[3]:sub(1, 6) .. math.roundTo(eventData[5]), false, eventData[3]}
+layout:listen("modem_message", function (_, localAddress, sender, senderPort, dist, v1, v2)
+    if localAddress == modem.address and senderPort == port and v1 == "rc_adv" then
+        local tbl = {v2 .. " " .. sender:sub(1, 6) .. math.roundTo(dist), false, sender}
         for i = 1, #connectList.list do
-            if tbl[i][3] == eventData[3] then
+            if tbl[i][3] == sender then
                 connectList.list[i] = tbl
                 tbl = nil
                 break
