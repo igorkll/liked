@@ -4,6 +4,8 @@ local gui_container = require("gui_container")
 local utils = require("utils")
 local system = require("system")
 local component = require("component")
+local gui = require("gui")
+local computer = require("computer")
 
 local screen = ...
 local port = 38710
@@ -35,7 +37,18 @@ local connectButton = layout:createButton(layout:center(-6, 5, 16, 3, uix.colors
 local refreshButton = layout:createButton(layout:center(8, 5, 9, 3, uix.colors.orange, uix.colors.white, "refresh"))
 
 function connectButton:onClick()
-    rcLayout:select()
+    local obj
+    for i = 1, #connectList.list do
+        if connectList.list[i][2] then
+            obj = connectList.list[i]
+        end
+    end
+
+    if obj then
+        rcLayout:select()
+    else
+        ui:func(gui.warn, screen, nil, nil, "first, select the device you want to control from the list")
+    end
 end
 
 function refreshButton:onClick()
@@ -43,9 +56,13 @@ function refreshButton:onClick()
     connectList:draw()
 end
 
+function layout:onSelect()
+    connectList.list = {}
+end
+
 layout:listen("modem_message", function (_, localAddress, sender, senderPort, dist, v1, v2)
     if localAddress == modem.address and senderPort == port and v1 == "rc_adv" then
-        local tbl = {v2 .. " " .. sender:sub(1, 6) .. " dist:" .. math.roundTo(dist, 1), false, sender}
+        local tbl = {v2 .. " " .. sender:sub(1, 6) .. " dist:" .. math.roundTo(dist, 1), false, sender, computer.uptime()}
         for i = 1, #connectList.list do
             if connectList.list[i][3] == sender then
                 connectList.list[i] = tbl
@@ -59,6 +76,19 @@ layout:listen("modem_message", function (_, localAddress, sender, senderPort, di
         connectList:draw()
     end
 end)
+
+layout:timer(1, function ()
+    local updated = false
+    for i = #connectList.list, 1, -1 do
+        if computer.uptime() - connectList.list[i][4] > 5 then
+            table.remove(connectList.list, i)
+            updated = true
+        end
+    end
+    if not updated then
+        connectList:draw()
+    end
+end, math.huge)
 
 -----------------------------
 

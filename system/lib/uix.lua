@@ -1119,6 +1119,14 @@ function manager:execute(...)
     return table.unpack(result)
 end
 
+function manager:func(func, ...)
+    self:fullStop()
+    local result = {func(...)}
+    self:fullStart()
+    self:draw()
+    return table.unpack(result)
+end
+
 function manager:select(layout)
     if self.current then
         self.current:fullStop()
