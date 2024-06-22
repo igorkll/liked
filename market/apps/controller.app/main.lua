@@ -9,13 +9,22 @@ local screen = ...
 local port = 38710
 local ui = uix.manager(screen)
 local rx, ry = ui:zoneSize()
-local modem = component.proxy(utils.findModem(true))
+local modem = component.proxy(utils.findModem(true) or "")
 
-utils.openPort(modem, port)
+if modem then
+    utils.openPort(modem, port)
+end
 
 -----------------------------
 
 local layout = ui:create("controller", uix.colors.black)
+local warnMsg
+
+if not modem then
+    warnMsg = layout:createText(2, layout.sizeY - 1, uix.colors.red, "the modem was not found! install a modem to use the app")
+elseif not modem.isWireless() then
+    warnMsg = layout:createText(2, layout.sizeY - 1, uix.colors.orange, "only a wired modem was found")
+end
 
 local connectList = layout:createCustom(layout:customCenter(0, -4, gobjs.checkboxgroup, 32, 10))
 layout:createVText(layout.sizeX / 2, connectList.y - 1, uix.colors.white, "list of devices")
