@@ -18,11 +18,25 @@ if modem then
     utils.openPort(modem, port)
 end
 
+local function sendAll(...)
+    if modem then
+        modem.broadcast(port, ...)
+    end
+    for tunnel in component.list("tunnel") do
+        component.invoke(tunnel, "send", ...)
+    end
+end
+
+local function advRequest()
+    sendAll("rc_radv")
+end
+advRequest()
+
 -----------------------------
 
 local layout = ui:create("controller", uix.colors.black)
-local warnMsg
 
+local warnMsg
 if not modem then
     warnMsg = layout:createText(2, layout.sizeY - 1, uix.colors.red, "the modem was not found! install a modem to use the app")
 elseif not modem.isWireless() then
@@ -37,6 +51,18 @@ local passwordInput = layout:createInput(layout:centerOneSize(0, 2, 32, nil, nil
 local connectButton = layout:createButton(layout:center(-6, 5, 16, 3, uix.colors.white, uix.colors.gray, "connect"))
 local refreshButton = layout:createButton(layout:center(8, 5, 9, 3, uix.colors.orange, uix.colors.white, "refresh"))
 local wakeAllButton = layout:createButton(2, layout.sizeY - 1, 10, 1, uix.colors.orange, uix.colors.white, "wake all")
+
+if warnMsg then
+    wakeAllButton.y = wakeAllButton.y - 1
+end
+for tunnel in component.list("tunnel") do
+    if warnMsg then
+        warnMsg.y = warnMsg.y - 1
+    end
+    wakeAllButton.y = wakeAllButton.y - 1
+    layout:createText(2, layout.sizeY - 1, uix.colors.cyan, "a tunnel card has been found, it can be used to connect to the robot")
+    break
+end
 
 local function deviceRequest(address, ...)
     if not modem.send(address, port, ...) then
@@ -53,10 +79,7 @@ local function deviceRequest(address, ...)
 end
 
 function wakeAllButton:onClick()
-    modem.broadcast(port, "rc_wake")
-    for tunnel in component.list("tunnel") do
-        component.invoke(tunnel, "send", "rc_wake")
-    end
+    sendAll("rc_wake")
 end
 
 function connectButton:onClick()
@@ -85,6 +108,7 @@ function connectButton:onClick()
 end
 
 function refreshButton:onClick()
+    advRequest()
     connectList.list = {}
     connectList:draw()
 end
@@ -100,9 +124,9 @@ function layout:onFullStart()
     end
 end
 
-layout:listen("modem_message", function (_, localAddress, sender, senderPort, dist, v1, v2)
+layout:listen("modem_message", function (_, localAddress, sender, senderPort, dist, v1, v2, v3)
     if localAddress == modem.address and senderPort == port and v1 == "rc_adv" then
-        local tbl = {v2 .. " " .. sender:sub(1, 6) .. " dist:" .. math.roundTo(dist, 1), false, sender, computer.uptime()}
+        local tbl = {v2 .. " " .. v3 .. " " .. sender:sub(1, 6) .. " | distance: " .. math.roundTo(dist, 1), false, sender, computer.uptime()}
         for i = 1, #connectList.list do
             local oldTbl = connectList.list[i]
             if oldTbl[3] == sender then
