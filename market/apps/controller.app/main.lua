@@ -140,7 +140,9 @@ end
 function layout:onFullStart()
     local uptime = computer.uptime()
     for i = 1, #connectList.list do
-        connectList.list[i][4] = uptime
+        if connectList.list[i][4] then
+            connectList.list[i][4] = uptime
+        end
     end
 end
 
@@ -154,7 +156,7 @@ layout:listen("modem_message", function (_, localAddress, sender, senderPort, di
         else
             addTitle = " | distance: " .. math.roundTo(dist, 1)
         end
-        local tbl = {v2 .. " " .. v3 .. " " .. sender:sub(1, 6) .. addTitle, false, writeAddr, isTunnel and math.huge or computer.uptime()}
+        local tbl = {v2 .. " " .. v3 .. " " .. sender:sub(1, 6) .. addTitle, false, writeAddr, not isTunnel and computer.uptime()}
         for i = 1, #connectList.list do
             local oldTbl = connectList.list[i]
             if oldTbl[3] == writeAddr then
@@ -174,7 +176,7 @@ end)
 layout:timer(1, function ()
     local updated = false
     for i = #connectList.list, 1, -1 do
-        if computer.uptime() - connectList.list[i][4] > 5 then
+        if connectList.list[i][4] and computer.uptime() - connectList.list[i][4] > 5 then
             table.remove(connectList.list, i)
             updated = true
         end
