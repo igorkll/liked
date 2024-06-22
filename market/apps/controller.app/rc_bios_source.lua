@@ -139,7 +139,7 @@ while true do
             if not randomPassword and not passwordHash then
                 pcall(modem.setStrength, 8)
             end
-            modem.broadcast(port, "rc_adv")
+            modem.broadcast(port, "rc_adv", devicetype)
             pcall(modem.setStrength, math.huge)
             oldAdvTime = uptime
         end

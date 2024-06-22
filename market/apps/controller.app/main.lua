@@ -30,11 +30,6 @@ local connectList = layout:createCustom(layout:customCenter(0, -4, gobjs.checkbo
 layout:createVText(layout.sizeX / 2, connectList.y - 1, uix.colors.white, "list of devices")
 connectList.oneSelect = true
 
-connectList.list = {}
-for i = 1, 32 do
-    table.insert(connectList.list, {"TEST " .. i, false})
-end
-
 local passwordInput = layout:createInput(layout:centerOneSize(0, 2, 32, nil, nil, "*", nil, nil, nil, "password: "))
 local connectButton = layout:createButton(layout:center(-6, 5, 16, 3, uix.colors.white, uix.colors.gray, "connect"))
 local refreshButton = layout:createButton(layout:center(8, 5, 9, 3, uix.colors.orange, uix.colors.white, "refresh"))
@@ -46,6 +41,23 @@ end
 function refreshButton:onClick()
     connectList.list = {}
     connectList:draw()
+end
+
+function layout:onEvent(eventData)
+    if eventData[1] == "modem_message" and eventData[2] == modem.address and eventData[4] == port and eventData[6] == "rc_adv" then
+        local tbl = {eventData[7] .. " " .. eventData[3]:sub(1, 6) .. math.roundTo(eventData[5]), false, eventData[3]}
+        for i = 1, #connectList.list do
+            if tbl[i][3] == eventData[3] then
+                connectList.list[i] = tbl
+                tbl = nil
+                break
+            end
+        end
+        if tbl then
+            table.insert(connectList.list, tbl)
+        end
+        connectList:draw()
+    end
 end
 
 -----------------------------
