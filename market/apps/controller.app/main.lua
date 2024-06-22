@@ -81,7 +81,7 @@ connectList.oneSelect = true
 local passwordInput = layout:createInput(layout:centerOneSize(0, 2, 32, nil, nil, "*", nil, nil, nil, "password: "))
 local connectButton = layout:createButton(layout:center(-6, 5, 16, 3, uix.colors.white, uix.colors.gray, "connect"))
 local refreshButton = layout:createButton(layout:center(8, 5, 9, 3, uix.colors.orange, uix.colors.white, "refresh"))
-local wakeAllButton = layout:createButton(2, layout.sizeY - 1, 10, 1, uix.colors.orange, uix.colors.white, "wake all")
+local wakeAllButton = layout:createButton(2, layout.sizeY - 1, 13, 1, uix.colors.orange, uix.colors.white, "wake-up all")
 
 if warnMsg then
     wakeAllButton.y = wakeAllButton.y - 1
@@ -93,6 +93,17 @@ for tunnel in pairs(tunnels) do
     wakeAllButton.y = wakeAllButton.y - 1
     layout:createText(2, layout.sizeY - 1, uix.colors.cyan, "a tunnel card has been found, it can be used to connect to the robot")
     break
+end
+
+local function deviceSend(address, ...)
+    local startWaitTime = computer.uptime()
+    if tunnels[address] then
+        component.invoke(address, "send", ...)
+    else
+        if modem then
+            modem.send(address, port, ...)
+        end
+    end
 end
 
 local function deviceRequest(address, ...)
@@ -237,6 +248,18 @@ local wakeUpSwitch = rcLayout:createSwitch(switchTitle.x + unicode.len(switchTit
 local colorpic = rcLayout:createColorpic(2, rcLayout.sizeY - 3, 13, 1, "light color", 0xffffff, true)
 local randPass = rcLayout:createButton(2, rcLayout.sizeY - 7, 21, 1, uix.colors.purple, uix.colors.white, "use random password")
 local customPass = rcLayout:createButton(2, rcLayout.sizeY - 5, 21, 1, uix.colors.purple, uix.colors.white, "use custom password")
+local shutdownButton = rcLayout:createButton(colorpic.x + colorpic.sx + 1, rcLayout.sizeY - 3, 10, 1, nil, nil, "shutdown")
+
+function shutdownButton:onDrop()
+    self.gui:fullStop()
+    if gui.yesno(screen, nil, nil, "are you sure you want to turn off the device? if you do not have physical access to the device, make sure that the wake-up option is enabled!") then
+        deviceSend(controlAddress, "rc_exec", "computer.shutdown()")
+        controlAddress = nil
+        layout:select()
+    end
+    self.gui:fullStart()
+    ui:draw()
+end
 
 function randPass:onDrop()
     self.gui:fullStop()
@@ -262,8 +285,10 @@ function colorpic:onColor(_, color)
 end
 
 function rcLayout:onUnselect()
-    deviceRequest(controlAddress, "rc_out")
-    controlAddress = nil
+    if controlAddress then
+        deviceRequest(controlAddress, "rc_out")
+        controlAddress = nil
+    end
 end
 
 function rcLayout:onSelect()
