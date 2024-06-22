@@ -102,7 +102,7 @@ function wakeAllButton:onClick()
     layout:timer(1, advRequest, 1)
 end
 
-function connectButton:onClick()
+local function connect()
     local obj
     for i = 1, #connectList.list do
         if connectList.list[i][2] then
@@ -126,6 +126,9 @@ function connectButton:onClick()
         ui:func(gui.warn, screen, nil, nil, "first, select the device you want to control from the list")
     end
 end
+
+connectButton.onClick = connect
+passwordInput.onTextAcceptedCheck = connect
 
 function refreshButton:onClick()
     advRequest()

@@ -233,6 +233,14 @@ function objclass:uploadEvent(eventData)
             if self.onTextAccepted then
                 self:onTextAccepted(str)
             end
+
+            if str == true and self.onTextCancel then
+                self:onTextCancel()
+            end
+
+            if type(str) == "string" and self.onTextAcceptedCheck then
+                self:onTextAcceptedCheck()
+            end
         end
 
         local text = self.read.getBuffer()
