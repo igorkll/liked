@@ -18,6 +18,7 @@ local rx, ry = ui:zoneSize()
 local modem = component.proxy(utils.findModem(true) or "")
 local tunnels = {}
 local allModems = {}
+local controlAddress
 if modem then
     allModems[modem.address] = true
 end
@@ -118,6 +119,7 @@ local function connect()
         local ret = deviceRequest(obj[3], "rc_connect", passwordInput.read.getBuffer())
         if ret == true then
             passwordInput.read.setBuffer("")
+            controlAddress = obj[3]
             rcLayout:select(obj[3])
         else
             ui:forceDraw()
@@ -216,15 +218,14 @@ local wakeUpSwitch = rcLayout:createSwitch(switchTitle.x + unicode.len(switchTit
 local colorpic = rcLayout:createColorpic(2, rcLayout.sizeY - 3, 13, 1, "light color", 0xffffff, true)
 
 function colorpic:onColor(_, color)
-    deviceRequest(self.gui.controlAddress, "rc_exec", "setColor(" .. color .. ")")
+    deviceRequest(controlAddress, "rc_exec", "setColor(" .. color .. ")")
 end
 
 function rcLayout:onUnselect()
-    deviceRequest(self.controlAddress, "rc_out")
+    deviceRequest(controlAddress, "rc_out")
 end
 
-function rcLayout:onSelect(controlAddress)
-    self.controlAddress = controlAddress
+function rcLayout:onSelect()
     deviceRequest(controlAddress, "rc_exec", [[
         local code = ...
         local eeprom = component.proxy(component.list("eeprom")() or "")
@@ -236,6 +237,7 @@ function rcLayout:onSelect(controlAddress)
             end
             eeprom.set(code)
             setColor(currentColor)
+            setText("")
         end
     ]], assert(fs.readFile(firmwarePath)))
     wakeUpSwitch.state = not not select(2, assert(deviceRequest(controlAddress, "rc_exec", "return (tunnel and tunnel.getWakeMessage() == \"rc_wake\") or (modem and modem.getWakeMessage() == \"rc_wake\")")))
@@ -243,7 +245,7 @@ end
 
 function wakeUpSwitch:onSwitch()
     if self.state then
-        deviceRequest(self.gui.controlAddress, "rc_exec", [[
+        deviceRequest(controlAddress, "rc_exec", [[
             if tunnel then
                 tunnel.setWakeMessage("rc_wake")
             end
@@ -253,7 +255,7 @@ function wakeUpSwitch:onSwitch()
             end
         ]])
     else
-        deviceRequest(self.gui.controlAddress, "rc_exec", [[
+        deviceRequest(controlAddress, "rc_exec", [[
             if tunnel then
                 tunnel.setWakeMessage()
             end
@@ -266,3 +268,4 @@ function wakeUpSwitch:onSwitch()
 end
 
 ui:loop()
+deviceRequest(controlAddress, "rc_out")
