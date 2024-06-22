@@ -21,8 +21,9 @@ modem.open(port)
 
 drone = component.proxy(component.list("drone")() or "")
 robot = component.proxy(component.list("robot")() or "")
-gpu = component.proxy(component.list("gpu")() or "")
-screen = component.list("screen")()
+local gpu = component.proxy(component.list("gpu")() or "")
+local eeprom = component.proxy(component.list("eeprom")() or "")
+local screen = component.list("screen")()
 if gpu and screen then
     gpu.bind(screen)
     gpu.setResolution(10, 2)
@@ -82,7 +83,7 @@ end
 ----------------------------------------------
 
 local randomPassword
-local passwordHash
+local passwordHash = eeprom.getData()
 
 if screenOk then
     if passwordHash then
@@ -93,6 +94,16 @@ if screenOk then
             randomPassword = randomPassword .. string.char(math.random(33, 126))
         end
         setText("password:\n" .. randomPassword)
+    end
+end
+
+local function checkPassword(password)
+    if randomPassword then
+        return password == randomPassword
+    elseif passwordHash then
+        
+    else
+        return true
     end
 end
 
