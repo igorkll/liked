@@ -40,7 +40,6 @@ end
 local function advRequest()
     sendAll("rc_radv")
 end
-advRequest()
 
 -----------------------------
 
@@ -139,6 +138,7 @@ function refreshButton:onClick()
 end
 
 function layout:onSelect()
+    advRequest()
     connectList.list = {}
 end
 
@@ -214,12 +214,12 @@ local wakeUpSwitch = rcLayout:createSwitch(switchTitle.x + unicode.len(switchTit
 
 function rcLayout:onSelect(controlAddress)
     self.controlAddress = controlAddress
-    wakeUpSwitch.state = not not deviceRequest(controlAddress, "rc_exec", "return (tunnel and tunnel.getWakeMessage() == wakeMsg) or (modem and modem.getWakeMessage() == wakeMsg)")
+    wakeUpSwitch.state = not not select(2, assert(deviceRequest(controlAddress, "rc_exec", "return (tunnel and tunnel.getWakeMessage() == \"rc_wake\") or (modem and modem.getWakeMessage() == \"rc_wake\")")))
 end
 
 function wakeUpSwitch:onSwitch()
     if self.state then
-        deviceRequest(self.controlAddress, "rc_exec", [[
+        deviceRequest(self.gui.controlAddress, "rc_exec", [[
             if tunnel then
                 tunnel.setWakeMessage("rc_wake")
             end
@@ -229,7 +229,7 @@ function wakeUpSwitch:onSwitch()
             end
         ]])
     else
-        deviceRequest(self.controlAddress, "rc_exec", [[
+        deviceRequest(self.gui.controlAddress, "rc_exec", [[
             if tunnel then
                 tunnel.setWakeMessage()
             end

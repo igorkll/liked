@@ -1,6 +1,6 @@
 local computer, component = computer, component
-local modem = component.proxy(component.list("modem")() or "")
-local tunnel = component.proxy(component.list("tunnel")() or "")
+modem = component.proxy(component.list("modem")() or "")
+tunnel = component.proxy(component.list("tunnel")() or "")
 
 local port = 38710
 local wakeMsg = "rc_wake"
@@ -176,9 +176,9 @@ while true do
             if cmd == "rc_exec" then
                 local code, err = load(arg)
                 if code then
-                    send(isTunnel, pcall(code))
+                    send(isTunnel, currentUser, pcall(code))
                 else
-                    send(isTunnel, false, err)
+                    send(isTunnel, currentUser, false, err)
                 end
             elseif cmd == "rc_color" then
                 setColor(arg)
