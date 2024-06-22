@@ -4,6 +4,7 @@ local tmpfs = component.proxy(computer.tmpAddress())
 local bootfs = component.proxy(computer.getBootAddress())
 
 local recoverysPaths = {"/data/recovery.lua", "/vendor/recovery.lua", "/system/recovery.lua", "/system/core/recovery.lua"}
+local recoveryScriptPaths = {"/data/recoveryScript.lua", "/vendor/recoveryScript.lua", "/system/recoveryScript.lua", "/system/core/recoveryScript.lua"}
 
 local function getGPU(screen)
     for address in component.list("gpu", true) do
@@ -121,7 +122,7 @@ local function readSysinfo(fs, path)
     if fs.exists(path) then
         local info = unserialize(assert(readFile(fs, path)))
         local params = {"name", "version"}
-        local tbl = {}
+        local tbl = {recoveryMode = info.recoveryMode}
         for i, v in ipairs(params) do
             if info[v] then
                 tbl[v] = info[v]
@@ -137,9 +138,8 @@ local function readSysinfo(fs, path)
 end
 
 local sysinfoFile = "/system/sysinfo.cfg"
-local function likeOSname(proxy, modeTitle)
+local function likeOSname(info, modeTitle)
     local str = "likeOS based system"
-    local info = readSysinfo(proxy, sysinfoFile)
     if info and info.name then
         str = str .. " (" .. tostring(info.name)
         if info.version then
@@ -160,8 +160,10 @@ local function findSystems(address)
     local isPipes = proxy.exists("/boot/kernel/pipes")
 
     if proxy.exists("/system/core/bootloader.lua") then
+        local info = readSysinfo(proxy, sysinfoFile)
+
         table.insert(tbl, {
-            likeOSname(proxy),
+            likeOSname(info),
             function ()
                 bootTo(proxy, "/system/core/bootloader.lua")
             end,
@@ -171,7 +173,7 @@ local function findSystems(address)
         for _, recoveryPath in ipairs(recoverysPaths) do
             if proxy.exists(recoveryPath) then
                 table.insert(tbl, {
-                    likeOSname(proxy, "recovery menu"),
+                    likeOSname(info, "recovery menu"),
                     function (_, _, keyboard)
                         for address in component.list("screen", true) do
                             local find = false
@@ -189,35 +191,41 @@ local function findSystems(address)
                     address
                 })
 
-                table.insert(tbl, {
-                    likeOSname(proxy, "recovery script"),
-                    function (_, _, keyboard)
-                        for address in component.list("screen", true) do
-                            local find = false
-                            for i, lkeys in ipairs(component.invoke(address, "getKeyboards")) do
-                                if lkeys == keyboard then
-                                    find = true
-                                    break
+                for _, recoveryScriptPath in ipairs(recoveryScriptPaths) do
+                    if proxy.exists(recoveryScriptPath) then
+                        table.insert(tbl, {
+                            likeOSname(info, "recovery script"),
+                            function (_, _, keyboard)
+                                for address in component.list("screen", true) do
+                                    local find = false
+                                    for i, lkeys in ipairs(component.invoke(address, "getKeyboards")) do
+                                        if lkeys == keyboard then
+                                            find = true
+                                            break
+                                        end
+                                    end
+                                    if find then
+                                        bootTo(proxy, "/system/core/bootloader.lua", {forceRecovery = address, recoveryScript=true})
+                                    end
                                 end
-                            end
-                            if find then
-                                bootTo(proxy, "/system/core/bootloader.lua", {forceRecovery = address, recoveryScript=true})
-                            end
-                        end
-                    end,
-                    address
-                })
-
-                table.insert(tbl, {
-                    likeOSname(proxy, "recovery mode"),
-                    function ()
-                        bootTo(proxy, "/system/core/bootloader.lua", {unpackBootloader={recoveryMode=true}, noRecovery = address})
-                    end,
-                    address
-                })
-
+                            end,
+                            address
+                        })
+                        break
+                    end
+                end
                 break
             end
+        end
+
+        if info.recoveryMode then
+            table.insert(tbl, {
+                likeOSname(info, "recovery mode"),
+                function ()
+                    bootTo(proxy, "/system/core/bootloader.lua", {unpackBootloader={recoveryMode=true}, noRecovery = address})
+                end,
+                address
+            })
         end
     elseif not isPipes then
         if proxy.exists("/lib/core/full_event.lua") then --I hope this file will not be found in other operating systems to avoid conflicts.
