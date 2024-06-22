@@ -148,7 +148,13 @@ layout:listen("modem_message", function (_, localAddress, sender, senderPort, di
     local isTunnel = tunnels[localAddress]
     if allModems[localAddress] and (senderPort == port or isTunnel) and v1 == "rc_adv" then
         local writeAddr = isTunnel and localAddress or sender
-        local tbl = {v2 .. " " .. v3 .. " " .. sender:sub(1, 6) .. " | distance: " .. math.roundTo(dist, 1), false, writeAddr, isTunnel and math.huge or computer.uptime()}
+        local addTitle
+        if isTunnel then
+            addTitle = " | tunnel " .. localAddress:sub(1, 6)
+        else
+            addTitle = " | distance: " .. math.roundTo(dist, 1)
+        end
+        local tbl = {v2 .. " " .. v3 .. " " .. sender:sub(1, 6) .. addTitle, false, writeAddr, isTunnel and math.huge or computer.uptime()}
         for i = 1, #connectList.list do
             local oldTbl = connectList.list[i]
             if oldTbl[3] == writeAddr then
