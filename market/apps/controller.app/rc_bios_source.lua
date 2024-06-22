@@ -129,7 +129,16 @@ local function checkPassword(password)
     end
 end
 
+local oldAdvTime = -math.huge
+local currentUser
 while true do
+    if not currentUser then
+        local uptime = computer.uptime()
+        if uptime - oldAdvTime > 3 then
+            modem.broadcast(port, "rc_adv")
+            oldAdvTime = uptime
+        end
+    end
     local eventData = {computer.pullSignal(0.5)}
     if eventData[1] == "modem_message" and eventData[2] == modem.address then
         

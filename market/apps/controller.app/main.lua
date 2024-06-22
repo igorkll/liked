@@ -57,6 +57,7 @@ infoLayout:createText(2, 6, uix.colors.white, gui_container.chars.dot .. " if th
 infoLayout:createText(2, 8, uix.colors.white, gui_container.chars.dot .. " there is always a screen on the drone and therefore a password will be set for the drone in any case", rx - 2)
 infoLayout:createText(2, 10, uix.colors.white, gui_container.chars.dot .. " the password will be generated randomly every time you start unless you set your password", rx - 2)
 infoLayout:createText(2, 12, uix.colors.white, gui_container.chars.dot .. " in fact, the \"RC Bios\" can be installed on any device, be it a computer or a microcontroller", rx - 2)
+infoLayout:createText(2, 14, uix.colors.white, gui_container.chars.dot .. " if a password is not set on the device and a random temporary one cannot be generated (due to the lack of a screen or GPU), then you cannot connect to the device from a distance of more than 8 blocks", rx - 2)
 layout:setReturnLayout(infoLayout, uix.colors.green, " INFO ")
 infoLayout:setReturnLayout(layout)
 
