@@ -100,6 +100,24 @@ if screenOk then
     end
 end
 
+local function hash(str)
+    local values = {}
+    for i = 1, 16 do
+        values[i] = ((8 * i * #str) + #str) % 256
+    end
+    for i = 0, #str - 1 do
+        local byte = str:byte(i + 1)
+        local next = str:byte(((i + 1) % #str) + 1)
+        local index = (i % 16) + 1
+        values[index] = (((values[index] + byte + 13) * 3 * next) + next + ((i + 1) * 6)) % 256
+    end
+    local hashStr = ""
+    for i = 1, #values do
+        hashStr = hashStr .. string.char(values[i])
+    end
+    return hashStr
+end
+
 local function checkPassword(password)
     if randomPassword then
         return password == randomPassword
