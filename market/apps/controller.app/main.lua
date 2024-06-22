@@ -16,7 +16,7 @@ local modem = component.proxy(utils.findModem(true) or "")
 local tunnels = {}
 local allModems = {}
 if modem then
-    allModems[modem] = true
+    allModems[modem.address] = true
 end
 for tunnel in component.list("tunnel") do
     tunnels[tunnel] = true
@@ -148,7 +148,7 @@ layout:listen("modem_message", function (_, localAddress, sender, senderPort, di
     local isTunnel = tunnels[localAddress]
     if allModems[localAddress] and (senderPort == port or isTunnel) and v1 == "rc_adv" then
         local writeAddr = isTunnel and localAddress or sender
-        local tbl = {v2 .. " " .. v3 .. " " .. sender:sub(1, 6) .. " | distance: " .. math.roundTo(dist, 1), false, writeAddr, computer.uptime()}
+        local tbl = {v2 .. " " .. v3 .. " " .. sender:sub(1, 6) .. " | distance: " .. math.roundTo(dist, 1), false, writeAddr, isTunnel and math.huge or computer.uptime()}
         for i = 1, #connectList.list do
             local oldTbl = connectList.list[i]
             if oldTbl[3] == writeAddr then
