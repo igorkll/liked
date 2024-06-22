@@ -239,14 +239,14 @@ local randPass = rcLayout:createButton(2, rcLayout.sizeY - 7, 21, 1, uix.colors.
 local customPass = rcLayout:createButton(2, rcLayout.sizeY - 5, 21, 1, uix.colors.purple, uix.colors.white, "use custom password")
 
 function randPass:onDrop()
-    deviceRequest(controlAddress, "rc_exec", "component.invoke(component.list('eeprom')(), 'set', '')")
+    deviceRequest(controlAddress, "rc_exec", "component.invoke(component.list('eeprom')(), 'setData', '')")
 end
 
 function customPass:onDrop()
     self.gui:fullStop()
     local password = gui.comfurmPassword(screen)
     if password then
-        deviceRequest(controlAddress, "rc_exec", "component.invoke(component.list('eeprom')(), 'set', ...)", hash(password))
+        deviceRequest(controlAddress, "rc_exec", "passwordHash = ...; component.invoke(component.list('eeprom')(), 'setData', passwordHash)", hash(password))
     end
     self.gui:fullStart()
     ui:draw()

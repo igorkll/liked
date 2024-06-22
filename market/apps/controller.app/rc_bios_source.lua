@@ -106,7 +106,7 @@ end
 ----------------------------------------------
 
 local randomPassword
-local passwordHash = eeprom.getData()
+passwordHash = eeprom.getData()
 if #passwordHash == 0 then
     passwordHash = nil
 end
