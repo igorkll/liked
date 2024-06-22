@@ -8,8 +8,10 @@ local gui = require("gui")
 local computer = require("computer")
 local event = require("event")
 local unicode = require("unicode")
+local fs = require("filesystem")
 
 local screen = ...
+local firmwarePath = system.getResourcePath("firmware/rc_bios/code.lua")
 local port = 38710
 local ui = uix.manager(screen)
 local rx, ry = ui:zoneSize()
@@ -218,11 +220,24 @@ function colorpic:onColor(_, color)
 end
 
 function rcLayout:onUnselect()
-    deviceRequest(self.gui.controlAddress, "rc_out")
+    deviceRequest(self.controlAddress, "rc_out")
 end
 
 function rcLayout:onSelect(controlAddress)
     self.controlAddress = controlAddress
+    deviceRequest(controlAddress, "rc_exec", [[
+        local code = ...
+        local eeprom = component.proxy(component.list("eeprom")() or "")
+        if eeprom and code ~= eeprom.get() then
+            setColor(0xef9700)
+            setText("firmware\nupdating")
+            for i = 1, 3 do
+                computer.beep(2000, 0.05)
+            end
+            eeprom.set(code)
+            setColor(currentColor)
+        end
+    ]], assert(fs.readFile(firmwarePath)))
     wakeUpSwitch.state = not not select(2, assert(deviceRequest(controlAddress, "rc_exec", "return (tunnel and tunnel.getWakeMessage() == \"rc_wake\") or (modem and modem.getWakeMessage() == \"rc_wake\")")))
 end
 

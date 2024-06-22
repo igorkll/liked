@@ -56,7 +56,7 @@ function setColor(color)
         obj.setLightColor(color)
     end
 end
-local currentColor = 0xffffff
+currentColor = 0xffffff
 setColor(currentColor)
 
 function setText(text)
@@ -176,7 +176,7 @@ while true do
             if cmd == "rc_exec" then
                 local code, err = load(arg)
                 if code then
-                    send(isTunnel, currentUser, pcall(code))
+                    send(isTunnel, currentUser, pcall(code, table.unpack(eventData, 8)))
                 else
                     send(isTunnel, currentUser, false, err)
                 end
@@ -191,6 +191,7 @@ while true do
                 computer.beep(200, 0.2)
                 computer.beep(150, 0.2)
                 computer.beep(100, 0.8)
+                send(isTunnel, currentUser, true)
                 currentUser = nil
             end
         end
