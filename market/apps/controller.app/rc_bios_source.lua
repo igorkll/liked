@@ -111,17 +111,20 @@ if #passwordHash == 0 then
     passwordHash = nil
 end
 
-if screenOk then
-    if passwordHash then
-        setText("password\nchanged")
-    else
-        randomPassword = ""
-        for i = 1, 8 do
-            randomPassword = randomPassword .. string.char(math.random(33, 126))
+local function passText()
+    if screenOk then
+        if passwordHash then
+            setText("password\nchanged")
+        else
+            randomPassword = ""
+            for i = 1, 8 do
+                randomPassword = randomPassword .. string.char(math.random(33, 126))
+            end
+            setText("password:\n" .. randomPassword)
         end
-        setText("password:\n" .. randomPassword)
     end
 end
+passText()
 
 local function hash(str)
     local values = {}
@@ -188,6 +191,7 @@ while true do
             elseif cmd == "rc_out" then
                 currentColor = 0xffffff
                 setColor(currentColor)
+                passText()
                 computer.beep(200, 0.2)
                 computer.beep(150, 0.2)
                 computer.beep(100, 0.8)

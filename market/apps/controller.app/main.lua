@@ -223,6 +223,7 @@ end
 
 function rcLayout:onUnselect()
     deviceRequest(controlAddress, "rc_out")
+    controlAddress = nil
 end
 
 function rcLayout:onSelect()
@@ -268,4 +269,6 @@ function wakeUpSwitch:onSwitch()
 end
 
 ui:loop()
-deviceRequest(controlAddress, "rc_out")
+if controlAddress then
+    deviceRequest(controlAddress, "rc_out")
+end
