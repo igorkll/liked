@@ -912,16 +912,7 @@ function uix:uploadEvent(eventData)
     return eventData
 end
 
-function uix:draw()
-    if self.allowAutoActive then
-        self.allowAutoActive = nil
-        self.active = true
-    end
-
-    if not self.active then
-        return
-    end
-
+function uix:forceDraw()
     for _, obj in ipairs(self.objs) do
         if obj.draw and obj.type == "up" then
             obj:draw()
@@ -947,6 +938,19 @@ function uix:draw()
             obj:draw()
         end
     end
+end
+
+function uix:draw()
+    if self.allowAutoActive then
+        self.allowAutoActive = nil
+        self.active = true
+    end
+
+    if not self.active then
+        return
+    end
+
+    self:forceDraw()
 end
 
 function uix:stop()
@@ -1217,6 +1221,12 @@ end
 function manager:draw()
     if self.current then
         self.current:draw()
+    end
+end
+
+function manager:forceDraw()
+    if self.current then
+        self.current:forceDraw()
     end
 end
 

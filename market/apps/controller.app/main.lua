@@ -37,12 +37,12 @@ local passwordInput = layout:createInput(layout:centerOneSize(0, 2, 32, nil, nil
 local connectButton = layout:createButton(layout:center(-6, 5, 16, 3, uix.colors.white, uix.colors.gray, "connect"))
 local refreshButton = layout:createButton(layout:center(8, 5, 9, 3, uix.colors.orange, uix.colors.white, "refresh"))
 
-local function deviceRequest(address, method, ...)
-    if not modem.send(address, port, method, ...) then
+local function deviceRequest(address, ...)
+    if not modem.send(address, port, ...) then
         return nil, "the message could not be sent"
     end
     local startWaitTime = computer.uptime()
-    while computer.uptime() - startWaitTime > 5 do
+    while computer.uptime() - startWaitTime < 5 do
         local eventData = {event.pull(0.5, "modem_message", modem.address, address, port)}
         if eventData[1] and eventData[6] ~= "rc_adv" then
             return table.unpack(eventData, 6)
@@ -60,11 +60,17 @@ function connectButton:onClick()
     end
 
     if obj then
+        ui:fullStop()
+        gui.status(screen, nil, nil, "connection attempt...")
         if deviceRequest(obj[3], "rc_connect", passwordInput.read.getBuffer()) then
+            passwordInput.read.setBuffer("")
             rcLayout:select()
         else
-            ui:func(gui.warn, screen, nil, nil, "failed to connect. check that the password is entered correctly")
+            ui:forceDraw()
+            gui.warn(screen, nil, nil, "failed to connect. check that the password is entered correctly")
         end
+        ui:fullStart()
+        ui:draw()
     else
         ui:func(gui.warn, screen, nil, nil, "first, select the device you want to control from the list")
     end
