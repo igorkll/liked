@@ -243,8 +243,9 @@ function randPass:onClick()
 end
 
 function customPass:onClick()
-    if password1 == password2 then
-        deviceRequest(controlAddress, "rc_exec", "component.invoke(component.list('eeprom')(), 'set', ...)", hash(password1))
+    local password = gui.comfurmPassword(screen)
+    if password then
+        deviceRequest(controlAddress, "rc_exec", "component.invoke(component.list('eeprom')(), 'set', ...)", hash(password))
     end
     ui:draw()
 end

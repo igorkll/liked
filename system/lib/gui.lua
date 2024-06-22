@@ -1622,6 +1622,20 @@ function gui.selectExternalFs(screen, cx, cy)
     return gui.selectcomponentProxy(screen, cx, cy, {"filesystem"}, false, false, nil, {fs.bootaddress, fs.tmpaddress})
 end
 
+function gui.comfurmPassword(screen, px, py)
+    local password1 = gui.input(screen, px, py, "enter new password", true)
+    if password1 then
+        local password2 = gui.input(screen, px, py, "comfurm new password", true)
+        if password2 then
+            if password1 == password2 then
+                return password1
+            else
+                gui.warn(screen, px, py, "passwords don't match")
+            end
+        end
+    end
+end
+
 function gui.checkPassword(screen, cx, cy, disableStartSound, noCancel)
     local regData = registry.data
     if regData then

@@ -43,19 +43,12 @@ return function(eventData)
             draw()
         elseif windowEventData[4] == 4 and windowEventData[3] >= 1 and windowEventData[3] <= 15 then
             if gui.checkPassword(screen) then
-                local password1 = gui.input(screen, nil, nil, "enter new password", true)
-                if password1 then
-                    local password2 = gui.input(screen, nil, nil, "comfurm new password", true)
-                    if password2 then
-                        if password1 == password2 then
-                            local salt = uuid.next()
-                            registry.password = sha256(password1 .. salt)
-                            registry.passwordSalt = salt
-                            require("likedCryptoFs").encrypt(password1)
-                        else
-                            gui.warn(screen, nil, nil, "passwords don't match")
-                        end
-                    end
+                local password = gui.comfurmPassword(screen)
+                if password then
+                    local salt = uuid.next()
+                    registry.password = require("sha256").sha256hex(password .. salt)
+                    registry.passwordSalt = salt
+                    require("likedCryptoFs").encrypt(password)
                 end
             end
             draw()
