@@ -208,9 +208,36 @@ infoLayout:setReturnLayout(layout)
 rcLayout = ui:create("controller [Remote Control]", uix.colors.black)
 rcLayout:setReturnLayout(layout)
 
+local switchTitle = rcLayout:createText(2, rcLayout.sizeY - 1, uix.colors.white, "allow remote wake-up")
+local wakeUpSwitch = rcLayout:createSwitch(switchTitle.x + switchTitle.sizeX + 1, rcLayout.sizeY - 1)
+
 function rcLayout:onSelect(controlAddress)
     self.controlAddress = controlAddress
-    self.wakeState = deviceRequest(controlAddress, "rc_exec", "return (tunnel and tunnel.getWakeMessage() == wakeMsg) or (modem and modem.getWakeMessage() == wakeMsg)")
+    wakeUpSwitch.state = not not deviceRequest(controlAddress, "rc_exec", "return (tunnel and tunnel.getWakeMessage() == wakeMsg) or (modem and modem.getWakeMessage() == wakeMsg)")
+end
+
+function wakeUpSwitch:onSwitch()
+    if self.state then
+        deviceRequest(self.controlAddress, "rc_exec", [[
+            if tunnel then
+                tunnel.setWakeMessage("rc_wake")
+            end
+
+            if modem then
+                modem.setWakeMessage("rc_wake")
+            end
+        ]])
+    else
+        deviceRequest(self.controlAddress, "rc_exec", [[
+            if tunnel then
+                tunnel.setWakeMessage()
+            end
+
+            if modem then
+                modem.setWakeMessage()
+            end
+        ]])
+    end
 end
 
 ui:loop()

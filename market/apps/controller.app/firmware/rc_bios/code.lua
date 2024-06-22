@@ -3,7 +3,6 @@ local modem = component.proxy(component.list("modem")() or "")
 local tunnel = component.proxy(component.list("tunnel")() or "")
 
 local port = 38710
-local wakeMsg = "rc_wake"
 
 if modem then
     pcall(modem.setStrength, math.huge)
@@ -28,26 +27,6 @@ if drone then
     devicename = drone.name()
 elseif robot then
     devicename = robot.name()
-end
-
-function setWake(state)
-    if state then
-        if tunnel then
-            tunnel.setWakeMessage(wakeMsg)
-        end
-        
-        if modem then
-            modem.setWakeMessage(wakeMsg)
-        end
-    else
-        if tunnel then
-            tunnel.setWakeMessage()
-        end
-        
-        if modem then
-            modem.setWakeMessage()
-        end
-    end
 end
 
 function setColor(color)
