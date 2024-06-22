@@ -239,7 +239,12 @@ local randPass = rcLayout:createButton(2, rcLayout.sizeY - 7, 21, 1, uix.colors.
 local customPass = rcLayout:createButton(2, rcLayout.sizeY - 5, 21, 1, uix.colors.purple, uix.colors.white, "use custom password")
 
 function randPass:onDrop()
-    deviceRequest(controlAddress, "rc_exec", "component.invoke(component.list('eeprom')(), 'setData', '')")
+    self.gui:fullStop()
+    if gui.yesno(screen, nil, nil, "are you sure you want to reset your password and use a random password?") then
+        deviceRequest(controlAddress, "rc_exec", "passwordHash = nil; component.invoke(component.list('eeprom')(), 'setData', '')")
+    end
+    self.gui:fullStart()
+    ui:draw()
 end
 
 function customPass:onDrop()
