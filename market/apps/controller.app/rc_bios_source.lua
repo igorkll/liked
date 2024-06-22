@@ -33,7 +33,10 @@ else
 end
 
 local function setColor(color)
-    (drone or robot).setLightColor(color)
+    local obj = drone or robot
+    if obj then
+        obj.setLightColor(color)
+    end
 end
 setColor(0xffffff)
 

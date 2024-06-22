@@ -43,8 +43,8 @@ function refreshButton:onClick()
     connectList:draw()
 end
 
-function layout:onEvent(eventData)
-    if eventData[1] == "modem_message" and eventData[2] == modem.address and eventData[4] == port and eventData[6] == "rc_adv" then
+layout:listen("modem_message", function (eventData)
+    if eventData[2] == modem.address and eventData[4] == port and eventData[6] == "rc_adv" then
         local tbl = {eventData[7] .. " " .. eventData[3]:sub(1, 6) .. math.roundTo(eventData[5]), false, eventData[3]}
         for i = 1, #connectList.list do
             if tbl[i][3] == eventData[3] then
@@ -58,7 +58,7 @@ function layout:onEvent(eventData)
         end
         connectList:draw()
     end
-end
+end)
 
 -----------------------------
 

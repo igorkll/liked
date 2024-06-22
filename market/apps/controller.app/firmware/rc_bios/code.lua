@@ -1,1 +1,161 @@
-local a;for b in component.list("modem",true)do if component.invoke(b,"isWireless")then if component.invoke(b,"setStrength",math.huge)>=400 then a=b;break end end end;if not a then a=component.list("modem",true)()if not a then error("the modem was not found",0)end end;a=component.proxy(a)local c=38710;a.close()a.open(c)pcall(a.setStrength,math.huge)drone=component.proxy(component.list("drone")()or"")robot=component.proxy(component.list("robot")()or"")local d=component.proxy(component.list("gpu")()or"")local e=component.proxy(component.list("eeprom")()or"")local f=component.list("screen")()if d and f then d.bind(f)d.setResolution(10,2)else d=nil end;local function g(h)(drone or robot).setLightColor(h)end;g(0xffffff)local function i(j)if drone then drone.setStatusText(j)return 1 elseif d then local k,l=d.getResolution()d.setBackground(0)d.setForeground(0xffffff)d.fill(1,1,k,l," ")local m=1;local n=1;for o=1,#j do local p=j:sub(o,o)if p=="\n"then m=m+1;n=1 else d.set(n,m,j)n=n+1 end end;return 1 end end;local q=i("")local r;do local s=computer.getDeviceInfo()local function t(u)return component.list(u)()and u end;local function v()local w=s[computer.address()]if w and w.description and w.description:lower()=="server"then return"server"end end;r=t("tablet")or t("microcontroller")or t("drone")or t("robot")or v()or t("computer")or"unknown"end;local x;local y=e.getData()if#y==0 then y=nil end;if q then if y then i("password\nchanged")else x=""for o=1,8 do x=x..string.char(math.random(33,126))end;i("password:\n"..x)end end;local function z(A)local B={}for o=1,16 do B[o]=(8*o*#A+#A)%256 end;for o=0,#A-1 do local C=A:byte((o-1)%#A+1)local D=A:byte(o+1)local E=A:byte((o+1)%#A+1)local n=(o+C+E)%16+1;B[n]=((B[n]+D+13)*3*E+E*C+(o+1)*6)%256 end;local F=""for o=1,#B do F=F..string.char(B[o])end;return F end;local function G(H)if x then return H==x elseif y then return z(H)==y else return true end end;local I=-math.huge;local J;while true do if not J then local K=computer.uptime()if K-I>3 then if not x and not y then pcall(a.setStrength,8)end;a.broadcast(c,"rc_adv")pcall(a.setStrength,math.huge)I=K end end;local L={computer.pullSignal(0.5)}if L[1]=="modem_message"and L[2]==a.address then if not J and L[6]=="rc_connect"and(x or y or L[5]<=8)then J=L[3]if G(L[7])then a.send(J,c,"rc_ok")else a.send(J,c,"rc_err")end end end end
+local modem
+for address in component.list("modem", true) do
+    if component.invoke(address, "isWireless") then
+        if component.invoke(address, "setStrength", math.huge) >= 400 then
+            modem = address
+            break
+        end
+    end
+end
+if not modem then
+    modem = component.list("modem", true)()
+    if not modem then
+        error("the modem was not found", 0)
+    end
+end
+modem = component.proxy(modem)
+
+local port = 38710
+modem.close()
+modem.open(port)
+pcall(modem.setStrength, math.huge)
+
+drone = component.proxy(component.list("drone")() or "")
+robot = component.proxy(component.list("robot")() or "")
+local gpu = component.proxy(component.list("gpu")() or "")
+local eeprom = component.proxy(component.list("eeprom")() or "")
+local screen = component.list("screen")()
+if gpu and screen then
+    gpu.bind(screen)
+    gpu.setResolution(10, 2)
+else
+    gpu = nil
+end
+
+local function setColor(color)
+    local obj = drone or robot
+    if obj then
+        obj.setLightColor(color)
+    end
+end
+setColor(0xffffff)
+
+local function setText(text)
+    if drone then
+        drone.setStatusText(text)
+        return 1
+    elseif gpu then
+        local rx, ry = gpu.getResolution()
+        gpu.setBackground(0)
+        gpu.setForeground(0xffffff)
+        gpu.fill(1, 1, rx, ry, " ")
+        local line = 1
+        local index = 1
+        for i = 1, #text do
+            local char = text:sub(i, i)
+            if char == "\n" then
+                line = line + 1
+                index = 1
+            else
+                gpu.set(index, line, text)
+                index = index + 1
+            end
+        end
+        return 1
+    end
+end
+local screenOk = setText("")
+
+local devicetype
+do
+    local deviceinfo = computer.getDeviceInfo()
+
+    local function isType(ctype)
+        return component.list(ctype)() and ctype
+    end
+    
+    local function isServer()
+        local obj = deviceinfo[computer.address()]
+        if obj and obj.description and obj.description:lower() == "server" then
+            return "server"
+        end
+    end
+    
+    devicetype = isType("tablet") or isType("microcontroller") or isType("drone") or isType("robot") or isServer() or isType("computer") or "unknown"
+end
+
+----------------------------------------------
+
+local randomPassword
+local passwordHash = eeprom.getData()
+if #passwordHash == 0 then
+    passwordHash = nil
+end
+
+if screenOk then
+    if passwordHash then
+        setText("password\nchanged")
+    else
+        randomPassword = ""
+        for i = 1, 8 do
+            randomPassword = randomPassword .. string.char(math.random(33, 126))
+        end
+        setText("password:\n" .. randomPassword)
+    end
+end
+
+local function hash(str)
+    local values = {}
+    for i = 1, 16 do
+        values[i] = ((8 * i * #str) + #str) % 256
+    end
+    for i = 0, #str - 1 do
+        local previous = str:byte(((i - 1) % #str) + 1)
+        local byte = str:byte(i + 1)
+        local next = str:byte(((i + 1) % #str) + 1)
+        local index = ((i + previous + next) % 16) + 1
+        values[index] = (((values[index] + byte + 13) * 3 * next) + (next * previous) + ((i + 1) * 6)) % 256
+    end
+    local hashStr = ""
+    for i = 1, #values do
+        hashStr = hashStr .. string.char(values[i])
+    end
+    return hashStr
+end
+
+local function checkPassword(password)
+    if randomPassword then
+        return password == randomPassword
+    elseif passwordHash then
+        return hash(password) == passwordHash
+    else
+        return true
+    end
+end
+
+local oldAdvTime = -math.huge
+local currentUser
+while true do
+    if not currentUser then
+        local uptime = computer.uptime()
+        if uptime - oldAdvTime > 3 then
+            if not randomPassword and not passwordHash then
+                pcall(modem.setStrength, 8)
+            end
+            modem.broadcast(port, "rc_adv", devicetype)
+            pcall(modem.setStrength, math.huge)
+            oldAdvTime = uptime
+        end
+    end
+    local eventData = {computer.pullSignal(0.5)}
+    if eventData[1] == "modem_message" and eventData[2] == modem.address then
+        if not currentUser and eventData[6] == "rc_connect" and (randomPassword or passwordHash or eventData[5] <= 8) then
+            currentUser = eventData[3]
+            if checkPassword(eventData[7]) then
+                modem.send(currentUser, port, "rc_ok")
+            else
+                modem.send(currentUser, port, "rc_err")
+            end
+        end
+    end
+end
