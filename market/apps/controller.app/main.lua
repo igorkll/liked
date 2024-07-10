@@ -293,48 +293,31 @@ function rcLayout:onUnselect()
 end
 
 function rcLayout:onSelect()
-    assert(deviceRequest(controlAddress, "rc_exec", [[
-        local code = ...
-        if #code < 2048 or not load(code) then
-            return false, "received firmware is damaged"
-        end
-        local eeprom = component.proxy(component.list("eeprom")() or "")
-        if eeprom and code ~= eeprom.get() then
-            setColor(0xef9700)
-            setText("firmware\nupdating")
-            for i = 1, 3 do
-                computer.beep(2000, 0.05)
-            end
-            eeprom.set(code)
-            setColor(currentColor)
-            setText("")
-        end
-        return true
-    ]], assert(fs.readFile(firmwarePath))))
+    local firmwareUpdater = [[local code = ...
+if #code < 2048 or not load(code) then
+    return false, "received firmware is damaged"
+end
+local eeprom = component.proxy(component.list("eeprom")() or "")
+if eeprom and code ~= eeprom.get() then
+    setColor(0xef9700)
+    setText("firmware\nupdating")
+    for i = 1, 3 do
+        computer.beep(2000, 0.05)
+    end
+    eeprom.set(code)
+    setColor(currentColor)
+    setText("")
+end
+return true]]
+    assert(deviceRequest(controlAddress, "rc_exec", firmwareUpdater, assert(fs.readFile(firmwarePath))))
     wakeUpSwitch.state = not not select(2, assert(deviceRequest(controlAddress, "rc_exec", "return (tunnel and tunnel.getWakeMessage() == \"rc_wake\") or (modem and modem.getWakeMessage() == \"rc_wake\")")))
 end
 
 function wakeUpSwitch:onSwitch()
     if self.state then
-        deviceRequest(controlAddress, "rc_exec", [[
-            if tunnel then
-                tunnel.setWakeMessage("rc_wake")
-            end
-
-            if modem then
-                modem.setWakeMessage("rc_wake")
-            end
-        ]])
+        deviceRequest(controlAddress, "rc_exec", "if tunnel then tunnel.setWakeMessage('rc_wake') end if modem then modem.setWakeMessage('rc_wake') end")
     else
-        deviceRequest(controlAddress, "rc_exec", [[
-            if tunnel then
-                tunnel.setWakeMessage()
-            end
-
-            if modem then
-                modem.setWakeMessage()
-            end
-        ]])
+        deviceRequest(controlAddress, "rc_exec", "if tunnel then tunnel.setWakeMessage() end if modem then modem.setWakeMessage() end")
     end
 end
 
