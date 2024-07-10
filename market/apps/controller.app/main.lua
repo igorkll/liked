@@ -150,7 +150,7 @@ local function connect()
         if ret == true then
             passwordInput.read.setBuffer("")
             controlAddress = obj[3]
-            rcLayout:select()
+            rcLayout:select(obj[5])
         else
             ui:forceDraw()
             gui.warn(screen, nil, nil, "incorrect password")
@@ -195,7 +195,7 @@ layout:listen("modem_message", function (_, localAddress, sender, senderPort, di
         else
             addTitle = " | distance: " .. math.roundTo(dist, 1)
         end
-        local tbl = {v2 .. " " .. v3 .. " " .. sender:sub(1, 6) .. addTitle, false, writeAddr, not isTunnel and computer.uptime()}
+        local tbl = {v2 .. " " .. v3 .. " " .. sender:sub(1, 6) .. addTitle, false, writeAddr, not isTunnel and computer.uptime(), v2}
         for i = 1, #connectList.list do
             local oldTbl = connectList.list[i]
             if oldTbl[3] == writeAddr then
@@ -292,7 +292,7 @@ function rcLayout:onUnselect()
     end
 end
 
-function rcLayout:onSelect()
+function rcLayout:onSelect(devicetype)
     local firmwareUpdater = [[local code = ...
 if #code < 2048 or not load(code) then
     return false, "received firmware is damaged"
@@ -311,6 +311,15 @@ end
 return true]]
     assert(deviceRequest(controlAddress, "rc_exec", firmwareUpdater, assert(fs.readFile(firmwarePath))))
     wakeUpSwitch.state = not not select(2, assert(deviceRequest(controlAddress, "rc_exec", "return (tunnel and tunnel.getWakeMessage() == \"rc_wake\") or (modem and modem.getWakeMessage() == \"rc_wake\")")))
+    
+    colorpic.disabledHidden = true
+    if devicetype == "drone" then
+        colorpic.disabledHidden = false
+        colorpic:setColor(select(2, assert(deviceRequest(controlAddress, "rc_exec", "return drone.getLightColor()"))))
+    elseif devicetype == "robot" then
+        colorpic.disabledHidden = false
+        colorpic:setColor(select(2, assert(deviceRequest(controlAddress, "rc_exec", "return robot.getLightColor()"))))
+    end
 end
 
 function wakeUpSwitch:onSwitch()
