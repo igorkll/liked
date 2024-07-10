@@ -10,6 +10,7 @@ local event = require("event")
 local unicode = require("unicode")
 local fs = require("filesystem")
 local parser = require("parser")
+local screensaver = require("screensaver")
 
 local screen = ...
 local firmwarePath = system.getResourcePath("firmware/rc_bios/code.lua")
@@ -254,6 +255,7 @@ rcLayout:setReturnLayout(layout)
 
 local switchTitle = rcLayout:createText(2, rcLayout.sizeY - 1, uix.colors.white, "allow remote wake-up")
 local deviceTypeTitle = rcLayout:createText(2, 2, uix.colors.white)
+local offsetTitle = rcLayout:createText(2, 3, uix.colors.white)
 local wakeUpSwitch = rcLayout:createSwitch(switchTitle.x + unicode.len(switchTitle.text) + 1, rcLayout.sizeY - 1)
 local colorpic = rcLayout:createColorpic(2, rcLayout.sizeY - 3, 13, 1, "light color", 0xffffff, true)
 local randPass = rcLayout:createButton(2, rcLayout.sizeY - 7, 21, 1, uix.colors.purple, uix.colors.white, "use random password")
@@ -291,7 +293,9 @@ local function statsUpdate(noDraw)
             table.insert(tbl, name .. ": unknown")
         end
     end
+    local offset
     if drone then
+        offset = drone.getOffset()
         detect("bottom  ", 0)
         detect("top     ", 1)
         detect("north -Z", 2)
@@ -301,14 +305,14 @@ local function statsUpdate(noDraw)
     elseif robot then
         detect("bottom  ", 0)
         detect("top     ", 1)
-        detect("back    ", 2)
+        --detect("back    ", 2)
         detect("front   ", 3)
-        detect("right   ", 4)
-        detect("left    ", 5)
+        --detect("right   ", 4)
+        --detect("left    ", 5)
     end
-    return table.concat(tbl, "\n")
+    return table.concat(tbl, "\n"), offset
 end)()]]
-    local ok, val, strs = deviceRequest(controlAddress, "rc_exec", getterCode)
+    local ok, val, strs, offset = deviceRequest(controlAddress, "rc_exec", getterCode)
     if ok then
         if type(val) == "number" then
             progressBar.value = val
@@ -318,16 +322,23 @@ end)()]]
         if type(strs) == "string" then
             local strs = parser.split(string, strs, "\n")
             for i, v in ipairs(statuses) do
-                v.text = " " .. (strs[i] or "no detector")
+                v.text = " " .. (strs[i] or "")
                 if not noDraw then v:draw() end
             end
         end
     end
+
+    offsetTitle.text = "offset: " .. math.roundTo(offset, 1)
+    if offset > 1 then
+        offsetTitle.text = offsetTitle.text .. ". POSSIBLE COLLISIONS WITH BLOCKS"
+    end
 end
 
-rcLayout:thread(function ()
+local th = rcLayout:thread(function ()
     while true do
+        local back = screensaver.noScreensaver(screen)
         statsUpdate()
+        back()
         os.sleep(1)
     end
 end)
@@ -431,6 +442,22 @@ return true]]
     currentBlockCount = 1
     seekbarTextUpdate(true)
     statsUpdate(true)
+
+    offsetTitle.hidden = true
+    if devicetype == "robot" then
+        for i, v in ipairs(statuses) do
+            v.hidden = i > 3
+        end
+    elseif devicetype == "drone" then
+        offsetTitle.hidden = false
+        for i, v in ipairs(statuses) do
+            v.hidden = false
+        end
+    else
+        for i, v in ipairs(statuses) do
+            v.hidden = true
+        end
+    end
 end
 
 function wakeUpSwitch:onSwitch()
