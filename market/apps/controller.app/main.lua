@@ -277,7 +277,7 @@ local luaPoses = execPoses + 6
 for i = 1, 4 do
     local py = (rcLayout.sizeY - 8) + ((i - 1) * 2)
     rcLayout:createButton(execPoses, py, 6, 1, colors.green, colors.white, "exec")
-    rcLayout:createInput(luaPoses, py, rcLayout.sizeX - luaPoses - 1, colors.white, colors.black, nil, nil, "lua", nil, nil, nil, nil, "cntr" .. i)
+    rcLayout:createInput(luaPoses, py, rcLayout.sizeX - luaPoses, colors.gray, colors.white, nil, nil, "lua", nil, nil, nil, nil, "cntr" .. i)
 end
 
 for i, v in ipairs(statuses) do

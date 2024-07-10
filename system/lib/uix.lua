@@ -666,7 +666,7 @@ function uix:createInput(x, y, sx, back, fore, testHidden, default, syntax, maxl
         obj.read = self.window:readNoDraw(x, y, sx, obj.back, obj.fore, preStr, testHidden, default, true, syntax)
     end
 
-    if registrySave then
+    if registrySave and registry.data.inputs then
         obj.read.setBuffer(registry.data.inputs[registrySave] or "")
     end
     
