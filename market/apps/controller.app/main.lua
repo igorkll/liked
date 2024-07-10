@@ -255,14 +255,17 @@ local seekbarText = rcLayout:createText(19, rcLayout.sizeY - 9, uix.colors.white
 local currentBlockCount
 
 rcLayout:createText(2, rcLayout.sizeY, uix.colors.white, "power: ")
-local progressBar = rcLayout:createProgress(10, rcLayout.sizeY, rcLayout.sizeX - 10, uix.colors.orange, uix.colors.white, 0.3)
+local progressBar = rcLayout:createProgress(10, rcLayout.sizeY, rcLayout.sizeX - 10, uix.colors.orange, uix.colors.white)
 
 local function statsUpdate()
-    
+    local ok, val = deviceRequest(controlAddress, "rc_exec", "return computer.energy() / computer.maxEnergy()")
+    if ok then
+        progressBar.value = val
+        progressBar:draw()
+    end
 end
 
 rcLayout:timer(1, statsUpdate, math.huge)
-statsUpdate()
 
 local function seekbarTextUpdate()
     seekbarText.text = "blocks for movement: " .. currentBlockCount .. " "
@@ -356,6 +359,7 @@ return true]]
 
     currentBlockCount = 1
     seekbarTextUpdate()
+    statsUpdate()
 end
 
 function wakeUpSwitch:onSwitch()
