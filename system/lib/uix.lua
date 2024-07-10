@@ -824,6 +824,7 @@ function uix:createColorpic(x, y, sx, sy, text, color, full)
 
     local screen = self.screen
     function button:onClick()
+        self.gui:fullStop()
         local fcolor, fout
         local clear = gui.saveBigZone(screen)
 
@@ -837,6 +838,7 @@ function uix:createColorpic(x, y, sx, sy, text, color, full)
             end
         end
         clear()
+        self.gui:fullStart()
 
         if fcolor then
             self:setColor(fcolor)

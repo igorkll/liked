@@ -131,6 +131,14 @@ local function deviceRequest(address, ...)
     ui:func(gui.warn, screen, nil, nil, "no response was received")
 end
 
+local function statusRequest(...)
+    local clear = gui.saveZone(screen)
+    gui.status(screen, nil, nil, "sending a request...")
+    local data = {deviceRequest(...)}
+    clear()
+    return table.unpack(data)
+end
+
 function wakeAllButton:onClick()
     sendAll("rc_wake")
     layout:timer(1, advRequest, 1)
@@ -271,7 +279,7 @@ end
 rcLayout:createText(2, rcLayout.sizeY, uix.colors.white, "power: ")
 local progressBar = rcLayout:createProgress(10, rcLayout.sizeY, rcLayout.sizeX - 10, uix.colors.orange, uix.colors.white)
 
-local function statsUpdate()
+local function statsUpdate(noDraw)
     if not controlAddress then return end
     local getterCode = [[return computer.energy() / computer.maxEnergy(), (function()
     local tbl = {}
@@ -297,14 +305,14 @@ end)()]]
     if ok then
         if type(val) == "number" then
             progressBar.value = val
-            progressBar:draw()
+            if not noDraw then progressBar:draw() end
         end
 
         if type(strs) == "string" then
             local strs = parser.split(string, strs, "\n")
             for i, v in ipairs(statuses) do
-                v.text = " " .. strs[i]
-                v:draw()
+                v.text = " " .. (strs[i] or "")
+                if not noDraw then v:draw() end
             end
         end
     end
@@ -317,9 +325,9 @@ rcLayout:thread(function ()
     end
 end)
 
-local function seekbarTextUpdate()
+local function seekbarTextUpdate(noDraw)
     seekbarText.text = "blocks for movement: " .. currentBlockCount .. " "
-    seekbarText:draw()
+    if not noDraw then seekbarText:draw() end
 end
 
 function seekbar:onSeek(value)
@@ -329,8 +337,10 @@ end
 
 function shutdownButton:onDrop()
     self.gui:fullStop()
+    local clear = gui.saveZone(screen)
     if gui.yesno(screen, nil, nil, "are you sure you want to turn off the device?") then
-        deviceSend(controlAddress, "rc_exec", "computer.shutdown()")
+        clear()
+        statusRequest(controlAddress, "rc_exec", "computer.shutdown()")
         controlAddress = nil
         layout:select()
         return
@@ -341,8 +351,10 @@ end
 
 function randPass:onDrop()
     self.gui:fullStop()
+    local clear = gui.saveZone(screen)
     if gui.yesno(screen, nil, nil, "are you sure you want to reset your password and use a random password?") then
-        deviceRequest(controlAddress, "rc_exec", "passwordHash = nil; component.invoke(component.list('eeprom')(), 'setData', '')")
+        clear()
+        statusRequest(controlAddress, "rc_exec", "passwordHash = nil; component.invoke(component.list('eeprom')(), 'setData', '')")
     end
     self.gui:fullStart()
     ui:draw()
@@ -350,21 +362,23 @@ end
 
 function customPass:onDrop()
     self.gui:fullStop()
+    local clear = gui.saveZone(screen)
     local password = gui.comfurmPassword(screen)
     if password then
-        deviceRequest(controlAddress, "rc_exec", "passwordHash = ...; component.invoke(component.list('eeprom')(), 'setData', passwordHash)", hash(password))
+        clear()
+        statusRequest(controlAddress, "rc_exec", "passwordHash = ...; component.invoke(component.list('eeprom')(), 'setData', passwordHash)", hash(password))
     end
     self.gui:fullStart()
     ui:draw()
 end
 
 function colorpic:onColor(_, color)
-    deviceRequest(controlAddress, "rc_exec", "setColor(" .. color .. ")")
+    statusRequest(controlAddress, "rc_exec", "setColor(" .. color .. ")")
 end
 
 function rcLayout:onUnselect()
     if controlAddress then
-        deviceRequest(controlAddress, "rc_out")
+        statusRequest(controlAddress, "rc_out")
         controlAddress = nil
     end
 end
@@ -408,19 +422,19 @@ return true]]
     deviceTypeTitle.text = "device type: " .. devicetype
 
     currentBlockCount = 1
-    seekbarTextUpdate()
-    statsUpdate()
+    seekbarTextUpdate(true)
+    statsUpdate(true)
 end
 
 function wakeUpSwitch:onSwitch()
     if self.state then
-        deviceRequest(controlAddress, "rc_exec", "if tunnel then tunnel.setWakeMessage('rc_wake') end if modem then modem.setWakeMessage('rc_wake') end")
+        statusRequest(controlAddress, "rc_exec", "if tunnel then tunnel.setWakeMessage('rc_wake') end if modem then modem.setWakeMessage('rc_wake') end")
     else
-        deviceRequest(controlAddress, "rc_exec", "if tunnel then tunnel.setWakeMessage() end if modem then modem.setWakeMessage() end")
+        statusRequest(controlAddress, "rc_exec", "if tunnel then tunnel.setWakeMessage() end if modem then modem.setWakeMessage() end")
     end
 end
 
 ui:loop()
 if controlAddress then
-    deviceRequest(controlAddress, "rc_out")
+    statusRequest(controlAddress, "rc_out")
 end
