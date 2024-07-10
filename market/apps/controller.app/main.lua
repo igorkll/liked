@@ -9,6 +9,7 @@ local computer = require("computer")
 local event = require("event")
 local unicode = require("unicode")
 local fs = require("filesystem")
+local parser = require("parser")
 
 local screen = ...
 local firmwarePath = system.getResourcePath("firmware/rc_bios/code.lua")
@@ -254,14 +255,58 @@ local seekbar = rcLayout:createSeek(2, rcLayout.sizeY - 9, 16)
 local seekbarText = rcLayout:createText(19, rcLayout.sizeY - 9, uix.colors.white)
 local currentBlockCount
 
+local startStatPoses = wakeUpSwitch.x + 7
+local statuses = {}
+for i = 0, 5 do
+    table.insert(statuses, rcLayout:createLabel(startStatPoses, (rcLayout.sizeY - 7) + i, 12, 1))
+end
+
+for i, v in ipairs(statuses) do
+    v.style = "square"
+    v.alignment = "left"
+    v.back = i % 2 == 1 and uix.colors.lightGray or uix.colors.white
+    v.fore = uix.colors.black
+end
+
 rcLayout:createText(2, rcLayout.sizeY, uix.colors.white, "power: ")
 local progressBar = rcLayout:createProgress(10, rcLayout.sizeY, rcLayout.sizeX - 10, uix.colors.orange, uix.colors.white)
 
 local function statsUpdate()
-    local ok, val = deviceRequest(controlAddress, "rc_exec", "return computer.energy() / computer.maxEnergy()")
+    local getterCode = [[return computer.energy() / computer.maxEnergy(), (function()
+    local tbl = {}
+    local function detect(name, i)
+        local ok, result = pcall((drone or robot).detect, i)
+        if ok then
+            table.insert(tbl, name .. ": " .. tostring(result))
+        else
+            table.insert(tbl, name .. ": unknown")
+        end
+    end
+    if drone then
+        detect("bottom  ", 0)
+        detect("top     ", 1)
+        detect("north -Z", 2)
+        detect("south +Z", 3)
+        detect("west  -X", 4)
+        detect("east  +X", 5)
+    end
+    return table.concat(tbl, "\n")
+end)()]]
+    local ok, val, strs = deviceRequest(controlAddress, "rc_exec", getterCode)
     if ok then
-        progressBar.value = val
-        progressBar:draw()
+        if type(val) == "number" then
+            progressBar.value = val
+            progressBar:draw()
+        end
+
+        if type(strs) == "string" then
+            for i, v in ipairs(parser.split(string, strs, "\n")) do
+                v.text = v
+            end
+        end
+        for i, v in ipairs(statuses) do
+            v:draw()
+        end
     end
 end
 
