@@ -11,6 +11,7 @@ local colorslib = require("colors")
 local paths = require("paths")
 local apps = require("apps")
 local lastinfo = require("lastinfo")
+local registry = require("registry")
 
 local colors = gui_container.colors
 local uix = {colors = colors}
@@ -246,6 +247,13 @@ function objclass:uploadEvent(eventData)
         local text = self.read.getBuffer()
         if text ~= self.oldText then
             self.oldText = text
+            if self.registrySave then
+                if not registry.data.inputs then
+                    registry.data.inputs = {}
+                end
+                registry.data.inputs[self.registrySave] = text
+                registry.save()
+            end
             if self.onTextChanged then
                 self:onTextChanged(text)
             end
@@ -639,7 +647,7 @@ function uix:createVText(x, y, color, text)
     return self:createText(x - (unicode.len(text) // 2), y, color, text)
 end
 
-function uix:createInput(x, y, sx, back, fore, testHidden, default, syntax, maxlen, preStr, titleColor, title)
+function uix:createInput(x, y, sx, back, fore, testHidden, default, syntax, maxlen, preStr, titleColor, title, registrySave)
     local obj = setmetatable({gui = self, type = "input"}, {__index = objclass})
     obj.x = x
     obj.y = y
@@ -649,12 +657,17 @@ function uix:createInput(x, y, sx, back, fore, testHidden, default, syntax, maxl
     obj.syntax = syntax
     obj.titleColor = titleColor or colors.lightGray
     obj.title = title
+    obj.registrySave = registrySave
     uix.doColor(obj, back, fore)
 
     if self.style == "round" then
         obj.read = self.window:readNoDraw(x + 1, y, sx - 2, obj.back, obj.fore, preStr, testHidden, default, true, syntax)
     else
         obj.read = self.window:readNoDraw(x, y, sx, obj.back, obj.fore, preStr, testHidden, default, true, syntax)
+    end
+
+    if registrySave then
+        obj.read.setBuffer(registry.data.inputs[registrySave] or "")
     end
     
     obj.oldText = obj.read.getBuffer()

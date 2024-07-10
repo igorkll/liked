@@ -13,6 +13,7 @@ local parser = require("parser")
 local screensaver = require("screensaver")
 
 local screen = ...
+local colors = uix.colors
 local firmwarePath = system.getResourcePath("firmware/rc_bios/code.lua")
 local port = 38710
 local ui = uix.manager(screen)
@@ -67,23 +68,23 @@ end
 
 -----------------------------
 
-local layout = ui:create("controller", uix.colors.black)
+local layout = ui:create("controller", colors.black)
 
 local warnMsg
 if not modem then
-    warnMsg = layout:createText(2, layout.sizeY - 1, uix.colors.red, "the modem was not found! install a modem to use the app")
+    warnMsg = layout:createText(2, layout.sizeY - 1, colors.red, "the modem was not found! install a modem to use the app")
 elseif not modem.isWireless() then
-    warnMsg = layout:createText(2, layout.sizeY - 1, uix.colors.orange, "only a wired modem was found")
+    warnMsg = layout:createText(2, layout.sizeY - 1, colors.orange, "only a wired modem was found")
 end
 
 local connectList = layout:createCustom(layout:customCenter(0, -4, gobjs.checkboxgroup, 50, 10))
-layout:createVText(layout.sizeX / 2, connectList.y - 1, uix.colors.white, "list of devices")
+layout:createVText(layout.sizeX / 2, connectList.y - 1, colors.white, "list of devices")
 connectList.oneSelect = true
 
 local passwordInput = layout:createInput(layout:centerOneSize(0, 2, 32, nil, nil, "*", nil, nil, nil, "password: "))
-local connectButton = layout:createButton(layout:center(-6, 5, 16, 3, uix.colors.white, uix.colors.gray, "connect"))
-local refreshButton = layout:createButton(layout:center(8, 5, 9, 3, uix.colors.orange, uix.colors.white, "refresh"))
-local wakeAllButton = layout:createButton(2, layout.sizeY - 1, 13, 1, uix.colors.orange, uix.colors.white, "wake-up all")
+local connectButton = layout:createButton(layout:center(-6, 5, 16, 3, colors.white, colors.gray, "connect"))
+local refreshButton = layout:createButton(layout:center(8, 5, 9, 3, colors.orange, colors.white, "refresh"))
+local wakeAllButton = layout:createButton(2, layout.sizeY - 1, 13, 1, colors.orange, colors.white, "wake-up all")
 
 if warnMsg then
     wakeAllButton.y = wakeAllButton.y - 1
@@ -93,7 +94,7 @@ for tunnel in pairs(tunnels) do
         warnMsg.y = warnMsg.y - 1
     end
     wakeAllButton.y = wakeAllButton.y - 1
-    layout:createText(2, layout.sizeY - 1, uix.colors.cyan, "a tunnel card has been found, it can be used to connect to the robot")
+    layout:createText(2, layout.sizeY - 1, colors.cyan, "a tunnel card has been found, it can be used to connect to the robot")
     break
 end
 
@@ -237,32 +238,32 @@ end, math.huge)
 
 -----------------------------
 
-local infoLayout = ui:create("controller [INFO]", uix.colors.black)
-infoLayout:createText(2, 2, uix.colors.white, gui_container.chars.dot .. " to use, flash the EEPROM of the robot/drone with the \"RC Bios\" firmware through the settings>eeprom", rx - 2)
-infoLayout:createText(2, 4, uix.colors.white, gui_container.chars.dot .. " if the robot has a screen and a video card, a random 8-character password will be set on it and it will be displayed on the screen", rx - 2)
-infoLayout:createText(2, 6, uix.colors.white, gui_container.chars.dot .. " if the robot does not have a screen and/or a video card, then by default it will not have a password", rx - 2)
-infoLayout:createText(2, 8, uix.colors.white, gui_container.chars.dot .. " there is always a screen on the drone and therefore a password will be set for the drone in any case", rx - 2)
-infoLayout:createText(2, 10, uix.colors.white, gui_container.chars.dot .. " the password will be generated randomly every time you start unless you set your password", rx - 2)
-infoLayout:createText(2, 12, uix.colors.white, gui_container.chars.dot .. " in fact, the \"RC Bios\" can be installed on any device, be it a computer or a microcontroller", rx - 2)
-infoLayout:createText(2, 14, uix.colors.white, gui_container.chars.dot .. " if a password is not set on the device and a random temporary one cannot be generated (due to the lack of a screen or GPU), then you cannot connect to the device from a distance of more than 8 blocks", rx - 2)
-layout:setReturnLayout(infoLayout, uix.colors.green, " INFO ")
+local infoLayout = ui:create("controller [INFO]", colors.black)
+infoLayout:createText(2, 2, colors.white, gui_container.chars.dot .. " to use, flash the EEPROM of the robot/drone with the \"RC Bios\" firmware through the settings>eeprom", rx - 2)
+infoLayout:createText(2, 4, colors.white, gui_container.chars.dot .. " if the robot has a screen and a video card, a random 8-character password will be set on it and it will be displayed on the screen", rx - 2)
+infoLayout:createText(2, 6, colors.white, gui_container.chars.dot .. " if the robot does not have a screen and/or a video card, then by default it will not have a password", rx - 2)
+infoLayout:createText(2, 8, colors.white, gui_container.chars.dot .. " there is always a screen on the drone and therefore a password will be set for the drone in any case", rx - 2)
+infoLayout:createText(2, 10, colors.white, gui_container.chars.dot .. " the password will be generated randomly every time you start unless you set your password", rx - 2)
+infoLayout:createText(2, 12, colors.white, gui_container.chars.dot .. " in fact, the \"RC Bios\" can be installed on any device, be it a computer or a microcontroller", rx - 2)
+infoLayout:createText(2, 14, colors.white, gui_container.chars.dot .. " if a password is not set on the device and a random temporary one cannot be generated (due to the lack of a screen or GPU), then you cannot connect to the device from a distance of more than 8 blocks", rx - 2)
+layout:setReturnLayout(infoLayout, colors.green, " INFO ")
 infoLayout:setReturnLayout(layout)
 
 -----------------------------
 
-rcLayout = ui:create("controller [Remote Control]", uix.colors.black)
+rcLayout = ui:create("controller [Remote Control]", colors.black)
 rcLayout:setReturnLayout(layout)
 
-local switchTitle = rcLayout:createText(2, rcLayout.sizeY - 1, uix.colors.white, "allow remote wake-up")
-local deviceTypeTitle = rcLayout:createText(2, 2, uix.colors.white)
-local offsetTitle = rcLayout:createText(2, 3, uix.colors.white)
+local switchTitle = rcLayout:createText(2, rcLayout.sizeY - 1, colors.white, "allow remote wake-up")
+local deviceTypeTitle = rcLayout:createText(2, 2, colors.white)
+local offsetTitle = rcLayout:createText(2, 3, colors.white)
 local wakeUpSwitch = rcLayout:createSwitch(switchTitle.x + unicode.len(switchTitle.text) + 1, rcLayout.sizeY - 1)
 local colorpic = rcLayout:createColorpic(2, rcLayout.sizeY - 3, 13, 1, "light color", 0xffffff, true)
-local randPass = rcLayout:createButton(2, rcLayout.sizeY - 7, 21, 1, uix.colors.purple, uix.colors.white, "use random password")
-local customPass = rcLayout:createButton(2, rcLayout.sizeY - 5, 21, 1, uix.colors.purple, uix.colors.white, "use custom password")
+local randPass = rcLayout:createButton(2, rcLayout.sizeY - 7, 21, 1, colors.purple, colors.white, "use random password")
+local customPass = rcLayout:createButton(2, rcLayout.sizeY - 5, 21, 1, colors.purple, colors.white, "use custom password")
 local shutdownButton = rcLayout:createButton(colorpic.x + colorpic.sx + 1, rcLayout.sizeY - 3, 10, 1, nil, nil, "shutdown")
 local seekbar = rcLayout:createSeek(2, rcLayout.sizeY - 9, 16)
-local seekbarText = rcLayout:createText(19, rcLayout.sizeY - 9, uix.colors.white)
+local seekbarText = rcLayout:createText(19, rcLayout.sizeY - 9, colors.white)
 local currentBlockCount
 
 local startStatPoses = wakeUpSwitch.x + 7
@@ -271,15 +272,23 @@ for i = 0, 5 do
     table.insert(statuses, rcLayout:createLabel(startStatPoses, (rcLayout.sizeY - 7) + i, 20, 1))
 end
 
+local execPoses = statuses[1].x + statuses[1].sx + 1
+local luaPoses = execPoses + 6
+for i = 1, 4 do
+    local py = (rcLayout.sizeY - 8) + ((i - 1) * 2)
+    rcLayout:createButton(execPoses, py, 6, 1, colors.green, colors.white, "exec")
+    rcLayout:createInput(luaPoses, py, rcLayout.sizeX - luaPoses - 1, colors.white, colors.black, nil, nil, "lua", nil, nil, nil, nil, "cntr" .. i)
+end
+
 for i, v in ipairs(statuses) do
     v.style = "square"
     v.alignment = "left"
-    v.back = i % 2 == 1 and uix.colors.lightGray or uix.colors.white
-    v.fore = uix.colors.black
+    v.back = i % 2 == 1 and colors.lightGray or colors.white
+    v.fore = colors.black
 end
 
-rcLayout:createText(2, rcLayout.sizeY, uix.colors.white, "power: ")
-local progressBar = rcLayout:createProgress(10, rcLayout.sizeY, rcLayout.sizeX - 10, uix.colors.orange, uix.colors.white)
+rcLayout:createText(2, rcLayout.sizeY, colors.white, "power: ")
+local progressBar = rcLayout:createProgress(10, rcLayout.sizeY, rcLayout.sizeX - 10, colors.orange, colors.white)
 
 local function statsUpdate(noDraw)
     if not controlAddress then return end
