@@ -258,7 +258,7 @@ local currentBlockCount
 local startStatPoses = wakeUpSwitch.x + 7
 local statuses = {}
 for i = 0, 5 do
-    table.insert(statuses, rcLayout:createLabel(startStatPoses, (rcLayout.sizeY - 7) + i, 12, 1))
+    table.insert(statuses, rcLayout:createLabel(startStatPoses, (rcLayout.sizeY - 7) + i, 18, 1))
 end
 
 for i, v in ipairs(statuses) do
@@ -275,9 +275,9 @@ local function statsUpdate()
     local getterCode = [[return computer.energy() / computer.maxEnergy(), (function()
     local tbl = {}
     local function detect(name, i)
-        local ok, result = pcall((drone or robot).detect, i)
+        local ok, _, result = pcall((drone or robot).detect, i)
         if ok then
-            table.insert(tbl, name .. ": " .. tostring(result))
+            table.insert(tbl, name .. ": " .. tostring(result or "none"))
         else
             table.insert(tbl, name .. ": unknown")
         end
@@ -300,17 +300,21 @@ end)()]]
         end
 
         if type(strs) == "string" then
-            for i, v in ipairs(parser.split(string, strs, "\n")) do
-                v.text = v
+            local strs = parser.split(string, strs, "\n")
+            for i, v in ipairs(statuses) do
+                v.text = " " .. strs[i]
+                v:draw()
             end
-        end
-        for i, v in ipairs(statuses) do
-            v:draw()
         end
     end
 end
 
-rcLayout:timer(1, statsUpdate, math.huge)
+rcLayout:thread(function ()
+    while true do
+        statsUpdate()
+        os.sleep(1)
+    end
+end):resume()
 
 local function seekbarTextUpdate()
     seekbarText.text = "blocks for movement: " .. currentBlockCount .. " "
