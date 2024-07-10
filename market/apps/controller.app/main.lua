@@ -328,9 +328,15 @@ end)()]]
         end
     end
 
-    offsetTitle.text = "offset: " .. math.roundTo(offset, 1)
-    if offset > 1 then
-        offsetTitle.text = offsetTitle.text .. ". POSSIBLE COLLISIONS WITH BLOCKS"
+    if offset then
+        offsetTitle.text = "offset: " .. math.roundTo(offset, 1)
+        if offset > 1 then
+            offsetTitle.text = offsetTitle.text .. " - POSSIBLE COLLISIONS WITH BLOCKS"
+        end
+        offsetTitle.text = offsetTitle.text .. string.rep(" ", rcLayout.sizeX)
+        offsetTitle:draw()
+    else
+        offsetTitle.text = "offset:"
     end
 end
 
