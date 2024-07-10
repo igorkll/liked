@@ -244,11 +244,35 @@ rcLayout = ui:create("controller [Remote Control]", uix.colors.black)
 rcLayout:setReturnLayout(layout)
 
 local switchTitle = rcLayout:createText(2, rcLayout.sizeY - 1, uix.colors.white, "allow remote wake-up")
+local deviceTypeTitle = rcLayout:createText(2, 2, uix.colors.white)
 local wakeUpSwitch = rcLayout:createSwitch(switchTitle.x + unicode.len(switchTitle.text) + 1, rcLayout.sizeY - 1)
 local colorpic = rcLayout:createColorpic(2, rcLayout.sizeY - 3, 13, 1, "light color", 0xffffff, true)
 local randPass = rcLayout:createButton(2, rcLayout.sizeY - 7, 21, 1, uix.colors.purple, uix.colors.white, "use random password")
 local customPass = rcLayout:createButton(2, rcLayout.sizeY - 5, 21, 1, uix.colors.purple, uix.colors.white, "use custom password")
 local shutdownButton = rcLayout:createButton(colorpic.x + colorpic.sx + 1, rcLayout.sizeY - 3, 10, 1, nil, nil, "shutdown")
+local seekbar = rcLayout:createSeek(2, rcLayout.sizeY - 9, 16)
+local seekbarText = rcLayout:createText(19, rcLayout.sizeY - 9, uix.colors.white)
+local currentBlockCount
+
+rcLayout:createText(32, rcLayout.sizeY - 1, uix.colors.white, "power: ")
+local progressBar = rcLayout:createProgress(38, rcLayout.sizeY - 1, rcLayout.sizeX - 16, uix.colors.orange, uix.colors.white, 0.3)
+
+local function statsUpdate()
+    
+end
+
+rcLayout:timer(1, statsUpdate, math.huge)
+statsUpdate()
+
+local function seekbarTextUpdate()
+    seekbarText.text = "blocks for movement: " .. currentBlockCount .. " "
+    seekbarText:draw()
+end
+
+function seekbar:onSeek(value)
+    currentBlockCount = math.mapRound(value, 0, 1, 1, 16)
+    seekbarTextUpdate()
+end
 
 function shutdownButton:onDrop()
     self.gui:fullStop()
@@ -326,6 +350,12 @@ return true]]
         colorpic.disabledHidden = false
         colorpic:setColor(0xffffff)
     end
+
+    seekbar.value = 0
+    deviceTypeTitle.text = "device type: " .. devicetype
+
+    currentBlockCount = 1
+    seekbarTextUpdate()
 end
 
 function wakeUpSwitch:onSwitch()
