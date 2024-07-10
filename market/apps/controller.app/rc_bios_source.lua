@@ -191,13 +191,13 @@ while true do
                 end
             elseif eventData[6] == "rc_connect" and (randomPassword or passwordHash or eventData[5] <= 8) then
                 if checkPassword(eventData[7]) then
+                    setText("")
                     setColor(0x00ff00)
                     computer.beep(1800, 0.05)
                     computer.beep(1800, 0.05)
                     setColor(currentColor)
                     send(isTunnel, sender, true)
                     currentUser = sender
-                    setText("")
                 else
                     setColor(0xff0000)
                     computer.beep(100, 0.1)
