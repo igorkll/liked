@@ -313,12 +313,18 @@ return true]]
     wakeUpSwitch.state = not not select(2, assert(deviceRequest(controlAddress, "rc_exec", "return (tunnel and tunnel.getWakeMessage() == \"rc_wake\") or (modem and modem.getWakeMessage() == \"rc_wake\")")))
     
     colorpic.disabledHidden = true
+    --[[
     if devicetype == "drone" then
         colorpic.disabledHidden = false
         colorpic:setColor(select(2, assert(deviceRequest(controlAddress, "rc_exec", "return drone.getLightColor()"))))
     elseif devicetype == "robot" then
         colorpic.disabledHidden = false
         colorpic:setColor(select(2, assert(deviceRequest(controlAddress, "rc_exec", "return robot.getLightColor()"))))
+    end
+    ]]
+    if devicetype == "drone" or devicetype == "robot" then
+        colorpic.disabledHidden = false
+        colorpic:setColor(0xffffff)
     end
 end
 
