@@ -266,7 +266,7 @@ local currentBlockCount
 local startStatPoses = wakeUpSwitch.x + 7
 local statuses = {}
 for i = 0, 5 do
-    table.insert(statuses, rcLayout:createLabel(startStatPoses, (rcLayout.sizeY - 7) + i, 18, 1))
+    table.insert(statuses, rcLayout:createLabel(startStatPoses, (rcLayout.sizeY - 7) + i, 20, 1))
 end
 
 for i, v in ipairs(statuses) do
@@ -298,6 +298,13 @@ local function statsUpdate(noDraw)
         detect("south +Z", 3)
         detect("west  -X", 4)
         detect("east  +X", 5)
+    elseif robot then
+        detect("bottom  ", 0)
+        detect("top     ", 1)
+        detect("back    ", 2)
+        detect("front   ", 3)
+        detect("right   ", 4)
+        detect("left    ", 5)
     end
     return table.concat(tbl, "\n")
 end)()]]
@@ -311,7 +318,7 @@ end)()]]
         if type(strs) == "string" then
             local strs = parser.split(string, strs, "\n")
             for i, v in ipairs(statuses) do
-                v.text = " " .. (strs[i] or "")
+                v.text = " " .. (strs[i] or "no detector")
                 if not noDraw then v:draw() end
             end
         end
