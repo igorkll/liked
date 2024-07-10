@@ -272,6 +272,7 @@ rcLayout:createText(2, rcLayout.sizeY, uix.colors.white, "power: ")
 local progressBar = rcLayout:createProgress(10, rcLayout.sizeY, rcLayout.sizeX - 10, uix.colors.orange, uix.colors.white)
 
 local function statsUpdate()
+    if not controlAddress then return end
     local getterCode = [[return computer.energy() / computer.maxEnergy(), (function()
     local tbl = {}
     local function detect(name, i)
@@ -314,7 +315,7 @@ rcLayout:thread(function ()
         statsUpdate()
         os.sleep(1)
     end
-end):resume()
+end)
 
 local function seekbarTextUpdate()
     seekbarText.text = "blocks for movement: " .. currentBlockCount .. " "
