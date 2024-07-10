@@ -254,8 +254,8 @@ local seekbar = rcLayout:createSeek(2, rcLayout.sizeY - 9, 16)
 local seekbarText = rcLayout:createText(19, rcLayout.sizeY - 9, uix.colors.white)
 local currentBlockCount
 
-rcLayout:createText(32, rcLayout.sizeY - 1, uix.colors.white, "power: ")
-local progressBar = rcLayout:createProgress(38, rcLayout.sizeY - 1, rcLayout.sizeX - 16, uix.colors.orange, uix.colors.white, 0.3)
+rcLayout:createText(2, rcLayout.sizeY, uix.colors.white, "power: ")
+local progressBar = rcLayout:createProgress(10, rcLayout.sizeY, rcLayout.sizeX - 10, uix.colors.orange, uix.colors.white, 0.3)
 
 local function statsUpdate()
     
