@@ -148,7 +148,7 @@ local function menu(label, lstrs, funcs, withoutBackButton, refresh)
             if eventData[4] == 28 then
                 if funcs[selected] then
                     if funcs[selected](strs[selected], eventData[5]) then
-                        break
+                        return true
                     else
                         if refresh then
                             local lstrs, lfuncs = refresh()
@@ -573,6 +573,7 @@ local function generateFunction(address)
                                     status("installation...")
                                     component.invoke(address, "remove", "/")
                                     install(address, branch, edition, nil, nil, i == 2)
+                                    return true
                                 end}
 
                                 if saveSystemStr then
@@ -580,22 +581,31 @@ local function generateFunction(address)
                                     table.insert(funcs, function ()
                                         status("installation...")
                                         install(address, branch, edition, openOS, mineOS, i == 2)
+                                        return true
                                     end)
                                 end
 
-                                menu(title .. " | installation options", strs, funcs)
+                                if menu(title .. " | installation options", strs, funcs) then
+                                    return true
+                                end
                             end)
                         end
-                        menu(title .. " | where the OS will be used (important)", {
+                        if menu(title .. " | where the OS will be used (important)", {
                             "on this device (flash the EEPROM if necessary and reboot into the system)",
                             "on another device (do not flash the EEPROM and do not turn off the device)"
-                        }, funcs)
+                        }, funcs) then
+                            return true
+                        end
                     end)
                 end
-                menu(title .. " | select edition", editions, funcs)
+                if menu(title .. " | select edition", editions, funcs) then
+                    return true
+                end
             end)
         end
-        menu(title .. " | select branch", branches, funcs)
+        if menu(title .. " | select branch", branches, funcs) then
+            return true
+        end
     end
 end
 
