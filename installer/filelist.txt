@@ -106,8 +106,7 @@
 /system/images/noInternet.t2p
 /system/images/switch_off.t2p
 /system/images/switch_on.t2p
-/system/installer/logo.lua
-/system/installer/main.lua
+/system/installer/init.lua
 /system/lib/advLabeling.lua
 /system/lib/apps.lua
 /system/lib/autorun.lua

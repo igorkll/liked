@@ -104,14 +104,8 @@ function installer.install_installer(vfs)
     local success, err = installer.init(vfs)
     if not success then return nil, err end
 
-    local success, err = installer.toTarget("init.lua")
-    if not success then return nil, err end
-
-    installer.rmTarget("system")
-    local success, err = installer.toTarget("system/core")
-    if not success then return nil, err end
-
-    return installer.uinit(vfs, "likeOS installer", fs.copy(installer.selfPath("system/installer"), installer.targetPath("system")))
+    installer.rmTarget(".")
+    return installer.uinit(vfs, "liked installer", fs.copy(installer.selfPath("system/installer"), installer.targetPath(".")))
 end
 
 function installer.install_selfsys(vfs)
@@ -181,7 +175,7 @@ end
 
 function installer.context(screen, posX, posY, vfs)
     local label, num = gui.contextAuto(screen, posX, posY, {
-        "likeOS installer",
+        "liked installer",
         "liked",
         "likedbox",
         "likeOS (core only)",
