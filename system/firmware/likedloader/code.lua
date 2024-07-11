@@ -48,7 +48,6 @@ if not addr then
 end
 
 invoke(computer.tmpAddress(), "makeDirectory", "bootloader") --blocks bootmanager startup
-
 local file = invoke(addr, "open", "/init.lua")
 local buffer = ""
 repeat
