@@ -32,7 +32,9 @@ if not checkSystem(bootAddress) then
     error("restricted loader: the system failed verification", 0)
 end
 
-invoke(computer.tmpAddress(), "makeDirectory", "bootloader") --blocks bootmanager startup
+local tmpAddress = computer.tmpAddress()
+invoke(tmpAddress, "remove", "bootloader") --disabling redirect to other operating systems
+invoke(tmpAddress, "makeDirectory", "bootloader") --blocks bootmanager startup
 invoke(bootAddress, "remove", "/bootmanager") --attempt to remove bootmanager. restricted loader runs only the verified operating systems
 invoke(bootAddress, "remove", "/vendor/apps/bootmanager.app")
 
