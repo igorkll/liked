@@ -92,7 +92,7 @@ end
 function eeprom.hiddenFlash(firmware, data, appendData)
     if not data or not appendData then
         local l1, l2 = eeprom.makeData(firmware, true)
-        data = l2 or data
+        data = l1 or data
         appendData = l2 or appendData
     end
     local componentEeprom = component.eeprom
