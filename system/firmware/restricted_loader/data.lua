@@ -1,12 +1,11 @@
 local gui = require("gui")
 local fs = require("filesystem")
-local serialization = require("serialization")
 
 local screen, _, hidden = ...
-local retData = serialization.serialize({a = fs.bootaddress})
+local appendData = "local bootAddress = \"" .. fs.bootaddress .. "\"\n"
 
 if hidden then
-    return retData
+    return nil, appendData
 end
 
 local clear = gui.saveBigZone(screen)
@@ -33,4 +32,4 @@ end
 
 clear()
 
-return retData
+return nil, appendData

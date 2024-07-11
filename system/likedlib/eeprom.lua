@@ -34,7 +34,7 @@ function eeprom.list(screen)
                 if fs.exists(datamakePath) then
                     local result = {apps.executeWithWarn(datamakePath, screen, nil, hidden)}
                     if result[1] then
-                        return result[2]
+                        return table.unpack(result, 2)
                     end
                 end
             end})
@@ -63,26 +63,41 @@ function eeprom.menu(screen)
 end
 
 function eeprom.makeData(firmware, hidden)
-    return (firmware.makeData and firmware.makeData(hidden)) or firmware.data or ""
+    if firmware.makeData then
+        return firmware.makeData(hidden)
+    elseif firmware.data then
+        return firmware.data
+    end
+    return ""
 end
 
 function eeprom.flash(screen, firmware, force)
-    local data = eeprom.makeData(firmware)
+    local data, appendData = eeprom.makeData(firmware)
     if data ~= true and (force or gui.pleaseType(screen, "FLASH", "flash eeprom")) then
         gui.status(screen, nil, nil, "flashing...")
-        return eeprom.hiddenFlash(firmware, data)
+        return eeprom.hiddenFlash(firmware, data, appendData)
     end
 end
 
 function eeprom.isFirmware(firmware)
     local componentEeprom = component.eeprom
-    return componentEeprom.get() == (firmware.rawCode or assert(fs.readFile(firmware.code))) and componentEeprom.getLabel() == (firmware.label or "UNKNOWN")
+    if componentEeprom.getLabel() == (firmware.label or "UNKNOWN") then
+        local _, appendData = eeprom.makeData(firmware, true)
+        local targetCode = (appendData or "") .. (firmware.rawCode or assert(fs.readFile(firmware.code)))
+        return componentEeprom.get() == targetCode
+    end
+    return false
 end
 
-function eeprom.hiddenFlash(firmware, data)
+function eeprom.hiddenFlash(firmware, data, appendData)
+    if not data or not appendData then
+        local l1, l2 = eeprom.makeData(firmware, true)
+        data = l2 or data
+        appendData = l2 or appendData
+    end
     local componentEeprom = component.eeprom
-    local _, err = componentEeprom.set(firmware.rawCode or assert(fs.readFile(firmware.code)))
-    componentEeprom.setData(data or eeprom.makeData(firmware, true))
+    local _, err = componentEeprom.set((appendData or "") .. (firmware.rawCode or assert(fs.readFile(firmware.code))))
+    componentEeprom.setData(data or "")
     componentEeprom.setLabel(firmware.label or "UNKNOWN")
     if err then
         return nil, err
