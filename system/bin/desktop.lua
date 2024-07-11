@@ -638,7 +638,7 @@ local function doIcon(windowEventData)
 
                             if v.fs.exists("/init.lua") then
                                 table.insert(strs, "  boot from this disk")
-                                table.insert(active, not registry.disableExternalBoot)
+                                table.insert(active, not registry.disableExternalBoot and not _restrictedLoader)
                             end
 
                             table.insert(strs, "  unmount")
@@ -791,7 +791,7 @@ local function doIcon(windowEventData)
                                     clear2()
                                 end
                             elseif str == "  boot from this disk" then
-                                if not registry.disableExternalBoot then
+                                if not registry.disableExternalBoot and not _restrictedLoader then
                                     fs.writeFile("/tmp/bootloader/bootaddr", v.fs.address)
                                     fs.writeFile("/tmp/bootloader/bootfile", "/init.lua")
                                     pcall(computer.shutdown, "fast")
