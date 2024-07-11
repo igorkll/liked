@@ -274,10 +274,20 @@ end
 
 local execPoses = statuses[1].x + statuses[1].sx + 1
 local luaPoses = execPoses + 6
-for i = 1, 4 do
-    local py = (rcLayout.sizeY - 8) + ((i - 1) * 2)
-    rcLayout:createButton(execPoses, py, 6, 1, colors.green, colors.white, "exec")
-    rcLayout:createInput(luaPoses, py, rcLayout.sizeX - luaPoses, colors.gray, colors.white, nil, nil, "lua", nil, nil, nil, nil, "cntr" .. i)
+for i = 1, 6 do
+    local py = (rcLayout.sizeY - 7) + (i - 1)
+    local execButton = rcLayout:createButton(execPoses, py, 6, 1, i % 2 == 1 and colors.green or colors.lime, colors.white, "exec")
+    rcLayout.style = uix.styles[2]
+    local inputStr = rcLayout:createInput(luaPoses, py, rcLayout.sizeX - luaPoses, i % 2 == 1 and colors.gray or colors.lightGray,
+        colors.white, nil, nil, "lua", nil, nil, nil, nil, "cntr" .. i)
+    function execButton:onDrop()
+        local ok, err = statusRequest(controlAddress, "rc_exec", inputStr.read.getBuffer())
+        if not ok then
+            gui.warn(screen, nil, nil, tostring(err))
+        end
+        ui:draw()
+    end
+    rcLayout.style = uix.styles[1]
 end
 
 for i, v in ipairs(statuses) do
