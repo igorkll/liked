@@ -29,7 +29,8 @@ end
 
 gpu.setBackground(0x000000)
 gpu.setForeground(0xffffff)
-local rx, ry = gpu.maxResolution()
+local orx, ory = gpu.maxResolution()
+local rx, ry = orx, ory
 gpu.setResolution(math.min(rx, 80), math.min(ry, 25))
 rx, ry = gpu.getResolution()
 gpu.fill(1, 1, rx, ry, " ")
@@ -606,3 +607,7 @@ end
 --------------------------------------------
 
 menu("liked & likeOS - web installer", generateList())
+gpu.setBackground(0x000000)
+gpu.setForeground(0xffffff)
+gpu.setResolution(orx, ory)
+gpu.fill(1, 1, orx, ory, " ")
