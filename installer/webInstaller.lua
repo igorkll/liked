@@ -488,7 +488,7 @@ local function install(disk, branch, edition, doOpenOS, doMineOS, otherDevice)
         gpu.setForeground(0xffffff)
         gpu.setResolution(rx, ry)
         gpu.fill(1, 1, rx, ry, " ")
-        showWarn("liked " .. branch .. " " .. edition .. " has been successfully installed on the " .. generateTitle(disk) .. " disk", " DONE ")
+        showWarn("liked-" .. branch .. "-" .. edition .. " has been successfully installed on the " .. generateTitle(disk) .. " disk", " DONE ")
     else
         pcall(computer.setBootAddress, disk)
         pcall(computer.shutdown, "fast")
