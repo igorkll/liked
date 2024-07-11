@@ -7,7 +7,7 @@ local paths = require("paths")
 local cache = require("cache")
 local text = require("text")
 local unicode = require("unicode")
-local likedCryptoFs = {}
+local efs = {}
 
 local lList
 local function loadlist()
@@ -29,13 +29,15 @@ local function getDatakey(path, password, state)
         fs.setAttribute(path, "datakey")
     end
 
-    return xorfs.xorcode(datakey, password)
+    return function ()
+        return xorfs.xorcode(datakey, password)
+    end
 end
 
 local function toggleFile(path, password, state)
     local datakey = getDatakey(path, password, state)
     if datakey ~= true then
-        xorfs.toggleFile(path, datakey)
+        xorfs.toggleFile(path, datakey())
     end
 end
 
@@ -87,7 +89,9 @@ local function reg(password)
                 if not fs.isDirectory(lpath) then
                     local datakey = fs.getAttribute(lpath, "datakey")
                     if datakey then
-                        fs.regXor(lpath, xorfs.xorcode(datakey, password))
+                        fs.regXor(lpath, function ()
+                            return xorfs.xorcode(datakey, password)
+                        end)
                     else
                         fs.regXor(lpath)
                     end
@@ -107,32 +111,32 @@ local function reg(password)
 end
 
 
-function likedCryptoFs.isEncrypt()
+function efs.isEncrypt()
     return not not registry.encrypt
 end
 
-function likedCryptoFs.encrypt(password)
-    if likedCryptoFs.isEncrypt() then return false end
+function efs.encrypt(password)
+    if efs.isEncrypt() then return false end
     toggleAll(password)
     reg(password)
     return true
 end
 
-function likedCryptoFs.decrypt(password)
-    if not likedCryptoFs.isEncrypt() then return false end
+function efs.decrypt(password)
+    if not efs.isEncrypt() then return false end
     toggleAll(password)
     reg()
     return true
 end
 
-function likedCryptoFs.init(password)
+function efs.init(password)
     if cache.static[0] then return false end
     cache.static[0] = true
 
-    if not likedCryptoFs.isEncrypt() then return false end
+    if not efs.isEncrypt() then return false end
     reg(password)
     return true
 end
 
-likedCryptoFs.unloadable = true
-return likedCryptoFs
+efs.unloadable = true
+return efs
