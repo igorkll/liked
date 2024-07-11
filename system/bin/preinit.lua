@@ -47,10 +47,10 @@ if not liked.recoveryMode then
     event.listen("accountChanged", check)
 end
 
-if registry.forceLikedLoader then
+if registry.forceRestrictedLoader then
     local eepromlib = require("eeprom")
-    local firmware = eepromlib.find("EEPROM (Liked Loader)")
-    local errTitle = "the system configuration requires the liked-loader firmware. "
+    local firmware = eepromlib.find("Restricted Loader")
+    local errTitle = "the system configuration requires the \"Restricted Loader\" firmware. "
     if firmware then
         if not eepromlib.isFirmware(firmware) then
             if not eepromlib.hiddenFlash(firmware) then

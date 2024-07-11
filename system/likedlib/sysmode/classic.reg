@@ -1,5 +1,5 @@
 {
-    forceLikedLoader = true,
+    forceRestrictedLoader = true,
     interpreterSandbox = true,
     onlyInternalDisk = true,
     noBootmanager = true,

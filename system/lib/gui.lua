@@ -1726,10 +1726,10 @@ function gui.nextOrCancel(screen, cx, cy, str, backgroundColor)
         window:set(2, 2, color, colors.orange, " ◢█◣ ")
         window:set(2, 3, color, colors.orange, "◢███◣")
         window:set(4, 2, colors.orange, colors.white, "!")
-    end)
+    end, 50, 16)
 
-    window:set(32 - 6, 7, colors.lightBlue, colors.white, " next ")
-    window:set(2, 7, colors.red, colors.white, " cancel ")
+    window:set(50 - 6, 15, colors.lightBlue, colors.white, " next ")
+    window:set(2, 15, colors.red, colors.white, " cancel ")
 
     graphic.forceUpdate(screen)
     if registry.soundEnable then
@@ -1737,7 +1737,7 @@ function gui.nextOrCancel(screen, cx, cy, str, backgroundColor)
     end
 
     local function drawYes()
-        window:set(32 - 6, 7, colors.blue, colors.white, " next ")
+        window:set(50 - 6, 15, colors.blue, colors.white, " next ")
         graphic.forceUpdate(screen)
         event.sleep(0.1)
     end
@@ -1746,12 +1746,12 @@ function gui.nextOrCancel(screen, cx, cy, str, backgroundColor)
         local eventData = {computer.pullSignal()}
         local windowEventData = window:uploadEvent(eventData)
         if windowEventData[1] == "touch" and windowEventData[5] == 0 then
-            if windowEventData[4] == 7 and windowEventData[3] > (32 - 7) and windowEventData[3] <= ((32 - 5) + 4) then
+            if windowEventData[4] == 15 and windowEventData[3] > (50 - 7) and windowEventData[3] <= ((50 - 5) + 4) then
                 drawYes()
                 noShadow()
                 return true
-            elseif windowEventData[4] == 7 and windowEventData[3] >= 2 and windowEventData[3] <= (2 + 3 + 4) then
-                window:set(2, 7, colors.brown, colors.white, " cancel ")
+            elseif windowEventData[4] == 15 and windowEventData[3] >= 2 and windowEventData[3] <= (2 + 3 + 4) then
+                window:set(2, 15, colors.brown, colors.white, " cancel ")
                 graphic.forceUpdate(screen)
                 event.sleep(0.1)
                 noShadow()

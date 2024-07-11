@@ -59,10 +59,11 @@
 /system/bin/setup.app/inet.lua
 /system/bin/setup.app/main.lua
 /system/bin/setup.app/stub.lua
-/system/firmware/likedloader/code.lua
-/system/firmware/likedloader/label.txt
-/system/firmware/luabios/code.lua
-/system/firmware/luabios/label.txt
+/system/firmware/lua_bios/code.lua
+/system/firmware/lua_bios/label.txt
+/system/firmware/restricted_loader/code.lua
+/system/firmware/restricted_loader/data.lua
+/system/firmware/restricted_loader/label.txt
 /system/icons/afpx.t2p
 /system/icons/app.t2p
 /system/icons/badicon.t2p

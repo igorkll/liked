@@ -34,21 +34,21 @@ do
 end
 
 local function checkSystem(address)
-    return invoke(address, "exists", "init.lua")
+    return invoke(address, "exists", "/init.lua")
 end
 
 local addr = data.a or ""
 
-if not checkSystem(addr) then
-    addr = ""
+if not component.proxy(addr) then
+    error("restricted loader: the boot disk is missing", 0)
 end
 
-if not component.proxy(addr) then
-    error("restricted loader: could not find a suitable OS to boot", 0)
+if not checkSystem(addr) then
+    error("restricted loader: the system failed verification", 0)
 end
 
 invoke(computer.tmpAddress(), "makeDirectory", "bootloader") --blocks bootmanager startup
-invoke(addr, "remove", "bootloader") --attempt to remove bootmanager. restricted loader runs only the verified operating systems
+invoke(addr, "remove", "/bootmanager") --attempt to remove bootmanager. restricted loader runs only the verified operating systems
 invoke(addr, "remove", "/vendor/apps/bootmanager.app")
 
 local file = invoke(addr, "open", "/init.lua")

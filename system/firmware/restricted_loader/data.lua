@@ -1,12 +1,15 @@
-local screen, _, hidden = ...
-
-if hidden then
-    return
-end
-
 local gui = require("gui")
 local fs = require("filesystem")
 local serialization = require("serialization")
+
+local screen, _, hidden = ...
+local retData = serialization.serialize({a = fs.bootaddress})
+
+if hidden then
+    return retData
+end
+
+local clear = gui.saveBigZone(screen)
 
 if not gui.nextOrCancel(screen, nil, nil, "Attention 1!!! after installation, you will not be able to boot into other operating systems") then
     return true
@@ -28,4 +31,6 @@ if not gui.nextOrCancel(screen, nil, nil, "this thing is needed for extremely sp
     return true
 end
 
-return serialization.serialize({a = fs.bootmanager})
+clear()
+
+return retData
