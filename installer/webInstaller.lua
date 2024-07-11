@@ -572,14 +572,14 @@ local function generateFunction(address)
                                 local strs, funcs = {"format disk"}, {function ()
                                     status("installation...")
                                     component.invoke(address, "remove", "/")
-                                    install(address, branch, edition)
+                                    install(address, branch, edition, nil, nil, i == 2)
                                 end}
 
                                 if saveSystemStr then
                                     table.insert(strs, saveSystemStr)
                                     table.insert(funcs, function ()
                                         status("installation...")
-                                        install(address, branch, edition, openOS, mineOS)
+                                        install(address, branch, edition, openOS, mineOS, i == 2)
                                     end)
                                 end
 
