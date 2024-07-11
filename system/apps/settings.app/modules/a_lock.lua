@@ -18,6 +18,34 @@ local rx, ry = gpu.getResolution()
 local window = graphic.createWindow(screen, posX, posY, rx - (posX - 1), ry - (posY - 1))
 local layout = uix.create(window, colors.black)
 
+local encryptionTitle = layout:createText(2, 4, colors.white, "disk encryption: ")
+local encryptionSwitch = layout:createSwitch(encryptionTitle.x + #encryptionTitle.text, 4)
+encryptionSwitch.state = not not registry.encrypt
+
+function encryptionSwitch:onSwitch()
+    if self.state then
+        if registry.password then
+            local ok, password = gui.checkPassword(screen)
+            if ok then
+                require("efs").encrypt(password)
+            else
+                self.state = false
+            end
+        else
+            gui.warn(screen, nil, nil, "to use disk encryption,you must set a password")
+            self.state = false
+        end
+    else
+        local ok, password = gui.checkPassword(screen)
+        if ok then
+            require("efs").decrypt(password)
+        else
+            self.state = true
+        end
+    end
+    layout:draw()
+end
+
 local passwordTitle = layout:createText(2, 2, colors.white, "use password: ")
 local passwordSwitch = layout:createSwitch(passwordTitle.x + #passwordTitle.text, 2)
 passwordSwitch.state = not not registry.password
@@ -41,33 +69,10 @@ function passwordSwitch:onSwitch()
             registry.passwordSalt = nil
             if registry.encrypt then
                 require("efs").decrypt(password)
+                encryptionSwitch.state = false
             end
         else
             self.state = true
-        end
-    end
-    layout:draw()
-end
-
-local encryptionTitle = layout:createText(2, 4, colors.white, "disk encryption: ")
-local encryptionSwitch = layout:createSwitch(encryptionTitle.x + #encryptionTitle.text, 4)
-encryptionSwitch.state = not not registry.encrypt
-
-function encryptionSwitch:onSwitch()
-    if self.state then
-        if registry.password then
-            local ok, password = gui.checkPassword(screen)
-            if ok then
-                require("efs").encrypt(password)
-            end
-        else
-            gui.warn(screen, nil, nil, "to use disk encryption, you must set a password")
-            self.state = false
-        end
-    else
-        local ok, password = gui.checkPassword(screen)
-        if ok then
-            require("efs").decrypt(password)
         end
     end
     layout:draw()
