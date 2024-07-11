@@ -602,7 +602,7 @@ local list = {
         name = "bootmanager",
         version = "1",
         vendor = "logic",
-        description = "it is installed on the hard drive and allows you to redirect loading to other operating systems. does not work with the \"liked loader\" installed due to its security policy",
+        description = "it is installed on the hard drive and allows you to redirect loading to other operating systems. does not work with the \"Restricted Loader\" installed due to its security policy",
         minDiskSpace = 64,
         executer = true,
         

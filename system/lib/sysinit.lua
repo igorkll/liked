@@ -189,6 +189,13 @@ function sysinit.runShell(screen, customShell)
 end
 
 function sysinit.init(box, lscreen)
+    local package = require("package")
+    table.insert(package.paths, "/system/likedlib")
+    package.hardAutoUnloading = true
+    if package.isInstalled("sysmode") then
+        require("sysmode").init()
+    end
+
     local registry = require("registry")
     local fs = require("filesystem")
     local component = require("component")
@@ -221,9 +228,6 @@ function sysinit.init(box, lscreen)
 
     local graphic = require("graphic")
     local programs = require("programs")
-    local package = require("package")
-
-    table.insert(package.paths, "/system/likedlib")
     table.insert(programs.paths, "/data/apps")
     table.insert(programs.paths, "/system/apps")
     table.insert(programs.paths, "/vendor/apps")
@@ -293,12 +297,6 @@ function sysinit.init(box, lscreen)
 
     local gui_container = require("gui_container")
     local gui = require("gui") --нужно подключить заранию чтобы функции записались в calls.loaded
-
-    package.hardAutoUnloading = true
-    if package.isInstalled("sysmode") then
-        require("sysmode").init()
-    end
-
     local thread = require("thread")
     local liked = require("liked")
     local apps = require("apps")
