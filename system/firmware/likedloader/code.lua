@@ -13,7 +13,7 @@ local function save()
             str = str .. k .. "=" .. tostring(v) .. ","
         end
     end
-    _pcall(eeprom.setData, str .. "}")
+    pcall(eeprom.setData, str .. "}")
 end
 
 computer.setBootAddress = function(address)
@@ -33,21 +33,32 @@ do
     end
 end
 
-local addr = data.a
+local function checkSystem(address)
+    return invoke(address, "exists", "init.lua")
+end
 
-for address in component.list("filesystem") do
-    init, reason = tryLoadFrom(address)
-    if init then
-        computer.setBootAddress(address)
-        break
+local addr = data.a or ""
+
+if not component.proxy(addr) then
+    for address in component.list("filesystem") do
+        if checkSystem(address) then
+            addr = address
+            computer.setBootAddress(addr)
+            break
+        end
     end
 end
 
-if not addr then
+if not checkSystem(addr) then
+    addr = ""
+end
+
+if not component.proxy(addr) then
     error("liked loader: could not find a suitable OS to boot", 0)
 end
 
 invoke(computer.tmpAddress(), "makeDirectory", "bootloader") --blocks bootmanager startup
+invoke(addr, "remove", "bootloader") --attempt to remove bootmanager. liked loader runs only the verified operating systems
 local file = invoke(addr, "open", "/init.lua")
 local buffer = ""
 repeat

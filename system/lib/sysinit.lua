@@ -195,7 +195,7 @@ function sysinit.init(box, lscreen)
     local computer = require("computer")
     local bootloader = require("bootloader")
 
-    if registry.onlyInternalDisk and component.slot() < 0 then
+    if registry.onlyInternalDisk and component.slot(fs.bootaddress) < 0 then
         bootloader.bootSplash("loading from external disk is disabled")
         bootloader.waitEnter()
         computer.shutdown()
