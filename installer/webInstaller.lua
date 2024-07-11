@@ -430,8 +430,19 @@ local function downloadFile(diskProxy, branch, path, toPath)
     diskProxy.close(file)
 end
 
+local function flashRestricted(disk, branch)
+    local eeprom = component.proxy(component.list("eeprom")() or "")
+    if eeprom then
+        local appendData = "local bootAddress = \"" .. disk .. "\"\n"
+        eeprom.setData("")
+        eeprom.setLabel(assert(wget(baseUrl .. branch .. "/system/firmware/restricted_loader/label.txt")))
+        eeprom.set(appendData .. assert(wget(baseUrl .. branch .. "/system/firmware/restricted_loader/code.lua")))
+    end
+end
+
 local function install(disk, branch, edition, doOpenOS, doMineOS)
     local diskProxy = component.proxy(disk)
+    local flashRestrictedFlag = edition ~= "full"
 
     if doOpenOS then
         diskProxy.rename("/init.lua", "/openOS.lua")
@@ -450,13 +461,11 @@ local function install(disk, branch, edition, doOpenOS, doMineOS)
         downloadFile(diskProxy, branch, "/market/apps/mineOS.app/main.lua", "/vendor/apps/mineOS.app/main.lua")
         downloadFile(diskProxy, branch, "/market/apps/mineOS.app/uninstall.lua", "/vendor/apps/mineOS.app/uninstall.lua")
         downloadFile(diskProxy, branch, "/market/apps/mineOS.app/mineOS.lua", "/mineOS.lua")
+        flashRestrictedFlag = true
+    end
 
-        local eeprom = component.proxy(component.list("eeprom")() or "")
-        if eeprom then
-            eeprom.setData("")
-            eeprom.setLabel(assert(wget(baseUrl .. branch .. "/system/firmware/likedloader/label.txt")))
-            eeprom.set(assert(wget(baseUrl .. branch .. "/system/firmware/likedloader/code.lua")))
-        end
+    if flashRestrictedFlag then
+        flashRestricted(disk, branch)
     end
 
     assert(load(buildUpdater(branch, edition), "=updater", nil, _G))(disk)
