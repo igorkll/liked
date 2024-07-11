@@ -116,7 +116,7 @@ local function menu(label, lstrs, funcs, withoutBackButton, refresh)
     end
 
     if not withoutBackButton then
-        table.insert(strs, "Back")
+        table.insert(strs, "back")
     end
 
     local function redraw()
@@ -149,7 +149,7 @@ local function menu(label, lstrs, funcs, withoutBackButton, refresh)
                         if refresh then
                             local lstrs, lfuncs = refresh()
                             if not withoutBackButton then
-                                table.insert(lstrs, "Back")
+                                table.insert(lstrs, "back")
                             end
                             strs = lstrs
                             funcs = lfuncs
@@ -348,6 +348,12 @@ local allowSaveOS = {
     ["full"] = true
 }
 
+local mainWarn = "ATTENTION, after installing this version of the system, other operating systems will not work on this device! if you want to install another OS in the future or another edition of liked, then you will have to change the EEPROM and format the disk. and only then will you be able to run the installer"
+local warnOS = {
+    ["classic"] = mainWarn,
+    ["demo"] = mainWarn .. ". the demo version was created solely for familiarization with the system, computers on the demo version can be used as an advertising shield demonstrating the capabilities of the OS in public, this version is extremely unsuitable for use"
+}
+
 --------------------------------------------
 
 local function segments(path)
@@ -478,6 +484,38 @@ local function openOSMineOSStr(openOS, mineOS)
     end
 end
 
+local function toParts(tool, str, max)
+    local strs = {}
+    while tool.len(str) > 0 do
+        table.insert(strs, tool.sub(str, 1, max))
+        str = tool.sub(str, tool.len(strs[#strs]) + 1)
+    end
+    return strs
+end
+
+local function showWarn(str)
+    clearScreen()
+    invertColor()
+    centerPrint(2, " WARNING ")
+    invertColor()
+    centerPrint(ry - 1, "press enter to continue")
+
+    for i, v in ipairs(toParts(string, str, rx - 4)) do
+        centerPrint(3 + i, v)
+    end
+
+    if updateScreen then updateScreen() end
+
+    while true do
+        local eventData = {computer.pullSignal()}
+        if eventData[1] == "key_down" and isKeyboard(eventData[2]) then
+            if eventData[4] == 28 then
+                break
+            end
+        end
+    end
+end
+
 local function generateFunction(address)
     local title = generateTitle(address)
     return function ()
@@ -487,6 +525,10 @@ local function generateFunction(address)
                 local funcs = {}
                 for _, edition in ipairs(editions) do
                     table.insert(funcs, function ()
+                        if warnOS[edition] then
+                            showWarn(warnOS[edition])
+                        end
+
                         local openOS, mineOS, omStr
                         if allowSaveOS[edition] then
                             openOS, mineOS = isOpenOS(address), isMineOS(address)
