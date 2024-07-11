@@ -3,6 +3,7 @@ local gui_container = require("gui_container")
 local registry = require("registry")
 local uuid = require("uuid")
 local gui = require("gui")
+local uix = require("uix")
 
 local colors = gui_container.colors
 
@@ -15,43 +16,67 @@ local rx, ry = gpu.getResolution()
 ------------------------------------
 
 local window = graphic.createWindow(screen, posX, posY, rx - (posX - 1), ry - (posY - 1))
+local layout = uix.create(window, colors.black)
 
-local function draw()
-    window:clear(colors.black)
-    window:set(1, 1, colors.black, registry.password and colors.lime or colors.red, "lock: " .. tostring(not not registry.password))
-    window:set(1, 3, colors.lightGray, colors.white, "remove password")
-    window:set(1, 4, colors.lightGray, colors.white, "set    password")
+local passwordTitle = layout:createText(2, 2, colors.white, "use password: ")
+local passwordSwitch = layout:createSwitch(passwordTitle.x + #passwordTitle.text, 2)
+passwordSwitch.state = not not registry.password
+
+function passwordSwitch:onSwitch()
+    if self.state then
+        if not registry.password then
+            local password = gui.comfurmPassword(screen)
+            if password then
+                local salt = uuid.next()
+                registry.password = require("sha256").sha256hex(password .. salt)
+                registry.passwordSalt = salt
+            else
+                self.state = false
+            end
+        end
+    elseif registry.password then
+        local ok, password = gui.checkPassword(screen)
+        if ok then
+            registry.password = nil
+            registry.passwordSalt = nil
+            if registry.encrypt then
+                require("efs").decrypt(password)
+            end
+        else
+            self.state = true
+        end
+    end
+    layout:draw()
 end
-draw()
+
+local encryptionTitle = layout:createText(2, 4, colors.white, "disk encryption: ")
+local encryptionSwitch = layout:createSwitch(encryptionTitle.x + #encryptionTitle.text, 4)
+encryptionSwitch.state = not not registry.encrypt
+
+function encryptionSwitch:onSwitch()
+    if self.state then
+        if registry.password then
+            local ok, password = gui.checkPassword(screen)
+            if ok then
+                require("efs").encrypt(password)
+            end
+        else
+            gui.warn(screen, nil, nil, "to use disk encryption, you must set a password")
+            self.state = false
+        end
+    else
+        local ok, password = gui.checkPassword(screen)
+        if ok then
+            require("efs").decrypt(password)
+        end
+    end
+    layout:draw()
+end
+
+layout:draw()
 
 ------------------------------------
 
 return function(eventData)
-    local windowEventData = window:uploadEvent(eventData)
-    if windowEventData[1] == "touch" then
-        if windowEventData[4] == 3 and windowEventData[3] >= 1 and windowEventData[3] <= 15 then
-            if registry.password then
-                local ok, rawPassword = gui.checkPassword(screen)
-                if ok then
-                    registry.password = nil
-                    registry.passwordSalt = nil
-                    require("efs").decrypt(rawPassword)
-                end
-            else
-                gui.warn(screen, nil, nil, "the password is not set")
-            end
-            draw()
-        elseif windowEventData[4] == 4 and windowEventData[3] >= 1 and windowEventData[3] <= 15 then
-            if gui.checkPassword(screen) then
-                local password = gui.comfurmPassword(screen)
-                if password then
-                    local salt = uuid.next()
-                    registry.password = require("sha256").sha256hex(password .. salt)
-                    registry.passwordSalt = salt
-                    require("efs").encrypt(password)
-                end
-            end
-            draw()
-        end
-    end
+    layout:uploadEvent(eventData)
 end
