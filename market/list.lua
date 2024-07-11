@@ -598,11 +598,11 @@ local list = {
         urlPrimaryPart = selfurlpart .. "/apps/clock.app/",
         files = {"main.lua", "icon.t2p", "alarm.t2p", "clock.t2p", "stopwatch.t2p", "timer.t2p", "palette.plt"}
     },
-    { --requires further development
+    {
         name = "bootmanager",
         version = "1",
         vendor = "logic",
-        description = "",
+        description = "it is installed on the hard drive and allows you to redirect loading to other operating systems. does not work with the \"liked loader\" installed due to its security policy",
         minDiskSpace = 64,
         executer = true,
         

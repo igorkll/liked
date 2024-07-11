@@ -1720,6 +1720,50 @@ function gui.yesno(screen, cx, cy, str, backgroundColor)
     end
 end
 
+function gui.nextOrCancel(screen, cx, cy, str, backgroundColor)
+    local window, noShadow = gui.smallWindow(screen, cx, cy, str, backgroundColor, function (window, color)
+        window:set(2, 1, color, colors.orange, "  " .. unicode.char(0x2800+192) ..  "  ")
+        window:set(2, 2, color, colors.orange, " ◢█◣ ")
+        window:set(2, 3, color, colors.orange, "◢███◣")
+        window:set(4, 2, colors.orange, colors.white, "!")
+    end)
+
+    window:set(32 - 6, 7, colors.lightBlue, colors.white, " next ")
+    window:set(2, 7, colors.red, colors.white, " cancel ")
+
+    graphic.forceUpdate(screen)
+    if registry.soundEnable then
+        sound.warn()
+    end
+
+    local function drawYes()
+        window:set(32 - 6, 7, colors.blue, colors.white, " next ")
+        graphic.forceUpdate(screen)
+        event.sleep(0.1)
+    end
+
+    while true do
+        local eventData = {computer.pullSignal()}
+        local windowEventData = window:uploadEvent(eventData)
+        if windowEventData[1] == "touch" and windowEventData[5] == 0 then
+            if windowEventData[4] == 7 and windowEventData[3] > (32 - 7) and windowEventData[3] <= ((32 - 5) + 4) then
+                drawYes()
+                noShadow()
+                return true
+            elseif windowEventData[4] == 7 and windowEventData[3] >= 2 and windowEventData[3] <= (2 + 3 + 4) then
+                window:set(2, 7, colors.brown, colors.white, " cancel ")
+                graphic.forceUpdate(screen)
+                event.sleep(0.1)
+                noShadow()
+                return false
+            end
+        elseif windowEventData[1] == "key_down" and windowEventData[4] == 28 then
+            drawYes()
+            noShadow()
+            return true
+        end
+    end
+end
 
 function gui.clearRun(func, screen, ...)
     local clear = gui.saveZone(screen)

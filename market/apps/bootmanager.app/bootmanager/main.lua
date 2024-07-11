@@ -1,3 +1,5 @@
+_G._bootmanager = true
+
 local computer = computer
 local component = component
 local tmpfs = component.proxy(computer.tmpAddress())

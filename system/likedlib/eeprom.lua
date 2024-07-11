@@ -29,10 +29,10 @@ function eeprom.list(screen)
             end
 
             table.insert(labels, label)
-            table.insert(list, {label = label, data = data, code = code, makeData = function ()
+            table.insert(list, {label = label, data = data, code = code, makeData = function (hidden)
                 local datamakePath = paths.concat(fullpath, "data.lua")
                 if fs.exists(datamakePath) then
-                    local result = {apps.executeWithWarn(datamakePath, screen)}
+                    local result = {apps.executeWithWarn(datamakePath, screen, nil, hidden)}
                     if result[1] then
                         return result[2]
                     end
@@ -62,8 +62,8 @@ function eeprom.menu(screen)
     end
 end
 
-function eeprom.makeData(firmware)
-    return (firmware.makeData and firmware.makeData()) or firmware.data or ""
+function eeprom.makeData(firmware, hidden)
+    return (firmware.makeData and firmware.makeData(hidden)) or firmware.data or ""
 end
 
 function eeprom.flash(screen, firmware, force)
@@ -82,7 +82,7 @@ end
 function eeprom.hiddenFlash(firmware)
     local componentEeprom = component.eeprom
     local _, err = componentEeprom.set(firmware.rawCode or assert(fs.readFile(firmware.code)))
-    componentEeprom.setData(eeprom.makeData(firmware))
+    componentEeprom.setData(eeprom.makeData(firmware, true))
     componentEeprom.setLabel(firmware.label or "UNKNOWN")
     if err then
         return nil, err

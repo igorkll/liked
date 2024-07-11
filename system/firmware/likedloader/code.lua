@@ -1,6 +1,8 @@
 local init
 do
-    local data = component.proxy(component.list("eeprom")())
+    _likedLoader = true
+    local eeprom = component.proxy(component.list("eeprom")())
+    
 
     do
         local screen = component.list("screen")()
@@ -10,6 +12,10 @@ do
         end
     end
 
-    _likedLoader = true
+    if not init then
+        error("liked loader: could not find a suitable OS to boot", 0)
+    end
+
+    component.invoke(computer.tmpAddress(), "makeDirectory", "bootloader") --blocks bootmanager startup
 end
 init()

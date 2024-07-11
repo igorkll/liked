@@ -189,11 +189,31 @@ function sysinit.runShell(screen, customShell)
 end
 
 function sysinit.init(box, lscreen)
+    local registry = require("registry")
     local fs = require("filesystem")
-    _G._OSVERSION = "liked-v" .. assert(fs.readFile("/system/version.cfg"))
-    require("calls") --подгрузка лютай легаси дичи
+    local component = require("component")
+    local computer = require("computer")
     local bootloader = require("bootloader")
+
+    if registry.onlyInternalDisk and component.slot() < 0 then
+        bootloader.bootSplash("loading from external disk is disabled")
+        bootloader.waitEnter()
+        computer.shutdown()
+        return
+    elseif registry.noBootViaBootmanager and _G._bootmanager then
+        bootloader.bootSplash("booting via bootmanager is disabled")
+        bootloader.waitEnter()
+        computer.shutdown()
+        return
+    end 
+
+    if registry.noBootmanager then
+        fs.remove("/bootmanager")
+    end
+
+    _G._OSVERSION = "liked-v" .. assert(fs.readFile("/system/version.cfg"))
     bootloader.runlevel = "user"
+    require("calls") --подгрузка лютай легаси дичи
 
     if lscreen and bootloader.recoveryApi then
         bootloader.recoveryApi.offScreens()
@@ -201,9 +221,7 @@ function sysinit.init(box, lscreen)
 
     local graphic = require("graphic")
     local programs = require("programs")
-    local component = require("component")
     local package = require("package")
-    local registry = require("registry")
 
     table.insert(package.paths, "/system/likedlib")
     table.insert(programs.paths, "/data/apps")
@@ -286,7 +304,6 @@ function sysinit.init(box, lscreen)
     local apps = require("apps")
     local event = require("event")
     local system = require("system")
-    local computer = require("computer")
 
     local devicetype = system.getDeviceType()
     local isTablet = devicetype == "tablet"
