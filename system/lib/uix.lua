@@ -999,6 +999,11 @@ function uix:fullStart()
     for _, th in ipairs(self.threads) do
         th:resume()
     end
+    for _, obj in ipairs(self.objs) do
+        if obj.type == "input" then
+            obj.read.setDrawLock(false)
+        end
+    end
     if self.onFullStart then
         self.onFullStart()
     end
