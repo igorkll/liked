@@ -46,6 +46,9 @@ if not drive then --если через getBootAddress не получилось
         drive = require("filesystem").get("/").address
     end)
 end
+if drive and not component.proxy(drive) then
+    drive = nil
+end
 
 --------------------------------------------
 
@@ -607,7 +610,12 @@ end
 --------------------------------------------
 
 menu("liked & likeOS - web installer", generateList())
+
 gpu.setBackground(0x000000)
 gpu.setForeground(0xffffff)
 gpu.setResolution(orx, ory)
 gpu.fill(1, 1, orx, ory, " ")
+pcall(function ()
+    require("term").clear()
+end)
+if updateScreen then updateScreen() end
