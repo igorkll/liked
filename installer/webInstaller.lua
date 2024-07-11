@@ -403,7 +403,14 @@ local function getBlackList(branch, edition)
 end
 
 local function getInstallData(branch, edition)
-    return {data = {branch = branch, mode = edition}, filesBlackList = getBlackList(branch, edition), label = "liked", noWait = true}
+    return {
+        data = {branch = branch, mode = edition},
+        filesBlackList = getBlackList(branch, edition),
+        label = "liked",
+        noWait = true,
+        noReboot = true,
+        noSetBootaddress = true
+    }
 end
 
 local function getInstallDataStr(branch, edition)
@@ -440,7 +447,7 @@ local function flashRestricted(disk, branch)
     end
 end
 
-local function install(disk, branch, edition, doOpenOS, doMineOS)
+local function install(disk, branch, edition, doOpenOS, doMineOS, otherDevice)
     local diskProxy = component.proxy(disk)
     local flashRestrictedFlag = edition ~= "full"
 
@@ -464,13 +471,15 @@ local function install(disk, branch, edition, doOpenOS, doMineOS)
         flashRestrictedFlag = true
     end
 
-    if flashRestrictedFlag then
+    if flashRestrictedFlag and not otherDevice then
         flashRestricted(disk, branch)
     end
 
     assert(load(buildUpdater(branch, edition), "=updater", nil, _G))(disk)
-    pcall(computer.setBootAddress, disk)
-    pcall(computer.shutdown, "fast")
+    if not otherDevice then
+        pcall(computer.setBootAddress, disk)
+        pcall(computer.shutdown, "fast")
+    end
 end
 
 --------------------------------------------
@@ -534,31 +543,38 @@ local function generateFunction(address)
                 local funcs = {}
                 for _, edition in ipairs(editions) do
                     table.insert(funcs, function ()
-                        if warnOS[edition] then
-                            showWarn(warnOS[edition])
-                        end
+                        local funcs = {}
+                        for i = 1, 2 do
+                            if warnOS[edition] then
+                                showWarn(warnOS[edition])
+                            end
 
-                        local openOS, mineOS, omStr
-                        if allowSaveOS[edition] then
-                            openOS, mineOS = isOpenOS(address), isMineOS(address)
-                            omStr = openOSMineOSStr(openOS, mineOS)
-                        end
+                            local openOS, mineOS, saveSystemStr
+                            if allowSaveOS[edition] then
+                                openOS, mineOS = isOpenOS(address), isMineOS(address)
+                                saveSystemStr = openOSMineOSStr(openOS, mineOS)
+                            end
 
-                        local strs, funcs = {"format disk"}, {function ()
-                            status("installation...")
-                            component.invoke(address, "remove", "/")
-                            install(address, branch, edition)
-                        end}
-
-                        if omStr then
-                            table.insert(strs, omStr)
-                            table.insert(funcs, function ()
+                            local strs, funcs = {"format disk"}, {function ()
                                 status("installation...")
-                                install(address, branch, edition, openOS, mineOS)
-                            end)
-                        end
+                                component.invoke(address, "remove", "/")
+                                install(address, branch, edition)
+                            end}
 
-                        menu(title .. " | installation options", strs, funcs)
+                            if saveSystemStr then
+                                table.insert(strs, saveSystemStr)
+                                table.insert(funcs, function ()
+                                    status("installation...")
+                                    install(address, branch, edition, openOS, mineOS)
+                                end)
+                            end
+
+                            menu(title .. " | installation options", strs, funcs)
+                        end
+                        menu(title .. " | where the OS will be used (important for correct configuration)", {
+                            "on this device (flash the EEPROM if necessary and reboot into the system)",
+                            "on another device (do not flash the EEPROM and do not turn off the device)"
+                        }, funcs)
                     end)
                 end
                 menu(title .. " | select edition", editions, funcs)

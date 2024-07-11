@@ -228,17 +228,18 @@ if installdata.self then
 end
 
 --отображаем 100% в течении секунды
+local setBootAddr = not installdata.noSetBootaddress and computer.getBootAddress and computer.setBootAddress and computer.getBootAddress() ~= proxy.address
 if printState(1) then
-    if computer.getBootAddress and computer.setBootAddress and computer.getBootAddress() ~= proxy.address then
+    if setBootAddr then
         computer.setBootAddress(proxy.address)
     elseif not installdata.noWait then
         sleep(1)
     end
-elseif computer.getBootAddress and computer.setBootAddress and computer.getBootAddress() ~= proxy.address then
+elseif setBootAddr then
     computer.setBootAddress(proxy.address)
 end
 
 --перезагружаем устройтсво
-if computer.setBootAddress then
+if not installdata.noReboot then
     computer.shutdown("fast")
 end
