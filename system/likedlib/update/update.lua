@@ -196,6 +196,7 @@ local function minifyFile(filepath, data)
             antiTLWY()
             local char = data:sub(i, i)
             if char == "\n" then
+                table.insert(partsData, "\n")
                 addChar = false
             elseif char ~= " " and char ~= "\t" then
                 addChar = true
@@ -204,7 +205,7 @@ local function minifyFile(filepath, data)
                 table.insert(partsData, char)
             end
         end
-        return table.concat(partsData, "\n")
+        return table.concat(partsData)
     end
     return data
 end
