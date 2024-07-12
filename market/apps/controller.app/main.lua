@@ -204,7 +204,7 @@ layout:listen("modem_message", function (_, localAddress, sender, senderPort, di
         else
             addTitle = " | distance: " .. math.roundTo(dist, 1)
         end
-        local tbl = {v2 .. " " .. v3 .. " " .. sender:sub(1, 6) .. addTitle, false, writeAddr, not isTunnel and computer.uptime(), v2}
+        local tbl = {v2 .. (v3 and (" " .. v3) or "") .. " " .. sender:sub(1, 6) .. addTitle, false, writeAddr, not isTunnel and computer.uptime(), v2}
         for i = 1, #connectList.list do
             local oldTbl = connectList.list[i]
             if oldTbl[3] == writeAddr then
