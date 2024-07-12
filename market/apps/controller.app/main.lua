@@ -262,8 +262,8 @@ local colorpic = rcLayout:createColorpic(2, rcLayout.sizeY - 3, 13, 1, "light co
 local randPass = rcLayout:createButton(2, rcLayout.sizeY - 7, 21, 1, colors.purple, colors.white, "use random password")
 local customPass = rcLayout:createButton(2, rcLayout.sizeY - 5, 21, 1, colors.purple, colors.white, "use custom password")
 local shutdownButton = rcLayout:createButton(colorpic.x + colorpic.sx + 1, rcLayout.sizeY - 3, 10, 1, nil, nil, "shutdown")
-local seekbar = rcLayout:createSeek(2, rcLayout.sizeY - 9, 16)
-local seekbarText = rcLayout:createText(19, rcLayout.sizeY - 9, colors.white)
+local blockPeerMove = rcLayout:createSeek(2, rcLayout.sizeY - 9, 16)
+local blockPeerMoveText = rcLayout:createText(19, rcLayout.sizeY - 9, colors.white)
 local currentBlockCount
 
 local startStatPoses = wakeUpSwitch.x + 7
@@ -278,16 +278,19 @@ for i = 1, 6 do
     local py = (rcLayout.sizeY - 7) + (i - 1)
     local execButton = rcLayout:createButton(execPoses, py, 6, 1, i % 2 == 1 and colors.green or colors.lime, colors.white, "exec")
     rcLayout.style = uix.styles[2]
-    local inputStr = rcLayout:createInput(luaPoses, py, rcLayout.sizeX - luaPoses, i % 2 == 1 and colors.gray or colors.lightGray,
+    local inputStr = rcLayout:createInput(luaPoses, py, rcLayout.sizeX - luaPoses,
+        i % 2 == 1 and colors.gray or colors.lightGray,
         colors.white, nil, nil, "lua", nil, nil, nil, nil, "cntr" .. i)
-    function execButton:onDrop()
-        local ok, err = statusRequest(controlAddress, "rc_exec", inputStr.read.getBuffer())
-        if not ok then
-            gui.warn(screen, nil, nil, tostring(err))
-        end
-        ui:draw()
-    end
     rcLayout.style = uix.styles[1]
+
+    function execButton:onDrop()
+        ui:func(function()
+            local ok, err = statusRequest(controlAddress, "rc_exec", inputStr.read.getBuffer())
+            if not ok then
+                gui.warn(screen, nil, nil, tostring(err))
+            end
+        end)
+    end
 end
 
 for i, v in ipairs(statuses) do
@@ -359,7 +362,7 @@ end)()]]
     end
 end
 
-local th = rcLayout:thread(function ()
+rcLayout:thread(function ()
     while true do
         local back = screensaver.noScreensaver(screen)
         statsUpdate()
@@ -368,14 +371,14 @@ local th = rcLayout:thread(function ()
     end
 end)
 
-local function seekbarTextUpdate(noDraw)
-    seekbarText.text = "blocks for movement: " .. currentBlockCount .. " "
-    if not noDraw then seekbarText:draw() end
+local function blockPeerMoveTextUpdate(noDraw)
+    blockPeerMoveText.text = "blocks for movement: " .. currentBlockCount .. " "
+    if not noDraw then blockPeerMoveText:draw() end
 end
 
-function seekbar:onSeek(value)
+function blockPeerMove:onSeek(value)
     currentBlockCount = math.mapRound(value, 0, 1, 1, 16)
-    seekbarTextUpdate()
+    blockPeerMoveTextUpdate()
 end
 
 function shutdownButton:onDrop()
@@ -461,19 +464,25 @@ return true]]
         colorpic:setColor(0xffffff)
     end
 
-    seekbar.value = 0
+    blockPeerMove.value = 0
     deviceTypeTitle.text = "device type: " .. devicetype
 
     currentBlockCount = 1
-    seekbarTextUpdate(true)
+    blockPeerMoveTextUpdate(true)
     statsUpdate(true)
 
     offsetTitle.hidden = true
+    blockPeerMove.hidden = true
+    blockPeerMoveText.hidden = true
     if devicetype == "robot" then
+        blockPeerMove.hidden = false
+        blockPeerMoveText.hidden = false
         for i, v in ipairs(statuses) do
             v.hidden = i > 3
         end
     elseif devicetype == "drone" then
+        blockPeerMove.hidden = false
+        blockPeerMoveText.hidden = false
         offsetTitle.hidden = false
         for i, v in ipairs(statuses) do
             v.hidden = false
