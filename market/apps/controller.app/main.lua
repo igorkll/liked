@@ -159,13 +159,14 @@ local function connect()
         if ret == true then
             passwordInput.read.setBuffer("")
             controlAddress = obj[3]
+            ui:fullStart()
             rcLayout:select(obj[5])
         else
             ui:forceDraw()
             gui.warn(screen, nil, nil, "incorrect password")
+            ui:fullStart()
+            ui:draw()
         end
-        ui:fullStart()
-        ui:draw()
     else
         ui:func(gui.warn, screen, nil, nil, "first, select the device you want to control from the list")
     end
@@ -284,12 +285,13 @@ for i = 1, 6 do
     rcLayout.style = uix.styles[1]
 
     function execButton:onDrop()
-        ui:func(function()
-            local ok, err = statusRequest(controlAddress, "rc_exec", inputStr.read.getBuffer())
-            if not ok then
-                gui.warn(screen, nil, nil, tostring(err))
-            end
-        end)
+        ui:fullStop()
+        local ok, err = statusRequest(controlAddress, "rc_exec", inputStr.read.getBuffer())
+        if not ok then
+            gui.warn(screen, nil, nil, tostring(err))
+        end
+        ui:fullStart()
+        ui:draw()
     end
 end
 
@@ -357,8 +359,6 @@ end)()]]
         end
         offsetTitle.text = offsetTitle.text .. string.rep(" ", rcLayout.sizeX)
         offsetTitle:draw()
-    else
-        offsetTitle.text = "offset:"
     end
 end
 
@@ -382,7 +382,7 @@ function blockPeerMove:onSeek(value)
 end
 
 function shutdownButton:onDrop()
-    self.gui:fullStop()
+    ui:fullStop()
     local clear = gui.saveZone(screen)
     if gui.yesno(screen, nil, nil, "are you sure you want to turn off the device?") then
         clear()
@@ -391,30 +391,30 @@ function shutdownButton:onDrop()
         layout:select()
         return
     end
-    self.gui:fullStart()
+    ui:fullStart()
     ui:draw()
 end
 
 function randPass:onDrop()
-    self.gui:fullStop()
+    ui:fullStop()
     local clear = gui.saveZone(screen)
     if gui.yesno(screen, nil, nil, "are you sure you want to reset your password and use a random password?") then
         clear()
         statusRequest(controlAddress, "rc_exec", "passwordHash = nil; component.invoke(component.list('eeprom')(), 'setData', '')")
     end
-    self.gui:fullStart()
+    ui:fullStart()
     ui:draw()
 end
 
 function customPass:onDrop()
-    self.gui:fullStop()
+    ui:fullStop()
     local clear = gui.saveZone(screen)
     local password = gui.comfurmPassword(screen)
     if password then
         clear()
         statusRequest(controlAddress, "rc_exec", "passwordHash = ...; component.invoke(component.list('eeprom')(), 'setData', passwordHash)", hash(password))
     end
-    self.gui:fullStart()
+    ui:fullStart()
     ui:draw()
 end
 
