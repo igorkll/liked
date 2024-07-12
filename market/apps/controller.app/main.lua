@@ -102,10 +102,8 @@ local function deviceSend(address, ...)
     local startWaitTime = computer.uptime()
     if tunnels[address] then
         component.invoke(address, "send", ...)
-    else
-        if modem then
-            modem.send(address, port, ...)
-        end
+    elseif modem then
+        modem.send(address, port, ...)
     end
 end
 

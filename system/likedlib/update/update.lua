@@ -9,18 +9,18 @@ local function initScreen(gpu, screen)
         gpu.bind(screen, false)
     end
 
-    local rx, ry = 50, 16
     local mrx, mry = gpu.maxResolution()
-    if component.list("tablet", true)() then
-        rx, ry = mrx, mry
+    if mrx > 80 then
+        mrx = 80
+        mry = 25
     end
 
     gpu.setDepth(1)
     gpu.setDepth(gpu.maxDepth())
-    gpu.setResolution(rx, ry)
+    gpu.setResolution(mrx, mry)
     gpu.setBackground(0)
     gpu.setForeground(0xffffff)
-    gpu.fill(1, 1, rx, ry, " ")
+    gpu.fill(1, 1, mrx, mry, " ")
 end
 
 local function centerPrint(gpu, text, y)
@@ -179,18 +179,70 @@ local function inBlackList(path)
     end
 end
 
+local function split(tool, str, seps) --дробит строку по разделителям(сохраняяя пустые строки)
+    local parts = {""}
+
+    if type(seps) ~= "table" then
+        seps = {seps}
+    end
+
+    local index = 1
+    local strlen = tool.len(str)
+    while index <= strlen do
+        while true do
+            local isBreak
+            for i, sep in ipairs(seps) do
+                if tool.sub(str, index, index + (tool.len(sep) - 1)) == sep then
+                    table.insert(parts, "")
+                    index = index + tool.len(sep)
+                    isBreak = true
+                    break
+                end
+            end
+            if not isBreak then break end
+        end
+
+        parts[#parts] = parts[#parts] .. tool.sub(str, index, index)
+        index = index + 1
+    end
+
+    return parts
+end
+
+local function minifyFile(filepath, data)
+    if filepath:sub(#filepath - 3, #filepath) == ".lua" then
+        local partsData = {}
+        for _, line in ipairs(split(unicode, data, "\n")) do
+            local lLine = {}
+            local addChar = false
+            for i = 1, #line do
+                local char = line:char(i, i)
+                if char ~= " " and char ~= "\t" then
+                    addChar = true
+                end
+                if addChar then
+                    table.insert(lLine, char)
+                end
+            end
+            table.insert(partsData, table.concat(lLine))
+        end
+        return table.concat(partsData, "\n")
+    end
+    return data
+end
+
 local function installUrl(urlPart, state2)
     local filelist = split(assert(getInternetFile(urlPart .. "/installer/filelist.txt")), "\n")
     local count = 0
-    for i, v in ipairs(filelist) do
-        if v ~= "" and not inBlackList(v) then
-            local filedata = assert(getInternetFile(urlPart .. v))
+    for i, filepath in ipairs(filelist) do
+        if filepath ~= "" and not inBlackList(filepath) then
+            local filedata = assert(getInternetFile(urlPart .. filepath))
 
             if count % 5 == 0 then
                 printState((((i - 1) / (#filelist - 1)) / 2) + (state2 and 0.5 or 0))
             end
 
-            saveFile(v, filedata)
+            saveFile(filepath, minifyFile(filepath, filedata))
             count = count + 1
         end
     end

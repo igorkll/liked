@@ -18,7 +18,7 @@ local rx, ry = gpu.getResolution()
 local window = graphic.createWindow(screen, posX, posY, rx - (posX - 1), ry - (posY - 1))
 local layout = uix.create(window, colors.black)
 
-local encryptionTitle = layout:createText(2, 4, colors.white, "disk encryption: ")
+local encryptionTitle = layout:createText(2, 4, colors.white, "userdata encryption: ")
 local encryptionSwitch = layout:createSwitch(encryptionTitle.x + #encryptionTitle.text, 4)
 encryptionSwitch.state = not not registry.encrypt
 
@@ -32,7 +32,7 @@ function encryptionSwitch:onSwitch()
                 self.state = false
             end
         else
-            gui.warn(screen, nil, nil, "to use disk encryption,you must set a password")
+            gui.warn(screen, nil, nil, "to use userdata encryption, you must set a password")
             self.state = false
         end
     else
