@@ -383,7 +383,7 @@ local function blockPeerMoveTextUpdate(noDraw)
 end
 
 local function accelerationTextUpdate(noDraw)
-    accelerationText.text = "acceleration: " .. currentAcceleration .. " "
+    accelerationText.text = "acceleration: " .. math.roundTo(currentAcceleration, 1) .. "   "
     if not noDraw then accelerationText:draw() end
 end
 
