@@ -179,7 +179,7 @@ local function inBlackList(path)
     end
 end
 
-local function split(tool, str, seps) --дробит строку по разделителям(сохраняяя пустые строки)
+local function smartSplit(tool, str, seps) --дробит строку по разделителям(сохраняяя пустые строки)
     local parts = {""}
 
     if type(seps) ~= "table" then
@@ -212,11 +212,11 @@ end
 local function minifyFile(filepath, data)
     if filepath:sub(#filepath - 3, #filepath) == ".lua" then
         local partsData = {}
-        for _, line in ipairs(split(unicode, data, "\n")) do
+        for _, line in ipairs(smartSplit(unicode, data, "\n")) do
             local lLine = {}
             local addChar = false
             for i = 1, #line do
-                local char = line:char(i, i)
+                local char = line:sub(i, i)
                 if char ~= " " and char ~= "\t" then
                     addChar = true
                 end
