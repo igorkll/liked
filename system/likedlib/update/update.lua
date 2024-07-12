@@ -91,7 +91,7 @@ local oldInterruptTime = 0
 local function antiTLWY()
     local uptime = computer.uptime()
     if uptime - oldInterruptTime > 2 then
-        pcall(computer.beep, 0, 0)
+        computer.pullSignal(0.1)
         oldInterruptTime = uptime
     end
 end
@@ -188,57 +188,21 @@ local function inBlackList(path)
     end
 end
 
-local function smartSplit(tool, str, seps) --дробит строку по разделителям(сохраняяя пустые строки)
-    local parts = {""}
-
-    if type(seps) ~= "table" then
-        seps = {seps}
-    end
-
-    local index = 1
-    local strlen = tool.len(str)
-    while index <= strlen do
-        antiTLWY()
-        while true do
-            antiTLWY()
-            local isBreak
-            for i, sep in ipairs(seps) do
-                antiTLWY()
-                if tool.sub(str, index, index + (tool.len(sep) - 1)) == sep then
-                    table.insert(parts, "")
-                    index = index + tool.len(sep)
-                    isBreak = true
-                    break
-                end
-            end
-            if not isBreak then break end
-        end
-
-        parts[#parts] = parts[#parts] .. tool.sub(str, index, index)
-        index = index + 1
-    end
-
-    return parts
-end
-
 local function minifyFile(filepath, data)
     if filepath:sub(#filepath - 3, #filepath) == ".lua" then
         local partsData = {}
-        for _, line in ipairs(smartSplit(unicode, data, "\n")) do
+        local addChar = false
+        for i = 1, #data do
             antiTLWY()
-            local lLine = {}
-            local addChar = false
-            for i = 1, #line do
-                antiTLWY()
-                local char = line:sub(i, i)
-                if char ~= " " and char ~= "\t" then
-                    addChar = true
-                end
-                if addChar then
-                    table.insert(lLine, char)
-                end
+            local char = data:sub(i, i)
+            if char == "\n" then
+                addChar = false
+            elseif char ~= " " and char ~= "\t" then
+                addChar = true
             end
-            table.insert(partsData, table.concat(lLine))
+            if addChar then
+                table.insert(partsData, char)
+            end
         end
         return table.concat(partsData, "\n")
     end
@@ -249,6 +213,7 @@ local function installUrl(urlPart, state2)
     local filelist = split(assert(getInternetFile(urlPart .. "/installer/filelist.txt")), "\n")
     local count = 0
     for i, filepath in ipairs(filelist) do
+        antiTLWY()
         if filepath ~= "" and not inBlackList(filepath) then
             local filedata = assert(getInternetFile(urlPart .. filepath))
 
