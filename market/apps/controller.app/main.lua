@@ -201,6 +201,8 @@ layout:listen("modem_message", function (_, localAddress, sender, senderPort, di
         local addTitle
         if isTunnel then
             addTitle = " | tunnel " .. localAddress:sub(1, 6)
+        elseif dist == 0 then
+            addTitle = " | wired " .. localAddress:sub(1, 6)
         else
             addTitle = " | distance: " .. math.roundTo(dist, 1)
         end
@@ -256,10 +258,10 @@ local switchTitle = rcLayout:createText(2, rcLayout.sizeY - 1, colors.white, "al
 local deviceTypeTitle = rcLayout:createText(2, 2, colors.white)
 local offsetTitle = rcLayout:createText(2, 3, colors.white)
 local wakeUpSwitch = rcLayout:createSwitch(switchTitle.x + unicode.len(switchTitle.text) + 1, rcLayout.sizeY - 1)
-local colorpic = rcLayout:createColorpic(2, rcLayout.sizeY - 3, 13, 1, "light color", 0xffffff, true)
 local randPass = rcLayout:createButton(2, rcLayout.sizeY - 7, 21, 1, colors.purple, colors.white, "use random password")
 local customPass = rcLayout:createButton(2, rcLayout.sizeY - 5, 21, 1, colors.purple, colors.white, "use custom password")
-local shutdownButton = rcLayout:createButton(colorpic.x + colorpic.sx + 1, rcLayout.sizeY - 3, 10, 1, nil, nil, "shutdown")
+local shutdownButton = rcLayout:createButton(2, rcLayout.sizeY - 3, 10, 1, nil, nil, "shutdown")
+local colorpic = rcLayout:createColorpic(shutdownButton.x + shutdownButton.sx + 1, rcLayout.sizeY - 3, 13, 1, "light color", 0xffffff, true)
 local blockPeerMove = rcLayout:createSeek(2, rcLayout.sizeY - 9, 16)
 local blockPeerMoveText = rcLayout:createText(19, rcLayout.sizeY - 9, colors.white)
 local currentBlockCount
