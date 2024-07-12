@@ -11,7 +11,7 @@ local colorslib = require("colors")
 local paths = require("paths")
 local apps = require("apps")
 local lastinfo = require("lastinfo")
-local registry = require("registry")
+local privateReg = require("lregs").private
 
 local colors = gui_container.colors
 local uix = {colors = colors}
@@ -248,11 +248,11 @@ function objclass:uploadEvent(eventData)
         if text ~= self.oldText then
             self.oldText = text
             if self.registrySave then
-                if not registry.data.inputs then
-                    registry.data.inputs = {}
+                if not privateReg.data.inputs then
+                    privateReg.data.inputs = {}
                 end
-                registry.data.inputs[self.registrySave] = text
-                registry.save()
+                privateReg.data.inputs[self.registrySave] = text
+                privateReg.save()
             end
             if self.onTextChanged then
                 self:onTextChanged(text)
@@ -666,8 +666,8 @@ function uix:createInput(x, y, sx, back, fore, testHidden, default, syntax, maxl
         obj.read = self.window:readNoDraw(x, y, sx, obj.back, obj.fore, preStr, testHidden, default, true, syntax)
     end
 
-    if registrySave and registry.data.inputs then
-        obj.read.setBuffer(registry.data.inputs[registrySave] or "")
+    if registrySave and privateReg.data.inputs then
+        obj.read.setBuffer(privateReg.data.inputs[registrySave] or "")
     end
     
     obj.oldText = obj.read.getBuffer()

@@ -172,17 +172,16 @@ end
 
 --------------------------------------------------------
 
-function liked.applyReg(path, screen)
+function liked.applyReg(path, screen, regObj)
+    regObj = regObj or registry
     if screen then
-        if liked.assert(screen, registry.apply(path)) then
+        if liked.assert(screen, regObj.apply(path)) then
             gui_container.refresh()
-            registry.save()
+            regObj.save()
         end
-    else
-        if registry.apply(path) then
-            gui_container.refresh()
-            registry.save()
-        end
+    elseif regObj.apply(path) then
+        gui_container.refresh()
+        regObj.save()
     end
 end
 

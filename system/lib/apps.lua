@@ -16,6 +16,7 @@ local archiver = require("archiver")
 local component = require("component")
 local text = require("text")
 local unicode = require("unicode")
+local lregs = require("lregs")
 local apps = {}
 
 local installedInfo = registry.new("/data/installedInfo.dat")
@@ -315,6 +316,11 @@ function apps.postInstall(screen, nickname, path, version)
         liked.applyReg(regPath)
     end
 
+    local regPrivatePath = paths.concat(path, "reg_private.reg")
+    if fs.exists(regPrivatePath) then
+        liked.applyReg(regPrivatePath, nil, lregs.private)
+    end
+
     local formatsPath = paths.concat(path, "formats.cfg")
     if fs.exists(formatsPath) then
         doFormats(path, formatsPath)
@@ -371,6 +377,11 @@ function apps.uninstall(screen, nickname, path, hide)
     local unregPath = paths.concat(path, "unreg.reg")
     if fs.exists(unregPath) then
         liked.applyReg(unregPath)
+    end
+
+    local unregPrivatePath = paths.concat(path, "unreg_private.reg")
+    if fs.exists(unregPrivatePath) then
+        liked.applyReg(unregPrivatePath, nil, lregs.private)
     end
 
     local formatsPath = paths.concat(path, "formats.cfg")
