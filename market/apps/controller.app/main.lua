@@ -108,12 +108,14 @@ local function deviceSend(address, ...)
 end
 
 local function deviceRequest(address, ...)
+    local backScreensaver = screensaver.noScreensaver(screen)
     local startWaitTime = computer.uptime()
     if tunnels[address] then
         component.invoke(address, "send", ...)
         while computer.uptime() - startWaitTime < 5 do
             local eventData = {event.pull(0.5, "modem_message", address, nil, nil, nil, "rc_tunnel")}
             if eventData[1] then
+                backScreensaver()
                 return table.unpack(eventData, 7)
             end
         end
@@ -124,10 +126,12 @@ local function deviceRequest(address, ...)
         while computer.uptime() - startWaitTime < 5 do
             local eventData = {event.pull(0.5, "modem_message", modem.address, address, port)}
             if eventData[1] and eventData[6] ~= "rc_adv" then
+                backScreensaver()
                 return table.unpack(eventData, 6)
             end
         end
     end
+    backScreensaver()
     ui:func(gui.warn, screen, nil, nil, "no response was received")
 end
 
@@ -264,8 +268,12 @@ local customPass = rcLayout:createButton(2, rcLayout.sizeY - 5, 21, 1, colors.pu
 local shutdownButton = rcLayout:createButton(2, rcLayout.sizeY - 3, 10, 1, nil, nil, "shutdown")
 local colorpic = rcLayout:createColorpic(shutdownButton.x + shutdownButton.sx + 1, rcLayout.sizeY - 3, 13, 1, "light color", 0xffffff, true)
 local blockPeerMove = rcLayout:createSeek(2, rcLayout.sizeY - 9, 16)
-local blockPeerMoveText = rcLayout:createText(19, rcLayout.sizeY - 9, colors.white)
+local blockPeerMoveText = rcLayout:createText(blockPeerMove.x + blockPeerMove.size + 1, rcLayout.sizeY - 9, colors.white)
+local acceleration = rcLayout:createSeek(43, rcLayout.sizeY - 9, 16)
+local accelerationText = rcLayout:createText(acceleration.x + acceleration.size + 1, rcLayout.sizeY - 9, colors.white)
 local currentBlockCount
+local currentAcceleration
+local maxAcceleration
 
 local startStatPoses = wakeUpSwitch.x + 7
 local statuses = {}
@@ -336,7 +344,7 @@ local function statsUpdate(noDraw)
     end
     return table.concat(tbl, "\n"), offset
 end)()]]
-    local ok, val, strs, offset = deviceRequest(controlAddress, "rc_exec", getterCode)
+    local ok, val, strs, offset, acceleration = deviceRequest(controlAddress, "rc_exec", getterCode)
     if ok then
         if type(val) == "number" then
             progressBar.value = val
@@ -364,9 +372,7 @@ end
 
 rcLayout:thread(function ()
     while true do
-        local back = screensaver.noScreensaver(screen)
         statsUpdate()
-        back()
         os.sleep(1)
     end
 end)
@@ -376,9 +382,19 @@ local function blockPeerMoveTextUpdate(noDraw)
     if not noDraw then blockPeerMoveText:draw() end
 end
 
+local function accelerationTextUpdate(noDraw)
+    accelerationText.text = "acceleration: " .. currentAcceleration .. " "
+    if not noDraw then accelerationText:draw() end
+end
+
 function blockPeerMove:onSeek(value)
     currentBlockCount = math.mapRound(value, 0, 1, 1, 16)
     blockPeerMoveTextUpdate()
+end
+
+function acceleration:onSeek(value)
+    currentAcceleration = math.mapRound(value, 0, 1, 1, maxAcceleration)
+    accelerationTextUpdate()
 end
 
 function shutdownButton:onDrop()
@@ -467,29 +483,41 @@ return true]]
     blockPeerMove.value = 0
     deviceTypeTitle.text = "device type: " .. devicetype
 
-    currentBlockCount = 1
-    blockPeerMoveTextUpdate(true)
-    statsUpdate(true)
-
-    offsetTitle.hidden = true
-    blockPeerMove.hidden = true
-    blockPeerMoveText.hidden = true
+    offsetTitle.disabledHidden = true
+    blockPeerMove.disabledHidden = true
+    blockPeerMoveText.disabledHidden = true
+    acceleration.disabledHidden = true
+    accelerationText.disabledHidden = true
     if devicetype == "robot" then
-        blockPeerMove.hidden = false
-        blockPeerMoveText.hidden = false
+        blockPeerMove.disabledHidden = false
+        blockPeerMoveText.disabledHidden = false
         for i, v in ipairs(statuses) do
-            v.hidden = i > 3
+            v.disabledHidden = i > 3
         end
+
+        currentBlockCount = 1
+        blockPeerMoveTextUpdate(true)
+        statsUpdate(true)
     elseif devicetype == "drone" then
-        blockPeerMove.hidden = false
-        blockPeerMoveText.hidden = false
-        offsetTitle.hidden = false
+        blockPeerMove.disabledHidden = false
+        blockPeerMoveText.disabledHidden = false
+        acceleration.disabledHidden = false
+        accelerationText.disabledHidden = false
+        offsetTitle.disabledHidden = false
         for i, v in ipairs(statuses) do
-            v.hidden = false
+            v.disabledHidden = false
         end
+
+        currentBlockCount = 1
+        currentAcceleration = 1
+        maxAcceleration = select(2, assert(deviceRequest(controlAddress, "rc_exec", "return drone.getAcceleration()")))
+        acceleration.value = math.map(1, 0, maxAcceleration, 0, 1)
+        blockPeerMoveTextUpdate(true)
+        accelerationTextUpdate(true)
+        statsUpdate(true)
     else
         for i, v in ipairs(statuses) do
-            v.hidden = true
+            v.disabledHidden = true
         end
     end
 end
