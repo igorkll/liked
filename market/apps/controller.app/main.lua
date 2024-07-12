@@ -119,10 +119,8 @@ local function deviceRequest(address, ...)
                 return table.unpack(eventData, 7)
             end
         end
-    else
-        if modem then
-            modem.send(address, port, ...)
-        end
+    elseif modem then
+        modem.send(address, port, ...)
         while computer.uptime() - startWaitTime < 5 do
             local eventData = {event.pull(0.5, "modem_message", modem.address, address, port, nil, "rc_ret")}
             if eventData[1] then
@@ -463,7 +461,7 @@ if eeprom and code ~= eeprom.get() then
 end
 return true]]
     assert(deviceRequest(controlAddress, "rc_exec", firmwareUpdater, assert(fs.readFile(firmwarePath))))
-    --wakeUpSwitch.state = not not select(2, assert(deviceRequest(controlAddress, "rc_exec", "return (tunnel and tunnel.getWakeMessage() == \"rc_wake\") or (modem and modem.getWakeMessage() == \"rc_wake\")")))
+    wakeUpSwitch.state = not not select(2, assert(deviceRequest(controlAddress, "rc_exec", "return (tunnel and tunnel.getWakeMessage() == \"rc_wake\") or (modem and modem.getWakeMessage() == \"rc_wake\")")))
     
     colorpic.disabledHidden = true
     --[[
