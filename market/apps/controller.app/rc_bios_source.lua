@@ -136,9 +136,9 @@ end
 
 local function send(isTunnel, address, ...)
     if isTunnel then
-        tunnel.send("rc_tunnel", ...)
+        tunnel.send("rc_ret", ...)
     else
-        modem.send(address, port, ...)
+        modem.send(address, port, "rc_ret", ...)
     end
 end
 

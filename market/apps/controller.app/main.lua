@@ -113,7 +113,7 @@ local function deviceRequest(address, ...)
     if tunnels[address] then
         component.invoke(address, "send", ...)
         while computer.uptime() - startWaitTime < 5 do
-            local eventData = {event.pull(0.5, "modem_message", address, nil, nil, nil, "rc_tunnel")}
+            local eventData = {event.pull(0.5, "modem_message", address, nil, 0, nil, "rc_ret")}
             if eventData[1] then
                 backScreensaver()
                 return table.unpack(eventData, 7)
@@ -124,10 +124,10 @@ local function deviceRequest(address, ...)
             modem.send(address, port, ...)
         end
         while computer.uptime() - startWaitTime < 5 do
-            local eventData = {event.pull(0.5, "modem_message", modem.address, address, port)}
-            if eventData[1] and eventData[6] ~= "rc_adv" then
+            local eventData = {event.pull(0.5, "modem_message", modem.address, address, port, nil, "rc_ret")}
+            if eventData[1] then
                 backScreensaver()
-                return table.unpack(eventData, 6)
+                return table.unpack(eventData, 7)
             end
         end
     end
@@ -393,7 +393,7 @@ function blockPeerMove:onSeek(value)
 end
 
 function acceleration:onSeek(value)
-    currentAcceleration = math.mapRound(value, 0, 1, 1, maxAcceleration)
+    currentAcceleration = math.map(value, 0, 1, 0, maxAcceleration)
     accelerationTextUpdate()
 end
 
@@ -463,7 +463,7 @@ if eeprom and code ~= eeprom.get() then
 end
 return true]]
     assert(deviceRequest(controlAddress, "rc_exec", firmwareUpdater, assert(fs.readFile(firmwarePath))))
-    wakeUpSwitch.state = not not select(2, assert(deviceRequest(controlAddress, "rc_exec", "return (tunnel and tunnel.getWakeMessage() == \"rc_wake\") or (modem and modem.getWakeMessage() == \"rc_wake\")")))
+    --wakeUpSwitch.state = not not select(2, assert(deviceRequest(controlAddress, "rc_exec", "return (tunnel and tunnel.getWakeMessage() == \"rc_wake\") or (modem and modem.getWakeMessage() == \"rc_wake\")")))
     
     colorpic.disabledHidden = true
     --[[
@@ -511,6 +511,7 @@ return true]]
         currentBlockCount = 1
         currentAcceleration = 1
         maxAcceleration = select(2, assert(deviceRequest(controlAddress, "rc_exec", "return drone.getAcceleration()")))
+        require("logs").log(maxAcceleration)
         acceleration.value = math.map(1, 0, maxAcceleration, 0, 1)
         blockPeerMoveTextUpdate(true)
         accelerationTextUpdate(true)
