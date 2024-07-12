@@ -87,6 +87,15 @@ printState(0)
 local internet = component.proxy(component.list("internet")() or error("no internet card found", 0))
 local proxy = component.proxy((...) or computer.getBootAddress())
 
+local oldInterruptTime = 0
+local function antiTLWY()
+    local uptime = computer.uptime()
+    if uptime - oldInterruptTime > 2 then
+        pcall(computer.beep, 0, 0)
+        oldInterruptTime = uptime
+    end
+end
+
 local function getInternetFile(url)
     local handle, data, result, reason = internet.request(url), ""
     if handle then
@@ -189,9 +198,12 @@ local function smartSplit(tool, str, seps) --дробит строку по ра
     local index = 1
     local strlen = tool.len(str)
     while index <= strlen do
+        antiTLWY()
         while true do
+            antiTLWY()
             local isBreak
             for i, sep in ipairs(seps) do
+                antiTLWY()
                 if tool.sub(str, index, index + (tool.len(sep) - 1)) == sep then
                     table.insert(parts, "")
                     index = index + tool.len(sep)
@@ -213,9 +225,11 @@ local function minifyFile(filepath, data)
     if filepath:sub(#filepath - 3, #filepath) == ".lua" then
         local partsData = {}
         for _, line in ipairs(smartSplit(unicode, data, "\n")) do
+            antiTLWY()
             local lLine = {}
             local addChar = false
             for i = 1, #line do
+                antiTLWY()
                 local char = line:sub(i, i)
                 if char ~= " " and char ~= "\t" then
                     addChar = true
