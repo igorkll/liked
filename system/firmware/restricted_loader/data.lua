@@ -26,6 +26,10 @@ if not gui.nextOrCancel(screen, nil, nil, "Attention 4!!! this loader will not a
     return true
 end
 
+if not gui.nextOrCancel(screen, nil, nil, "Attention 5!!! you will not be able to use the system recovery menu after installation") then
+    return true
+end
+
 if not gui.nextOrCancel(screen, nil, nil, "this thing is needed for extremely specific tasks, DO NOT INSTALL IT IF YOU DO NOT KNOW WHY YOU NEED IT") then
     return true
 end

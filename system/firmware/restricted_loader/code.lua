@@ -24,6 +24,25 @@ local function checkSystem(address)
     return invoke(address, "exists", "/init.lua")
 end
 
+local function readFile(address, path)
+    local file = invoke(address, "open", path)
+    local buffer = ""
+    repeat
+        local data = invoke(address, "read", file, math.maxinteger or math.huge)
+        buffer = buffer .. (data or "")
+    until not data
+    invoke(address, "close", file)
+    return buffer
+end
+
+local function writeFile(address, path, data)
+    local file = invoke(address, "open", path, "wb")
+    if file then
+        invoke(address, "write", file, data)
+        invoke(address, "close", file)
+    end
+end
+
 if not component.proxy(bootAddress) then
     error("restricted loader: the boot disk is missing", 0)
 end
@@ -33,16 +52,12 @@ if not checkSystem(bootAddress) then
 end
 
 local tmpAddress = computer.tmpAddress()
-invoke(tmpAddress, "remove", "bootloader") --disabling redirect to other operating systems
-invoke(tmpAddress, "makeDirectory", "bootloader") --blocks bootmanager startup
+invoke(tmpAddress, "remove", "/bootloader") --disabling redirect to other operating systems
+invoke(tmpAddress, "makeDirectory", "/bootloader") --blocks bootmanager startup
+writeFile(tmpAddress, "/bootloader/noRecovery", "")
+
 invoke(bootAddress, "remove", "/bootmanager") --attempt to remove bootmanager. restricted loader runs only the verified operating systems
 invoke(bootAddress, "remove", "/vendor/apps/bootmanager.app")
+invoke(bootAddress, "remove", "/system/core/recovery.lua")
 
-local file = invoke(bootAddress, "open", "/init.lua")
-local buffer = ""
-repeat
-    local data = invoke(bootAddress, "read", file, math.maxinteger or math.huge)
-    buffer = buffer .. (data or "")
-until not data
-invoke(bootAddress, "close", file)
-assert(load(buffer, "=init"))()
+assert(load(readFile(bootAddress, "/init.lua"), "=init"))()
