@@ -30,6 +30,7 @@ do
 end
 
 local function checkSystem(address)
+    computer.beep(2000, 0.1)
     if not invoke(address, "exists", "/init.lua") then
         return false
     end
@@ -41,13 +42,13 @@ local function checkSystem(address)
         for _, name in ipairs(invoke(address, "list", dir) or {}) do
             local path = dir .. name
             if invoke(address, "isDirectory", path) then
-                process(path)
+                if process(path) then return true end
             elseif checkFile(path) then
                 return true
             end
         end
     end
-    if process("/system") then return false end
+    if process("/system/") then return false end
     if checkFile("/init.lua") then return false end
     return true
 end
@@ -89,4 +90,8 @@ if not checkSystem(bootAddress) then
     error("restricted loader: the system failed verification", 0)
 end
 
+computer.beep(1700, 0.05)
+computer.beep(1800, 0.05)
+computer.beep(2000, 0.05)
+computer.beep(2000, 0.05)
 assert(load(readFile(bootAddress, "/init.lua"), "=init"))()
