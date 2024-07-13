@@ -71,7 +71,13 @@ function installer.install_liked(vfs)
     if not success then return nil, err end
 
     installer.rmTarget("system") --удаляю старую систему чтобы не было канфликтов версий и не оставалось лишних файлов
-    return installer.uinit(vfs, "liked", installer.toTarget("system"))
+    
+    local success, err = installer.toTarget("system")
+    if not success then return nil, err end
+
+    installer.rmTarget("system/sysdata/eeprom") --the cloned system should not be linked to the EEPROM
+
+    return installer.uinit(vfs, "liked", true)
 end
 
 function installer.install_likedbox(vfs)

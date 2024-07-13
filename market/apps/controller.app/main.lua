@@ -22,6 +22,7 @@ local modem = component.proxy(utils.findModem(true) or "")
 local tunnels = {}
 local allModems = {}
 local controlAddress
+local finalConnect = false
 if modem then
     allModems[modem.address] = true
 end
@@ -162,6 +163,7 @@ local function connect()
             passwordInput.read.setBuffer("")
             controlAddress = obj[3]
             ui:fullStart()
+            finalConnect = false
             rcLayout:select(obj[5])
         else
             ui:forceDraw()
@@ -267,7 +269,7 @@ local shutdownButton = rcLayout:createButton(2, rcLayout.sizeY - 3, 10, 1, nil, 
 local colorpic = rcLayout:createColorpic(shutdownButton.x + shutdownButton.sx + 1, rcLayout.sizeY - 3, 13, 1, "light color", 0xffffff, true)
 local blockPeerMove = rcLayout:createSeek(2, rcLayout.sizeY - 9, 16)
 local blockPeerMoveText = rcLayout:createText(blockPeerMove.x + blockPeerMove.size + 1, rcLayout.sizeY - 9, colors.white)
-local acceleration = rcLayout:createSeek(43, rcLayout.sizeY - 9, 16)
+local acceleration = rcLayout:createSeek(43, rcLayout.sizeY - 9, 17)
 local accelerationText = rcLayout:createText(acceleration.x + acceleration.size + 1, rcLayout.sizeY - 9, colors.white)
 local currentBlockCount
 local currentAcceleration
@@ -370,7 +372,9 @@ end
 
 rcLayout:thread(function ()
     while true do
-        statsUpdate()
+        if finalConnect then
+            statsUpdate()
+        end
         os.sleep(1)
     end
 end)
@@ -392,6 +396,7 @@ end
 
 function acceleration:onSeek(value)
     currentAcceleration = math.map(value, 0, 1, 0, maxAcceleration)
+    statusRequest(controlAddress, "rc_exec", "drone.setAcceleration(...)", currentAcceleration)
     accelerationTextUpdate()
 end
 
@@ -508,8 +513,7 @@ return true]]
 
         currentBlockCount = 1
         currentAcceleration = 1
-        maxAcceleration = select(2, assert(deviceRequest(controlAddress, "rc_exec", "return drone.getAcceleration()")))
-        require("logs").log(maxAcceleration)
+        maxAcceleration = select(2, assert(deviceRequest(controlAddress, "rc_exec", "return drone.setAcceleration(math.huge)")))
         acceleration.value = math.map(1, 0, maxAcceleration, 0, 1)
         blockPeerMoveTextUpdate(true)
         accelerationTextUpdate(true)
@@ -519,6 +523,8 @@ return true]]
             v.disabledHidden = true
         end
     end
+
+    finalConnect = true
 end
 
 function wakeUpSwitch:onSwitch()
