@@ -56,6 +56,7 @@ invoke(tmpAddress, "remove", "/bootloader") --disabling redirect to other operat
 invoke(tmpAddress, "makeDirectory", "/bootloader") --blocks bootmanager startup
 writeFile(tmpAddress, "/bootloader/noRecovery", "")
 
+invoke(bootAddress, "remove", "/likeOS_startup.lua")
 invoke(bootAddress, "remove", "/bootmanager") --attempt to remove bootmanager. restricted loader runs only the verified operating systems
 invoke(bootAddress, "remove", "/vendor/apps/bootmanager.app")
 invoke(bootAddress, "remove", "/system/core/recovery.lua")
