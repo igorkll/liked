@@ -1044,7 +1044,7 @@ end
 
 function uix.objEvent(self, eventData)
     if eventData and (eventData[1] == "touch" or eventData[1] == "drop" or eventData[1] == "drag" or eventData[1] == "scroll") then
-        if eventData[3] >= self.x and eventData[4] >= self.y and eventData[3] < self.x + self.sizeX and eventData[4] < self.y + self.sizeY then
+        if eventData[3] >= self.x and eventData[4] >= self.y and eventData[3] < self.x + (self.sizeX or self.sx) and eventData[4] < self.y + (self.sizeY or self.sy) then
             eventData[3] = (eventData[3] - self.x) + 1
             eventData[4] = (eventData[4] - self.y) + 1
 
