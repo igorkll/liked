@@ -294,6 +294,9 @@ function objclass:uploadEvent(eventData)
                 end
             end
         else
+            if self.focus == nil then
+                self.focus = false
+            end
             if self.vertical then
                 if eventData[1] == "touch" and eventData[3] == self.x and eventData[4] >= self.y and eventData[4] < self.y + self.size then
                     self.focus = true

@@ -109,7 +109,7 @@ local function deviceSend(address, ...)
     end
 end
 
-local function deviceRequest(address, ...)
+local function rawDeviceRequest(address, ...)
     if not address then return end
     local backScreensaver = screensaver.noScreensaver(screen)
     local startWaitTime = computer.uptime()
@@ -119,7 +119,7 @@ local function deviceRequest(address, ...)
             local eventData = {event.pull(0.5, "modem_message", address, nil, 0, nil, "rc_ret")}
             if eventData[1] then
                 backScreensaver()
-                return table.unpack(eventData, 7)
+                return true, table.unpack(eventData, 7)
             end
         end
     elseif modem then
@@ -128,12 +128,22 @@ local function deviceRequest(address, ...)
             local eventData = {event.pull(0.5, "modem_message", modem.address, address, port, nil, "rc_ret")}
             if eventData[1] then
                 backScreensaver()
-                return table.unpack(eventData, 7)
+                return true, table.unpack(eventData, 7)
             end
         end
     end
     backScreensaver()
-    ui:func(gui.warn, screen, nil, nil, "no response was received")
+end
+
+local function deviceRequest(address, ...)
+    if not address then return end
+    local data = {rawDeviceRequest(address, ...)}
+    if data[1] then
+        return table.unpack(data, 2)
+    else
+        ui:func(gui.simpleWarn, screen, nil, nil, "no response was received")
+        os.sleep(2)
+    end
 end
 
 local function statusRequest(...)
@@ -348,7 +358,9 @@ local function statsUpdate(noDraw)
     end
     return table.concat(tbl, "\n"), offset
 end)()]]
-    local ok, val, strs, offset, acceleration = deviceRequest(controlAddress, "rc_exec", getterCode)
+
+    local requestOk, ok, val, strs, offset, acceleration = rawDeviceRequest(controlAddress, "rc_exec", getterCode)
+    if not requestOk then return true end
     if ok then
         if type(val) == "number" then
             progressBar.value = val
@@ -368,16 +380,18 @@ end)()]]
         offsetTitle.text = "offset: " .. math.roundTo(offset, 1)
         if offset > 1 then
             offsetTitle.text = offsetTitle.text .. " - POSSIBLE COLLISIONS WITH BLOCKS"
+        else
+            offsetTitle.text = offsetTitle.text .. string.rep(" ", 40)
         end
-        offsetTitle.text = offsetTitle.text .. string.rep(" ", rcLayout.sizeX)
         offsetTitle:draw()
     end
 end
 
 rcLayout:thread(function ()
     while true do
-        if finalConnect then
-            statsUpdate()
+        if finalConnect and statsUpdate() then
+            controlAddress = nil
+            layout:select()
         end
         os.sleep(1)
     end
@@ -459,7 +473,27 @@ function rcLayout:onUnselect()
     end
 end
 
+local controls = {}
+
+local function createDroneControl()
+    controls.touchControl = rcLayout:createCanvas(rcLayout.sizeX - 25, 2, 24, 12, colors.white, 0, " ")
+    controls.touchControl:draw()
+    controls.touchControl:set(11, 1, colors.white, colors.black, "+Z")
+    controls.touchControl:set(11, 12, colors.white, colors.black, "-Z")
+    controls.touchControl:set(24, 5, colors.white, colors.black, "+X", true)
+    controls.touchControl:set(1, 5, colors.white, colors.black, "-X", true)
+end
+
+local function createRobotControl()
+    
+end
+
 function rcLayout:onSelect(devicetype)
+    for _, object in pairs(controls) do
+        object:destroy()
+    end
+    controls = {}
+
     local firmwareUpdater = [[local code = ...
 if #code < 2048 or not load(code) then
     return false, "received firmware is damaged"
@@ -512,6 +546,7 @@ return true]]
         currentBlockCount = 1
         blockPeerMoveTextUpdate(true)
         statsUpdate(true)
+        createRobotControl()
     elseif devicetype == "drone" then
         blockPeerMove.disabledHidden = false
         blockPeerMoveText.disabledHidden = false
@@ -529,6 +564,7 @@ return true]]
         blockPeerMoveTextUpdate(true)
         accelerationTextUpdate(true)
         statsUpdate(true)
+        createDroneControl()
     else
         for i, v in ipairs(statuses) do
             v.disabledHidden = true

@@ -506,6 +506,20 @@ function gui.warn(screen, cx, cy, str, backgroundColor)
     noShadow()
 end
 
+function gui.simpleWarn(screen, cx, cy, str, backgroundColor)
+    local window, noShadow = gui.smallWindow(screen, cx, cy, str, backgroundColor, function (window, color)
+        window:set(2, 1, color, colors.orange, "  " .. unicode.char(0x2800+192) ..  "  ")
+        window:set(2, 2, color, colors.orange, " ◢█◣ ")
+        window:set(2, 3, color, colors.orange, "◢███◣")
+        window:set(4, 2, colors.orange, colors.white, "!")
+    end)
+
+    graphic.forceUpdate(screen)
+    if registry.soundEnable then
+        sound.warn()
+    end
+end
+
 function gui.done(screen, cx, cy, str, backgroundColor)
     local window, noShadow = gui.smallWindow(screen, cx, cy, str, backgroundColor, function (window, color)
         window:set(2, 1, color, colors.green, "  " .. unicode.char(0x2800+192) ..  "  ")
