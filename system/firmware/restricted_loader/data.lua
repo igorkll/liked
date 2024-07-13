@@ -1,6 +1,8 @@
 local gui = require("gui")
 local fs = require("filesystem")
 local component = require("component")
+local time = require("time")
+local computer = require("computer")
 
 local screen, _, hidden = ...
 local appendData = "local bootAddress = \"" .. fs.bootaddress .. "\"\n"
@@ -9,6 +11,8 @@ local function apply()
     local eeprom = component.list("eeprom")()
     require("sysdata").set("eeprom", eeprom)
     component.invoke(eeprom, "makeReadonly", component.invoke(eeprom, "getChecksum"))
+    component.invoke(eeprom, "setData", tostring(time.getRealTime()))
+    computer.shutdown("fast")
 end
 
 if hidden then
