@@ -100,6 +100,7 @@ for tunnel in pairs(tunnels) do
 end
 
 local function deviceSend(address, ...)
+    if not address then return end
     local startWaitTime = computer.uptime()
     if tunnels[address] then
         component.invoke(address, "send", ...)
@@ -109,6 +110,7 @@ local function deviceSend(address, ...)
 end
 
 local function deviceRequest(address, ...)
+    if not address then return end
     local backScreensaver = screensaver.noScreensaver(screen)
     local startWaitTime = computer.uptime()
     if tunnels[address] then
@@ -135,6 +137,8 @@ local function deviceRequest(address, ...)
 end
 
 local function statusRequest(...)
+    local address = ...
+    if not address then return end
     local clear = gui.saveZone(screen)
     gui.status(screen, nil, nil, "sending a request...")
     local data = {deviceRequest(...)}
@@ -412,7 +416,7 @@ function shutdownButton:onDrop()
     local clear = gui.saveZone(screen)
     if gui.yesno(screen, nil, nil, "are you sure you want to turn off the device?") then
         clear()
-        statusRequest(controlAddress, "rc_exec", "computer.shutdown()")
+        deviceSend(controlAddress, "rc_exec", "computer.shutdown()")
         controlAddress = nil
         layout:select()
         return
