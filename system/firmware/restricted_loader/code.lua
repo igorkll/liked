@@ -3,7 +3,16 @@ if not bootAddress then
 end
 
 _restrictedLoader = true
+local eeprom = component.list("eeprom")()
 local invoke = component.invoke
+function component.invoke(address, method, ...)
+    if address == eeprom then
+        if method == "setData" or method == "getData" then
+            return ""
+        end
+    end
+    return invoke(address, method, ...)
+end
 
 computer.setBootAddress = function(address)
 end
@@ -24,7 +33,6 @@ local function checkSystem(address)
     if not invoke(address, "exists", "/init.lua") then
         return false
     end
-    local eeprom = component.list("eeprom")()
     local lastModTime = tonumber(invoke(eeprom, "getData"))
     local function checkFile(path)
         return invoke(address, "lastModified", path) > lastModTime
