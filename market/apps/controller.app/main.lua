@@ -396,8 +396,15 @@ end
 
 function acceleration:onSeek(value)
     currentAcceleration = math.map(value, 0, 1, 0, maxAcceleration)
-    statusRequest(controlAddress, "rc_exec", "drone.setAcceleration(...)", currentAcceleration)
     accelerationTextUpdate()
+end
+
+function acceleration:onTouch(state)
+    if not state then
+        ui:func(function ()
+            statusRequest(controlAddress, "rc_exec", "drone.setAcceleration(...)", currentAcceleration)
+        end)
+    end
 end
 
 function shutdownButton:onDrop()

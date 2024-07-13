@@ -316,6 +316,12 @@ function objclass:uploadEvent(eventData)
                 end
                 doSeek(oldValue, true)
             end
+            if self.focus ~= self._focus then
+                if self.onTouch then
+                    self:onTouch(self.focus)
+                end
+                self._focus = self.focus
+            end
         end
     end
     return retval
