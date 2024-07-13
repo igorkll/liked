@@ -478,10 +478,11 @@ local controls = {}
 local function createDroneControl()
     controls.touchControl = rcLayout:createCanvas(rcLayout.sizeX - 25, 2, 24, 12, colors.white, 0, " ")
     controls.touchControl:draw()
-    controls.touchControl:set(11, 1, colors.white, colors.black, "+Z")
-    controls.touchControl:set(11, 12, colors.white, colors.black, "-Z")
-    controls.touchControl:set(24, 5, colors.white, colors.black, "+X", true)
-    controls.touchControl:set(1, 5, colors.white, colors.black, "-X", true)
+    controls.touchControl:set(12, 1, colors.white, colors.black, "+Z")
+    controls.touchControl:set(12, 12, colors.white, colors.black, "-Z")
+    controls.touchControl:set(24, 6, colors.white, colors.black, "+X", true)
+    controls.touchControl:set(1, 6, colors.white, colors.black, "-X", true)
+    controls.touchControl:set(7, 6, colors.white, colors.black, "drag control")
 end
 
 local function createRobotControl()
