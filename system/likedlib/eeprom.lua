@@ -90,17 +90,22 @@ function eeprom.isFirmware(firmware)
 end
 
 function eeprom.hiddenFlash(firmware, data, appendData)
+    local afterFlash
     if not data or not appendData then
-        local l1, l2 = eeprom.makeData(firmware, true)
+        local l1, l2, _afterFlash = eeprom.makeData(firmware, true)
         data = l1 or data
         appendData = l2 or appendData
+        afterFlash = _afterFlash
     end
     local componentEeprom = component.eeprom
     local _, err = componentEeprom.set((appendData or "") .. (firmware.rawCode or assert(fs.readFile(firmware.code))))
-    componentEeprom.setData(data or "")
-    componentEeprom.setLabel(firmware.label or "UNKNOWN")
     if err then
         return nil, err
+    end
+    componentEeprom.setData(data or "")
+    componentEeprom.setLabel(firmware.label or "UNKNOWN")
+    if afterFlash then
+        afterFlash()
     end
     return true
 end

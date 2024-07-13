@@ -201,8 +201,15 @@ function sysinit.init(box, lscreen)
     local component = require("component")
     local computer = require("computer")
     local bootloader = require("bootloader")
+    local sysdata = require("sysdata")
 
-    if registry.onlyInternalDisk and component.slot(fs.bootaddress) < 0 then
+    local targetEeprom = sysdata.get("eeprom")
+    if targetEeprom and component.list("eeprom")() ~= targetEeprom then
+        bootloader.bootSplash("the liked was expecting an EEPROM: " .. targetEeprom:sub(1, 6))
+        bootloader.waitEnter()
+        computer.shutdown()
+        return
+    elseif registry.onlyInternalDisk and component.slot(fs.bootaddress) < 0 then
         bootloader.bootSplash("loading from external disk is disabled")
         bootloader.waitEnter()
         computer.shutdown()

@@ -26,9 +26,9 @@ function update.needWipe(branch, mode)
 end
 
 function update.run(branch, mode, wipedata)
-    local data = {}
-    data.branch = branch or sysdata.get("branch")
-    data.mode = mode or sysdata.get("mode")
+    local data = sysdata.list()
+    data.branch = branch or data.branch
+    data.mode = mode or data.mode
     
     update._write({data = data, filesBlackList = registry.filesBlackList})
     if wipedata then

@@ -1,11 +1,18 @@
 local gui = require("gui")
 local fs = require("filesystem")
+local component = require("component")
 
 local screen, _, hidden = ...
 local appendData = "local bootAddress = \"" .. fs.bootaddress .. "\"\n"
 
+local function apply()
+    local eeprom = component.list("eeprom")()
+    require("sysdata").set("eeprom", eeprom)
+    component.invoke(eeprom, "makeReadonly", component.invoke(eeprom, "getChecksum"))
+end
+
 if hidden then
-    return nil, appendData
+    return nil, appendData, apply
 end
 
 local clear = gui.saveBigZone(screen)
@@ -30,10 +37,17 @@ if not gui.nextOrCancel(screen, nil, nil, "Attention 5!!! you will not be able t
     return true
 end
 
+if not gui.nextOrCancel(screen, nil, nil, "Attention 6!!! your operating system will no longer be able to boot using another EEPROM") then
+    return true
+end
+
+if not gui.nextOrCancel(screen, nil, nil, "Attention 7!!! after installation, the EEPROM will automatically become readonly, it will be possible to remove \"Restricted Loader\" only by replacing the EEPROM and manually reinstalling the system") then
+    return true
+end
+
 if not gui.nextOrCancel(screen, nil, nil, "this thing is needed for extremely specific tasks, DO NOT INSTALL IT IF YOU DO NOT KNOW WHY YOU NEED IT") then
     return true
 end
 
 clear()
-
-return nil, appendData
+return nil, appendData, apply
