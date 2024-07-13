@@ -45,7 +45,7 @@ if not gui.nextOrCancel(screen, nil, nil, "Attention 6!!! your operating system 
     return true
 end
 
-if not gui.nextOrCancel(screen, nil, nil, "Attention 7!!! after installation, the EEPROM will automatically become readonly, it will be possible to remove \"Restricted Loader\" only by replacing the EEPROM and manually reinstalling the system") then
+if not gui.nextOrCancel(screen, nil, nil, "Attention 7!!! after installation, the EEPROM will automatically become readonly, it will be possible to remove \"Restricted Loader\" only by replacing the EEPROM and manually reinstalling the system from recovery(after replacing the EEPROM, the system cannot be started, but you will be able to open recovery)") then
     return true
 end
 

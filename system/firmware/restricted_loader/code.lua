@@ -84,7 +84,6 @@ writeFile(tmpAddress, "/bootloader/noRecovery", "")
 invoke(bootAddress, "remove", "/likeOS_startup.lua")
 invoke(bootAddress, "remove", "/bootmanager") --attempt to remove bootmanager. restricted loader runs only the verified operating systems
 invoke(bootAddress, "remove", "/vendor/apps/bootmanager.app")
-invoke(bootAddress, "remove", "/system/core/recovery.lua")
 
 if not checkSystem(bootAddress) then
     error("restricted loader: the system failed verification", 0)
