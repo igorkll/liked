@@ -444,13 +444,31 @@ local function downloadFile(diskProxy, branch, path, toPath)
     diskProxy.close(file)
 end
 
+local function getRealTime()
+    local tmpfs = component.proxy(computer.tmpAddress())
+
+    local file = assert(tmpfs.open("/tmp/null", "wb"))
+    tmpfs.close(file)
+
+    local unixTime = tmpfs.lastModified("/tmp/null")
+    tmpfs.remove("/tmp/null")
+
+    return unixTime
+end
+
 local function flashRestricted(disk, branch)
     local eeprom = component.proxy(component.list("eeprom")() or "")
     if eeprom then
         local appendData = "local bootAddress = \"" .. disk .. "\"\n"
-        eeprom.setData("")
+        local diskProxy = component.proxy(disk)
+        local file = diskProxy.open("/system/sysdata/eeprom", "wb")
+        diskProxy.write(file, eeprom.address)
+        diskProxy.close(file)
+
+        eeprom.setData(tostring(getRealTime()))
         eeprom.setLabel(assert(wget(baseUrl .. branch .. "/system/firmware/restricted_loader/label.txt")))
         eeprom.set(appendData .. assert(wget(baseUrl .. branch .. "/system/firmware/restricted_loader/code.lua")))
+        eeprom.makeReadonly(eeprom.getChecksum())
     end
 end
 
