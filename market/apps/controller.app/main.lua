@@ -488,7 +488,11 @@ function rcLayout:onUnselect()
 end
 
 local controls = {}
-local droneMoveCode = "local dx, dy, dz = ...; ox = (ox or 0) + dx; oy = (oy or 0) + dx; oz = (oz or 0) + dz; drone.move(...)"
+local droneMoveCode = [[local dx, dy, dz = ...;
+ox = (ox or 0) + dx;
+oy = (oy or 0) + dy;
+oz = (oz or 0) + dz;
+drone.move(...)]]
 
 local function createDroneControl()
     controls.touchControl = rcLayout:createCanvas(rcLayout.sizeX - 25, 2, 24, 12, colors.white, 0, " ")
@@ -540,7 +544,7 @@ local function createDroneControl()
     controls.home = rcLayout:createButton(rcLayout.sizeX - 35, 13, 6, 1, colors.purple, colors.white, "HOME")
 
     function controls.home:onDropInZone()
-        deviceSend(controlAddress, "rc_fexec", "if ox then drone.move(-ox, -oy, -oz) end ox, oy, oz = nil, nil, nil")
+        deviceSend(controlAddress, "rc_fexec", "if ox then drone.move(-ox, -oy, -oz) end; ox, oy, oz = nil, nil, nil; mox, moy, moz = nil, nil, nil")
     end
 end
 
