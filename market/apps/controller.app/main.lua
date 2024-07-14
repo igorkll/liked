@@ -87,6 +87,9 @@ local connectButton = layout:createButton(layout:center(-6, 5, 16, 3, colors.whi
 local refreshButton = layout:createButton(layout:center(8, 5, 9, 3, colors.orange, colors.white, "refresh"))
 local wakeAllButton = layout:createButton(2, layout.sizeY - 1, 13, 1, colors.orange, colors.white, "wake-up all")
 
+connectButton.y = passwordInput.y + 2
+refreshButton.y = passwordInput.y + 2
+
 if warnMsg then
     wakeAllButton.y = wakeAllButton.y - 1
 end
