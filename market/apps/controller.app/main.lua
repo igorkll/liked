@@ -491,6 +491,12 @@ function rcLayout:onUnselect()
 end
 
 local controls = {}
+local move1 = rcLayout:createButton(6, 5, 4, 2, colors.purple, colors.white)
+local move2 = rcLayout:createButton(10, 7, 4, 2, colors.purple, colors.white)
+local move3 = rcLayout:createButton(6, 9, 4, 2, colors.purple, colors.white)
+local move4 = rcLayout:createButton(2, 7, 4, 2, colors.purple, colors.white)
+local move5 = rcLayout:createButton(6+8, 5, 4, 2, colors.orange, colors.white)
+local move6 = rcLayout:createButton(6+8, 9, 4, 2, colors.orange, colors.white)
 
 local function createDroneControl()
     local droneMoveCode = [[local dx, dy, dz = ...
@@ -598,23 +604,42 @@ drone.move(dx, dy, dz)]]
         end)
     end
 
+
+
+    controls.center = rcLayout:createButton(rcLayout.sizeX - 41, 9, 12, 1, colors.purple, colors.white, "CENTER")
+
+    function controls.center:onDrop()
+        deviceSend(controlAddress, "rc_fexec", [[local nx, ny, nz = math.floor((ox or 0) + 0.5), math.floor((oy or 0) + 0.5), math.floor((oz or 0) + 0.5)
+local mx, my, mz = nx - (ox or 0), ny - (oy or 0), nz - (oz or 0)
+drone.move(mx, my, mz)
+ox, oy, oz = nx, ny, nz]])
+    end
+
     
 
-    controls.move1 = rcLayout:createButton(5, 5, 4, 1, colors.purple, colors.white, "+Z")
-    function controls.move1:onDrop()
+    move1.text = "+Z"
+    function move1:onDrop()
         droneMove(0, 0, currentBlockCount)
     end
-    controls.move2 = rcLayout:createButton(8, 6, 4, 1, colors.purple, colors.white, "-X")
-    function controls.move2:onDrop()
+    move2.text = "-X"
+    function move2:onDrop()
         droneMove(-currentBlockCount, 0, 0)
     end
-    controls.move3 = rcLayout:createButton(5, 7, 4, 1, colors.purple, colors.white, "-Z")
-    function controls.move3:onDrop()
+    move3.text = "-Z"
+    function move3:onDrop()
         droneMove(0, 0, -currentBlockCount)
     end
-    controls.move4 = rcLayout:createButton(2, 6, 4, 1, colors.purple, colors.white, "+X")
-    function controls.move4:onDrop()
+    move4.text = "+X"
+    function move4:onDrop()
         droneMove(currentBlockCount, 0, 0)
+    end
+    move5.text = "+Y"
+    function move5:onDrop()
+        droneMove(0, currentBlockCount, 0)
+    end
+    move6.text = "-Y"
+    function move6:onDrop()
+        droneMove(0, -currentBlockCount, 0)
     end
 end
 
