@@ -430,7 +430,7 @@ function shutdownButton:onDrop()
     local clear = gui.saveZone(screen)
     if gui.yesno(screen, nil, nil, "are you sure you want to turn off the device?") then
         clear()
-        deviceSend(controlAddress, "rc_exec", "computer.shutdown()")
+        deviceSend(controlAddress, "rc_fexec", "computer.shutdown()")
         controlAddress = nil
         layout:select()
         return
@@ -488,14 +488,14 @@ local function createDroneControl()
     function controls.touchControl:userEvent(eventData)
         if eventData[1] == "drag" then
             local dx, dy = ((eventData[3] - oPosX) / self.sx) * currentBlockCount, ((eventData[4] - oPosY) / self.sy) * currentBlockCount
-            deviceSend(controlAddress, "rc_exec", "drone.move(...)", dx, 0, dy)
+            deviceSend(controlAddress, "rc_fexec", "drone.move(...)", dx, 0, dy)
             oPosX, oPosY = eventData[3], eventData[4]
         elseif eventData[1] == "drop" then
             oPosX, oPosY = nil, nil
         elseif eventData[1] == "touch" then
             oPosX, oPosY = eventData[3], eventData[4]
         elseif eventData[1] == "scroll" then
-            deviceSend(controlAddress, "rc_exec", "drone.move(...)", 0, (eventData[5] / 10) * currentBlockCount, 0)
+            deviceSend(controlAddress, "rc_fexec", "drone.move(...)", 0, (eventData[5] / 10) * currentBlockCount, 0)
         end
     end
 end

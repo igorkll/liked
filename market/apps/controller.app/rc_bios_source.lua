@@ -154,13 +154,16 @@ while true do
 
     if currentUser then
         if eventData[1] == "modem_message" and eventData[3] == currentUser then
-            local cmd, arg = eventData[6], eventData[7]
-            if cmd == "rc_exec" then
+            local cmd, arg, nexec = eventData[6], eventData[7]
+            nexec = cmd == "rc_exec"
+            if nexec or cmd == "rc_fexec" then
                 local code, err = load(arg)
-                if code then
-                    send(isTunnel, currentUser, pcall(code, table.unpack(eventData, 8)))
-                else
-                    send(isTunnel, currentUser, false, err)
+                if nexec then
+                    if code then
+                        send(isTunnel, currentUser, pcall(code, table.unpack(eventData, 8)))
+                    else
+                        send(isTunnel, currentUser, false, err)
+                    end
                 end
             elseif cmd == "rc_color" then
                 currentColor = arg
