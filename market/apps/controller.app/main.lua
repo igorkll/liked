@@ -86,7 +86,7 @@ local passwordInput = layout:createInput(layout:centerOneSize(0, 2, 32, nil, nil
 local connectButton = layout:createButton(layout:center(-6, 5, 16, 3, colors.white, colors.gray, "connect"))
 local refreshButton = layout:createButton(layout:center(8, 5, 9, 3, colors.orange, colors.white, "refresh"))
 local wakeAllButton = layout:createButton(2, layout.sizeY - 1, 13, 1, colors.orange, colors.white, "wake-up all")
-local firmwareUpdate = layout:createButton(layout:center(19, 5, 8, 3, colors.orange, colors.white, "update"))
+--local firmwareUpdate = layout:createButton(layout:center(19, 5, 8, 3, colors.orange, colors.white, "update"))
 
 connectButton.y = passwordInput.y + 2
 refreshButton.y = passwordInput.y + 2
@@ -212,6 +212,7 @@ local function connect()
     manConnect(obj)
 end
 
+--[[
 function firmwareUpdate:onDrop()
     ui:fullStop()
     local obj = findObj()
@@ -230,7 +231,7 @@ if eeprom and code ~= eeprom.get() then
     setColor(currentColor)
     setText("")
 end
-computer.shutdown(true)]], assert(fs.readFile(firmwarePath)))
+computer.shutdown(true)] ], assert(fs.readFile(firmwarePath)))
             advRequest()
             connectList.list = {}
         else
@@ -242,6 +243,7 @@ computer.shutdown(true)]], assert(fs.readFile(firmwarePath)))
     ui:fullStart()
     ui:draw()
 end
+]]
 
 connectButton.onDrop = connect
 passwordInput.onTextAcceptedCheck = connect
