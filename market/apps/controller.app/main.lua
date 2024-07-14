@@ -86,6 +86,7 @@ local passwordInput = layout:createInput(layout:centerOneSize(0, 2, 32, nil, nil
 local connectButton = layout:createButton(layout:center(-6, 5, 16, 3, colors.white, colors.gray, "connect"))
 local refreshButton = layout:createButton(layout:center(8, 5, 9, 3, colors.orange, colors.white, "refresh"))
 local wakeAllButton = layout:createButton(2, layout.sizeY - 1, 13, 1, colors.orange, colors.white, "wake-up all")
+local firmwareUpdate = layout:createButton(layout:center(19, 5, 8, 3, colors.orange, colors.white, "update"))
 
 connectButton.y = passwordInput.y + 2
 refreshButton.y = passwordInput.y + 2
@@ -164,6 +165,8 @@ function wakeAllButton:onClick()
     layout:timer(1, advRequest, 1)
 end
 
+local noObjErr = "first, select the device you want to control from the list"
+
 local function manConnect(obj, pass)
     if obj then
         ui:fullStop()
@@ -182,25 +185,49 @@ local function manConnect(obj, pass)
             ui:draw()
         end
     else
-        ui:func(gui.warn, screen, nil, nil, "first, select the device you want to control from the list")
+        ui:func(gui.warn, screen, nil, nil, noObjErr)
+    end
+end
+
+local function findObj()
+    for i = 1, #connectList.list do
+        if connectList.list[i][2] then
+            return connectList.list[i]
+        end
     end
 end
 
 local lastConnect
 local lastPassword
 local function connect()
-    local obj
-    for i = 1, #connectList.list do
-        if connectList.list[i][2] then
-            obj = connectList.list[i]
-        end
-    end
-
+    local obj = findObj()
     if obj then
         lastConnect = table.clone(obj)
         lastPassword = passwordInput.read.getBuffer()
     end
     manConnect(obj)
+end
+
+function firmwareUpdate:onClick()
+    ui:fullStop()
+    local obj = findObj()
+    if obj then
+        deviceSend(obj[3], "rc_fexec", [[local eeprom = component.proxy(component.list("eeprom")() or "")
+if eeprom and code ~= eeprom.get() then
+    setColor(0xef9700)
+    setText("firmware\nupdating")
+    for i = 1, 3 do
+        computer.beep(2000, 0.05)
+    end
+    eeprom.set(code)
+    setColor(currentColor)
+    setText("")
+end]], assert(fs.readFile(firmwarePath)))
+    else
+        gui.warn(screen, nil, nil, noObjErr)
+    end
+    ui:fullStart()
+    ui:draw()
 end
 
 connectButton.onDrop = connect
@@ -515,12 +542,14 @@ function rcLayout:onUnselect()
 end
 
 local controls = {}
-local move1 = rcLayout:createButton(6, 5, 4, 2, colors.purple, colors.white)
-local move2 = rcLayout:createButton(10, 7, 4, 2, colors.purple, colors.white)
-local move3 = rcLayout:createButton(6, 9, 4, 2, colors.purple, colors.white)
-local move4 = rcLayout:createButton(2, 7, 4, 2, colors.purple, colors.white)
-local move5 = rcLayout:createButton(6+8, 5, 4, 2, colors.orange, colors.white)
-local move6 = rcLayout:createButton(6+8, 9, 4, 2, colors.orange, colors.white)
+local move = {
+    rcLayout:createButton(6, 5, 4, 2, colors.purple, colors.white),
+    rcLayout:createButton(10, 7, 4, 2, colors.purple, colors.white),
+    rcLayout:createButton(6, 9, 4, 2, colors.purple, colors.white),
+    rcLayout:createButton(2, 7, 4, 2, colors.purple, colors.white),
+    rcLayout:createButton(6+8, 5, 4, 2, colors.orange, colors.white),
+    rcLayout:createButton(6+8, 9, 4, 2, colors.orange, colors.white)
+}
 
 local function createDroneControl()
     local droneMoveCode = [[local dx, dy, dz = ...
@@ -641,28 +670,28 @@ ox, oy, oz = nx, ny, nz]])
 
     
 
-    move1.text = "+Z"
-    function move1:onDrop()
+    move[1].text = "+Z"
+    move[1].onDrop = function (self)
         droneMove(0, 0, currentBlockCount)
     end
-    move2.text = "-X"
-    function move2:onDrop()
+    move[2].text = "-X"
+    move[2].onDrop = function (self)
         droneMove(-currentBlockCount, 0, 0)
     end
-    move3.text = "-Z"
-    function move3:onDrop()
+    move[3].text = "-Z"
+    move[3].onDrop = function (self)
         droneMove(0, 0, -currentBlockCount)
     end
-    move4.text = "+X"
-    function move4:onDrop()
+    move[4].text = "+X"
+    move[4].onDrop = function (self)
         droneMove(currentBlockCount, 0, 0)
     end
-    move5.text = "+Y"
-    function move5:onDrop()
+    move[5].text = "+Y"
+    move[5].onDrop = function (self)
         droneMove(0, currentBlockCount, 0)
     end
-    move6.text = "-Y"
-    function move6:onDrop()
+    move[6].text = "-Y"
+    move[6].onDrop = function (self)
         droneMove(0, -currentBlockCount, 0)
     end
 end
@@ -715,8 +744,15 @@ return true]]
     end
     ]]
     if devicetype == "drone" or devicetype == "robot" then
+        for _, v in pairs(move) do
+            v.disabledHidden = false
+        end
         colorpic.disabledHidden = false
         colorpic:setColor(0xffffff)
+    else
+        for _, v in pairs(move) do
+            v.disabledHidden = true
+        end
     end
 
     blockPeerMove.value = 0
