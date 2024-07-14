@@ -573,18 +573,26 @@ drone.move(dx, dy, dz)]]
 
     controls.home = rcLayout:createButton(rcLayout.sizeX - 41, 13, 12, 1, colors.purple, colors.white, "HOME")
 
-    function controls.home:onDropInZone()
-        deviceSend(controlAddress, "rc_fexec", "drone.move(-(ox or 0), -(oy or 0), -(oz or 0)); ox, oy, oz = nil, nil, nil")
-        mdx, mdy, mdz = 0, 0, 0
+    function controls.home:onDrop()
+        ui:func(function ()
+            if gui.yesno(screen, nil, nil, "are you sure you want to return to your home point?") then
+                deviceSend(controlAddress, "rc_fexec", "drone.move(-(ox or 0), -(oy or 0), -(oz or 0)); ox, oy, oz = nil, nil, nil")
+                mdx, mdy, mdz = 0, 0, 0
+            end
+        end)
     end
 
 
 
     controls.setHome = rcLayout:createButton(rcLayout.sizeX - 41, 11, 12, 1, colors.purple, colors.white, "SET HOME")
 
-    function controls.setHome:onDropInZone()
-        deviceSend(controlAddress, "rc_fexec", "ox, oy, oz = nil, nil, nil")
-        mdx, mdy, mdz = 0, 0, 0
+    function controls.setHome:onDrop()
+        ui:func(function ()
+            if gui.yesno(screen, nil, nil, "are you sure you want to set this point as the home point for the drone?") then
+                deviceSend(controlAddress, "rc_fexec", "ox, oy, oz = nil, nil, nil")
+                mdx, mdy, mdz = 0, 0, 0
+            end
+        end)
     end
 end
 
