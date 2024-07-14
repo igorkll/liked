@@ -167,10 +167,14 @@ end
 
 local noObjErr = "first, select the device you want to control from the list"
 
+local function connectionAttempt()
+    gui.status(screen, nil, nil, "connection attempt...")
+end
+
 local function manConnect(obj, pass)
     if obj then
         ui:fullStop()
-        gui.status(screen, nil, nil, "connection attempt...")
+        connectionAttempt()
         local ret = deviceRequest(obj[3], "rc_connect", pass or passwordInput.read.getBuffer())
         if ret == true then
             passwordInput.read.setBuffer("")
@@ -208,11 +212,14 @@ local function connect()
     manConnect(obj)
 end
 
-function firmwareUpdate:onClick()
+function firmwareUpdate:onDrop()
     ui:fullStop()
     local obj = findObj()
     if obj then
-        deviceSend(obj[3], "rc_fexec", [[local eeprom = component.proxy(component.list("eeprom")() or "")
+        local ret = deviceRequest(obj[3], "rc_connect", pass or passwordInput.read.getBuffer())
+        if ret == true then
+            deviceSend(obj[3], "rc_fexec", [[local code = ...
+local eeprom = component.proxy(component.list("eeprom")() or "")
 if eeprom and code ~= eeprom.get() then
     setColor(0xef9700)
     setText("firmware\nupdating")
@@ -222,7 +229,13 @@ if eeprom and code ~= eeprom.get() then
     eeprom.set(code)
     setColor(currentColor)
     setText("")
-end]], assert(fs.readFile(firmwarePath)))
+end
+computer.shutdown(true)]], assert(fs.readFile(firmwarePath)))
+            advRequest()
+            connectList.list = {}
+        else
+            gui.warn(screen, nil, nil, "incorrect password")
+        end
     else
         gui.warn(screen, nil, nil, noObjErr)
     end
