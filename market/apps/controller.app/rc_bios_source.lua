@@ -153,7 +153,7 @@ tsks = {}
 while true do
     local eventData = {computer.pullSignal(0.1)}
     for k, v in pairs(tsks) do
-        pcall(v)
+        pcall(v, eventData)
     end
 
     if currentUser then

@@ -326,14 +326,25 @@ for i = 1, 6 do
     rcLayout.style = uix.styles[1]
     local checkbox = rcLayout:createCheckbox(execPoses - 2, py)
     checkbox.enableColor = colors.lime
-    checkbox.disableColor = colors.gray
-    checkbox.pointerColor = colors.white
+    checkbox.disableColor = colors.lightGray
+    checkbox.pointerColor = colors.gray
+
+    local function uploadAutoCode()
+        deviceSend(controlAddress, "rc_fexec", "local i, code = ...; tsks[i] = load(code)", i, inputStr.read.getBuffer())
+    end
+
+    function inputStr:onTextChanged()
+        if checkbox.state then
+            uploadAutoCode()
+        end
+    end
 
     function checkbox:onSwitch()
-        ui:fullStop()
-        statusRequest(controlAddress, "rc_fexec", "local i, code = ...; tsks[i] = load(code)", i, inputStr.read.getBuffer())
-        ui:fullStart()
-        ui:draw()
+        if self.state then
+            uploadAutoCode()
+        else
+            deviceSend(controlAddress, "rc_fexec", "tsks[...] = nil", i)
+        end
     end
 
     function execButton:onDrop()
