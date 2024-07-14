@@ -163,50 +163,6 @@ local list = {
         end
     },
     {
-        name = "VychVyzhProm",
-        version = "1",
-        vendor = "Bs0Dd",
-        libs = {"openbox"},
-        icon = selfurlpart .. "/apps/VychVyzhProm.app/icon.t2p",
-        license = selfurlpart .. "/apps/VychVyzhProm.app/LICENSE",
-        description = "I came across the game Vychvyzhprom, written in Java by one group. In a week, I almost completely transferred it to Lua (a couple of points had to be simplified due to the feeble power of computers). The goal of this game is simple: we have a scorcher, a controller and a number of tasks. You need to program the controller to burn out the pattern shown in the task, with a small set of Assembler commands.",
-        minDiskSpace = 64,
-        minColorDepth = 8,
-
-        path = "/data/apps/VychVyzhProm.app",
-        urlPrimaryPart = selfurlpart .. "/apps/VychVyzhProm.app/",
-        files = (function ()
-            local tbl = {
-                "LICENSE",
-                "main.lua",
-                "icon.t2p",
-                "actions.cfg",
-                "taskedit.lua",
-                "vvprom/vvprom.lua",
-                "vvprom/vvptask.lua",
-                "vvprom/Languages/English.lng",
-                "vvprom/Languages/Russian.lng",
-                "vvprom/NyaDraw/init.lua",
-                "vvprom/Pictures/bcontr.pic",
-                "vvprom/Pictures/cidlogo.pic",
-                "vvprom/Pictures/comlogo.pic",
-                "vvprom/Pictures/controls.pic",
-                "vvprom/Pictures/editor.pic",
-                "vvprom/Pictures/exit.pic",
-                "vvprom/Pictures/help.pic",
-                "vvprom/Pictures/info.pic",
-                "vvprom/Pictures/task.pic",
-                "vvprom/Pictures/vvprom.pic"
-            }
-
-            for i = 1, 8 do
-                table.insert(tbl, "vvprom/Tasks/task" .. tostring(i) .. ".vtf")
-            end
-
-            return tbl
-        end)()
-    },
-    {
         name = "explode",
         version = "2",
         vendor = "logic",
