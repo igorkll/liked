@@ -149,7 +149,20 @@ end
 local oldAdvTime = -math.huge
 local currentUser
 local isTunnel
+local autoDisconTimer
 tsks = {}
+
+local function discon()
+    currentColor = 0xffffff
+    setColor(currentColor)
+    passText()
+    computer.beep(200, 0.2)
+    computer.beep(150, 0.2)
+    computer.beep(100, 0.8)
+    send(isTunnel, currentUser, true)
+    currentUser = nil
+end
+
 while true do
     local eventData = {computer.pullSignal(0.1)}
     for k, v in pairs(tsks) do
@@ -157,10 +170,15 @@ while true do
     end
 
     if currentUser then
+        if autoDisconTimer and computer.uptime() - autoDisconTimer > 5 then
+            discon()
+        end
+
         if eventData[1] == "modem_message" and eventData[3] == currentUser then
             local cmd, arg, nexec = eventData[6], eventData[7]
             nexec = cmd == "rc_exec"
             if nexec or cmd == "rc_fexec" then
+                autoDisconTimer = computer.uptime()
                 local code, err = load(arg)
                 if nexec then
                     if code then
@@ -177,14 +195,7 @@ while true do
             elseif cmd == "rc_title" then
                 setText(arg)
             elseif cmd == "rc_out" then
-                currentColor = 0xffffff
-                setColor(currentColor)
-                passText()
-                computer.beep(200, 0.2)
-                computer.beep(150, 0.2)
-                computer.beep(100, 0.8)
-                send(isTunnel, currentUser, true)
-                currentUser = nil
+                discon()
             end
         end
     else

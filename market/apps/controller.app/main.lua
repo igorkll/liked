@@ -123,7 +123,7 @@ local function rawDeviceRequest(address, ...)
             local eventData = {event.pull(0.5, "modem_message", address, nil, 0, nil, "rc_ret")}
             if eventData[1] then
                 backScreensaver()
-                return true, table.unpack(eventData, 7)
+                return {eventData[5]}, table.unpack(eventData, 7)
             end
         end
     elseif modem then
@@ -132,7 +132,7 @@ local function rawDeviceRequest(address, ...)
             local eventData = {event.pull(0.5, "modem_message", modem.address, address, port, nil, "rc_ret")}
             if eventData[1] then
                 backScreensaver()
-                return true, table.unpack(eventData, 7)
+                return {eventData[5]}, table.unpack(eventData, 7)
             end
         end
     end
@@ -336,7 +336,8 @@ rcLayout:setReturnLayout(layout)
 
 local switchTitle = rcLayout:createText(2, rcLayout.sizeY - 1, colors.white, "allow remote wake-up")
 local deviceTypeTitle = rcLayout:createText(2, 2, colors.white)
-local offsetTitle = rcLayout:createText(2, 3, colors.white)
+local colTitle = rcLayout:createText(18, 3, colors.white)
+local distanceTitle = rcLayout:createText(2, 3, colors.white)
 local wakeUpSwitch = rcLayout:createSwitch(switchTitle.x + unicode.len(switchTitle.text) + 1, rcLayout.sizeY - 1)
 local randPass = rcLayout:createButton(2, rcLayout.sizeY - 7, 21, 1, colors.purple, colors.white, "use random password")
 local customPass = rcLayout:createButton(2, rcLayout.sizeY - 5, 21, 1, colors.purple, colors.white, "use custom password")
@@ -358,6 +359,7 @@ end
 
 local execPoses = statuses[1].x + statuses[1].sx + 3
 local luaPoses = execPoses + 6
+local checkboxes = {}
 for i = 1, 6 do
     local py = (rcLayout.sizeY - 7) + (i - 1)
     local execButton = rcLayout:createButton(execPoses, py, 6, 1, i % 2 == 1 and colors.green or colors.lime, colors.white, "exec")
@@ -370,6 +372,7 @@ for i = 1, 6 do
     checkbox.enableColor = colors.lime
     checkbox.disableColor = colors.lightGray
     checkbox.pointerColor = colors.gray
+    table.insert(checkboxes, checkbox)
 
     local function uploadAutoCode()
         deviceSend(controlAddress, "rc_fexec", "local i, code = ...; tsks[i] = load(code)", i, inputStr.read.getBuffer())
@@ -444,6 +447,7 @@ end)()]]
 
     local requestOk, ok, val, strs, offset, acceleration = rawDeviceRequest(controlAddress, "rc_exec", getterCode)
     if not requestOk then return true end
+    distanceTitle.text = "distance: " .. math.roundTo(requestOk[1], 1)
     if ok then
         if type(val) == "number" then
             progressBar.value = val
@@ -460,14 +464,10 @@ end)()]]
     end
 
     if offset then
-        offsetTitle.text = "offset: " .. math.roundTo(offset, 1)
-        if offset > 1 then
-            offsetTitle.text = offsetTitle.text .. " - POSSIBLE COLLISIONS WITH BLOCKS"
-        else
-            offsetTitle.text = offsetTitle.text .. string.rep(" ", 38)
-        end
-        offsetTitle:draw()
+        colTitle.text = "collision: " .. math.roundTo(offset, 1)
+        colTitle:draw()
     end
+    distanceTitle:draw()
 end
 
 rcLayout:thread(function ()
@@ -722,8 +722,10 @@ function rcLayout:onSelect(devicetype)
     controls = {}
 
     local initCode = [[local code = ...
-for i = 1, 6 do
-    tsks[i] = nil
+local function lend()
+    for i = 1, 6 do
+        tsks[i] = nil
+    end
 end
 if #code < 2048 or not load(code) then
     return false, "received firmware is damaged"
@@ -738,8 +740,10 @@ if eeprom and code ~= eeprom.get() then
     eeprom.set(code)
     setColor(currentColor)
     setText("")
+    lend()
     return true, true
 end
+lend()
 return true]]
     if select(2, assert(select(2, assert(deviceRequest(controlAddress, "rc_exec", initCode, assert(fs.readFile(firmwarePath))))))) then
         deviceSend(controlAddress, "rc_fexec", "computer.shutdown(true)")
@@ -773,7 +777,7 @@ return true]]
     blockPeerMove.value = 0
     deviceTypeTitle.text = "device type: " .. devicetype
 
-    offsetTitle.disabledHidden = true
+    colTitle.disabledHidden = true
     blockPeerMove.disabledHidden = true
     blockPeerMoveText.disabledHidden = true
     acceleration.disabledHidden = true
@@ -794,7 +798,7 @@ return true]]
         blockPeerMoveText.disabledHidden = false
         acceleration.disabledHidden = false
         accelerationText.disabledHidden = false
-        offsetTitle.disabledHidden = false
+        colTitle.disabledHidden = false
         for i, v in ipairs(statuses) do
             v.disabledHidden = false
         end
@@ -812,6 +816,10 @@ return true]]
         for i, v in ipairs(statuses) do
             v.disabledHidden = true
         end
+    end
+
+    for i, v in ipairs(checkboxes) do
+        v.state = false
     end
 
     finalConnect = true
