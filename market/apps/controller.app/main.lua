@@ -11,6 +11,7 @@ local unicode = require("unicode")
 local fs = require("filesystem")
 local parser = require("parser")
 local screensaver = require("screensaver")
+local thread = require("thread")
 
 local screen = ...
 local colors = uix.colors
@@ -479,6 +480,15 @@ rcLayout:thread(function ()
         os.sleep(1)
     end
 end)
+
+thread.create(function ()
+    while true do
+        if finalConnect and controlAddress then
+            deviceSend(controlAddress, "rc_fexec", "") --resetting the shutdown timer when the blocking window is displayed
+        end
+        os.sleep(3)
+    end
+end):resume()
 
 local function blockPeerMoveTextUpdate(noDraw)
     blockPeerMoveText.text = "blocks for movement: " .. currentBlockCount .. " "
