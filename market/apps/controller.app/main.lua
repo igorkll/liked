@@ -500,19 +500,19 @@ drone.move(dx, dy, dz)]]
     local function droneMove(dx, dy, dz)
         mdx, mdy, mdz = mdx + dx, mdy + dy, mdz + dz
         if math.abs(mdx) > 0.25 then
-            dx = mdx
+            dx = math.round(mdx * 4) / 4
             mdx = 0
         else
             dx = 0
         end
         if math.abs(mdy) > 0.25 then
-            dy = mdy
+            dy = math.round(mdy * 4) / 4
             mdy = 0
         else
             dy = 0
         end
         if math.abs(mdz) > 0.25 then
-            dz = mdz
+            dz = math.round(mdz * 4) / 4
             mdz = 0
         else
             dz = 0
