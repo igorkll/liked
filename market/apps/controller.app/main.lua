@@ -514,6 +514,8 @@ local function createDroneControl()
         end
     end
 
+
+
     controls.touchControl2 = rcLayout:createCanvas(rcLayout.sizeX - 28, 2, 2, 12, colors.white, 0, " ")
     controls.touchControl2:draw()
     controls.touchControl2:set(1, 1, colors.white, colors.black, "+Y")
@@ -531,6 +533,14 @@ local function createDroneControl()
         elseif eventData[1] == "scroll" then
             deviceSend(controlAddress, "rc_fexec", droneMoveCode, 0, (eventData[5] / 10) * currentBlockCount, 0)
         end
+    end
+
+
+
+    controls.home = rcLayout:createButton(rcLayout.sizeX - 35, 13, 6, 1, colors.purple, colors.white, "HOME")
+
+    function controls.home:onDropInZone()
+        deviceSend(controlAddress, "rc_fexec", "if ox then drone.move(-ox, -oy, -oz) end ox, oy, oz = nil, nil, nil")
     end
 end
 

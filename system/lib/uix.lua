@@ -148,12 +148,16 @@ function objclass:stop()
     end
 end
 
+local function checkZone(self, eventData)
+    return eventData[3] >= self.x and eventData[4] >= self.y and eventData[3] < self.x + self.sx and eventData[4] < self.y + self.sy
+end
+
 function objclass:uploadEvent(eventData)
     if self.disabled or self.disabledHidden then return end
     local retval
     if self.type == "button" or self.type == "context" then
         if self.toggle then
-            if eventData[1] == "touch" and eventData[3] >= self.x and eventData[4] >= self.y and eventData[3] < self.x + self.sx and eventData[4] < self.y + self.sy then
+            if eventData[1] == "touch" and checkZone(self, eventData) then
                 self.state = not self.state
                 self:draw()
                 if self.onSwitch then
@@ -166,11 +170,13 @@ function objclass:uploadEvent(eventData)
                     self.state = false
                     self:draw()
 
-                    if self.onDrop then
+                    if self.onDropInZone and checkZone(self, eventData) then
+                        retval = self:onDropInZone(eventData[5], eventData[6], eventData)
+                    elseif self.onDrop then
                         retval = self:onDrop(eventData[5], eventData[6], eventData)
                     end
                 end
-            elseif not self.state and eventData[1] == "touch" and eventData[3] >= self.x and eventData[4] >= self.y and eventData[3] < self.x + self.sx and eventData[4] < self.y + self.sy then
+            elseif not self.state and eventData[1] == "touch" and checkZone(self, eventData) then
                 if self.type == "context" then
                     self.state = true
                     self:draw()
