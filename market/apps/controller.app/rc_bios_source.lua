@@ -149,8 +149,12 @@ end
 local oldAdvTime = -math.huge
 local currentUser
 local isTunnel
+tsks = {}
 while true do
-    local eventData = {computer.pullSignal(0.5)}
+    local eventData = {computer.pullSignal(0.1)}
+    for k, v in pairs(tsks) do
+        pcall(v)
+    end
 
     if currentUser then
         if eventData[1] == "modem_message" and eventData[3] == currentUser then

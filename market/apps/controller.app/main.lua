@@ -164,11 +164,11 @@ function wakeAllButton:onClick()
     layout:timer(1, advRequest, 1)
 end
 
-local function manConnect(obj)
+local function manConnect(obj, pass)
     if obj then
         ui:fullStop()
         gui.status(screen, nil, nil, "connection attempt...")
-        local ret = deviceRequest(obj[3], "rc_connect", passwordInput.read.getBuffer())
+        local ret = deviceRequest(obj[3], "rc_connect", pass or passwordInput.read.getBuffer())
         if ret == true then
             passwordInput.read.setBuffer("")
             controlAddress = obj[3]
@@ -187,6 +187,7 @@ local function manConnect(obj)
 end
 
 local lastConnect
+local lastPassword
 local function connect()
     local obj
     for i = 1, #connectList.list do
@@ -197,6 +198,7 @@ local function connect()
 
     if obj then
         lastConnect = table.clone(obj)
+        lastPassword = passwordInput.read.getBuffer()
     end
     manConnect(obj)
 end
@@ -213,7 +215,7 @@ end
 function layout:onSelect(reconnect)
     if reconnect and lastConnect then
         ui:draw()
-        manConnect(lastConnect)
+        manConnect(lastConnect, lastPassword)
         return
     end
 
@@ -309,10 +311,10 @@ local maxAcceleration
 local startStatPoses = wakeUpSwitch.x + 7
 local statuses = {}
 for i = 0, 5 do
-    table.insert(statuses, rcLayout:createLabel(startStatPoses, (rcLayout.sizeY - 7) + i, 20, 1))
+    table.insert(statuses, rcLayout:createLabel(startStatPoses, (rcLayout.sizeY - 7) + i, 17, 1))
 end
 
-local execPoses = statuses[1].x + statuses[1].sx + 1
+local execPoses = statuses[1].x + statuses[1].sx + 3
 local luaPoses = execPoses + 6
 for i = 1, 6 do
     local py = (rcLayout.sizeY - 7) + (i - 1)
@@ -322,6 +324,17 @@ for i = 1, 6 do
         i % 2 == 1 and colors.gray or colors.lightGray,
         colors.white, nil, nil, "lua", nil, nil, nil, nil, "cntr" .. i)
     rcLayout.style = uix.styles[1]
+    local checkbox = rcLayout:createCheckbox(execPoses - 2, py)
+    checkbox.enableColor = colors.lime
+    checkbox.disableColor = colors.gray
+    checkbox.pointerColor = colors.white
+
+    function checkbox:onSwitch()
+        ui:fullStop()
+        statusRequest(controlAddress, "rc_fexec", "local i, code = ...; tsks[i] = load(code)", i, inputStr.read.getBuffer())
+        ui:fullStart()
+        ui:draw()
+    end
 
     function execButton:onDrop()
         ui:fullStop()
@@ -653,7 +666,10 @@ function rcLayout:onSelect(devicetype)
     end
     controls = {}
 
-    local firmwareUpdater = [[local code = ...
+    local initCode = [[local code = ...
+for i = 1, 6 do
+    tsks[i] = nil
+end
 if #code < 2048 or not load(code) then
     return false, "received firmware is damaged"
 end
@@ -670,7 +686,8 @@ if eeprom and code ~= eeprom.get() then
     return true, true
 end
 return true]]
-    if select(2, assert(select(2, assert(deviceRequest(controlAddress, "rc_exec", firmwareUpdater, assert(fs.readFile(firmwarePath))))))) then
+    if select(2, assert(select(2, assert(deviceRequest(controlAddress, "rc_exec", initCode, assert(fs.readFile(firmwarePath))))))) then
+        deviceSend(controlAddress, "rc_fexec", "computer.shutdown(true)")
         layout:select(controlAddress)
         return
     end
@@ -723,7 +740,8 @@ return true]]
         currentBlockCount = 1
         currentAcceleration = 1
         maxAcceleration = select(2, assert(deviceRequest(controlAddress, "rc_exec", "return drone.setAcceleration(math.huge)")))
-        acceleration.value = math.map(1, 0, maxAcceleration, 0, 1)
+        currentAcceleration = maxAcceleration
+        acceleration.value = 1
         blockPeerMoveTextUpdate(true)
         accelerationTextUpdate(true)
         statsUpdate(true)
