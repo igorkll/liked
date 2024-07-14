@@ -502,19 +502,19 @@ drone.move(dx, dy, dz)]]
     local mdx, mdy, mdz = 0, 0, 0
     local function droneMove(dx, dy, dz)
         mdx, mdy, mdz = mdx + dx, mdy + dy, mdz + dz
-        if math.abs(mdx) > 0.25 then
+        if math.abs(mdx) >= 0.25 then
             dx = math.round(mdx * 4) / 4
             mdx = 0
         else
             dx = 0
         end
-        if math.abs(mdy) > 0.25 then
+        if math.abs(mdy) >= 0.25 then
             dy = math.round(mdy * 4) / 4
             mdy = 0
         else
             dy = 0
         end
-        if math.abs(mdz) > 0.25 then
+        if math.abs(mdz) >= 0.25 then
             dz = math.round(mdz * 4) / 4
             mdz = 0
         else
@@ -539,7 +539,7 @@ drone.move(dx, dy, dz)]]
             oPosX = oPosX or eventData[3]
             oPosY = oPosY or eventData[4]
             
-            local dx, dy = ((eventData[3] - oPosX) / self.sx) * currentBlockCount, ((eventData[4] - oPosY) / self.sy) * currentBlockCount
+            local dx, dy = ((eventData[3] - oPosX) / (self.sx - 1)) * currentBlockCount, ((eventData[4] - oPosY) / (self.sy - 1)) * currentBlockCount
             droneMove(dx, 0, dy)
             oPosX, oPosY = eventData[3], eventData[4]
         elseif eventData[1] == "drop" then
