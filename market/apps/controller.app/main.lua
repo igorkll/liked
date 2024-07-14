@@ -161,14 +161,7 @@ function wakeAllButton:onClick()
     layout:timer(1, advRequest, 1)
 end
 
-local function connect()
-    local obj
-    for i = 1, #connectList.list do
-        if connectList.list[i][2] then
-            obj = connectList.list[i]
-        end
-    end
-
+local function manConnect(obj)
     if obj then
         ui:fullStop()
         gui.status(screen, nil, nil, "connection attempt...")
@@ -190,6 +183,21 @@ local function connect()
     end
 end
 
+local lastConnect
+local function connect()
+    local obj
+    for i = 1, #connectList.list do
+        if connectList.list[i][2] then
+            obj = connectList.list[i]
+        end
+    end
+
+    if obj then
+        lastConnect = table.clone(obj)
+    end
+    manConnect(obj)
+end
+
 connectButton.onDrop = connect
 passwordInput.onTextAcceptedCheck = connect
 
@@ -199,7 +207,13 @@ function refreshButton:onClick()
     connectList:draw()
 end
 
-function layout:onSelect()
+function layout:onSelect(reconnect)
+    if reconnect and lastConnect then
+        ui:draw()
+        manConnect(lastConnect)
+        return
+    end
+
     advRequest()
     connectList.list = {}
 end
@@ -381,7 +395,7 @@ end)()]]
         if offset > 1 then
             offsetTitle.text = offsetTitle.text .. " - POSSIBLE COLLISIONS WITH BLOCKS"
         else
-            offsetTitle.text = offsetTitle.text .. string.rep(" ", 40)
+            offsetTitle.text = offsetTitle.text .. string.rep(" ", 38)
         end
         offsetTitle:draw()
     end
@@ -474,6 +488,7 @@ function rcLayout:onUnselect()
 end
 
 local controls = {}
+local droneMoveCode = "local dx, dy, dz = ...; ox = (ox or 0) + dx; oy = (oy or 0) + dx; oz = (oz or 0) + dz; drone.move(...)"
 
 local function createDroneControl()
     controls.touchControl = rcLayout:createCanvas(rcLayout.sizeX - 25, 2, 24, 12, colors.white, 0, " ")
@@ -488,14 +503,33 @@ local function createDroneControl()
     function controls.touchControl:userEvent(eventData)
         if eventData[1] == "drag" then
             local dx, dy = ((eventData[3] - oPosX) / self.sx) * currentBlockCount, ((eventData[4] - oPosY) / self.sy) * currentBlockCount
-            deviceSend(controlAddress, "rc_fexec", "drone.move(...)", dx, 0, dy)
+            deviceSend(controlAddress, "rc_fexec", droneMoveCode, dx, 0, dy)
             oPosX, oPosY = eventData[3], eventData[4]
         elseif eventData[1] == "drop" then
             oPosX, oPosY = nil, nil
         elseif eventData[1] == "touch" then
             oPosX, oPosY = eventData[3], eventData[4]
         elseif eventData[1] == "scroll" then
-            deviceSend(controlAddress, "rc_fexec", "drone.move(...)", 0, (eventData[5] / 10) * currentBlockCount, 0)
+            deviceSend(controlAddress, "rc_fexec", droneMoveCode, 0, (eventData[5] / 10) * currentBlockCount, 0)
+        end
+    end
+
+    controls.touchControl2 = rcLayout:createCanvas(rcLayout.sizeX - 28, 2, 2, 12, colors.white, 0, " ")
+    controls.touchControl2:draw()
+    controls.touchControl2:set(1, 1, colors.white, colors.black, "+Y")
+    controls.touchControl2:set(1, 12, colors.white, colors.black, "-Y")
+
+    function controls.touchControl2:userEvent(eventData)
+        if eventData[1] == "drag" then
+            local dy = ((eventData[4] - oPosY) / self.sy) * currentBlockCount
+            deviceSend(controlAddress, "rc_fexec", droneMoveCode, 0, -dy, 0)
+            oPosX, oPosY = eventData[3], eventData[4]
+        elseif eventData[1] == "drop" then
+            oPosX, oPosY = nil, nil
+        elseif eventData[1] == "touch" then
+            oPosX, oPosY = eventData[3], eventData[4]
+        elseif eventData[1] == "scroll" then
+            deviceSend(controlAddress, "rc_fexec", droneMoveCode, 0, (eventData[5] / 10) * currentBlockCount, 0)
         end
     end
 end
@@ -524,9 +558,13 @@ if eeprom and code ~= eeprom.get() then
     eeprom.set(code)
     setColor(currentColor)
     setText("")
+    return true, true
 end
 return true]]
-    assert(deviceRequest(controlAddress, "rc_exec", firmwareUpdater, assert(fs.readFile(firmwarePath))))
+    if select(2, assert(select(2, assert(deviceRequest(controlAddress, "rc_exec", firmwareUpdater, assert(fs.readFile(firmwarePath))))))) then
+        layout:select(controlAddress)
+        return
+    end
     wakeUpSwitch.state = not not select(2, assert(deviceRequest(controlAddress, "rc_exec", "return (tunnel and tunnel.getWakeMessage() == \"rc_wake\") or (modem and modem.getWakeMessage() == \"rc_wake\")")))
     
     colorpic.disabledHidden = true

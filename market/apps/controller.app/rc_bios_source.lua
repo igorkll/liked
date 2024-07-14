@@ -164,6 +164,8 @@ while true do
                     else
                         send(isTunnel, currentUser, false, err)
                     end
+                else
+                    pcall(code, table.unpack(eventData, 8))
                 end
             elseif cmd == "rc_color" then
                 currentColor = arg

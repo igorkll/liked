@@ -1197,9 +1197,12 @@ function manager:select(layout, ...)
         self.current.allowAutoActive = nil
         self.current:fullStart()
         if self.current.onSelect then
-            self.current:onSelect(...)
+            if not self.current:onSelect(...) then
+                self.current:draw()
+            end
+        else
+            self.current:draw()
         end
-        self.current:draw()
     end
 end
 
