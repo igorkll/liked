@@ -488,13 +488,40 @@ function rcLayout:onUnselect()
 end
 
 local controls = {}
-local droneMoveCode = [[local dx, dy, dz = ...;
-ox = (ox or 0) + dx;
-oy = (oy or 0) + dy;
-oz = (oz or 0) + dz;
-drone.move(...)]]
 
 local function createDroneControl()
+    local droneMoveCode = [[local dx, dy, dz = ...
+ox = (ox or 0) + dx
+oy = (oy or 0) + dy
+oz = (oz or 0) + dz
+drone.move(dx, dy, dz)]]
+
+    local mdx, mdy, mdz = 0, 0, 0
+    local function droneMove(dx, dy, dz)
+        mdx, mdy, mdz = mdx + dx, mdy + dy, mdz + dz
+        if math.abs(mdx) > 0.25 then
+            dx = mdx
+            mdx = 0
+        else
+            dx = 0
+        end
+        if math.abs(mdy) > 0.25 then
+            dy = mdy
+            mdy = 0
+        else
+            dy = 0
+        end
+        if math.abs(mdz) > 0.25 then
+            dz = mdz
+            mdz = 0
+        else
+            dz = 0
+        end
+        if dx ~= 0 or dy ~= 0 or dz ~= 0 then
+            deviceSend(controlAddress, "rc_fexec", droneMoveCode, dx, dy, dz)
+        end
+    end
+
     controls.touchControl = rcLayout:createCanvas(rcLayout.sizeX - 25, 2, 24, 12, colors.white, 0, " ")
     controls.touchControl:draw()
     controls.touchControl:set(12, 1, colors.white, colors.black, "-Z")
@@ -506,15 +533,18 @@ local function createDroneControl()
     local oPosX, oPosY
     function controls.touchControl:userEvent(eventData)
         if eventData[1] == "drag" then
+            oPosX = oPosX or eventData[3]
+            oPosY = oPosY or eventData[4]
+            
             local dx, dy = ((eventData[3] - oPosX) / self.sx) * currentBlockCount, ((eventData[4] - oPosY) / self.sy) * currentBlockCount
-            deviceSend(controlAddress, "rc_fexec", droneMoveCode, dx, 0, dy)
+            droneMove(dx, 0, dy)
             oPosX, oPosY = eventData[3], eventData[4]
         elseif eventData[1] == "drop" then
             oPosX, oPosY = nil, nil
         elseif eventData[1] == "touch" then
             oPosX, oPosY = eventData[3], eventData[4]
         elseif eventData[1] == "scroll" then
-            deviceSend(controlAddress, "rc_fexec", droneMoveCode, 0, (eventData[5] / 10) * currentBlockCount, 0)
+            droneMove(0, (eventData[5] / 10) * currentBlockCount, 0)
         end
     end
 
@@ -528,23 +558,31 @@ local function createDroneControl()
     function controls.touchControl2:userEvent(eventData)
         if eventData[1] == "drag" then
             local dy = ((eventData[4] - oPosY) / self.sy) * currentBlockCount
-            deviceSend(controlAddress, "rc_fexec", droneMoveCode, 0, -dy, 0)
+            droneMove(0, -dy, 0)
             oPosX, oPosY = eventData[3], eventData[4]
         elseif eventData[1] == "drop" then
             oPosX, oPosY = nil, nil
         elseif eventData[1] == "touch" then
             oPosX, oPosY = eventData[3], eventData[4]
         elseif eventData[1] == "scroll" then
-            deviceSend(controlAddress, "rc_fexec", droneMoveCode, 0, (eventData[5] / 10) * currentBlockCount, 0)
+            droneMove(0, (eventData[5] / 10) * currentBlockCount, 0)
         end
     end
 
 
 
-    controls.home = rcLayout:createButton(rcLayout.sizeX - 35, 13, 6, 1, colors.purple, colors.white, "HOME")
+    controls.home = rcLayout:createButton(rcLayout.sizeX - 41, 13, 12, 1, colors.purple, colors.white, "HOME")
 
     function controls.home:onDropInZone()
-        deviceSend(controlAddress, "rc_fexec", "if ox then drone.move(-ox, -oy, -oz) end; ox, oy, oz = nil, nil, nil; mox, moy, moz = nil, nil, nil")
+        deviceSend(controlAddress, "rc_fexec", "drone.move(-(ox or 0), -(oy or 0), -(oz or 0)); ox, oy, oz = nil, nil, nil")
+    end
+
+
+
+    controls.setHome = rcLayout:createButton(rcLayout.sizeX - 41, 11, 12, 1, colors.purple, colors.white, "SET HOME")
+
+    function controls.setHome:onDropInZone()
+        deviceSend(controlAddress, "rc_fexec", "ox, oy, oz = nil, nil, nil")
     end
 end
 
