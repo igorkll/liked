@@ -527,10 +527,10 @@ drone.move(dx, dy, dz)]]
 
     controls.touchControl = rcLayout:createCanvas(rcLayout.sizeX - 25, 2, 24, 12, colors.white, 0, " ")
     controls.touchControl:draw()
-    controls.touchControl:set(12, 1, colors.white, colors.black, "-Z")
-    controls.touchControl:set(12, 12, colors.white, colors.black, "+Z")
-    controls.touchControl:set(24, 6, colors.white, colors.black, "+X", true)
-    controls.touchControl:set(1, 6, colors.white, colors.black, "-X", true)
+    controls.touchControl:set(12, 1, colors.white, colors.black, "+Z")
+    controls.touchControl:set(12, 12, colors.white, colors.black, "-Z")
+    controls.touchControl:set(24, 6, colors.white, colors.black, "-X", true)
+    controls.touchControl:set(1, 6, colors.white, colors.black, "+X", true)
     controls.touchControl:set(7, 6, colors.white, colors.black, "drag control")
 
     local oPosX, oPosY
@@ -540,7 +540,7 @@ drone.move(dx, dy, dz)]]
             oPosY = oPosY or eventData[4]
             
             local dx, dy = ((eventData[3] - oPosX) / (self.sx - 1)) * currentBlockCount, ((eventData[4] - oPosY) / (self.sy - 1)) * currentBlockCount
-            droneMove(dx, 0, dy)
+            droneMove(-dx, 0, -dy)
             oPosX, oPosY = eventData[3], eventData[4]
         elseif eventData[1] == "drop" then
             oPosX, oPosY = nil, nil
@@ -596,6 +596,25 @@ drone.move(dx, dy, dz)]]
                 mdx, mdy, mdz = 0, 0, 0
             end
         end)
+    end
+
+    
+
+    controls.move1 = rcLayout:createButton(5, 5, 4, 1, colors.purple, colors.white, "+Z")
+    function controls.move1:onDrop()
+        droneMove(0, 0, currentBlockCount)
+    end
+    controls.move2 = rcLayout:createButton(8, 6, 4, 1, colors.purple, colors.white, "-X")
+    function controls.move2:onDrop()
+        droneMove(-currentBlockCount, 0, 0)
+    end
+    controls.move3 = rcLayout:createButton(5, 7, 4, 1, colors.purple, colors.white, "-Z")
+    function controls.move3:onDrop()
+        droneMove(0, 0, -currentBlockCount)
+    end
+    controls.move4 = rcLayout:createButton(2, 6, 4, 1, colors.purple, colors.white, "+X")
+    function controls.move4:onDrop()
+        droneMove(currentBlockCount, 0, 0)
     end
 end
 
