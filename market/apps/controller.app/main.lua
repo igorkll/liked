@@ -575,6 +575,7 @@ drone.move(dx, dy, dz)]]
 
     function controls.home:onDropInZone()
         deviceSend(controlAddress, "rc_fexec", "drone.move(-(ox or 0), -(oy or 0), -(oz or 0)); ox, oy, oz = nil, nil, nil")
+        mdx, mdy, mdz = 0, 0, 0
     end
 
 
@@ -583,6 +584,7 @@ drone.move(dx, dy, dz)]]
 
     function controls.setHome:onDropInZone()
         deviceSend(controlAddress, "rc_fexec", "ox, oy, oz = nil, nil, nil")
+        mdx, mdy, mdz = 0, 0, 0
     end
 end
 
