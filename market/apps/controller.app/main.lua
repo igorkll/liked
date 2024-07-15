@@ -13,6 +13,7 @@ local parser = require("parser")
 local screensaver = require("screensaver")
 local thread = require("thread")
 local sides = require("sides")
+local uuid = require("uuid")
 
 local screen = ...
 local colors = uix.colors
@@ -105,13 +106,24 @@ for tunnel in pairs(tunnels) do
     break
 end
 
+local function extendArgs(args, id)
+    local cmd = args[1]
+    if cmd == "rc_out" or cmd == "rc_connect" then
+        table.insert(args, id)
+    elseif cmd == "rc_exec" or cmd == "rc_fexec" then
+        table.insert(args, 3, id)
+    end
+end
+
 local function deviceSend(address, ...)
     if not address then return end
     local startWaitTime = computer.uptime()
+    local args = {...}
+    extendArgs(args, uuid.next())
     if tunnels[address] then
-        component.invoke(address, "send", ...)
+        component.invoke(address, "send", table.unpack(args))
     elseif modem then
-        modem.send(address, port, ...)
+        modem.send(address, port, table.unpack(args))
     end
 end
 
@@ -119,19 +131,23 @@ local function rawDeviceRequest(timeout, address, ...)
     if not address then return end
     local backScreensaver = screensaver.noScreensaver(screen)
     local startWaitTime = computer.uptime()
+    local id = uuid.next()
+    local args = {...}
+    extendArgs(args, id)
+    local idRet = "rc_ret:" .. id
     if tunnels[address] then
-        component.invoke(address, "send", ...)
+        component.invoke(address, "send", table.unpack(args))
         while computer.uptime() - startWaitTime < timeout do
-            local eventData = {event.pull(0.5, "modem_message", address, nil, 0, nil, "rc_ret")}
+            local eventData = {event.pull(0.5, "modem_message", address, nil, 0, nil, idRet)}
             if eventData[1] then
                 backScreensaver()
                 return {eventData[5]}, table.unpack(eventData, 7)
             end
         end
     elseif modem then
-        modem.send(address, port, ...)
+        modem.send(address, port, table.unpack(args))
         while computer.uptime() - startWaitTime < timeout do
-            local eventData = {event.pull(0.5, "modem_message", modem.address, address, port, nil, "rc_ret")}
+            local eventData = {event.pull(0.5, "modem_message", modem.address, address, port, nil, idRet)}
             if eventData[1] then
                 backScreensaver()
                 return {eventData[5]}, table.unpack(eventData, 7)
@@ -563,7 +579,7 @@ function customPass:onDrop()
 end
 
 function colorpic:onColor(_, color)
-    statusRequest(controlAddress, "rc_exec", "setColor(" .. color .. ")")
+    deviceSend(controlAddress, "rc_color", color)
 end
 
 function rcLayout:onUnselect()
@@ -778,18 +794,18 @@ ox, oy, oz = nx, ny, nz]])
 
     controls.l1 = rcLayout:createButton(2, 12, 4, 2, colors.green, colors.white, "<<")
     function controls.l1:onDrop()
-        droneVirtualRotation = droneVirtualRotation + 1
-        if droneVirtualRotation > 3 then
-            droneVirtualRotation = 0
+        droneVirtualRotation = droneVirtualRotation - 1
+        if droneVirtualRotation < 0 then
+            droneVirtualRotation = 3
         end
         updateRotation(true)
     end
 
     controls.l2 = rcLayout:createButton(10, 12, 4, 2, colors.green, colors.white, ">>")
     function controls.l2:onDrop()
-        droneVirtualRotation = droneVirtualRotation - 1
-        if droneVirtualRotation < 0 then
-            droneVirtualRotation = 3
+        droneVirtualRotation = droneVirtualRotation + 1
+        if droneVirtualRotation > 3 then
+            droneVirtualRotation = 0
         end
         updateRotation(true)
     end

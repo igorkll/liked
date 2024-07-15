@@ -134,11 +134,12 @@ local function checkPassword(password)
     end
 end
 
-local function send(isTunnel, address, ...)
+local function send(id, isTunnel, address, ...)
+    local msg_title = "rc_ret:" .. id
     if isTunnel then
-        tunnel.send("rc_ret", ...)
+        tunnel.send(msg_title, ...)
     else
-        modem.send(address, port, "rc_ret", ...)
+        modem.send(address, port, msg_title, ...)
     end
 end
 
@@ -156,14 +157,16 @@ function ut() --update timer
     autoDisconTimer = computer.uptime()
 end
 
-local function discon()
+local function discon(id)
     currentColor = 0xffffff
     setColor(currentColor)
     passText()
     computer.beep(200, 0.2)
     computer.beep(150, 0.2)
     computer.beep(100, 0.8)
-    send(isTunnel, currentUser, true)
+    if id then
+        send(id, isTunnel, currentUser, true)
+    end
     currentUser = nil
 end
 
@@ -186,12 +189,12 @@ while true do
                 local code, err = load(arg)
                 if nexec then
                     if code then
-                        send(isTunnel, currentUser, pcall(code, table.unpack(eventData, 8)))
+                        send(eventData[8], isTunnel, currentUser, pcall(code, table.unpack(eventData, 9)))
                     else
-                        send(isTunnel, currentUser, false, err)
+                        send(eventData[8], isTunnel, currentUser, false, err)
                     end
                 else
-                    pcall(code, table.unpack(eventData, 8))
+                    pcall(code, table.unpack(eventData, 9))
                 end
             elseif cmd == "rc_color" then
                 currentColor = arg
@@ -199,7 +202,7 @@ while true do
             elseif cmd == "rc_title" then
                 setText(arg)
             elseif cmd == "rc_out" then
-                discon()
+                discon(arg)
             end
         end
     else
@@ -221,14 +224,14 @@ while true do
                     computer.beep(1800, 0.05)
                     computer.beep(1800, 0.05)
                     setColor(currentColor)
-                    send(isTunnel, sender, true)
+                    send(eventData[8], isTunnel, sender, true)
                     currentUser = sender
                 else
                     setColor(0xff0000)
                     computer.beep(100, 0.1)
                     computer.beep(100, 0.1)
                     setColor(currentColor)
-                    send(isTunnel, sender, false)
+                    send(eventData[8], isTunnel, sender, false)
                 end
             end
         end
