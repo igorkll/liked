@@ -829,46 +829,48 @@ ox, oy, oz = nx, ny, nz]])
             self.state = false
             self:draw()
         elseif self.state then
-            tmpThreads.autoSync = thread.create(function ()
-                local oldDir = droneVirtualRotation
-                while true do
-                    local rawYaw = component.tablet.getYaw()
-                    local yaw = math.floor(((-math.abs(rawYaw) + 180) / (360 / 4)) + 0.5)
-                    local dir
-                    if yaw == 2 or yaw == -2 then
-                        if rawYaw > 0 then
-                            dir = 2
+            if not tmpThreads.autoSync then
+                tmpThreads.autoSync = thread.create(function ()
+                    local oldDir = droneVirtualRotation
+                    while true do
+                        local rawYaw = component.tablet.getYaw()
+                        local yaw = math.floor(((-math.abs(rawYaw) + 180) / (360 / 4)) + 0.5)
+                        local dir
+                        if yaw == 2 or yaw == -2 then
+                            if rawYaw > 0 then
+                                dir = 2
+                            else
+                                dir = 0
+                            end
+                        elseif yaw == 1 then
+                            if rawYaw > 0 then
+                                dir = 1
+                            else
+                                dir = 3
+                            end
+                        elseif yaw == -1 then
+                            if rawYaw > 0 then
+                                dir = 3
+                            else
+                                dir = 1
+                            end
                         else
-                            dir = 0
+                            if rawYaw > 0 then
+                                dir = 0
+                            else
+                                dir = 2
+                            end
                         end
-                    elseif yaw == 1 then
-                        if rawYaw > 0 then
-                            dir = 1
-                        else
-                            dir = 3
+                        if dir ~= oldDir then
+                            droneVirtualRotation = dir
+                            updateRotation(true)
+                            oldDir = dir
                         end
-                    elseif yaw == -1 then
-                        if rawYaw > 0 then
-                            dir = 3
-                        else
-                            dir = 1
-                        end
-                    else
-                        if rawYaw > 0 then
-                            dir = 0
-                        else
-                            dir = 2
-                        end
+                        os.sleep(0.5)
                     end
-                    if dir ~= oldDir then
-                        droneVirtualRotation = dir
-                        updateRotation(true)
-                        oldDir = dir
-                    end
-                    os.sleep(0.5)
-                end
-            end)
-            tmpThreads.autoSync:resume()
+                end)
+                tmpThreads.autoSync:resume()
+            end
         elseif tmpThreads.autoSync then
             tmpThreads.autoSync:kill()
             tmpThreads.autoSync = nil
