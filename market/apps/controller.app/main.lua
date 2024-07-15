@@ -589,6 +589,19 @@ drone.move(dx, dy, dz)]]
 
     local mdx, mdy, mdz = 0, 0, 0
     local function droneMove(dx, dy, dz)
+        if droneVirtualRotation == 1 then
+            local t = dx
+            dx = -dz
+            dz = t
+        elseif droneVirtualRotation == 2 then
+            dx = -dx
+            dz = -dz
+        elseif droneVirtualRotation == 3 then
+            local t = dx
+            dx = dz
+            dz = -t
+        end
+
         mdx, mdy, mdz = mdx + dx, mdy + dy, mdz + dz
         if math.abs(mdx) >= 0.25 then
             dx = math.round(mdx * 4) / 4
@@ -718,7 +731,7 @@ ox, oy, oz = nx, ny, nz]])
         if str == "+Z" then
             return colors.red
         elseif str == "-Z" then
-            return colors.cyan
+            return colors.lightBlue
         end
         return def or colors.black
     end
