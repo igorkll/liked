@@ -832,16 +832,33 @@ ox, oy, oz = nx, ny, nz]])
             tmpThreads.autoSync = thread.create(function ()
                 local oldDir = droneVirtualRotation
                 while true do
-                    local yaw = math.floor(((component.tablet.getYaw() + 180) / (360 / 4)) + 0.5)
+                    local rawYaw = component.tablet.getYaw()
+                    local yaw = math.floor(((-math.abs(rawYaw) + 180) / (360 / 4)) + 0.5)
                     local dir
                     if yaw == 2 or yaw == -2 then
-                        dir = 0
+                        if rawYaw > 0 then
+                            dir = 2
+                        else
+                            dir = 0
+                        end
                     elseif yaw == 1 then
-                        dir = 3
+                        if rawYaw > 0 then
+                            dir = 1
+                        else
+                            dir = 3
+                        end
                     elseif yaw == -1 then
-                        dir = 1
+                        if rawYaw > 0 then
+                            dir = 3
+                        else
+                            dir = 1
+                        end
                     else
-                        dir = 2
+                        if rawYaw > 0 then
+                            dir = 0
+                        else
+                            dir = 2
+                        end
                     end
                     if dir ~= oldDir then
                         droneVirtualRotation = dir
@@ -856,6 +873,11 @@ ox, oy, oz = nx, ny, nz]])
             tmpThreads.autoSync:kill()
             tmpThreads.autoSync = nil
         end
+    end
+
+    if component.tablet then
+        controls.syncDir.state = true
+        controls.syncDir:onSwitch()
     end
 end
 
