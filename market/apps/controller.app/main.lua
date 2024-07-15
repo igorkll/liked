@@ -483,7 +483,7 @@ end)
 
 thread.create(function ()
     while true do
-        if finalConnect and controlAddress then
+        if finalConnect and controlAddress and not rcLayout.active then
             deviceSend(controlAddress, "rc_fexec", "") --resetting the shutdown timer when the blocking window is displayed
         end
         os.sleep(3)
