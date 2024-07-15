@@ -951,10 +951,8 @@ function uix:uploadEvent(eventData)
         end
 
         for _, obj in ipairs(self.objs) do
-            if obj.uploadEvent then
-                if obj:uploadEvent(eventData) then
-                    break
-                end
+            if obj.uploadEvent and obj:uploadEvent(eventData) then
+                break
             end
         end
     end
@@ -1094,7 +1092,6 @@ function uix.create(window, bgcolor, style)
     guiobj.sizeX = window.sizeX
     guiobj.sizeY = window.sizeY
     guiobj.threads = {}
-    guiobj.keybinds = {}
 
     return guiobj
 end
@@ -1230,6 +1227,10 @@ function manager:setExit_enter()
     self.exit_enter = true
 end
 
+local function keyboardCheck(self, eventData)
+    return table.exists(lastinfo.keyboards[self.screen], eventData[2])
+end
+
 function manager:loop(timeout)
     if self.firstLayout and not self.current then
         self:select(self.firstLayout)
@@ -1246,12 +1247,30 @@ function manager:loop(timeout)
             self:onEvent(eventData, windowEventData)
         end
 
+        local keybinds = self.current.keybinds
         if self.exit_ctrlW and eventData[1] == "close" then
             break
-        elseif self.exit_enter and (eventData[1] == "key_down" and table.exists(lastinfo.keyboards[self.screen], eventData[2]) and eventData[3] == 13 and eventData[4] == 28) then
+        elseif self.exit_enter and eventData[1] == "key_down" and keyboardCheck(self, eventData) and eventData[3] == 13 and eventData[4] == 28 then
             break
         elseif self.exitFlag then
             break
+        elseif self.current and keybinds and (eventData[1] == "key_down" or eventData[1] == "key_up") and keyboardCheck(self, eventData) then
+            local bind = keybinds[eventData[4]]
+            if bind then
+                for i, v in ipairs(bind) do
+                    local l = v[2] or {}
+                    v[1]:uploadEvent(eventData[1] == "key_down" and "touch" or "drop", v[1].gui.screen, l[1] or 0, l[2] or 0, l[3] or 0, l[4] or eventData[5])
+                end
+            end
+        end
+    end
+end
+
+function manager:bind(key, ...)
+    for _, obj in ipairs({...}) do
+        local layout = obj.gui
+        if not layout.keybinds then
+            layout.keybinds = 0
         end
     end
 end

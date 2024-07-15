@@ -583,6 +583,8 @@ local move = {
     rcLayout:createButton(6+10, 9, 4, 2, colors.orange, colors.white)
 }
 
+ui:bind()
+
 local function createDroneControl()
     local droneMoveCode = [[local dx, dy, dz = ...
 ox = (ox or 0) + dx
