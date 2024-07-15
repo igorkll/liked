@@ -12,6 +12,7 @@ local fs = require("filesystem")
 local parser = require("parser")
 local screensaver = require("screensaver")
 local thread = require("thread")
+local sides = require("sides")
 
 local screen = ...
 local colors = uix.colors
@@ -777,7 +778,40 @@ ox, oy, oz = nx, ny, nz]])
 end
 
 local function createRobotControl()
-    
+    local function robotMove(side)
+        deviceSend(controlAddress, "rc_exec", "local side, count = ...; for i = 1, count do robot.move(side) end", side, currentBlockCount)
+    end
+
+    for i = 1, 4 do
+        local arrow = move[i]
+        arrow.fore = colors.white
+    end
+
+    move[1].text = "forw"
+    move[1].onDrop = function (self)
+        robotMove(sides.forward)
+    end
+    move[2].text = "righ"
+    move[2].onDrop = function (self)
+        deviceSend(controlAddress, "rc_fexec", "robot.turn(true)")
+    end
+    move[3].text = "back"
+    move[3].onDrop = function (self)
+        robotMove(sides.back)
+    end
+    move[4].text = "left"
+    move[4].onDrop = function (self)
+        deviceSend(controlAddress, "rc_fexec", "robot.turn(false)")
+    end
+
+    move[5].text = "up"
+    move[5].onDrop = function (self)
+        robotMove(sides.up)
+    end
+    move[6].text = "down"
+    move[6].onDrop = function (self)
+        robotMove(sides.down)
+    end
 end
 
 function rcLayout:onSelect(devicetype)
