@@ -739,6 +739,19 @@ drone.move(mx, my, mz)
 ox, oy, oz = nx, ny, nz]])
     end
 
+
+
+    controls[1] = rcLayout:createText(21, 5, colors.white, "sync direction:")
+    controls.syncDir = rcLayout:createSwitch(controls[1].x + #controls[1].text + 1, controls[1].y)
+
+    function controls.syncDir:onSwitch()
+        if self.state and not component.tablet then
+            ui:mwindow(screen, gui.warn, screen, nil, nil, "this option is only available on the tablet")
+            self.state = false
+            self:draw()
+        end
+    end
+
     
     move[1].onDrop = function (self)
         droneMove(0, 0, currentBlockCount)
