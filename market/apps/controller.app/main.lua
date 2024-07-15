@@ -284,7 +284,7 @@ end
 
 function layout:onSelect(reconnect)
     ui:forceDraw()
-    
+
     if controlAddress then
         for k, v in pairs(tmpThreads) do
             v:kill()
@@ -381,7 +381,7 @@ local wakeUpSwitch = rcLayout:createSwitch(switchTitle.x + unicode.len(switchTit
 local randPass = rcLayout:createButton(2, rcLayout.sizeY - 7, 21, 1, colors.purple, colors.white, "use random password")
 local customPass = rcLayout:createButton(2, rcLayout.sizeY - 5, 21, 1, colors.purple, colors.white, "use custom password")
 local shutdownButton = rcLayout:createButton(2, rcLayout.sizeY - 3, 10, 1, nil, nil, "shutdown")
-local toOther = rcLayout:createButton(shutdownButton.x + shutdownButton.sx + 1, rcLayout.sizeY - 3, 13, 1, colors.white, colors.black, "other functions")
+local toOther = rcLayout:createButton(shutdownButton.x + shutdownButton.sx + 1, rcLayout.sizeY - 3, 7, 1, colors.white, colors.black, "other")
 local blockPeerMove = rcLayout:createSeek(2, rcLayout.sizeY - 9, 16)
 local blockPeerMoveText = rcLayout:createText(blockPeerMove.x + blockPeerMove.size + 1, rcLayout.sizeY - 9, colors.white)
 local acceleration = rcLayout:createSeek(43, rcLayout.sizeY - 9, 17)
