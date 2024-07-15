@@ -572,8 +572,8 @@ local move = {
     rcLayout:createButton(10, 7, 4, 2, colors.purple, colors.white),
     rcLayout:createButton(6, 9, 4, 2, colors.purple, colors.white),
     rcLayout:createButton(2, 7, 4, 2, colors.purple, colors.white),
-    rcLayout:createButton(6+8, 5, 4, 2, colors.orange, colors.white),
-    rcLayout:createButton(6+8, 9, 4, 2, colors.orange, colors.white)
+    rcLayout:createButton(6+10, 5, 4, 2, colors.orange, colors.white),
+    rcLayout:createButton(6+10, 9, 4, 2, colors.orange, colors.white)
 }
 
 local function createDroneControl()
@@ -582,6 +582,10 @@ ox = (ox or 0) + dx
 oy = (oy or 0) + dy
 oz = (oz or 0) + dz
 drone.move(dx, dy, dz)]]
+
+    local droneVirtualRotation = 2
+    local rawMvTitle = {"+Z", "-X", "-Z", "+X"}
+    local mvTitle = {}
 
     local mdx, mdy, mdz = 0, 0, 0
     local function droneMove(dx, dy, dz)
@@ -610,12 +614,6 @@ drone.move(dx, dy, dz)]]
     end
 
     controls.touchControl = rcLayout:createCanvas(rcLayout.sizeX - 25, 2, 24, 12, colors.white, 0, " ")
-    controls.touchControl:draw()
-    controls.touchControl:set(12, 1, colors.white, colors.black, "+Z")
-    controls.touchControl:set(12, 12, colors.white, colors.black, "-Z")
-    controls.touchControl:set(24, 6, colors.white, colors.black, "-X", true)
-    controls.touchControl:set(1, 6, colors.white, colors.black, "+X", true)
-    controls.touchControl:set(7, 6, colors.white, colors.black, "drag control")
 
     local oPosX, oPosY
     function controls.touchControl:userEvent(eventData)
@@ -694,23 +692,19 @@ ox, oy, oz = nx, ny, nz]])
     end
 
     
-
-    move[1].text = "+Z"
     move[1].onDrop = function (self)
         droneMove(0, 0, currentBlockCount)
     end
-    move[2].text = "-X"
     move[2].onDrop = function (self)
         droneMove(-currentBlockCount, 0, 0)
     end
-    move[3].text = "-Z"
     move[3].onDrop = function (self)
         droneMove(0, 0, -currentBlockCount)
     end
-    move[4].text = "+X"
     move[4].onDrop = function (self)
         droneMove(currentBlockCount, 0, 0)
     end
+
     move[5].text = "+Y"
     move[5].onDrop = function (self)
         droneMove(0, currentBlockCount, 0)
@@ -718,6 +712,54 @@ ox, oy, oz = nx, ny, nz]])
     move[6].text = "-Y"
     move[6].onDrop = function (self)
         droneMove(0, -currentBlockCount, 0)
+    end
+
+    local function getArrowColor(str, def)
+        if str == "+Z" then
+            return colors.red
+        elseif str == "-Z" then
+            return colors.cyan
+        end
+        return def or colors.black
+    end
+
+    local function updateRotation(updateArrows)
+        for i = 0, 3 do
+            mvTitle[i + 1] = rawMvTitle[((i + droneVirtualRotation) % 4) + 1]
+            local arrow = move[i + 1]
+            arrow.text = mvTitle[i + 1]
+            arrow.fore = getArrowColor(arrow.text, colors.white)
+            if updateArrows then
+                arrow:draw()
+            end
+        end
+
+        controls.touchControl:draw()
+        controls.touchControl:set(12, 1, colors.white, getArrowColor(mvTitle[1]), mvTitle[1])
+        controls.touchControl:set(24, 6, colors.white, getArrowColor(mvTitle[2]), mvTitle[2], true)
+        controls.touchControl:set(12, 12, colors.white, getArrowColor(mvTitle[3]), mvTitle[3])
+        controls.touchControl:set(1, 6, colors.white, getArrowColor(mvTitle[4]), mvTitle[4], true)
+        controls.touchControl:set(7, 6, colors.white, colors.black, "drag control")
+    end
+
+    updateRotation()
+
+    controls.l1 = rcLayout:createButton(2, 12, 4, 2, colors.green, colors.white, "<<")
+    function controls.l1:onDrop()
+        droneVirtualRotation = droneVirtualRotation + 1
+        if droneVirtualRotation > 3 then
+            droneVirtualRotation = 0
+        end
+        updateRotation(true)
+    end
+
+    controls.l2 = rcLayout:createButton(10, 12, 4, 2, colors.green, colors.white, ">>")
+    function controls.l2:onDrop()
+        droneVirtualRotation = droneVirtualRotation - 1
+        if droneVirtualRotation < 0 then
+            droneVirtualRotation = 3
+        end
+        updateRotation(true)
     end
 end
 
