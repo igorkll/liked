@@ -152,6 +152,10 @@ local isTunnel
 local autoDisconTimer
 tsks = {}
 
+function ut() --update timer
+    autoDisconTimer = computer.uptime()
+end
+
 local function discon()
     currentColor = 0xffffff
     setColor(currentColor)
@@ -178,7 +182,7 @@ while true do
             local cmd, arg, nexec = eventData[6], eventData[7]
             nexec = cmd == "rc_exec"
             if nexec or cmd == "rc_fexec" then
-                autoDisconTimer = computer.uptime()
+                ut()
                 local code, err = load(arg)
                 if nexec then
                     if code then
@@ -211,7 +215,7 @@ while true do
                 end
             elseif eventData[6] == "rc_connect" and (randomPassword or passwordHash or eventData[5] <= 8) then
                 if checkPassword(eventData[7]) then
-                    autoDisconTimer = computer.uptime()
+                    ut()
                     setText("")
                     setColor(0x00ff00)
                     computer.beep(1800, 0.05)

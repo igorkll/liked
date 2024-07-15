@@ -1094,6 +1094,7 @@ function uix.create(window, bgcolor, style)
     guiobj.sizeX = window.sizeX
     guiobj.sizeY = window.sizeY
     guiobj.threads = {}
+    guiobj.keybinds = {}
 
     return guiobj
 end
@@ -1186,6 +1187,15 @@ function manager:func(func, ...)
     local result = {func(...)}
     self:fullStart()
     self:draw()
+    return table.unpack(result)
+end
+
+function manager:mwindow(screen, func, ...)
+    local clear = gui.saveZone(screen)
+    self:fullStop()
+    local result = {func(...)}
+    self:fullStart()
+    clear()
     return table.unpack(result)
 end
 

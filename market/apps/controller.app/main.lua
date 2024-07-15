@@ -115,13 +115,13 @@ local function deviceSend(address, ...)
     end
 end
 
-local function rawDeviceRequest(address, ...)
+local function rawDeviceRequest(timeout, address, ...)
     if not address then return end
     local backScreensaver = screensaver.noScreensaver(screen)
     local startWaitTime = computer.uptime()
     if tunnels[address] then
         component.invoke(address, "send", ...)
-        while computer.uptime() - startWaitTime < 5 do
+        while computer.uptime() - startWaitTime < timeout do
             local eventData = {event.pull(0.5, "modem_message", address, nil, 0, nil, "rc_ret")}
             if eventData[1] then
                 backScreensaver()
@@ -130,7 +130,7 @@ local function rawDeviceRequest(address, ...)
         end
     elseif modem then
         modem.send(address, port, ...)
-        while computer.uptime() - startWaitTime < 5 do
+        while computer.uptime() - startWaitTime < timeout do
             local eventData = {event.pull(0.5, "modem_message", modem.address, address, port, nil, "rc_ret")}
             if eventData[1] then
                 backScreensaver()
@@ -141,25 +141,33 @@ local function rawDeviceRequest(address, ...)
     backScreensaver()
 end
 
-local function deviceRequest(address, ...)
+local function deviceLongRequest(timeout, address, ...)
     if not address then return end
-    local data = {rawDeviceRequest(address, ...)}
+    local data = {rawDeviceRequest(timeout, address, ...)}
     if data[1] then
         return table.unpack(data, 2)
     else
-        ui:func(gui.simpleWarn, screen, nil, nil, "no response was received")
+        ui:mwindow(gui.simpleWarn, screen, nil, nil, "no response was received")
         os.sleep(2)
     end
 end
 
-local function statusRequest(...)
+local function deviceRequest(...)
+    return deviceLongRequest(5, ...)
+end
+
+local function statusLongRequest(timeout, ...)
     local address = ...
     if not address then return end
     local clear = gui.saveZone(screen)
     gui.status(screen, nil, nil, "sending a request...")
-    local data = {deviceRequest(...)}
+    local data = {deviceLongRequest(timeout, ...)}
     clear()
     return table.unpack(data)
+end
+
+local function statusRequest(...)
+    return statusLongRequest(5, ...)
 end
 
 function wakeAllButton:onClick()
@@ -191,7 +199,7 @@ local function manConnect(obj, pass)
             ui:draw()
         end
     else
-        ui:func(gui.warn, screen, nil, nil, noObjErr)
+        ui:mwindow(gui.warn, screen, nil, nil, noObjErr)
     end
 end
 
@@ -447,7 +455,7 @@ local function statsUpdate(noDraw)
     return table.concat(tbl, "\n"), offset
 end)()]]
 
-    local requestOk, ok, val, strs, offset, acceleration = rawDeviceRequest(controlAddress, "rc_exec", getterCode)
+    local requestOk, ok, val, strs, offset, acceleration = rawDeviceRequest(5, controlAddress, "rc_exec", getterCode)
     if not requestOk then return true end
     distanceTitle.text = "distance: " .. math.roundTo(requestOk[1], 1)
     if ok then
@@ -513,9 +521,7 @@ end
 
 function acceleration:onTouch(state)
     if not state then
-        ui:func(function ()
-            statusRequest(controlAddress, "rc_exec", "drone.setAcceleration(...)", currentAcceleration)
-        end)
+        ui:mwindow(statusRequest, controlAddress, "rc_exec", "drone.setAcceleration(...)", currentAcceleration))
     end
 end
 
@@ -673,7 +679,7 @@ drone.move(dx, dy, dz)]]
     controls.home = rcLayout:createButton(rcLayout.sizeX - 41, 13, 12, 1, colors.purple, colors.white, "HOME")
 
     function controls.home:onDrop()
-        ui:func(function ()
+        ui:mwindow(function ()
             if gui.yesno(screen, nil, nil, "are you sure you want to return to your home point?") then
                 deviceSend(controlAddress, "rc_fexec", "drone.move(-(ox or 0), -(oy or 0), -(oz or 0)); ox, oy, oz = nil, nil, nil")
                 mdx, mdy, mdz = 0, 0, 0
@@ -686,7 +692,7 @@ drone.move(dx, dy, dz)]]
     controls.setHome = rcLayout:createButton(rcLayout.sizeX - 41, 11, 12, 1, colors.purple, colors.white, "SET HOME")
 
     function controls.setHome:onDrop()
-        ui:func(function ()
+        ui:mwindow(function ()
             if gui.yesno(screen, nil, nil, "are you sure you want to set this point as the home point for the drone?") then
                 deviceSend(controlAddress, "rc_fexec", "ox, oy, oz = nil, nil, nil")
                 mdx, mdy, mdz = 0, 0, 0
@@ -778,8 +784,22 @@ ox, oy, oz = nx, ny, nz]])
 end
 
 local function createRobotControl()
+    local robotMoveCode = [[local side, count = ...
+local ci = 0 for i = 1, count do
+    if not robot.move(side) then
+        break
+    else
+        ci = ci + 1
+    end
+end
+ut()
+return ci]]
+
     local function robotMove(side)
-        deviceSend(controlAddress, "rc_exec", "local side, count = ...; for i = 1, count do robot.move(side) end", side, currentBlockCount)
+        local blocks = math.floor(select(2, assert(ui:mwindow(statusLongRequest, 15, controlAddress, "rc_exec", robotMoveCode, side, currentBlockCount))))
+        if blocks ~= currentBlockCount then
+            ui:mwindow(gui.warn, screen, nil, nil, "the movement failed, " .. blocks .." blocks were passed")
+        end
     end
 
     for i = 1, 4 do
