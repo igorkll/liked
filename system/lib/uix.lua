@@ -1255,11 +1255,18 @@ function manager:loop(timeout)
         elseif self.exitFlag then
             break
         elseif self.current and keybinds and (eventData[1] == "key_down" or eventData[1] == "key_up") and keyboardCheck(self, eventData) then
-            local bind = keybinds[eventData[4]]
-            if bind then
-                for i, v in ipairs(bind) do
-                    local l = v[2] or {}
-                    v[1]:uploadEvent(eventData[1] == "key_down" and "touch" or "drop", v[1].gui.screen, l[1] or 0, l[2] or 0, l[3] or 0, l[4] or eventData[5])
+            local binds = keybinds[eventData[4]]
+            if binds then
+                for i, bind in ipairs(binds) do
+                    local obj = bind[1]
+                    local l = bind[2] or {}
+                    obj:uploadEvent({eventData[1] == "key_down" and "touch" or "drop",
+                        obj.gui.screen,
+                        obj.x + (l[1] or 0),
+                        obj.y + (l[2] or 0),
+                        l[3] or 0,
+                        l[4] or eventData[5]
+                    })
                 end
             end
         end
@@ -1270,8 +1277,12 @@ function manager:bind(key, ...)
     for _, obj in ipairs({...}) do
         local layout = obj.gui
         if not layout.keybinds then
-            layout.keybinds = 0
+            layout.keybinds = {}
         end
+        if not layout.keybinds[key] then
+            layout.keybinds[key] = {}
+        end
+        table.insert(layout.keybinds[key], {obj})
     end
 end
 

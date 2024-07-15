@@ -147,7 +147,7 @@ local function deviceLongRequest(timeout, address, ...)
     if data[1] then
         return table.unpack(data, 2)
     else
-        ui:mwindow(gui.simpleWarn, screen, nil, nil, "no response was received")
+        ui:mwindow(screen, gui.simpleWarn, screen, nil, nil, "no response was received")
         os.sleep(2)
     end
 end
@@ -199,7 +199,7 @@ local function manConnect(obj, pass)
             ui:draw()
         end
     else
-        ui:mwindow(gui.warn, screen, nil, nil, noObjErr)
+        ui:mwindow(screen, gui.warn, screen, nil, nil, noObjErr)
     end
 end
 
@@ -521,7 +521,7 @@ end
 
 function acceleration:onTouch(state)
     if not state then
-        ui:mwindow(statusRequest, controlAddress, "rc_exec", "drone.setAcceleration(...)", currentAcceleration))
+        ui:mwindow(screen, statusRequest, controlAddress, "rc_exec", "drone.setAcceleration(...)", currentAcceleration)
     end
 end
 
@@ -583,7 +583,17 @@ local move = {
     rcLayout:createButton(6+10, 9, 4, 2, colors.orange, colors.white)
 }
 
-ui:bind()
+ui:bind(17, move[1])
+ui:bind(32, move[2])
+ui:bind(31, move[3])
+ui:bind(30, move[4])
+ui:bind(57, move[5])
+ui:bind(42, move[6])
+
+ui:bind(200, move[1])
+ui:bind(205, move[2])
+ui:bind(208, move[3])
+ui:bind(203, move[4])
 
 local function createDroneControl()
     local droneMoveCode = [[local dx, dy, dz = ...
@@ -681,7 +691,7 @@ drone.move(dx, dy, dz)]]
     controls.home = rcLayout:createButton(rcLayout.sizeX - 41, 13, 12, 1, colors.purple, colors.white, "HOME")
 
     function controls.home:onDrop()
-        ui:mwindow(function ()
+        ui:mwindow(screen, function ()
             if gui.yesno(screen, nil, nil, "are you sure you want to return to your home point?") then
                 deviceSend(controlAddress, "rc_fexec", "drone.move(-(ox or 0), -(oy or 0), -(oz or 0)); ox, oy, oz = nil, nil, nil")
                 mdx, mdy, mdz = 0, 0, 0
@@ -694,7 +704,7 @@ drone.move(dx, dy, dz)]]
     controls.setHome = rcLayout:createButton(rcLayout.sizeX - 41, 11, 12, 1, colors.purple, colors.white, "SET HOME")
 
     function controls.setHome:onDrop()
-        ui:mwindow(function ()
+        ui:mwindow(screen, function ()
             if gui.yesno(screen, nil, nil, "are you sure you want to set this point as the home point for the drone?") then
                 deviceSend(controlAddress, "rc_fexec", "ox, oy, oz = nil, nil, nil")
                 mdx, mdy, mdz = 0, 0, 0
@@ -798,9 +808,9 @@ ut()
 return ci]]
 
     local function robotMove(side)
-        local blocks = math.floor(select(2, assert(ui:mwindow(statusLongRequest, 15, controlAddress, "rc_exec", robotMoveCode, side, currentBlockCount))))
+        local blocks = math.floor(select(2, assert(ui:mwindow(screen, statusLongRequest, 15, controlAddress, "rc_exec", robotMoveCode, side, currentBlockCount))))
         if blocks ~= currentBlockCount then
-            ui:mwindow(gui.warn, screen, nil, nil, "the movement failed, " .. blocks .." blocks were passed")
+            ui:mwindow(screen, gui.warn, screen, nil, nil, "the movement failed, " .. blocks .." blocks were passed")
         end
     end
 
