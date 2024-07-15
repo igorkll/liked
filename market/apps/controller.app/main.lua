@@ -506,14 +506,15 @@ rcLayout:thread(function ()
     end
 end)
 
-thread.create(function ()
+local bgThread = thread.createBackground(function ()
     while true do
-        if finalConnect and controlAddress and not rcLayout.active then
+        if finalConnect and controlAddress and (not rcLayout.active or screensaver.current(screen)) then
             deviceSend(controlAddress, "rc_fexec", "") --resetting the shutdown timer when the blocking window is displayed
         end
         os.sleep(3)
     end
-end):resume()
+end)
+bgThread:resume()
 
 local function blockPeerMoveTextUpdate(noDraw)
     blockPeerMoveText.text = "blocks for movement: " .. currentBlockCount .. " "
@@ -994,6 +995,7 @@ function wakeUpSwitch:onSwitch()
 end
 
 ui:loop()
+bgThread:kill()
 if controlAddress then
     statusRequest(controlAddress, "rc_out")
 end

@@ -11,11 +11,15 @@ cache.static.screensaver_enabled = cache.static.screensaver_enabled or {}
 cache.static.screensaver_current = cache.static.screensaver_current or {}
 
 function screensaver.isEnabled(screen)
-    return cache.static.screensaver_enabled[screen] == true or cache.static.screensaver_enabled[screen] == nil
+    return cache.static.screensaver_enabled[screen] == nil
 end
 
 function screensaver.setEnabled(screen, state)
-    cache.static.screensaver_enabled[screen] = not not state
+    if state then
+        cache.static.screensaver_enabled[screen] = nil
+    else
+        cache.static.screensaver_enabled[screen] = false
+    end
 end
 
 
