@@ -94,6 +94,8 @@ local wakeAllButton = layout:createButton(2, layout.sizeY - 1, 13, 1, colors.ora
 connectButton.y = passwordInput.y + 2
 refreshButton.y = passwordInput.y + 2
 
+local tmpThreads = {}
+
 if warnMsg then
     wakeAllButton.y = wakeAllButton.y - 1
 end
@@ -281,8 +283,19 @@ function refreshButton:onClick()
 end
 
 function layout:onSelect(reconnect)
+    ui:forceDraw()
+    
+    if controlAddress then
+        for k, v in pairs(tmpThreads) do
+            v:kill()
+        end
+        tmpThreads = {}
+
+        statusRequest(controlAddress, "rc_out")
+        controlAddress = nil
+    end
+
     if reconnect and lastConnect then
-        ui:draw()
         manConnect(lastConnect, lastPassword)
         return
     end
@@ -368,7 +381,7 @@ local wakeUpSwitch = rcLayout:createSwitch(switchTitle.x + unicode.len(switchTit
 local randPass = rcLayout:createButton(2, rcLayout.sizeY - 7, 21, 1, colors.purple, colors.white, "use random password")
 local customPass = rcLayout:createButton(2, rcLayout.sizeY - 5, 21, 1, colors.purple, colors.white, "use custom password")
 local shutdownButton = rcLayout:createButton(2, rcLayout.sizeY - 3, 10, 1, nil, nil, "shutdown")
-local colorpic = rcLayout:createColorpic(shutdownButton.x + shutdownButton.sx + 1, rcLayout.sizeY - 3, 13, 1, "light color", 0xffffff, true)
+local toOther = rcLayout:createButton(shutdownButton.x + shutdownButton.sx + 1, rcLayout.sizeY - 3, 13, 1, colors.white, colors.black, "other functions")
 local blockPeerMove = rcLayout:createSeek(2, rcLayout.sizeY - 9, 16)
 local blockPeerMoveText = rcLayout:createText(blockPeerMove.x + blockPeerMove.size + 1, rcLayout.sizeY - 9, colors.white)
 local acceleration = rcLayout:createSeek(43, rcLayout.sizeY - 9, 17)
@@ -526,6 +539,10 @@ local function accelerationTextUpdate(noDraw)
     if not noDraw then accelerationText:draw() end
 end
 
+function toOther:onClick()
+    otherLayout:select()
+end
+
 function blockPeerMove:onSeek(value)
     currentBlockCount = math.mapRound(value, 0, 1, 1, 16)
     blockPeerMoveTextUpdate()
@@ -577,24 +594,6 @@ function customPass:onDrop()
     end
     ui:fullStart()
     ui:draw()
-end
-
-function colorpic:onColor(_, color)
-    deviceSend(controlAddress, "rc_color", color)
-end
-
-local tmpThreads = {}
-
-function rcLayout:onUnselect()
-    for k, v in pairs(tmpThreads) do
-        v:kill()
-    end
-    tmpThreads = {}
-
-    if controlAddress then
-        statusRequest(controlAddress, "rc_out")
-        controlAddress = nil
-    end
 end
 
 local controls = {}
@@ -912,6 +911,8 @@ return ci]]
 end
 
 function rcLayout:onSelect(devicetype)
+    if not devicetype then return end
+
     for _, object in pairs(controls) do
         object:destroy()
     end
@@ -1027,6 +1028,16 @@ function wakeUpSwitch:onSwitch()
     else
         statusRequest(controlAddress, "rc_exec", "if tunnel then tunnel.setWakeMessage() end if modem then modem.setWakeMessage() end")
     end
+end
+
+-----------------------------
+
+otherLayout = ui:create("controller [Remote Control]", colors.black)
+otherLayout:setReturnLayout(rcLayout)
+colorpic = otherLayout:createColorpic(2, 2, 13, 1, "light color", 0xffffff, true)
+
+function colorpic:onColor(_, color)
+    deviceSend(controlAddress, "rc_color", color)
 end
 
 ui:loop()
