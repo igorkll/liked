@@ -285,12 +285,12 @@ end
 function layout:onSelect(reconnect)
     ui:forceDraw()
 
-    if controlAddress then
-        for k, v in pairs(tmpThreads) do
-            v:kill()
-        end
-        tmpThreads = {}
+    for k, v in pairs(tmpThreads) do
+        v:kill()
+    end
+    tmpThreads = {}
 
+    if controlAddress then
         statusRequest(controlAddress, "rc_out")
         controlAddress = nil
     end
