@@ -13,16 +13,16 @@ if not drawed[screen] then
 &(_______/\_______/|_/    \/(_______/(______/ &
 ]]
 
-    local logoLines = {{}}
+    local logoLines = {{true}}
     for i = 1, #logo do
         local char = logo:sub(i, i)
         if char == "\n" then
             table.insert(logoLines, {true})
         elseif char == "&" then
-            if logoLines[#logoLines][1] ~= true then
+            if logoLines[#logoLines][1] == true then
                 table.remove(logoLines[#logoLines], 1)
             else
-                table.insert(logoLines[#logoLines], char)
+                table.insert(logoLines[#logoLines], true)
             end
         elseif logoLines[#logoLines][#logoLines] ~= true then
             table.insert(logoLines[#logoLines], char)
@@ -44,6 +44,7 @@ if not drawed[screen] then
             sx = #line
         end
     end
+    sx = sx + 2
     local x, y = ((rx / 2) - (sx / 2)) + 1, (ry / 2) - (sy / 2)
     local depth = gpu.getDepth()
 
@@ -66,7 +67,7 @@ if not drawed[screen] then
     end
 
     for i = 1, #logoLines do
-        gpu.set(x, y + (i - 1), logoLines[i])
+        gpu.set(x + 1, y + (i - 1), logoLines[i])
     end
 else
     gpu.bind(screen, false)
