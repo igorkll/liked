@@ -208,7 +208,6 @@ local function manConnect(obj, pass)
             passwordInput.read.setBuffer("")
             controlAddress = obj[3]
             ui:fullStart()
-            finalConnect = false
             rcLayout:select(obj[5])
         else
             ui:forceDraw()
@@ -283,6 +282,7 @@ function refreshButton:onClick()
 end
 
 function layout:onSelect(reconnect)
+    finalConnect = false
     ui:forceDraw()
 
     for k, v in pairs(tmpThreads) do

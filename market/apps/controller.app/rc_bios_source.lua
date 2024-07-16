@@ -177,7 +177,7 @@ while true do
     end
 
     if currentUser then
-        if autoDisconTimer and computer.uptime() - autoDisconTimer > 5 then
+        if autoDisconTimer and computer.uptime() - autoDisconTimer > 7 then
             discon()
         end
 
