@@ -1,8 +1,49 @@
 drawed = drawed or {}
 
 if not drawed[screen] then
+    local logo =
+[[
+& _       _________ _        _______  ______  &
+&( \      \__   __/| \    /\(  ____ \(  __  \ &
+&| (         ) (   |  \  / /| (    \/| (  \  )&
+&| |         | |   |  (_/ / | (__    | |   ) |&
+&| |         | |   |   _ (  |  __)   | |   | |&
+&| |         | |   |  ( \ \ | (      | |   ) |&
+&| (____/\___) (___|  /  \ \| (____/\| (__/  )&
+&(_______/\_______/|_/    \/(_______/(______/ &
+]]
+
+    local logoLines = {{}}
+    for i = 1, #logo do
+        local char = logo:sub(i, i)
+        if char == "\n" then
+            table.insert(logoLines, {true})
+        elseif char == "&" then
+            if logoLines[#logoLines][1] ~= true then
+                table.remove(logoLines[#logoLines], 1)
+            else
+                table.insert(logoLines[#logoLines], char)
+            end
+        elseif logoLines[#logoLines][#logoLines] ~= true then
+            table.insert(logoLines[#logoLines], char)
+        end
+    end
+    for i, v in ipairs(logoLines) do
+        if v[1] == true then
+            logoLines[i] = ""
+        else
+            table.remove(logoLines[i], #logoLines[i])
+            logoLines[i] = table.concat(v)
+        end
+    end
+
     local rx, ry = bootloader.initScreen(gpu, screen, 80, 25)
-    local sx, sy = 42, 10
+    local sx, sy = 0, #logoLines
+    for i, line in ipairs(logoLines) do
+        if #line > sx then
+            sx = #line
+        end
+    end
     local x, y = ((rx / 2) - (sx / 2)) + 1, (ry / 2) - (sy / 2)
     local depth = gpu.getDepth()
 
@@ -24,17 +65,9 @@ if not drawed[screen] then
         gpu.setForeground(0xffffff)
     end
 
-    gpu.set(x, y + 0, "                                          ")
-    gpu.set(x, y + 1, " █        ██   █      █   ██████   ███    ")
-    gpu.set(x, y + 2, " █             █     █    █        █  ██  ")
-    gpu.set(x, y + 3, " █        ██   █   ██     █        █    █ ")
-    gpu.set(x, y + 4, " █        ██   █ ██       █        █    █ ")
-    gpu.set(x, y + 5, " █        ██   ██         ██████   █    █ ")
-    gpu.set(x, y + 6, " █        ██   █ ██       █        █    █ ")
-    gpu.set(x, y + 7, " █        ██   █   ██     █        █    █ ")
-    gpu.set(x, y + 8, " █        ██   █     █    █        █  ██  ")
-    gpu.set(x, y + 9, " ██████   ██   █      █   ██████   ███    ")
-    gpu.set(x, y +10, "                                          ")
+    for i = 1, #logoLines do
+        gpu.set(x, y + (i - 1), logoLines[i])
+    end
 else
     gpu.bind(screen, false)
     local rx, ry = gpu.getResolution()
