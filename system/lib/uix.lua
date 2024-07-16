@@ -1198,6 +1198,7 @@ end
 
 function manager:select(layout, ...)
     if self.current then
+        self.current.selected = false
         if self.current.onUnselect then
             self.current:onUnselect()
         end
@@ -1206,6 +1207,7 @@ function manager:select(layout, ...)
 
     self.current = layout
     if self.current then
+        self.current.selected = true
         self.current.smartGuiManager = self
         self.current.allowAutoActive = nil
         self.current:fullStart()
