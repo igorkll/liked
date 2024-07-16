@@ -292,7 +292,7 @@ function layout:onSelect(reconnect)
     tmpThreads = {}
 
     if controlAddress then
-        statusRequest(controlAddress, "rc_out")
+        deviceSend(controlAddress, "rc_out")
         controlAddress = nil
     end
 
@@ -608,8 +608,9 @@ local move = {
 }
 
 local actionOffset = 18
+local firstActionPosX, firstActionPosY = actionOffset + 6, 5
 local action = {
-    rcLayout:createButton(actionOffset + 6, 5, 4, 2, colors.red, colors.white),
+    rcLayout:createButton(firstActionPosX, firstActionPosY, 4, 2, colors.red, colors.white),
     rcLayout:createButton(actionOffset + 10, 7, 4, 2, colors.red, colors.white),
     rcLayout:createButton(actionOffset + 6, 9, 4, 2, colors.red, colors.white),
     rcLayout:createButton(actionOffset + 2, 7, 4, 2, colors.red, colors.white),
@@ -759,6 +760,8 @@ ox, oy, oz = nx, ny, nz]])
 
 
     
+    action[1].x = firstActionPosX
+    action[1].y = firstActionPosY
     move[1].onDrop = function (self)
         droneMove(0, 0, currentBlockCount)
     end
@@ -908,16 +911,42 @@ end
 ut()
 return ci]]
 
+    controls[1] = rcLayout:createText(2, 12, colors.white, "feedback on movement:")
+    controls.feedback = rcLayout:createSwitch(controls[1].x + #controls[1].text + 1, controls[1].y, true)
+
     local function robotMove(side)
-        local blocks = math.floor(select(2, assert(ui:mwindow(screen, statusLongRequest, 15, controlAddress, "rc_exec", robotMoveCode, side, currentBlockCount))))
-        if blocks ~= currentBlockCount then
-            ui:mwindow(screen, gui.warn, screen, nil, nil, "the movement failed, " .. blocks .." blocks were passed")
+        if controls.feedback.state then
+            local blocks = math.floor(select(2, assert(ui:mwindow(screen, statusLongRequest, 15, controlAddress, "rc_exec", robotMoveCode, side, currentBlockCount))))
+            if blocks ~= currentBlockCount then
+                ui:mwindow(screen, gui.warn, screen, nil, nil, "the movement failed, " .. blocks .." blocks were passed")
+            end
+        else
+            deviceSend(controlAddress, "rc_exec", robotMoveCode, side, currentBlockCount)
         end
+    end
+
+    local function actionOnSide(side)
+        
     end
 
     for i = 1, 4 do
         local arrow = move[i]
         arrow.fore = colors.white
+    end
+
+    action[1].x = firstActionPosX + 4
+    action[1].y = firstActionPosY + 2
+    action[1].text = "frow"
+    action[1].onDrop = function()
+        actionOnSide(sides.front)
+    end
+    action[5].text = "up"
+    action[5].onDrop = function()
+        actionOnSide(sides.up)
+    end
+    action[6].text = "down"
+    action[6].onDrop = function()
+        actionOnSide(sides.down)
     end
 
     move[1].text = "forw"
@@ -1086,5 +1115,5 @@ end
 ui:loop()
 bgThread:kill()
 if controlAddress then
-    statusRequest(controlAddress, "rc_out")
+    deviceSend(controlAddress, "rc_out")
 end
