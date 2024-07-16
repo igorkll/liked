@@ -284,6 +284,7 @@ end
 
 function layout:onSelect(reconnect)
     finalConnect = false
+    connectList.list = {}
     ui:forceDraw()
 
     for k, v in pairs(tmpThreads) do
@@ -302,7 +303,6 @@ function layout:onSelect(reconnect)
     end
 
     advRequest()
-    connectList.list = {}
 end
 
 function layout:onFullStart()
