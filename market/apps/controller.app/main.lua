@@ -603,8 +603,18 @@ local move = {
     rcLayout:createButton(10, 7, 4, 2, colors.purple, colors.white),
     rcLayout:createButton(6, 9, 4, 2, colors.purple, colors.white),
     rcLayout:createButton(2, 7, 4, 2, colors.purple, colors.white),
-    rcLayout:createButton(6+10, 5, 4, 2, colors.orange, colors.white),
-    rcLayout:createButton(6+10, 9, 4, 2, colors.orange, colors.white)
+    rcLayout:createButton(6+9, 5, 4, 2, colors.orange, colors.white),
+    rcLayout:createButton(6+9, 9, 4, 2, colors.orange, colors.white)
+}
+
+local actionOffset = 18
+local action = {
+    rcLayout:createButton(actionOffset + 6, 5, 4, 2, colors.red, colors.white),
+    rcLayout:createButton(actionOffset + 10, 7, 4, 2, colors.red, colors.white),
+    rcLayout:createButton(actionOffset + 6, 9, 4, 2, colors.red, colors.white),
+    rcLayout:createButton(actionOffset + 2, 7, 4, 2, colors.red, colors.white),
+    rcLayout:createButton(actionOffset + 6+9, 5, 4, 2, colors.pink, colors.white),
+    rcLayout:createButton(actionOffset + 6+9, 9, 4, 2, colors.pink, colors.white)
 }
 
 ui:bind(17, move[1])
@@ -990,10 +1000,16 @@ return true]]
         for _, v in pairs(move) do
             v.disabledHidden = false
         end
+        for i, v in pairs(action) do
+            v.disabledHidden = not (devicetype == "drone" or i == 1 or i == 5 or i == 6)
+        end
         colorpic.disabledHidden = false
         colorpic:setColor(0xffffff)
     else
         for _, v in pairs(move) do
+            v.disabledHidden = true
+        end
+        for _, v in pairs(action) do
             v.disabledHidden = true
         end
     end
