@@ -1257,18 +1257,28 @@ function manager:loop(timeout)
         elseif self.exitFlag then
             break
         elseif self.current and keybinds and (eventData[1] == "key_down" or eventData[1] == "key_up") and keyboardCheck(self, eventData) then
-            local binds = keybinds[eventData[4]]
-            if binds then
-                for i, bind in ipairs(binds) do
-                    local obj = bind[1]
-                    local l = bind[2] or {}
-                    obj:uploadEvent({eventData[1] == "key_down" and "touch" or "drop",
-                        obj.gui.screen,
-                        obj.x + (l[1] or 0),
-                        obj.y + (l[2] or 0),
-                        l[3] or 0,
-                        l[4] or eventData[5]
-                    })
+            local inputFromLine = false
+            for i, obj in ipairs(self.current.objs) do
+                if obj.type == "input" and obj.read.getAllowUse() then
+                    inputFromLine = true
+                    break
+                end
+            end
+
+            if not inputFromLine then
+                local binds = keybinds[eventData[4]]
+                if binds then
+                    for i, bind in ipairs(binds) do
+                        local obj = bind[1]
+                        local l = bind[2] or {}
+                        obj:uploadEvent({eventData[1] == "key_down" and "touch" or "drop",
+                            obj.gui.screen,
+                            obj.x + (l[1] or 0),
+                            obj.y + (l[2] or 0),
+                            l[3] or 0,
+                            l[4] or eventData[5]
+                        })
+                    end
                 end
             end
         end
