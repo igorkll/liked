@@ -221,10 +221,10 @@ local function manConnect(obj, pass)
     end
 end
 
-local function findObj()
-    for i = 1, #connectList.list do
-        if connectList.list[i][2] then
-            return connectList.list[i]
+local function findObj(list)
+    for i = 1, #list do
+        if list[i][2] then
+            return i, list[i]
         end
     end
 end
@@ -232,7 +232,7 @@ end
 local lastConnect
 local lastPassword
 local function connect()
-    local obj = findObj()
+    local _, obj = findObj(connectList.list)
     if obj then
         lastConnect = table.clone(obj)
         lastPassword = passwordInput.read.getBuffer()
@@ -597,6 +597,41 @@ function customPass:onDrop()
     ui:draw()
 end
 
+local actionsTitle = rcLayout:createText(39, 2, colors.white, "actions")
+local actionsList = rcLayout:createCustom(actionsTitle.x, actionsTitle.y + 1, gobjs.checkboxgroup, 11, 5)
+actionsList.oneSelect = true
+actionsList.list = {
+    {"swing"},
+    {"use"},
+    {"use sneaky"},
+    {"place"},
+    {"place sneaky"},
+    {"drain"},
+    {"drain max"},
+    {"fill"},
+    {"fill max"},
+    {"drop"},
+    {"drop max"},
+    {"suck"},
+    {"suck max"}
+}
+
+local actionsFuncs = {
+    "(robot or drone).swing(...)",
+    "(robot or drone).use(...)",
+    "(robot or drone).use(..., true)",
+    "(robot or drone).place(...)",
+    "(robot or drone).place(..., true)",
+    "(robot or drone).drain(..., 1)",
+    "(robot or drone).drain(..., math.huge)",
+    "(robot or drone).fill(..., 1)",
+    "(robot or drone).fill(..., math.huge)",
+    "(robot or drone).drop(..., 1)",
+    "(robot or drone).drop(..., math.huge)",
+    "(robot or drone).suck(..., 1)",
+    "(robot or drone).suck(..., math.huge)"
+}
+
 local controls = {}
 local move = {
     rcLayout:createButton(6, 5, 4, 2, colors.purple, colors.white),
@@ -926,7 +961,10 @@ return ci]]
     end
 
     local function actionOnSide(side)
-        
+        local i = findObj(actionsList)
+        if i then
+            deviceSend(controlAddress, "rc_exec", actionsFuncs[i], side)
+        end
     end
 
     for i = 1, 4 do
