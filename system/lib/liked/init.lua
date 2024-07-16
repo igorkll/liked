@@ -254,6 +254,18 @@ function liked.applyPowerMode()
     end
 end
 
+function liked.noEnergySaver()
+    if registry.powerMode == "power" then
+        return function () end
+    end
+
+    energyTh:suspend()
+    event.minTime = 0.05
+    return function ()
+        energyTh:resume()
+    end
+end
+
 function liked.applyBeepState()
     if registry.fullBeepDisable then
         computer.beep = system.stub

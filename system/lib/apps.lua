@@ -164,6 +164,7 @@ function apps.load(name, screen, nickname, mainEnv, exitEnv)
     end
 
     local oldScreenSaverState
+    local backEnergySaving
     local oldPrecise
 
     --------------------------------
@@ -195,6 +196,10 @@ function apps.load(name, screen, nickname, mainEnv, exitEnv)
                 screensaver.setEnabled(screen, false)
             end
 
+            if configTbl.noEnergySaver then
+                backEnergySaving = liked.noEnergySaver()
+            end
+
             if configTbl.res then
                 graphic.setResolution(screen, table.unpack(configTbl.res))
             end
@@ -222,6 +227,10 @@ function apps.load(name, screen, nickname, mainEnv, exitEnv)
 
             if configTbl.noScreenSaver then
                 screensaver.setEnabled(screen, oldScreenSaverState)
+            end
+
+            if configTbl.noEnergySaver then
+                backEnergySaving()
             end
 
             if oldPrecise ~= nil then

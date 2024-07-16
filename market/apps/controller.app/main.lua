@@ -14,6 +14,7 @@ local screensaver = require("screensaver")
 local thread = require("thread")
 local sides = require("sides")
 local uuid = require("uuid")
+local liked = require("liked")
 
 local screen = ...
 local colors = uix.colors

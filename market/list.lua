@@ -52,7 +52,7 @@ local list = {
 
         path = "/data/apps/controller.app",
         urlPrimaryPart = selfurlpart .. "/apps/controller.app/",
-        files = {"main.lua", "icon.t2p", "unreg_private.reg", "extern.cfg", "firmware/rc_bios/code.lua", "firmware/rc_bios/label.txt"}
+        files = {"main.lua", "icon.t2p", "config.cfg", "unreg_private.reg", "extern.cfg", "firmware/rc_bios/code.lua", "firmware/rc_bios/label.txt"}
     },
     {
         name = "worm",
