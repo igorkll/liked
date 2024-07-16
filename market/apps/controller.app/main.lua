@@ -961,7 +961,7 @@ return ci]]
     end
 
     local function actionOnSide(side)
-        local i = findObj(actionsList)
+        local i = findObj(actionsList.list)
         if i then
             deviceSend(controlAddress, "rc_exec", actionsFuncs[i], side)
         end
