@@ -36,11 +36,14 @@ vec.meta3 = {
         local blen = type(b) == "number" and b or b:len()
         return alen <= blen
     end,
-    __len = function (vec)
-        return vec:len()
+    __len = function (self)
+        return self:len()
     end,
     __call = function (self)
         return vec.vec3(self.x, self.y, self.z)
+    end,
+    __tostring = function(self)
+        return self:tostring()
     end
 }
 
@@ -78,11 +81,14 @@ vec.meta2 = {
         local blen = type(b) == "number" and b or b:len()
         return alen <= blen
     end,
-    __len = function (vec)
-        return vec:len()
+    __len = function (self)
+        return self:len()
     end,
     __call = function (self)
         return vec.vec2(self.x, self.y)
+    end,
+    __tostring = function(self)
+        return self:tostring()
     end
 }
 
@@ -141,13 +147,20 @@ vec.meta = {
         local blen = type(b) == "number" and b or b:len()
         return alen <= blen
     end,
-    __len = function (vec)
-        return vec:len()
+    __len = function (self)
+        return self:len()
     end,
     __call = function (self)
         return vec.vec(table.unpack(self))
+    end,
+    __tostring = function(self)
+        return self:tostring()
     end
 }
+
+setmetatable(vec.meta3, {__index = vec})
+setmetatable(vec.meta2, {__index = vec})
+setmetatable(vec.meta, {__index = vec})
 
 ------------------------------------- methods
 
@@ -169,25 +182,34 @@ function vec:normalize()
     return self / #self
 end
 
+function vec:tostring()
+    local str = "vec<"
+    if self.z then
+        str = str .. "x: " .. self.x .. ", y: " .. self.y .. ", z: " .. self.z
+    elseif self.y then
+        str = str .. "x: " .. self.x .. ", y: " .. self.y
+    else
+        local flag = false
+        for _, v in ipairs(self) do
+            str = str .. (flag and ", " or "") .. v
+            flag = true
+        end
+    end
+    return str .. ">"
+end
+
 -------------------------------------
 
 function vec.vec3(x, y, z)
-    local vec3 = setmetatable({__index = vec}, vec.meta3)
-    vec3.x = x
-    vec3.y = y
-    vec3.z = z
-    return vec3
+    return setmetatable({x = x, y = y, z = z}, vec.meta3)
 end
 
 function vec.vec2(x, y)
-    local vec2 = setmetatable({__index = vec}, vec.meta2)
-    vec2.x = x
-    vec2.y = y
-    return vec2
+    return setmetatable({x = x, y = y}, vec.meta2)
 end
 
 function vec.vec(...)
-    return setmetatable({__index = vec, ...}, vec.meta)
+    return setmetatable({...}, vec.meta)
 end
 
 vec.unloadable = true
