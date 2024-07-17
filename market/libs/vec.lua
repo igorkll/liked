@@ -3,6 +3,7 @@ local vec = {}
 ------------------------------------- meta
 
 vec.meta3 = {
+    __index = vec,
     __add = function (a, b)
         if type(a) == "number" then a = vec.vec3(a, a, a) end
         if type(b) == "number" then b = vec.vec3(b, b, b) end
@@ -48,6 +49,7 @@ vec.meta3 = {
 }
 
 vec.meta2 = {
+    __index = vec,
     __add = function (a, b)
         if type(a) == "number" then a = vec.vec2(a, a) end
         if type(b) == "number" then b = vec.vec2(b, b) end
@@ -93,6 +95,7 @@ vec.meta2 = {
 }
 
 vec.meta = {
+    __index = vec,
     __add = function (a, b)
         if type(a) == "number" then a = setmetatable({}, {__index = function() return a end}) end
         if type(b) == "number" then b = setmetatable({}, {__index = function() return b end}) end
@@ -157,10 +160,6 @@ vec.meta = {
         return self:tostring()
     end
 }
-
-setmetatable(vec.meta3, {__index = vec})
-setmetatable(vec.meta2, {__index = vec})
-setmetatable(vec.meta, {__index = vec})
 
 ------------------------------------- methods
 
