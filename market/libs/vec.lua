@@ -157,7 +157,7 @@ vec.meta = {
         return self:len()
     end,
     __call = function (self)
-        return vec.vec(table.unpack(self))
+        return vec.vec(table.unpack(self, 1, self.n))
     end,
     __tostring = function(self)
         return self:tostring()
@@ -211,7 +211,7 @@ function vec.vec2(x, y)
 end
 
 function vec.vec(...)
-    return setmetatable({...}, vec.meta)
+    return setmetatable(table.pack(...), vec.meta)
 end
 
 vec.unloadable = true
