@@ -48,16 +48,40 @@ if not drawed[screen] then
     local x, y = ((rx / 2) - (sx / 2)) + 1, (ry / 2) - (sy / 2)
     local depth = gpu.getDepth()
 
+    local logoColor
+    do
+        local random = math.random
+
+        local major = {false, false, false}
+        for i = 1, random(1, 2) do
+            local pos = random(1, 3)
+            if major[pos] then
+                pos = pos + 1
+                if pos > 3 then
+                    pos = 1
+                end
+            end
+            major[pos] = true
+        end
+        
+        local function componentGen(pos)
+            return major[pos] and random(190, 240) or random(25, 80)
+        end
+
+        local r, g, b = componentGen(1), componentGen(2), componentGen(3)
+        logoColor = b + (g * 256) + (r * 256 * 256)
+    end
+
     if depth ~= 1 then
         gpu.setPaletteColor(0, 0x000000)
-        gpu.setPaletteColor(1, 0xff0000)
+        gpu.setPaletteColor(1, logoColor)
         gpu.setPaletteColor(2, 0xffffff)
     end
 
     gpu.setBackground(0x000000)
     gpu.fill(1, 1, rx, ry, " ")
 
-    gpu.setBackground(0xff0000)
+    gpu.setBackground(logoColor)
     gpu.fill(x, y, sx, sy, " ")
 
     if depth == 1 then
