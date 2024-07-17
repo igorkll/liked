@@ -94,43 +94,46 @@ vec.meta2 = {
     end
 }
 
+local vecMathAdd = function(v1, v2) return v1 + v2 end
+local vecMathSub = function(v1, v2) return v1 - v2 end
+local vecMathMul = function(v1, v2) return v1 * v2 end
+local vecMathDiv = function(v1, v2) return v1 / v2 end
+local function vecMath(a, b, func)
+    local aNum = type(a) == "number"
+    if aNum then
+        local v = a
+        a = setmetatable({}, {__index = function() return v end})
+    end
+    if type(b) == "number" then
+        local v = b
+        b = setmetatable({}, {__index = function() return v end})
+    end
+    local ret = vec.vec()
+    if aNum then
+        for i, v in ipairs(b) do
+            ret[i] = func(a[i], b[i])
+        end
+    else
+        for i, v in ipairs(a) do
+            ret[i] = func(a[i], b[i])
+        end
+    end
+    return ret
+end
+
 vec.meta = {
     __index = vec,
     __add = function (a, b)
-        if type(a) == "number" then a = setmetatable({}, {__index = function() return a end}) end
-        if type(b) == "number" then b = setmetatable({}, {__index = function() return b end}) end
-        local ret = vec.vec()
-        for i, v in ipairs(a) do
-            ret[i] = a[i] + b[i]
-        end
-        return ret
+        return vecMath(a, b, vecMathAdd)
     end,
     __sub = function (a, b)
-        if type(a) == "number" then a = setmetatable({}, {__index = function() return a end}) end
-        if type(b) == "number" then b = setmetatable({}, {__index = function() return b end}) end
-        local ret = vec.vec()
-        for i, v in ipairs(a) do
-            ret[i] = a[i] - b[i]
-        end
-        return ret
+        return vecMath(a, b, vecMathSub)
     end,
     __mul = function (a, b)
-        if type(a) == "number" then a = setmetatable({}, {__index = function() return a end}) end
-        if type(b) == "number" then b = setmetatable({}, {__index = function() return b end}) end
-        local ret = vec.vec()
-        for i, v in ipairs(a) do
-            ret[i] = a[i] * b[i]
-        end
-        return ret
+        return vecMath(a, b, vecMathMul)
     end,
     __div = function (a, b)
-        if type(a) == "number" then a = setmetatable({}, {__index = function() return a end}) end
-        if type(b) == "number" then b = setmetatable({}, {__index = function() return b end}) end
-        local ret = vec.vec()
-        for i, v in ipairs(a) do
-            ret[i] = a[i] / b[i]
-        end
-        return ret
+        return vecMath(a, b, vecMathDiv)
     end,
     __eq = function (a, b)
         for i, v in ipairs(a) do
