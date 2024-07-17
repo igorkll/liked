@@ -86,13 +86,82 @@ vec.meta2 = {
     end
 }
 
+vec.meta = {
+    __add = function (a, b)
+        if type(a) == "number" then a = setmetatable({}, {__index = function() return a end}) end
+        if type(b) == "number" then b = setmetatable({}, {__index = function() return b end}) end
+        local ret = vec.vec()
+        for i, v in ipairs(a) do
+            ret[i] = a[i] + b[i]
+        end
+        return ret
+    end,
+    __sub = function (a, b)
+        if type(a) == "number" then a = setmetatable({}, {__index = function() return a end}) end
+        if type(b) == "number" then b = setmetatable({}, {__index = function() return b end}) end
+        local ret = vec.vec()
+        for i, v in ipairs(a) do
+            ret[i] = a[i] - b[i]
+        end
+        return ret
+    end,
+    __mul = function (a, b)
+        if type(a) == "number" then a = setmetatable({}, {__index = function() return a end}) end
+        if type(b) == "number" then b = setmetatable({}, {__index = function() return b end}) end
+        local ret = vec.vec()
+        for i, v in ipairs(a) do
+            ret[i] = a[i] * b[i]
+        end
+        return ret
+    end,
+    __div = function (a, b)
+        if type(a) == "number" then a = setmetatable({}, {__index = function() return a end}) end
+        if type(b) == "number" then b = setmetatable({}, {__index = function() return b end}) end
+        local ret = vec.vec()
+        for i, v in ipairs(a) do
+            ret[i] = a[i] / b[i]
+        end
+        return ret
+    end,
+    __eq = function (a, b)
+        for i, v in ipairs(a) do
+            if b[i] ~= v then
+                return false
+            end
+        end
+        return true
+    end,
+    __lt = function (a, b)
+        local alen = type(a) == "number" and a or a:len()
+        local blen = type(b) == "number" and b or b:len()
+        return alen < blen
+    end,
+    __le = function (a, b)
+        local alen = type(a) == "number" and a or a:len()
+        local blen = type(b) == "number" and b or b:len()
+        return alen <= blen
+    end,
+    __len = function (vec)
+        return vec:len()
+    end,
+    __call = function (self)
+        return vec.vec(table.unpack(self))
+    end
+}
+
 ------------------------------------- methods
 
 function vec:len()
     if self.z then
         return math.sqrt(self.x ^ 2 + self.y ^ 2 + self.z ^ 2)
-    else
+    elseif self.y then
         return math.sqrt(self.x ^ 2 + self.y ^ 2)
+    else
+        local sum = 0
+        for i, v in ipairs(self) do
+            sum = sum + (v ^ 2)
+        end
+        return math.sqrt(sum)
     end
 end
 
@@ -115,6 +184,10 @@ function vec.vec2(x, y)
     vec2.x = x
     vec2.y = y
     return vec2
+end
+
+function vec.vec(...)
+    return setmetatable({__index = vec, ...}, vec.meta)
 end
 
 vec.unloadable = true

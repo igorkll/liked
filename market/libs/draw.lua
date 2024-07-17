@@ -41,23 +41,32 @@ function draw:size()
 end
 
 function draw:dot(x, y, color)
-    x = math.round(x)
-    y = math.round(y)
-
     if self.mask then
         color = self.mask(x, y, color, table.unpack(self.maskArgs)) or color
     end
 
     color = color or 0xffffff
-    local offsetX, offsetY = self.x - 1, self.y - 1
+    local offsetX, offsetY = self.window.x - 2, self.window.y - 2
+    local gpu, index
     local setX, setY, setB, setF, setC, setI
+    local chars, foregrounds, backgrounds, width, height
     if self.mode == draw.modes.box then
         setX, setY, setB, setF, setC, setI = ((x - 1) * 2) + 1, y, color, 0, " ", 2
     elseif self.mode == draw.modes.full then
         setX, setY, setB, setF, setC, setI = x, y, color, 0, " ", 1
     elseif self.mode == draw.modes.semi then
         local realY = ((y - 1) // 2) + 1
-        local _, _, fore, back = pcall(self.window.get, self.window, x, realY)
+
+        gpu = graphic.findGpu(self.window.screen)
+        local _, fore, back
+        if gpu and gpu.getSoftwareBuffers then
+            chars, foregrounds, backgrounds, width, height = gpu.getSoftwareBuffers()
+            index = offsetX + x + 1 + ((offsetY + realY) * width)
+            fore, back = foregrounds[index], backgrounds[index]
+        else
+            _, _, fore, back = pcall(self.window.get, self.window, x, realY)
+        end
+        
         if fore then
             if y % 2 == 0 then
                 fore = color
@@ -69,10 +78,12 @@ function draw:dot(x, y, color)
     end
 
     if setX then
-        local gpu = graphic.findGpu(self.window.screen)
+        gpu = gpu or graphic.findGpu(self.window.screen)
         if gpu and gpu.getSoftwareBuffers then
-            local chars, foregrounds, backgrounds, width, height = gpu.getSoftwareBuffers()
-            local index = ((x - 1) // 2) + 1 + ((y - 1) * width)
+            if not chars then
+                chars, foregrounds, backgrounds, width, height = gpu.getSoftwareBuffers()
+            end
+            index = offsetX + setX + 1 + ((offsetY + setY) * width)
             for i = 1, setI do
                 chars[index] = setC
                 foregrounds[index] = setF
@@ -92,10 +103,6 @@ end
 -------------------------------- graphic
 
 function draw:line(x0, y0, x1, y1, color)
-    x0 = math.round(x0)
-    y0 = math.round(y0)
-    x1 = math.round(x1)
-    y1 = math.round(y1)
     color = color or 0xffffff
 
     local sx, sy, e2, err;
@@ -122,10 +129,6 @@ function draw:line(x0, y0, x1, y1, color)
 end
 
 function draw:fill(x, y, sx, sy, color)
-    x = math.round(x)
-    y = math.round(y)
-    sx = math.round(sx)
-    sy = math.round(sy)
     color = color or 0xffffff
 
     if self.mode == draw.modes.box and not self.mask then
@@ -142,10 +145,6 @@ function draw:fill(x, y, sx, sy, color)
 end
 
 function draw:rect(x, y, sx, sy, color)
-    x = math.round(x)
-    y = math.round(y)
-    sx = math.round(sx)
-    sy = math.round(sy)
     color = color or 0xffffff
 
     for ix = x, x + (sx - 1) do
@@ -171,15 +170,15 @@ local function quadInCircle(qx, qy, qs, cx, cy, cr)
 end
 
 function draw:circle(x, y, r, color)
-    x = math.round(x) + 1.5
-    y = math.round(y) + 1.5
+    x = math.round(x) + 0.5
+    y = math.round(y) + 0.5
     r = math.round(r) + 0.5
 
     local rx, ry = self:size()
     local px, py
-    for ix = math.max(-r, -x), math.min(r, rx - x) do
+    for ix = math.max(-r, -x + 1), math.min(r, rx - x) do
         px = x + ix
-        for iy = math.max(-r, -y), math.min(r, ry - y) do
+        for iy = math.max(-r, -y + 1), math.min(r, ry - y) do
             py = y + iy
             if quadInCircle(px, py, 1, x, y, r) then
                 self:dot(px, py, color)
@@ -210,9 +209,6 @@ local function drawCircle_putpixel(self, cx, cy, x, y, color)
 end
 
 function draw:drawCircle(x, y, r, color)
-    x = math.round(x) + 0.5
-    y = math.round(y) + 0.5
-
     local lx = 0
     local ly = r
     local d = 3 - 2 * r
