@@ -1,10 +1,13 @@
 local graphic = require("graphic")
 local gui_container = require("gui_container")
+
 local draw = {modes = {}, colors = gui_container.colors}
 draw.modes.box = 0
 draw.modes.full = 1
 draw.modes.semi = 2
 draw.modes.braille = 3
+
+local rep = string.rep
 
 -------------------------------- base
 
@@ -46,11 +49,12 @@ function draw:dot(x, y, color)
     end
 
     color = color or 0xffffff
-
+    local offsetX, offsetY = self.x - 1, self.y - 1
+    local setX, setY, setB, setF, setC, setI
     if self.mode == draw.modes.box then
-        self.window:set(((x - 1) * 2) + 1, y, color, 0, "  ")
+        setX, setY, setB, setF, setC, setI = ((x - 1) * 2) + 1, y, color, 0, " ", 2
     elseif self.mode == draw.modes.full then
-        self.window:set(x, y, color, 0, " ")
+        setX, setY, setB, setF, setC, setI = x, y, color, 0, " ", 1
     elseif self.mode == draw.modes.semi then
         local realY = ((y - 1) // 2) + 1
         local _, _, fore, back = pcall(self.window.get, self.window, x, realY)
@@ -60,7 +64,23 @@ function draw:dot(x, y, color)
             else
                 back = color
             end
-            self.window:set(x, realY, back, fore, "▄")
+            setX, setY, setB, setF, setC, setI = x, realY, back, fore, "▄", 1
+        end
+    end
+
+    if setX then
+        local gpu = graphic.findGpu(self.window.screen)
+        if gpu and gpu.getSoftwareBuffers then
+            local chars, foregrounds, backgrounds, width, height = gpu.getSoftwareBuffers()
+            local index = ((x - 1) // 2) + 1 + ((y - 1) * width)
+            for i = 1, setI do
+                chars[index] = setC
+                foregrounds[index] = setF
+                backgrounds[index] = setB
+                index = index + 1
+            end
+        else
+            self.window:set(setX, setY, setB, setF, rep(setC, setI))
         end
     end
 end
