@@ -10,7 +10,9 @@ local advLabeling = require("advLabeling")
 _G.componentLog = _G.componentLog or {}
 
 local screen = ...
+local clear = gui.saveBigZone(screen)
 local address = gui.selectcomponent(screen)
+clear()
 if not address then
     return
 end

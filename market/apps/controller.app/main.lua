@@ -597,7 +597,8 @@ function customPass:onDrop()
     ui:draw()
 end
 
-local actionsTitle = rcLayout:createText(39, 2, colors.white, "actions")
+local actionsPosX, actionsPosY = 39, 2
+local actionsTitle = rcLayout:createText(actionsPosX, actionsPosY, colors.white, "actions")
 local actionsList = rcLayout:createCustom(actionsTitle.x, actionsTitle.y + 1, gobjs.checkboxgroup, 11, 5)
 actionsList.oneSelect = true
 actionsList.list = {
@@ -644,13 +645,15 @@ local move = {
 
 local actionOffset = 18
 local firstActionPosX, firstActionPosY = actionOffset + 6, 5
+local upActPosX, upActPosY = actionOffset + 6+9, 5
+local downActPosX, downActPosY = actionOffset + 6+9, 9
 local action = {
     rcLayout:createButton(firstActionPosX, firstActionPosY, 4, 2, colors.red, colors.white),
     rcLayout:createButton(actionOffset + 10, 7, 4, 2, colors.red, colors.white),
     rcLayout:createButton(actionOffset + 6, 9, 4, 2, colors.red, colors.white),
     rcLayout:createButton(actionOffset + 2, 7, 4, 2, colors.red, colors.white),
-    rcLayout:createButton(actionOffset + 6+9, 5, 4, 2, colors.pink, colors.white),
-    rcLayout:createButton(actionOffset + 6+9, 9, 4, 2, colors.pink, colors.white)
+    rcLayout:createButton(upActPosX, upActPosY, 4, 2, colors.pink, colors.white),
+    rcLayout:createButton(downActPosX, downActPosY, 4, 2, colors.pink, colors.white)
 }
 
 ui:bind(17, move[1])
@@ -794,7 +797,12 @@ ox, oy, oz = nx, ny, nz]])
     end
 
 
-    
+    actionsTitle.x = actionsPosX
+    actionsTitle.y = actionsPosY
+    actionsList.x = actionsPosX
+    actionsList.y = actionsPosY + 1
+    uix.updateDrawZone(actionsList)
+
     action[1].x = firstActionPosX
     action[1].y = firstActionPosY
     move[1].onDrop = function (self)
@@ -811,10 +819,14 @@ ox, oy, oz = nx, ny, nz]])
     end
 
     move[5].text = "+Y"
+    action[5].x = upActPosX
+    action[5].y = upActPosY
     move[5].onDrop = function (self)
         droneMove(0, currentBlockCount, 0)
     end
     move[6].text = "-Y"
+    action[6].x = downActPosX
+    action[6].y = downActPosY
     move[6].onDrop = function (self)
         droneMove(0, -currentBlockCount, 0)
     end
@@ -972,17 +984,28 @@ return ci]]
         arrow.fore = colors.white
     end
 
-    action[1].x = firstActionPosX + 4
+    local aOffset = -3
+    actionsTitle.x = actionsPosX + aOffset
+    actionsTitle.y = actionsPosY + 3
+    actionsList.x = actionsPosX
+    actionsList.y = actionsPosY + 1
+    uix.updateDrawZone(actionsList)
+
+    action[1].x = firstActionPosX + 4 + aOffset
     action[1].y = firstActionPosY + 2
     action[1].text = "frow"
     action[1].onDrop = function()
         actionOnSide(sides.front)
     end
     action[5].text = "up"
+    action[5].x = upActPosX + aOffset
+    action[5].y = upActPosY
     action[5].onDrop = function()
         actionOnSide(sides.up)
     end
     action[6].text = "down"
+    action[6].x = downActPosX + aOffset
+    action[6].y = downActPosY
     action[6].onDrop = function()
         actionOnSide(sides.down)
     end

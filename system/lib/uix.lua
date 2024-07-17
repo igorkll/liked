@@ -1061,6 +1061,11 @@ function uix.regDrawZone(self, sizeX, sizeY)
     return graphic.createWindow(self.gui.screen, self.gui.window.x + (self.x - 1), self.gui.window.y + (self.y - 1), sizeX, sizeY)
 end
 
+function uix.updateDrawZone(self)
+    self.w.x = self.gui.window.x + (self.x - 1)
+    self.w.y = self.gui.window.y + (self.y - 1)
+end
+
 function uix.doColor(obj, back, fore)
     obj.back = back or colors.white
     obj.fore = fore
