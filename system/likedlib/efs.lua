@@ -85,15 +85,17 @@ local function reg(password)
         cache.static[2] = true
 
         for _, path in ipairs(loadlist()) do
-            for _, lpath in fs.recursion(fs.mntPath(path)) do
-                if not fs.isDirectory(lpath) then
-                    local datakey = fs.getAttribute(lpath, "datakey")
-                    if datakey then
-                        fs.regXor(lpath, function ()
-                            return xorfs.xorcode(datakey, password)
-                        end)
-                    else
-                        fs.regXor(lpath)
+            if fs.exists(path) then
+                for _, lpath in fs.recursion(fs.mntPath(path)) do
+                    if not fs.isDirectory(lpath) then
+                        local datakey = fs.getAttribute(lpath, "datakey")
+                        if datakey then
+                            fs.regXor(lpath, function ()
+                                return xorfs.xorcode(datakey, password)
+                            end)
+                        else
+                            fs.regXor(lpath)
+                        end
                     end
                 end
             end
@@ -101,9 +103,11 @@ local function reg(password)
     else
         table.clear(fs.openHooks, 774)
         for _, path in ipairs(loadlist()) do
-            for _, lpath in fs.recursion(fs.mntPath(path)) do
-                if not fs.isDirectory(lpath) then
-                    fs.regXor(lpath)
+            if fs.exists(path) then
+                for _, lpath in fs.recursion(fs.mntPath(path)) do
+                    if not fs.isDirectory(lpath) then
+                        fs.regXor(lpath)
+                    end
                 end
             end
         end
