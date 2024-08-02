@@ -52,10 +52,12 @@ end
 local function toggleAll(password) --the password must be correct when decrypting files, otherwise the keys will overlap
     local newState = not registry.encrypt
     for _, path in ipairs(loadlist()) do
-        if fs.isDirectory(path) then
-            toggleFolder(path, password, newState)
-        else
-            toggleFile(path, password, newState)
+        if fs.exists(path) then
+            if fs.isDirectory(path) then
+                toggleFolder(path, password, newState)
+            else
+                toggleFile(path, password, newState)
+            end
         end
     end
     registry.encrypt = newState
