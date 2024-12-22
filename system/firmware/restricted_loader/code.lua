@@ -30,7 +30,6 @@ do
 end
 
 local function checkSystem(address)
-	computer.beep(2000, 0.1)
 	if not invoke(address, "exists", "/init.lua") then
 		return false
 	end
@@ -89,8 +88,5 @@ if not checkSystem(bootAddress) then
 	error("restricted loader: the system failed verification", 0)
 end
 
-computer.beep(1700, 0.05)
-computer.beep(1800, 0.05)
-computer.beep(2000, 0.05)
-computer.beep(2000, 0.05)
+computer.beep(1000, 0.2)
 assert(load(readFile(bootAddress, "/init.lua"), "=init"))()
