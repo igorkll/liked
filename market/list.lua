@@ -602,7 +602,7 @@ local list = {
 		
 		path = "/data/apps/zxSlideshow.app",
 		urlPrimaryPart = selfurlpart .. "/apps/zxSlideshow.app/",
-		files = {"main.lua", "icon.t2p", "logo.t2p", "formats.cfg", "config.cfg"}
+		files = {"main.lua", "icon.t2p", "logo.t2p", "config.cfg"}
 	},
 }
 

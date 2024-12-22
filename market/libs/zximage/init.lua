@@ -109,6 +109,7 @@ function zximage.draw(screen, path, crop)
 	local set = graphic.set
 	local gpu = graphic.findGpu(screen)
 	if gpu.getSoftwareBuffers then
+		local updateZone = gpu.updateZone or function () end
 		local chars, fores, backs = gpu.getSoftwareBuffers()
 		local pal = graphic.getPalette(screen, true)
 		local rx = graphic.getResolution(screen)
@@ -118,6 +119,7 @@ function zximage.draw(screen, path, crop)
 		if crop then
 			return zximage.parse(path, function (x, y, back, fore, char)
 				index = ((x - 1) // 2) + 1 + (((y - 1) // 2) * rx)
+				updateZone(index)
 				chars[index] = char
 				fores[index] = pal[fore]
 				backs[index] = pal[back]
@@ -125,6 +127,7 @@ function zximage.draw(screen, path, crop)
 		else
 			return zximage.parse(path, function (x, y, back, fore, char)
 				index = x + ((y - 1) * rx)
+				updateZone(index)
 				chars[index] = char
 				fores[index] = pal[fore]
 				backs[index] = pal[back]

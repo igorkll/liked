@@ -115,6 +115,7 @@ function image.draw(screen, path, x, y, wallpaperMode, forceFullColor, lightMul,
 	local col, col2
 	local _, c, f, b
 	if gpu.getSoftwareBuffers then
+		local updateZone = gpu.updateZone or function () end
 		local chars, fores, backs = gpu.getSoftwareBuffers()
 		local rx = graphic.getResolution(screen)
 		local colorByte, countCharBytes
@@ -159,6 +160,7 @@ function image.draw(screen, path, x, y, wallpaperMode, forceFullColor, lightMul,
 					if (background == foreground or isEmptyBuff) and not fullBack then
 						backs[index] = imageReColor(colorslib.colorMul(llcolors[background + 1], lightMul), blackListedColor, newColors)
 						chars[index] = " "
+						updateZone(index)
 					else
 						col, col2 = nil, nil
 						if wallpaperMode then
@@ -176,6 +178,7 @@ function image.draw(screen, path, x, y, wallpaperMode, forceFullColor, lightMul,
 							fores[index] = imageReColor(colorslib.colorMul(fullFore or llcolors[foreground + 1], lightMul), blackListedColor, newColors)
 						end
 						chars[index] = char
+						updateZone(index)
 					end
 				end
 			end
