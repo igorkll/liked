@@ -542,7 +542,7 @@ local function draw(clear)
 			return str:lower():find(finding:lower())
 		end
 
-		if (not v.hided or gui_container.devModeStates[screen]) and (isSearch(v.name) or isSearch(v.vendor) or isSearch(v.description)) then
+		if (not v.hidden or gui_container.devModeStates[screen]) and (isSearch(v.name) or isSearch(v.vendor) or isSearch(v.description)) then
 			local y = math.floor((4 + ((appCount - listOffSet) * 7)) + 0.5)
 			if y > 1 and y < ry then
 				table.insert(appLabels, applicationLabel(v, 2, y))

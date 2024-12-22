@@ -284,6 +284,7 @@ local list = {
 		vendor = "logic",
 		description = "allows you to open/edit/save and print 3D models in 3dm format.\nThe model format is fully compatible with the \"3D Print\" program in MineOS.\nalso, models in this format can be found on the Internet without any problems.\nvisualization on a holographic projector is supported",
 		minDiskSpace = 64,
+		hidden = true,
 
 		path = "/data/apps/printer3d.app",
 		urlPrimaryPart = selfurlpart .. "/apps/printer3d.app/"
@@ -295,6 +296,7 @@ local list = {
 		description = "contains a minecraft-style watch and compass\nthe compass points north and only works on a tablet",
 		minDiskSpace = 64,
 		libs = {"draw"},
+		hidden = true,
 
 		path = "/data/apps/toolbox.app",
 		urlPrimaryPart = selfurlpart .. "/apps/toolbox.app/",
@@ -391,6 +393,7 @@ local list = {
 		vendor = "logic",
 		description = "",
 		minDiskSpace = 64,
+		hidden = true,
 		
 		path = "/data/apps/videoplayer.app",
 		urlPrimaryPart = selfurlpart .. "/apps/videoplayer.app/",
@@ -488,7 +491,7 @@ local list = {
 		urlPrimaryPart = selfurlpart .. "/apps/codeMaster.app/",
 		files = {"main.lua", "icon.t2p", "logo.t2p", "bios.lua", "documentation_rus.txt", "documentation_eng.txt", "examples/hello.lua", "examples/dots.lua", "examples/gui.lua", "examples/keyboard.lua"}
 	},
-	{ --requires further development
+	{
 		name = "imageViewer",
 		version = "1",
 		vendor = "logic",
@@ -538,6 +541,7 @@ local list = {
 		vendor = "logic",
 		description = "compresses the code for the eeprom",
 		minDiskSpace = 64,
+		hidden = true,
 		
 		path = "/data/apps/eepacker.app",
 		urlPrimaryPart = selfurlpart .. "/apps/eepacker.app/",
@@ -549,6 +553,7 @@ local list = {
 		vendor = "logic",
 		description = "clone of the clock app from android",
 		minDiskSpace = 64,
+		hidden = true,
 		
 		path = "/data/apps/clock.app",
 		urlPrimaryPart = selfurlpart .. "/apps/clock.app/",
@@ -587,6 +592,7 @@ local list = {
 		vendor = "logic",
 		description = "a simple web browser for opencomputers. allows you to open html files",
 		minDiskSpace = 64,
+		hidden = true,
 		
 		path = "/data/apps/browser.app",
 		urlPrimaryPart = selfurlpart .. "/apps/browser.app/",
