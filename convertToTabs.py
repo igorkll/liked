@@ -2,22 +2,25 @@ import os
 
 def replace_spaces_with_tabs(file_path):
     with open(file_path, 'r', encoding='utf-8') as file:
-        content = file.read()
+        lines = file.readlines()
 
-    new_content = content.replace('    ', '\t')
+    new_lines = []
+    for line in lines:
+        while line.startswith('    '):
+            line = '\t' + line[4:]
+        new_lines.append(line)
     
     with open(file_path, 'w', encoding='utf-8') as file:
-        file.write(new_content)
+        file.writelines(new_lines)
 
 def process_directory(directory):
-    init_file_path = os.path.join(directory, 'init.lua')
-    if os.path.isfile(init_file_path):
-        replace_spaces_with_tabs(init_file_path)
-
     for root, dirs, files in os.walk(directory):
         for file in files:
             if file.endswith('.lua'):
                 file_path = os.path.join(root, file)
                 replace_spaces_with_tabs(file_path)
 
+replace_spaces_with_tabs('init.lua')
 process_directory("system")
+process_directory("market")
+process_directory("installer")
