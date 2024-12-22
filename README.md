@@ -24,7 +24,7 @@ this is done because in "MineOS EFI" the priority is set to MineOS and liked wou
 
 ## installer link
 * installer: https://raw.githubusercontent.com/igorkll/liked/main/installer/webInstaller.lua
-* computercraft version(alpha): https://raw.githubusercontent.com/igorkll/liked/main/installer/computercraft.lua
+* computercraft version(not supported yet): https://raw.githubusercontent.com/igorkll/liked/main/installer/computercraft.lua
 
 ## installation commands:
 * openOS : wget https://raw.githubusercontent.com/igorkll/liked/main/installer/webInstaller.lua /tmp/like; /tmp/like
