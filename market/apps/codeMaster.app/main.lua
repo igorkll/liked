@@ -37,158 +37,158 @@ local callBudgetMax = 100
 local function callBudget(num)
 	callBudgetVal = callBudgetVal + num
 	if callBudgetVal > callBudgetMax then
-	    local mval = callBudgetVal - callBudgetMax
-	    callBudgetVal = mval
-	    os.sleep(0.05)
+		local mval = callBudgetVal - callBudgetMax
+		callBudgetVal = mval
+		os.sleep(0.05)
 	end
 end
 
 local function createSandbox()
 	local sandbox
 	sandbox = {
-	    _VERSION = _VERSION,
+		_VERSION = _VERSION,
 
-	    math = table.deepclone(natives.math),
-	    table = table.deepclone(natives.table),
-	    string = table.deepclone(string),
-	    bit32 = table.deepclone(bit32),
-	    coroutine = table.deepclone(coroutine),
+		math = table.deepclone(natives.math),
+		table = table.deepclone(natives.table),
+		string = table.deepclone(string),
+		bit32 = table.deepclone(bit32),
+		coroutine = table.deepclone(coroutine),
 
-	    assert = assert,
-	    error = error,
-	    ipairs = ipairs,
-	    next = next,
-	    pairs = pairs,
-	    pcall = pcall,
-	    tonumber = tonumber,
-	    tostring = tostring,
-	    type = type,
-	    xpcall = xpcall,
+		assert = assert,
+		error = error,
+		ipairs = ipairs,
+		next = next,
+		pairs = pairs,
+		pcall = pcall,
+		tonumber = tonumber,
+		tostring = tostring,
+		type = type,
+		xpcall = xpcall,
 
-	    load = function (chunk, chunkname, mode, env)
-	        return load(chunk, chunkname, "t", env or sandbox)
-	    end,
+		load = function (chunk, chunkname, mode, env)
+			return load(chunk, chunkname, "t", env or sandbox)
+		end,
 
-	    sleep = function (time)
-	        checkArg(1, time, "number", "nil")
-	        os.sleep(time or 0.05)
-	    end,
+		sleep = function (time)
+			checkArg(1, time, "number", "nil")
+			os.sleep(time or 0.05)
+		end,
 
-	    ------ apis
+		------ apis
 
-	    debug = {
-	        traceback = debug.traceback
-	    },
+		debug = {
+			traceback = debug.traceback
+		},
 
-	    screen = {
-	        clear = function ()
-	            deviceScreen:clear(uix.colors.black)
-	            callBudget(10)
-	        end,
-	        set = function (x, y, char, color)
-	            checkArg(1, x, "number")
-	            checkArg(2, y, "number")
-	            checkArg(3, char, "string")
-	            checkArg(4, color, "number", "nil")
+		screen = {
+			clear = function ()
+				deviceScreen:clear(uix.colors.black)
+				callBudget(10)
+			end,
+			set = function (x, y, char, color)
+				checkArg(1, x, "number")
+				checkArg(2, y, "number")
+				checkArg(3, char, "string")
+				checkArg(4, color, "number", "nil")
 
-	            local lcolor = uix.colors.red
-	            if color == 1 then
-	                lcolor = uix.colors.green
-	            elseif color == 2 then
-	                lcolor = uix.colors.blue
-	            elseif color == 3 then
-	                lcolor = uix.colors.yellow
-	            end
+				local lcolor = uix.colors.red
+				if color == 1 then
+					lcolor = uix.colors.green
+				elseif color == 2 then
+					lcolor = uix.colors.blue
+				elseif color == 3 then
+					lcolor = uix.colors.yellow
+				end
 
-	            if #char ~= 1 then error("unsupported string length", 2) end
-	            local byte = string.byte(char)
-	            if byte < 32 or byte > 126 then
-	                char = "?"
-	            end
+				if #char ~= 1 then error("unsupported string length", 2) end
+				local byte = string.byte(char)
+				if byte < 32 or byte > 126 then
+					char = "?"
+				end
 
-	            deviceScreen:set(x, y, uix.colors.black, lcolor, char)
-	            callBudget(10)
-	        end,
-	        getSize = function ()
-	            return deviceScreen.sx, deviceScreen.sy
-	        end
-	    },
+				deviceScreen:set(x, y, uix.colors.black, lcolor, char)
+				callBudget(10)
+			end,
+			getSize = function ()
+				return deviceScreen.sx, deviceScreen.sy
+			end
+		},
 
-	    storage = {
-	        getData = function()
-	            return gamesave.data.data
-	        end,
-	        setData = function(data)
-	            checkArg(1, data, "string")
-	            if #data > dataLimit then
-	                error("the maximum amount of data is 4KB", 2)
-	            end
-	            gamesave.data.data = data
-	            gamesave.save()
-	            callBudget(50)
-	        end,
-	        getCode = function()
-	            return gamesave.code
-	        end,
-	        setCode = function(code)
-	            checkArg(1, code, "string")
-	            if #code > codeLimit then
-	                error("the maximum amount of data is 16KB", 2)
-	            end
-	            gamesave.code = code
-	            callBudget(50)
-	        end
-	    },
+		storage = {
+			getData = function()
+				return gamesave.data.data
+			end,
+			setData = function(data)
+				checkArg(1, data, "string")
+				if #data > dataLimit then
+					error("the maximum amount of data is 4KB", 2)
+				end
+				gamesave.data.data = data
+				gamesave.save()
+				callBudget(50)
+			end,
+			getCode = function()
+				return gamesave.code
+			end,
+			setCode = function(code)
+				checkArg(1, code, "string")
+				if #code > codeLimit then
+					error("the maximum amount of data is 16KB", 2)
+				end
+				gamesave.code = code
+				callBudget(50)
+			end
+		},
 
-	    device = {
-	        beep = function (freq, delay)
-	            checkArg(1, freq, "number", "nil")
-	            checkArg(2, delay, "number", "nil")
-	            sound.beep(freq, delay, true)
-	        end,
-	        shutdown = function()
-	            powerOff()
-	            powerButton.state = false
-	            powerButton:draw()
-	            os.sleep()
-	        end,
-	        reboot = function()
-	            rebootFlag = true
-	            powerOff()
-	            powerButton.state = false
-	            powerButton:draw()
-	            os.sleep()
-	        end,
-	        uptime = function()
-	            return computer.uptime() - startTime
-	        end
-	    },
+		device = {
+			beep = function (freq, delay)
+				checkArg(1, freq, "number", "nil")
+				checkArg(2, delay, "number", "nil")
+				sound.beep(freq, delay, true)
+			end,
+			shutdown = function()
+				powerOff()
+				powerButton.state = false
+				powerButton:draw()
+				os.sleep()
+			end,
+			reboot = function()
+				rebootFlag = true
+				powerOff()
+				powerButton.state = false
+				powerButton:draw()
+				os.sleep()
+			end,
+			uptime = function()
+				return computer.uptime() - startTime
+			end
+		},
 
-	    keyboard = {
-	        get = function()
-	            return inputStr.read.getBuffer()
-	        end,
-	        set = function(str)
-	            checkArg(1, str, "string")
-	            inputStr.read.setBuffer(str)
-	            inputStr:draw()
-	        end,
-	        isAction = function()
-	            return not not actionButton.state
-	        end,
-	        isUp = function()
-	            return not not upButton.state
-	        end,
-	        isDown = function()
-	            return not not downButton.state
-	        end,
-	        isLeft = function()
-	            return not not leftButton.state
-	        end,
-	        isRight = function()
-	            return not not rightButton.state
-	        end
-	    }
+		keyboard = {
+			get = function()
+				return inputStr.read.getBuffer()
+			end,
+			set = function(str)
+				checkArg(1, str, "string")
+				inputStr.read.setBuffer(str)
+				inputStr:draw()
+			end,
+			isAction = function()
+				return not not actionButton.state
+			end,
+			isUp = function()
+				return not not upButton.state
+			end,
+			isDown = function()
+				return not not downButton.state
+			end,
+			isLeft = function()
+				return not not leftButton.state
+			end,
+			isRight = function()
+				return not not rightButton.state
+			end
+		}
 	}
 	sandbox._G = sandbox
 	return sandbox
@@ -199,7 +199,7 @@ local function exitFromGame()
 	gamesavePath = nil
 	gamesave = nil
 	if computerThread then
-	    computerThread:kill()
+		computerThread:kill()
 	end
 	computerThread = nil
 	ui:select(menuLayout)
@@ -208,8 +208,8 @@ end
 local function startGame(num)
 	gamesavePath = paths.concat(selfAppPath, "saves", tostring(math.round(num)))
 	gamesave = registry.new(paths.concat(gamesavePath, "settings.dat"), {
-	    code = exampleCode,
-	    data = ""
+		code = exampleCode,
+		data = ""
 	})
 
 	ui:select(gameLayout)
@@ -219,8 +219,8 @@ function powerOff()
 	callBudgetVal = 0
 
 	if computerThread then
-	    computerThread:kill()
-	    computerThread = nil
+		computerThread:kill()
+		computerThread = nil
 	end
 
 	deviceScreen:clear(uix.colors.black)
@@ -229,35 +229,35 @@ end
 function powerOn()
 	local code = load(biosCode, "=bios", "t", createSandbox()) --ошибки в BIOS нечем не будут обработаны
 	if code then
-	    if computerThread then
-	        computerThread:kill()
-	    end
+		if computerThread then
+			computerThread:kill()
+		end
 
-	    startTime = computer.uptime()
+		startTime = computer.uptime()
 
-	    computerThread = thread.create(function ()
-	        local ok, err = xpcall(code, debug.traceback)
-	        if not ok then
-	            computerError = tostring(err or "unknown error")
-	            if computerThread then
-	                computerThread:kill()
-	                computerThread = nil
-	            end
-	        end
-	    end)
-	    computerThread:resume()
+		computerThread = thread.create(function ()
+			local ok, err = xpcall(code, debug.traceback)
+			if not ok then
+				computerError = tostring(err or "unknown error")
+				if computerThread then
+					computerThread:kill()
+					computerThread = nil
+				end
+			end
+		end)
+		computerThread:resume()
 	end
 end
 
 
 function wstop()
 	if computerThread then
-	    powerOff()
-	    return function ()
-	        powerOn()
-	    end
+		powerOff()
+		return function ()
+			powerOn()
+		end
 	else
-	    return system.stub
+		return system.stub
 	end
 end
 
@@ -282,7 +282,7 @@ function importCode()
 	local path = iowindows.selectfile(screen, "lua")
 	clear()
 	if path then
-	    gamesave.code = assert(fs.readFile(path))
+		gamesave.code = assert(fs.readFile(path))
 	end
 	ui:fullStart()
 	ui:draw()
@@ -297,16 +297,16 @@ function importExample()
 	local list = {}
 	local nativeList = fs.list(examplesPath)
 	for i, name in ipairs(nativeList) do
-	    table.insert(list, paths.hideExtension(name))
+		table.insert(list, paths.hideExtension(name))
 	end
 	local num = gui.select(screen, nil, nil, "load example", list)
 	local path
 	if num then
-	    path = paths.concat(examplesPath, nativeList[num])
+		path = paths.concat(examplesPath, nativeList[num])
 	end
 	clear()
 	if path then
-	    gamesave.code = assert(fs.readFile(path))
+		gamesave.code = assert(fs.readFile(path))
 	end
 	ui:fullStart()
 	ui:draw()
@@ -322,7 +322,7 @@ menuLayout:createImage(2, 2, "logo.t2p")
 for i = 0, 5 do
 	local start = menuLayout:createButton(2 + ((i // 2) * 17), 2 + 8 + ((i % 2) * 6), 16, 5, startButtonsBack, startButtonsFore, "save slot " .. (i + 1), true)
 	function start:onClick()
-	    startGame(i)
+		startGame(i)
 	end
 end
 
@@ -357,9 +357,9 @@ powerButton.toggle = true
 function powerButton:onSwitch()
 	rebootFlag = nil
 	if self.state then
-	    powerOn()
+		powerOn()
 	else
-	    powerOff()
+		powerOff()
 	end
 end
 
@@ -400,10 +400,10 @@ end
 
 gameLayout:timer(0.1, function ()
 	if rebootFlag then
-	    powerButton.state = true
-	    powerButton:draw()
-	    powerOn()
-	    rebootFlag = nil
+		powerButton.state = true
+		powerButton:draw()
+		powerOn()
+		rebootFlag = nil
 	end
 end, math.huge)
 
@@ -411,11 +411,11 @@ end, math.huge)
 
 function ui:onEvent()
 	if computerError then
-	    gui.bigWarn(screen, nil, nil, computerError)
-	    ui:draw()
-	    deviceScreen:clear(uix.colors.black)
+		gui.bigWarn(screen, nil, nil, computerError)
+		ui:draw()
+		deviceScreen:clear(uix.colors.black)
 
-	    computerError = nil
+		computerError = nil
 	end
 end
 

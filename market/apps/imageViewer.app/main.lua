@@ -47,8 +47,8 @@ end
 function selectfolder:onClick()
 	local folder = iowindows.selectfile(screen, "t2p")
 	if folder then
-	    config.imagepath = folder
-	    updateText()
+		config.imagepath = folder
+		updateText()
 	end
 	layout:draw()
 end
@@ -61,44 +61,44 @@ function startButton:onClick()
 	local path = config.imagepath
 	
 	if path then
-	    layout.active = false
-	    layout:stop()
+		layout.active = false
+		layout:stop()
 
 
 
-	    local sx, sy = image.size(path, screen)
-	    local cropped
-	    if not graphic.isValidResolution(screen, sx, sy) or not pcall(graphic.setResolution, screen, sx, sy) then
-	        sx, sy = graphic.maxResolution(screen)
-	        cropped = true
-	    end
-	    local customPalette
-	    if graphic.getDepth(screen) == 4 then
-	        if not image.applyPalette(screen, path) then
-	            palette.fromFile(screen, "/system/palettes/light.plt", true)
-	        else
-	            customPalette = true
-	        end
-	    else
-	        palette.blackWhite(screen, true)
-	    end
-	    graphic.clear(screen, uix.colors.black)
-	    local startTime = computer.uptime()
-	    if cropped then
-	        local ix, iy = image.size(path, screen)
-	        image.draw(screen, path, 1 - (ix / 2), 1 - (iy / 2), nil, nil, nil, customPalette)
-	    else
-	        image.draw(screen, path, 1, 1, nil, nil, nil, customPalette)
-	    end
-	    if waterMark.state then
-	        gui.drawtext(screen, 2, sy - 3, 0xffffff, "Operating System     : likeOS & liked")
-	        gui.drawtext(screen, 2, sy - 2, 0xffffff, "Application          : image viewer")
-	        gui.drawtext(screen, 2, sy - 1, 0xffffff, "Developer In Discord : smlogic")
-	    end
-	    graphic.forceUpdate(screen)
+		local sx, sy = image.size(path, screen)
+		local cropped
+		if not graphic.isValidResolution(screen, sx, sy) or not pcall(graphic.setResolution, screen, sx, sy) then
+			sx, sy = graphic.maxResolution(screen)
+			cropped = true
+		end
+		local customPalette
+		if graphic.getDepth(screen) == 4 then
+			if not image.applyPalette(screen, path) then
+				palette.fromFile(screen, "/system/palettes/light.plt", true)
+			else
+				customPalette = true
+			end
+		else
+			palette.blackWhite(screen, true)
+		end
+		graphic.clear(screen, uix.colors.black)
+		local startTime = computer.uptime()
+		if cropped then
+			local ix, iy = image.size(path, screen)
+			image.draw(screen, path, 1 - (ix / 2), 1 - (iy / 2), nil, nil, nil, customPalette)
+		else
+			image.draw(screen, path, 1, 1, nil, nil, nil, customPalette)
+		end
+		if waterMark.state then
+			gui.drawtext(screen, 2, sy - 3, 0xffffff, "Operating System     : likeOS & liked")
+			gui.drawtext(screen, 2, sy - 2, 0xffffff, "Application          : image viewer")
+			gui.drawtext(screen, 2, sy - 1, 0xffffff, "Developer In Discord : smlogic")
+		end
+		graphic.forceUpdate(screen)
 	else
-	    gui.warn(screen, nil, nil, "first you need to select an image")
-	    layout:draw()
+		gui.warn(screen, nil, nil, "first you need to select an image")
+		layout:draw()
 	end
 end
 

@@ -29,18 +29,18 @@ draw()
 return function(eventData)
 	local windowEventData = window:uploadEvent(eventData)
 	if windowEventData[1] == "touch" then
-	    if windowEventData[4] == 2 and windowEventData[3] >= 1 and windowEventData[3] <= 16 then
-	        local data = gui.input(screen, nil, nil, "timezone")
-	        if data then
-	            data = tonumber(data)
-	            if not data then
-	                gui.warn(screen, nil, nil, "uncorrent input")
-	            else
-	                registry.timeZone = data
-	                liked.applyTimeZone()
-	            end
-	        end
-	        draw()
-	    end
+		if windowEventData[4] == 2 and windowEventData[3] >= 1 and windowEventData[3] <= 16 then
+			local data = gui.input(screen, nil, nil, "timezone")
+			if data then
+				data = tonumber(data)
+				if not data then
+					gui.warn(screen, nil, nil, "uncorrent input")
+				else
+					registry.timeZone = data
+					liked.applyTimeZone()
+				end
+			end
+			draw()
+		end
 	end
 end

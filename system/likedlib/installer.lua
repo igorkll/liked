@@ -93,13 +93,13 @@ function installer.install_likedbox(vfs)
 	local systemFolder = installer.selfPath("system")
 	local targetSystemFolder = installer.targetPath("system")
 	local success, err = fs.copy(systemFolder, targetSystemFolder, function (from)
-	    for _, lpath in ipairs(bl) do
-	        if paths.equals(paths.concat(systemFolder, lpath), from) then
-	            return false
-	        end
-	    end
-	    
-	    return true
+		for _, lpath in ipairs(bl) do
+			if paths.equals(paths.concat(systemFolder, lpath), from) then
+				return false
+			end
+		end
+		
+		return true
 	end)
 	if not success then return nil, err end
 
@@ -134,35 +134,35 @@ function installer.install_boxfile(vfs, path, splashCallback)
 	local exp = paths.extension(path) 
 	local ok, err
 	if exp == "sbox" then
-	    if splashCallback then splashCallback("installing core...") end
-	    ok, err = installer.install_core(vfs)
+		if splashCallback then splashCallback("installing core...") end
+		ok, err = installer.install_core(vfs)
 	elseif exp == "vbox" then
-	    if splashCallback then splashCallback("installing liked...") end
-	    ok, err = installer.install_liked(vfs)
+		if splashCallback then splashCallback("installing liked...") end
+		ok, err = installer.install_liked(vfs)
 	elseif exp == "ebox" then
-	    -- nothing
-	    ok = true
+		-- nothing
+		ok = true
 	else
-	    if splashCallback then splashCallback("installing box...") end
-	    ok, err = installer.install_likedbox(vfs)
+		if splashCallback then splashCallback("installing box...") end
+		ok, err = installer.install_likedbox(vfs)
 	end
 
 	local inited = installer.init(vfs)
 	if ok and inited then
-	    -- unpacking archive
-	    if splashCallback then splashCallback("unpacking archive...") end
-	    local aok, aerr = require("archiver").unpack(path, targetsys)
+		-- unpacking archive
+		if splashCallback then splashCallback("unpacking archive...") end
+		local aok, aerr = require("archiver").unpack(path, targetsys)
 
-	    -- set label
-	    liked.umountAll()
-	    if aok then
-	        pcall(vfs.setLabel, paths.hideExtension(paths.name(path)))
-	        liked.mountAll()
-	    else
-	        pcall(vfs.setLabel, "failed")
-	        liked.mountAll()
-	        return nil, aerr
-	    end
+		-- set label
+		liked.umountAll()
+		if aok then
+			pcall(vfs.setLabel, paths.hideExtension(paths.name(path)))
+			liked.mountAll()
+		else
+			pcall(vfs.setLabel, "failed")
+			liked.mountAll()
+			return nil, aerr
+		end
 	end
 
 	return ok, err
@@ -173,44 +173,44 @@ end
 function installer.ui_install_boxfile(screen, vfs, path)
 	local clear
 	return installer.install_boxfile(vfs, path, function (str)
-	    if clear then clear() end
-	    clear = gui.saveZone(screen)
-	    gui.status(screen, nil, nil, str)
+		if clear then clear() end
+		clear = gui.saveZone(screen)
+		gui.status(screen, nil, nil, str)
 	end)
 end
 
 function installer.context(screen, posX, posY, vfs)
 	local label, num = gui.contextAuto(screen, posX, posY, {
-	    "liked installer",
-	    "liked",
-	    "likedbox",
-	    "likeOS (core only)",
-	    "full cloning of the system"
+		"liked installer",
+		"liked",
+		"likedbox",
+		"likeOS (core only)",
+		"full cloning of the system"
 	})
 
 	if not label then
-	    return
+		return
 	end
 
 	if num == 5 then
-	    label = "self-sys"
+		label = "self-sys"
 	end
 
 	local installers = {
-	    installer.install_installer,
-	    installer.install_liked,
-	    installer.install_likedbox,
-	    installer.install_core,
-	    installer.install_selfsys,
+		installer.install_installer,
+		installer.install_liked,
+		installer.install_likedbox,
+		installer.install_core,
+		installer.install_selfsys,
 	}
 
 	local name = paths.name(require("hdd").genName(vfs))
 	local clear = gui.saveZone(screen)
 	if gui.yesno(screen, nil, nil, "install \"" .. label .. "\" to \"" .. name .. "\"?") then
-	    gui.status(screen, nil, nil, "installing \"" .. label .. "\" to \"" .. name .. "\"...")
-	    local result = {liked.assert(screen, installers[num](vfs))}
-	    clear()
-	    return table.unpack(result)
+		gui.status(screen, nil, nil, "installing \"" .. label .. "\" to \"" .. name .. "\"...")
+		local result = {liked.assert(screen, installers[num](vfs))}
+		clear()
+		return table.unpack(result)
 	end
 	clear()
 end

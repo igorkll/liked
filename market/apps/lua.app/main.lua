@@ -34,7 +34,7 @@ end
 local function lprint(color, ...)
 	local tbl = {...}
 	for i = 1, #tbl do
-	    tbl[i] = tostring(tbl[i])
+		tbl[i] = tostring(tbl[i])
 	end
 	window:copy(1, 3, sizeX, sizeY - 3, 0, -1)
 	window:fill(1, sizeY - 1, sizeX, 1, colors.black, 0, " ")
@@ -52,7 +52,7 @@ local env
 
 if registry.interpreterSandbox then
 	env = {print = function (...)
-	    lprint(colors.white, ...)
+		lprint(colors.white, ...)
 	end, screen = screen}
 
 	env.math = table.deepclone(math)
@@ -64,7 +64,7 @@ if registry.interpreterSandbox then
 	env.ipairs = ipairs
 	env.pairs = pairs
 	env.load = function(chunk, chunkname, mode, lenv)
-	    return load(chunk, chunkname, "t", lenv or env)
+		return load(chunk, chunkname, "t", lenv or env)
 	end
 	env.next = next
 	env.pcall = pcall
@@ -79,15 +79,15 @@ if registry.interpreterSandbox then
 	env.assert = assert
 else
 	env = setmetatable({_G = _G, screen = screen, print = function (...)
-	    lprint(colors.white, ...)
+		lprint(colors.white, ...)
 	end, fs = fs}, {__index = function (self, key)
-	    if _G[key] then
-	        return _G[key]
-	    elseif package.loaded[key] then
-	        return package.loaded[key]
-	    elseif package.cache[key] then
-	        return package.cache[key]
-	    end
+		if _G[key] then
+			return _G[key]
+		elseif package.loaded[key] then
+			return package.loaded[key]
+		elseif package.cache[key] then
+			return package.cache[key]
+		end
 	end})
 end
 
@@ -97,40 +97,40 @@ while true do
 	local readerData = reader.uploadEvent(eventData)
 
 	if readerData then
-	    if readerData == true then
-	        return
-	    end
+		if readerData == true then
+			return
+		end
 
-	    reader.setBuffer("")
-	    reader.redraw()
-	    lprint(colors.green, "LUA>")
-	    syntax.draw(6, sizeY - 1, syntax.parse(readerData), graphic.findGpu(screen), graphic.fakePalette)
-	    
-	    if readerData:sub(1, 1) == "=" then
-	        readerData = "return " .. readerData:sub(2, #readerData)
-	    end
+		reader.setBuffer("")
+		reader.redraw()
+		lprint(colors.green, "LUA>")
+		syntax.draw(6, sizeY - 1, syntax.parse(readerData), graphic.findGpu(screen), graphic.fakePalette)
+		
+		if readerData:sub(1, 1) == "=" then
+			readerData = "return " .. readerData:sub(2, #readerData)
+		end
 
-	    if not registry.interpreterSandbox then
-	        env.gpu = graphic.findGpu(env.screen)
-	    end
+		if not registry.interpreterSandbox then
+			env.gpu = graphic.findGpu(env.screen)
+		end
 
-	    local code, err = load(readerData, "=lua", "t", env)
-	    if code then
-	        local result = {xpcall(code, debug.traceback)}
-	        window.selected = true
-	        if result[1] then
-	            if #result > 1 then
-	                lprint(colors.white, table.unpack(result, 2))
-	            end
-	        else
-	            local red = true
-	            for i, line in ipairs(parser.parseTraceback(tostring(result[2] or "unknown error"), sizeX - 1, sizeY - 5)) do
-	                lprint(red and colors.red or colors.yellow, line)
-	                red = false
-	            end
-	        end
-	    else
-	        lprint(colors.red, err or "unknown error")
-	    end
+		local code, err = load(readerData, "=lua", "t", env)
+		if code then
+			local result = {xpcall(code, debug.traceback)}
+			window.selected = true
+			if result[1] then
+				if #result > 1 then
+					lprint(colors.white, table.unpack(result, 2))
+				end
+			else
+				local red = true
+				for i, line in ipairs(parser.parseTraceback(tostring(result[2] or "unknown error"), sizeX - 1, sizeY - 5)) do
+					lprint(red and colors.red or colors.yellow, line)
+					red = false
+				end
+			end
+		else
+			lprint(colors.red, err or "unknown error")
+		end
 	end
 end

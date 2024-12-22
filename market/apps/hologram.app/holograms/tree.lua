@@ -3,11 +3,11 @@ local holo = ...
 local function box(x, y, z, color)
 	local size = 8
 	for ix = x * size, (x * size) + size do
-	    for iy = y * size, (y * size) + size do
-	        for iz = z * size, (z * size) + size do
-	            holo.set(ix + 1, iy + 1, iz + 1, col(color))
-	        end
-	    end
+		for iy = y * size, (y * size) + size do
+			for iz = z * size, (z * size) + size do
+				holo.set(ix + 1, iy + 1, iz + 1, col(color))
+			end
+		end
 	end
 end
 
@@ -17,7 +17,7 @@ box(2.5, 2, 2.5, 2)
 
 for ix = 2, 3 do
 	for iy = 2, 3 do
-	    box(ix, 3, iy, 1)
+		box(ix, 3, iy, 1)
 	end
 end
 

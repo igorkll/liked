@@ -19,7 +19,7 @@ gpu.set(1, 15, [[--------------------------------------------------]])
 
 if text then
 	while text:sub(#text, #text) == "." do
-	    text = text:sub(1, #text - 1)
+		text = text:sub(1, #text - 1)
 	end
 	gpu.set(math.floor(((rx / 2) - (unicode.len(text) / 2)) + 0.5) + 1, 13, text or "")
 end

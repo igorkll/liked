@@ -47,47 +47,47 @@ while true do
 	inputReader.uploadEvent(eventData)
 
 	if interpreter then
-	    for i = 1, 4096 do
-	        local next = interpreter.next()
+		for i = 1, 4096 do
+			local next = interpreter.next()
 
-	        if next == "," then
-	            local input = inputReader.getBuffer()
-	            if #input > 0 then
-	                interpreter.insert(input:byte(1))
-	            end
-	            inputReader.setBuffer(input:sub(2, #input))
-	        end
+			if next == "," then
+				local input = inputReader.getBuffer()
+				if #input > 0 then
+					interpreter.insert(input:byte(1))
+				end
+				inputReader.setBuffer(input:sub(2, #input))
+			end
 
-	        local itype = interpreter.tick()
-	        if not itype then
-	            interpreter = nil
-	            isRunning = false
-	            break
-	        end
+			local itype = interpreter.tick()
+			if not itype then
+				interpreter = nil
+				isRunning = false
+				break
+			end
 
-	        if itype == "." then
-	            local output = interpreter.output()
-	            if output then
-	                outputLine = outputLine .. string.char(output)
-	            end
-	        end
-	    end
+			if itype == "." then
+				local output = interpreter.output()
+				if output then
+					outputLine = outputLine .. string.char(output)
+				end
+			end
+		end
 
-	    update()
+		update()
 	end
 
 	if windowEventData[1] == "touch" then
-	    if windowEventData[3] == sizeX and windowEventData[4] == 1 then
-	        break
-	    elseif windowEventData[3] >= 1 and windowEventData[3] <= 5 and windowEventData[4] == sizeY - 3 then
-	        isRunning = not isRunning
-	        if isRunning then
-	            outputLine = ""
-	            interpreter = brainfuck.create(programmReader.getBuffer())
-	        else
-	            interpreter = nil
-	        end
-	        update()
-	    end
+		if windowEventData[3] == sizeX and windowEventData[4] == 1 then
+			break
+		elseif windowEventData[3] >= 1 and windowEventData[3] <= 5 and windowEventData[4] == sizeY - 3 then
+			isRunning = not isRunning
+			if isRunning then
+				outputLine = ""
+				interpreter = brainfuck.create(programmReader.getBuffer())
+			else
+				interpreter = nil
+			end
+			update()
+		end
 	end
 end

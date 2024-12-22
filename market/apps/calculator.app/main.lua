@@ -18,29 +18,29 @@ local current = ""
 local history = {}
 local function saveToHistory()
 	if history[#history] ~= current then
-	    table.insert(history, current)
+		table.insert(history, current)
 	end
 end
 
 local function doCurrent()
 	if unicode.len(current) == 0 then
-	    mathLabel.text = "0"
+		mathLabel.text = "0"
 	else
-	    mathLabel.text = current
+		mathLabel.text = current
 	end
 	mathLabel.alignment = "right"
 	mathLabel:draw()
 
 	local code = load("return (" .. current .. ")", "=math", "t", {PI = math.pi, round = math.round})
 	if code then
-	    local result = {pcall(code)}
-	    if result[1] then
-	        resultLabel.text = tostring(result[2])
-	    else
-	        resultLabel.text = "ERR"
-	    end
+		local result = {pcall(code)}
+		if result[1] then
+			resultLabel.text = tostring(result[2])
+		else
+			resultLabel.text = "ERR"
+		end
 	else
-	    resultLabel.text = "0"
+		resultLabel.text = "0"
 	end
 	resultLabel.alignment = "right"
 	resultLabel:draw()
@@ -52,29 +52,29 @@ local function addButton(x, y, color, textcolor, char, func, xoffset)
 	local button = layout:createButton((x * 16) + (xoffset or 0), (y * 5) + 5, 16, 5, color, textcolor, char)
 
 	if color == buttonBackgroundColor then
-	    button.back2 = uix.colors.gray
+		button.back2 = uix.colors.gray
 	elseif color == uix.colors.orange then
-	    button.back2 = uix.colors.brown
+		button.back2 = uix.colors.brown
 	elseif color == uix.colors.red then
-	    button.back2 = uix.colors.brown
+		button.back2 = uix.colors.brown
 	elseif color == uix.colors.cyan then
-	    button.back2 = uix.colors.blue
+		button.back2 = uix.colors.blue
 	else
-	    button.back2 = uix.colors.black
+		button.back2 = uix.colors.black
 	end
 
 	if func then
-	    button.onClick = func
+		button.onClick = func
 	else
-	    function button:onClick()
-	        saveToHistory()
-	        if tonumber(char) or char == "." then
-	            current = current .. char
-	        else
-	            current = current .. " " .. char .. " "
-	        end
-	        doCurrent()
-	    end
+		function button:onClick()
+			saveToHistory()
+			if tonumber(char) or char == "." then
+				current = current .. char
+			else
+				current = current .. " " .. char .. " "
+			end
+			doCurrent()
+		end
 	end
 	return button
 end
@@ -112,14 +112,14 @@ end, 1)
 addButton(4, 1, uix.colors.red, buttonTextColor, "<", function ()
 	local finded
 	for i = 1, #history do
-	    finded = table.remove(history)
-	    if finded ~= current then
-	        break
-	    end
+		finded = table.remove(history)
+		if finded ~= current then
+			break
+		end
 	end
 	if finded then
-	    current = finded
-	    doCurrent(true)
+		current = finded
+		doCurrent(true)
 	end
 end, 1)
 

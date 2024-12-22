@@ -1,11 +1,11 @@
 local event = require("event")
 
 function gcd(a,b)
-	if b ~= 0 then
-		return gcd(b, a % b)
-	else
-		return math.abs(a)
-	end
+if b ~= 0 then
+return gcd(b, a % b)
+else
+return math.abs(a)
+end
 end
 
 function int(f)
@@ -14,7 +14,7 @@ end
 
 function ext_euclid(a,b)
 	if b == 0 then
-	    return a,1,0
+		return a,1,0
 	end
 	
 	local d,s,t = ext_euclid(b, a % b)
@@ -26,7 +26,7 @@ end
 function find_coprime(eul)
 	local r
 	repeat
-	    r = math.random(5, eul)
+		r = math.random(5, eul)
 	until gcd(eul,r) == 1
 	return r
 end
@@ -55,7 +55,7 @@ end
 function pow_mod(x,p,n)
 	local temp = x
 	for i=2,p do
-	    temp = temp * x % n
+		temp = temp * x % n
 	end
 	return temp
 end
@@ -63,13 +63,13 @@ end
 function rsa_encr(msg, e, N)
 	local ret = ""
 	for i = 1, #msg do
-	    local c = msg:sub(i,i)
-	    local ac = string.byte(c)
-	    local ec = pow_mod(ac,e,N)
-	    ret = ret .. ec .. "#"
-	    event.yield()
-	    
-	    --print(c.."("..ac..") -> "..ec)
+		local c = msg:sub(i,i)
+		local ac = string.byte(c)
+		local ec = pow_mod(ac,e,N)
+		ret = ret .. ec .. "#"
+		event.yield()
+		
+		--print(c.."("..ac..") -> "..ec)
 	end
 	return ret
 end
@@ -77,7 +77,7 @@ end
 local function localsplit(s, delimiter)
 	result = {};
 	for match in (s..delimiter):gmatch("(.-)"..delimiter) do
-	    table.insert(result, match);
+		table.insert(result, match);
 	end
 	return result;
 end
@@ -85,13 +85,13 @@ end
 function rsa_decr(msg, d, N)
 	local ret = ""
 	for i,v in ipairs(localsplit(msg:sub(1,-2),"#")) do
-	    local vn = tonumber(v)
-	    local dc = pow_mod(vn,d,N)
-	    local ac = string.char(dc)
-	    ret = ret .. ac
-	    event.yield()
-	    
-	    --print(vn.." -> "..dc.."("..ac..")")
+		local vn = tonumber(v)
+		local dc = pow_mod(vn,d,N)
+		local ac = string.char(dc)
+		ret = ret .. ac
+		event.yield()
+		
+		--print(vn.." -> "..dc.."("..ac..")")
 	end
 	return ret
 end
@@ -148,16 +148,16 @@ end
 
 functions = { --это всеравно не будет доступно за пределами библиотеки из за специфики ОС
 	new = function (p, q)
-	    local encryptionKey, decryptionKey, N = rsa(p, q)
-	    return tostring(math.round(encryptionKey)) .. "#" .. tostring(math.round(N)), tostring(math.round(decryptionKey)) .. "#" .. tostring(math.round(N))
+		local encryptionKey, decryptionKey, N = rsa(p, q)
+		return tostring(math.round(encryptionKey)) .. "#" .. tostring(math.round(N)), tostring(math.round(decryptionKey)) .. "#" .. tostring(math.round(N))
 	end,
 	decrypt = function (data, decryptionKey)
-	    local key, N = parseKey(decryptionKey)
-	    return rsa_decr(data, key, N)
+		local key, N = parseKey(decryptionKey)
+		return rsa_decr(data, key, N)
 	end,
 	encrypt = function (data, encryptionKey)
-	    local key, N = parseKey(encryptionKey)
-	    return rsa_encr(data, key, N)
+		local key, N = parseKey(encryptionKey)
+		return rsa_encr(data, key, N)
 	end
 }
 
@@ -165,12 +165,12 @@ lib = {env = _ENV, unloadable = true}
 
 for name, func in pairs(functions) do --любое исключения в этих функциях - ненужная дрянь
 	lib[name] = function (...)
-	    local result = {pcall(func, ...)}
-	    if result[1] then
-	        return table.unpack(result, 2)
-	    else
-	        return nil, "invalid input data"
-	    end
+		local result = {pcall(func, ...)}
+		if result[1] then
+			return table.unpack(result, 2)
+		else
+			return nil, "invalid input data"
+		end
 	end
 end
 

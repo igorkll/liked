@@ -58,7 +58,7 @@ function gui_container.getUserRoot(screen)
 	local path = gui_container.userRoot[screen] or gui_container.defaultUserRoot
 	fs.makeDirectory(path)
 	if path:sub(#path, #path) ~= "/" then
-	    return path .. "/"
+		return path .. "/"
 	end
 	return path
 end
@@ -66,11 +66,11 @@ end
 function gui_container.short(str, max, endcheck)
 	local len = unicode.len(str)
 	if len > max then
-	    if endcheck then
-	        return unicode.sub(str, 1, max - 1) .. gui_container.chars.threeDots
-	    else
-	        return gui_container.chars.threeDots .. unicode.sub(str, (len - max) + 2, len)
-	    end
+		if endcheck then
+			return unicode.sub(str, 1, max - 1) .. gui_container.chars.threeDots
+		else
+			return gui_container.chars.threeDots .. unicode.sub(str, (len - max) + 2, len)
+		end
 	end
 	return str
 end
@@ -82,27 +82,27 @@ end
 function gui_container.checkPath(screen, path) --проверяет не вышел ли пользователь из своий папки
 	local userPath = gui_container.getUserRoot(screen)
 	if unicode.sub(path, 1, unicode.len(userPath)) ~= userPath then
-	    return userPath
+		return userPath
 	end
 	return path
 end
 
 function gui_container.refresh()
 	local colors = {
-	    ["app"] = gui_container.colors.red,
-	    ["afpx"] = gui_container.colors.orange,
-	    ["lua"] = gui_container.colors.lime
+		["app"] = gui_container.colors.red,
+		["afpx"] = gui_container.colors.orange,
+		["lua"] = gui_container.colors.lime
 	}
 
 	for k, v in pairs(colors) do
-	    gui_container.typecolors[k] = v
+		gui_container.typecolors[k] = v
 	end
 
 	local registry = require("registry")
 	for str, tbl in pairs(registry.gui_container or {}) do
-	    for key, value in pairs(tbl) do
-	        gui_container[str][key] = value
-	    end
+		for key, value in pairs(tbl) do
+			gui_container[str][key] = value
+		end
 	end
 
 	local cache = require("cache")

@@ -7,9 +7,9 @@ local eeprom = component.list("eeprom")()
 local invoke = component.invoke
 function component.invoke(address, method, ...)
 	if address == eeprom then
-	    if method == "setData" or method == "getData" then
-	        return ""
-	    end
+		if method == "setData" or method == "getData" then
+			return ""
+		end
 	end
 	return invoke(address, method, ...)
 end
@@ -25,28 +25,28 @@ do
 	local screen = component.list("screen")()
 	local gpu = component.list("gpu")()
 	if gpu and screen then
-	    invoke(gpu, "bind", screen)
+		invoke(gpu, "bind", screen)
 	end
 end
 
 local function checkSystem(address)
 	computer.beep(2000, 0.1)
 	if not invoke(address, "exists", "/init.lua") then
-	    return false
+		return false
 	end
 	local lastModTime = tonumber(invoke(eeprom, "getData"))
 	local function checkFile(path)
-	    return invoke(address, "lastModified", path) > lastModTime
+		return invoke(address, "lastModified", path) > lastModTime
 	end
 	local function process(dir)
-	    for _, name in ipairs(invoke(address, "list", dir) or {}) do
-	        local path = dir .. name
-	        if invoke(address, "isDirectory", path) then
-	            if process(path) then return true end
-	        elseif checkFile(path) then
-	            return true
-	        end
-	    end
+		for _, name in ipairs(invoke(address, "list", dir) or {}) do
+			local path = dir .. name
+			if invoke(address, "isDirectory", path) then
+				if process(path) then return true end
+			elseif checkFile(path) then
+				return true
+			end
+		end
 	end
 	if process("/system/") then return false end
 	if checkFile("/init.lua") then return false end
@@ -57,8 +57,8 @@ local function readFile(address, path)
 	local file = invoke(address, "open", path)
 	local buffer = ""
 	repeat
-	    local data = invoke(address, "read", file, math.maxinteger or math.huge)
-	    buffer = buffer .. (data or "")
+		local data = invoke(address, "read", file, math.maxinteger or math.huge)
+		buffer = buffer .. (data or "")
 	until not data
 	invoke(address, "close", file)
 	return buffer
@@ -67,8 +67,8 @@ end
 local function writeFile(address, path, data)
 	local file = invoke(address, "open", path, "wb")
 	if file then
-	    invoke(address, "write", file, data)
-	    invoke(address, "close", file)
+		invoke(address, "write", file, data)
+		invoke(address, "close", file)
 	end
 end
 

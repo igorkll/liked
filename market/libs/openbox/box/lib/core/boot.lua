@@ -13,28 +13,28 @@ _G.runlevel = "S"
 local shutdown = computer.shutdown
 computer.runlevel = function() return _G.runlevel end
 computer.shutdown = function(reboot)
-  _G.runlevel = reboot and 6 or 0
-  if os.sleep then
+_G.runlevel = reboot and 6 or 0
+if os.sleep then
 	computer.pushSignal("shutdown")
 	os.sleep(0.1) -- Allow shutdown processing.
-  end
-  shutdown(reboot)
+end
+shutdown(reboot)
 end
 
 local w, h
 local screen = component.list("screen", true)()
 local gpu = screen and component.list("gpu", true)()
 if gpu then
-  gpu = component.proxy(gpu)
-  if not gpu.getScreen() then
+gpu = component.proxy(gpu)
+if not gpu.getScreen() then
 	gpu.bind(screen)
-  end
-  _G.boot_screen = gpu.getScreen()
-  w, h = gpu.maxResolution()
-  gpu.setResolution(w, h)
-  gpu.setBackground(0x000000)
-  gpu.setForeground(0xFFFFFF)
-  gpu.fill(1, 1, w, h, " ")
+end
+_G.boot_screen = gpu.getScreen()
+w, h = gpu.maxResolution()
+gpu.setResolution(w, h)
+gpu.setBackground(0x000000)
+gpu.setForeground(0xFFFFFF)
+gpu.fill(1, 1, w, h, " ")
 end
 
 -- Report boot progress if possible.
@@ -45,45 +45,45 @@ local uptime = computer.uptime
 local pull = computer.pullSignal
 local last_sleep = uptime()
 local function status(msg)
-  --[[
-  if gpu then
+--[[
+if gpu then
 	gpu.set(1, y, msg)
 	if y == h then
-	  gpu.copy(1, 2, w, h - 1, 0, -1)
-	  gpu.fill(1, h, w, 1, " ")
+	gpu.copy(1, 2, w, h - 1, 0, -1)
+	gpu.fill(1, h, w, 1, " ")
 	else
-	  y = y + 1
+	y = y + 1
 	end
-  end
-  -- boot can be slow in some environments, protect from timeouts
-  if uptime() - last_sleep > 1 then
+end
+-- boot can be slow in some environments, protect from timeouts
+if uptime() - last_sleep > 1 then
 	local signal = table.pack(pull(0))
 	-- there might not be any signal
 	if signal.n > 0 then
-	  -- push the signal back in queue for the system to use it
-	  computer.pushSignal(table.unpack(signal, 1, signal.n))
+	-- push the signal back in queue for the system to use it
+	computer.pushSignal(table.unpack(signal, 1, signal.n))
 	end
 	last_sleep = uptime()
-  end
-  ]]
+end
+]]
 end
 
 status("Booting " .. _OSVERSION .. "...")
 
 -- Custom low-level dofile implementation reading from our ROM.
 local function dofile(file)
-  status("> " .. file)
-  local program, reason = raw_loadfile(file)
-  if program then
+status("> " .. file)
+local program, reason = raw_loadfile(file)
+if program then
 	local result = table.pack(pcall(program))
 	if result[1] then
-	  return table.unpack(result, 2, result.n)
+	return table.unpack(result, 2, result.n)
 	else
-	  error(result[2])
+	error(result[2])
 	end
-  else
+else
 	error(reason)
-  end
+end
 end
 
 status("Initializing package management...")
@@ -94,23 +94,23 @@ status("Initializing package management...")
 local package = dofile("/lib/package.lua")
 
 do
-  -- Unclutter global namespace now that we have the package module and a filesystem
-  _G.component = nil
-  _G.computer = nil
-  _G.process = nil
-  _G.unicode = nil
-  -- Inject the package modules into the global namespace, as in Lua.
-  _G.package = package
+-- Unclutter global namespace now that we have the package module and a filesystem
+_G.component = nil
+_G.computer = nil
+_G.process = nil
+_G.unicode = nil
+-- Inject the package modules into the global namespace, as in Lua.
+_G.package = package
 
-  -- Initialize the package module with some of our own APIs.
-  package.loaded.component = component
-  package.loaded.computer = computer
-  package.loaded.unicode = unicode
-  package.loaded.buffer = dofile("/lib/buffer.lua")
-  package.loaded.filesystem = dofile("/lib/filesystem.lua")
+-- Initialize the package module with some of our own APIs.
+package.loaded.component = component
+package.loaded.computer = computer
+package.loaded.unicode = unicode
+package.loaded.buffer = dofile("/lib/buffer.lua")
+package.loaded.filesystem = dofile("/lib/filesystem.lua")
 
-  -- Inject the io modules
-  _G.io = dofile("/lib/io.lua")
+-- Inject the io modules
+_G.io = dofile("/lib/io.lua")
 end
 
 status("Initializing file system...")
@@ -123,25 +123,25 @@ status("Running boot scripts...")
 
 -- Run library startup scripts. These mostly initialize event handlers.
 local function rom_invoke(method, ...)
-  return component.invoke(computer.getBootAddress(), method, ...)
+return component.invoke(computer.getBootAddress(), method, ...)
 end
 
 local scripts = {}
 for _, file in ipairs(rom_invoke("list", "boot")) do
-  local path = "boot/" .. file
-  if not rom_invoke("isDirectory", path) then
+local path = "boot/" .. file
+if not rom_invoke("isDirectory", path) then
 	table.insert(scripts, path)
-  end
+end
 end
 table.sort(scripts)
 for i = 1, #scripts do
-  dofile(scripts[i])
+dofile(scripts[i])
 end
 
 status("Initializing components...")
 
 for c, t in component.list() do
-  computer.pushSignal("component_added", c, t)
+computer.pushSignal("component_added", c, t)
 end
 
 status("Initializing system...")

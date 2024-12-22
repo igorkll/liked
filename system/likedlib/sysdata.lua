@@ -15,9 +15,9 @@ end
 function sysdata.get(key)
 	local path = sysdata.path(key)
 	if fs.exists(path) then
-	    return fs.readFile(path) or defaults[key]
+		return fs.readFile(path) or defaults[key]
 	else
-	    return defaults[key]
+		return defaults[key]
 	end
 end
 
@@ -29,10 +29,10 @@ end
 function sysdata.list()
 	local lst = {}
 	for k, v in pairs(defaults) do
-	    lst[k] = v
+		lst[k] = v
 	end
 	for _, name in ipairs(fs.list(varsPath)) do
-	    lst[name] = sysdata.get(name)
+		lst[name] = sysdata.get(name)
 	end
 	return lst
 end

@@ -3,7 +3,7 @@ local holo = ...
 
 local function drawCircle_draw(y, x, z, color, rand)
 	if not rand or math.random(0, rand) == 0 then
-	    holo.set(x, y, z, col(color))
+		holo.set(x, y, z, col(color))
 	end
 end
 
@@ -35,16 +35,16 @@ local function drawCircle(x, w, y, r, color, rand)
 
 	drawCircle_putpixel(w, x, y, lx, ly, color, rand)
 	while ly >= lx do
-	    lx = lx + 1
+		lx = lx + 1
 
-	    if d > 0 then
-	        ly = ly - 1
-	        d = d + 4 * (lx - ly) + 10
-	    else
-	        d = d + 4 * lx + 6
-	    end
+		if d > 0 then
+			ly = ly - 1
+			d = d + 4 * (lx - ly) + 10
+		else
+			d = d + 4 * lx + 6
+		end
 
-	    drawCircle_putpixel(w, x, y, lx, ly, color, rand)
+		drawCircle_putpixel(w, x, y, lx, ly, color, rand)
 	end
 end
 
@@ -53,11 +53,11 @@ end
 
 local function cone(add, len, col, rand, randcol)
 	for i = 0.5, len, 0.1 do
-	    if rand then
-	        drawCircle(hx / 2, hy - i - 0 - add, hz / 2, i + 1, randcol, rand)
-	    end
-	    drawCircle(hx / 2, hy - i - 0 - add, hz / 2, i, col)
-	    drawCircle(hx / 2, hy - i - 1 - add, hz / 2, i, col)
+		if rand then
+			drawCircle(hx / 2, hy - i - 0 - add, hz / 2, i + 1, randcol, rand)
+		end
+		drawCircle(hx / 2, hy - i - 0 - add, hz / 2, i, col)
+		drawCircle(hx / 2, hy - i - 1 - add, hz / 2, i, col)
 	end
 end
 
@@ -74,9 +74,9 @@ local fireworks = {}
 
 for iy = 1, hy - 1 do
 	for idx = -1, 1 do
-	    for idz = -1, 1 do
-	        holo.set((hx / 2) + idx, iy, (hz / 2) + idz, col(2))
-	    end
+		for idz = -1, 1 do
+			holo.set((hx / 2) + idx, iy, (hz / 2) + idz, col(2))
+		end
 	end
 end
 
@@ -98,41 +98,41 @@ cone(20, 10, 2)
 while true do
 	local startTime = os.clock()
 	for i = #fireworks, 1, -1 do
-	    local firework = fireworks[i]
+		local firework = fireworks[i]
 
-	    firework.pos = firework.pos + (firework.vec * deltatime)
-	    if firework.pos.x < 1 then firework.pos.x = 1 end
-	    if firework.pos.z < 1 then firework.pos.z = 1 end
-	    if firework.pos.x > hx then firework.pos.x = hx end
-	    if firework.pos.z > hz then firework.pos.z = hz end
+		firework.pos = firework.pos + (firework.vec * deltatime)
+		if firework.pos.x < 1 then firework.pos.x = 1 end
+		if firework.pos.z < 1 then firework.pos.z = 1 end
+		if firework.pos.x > hx then firework.pos.x = hx end
+		if firework.pos.z > hz then firework.pos.z = hz end
 
-	    local removed
-	    if firework.pos.y <= 1 then
-	        table.remove(fireworks, i)
-	        firework.pos.y = 1
-	        removed = true
-	    end
+		local removed
+		if firework.pos.y <= 1 then
+			table.remove(fireworks, i)
+			firework.pos.y = 1
+			removed = true
+		end
 
-	    if firework.oldColor then
-	        if firework.oldColor == 3 then
-	            dot(firework.oldPos, 0)
-	        else
-	            dot(firework.oldPos, firework.oldColor)
-	        end
-	    end
+		if firework.oldColor then
+			if firework.oldColor == 3 then
+				dot(firework.oldPos, 0)
+			else
+				dot(firework.oldPos, firework.oldColor)
+			end
+		end
 
-	    if not removed then
-	        firework.oldColor = get(firework.pos)
-	        firework.oldPos = firework.pos()
-	        dot(firework.pos, 3)
-	    end
+		if not removed then
+			firework.oldColor = get(firework.pos)
+			firework.oldPos = firework.pos()
+			dot(firework.pos, 3)
+		end
 	end
 
 	if true or math.random(0, 2) == 0 then
-	    table.insert(fireworks, {
-	        pos = vec.vec3(math.random(1, hx), hy, math.random(1, hz)),
-	        vec = vec.vec3((math.random() - 0.5) * 4, -math.random(10, 20), (math.random() - 0.5) * 4)
-	    })
+		table.insert(fireworks, {
+			pos = vec.vec3(math.random(1, hx), hy, math.random(1, hz)),
+			vec = vec.vec3((math.random() - 0.5) * 4, -math.random(10, 20), (math.random() - 0.5) * 4)
+		})
 	end
 
 	deltatime = math.max(0.1, os.clock() - startTime)

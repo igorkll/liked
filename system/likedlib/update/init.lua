@@ -32,7 +32,7 @@ function update.run(branch, mode, wipedata)
 	
 	update._write({data = data, filesBlackList = registry.filesBlackList})
 	if wipedata then
-	    fs.remove("/data")
+		fs.remove("/data")
 	end
 	computer.shutdown("fast")
 end

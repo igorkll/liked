@@ -16,7 +16,7 @@ for i, path in ipairs(fs.list(system.getResourcePath("demo"), true)) do
 	localLayout:setReturnLayout(layout)
 
 	function button:onClick()
-	    ui:select(localLayout)
+		ui:select(localLayout)
 	end
 end
 

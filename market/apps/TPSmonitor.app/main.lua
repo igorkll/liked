@@ -9,22 +9,22 @@ local rx, ry = graphic.getResolution(screen)
 local baseTh = thread.current()
 thread.listen("close", function(_, uuid)
 	if screen == uuid then
-	    baseTh:kill()
-	    return false
+		baseTh:kill()
+		return false
 	end
 end)
 
 local function getTpsColor(tps)
 	if tps < 10 then
-	    return colors.red
+		return colors.red
 	elseif tps < 15 then
-	    return colors.orange
+		return colors.orange
 	elseif tps < 17 then
-	    return colors.yellow
+		return colors.yellow
 	elseif tps < 19 then
-	    return colors.green
+		return colors.green
 	else
-	    return colors.lime
+		return colors.lime
 	end
 end
 

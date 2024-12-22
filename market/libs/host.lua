@@ -24,12 +24,12 @@ function host.worldFolder()
 
 	local file, err = bootloader.bootfs.open(invalidPath, "wb")
 	if file then
-	    bootloader.bootfs.close(file)
+		bootloader.bootfs.close(file)
 	elseif type(err) == "string" then
-	    local path = parser.split(unicode, err, {fullInvalidPath, fullInvalidPath:gsub("/", "\\")})[1]
-	    if path and unicode.len(path) > 0 then
-	        return unicode.sub(path, 1, unicode.len(path) - 1)
-	    end
+		local path = parser.split(unicode, err, {fullInvalidPath, fullInvalidPath:gsub("/", "\\")})[1]
+		if path and unicode.len(path) > 0 then
+			return unicode.sub(path, 1, unicode.len(path) - 1)
+		end
 	end
 end
 

@@ -41,15 +41,15 @@ local lpx, lpy, lpz
 
 local function getFacingStr(facing)
 	if facing == sides.north then
-	    return "north"
+		return "north"
 	elseif facing == sides.south then
-	    return "south"
+		return "south"
 	elseif facing == sides.west then
-	    return "west"
+		return "west"
 	elseif facing == sides.east then
-	    return "east"
+		return "east"
 	else
-	    return "unknown"
+		return "unknown"
 	end
 end
 
@@ -59,15 +59,15 @@ end
 
 local function getRotationChar(facing)
 	if facing == sides.north then
-	    return "^"
+		return "^"
 	elseif facing == sides.south then
-	    return "V"
+		return "V"
 	elseif facing == sides.west then
-	    return "<"
+		return "<"
 	elseif facing == sides.east then
-	    return ">"
+		return ">"
 	else
-	    return "#"
+		return "#"
 	end
 end
 
@@ -80,9 +80,9 @@ local function toPosInMap(px, py, pz, x, z)
 	local cx, cz = canvas.sx / 2, canvas.sy / 2
 
 	if fixedMap.state then
-	    return math.mapRound(x, -crange, crange, 1, canvas.sx), math.mapRound(z, -crange, crange, 1, canvas.sy)
+		return math.mapRound(x, -crange, crange, 1, canvas.sx), math.mapRound(z, -crange, crange, 1, canvas.sy)
 	else
-	    return math.mapRound(ox, -crange, crange, 1, canvas.sx), math.mapRound(oz, -crange, crange, 1, canvas.sy)
+		return math.mapRound(ox, -crange, crange, 1, canvas.sx), math.mapRound(oz, -crange, crange, 1, canvas.sy)
 	end
 end
 
@@ -95,9 +95,9 @@ local function update()
 	local facing = navigation.getFacing()
 
 	if px then
-	    positionLabel.text = "local pos: " .. math.round(px) .. "x " .. math.round(py) .. "y " .. math.round(pz) .. "z" .. stubStr
+		positionLabel.text = "local pos: " .. math.round(px) .. "x " .. math.round(py) .. "y " .. math.round(pz) .. "z" .. stubStr
 	else
-	    positionLabel.text = "local pos: unknown" .. stubStr
+		positionLabel.text = "local pos: unknown" .. stubStr
 	end
 
 	facingLabel.text    = "facing   : " .. getFacingStr(facing) .. stubStr
@@ -115,27 +115,27 @@ local function update()
 	canvas:centerText(canvas.sx, canvas.sy / 2, nil, nil, "EAST", true)
 
 	if px and not passiveMode.state then
-	    local dx, dy = toPosInMap(px, py, pz, px, pz)
-	    if dx then
-	        drawSelf(dx, dy, facing)
-	    end
+		local dx, dy = toPosInMap(px, py, pz, px, pz)
+		if dx then
+			drawSelf(dx, dy, facing)
+		end
 
-	    if waypoints and wpx then
-	        for _, waypoint in ipairs(waypoints) do
-	            local dx, dy = toPosInMap(px, py, pz, wpx + waypoint.position[1], wpz + waypoint.position[3])
-	            if dx then
-	                drawWaypoint(dx, dy, waypoint)
-	            end
-	        end
-	    end
+		if waypoints and wpx then
+			for _, waypoint in ipairs(waypoints) do
+				local dx, dy = toPosInMap(px, py, pz, wpx + waypoint.position[1], wpz + waypoint.position[3])
+				if dx then
+					drawWaypoint(dx, dy, waypoint)
+				end
+			end
+		end
 	else
-	    drawSelf(canvas.sx / 2, canvas.sy / 2, facing, uix.colors.orange)
+		drawSelf(canvas.sx / 2, canvas.sy / 2, facing, uix.colors.orange)
 
-	    if waypoints then
-	        for _, waypoint in ipairs(waypoints) do
-	            drawWaypoint(math.mapRound(waypoint.position[1], -crange, crange, 1, canvas.sx), math.mapRound(waypoint.position[3], -crange, crange, 1, canvas.sy), waypoint)
-	        end
-	    end
+		if waypoints then
+			for _, waypoint in ipairs(waypoints) do
+				drawWaypoint(math.mapRound(waypoint.position[1], -crange, crange, 1, canvas.sx), math.mapRound(waypoint.position[3], -crange, crange, 1, canvas.sy), waypoint)
+			end
+		end
 	end
 end
 

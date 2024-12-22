@@ -35,7 +35,7 @@ local minScale = 0.33
 
 local function col(index)
 	if index > colorsCount then
-	    return 1
+		return 1
 	end
 	return index
 end
@@ -47,17 +47,17 @@ agent.colorsCount = colorsCount
 
 local function updateRotation()
 	if agent.useSpeed then
-	    pcall(holo.setRotationSpeed, agent.rotation, 0, 1, 0)
-	    pcall(holo.setRotation, 0, 0, 0, 0)
+		pcall(holo.setRotationSpeed, agent.rotation, 0, 1, 0)
+		pcall(holo.setRotation, 0, 0, 0, 0)
 	else
-	    pcall(holo.setRotationSpeed, 0, 0, 0, 0)
-	    pcall(holo.setRotation, agent.rotation, 0, 1, 0)
+		pcall(holo.setRotationSpeed, 0, 0, 0, 0)
+		pcall(holo.setRotation, agent.rotation, 0, 1, 0)
 	end
 end
 
 local function saveAgent()
 	if not registry.data.holo then
-	    registry.data.holo = {}
+		registry.data.holo = {}
 	end
 
 	local data = table.clone(agent)
@@ -172,14 +172,14 @@ end
 
 for i = 1, colorsCount do
 	layout:createButton(rx - 16, (i * 2) + 1, 16, 1, holo.getPaletteColor(i), nil, "color" .. i, true).onClick = function (self)
-	    local color = gui.selectfullcolor(screen)
-	    if color then
-	        holo.setPaletteColor(i, color)
-	        uix.doColor(self, color)
-	        self.back2 = self.fore
-	        self.fore2 = self.back
-	    end
-	    layout:draw()
+		local color = gui.selectfullcolor(screen)
+		if color then
+			holo.setPaletteColor(i, color)
+			uix.doColor(self, color)
+			self.back2 = self.fore
+			self.fore2 = self.back
+		end
+		layout:draw()
 	end
 end
 
@@ -190,39 +190,39 @@ for name, path in pairs(hologramsPaths) do
 	layout:createText(10, 3 + switchI, colors.white, name)
 	table.insert(switchs, switch)
 	function switch:onSwitch()
-	    if self.state then
-	        for _, lswitch in ipairs(switchs) do
-	            if lswitch ~= self and lswitch.state then
-	                lswitch.state = false
-	                lswitch:draw()
-	            end
-	        end
-	        
-	        holo.clear()
-	        agent.current = name
-	        saveAgent()
-	        if agent.th then
-	            agent.th:kill()
-	            agent.th = nil
-	        end
+		if self.state then
+			for _, lswitch in ipairs(switchs) do
+				if lswitch ~= self and lswitch.state then
+					lswitch.state = false
+					lswitch:draw()
+				end
+			end
+			
+			holo.clear()
+			agent.current = name
+			saveAgent()
+			if agent.th then
+				agent.th:kill()
+				agent.th = nil
+			end
 
-	        local env = bootloader.createEnv()
-	        env.hx = hx
-	        env.hy = hy
-	        env.hz = hz
-	        env.col = col
-	        env.colorsCount = colorsCount
-	        agent.th = thread.createBackground(assert(loadfile(path, nil, env)), holo)
-	        agent.th:resume()
-	    else
-	        holo.clear()
-	        agent.current = nil
-	        saveAgent()
-	        if agent.th then
-	            agent.th:kill()
-	            agent.th = nil
-	        end
-	    end
+			local env = bootloader.createEnv()
+			env.hx = hx
+			env.hy = hy
+			env.hz = hz
+			env.col = col
+			env.colorsCount = colorsCount
+			agent.th = thread.createBackground(assert(loadfile(path, nil, env)), holo)
+			agent.th:resume()
+		else
+			holo.clear()
+			agent.current = nil
+			saveAgent()
+			if agent.th then
+				agent.th:kill()
+				agent.th = nil
+			end
+		end
 	end
 	switchI = switchI + 2
 end

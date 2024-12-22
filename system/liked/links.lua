@@ -10,14 +10,14 @@ end
 local modify = {}
 modify.newCreate = { --структура {name, exp, allowCheck(), create(path)}
 	{
-	    "system-dump",
-	    "afpx",
-	    function (path)
-	        return not fs.isReadOnly(path)
-	    end,
-	    function (path)
-	        return require("archiver").pack("/mnt/root", path)
-	    end
+		"system-dump",
+		"afpx",
+		function (path)
+			return not fs.isReadOnly(path)
+		end,
+		function (path)
+			return require("archiver").pack("/mnt/root", path)
+		end
 	}
 }
 
@@ -79,7 +79,7 @@ modify.editable = { --вместо "open is text editor" будет писать
 
 for listname, list in pairs(modify) do
 	for k, v in pairs(list) do
-	    gui_container[listname][k] = v
+		gui_container[listname][k] = v
 	end
 end
 

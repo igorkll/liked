@@ -16,30 +16,30 @@ if not liked.recoveryMode then
 	assert(apps.execute("/system/liked/links.lua"))
 
 	local function realCheck()
-	    apps.check()
-	    
-	    if internet.check() then
-	        account.check()
-	        
-	        if account.isStorage() then
-	            if not fs.exists(storagePath) then
-	                local storage = account.getStorage()
-	                if storage then
-	                    fs.mount(storage, storagePath)
-	                end
-	            end
-	        elseif fs.exists(storagePath) then
-	            fs.umount(storagePath)
-	        end
+		apps.check()
+		
+		if internet.check() then
+			account.check()
+			
+			if account.isStorage() then
+				if not fs.exists(storagePath) then
+					local storage = account.getStorage()
+					if storage then
+						fs.mount(storage, storagePath)
+					end
+				end
+			elseif fs.exists(storagePath) then
+				fs.umount(storagePath)
+			end
 
-	        if account.isBricked() then
-	            assert(programs.execute("/system/liked/brick.lua"))
-	        end
-	    end
+			if account.isBricked() then
+				assert(programs.execute("/system/liked/brick.lua"))
+			end
+		end
 	end
 
 	local function check()
-	    thread.createBackground(realCheck):resume()
+		thread.createBackground(realCheck):resume()
 	end
 
 	realCheck()
@@ -52,15 +52,15 @@ if registry.forceRestrictedLoader then
 	local firmware = eepromlib.find("Restricted Loader")
 	local errTitle = "the system configuration requires the \"Restricted Loader\" firmware. "
 	if firmware then
-	    if not eepromlib.isFirmware(firmware) then
-	        if not eepromlib.hiddenFlash(firmware) then
-	            error(errTitle .. "failed to flash the EEPROM")
-	        end
-	        computer.shutdown("fast") --after flashing, you need to restart the computer, since there is no guarantee that spyware has not been installed in a third-party EEPROM
-	    end
+		if not eepromlib.isFirmware(firmware) then
+			if not eepromlib.hiddenFlash(firmware) then
+				error(errTitle .. "failed to flash the EEPROM")
+			end
+			computer.shutdown("fast") --after flashing, you need to restart the computer, since there is no guarantee that spyware has not been installed in a third-party EEPROM
+		end
 	else
-	    error(errTitle .. "the firmware image could not be found")
-	    computer.shutdown("fast")
+		error(errTitle .. "the firmware image could not be found")
+		computer.shutdown("fast")
 	end
 end
 

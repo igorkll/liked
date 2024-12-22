@@ -11,9 +11,9 @@ end
 function adv.dist(pos1, pos2)
 	local sum = 0
 	for k, v in pairs(pos1) do
-	    if type(v) == "number" then
-	        sum = sum + ((v - pos2[k]) ^ 2)
-	    end
+		if type(v) == "number" then
+			sum = sum + ((v - pos2[k]) ^ 2)
+		end
 	end
 	return math.sqrt(sum)
 end

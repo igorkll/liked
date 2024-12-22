@@ -17,7 +17,7 @@ graphic.update(screen)
 
 local th = thread.create(function ()
 	assert(apps.execute("/system/bin/setup.app/inet.lua", screen, nil, window, nil, function ()
-	    gRedraw()
+		gRedraw()
 	end))
 end)
 th:resume()

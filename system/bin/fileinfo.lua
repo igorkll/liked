@@ -17,7 +17,7 @@ if not registry.disableHiddenFiles then
 	local checkbox = layout:createCheckbox(2, 11, not not fs.getAttribute(path, "hidden"), colors.red, colors.gray, colors.black)
 	layout:createText(5, 11, colors.black, "hidden")
 	function checkbox:onSwitch()
-	    fs.setAttribute(path, "hidden", self.state)
+		fs.setAttribute(path, "hidden", self.state)
 	end
 end
 
@@ -59,8 +59,8 @@ local sum = "-"
 if not fs.isDirectory(path) and size <= (16 * 1024) then
 	local content = fs.readFile(path)
 	if content then
-	    sum = require("sha256").sha256hex(content)
-	    sum = sum:sub(1, #addr) .. gui_container.chars.threeDots
+		sum = require("sha256").sha256hex(content)
+		sum = sum:sub(1, #addr) .. gui_container.chars.threeDots
 	end
 end
 window:fill(2, 8, 49, 1, colors.white, 0, " ")
@@ -73,12 +73,12 @@ while true do
 	layout:uploadEvent(windowEventData)
 
 	if windowEventData[1] == "key_down" then
-	    if windowEventData[4] == 28 then
-	        break
-	    end
+		if windowEventData[4] == 28 then
+			break
+		end
 	elseif windowEventData[1] == "touch" then
-	    if windowEventData[3] >= window.sizeX - 2 and windowEventData[4] == 1 then
-	        break
-	    end
+		if windowEventData[3] >= window.sizeX - 2 and windowEventData[4] == 1 then
+			break
+		end
 	end
 end

@@ -132,12 +132,12 @@ keyboard.keys.numpadequals    = 0x8D
 -- Create inverse mapping for name lookup.
 setmetatable(keyboard.keys,
 {
-  __index = function(tbl, k)
+__index = function(tbl, k)
 	if type(k) ~= "number" then return end
 	for name,value in pairs(tbl) do
-	  if value == k then
-	    return name
-	  end
+	if value == k then
+		return name
 	end
-  end
+	end
+end
 })

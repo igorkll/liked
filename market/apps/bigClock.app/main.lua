@@ -11,7 +11,7 @@ local rx, ry = graphic.getResolution(screen)
 local exit
 thread.listen("close", function(_, uuid)
 	if screen == uuid then
-	    exit = true
+		exit = true
 	end
 end)
 
@@ -27,6 +27,6 @@ while true do
 	os.sleep(0.1)
 
 	if exit then
-	    break
+		break
 	end
 end

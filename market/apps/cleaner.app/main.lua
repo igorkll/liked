@@ -65,15 +65,15 @@ end
 
 local function exists(lst)
 	for i, v in ipairs(lst) do
-	    if fs.exists(rePath(v)) then
-	        return true
-	    end
+		if fs.exists(rePath(v)) then
+			return true
+		end
 	end
 end
 
 local function rmAll(lst)
 	for i, v in ipairs(lst) do
-	    fs.remove(rePath(v))
+		fs.remove(rePath(v))
 	end
 end
 
@@ -85,13 +85,13 @@ local function cleanList()
 	local isMineOS = fs.exists("/vendor/apps/mineOS.app")
 
 	if not isOpenOS and exists(openOSfiles) then
-	    table.insert(list, "residual OpenOS files")
-	    table.insert(removeLists, openOSfiles)
+		table.insert(list, "residual OpenOS files")
+		table.insert(removeLists, openOSfiles)
 	end
 
 	if not isMineOS and exists(mineOSfiles) then
-	    table.insert(list, "residual MineOS files")
-	    table.insert(removeLists, mineOSfiles)
+		table.insert(list, "residual MineOS files")
+		table.insert(removeLists, mineOSfiles)
 	end
 
 	local ltrash = table.clone(trashRootFiles)
@@ -99,24 +99,24 @@ local function cleanList()
 	table.add(lnorm, openOSfiles)
 	table.add(lnorm, mineOSfiles)
 	for _, name in ipairs(fs.list("/mnt/root")) do
-	    local path = paths.concat("/", name)
-	    if not table.exists(lnorm, path) then
-	        table.insert(ltrash, path)
-	    end
+		local path = paths.concat("/", name)
+		if not table.exists(lnorm, path) then
+			table.insert(ltrash, path)
+		end
 	end
 	if exists(ltrash) then
-	    table.insert(list, "junk files of the root directory")
-	    table.insert(removeLists, ltrash)
+		table.insert(list, "junk files of the root directory")
+		table.insert(removeLists, ltrash)
 	end
 
 	if fs.exists("/data/errorlog.log") then
-	    table.insert(list, "error log")
-	    table.insert(removeLists, {"/data/errorlog.log"})
+		table.insert(list, "error log")
+		table.insert(removeLists, {"/data/errorlog.log"})
 	end
 
 	if fs.exists("/data/cache") then
-	    table.insert(list, "system cache")
-	    table.insert(removeLists, {"/data/cache"})
+		table.insert(list, "system cache")
+		table.insert(removeLists, {"/data/cache"})
 	end
 
 	return list, removeLists
@@ -136,20 +136,20 @@ local function updateList()
 	list, removeLists = cleanList()
 	layout.actionList.list = {}
 	if #list > 0 then
-	    layout.actionList.list = {}
-	    for i, title in ipairs(list) do
-	        if states[title] == nil then
-	            states[title] = not table.exists(notEnablesByDefault, title)
-	        end
-	        local size = 0
-	        for _, removePath in ipairs(removeLists[i]) do
-	            if fs.exists(removePath) then
-	                size = size + select(2, fs.size(removePath))
-	            end
-	        end
-	        local num = formatSize(size)
-	        layout.actionList.list[i] = {title .. string.rep(" ", layout.actionList.sizeX - #title - 2 - #num) .. num, states[title], title}
-	    end
+		layout.actionList.list = {}
+		for i, title in ipairs(list) do
+			if states[title] == nil then
+				states[title] = not table.exists(notEnablesByDefault, title)
+			end
+			local size = 0
+			for _, removePath in ipairs(removeLists[i]) do
+				if fs.exists(removePath) then
+					size = size + select(2, fs.size(removePath))
+				end
+			end
+			local num = formatSize(size)
+			layout.actionList.list[i] = {title .. string.rep(" ", layout.actionList.sizeX - #title - 2 - #num) .. num, states[title], title}
+		end
 	end
 end
 
@@ -159,24 +159,24 @@ end
 
 function layout.cleanButton:onClick()
 	if #removeLists > 0 then
-	    if gui.yesno(screen, nil, nil, "are you sure you want to start cleaning the system?") then
-	        local clear = gui.saveZone(screen)
-	        gui.status(screen, nil, nil, "cleaning the system...")
-	        local used = fs.spaceUsed("/")
-	        for i, removeList in ipairs(removeLists) do
-	            if layout.actionList.list[i][2] then
-	                for _, removePath in ipairs(removeList) do
-	                    fs.remove(removePath)
-	                end
-	            end
-	        end
-	        clear()
-	        updateList()
-	        layout.actionList:draw()
-	        gui.done(screen, nil, nil, "cleaned: " .. formatSize(used - fs.spaceUsed("/")))
-	    end
+		if gui.yesno(screen, nil, nil, "are you sure you want to start cleaning the system?") then
+			local clear = gui.saveZone(screen)
+			gui.status(screen, nil, nil, "cleaning the system...")
+			local used = fs.spaceUsed("/")
+			for i, removeList in ipairs(removeLists) do
+				if layout.actionList.list[i][2] then
+					for _, removePath in ipairs(removeList) do
+						fs.remove(removePath)
+					end
+				end
+			end
+			clear()
+			updateList()
+			layout.actionList:draw()
+			gui.done(screen, nil, nil, "cleaned: " .. formatSize(used - fs.spaceUsed("/")))
+		end
 	else
-	    gui.warn(screen, nil, nil, "cleaning of the system is not required")
+		gui.warn(screen, nil, nil, "cleaning of the system is not required")
 	end
 	ui:draw()
 end

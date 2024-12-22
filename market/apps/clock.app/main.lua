@@ -20,22 +20,22 @@ local function addButton(num, x, y, ipath, title)
 	button.noDropDraw = true
 	
 	function button:draw()
-	    local icol
-	    if currentNum == num then
-	        icol = colorlib.red
-	    else
-	        icol = colorlib.white
-	    end
+		local icol
+		if currentNum == num then
+			icol = colorlib.red
+		else
+			icol = colorlib.white
+		end
 
-	    local px, py = self.gui.window:toRealPos(self.x, self.y)
-	    graphic.fill(screen, px, py, sx, sy, uix.colors.blue, uix.colors.blue, " ")
-	    image.draw(screen, ipath, px, py, true, nil, nil, nil, uix.colors.white, {icol})
-	    gui.drawtext(screen, px + (8 - (unicode.len(self.text) / 2)), py + 9, uix.colors.white, self.text)
+		local px, py = self.gui.window:toRealPos(self.x, self.y)
+		graphic.fill(screen, px, py, sx, sy, uix.colors.blue, uix.colors.blue, " ")
+		image.draw(screen, ipath, px, py, true, nil, nil, nil, uix.colors.white, {icol})
+		gui.drawtext(screen, px + (8 - (unicode.len(self.text) / 2)), py + 9, uix.colors.white, self.text)
 	end
 
 	function button:onClick()
-	    currentNum = num
-	    ui:draw()
+		currentNum = num
+		ui:draw()
 	end
 
 	return button

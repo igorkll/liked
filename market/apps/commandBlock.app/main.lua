@@ -30,7 +30,7 @@ if path then
 	queue = {}
 	local content = assert(fs.readFile(path))
 	for _, command in ipairs(parser.split(unicode, content, "\n")) do
-	    table.insert(queue, command)
+		table.insert(queue, command)
 	end
 end
 
@@ -38,32 +38,32 @@ while true do
 	term:write("> ")
 	local command
 	if queue and #queue > 0 then
-	    command = table.remove(queue, 1)
-	    term:writeLn(command)
+		command = table.remove(queue, 1)
+		term:writeLn(command)
 	else
-	    command = term:readLn()
-	    if not command then
-	        break
-	    end
+		command = term:readLn()
+		if not command then
+			break
+		end
 	end
 
 	if cb.type == "debug" then
-	    local ret = tostring(cb.runCommand(command))
-	    if ret then
-	        term:write(ret)
-	    end
+		local ret = tostring(cb.runCommand(command))
+		if ret then
+			term:write(ret)
+		end
 	else
-	    cb.setCommand(command)
-	    local _, ret = cb.executeCommand()
-	    if ret then
-	        term:write(ret)
-	    end
+		cb.setCommand(command)
+		local _, ret = cb.executeCommand()
+		if ret then
+			term:write(ret)
+		end
 	end
 	term:newLine()
 	graphic.forceUpdate(screen)
 
 	if queue and #queue == 0 then
-	    os.sleep(1)
-	    break
+		os.sleep(1)
+		break
 	end
 end

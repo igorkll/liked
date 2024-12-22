@@ -43,7 +43,7 @@ local screen = {}
 for x=1,w do
 	screen[x] = {}
 	for y=1,h do
-	    screen[x][y] = {}
+		screen[x][y] = {}
 	end
 end
 screen[xPos][yPos] = { snake = true }
@@ -64,22 +64,22 @@ local tFruits = {
 
 local function addFruit()
 	while true do
-	    local x = math.random(1,w)
-	    local y = math.random(2,h)
-	    local fruit = screen[x][y]
-	    if fruit.snake == nil and fruit.wall == nil and fruit.fruit == nil then
-	        screen[x][y] = { fruit = true }
-	        term.setCursorPos(x,y)
-	        term.setBackgroundColour( fruitColour )
-	        term.write(" ")
-	        term.setBackgroundColour( colours.black )
-	        break
-	    end
+		local x = math.random(1,w)
+		local y = math.random(2,h)
+		local fruit = screen[x][y]
+		if fruit.snake == nil and fruit.wall == nil and fruit.fruit == nil then
+			screen[x][y] = { fruit = true }
+			term.setCursorPos(x,y)
+			term.setBackgroundColour( fruitColour )
+			term.write(" ")
+			term.setBackgroundColour( colours.black )
+			break
+		end
 	end
 	
 	nFruit = nFruit + 1
 	if nFruit > #tFruits then
-	    nFruit = 1
+		nFruit = 1
 	end
 end
 
@@ -106,20 +106,20 @@ end
 local function update( )
 	local x,y = xPos,yPos
 	if pxVel and pyVel then
-	    xVel, yVel = pxVel, pyVel
-	    pxVel, pyVel = nil, nil
+		xVel, yVel = pxVel, pyVel
+		pxVel, pyVel = nil, nil
 	end
 
 	-- Remove the tail
 	if nExtraLength == 0 then
-	    local tail = screen[tailX][tailY]
-	    screen[tailX][tailY] = {}
-	    term.setCursorPos(tailX,tailY)
-	    term.write(" ")
-	    tailX = tail.nextX
-	    tailY = tail.nextY
+		local tail = screen[tailX][tailY]
+		screen[tailX][tailY] = {}
+		term.setCursorPos(tailX,tailY)
+		term.write(" ")
+		tailX = tail.nextX
+		tailY = tail.nextY
 	else
-	    nExtraLength = nExtraLength - 1
+		nExtraLength = nExtraLength - 1
 	end
 	
 	-- Update the head
@@ -127,32 +127,32 @@ local function update( )
 	local newXPos = xPos + xVel
 	local newYPos = yPos + yVel
 	if newXPos < 1 then
-	    newXPos = w
+		newXPos = w
 	elseif newXPos > w then
-	    newXPos = 1
+		newXPos = 1
 	end
 	if newYPos < 2 then
-	    newYPos = h
+		newYPos = h
 	elseif newYPos > h then
-	    newYPos = 2
+		newYPos = 2
 	end
 	
 	local newHead = screen[newXPos][newYPos]
 	if newHead.snake == true or newHead.wall == true then
-	    bRunning = false
-	    
+		bRunning = false
+		
 	else
-	    if newHead.fruit == true then
-	        nScore = nScore + 10
-	        nExtraLength = nExtraLength + 1
-	        addFruit()
-	    end
-	    xPos = newXPos
-	    yPos = newYPos
-	    head.nextX = newXPos
-	    head.nextY = newYPos
-	    screen[newXPos][newYPos] = { snake = true }
-	    
+		if newHead.fruit == true then
+			nScore = nScore + 10
+			nExtraLength = nExtraLength + 1
+			addFruit()
+		end
+		xPos = newXPos
+		yPos = newYPos
+		head.nextX = newXPos
+		head.nextY = newYPos
+		screen[newXPos][newYPos] = { snake = true }
+		
 	end
 	
 	term.setCursorPos(xPos,yPos)
@@ -193,22 +193,22 @@ drawFrontend()
 while true do
 	local e,key = os.pullEvent( "key" )
 	if key == keys.up or key == keys.w then
-	    -- Up
-	    if nDifficulty > 1 then
-	        nDifficulty = nDifficulty - 1
-	        drawMenu()
-	        drawFrontend()
-	    end
+		-- Up
+		if nDifficulty > 1 then
+			nDifficulty = nDifficulty - 1
+			drawMenu()
+			drawFrontend()
+		end
 	elseif key == keys.down or key == keys.s then
-	    -- Down
-	    if nDifficulty < 3 then
-	        nDifficulty = nDifficulty + 1
-	        drawMenu()
-	        drawFrontend()
-	    end
+		-- Down
+		if nDifficulty < 3 then
+			nDifficulty = nDifficulty + 1
+			drawMenu()
+			drawFrontend()
+		end
 	elseif key == keys.enter then
-	    -- Enter
-	    break
+		-- Enter
+		break
 	end
 end
 
@@ -231,34 +231,34 @@ local timer = os.startTimer(0)
 while bRunning do
 	local event, p1, p2 = os.pullEvent()
 	if event == "timer" and p1 == timer then
-	    timer = os.startTimer(nInterval)
-	    update( false )
+		timer = os.startTimer(nInterval)
+		update( false )
 	
 	elseif event == "key" then
-	    local key = p1
-	    if key == keys.up or key == keys.w then
-	        -- Up
-	        if yVel == 0 then
-	            pxVel,pyVel = 0,-1
-	        end
-	    elseif key == keys.down or key == keys.s then
-	        -- Down
-	        if yVel == 0 then
-	            pxVel,pyVel = 0,1
-	        end
-	    elseif key == keys.left or key == keys.a then
-	        -- Left
-	        if xVel == 0 then
-	            pxVel,pyVel = -1,0
-	        end
-	    
-	    elseif key == keys.right or key == keys.d then
-	        -- Right
-	        if xVel == 0 then
-	            pxVel,pyVel = 1,0
-	        end
-	    
-	    end    
+		local key = p1
+		if key == keys.up or key == keys.w then
+			-- Up
+			if yVel == 0 then
+				pxVel,pyVel = 0,-1
+			end
+		elseif key == keys.down or key == keys.s then
+			-- Down
+			if yVel == 0 then
+				pxVel,pyVel = 0,1
+			end
+		elseif key == keys.left or key == keys.a then
+			-- Left
+			if xVel == 0 then
+				pxVel,pyVel = -1,0
+			end
+		
+		elseif key == keys.right or key == keys.d then
+			-- Right
+			if xVel == 0 then
+				pxVel,pyVel = 1,0
+			end
+		
+		end    
 	end
 end
 
@@ -277,17 +277,17 @@ local timer = os.startTimer(2.5)
 repeat
 	local e,p = os.pullEvent()
 	if e == "timer" and p == timer then
-	    term.setTextColour( textColour )
-	    printCentred( math.floor(h/2) + 2, " PRESS ANY KEY " )
-	    printCentred( math.floor(h/2) + 3, "               " )
-	    term.setTextColour( colours.white )
+		term.setTextColour( textColour )
+		printCentred( math.floor(h/2) + 2, " PRESS ANY KEY " )
+		printCentred( math.floor(h/2) + 3, "               " )
+		term.setTextColour( colours.white )
 	end
 until e == "char"
 
 term.clear()
 term.setCursorPos(1,1)
 
-	    
+		
 ]]
 --[[
 local colorPic = require("colorPic")
@@ -321,58 +321,58 @@ local keyboard = {pressedChars = {}, pressedCodes = {}}
 
 
 keyboard.keys = {
-  c               = 0x2E,
-  d               = 0x20,
-  q               = 0x10,
-  w               = 0x11,
-  back            = 0x0E, -- backspace
-  delete          = 0xD3,
-  down            = 0xD0,
-  enter           = 0x1C,
-  home            = 0xC7,
-  lcontrol        = 0x1D,
-  left            = 0xCB,
-  lmenu           = 0x38, -- left Alt
-  lshift          = 0x2A,
-  pageDown        = 0xD1,
-  rcontrol        = 0x9D,
-  right           = 0xCD,
-  rmenu           = 0xB8, -- right Alt
-  rshift          = 0x36,
-  space           = 0x39,
-  tab             = 0x0F,
-  up              = 0xC8,
-  ["end"]         = 0xCF,
-  enter           = 0x1C,
-  tab             = 0x0F,
-  numpadenter     = 0x9C,
+c               = 0x2E,
+d               = 0x20,
+q               = 0x10,
+w               = 0x11,
+back            = 0x0E, -- backspace
+delete          = 0xD3,
+down            = 0xD0,
+enter           = 0x1C,
+home            = 0xC7,
+lcontrol        = 0x1D,
+left            = 0xCB,
+lmenu           = 0x38, -- left Alt
+lshift          = 0x2A,
+pageDown        = 0xD1,
+rcontrol        = 0x9D,
+right           = 0xCD,
+rmenu           = 0xB8, -- right Alt
+rshift          = 0x36,
+space           = 0x39,
+tab             = 0x0F,
+up              = 0xC8,
+["end"]         = 0xCF,
+enter           = 0x1C,
+tab             = 0x0F,
+numpadenter     = 0x9C,
 }
 
 -------------------------------------------------------------------------------
 
 function keyboard.isAltDown()
-  return keyboard.pressedCodes[keyboard.keys.lmenu] or keyboard.pressedCodes[keyboard.keys.rmenu]
+return keyboard.pressedCodes[keyboard.keys.lmenu] or keyboard.pressedCodes[keyboard.keys.rmenu]
 end
 
 function keyboard.isControl(char)
-  return type(char) == "number" and (char < 0x20 or (char >= 0x7F and char <= 0x9F))
+return type(char) == "number" and (char < 0x20 or (char >= 0x7F and char <= 0x9F))
 end
 
 function keyboard.isControlDown()
-  return keyboard.pressedCodes[keyboard.keys.lcontrol] or keyboard.pressedCodes[keyboard.keys.rcontrol]
+return keyboard.pressedCodes[keyboard.keys.lcontrol] or keyboard.pressedCodes[keyboard.keys.rcontrol]
 end
 
 function keyboard.isKeyDown(charOrCode)
-  checkArg(1, charOrCode, "string", "number")
-  if type(charOrCode) == "string" then
+checkArg(1, charOrCode, "string", "number")
+if type(charOrCode) == "string" then
 	return keyboard.pressedChars[utf8 and utf8.codepoint(charOrCode) or charOrCode:byte()]
-  elseif type(charOrCode) == "number" then
+elseif type(charOrCode) == "number" then
 	return keyboard.pressedCodes[charOrCode]
-  end
+end
 end
 
 function keyboard.isShiftDown()
-  return keyboard.pressedCodes[keyboard.keys.lshift] or keyboard.pressedCodes[keyboard.keys.rshift]
+return keyboard.pressedCodes[keyboard.keys.lshift] or keyboard.pressedCodes[keyboard.keys.rshift]
 end
 
 -------------------------------------------------------------------------------
@@ -510,14 +510,14 @@ keyboard.keys.numpadequals    = 0x8D
 -- Create inverse mapping for name lookup.
 setmetatable(keyboard.keys,
 {
-  __index = function(tbl, k)
+__index = function(tbl, k)
 	if type(k) ~= "number" then return end
 	for name,value in pairs(tbl) do
-	  if value == k then
-	    return name
-	  end
+	if value == k then
+		return name
 	end
-  end
+	end
+end
 })
 
 
@@ -567,326 +567,326 @@ local ccqueue = {}
 local env
 env = {
 	fs = {
-	    getDir = function (path)
-	        return paths.path(path)
-	    end,
-	    list = function(path)
-	        local files = {}
-	        for file in fs.list(path) do
-	            local text = fs.concat(file)
-	            if unicode.sub(text, unicode.len(text), unicode.len(text)) == "/" then
-	                text = unicode.sub(text, unicode.len(text), unicode.len(text) - 1)
-	            end
-	            table.insert(files, text)
-	        end
-	        return files
-	    end,
-	    isDir = fs.isDirectory,
-	    exists = fs.exists,
-	    isReadOnly = function(path)
-	        return fs.get(path).isReadOnly()
-	    end,
-	    getName = function(path)
-	        return fs.get(path).getLabel()
-	    end,
-	    makeDir = fs.makeDirectory,
-	    move = fs.move,
-	    copy = fs.copy,
-	    delete = fs.remove,
-	    combine = fs.concat,
-	    open = function(path, mode)
-	        local file, err = fs.open(path, mode)
-	        if not file then return nil, err end
+		getDir = function (path)
+			return paths.path(path)
+		end,
+		list = function(path)
+			local files = {}
+			for file in fs.list(path) do
+				local text = fs.concat(file)
+				if unicode.sub(text, unicode.len(text), unicode.len(text)) == "/" then
+					text = unicode.sub(text, unicode.len(text), unicode.len(text) - 1)
+				end
+				table.insert(files, text)
+			end
+			return files
+		end,
+		isDir = fs.isDirectory,
+		exists = fs.exists,
+		isReadOnly = function(path)
+			return fs.get(path).isReadOnly()
+		end,
+		getName = function(path)
+			return fs.get(path).getLabel()
+		end,
+		makeDir = fs.makeDirectory,
+		move = fs.move,
+		copy = fs.copy,
+		delete = fs.remove,
+		combine = fs.concat,
+		open = function(path, mode)
+			local file, err = fs.open(path, mode)
+			if not file then return nil, err end
 
-	        local obj = {}
+			local obj = {}
 
-	        function obj.readAll()
-	            return file.readAll()
-	        end
+			function obj.readAll()
+				return file.readAll()
+			end
 
-	        function obj.close()
-	            return file.close()
-	        end
+			function obj.close()
+				return file.close()
+			end
 
-	        function obj.write(str)
-	            if type(str) == "string" then
-	                return file.write(str)
-	            else
-	                return file.write(string.byte(str))
-	            end
-	        end
+			function obj.write(str)
+				if type(str) == "string" then
+					return file.write(str)
+				else
+					return file.write(string.byte(str))
+				end
+			end
 
-	        function obj.writeLine(str)
-	            return file.write(str .. "\n")
-	        end
+			function obj.writeLine(str)
+				return file.write(str .. "\n")
+			end
 
-	        function obj.read(bytes)
-	            if bytes then
-	                return file.read(bytes)
-	            else
-	                return string.char(file.read(1))
-	            end
-	        end
-	        
-	        function obj.readLine()
-	            local line = nil
-	            while true do
-	                local char = file.read(1)
-	                if not char or char == "\n" then break end
-	                if not line then line = "" end
-	                line = line .. char
-	            end
-	            return line
-	        end
+			function obj.read(bytes)
+				if bytes then
+					return file.read(bytes)
+				else
+					return string.char(file.read(1))
+				end
+			end
+			
+			function obj.readLine()
+				local line = nil
+				while true do
+					local char = file.read(1)
+					if not char or char == "\n" then break end
+					if not line then line = "" end
+					line = line .. char
+				end
+				return line
+			end
 
-	        return obj
-	    end,
+			return obj
+		end,
 	},
 	term = {
-	    getSize = function()
-	        local gpu = graphic.findGpu(screen)
-	        return gpu.getResolution()
-	    end,
-	    isColor = function()
-	        local gpu = graphic.findGpu(screen)
-	        return gpu.getDepth() ~= 1
-	    end,
-	    write = function(data)
-	        local gpu = graphic.findGpu(screen)
-	        window:write(data, gpu.getBackground(), gpu.getForeground())
-	    end,
-	    setCursorPos = function(x, y)
-	        window:setCursor(x, y)
-	    end,
-	    --getCursorPos = term.getCursor,
-	    clear = function(color)
-	        window:clear(color or colors.black)
-	    end,
-	    --clearLine = term.clearLine,
-	    --scroll = term.scroll,
-	    getTextColor = function(color)
-	        local gpu = graphic.findGpu(screen)
-	        return gpu.getForeground(color)
-	    end,
-	    getBackgroundColor = function(color)
-	        local gpu = graphic.findGpu(screen)
-	        return gpu.getBackground(color)
-	    end,
-	    setTextColor = function(color)
-	        local gpu = graphic.findGpu(screen)
-	        gpu.setForeground(color)
-	    end,
-	    setBackgroundColor = function(color)
-	        local gpu = graphic.findGpu(screen)
-	        gpu.setBackground(color)
-	    end,
-	    getCursorBlink = function()
-	        return cursorBlick
-	    end,
-	    setCursorBlink = function(state)
-	        cursorBlick = state
-	    end,
+		getSize = function()
+			local gpu = graphic.findGpu(screen)
+			return gpu.getResolution()
+		end,
+		isColor = function()
+			local gpu = graphic.findGpu(screen)
+			return gpu.getDepth() ~= 1
+		end,
+		write = function(data)
+			local gpu = graphic.findGpu(screen)
+			window:write(data, gpu.getBackground(), gpu.getForeground())
+		end,
+		setCursorPos = function(x, y)
+			window:setCursor(x, y)
+		end,
+		--getCursorPos = term.getCursor,
+		clear = function(color)
+			window:clear(color or colors.black)
+		end,
+		--clearLine = term.clearLine,
+		--scroll = term.scroll,
+		getTextColor = function(color)
+			local gpu = graphic.findGpu(screen)
+			return gpu.getForeground(color)
+		end,
+		getBackgroundColor = function(color)
+			local gpu = graphic.findGpu(screen)
+			return gpu.getBackground(color)
+		end,
+		setTextColor = function(color)
+			local gpu = graphic.findGpu(screen)
+			gpu.setForeground(color)
+		end,
+		setBackgroundColor = function(color)
+			local gpu = graphic.findGpu(screen)
+			gpu.setBackground(color)
+		end,
+		getCursorBlink = function()
+			return cursorBlick
+		end,
+		setCursorBlink = function(state)
+			cursorBlick = state
+		end,
 
-	    blit = function(char, fore, back)
-	        local gpu = graphic.findGpu(screen)
+		blit = function(char, fore, back)
+			local gpu = graphic.findGpu(screen)
 
-	        local oldFore = gpu.getForeground()
-	        local oldBack = gpu.getBackground()
-	        gpu.setForeground(tonumber(fore, 16))
-	        gpu.setBackground(tonumber(back, 16))
-	        gpu.set(char)
-	        gpu.setForeground(oldFore)
-	        gpu.setBackground(oldBack)
-	    end
+			local oldFore = gpu.getForeground()
+			local oldBack = gpu.getBackground()
+			gpu.setForeground(tonumber(fore, 16))
+			gpu.setBackground(tonumber(back, 16))
+			gpu.set(char)
+			gpu.setForeground(oldFore)
+			gpu.setBackground(oldBack)
+		end
 	},
 	os = {
-	    version = function()
-	        return "CraftOS 1.8"
-	    end,
-	    getComputerID = function()
-	        return 1
-	    end,
-	    --getComputerLabel = function()
-	    --    return fs.get("/").getLabel()
-	    --end,
-	    --setComputerLabel = function(label)
-	    --    fs.get("/").setLabel(label)
-	    --end,
-	    clock = os.clock,
-	    time = os.time,
-	    shutdown = function()
-	        computer.shutdown()
-	    end,
-	    reboot = function()
-	        computer.shutdown(true)
-	    end,
-	    pullEvent = function(name)
-	        while true do
-	            local newEventData
+		version = function()
+			return "CraftOS 1.8"
+		end,
+		getComputerID = function()
+			return 1
+		end,
+		--getComputerLabel = function()
+		--    return fs.get("/").getLabel()
+		--end,
+		--setComputerLabel = function(label)
+		--    fs.get("/").setLabel(label)
+		--end,
+		clock = os.clock,
+		time = os.time,
+		shutdown = function()
+			computer.shutdown()
+		end,
+		reboot = function()
+			computer.shutdown(true)
+		end,
+		pullEvent = function(name)
+			while true do
+				local newEventData
 
-	            if #ccqueue > 0 then
-	                newEventData = table.remove(ccqueue)
-	            else
-	                local eventData
-	                if cursorBlick then
-	                    eventData = {event.pull(0.1)}
-	                else
-	                    eventData = {event.pull(0.1)}
-	                end
+				if #ccqueue > 0 then
+					newEventData = table.remove(ccqueue)
+				else
+					local eventData
+					if cursorBlick then
+						eventData = {event.pull(0.1)}
+					else
+						eventData = {event.pull(0.1)}
+					end
 
-	                if eventData[1] == "touch" and eventData[2] == screen then
-	                    newEventData = {"mouse_click", math.floor(eventData[5] + 1), math.floor(eventData[3]), math.floor(eventData[4])}
-	                elseif eventData[1] == "key_down" and eventData[2] == keyboard2 and eventData[3] == 3 and eventData[4] == 46 then
-	                    error("interrupted", 0)
-	                elseif eventData[1] == "drop" and eventData[2] == screen then
-	                    newEventData = {"mouse_up", math.floor(eventData[5] + 1), math.floor(eventData[3]), math.floor(eventData[4])}
-	                elseif eventData[1] == "drag" and eventData[2] == screen then
-	                    newEventData = {"mouse_drag", math.floor(eventData[5] + 1), math.floor(eventData[3]), math.floor(eventData[4])}
-	                elseif eventData[1] == "scroll" and eventData[2] == screen then
-	                    newEventData = {"mouse_scroll", math.floor(-eventData[5]), math.floor(eventData[3]), math.floor(eventData[4])}
-	                elseif eventData[1] == "key_down" and eventData[2] == keyboard2 then
-	                    newEventData = {"key", math.floor(eventData[4]), false}
-	                    if eventData[3] >= 32 and eventData[3] <= 126 then
-	                        table.insert(ccqueue, {"char", string.char(eventData[3])})
-	                    end
-	                elseif eventData[1] == "key_up" and eventData[2] == keyboard2 then
-	                    newEventData = {"key_up", math.floor(eventData[4])}
-	                elseif eventData[1] == "clipboard" and eventData[2] == keyboard2 then
-	                    newEventData = {"paste", eventData[3]}
-	                end
-	            end
+					if eventData[1] == "touch" and eventData[2] == screen then
+						newEventData = {"mouse_click", math.floor(eventData[5] + 1), math.floor(eventData[3]), math.floor(eventData[4])}
+					elseif eventData[1] == "key_down" and eventData[2] == keyboard2 and eventData[3] == 3 and eventData[4] == 46 then
+						error("interrupted", 0)
+					elseif eventData[1] == "drop" and eventData[2] == screen then
+						newEventData = {"mouse_up", math.floor(eventData[5] + 1), math.floor(eventData[3]), math.floor(eventData[4])}
+					elseif eventData[1] == "drag" and eventData[2] == screen then
+						newEventData = {"mouse_drag", math.floor(eventData[5] + 1), math.floor(eventData[3]), math.floor(eventData[4])}
+					elseif eventData[1] == "scroll" and eventData[2] == screen then
+						newEventData = {"mouse_scroll", math.floor(-eventData[5]), math.floor(eventData[3]), math.floor(eventData[4])}
+					elseif eventData[1] == "key_down" and eventData[2] == keyboard2 then
+						newEventData = {"key", math.floor(eventData[4]), false}
+						if eventData[3] >= 32 and eventData[3] <= 126 then
+							table.insert(ccqueue, {"char", string.char(eventData[3])})
+						end
+					elseif eventData[1] == "key_up" and eventData[2] == keyboard2 then
+						newEventData = {"key_up", math.floor(eventData[4])}
+					elseif eventData[1] == "clipboard" and eventData[2] == keyboard2 then
+						newEventData = {"paste", eventData[3]}
+					end
+				end
 
-	            if newEventData and (not name or newEventData[1] == name) then
-	                return table.unpack(newEventData)
-	            end
-	        end
-	    end,
-	    startTimer = function(time)
-	        local id
-	        id = event.timer(time, function()
-	            table.insert(ccqueue, {"timer", id})
-	        end)
-	        return id
-	    end,
-	    queueEvent = function(name, ...)
-	        table.insert(ccqueue, {name, ...})
-	    end
+				if newEventData and (not name or newEventData[1] == name) then
+					return table.unpack(newEventData)
+				end
+			end
+		end,
+		startTimer = function(time)
+			local id
+			id = event.timer(time, function()
+				table.insert(ccqueue, {"timer", id})
+			end)
+			return id
+		end,
+		queueEvent = function(name, ...)
+			table.insert(ccqueue, {name, ...})
+		end
 	},
 	parallel = {
-	    waitForAny = function(...)
-	        local threads = {}
+		waitForAny = function(...)
+			local threads = {}
 
-	        for k, v in pairs({...}) do
-	            table.insert(threads, thread.create(v))
-	        end
+			for k, v in pairs({...}) do
+				table.insert(threads, thread.create(v))
+			end
 
-	        while true do
-	            local isBreak
-	            for k, v in pairs(threads) do
-	                if v:status() == "dead" then
-	                    isBreak = true
-	                    break
-	                end
-	            end
-	            if isBreak then
-	                break
-	            end
-	        end
+			while true do
+				local isBreak
+				for k, v in pairs(threads) do
+					if v:status() == "dead" then
+						isBreak = true
+						break
+					end
+				end
+				if isBreak then
+					break
+				end
+			end
 
-	        for k, v in pairs(threads) do
-	            v:kill()
-	        end
-	    end,
-	    waitForAll = function(...)
-	        local threads = {}
+			for k, v in pairs(threads) do
+				v:kill()
+			end
+		end,
+		waitForAll = function(...)
+			local threads = {}
 
-	        for k, v in pairs({...}) do
-	            table.insert(threads, thread.create(v))
-	        end
+			for k, v in pairs({...}) do
+				table.insert(threads, thread.create(v))
+			end
 
-	        repeat
-	            local activeThread
-	            for k, v in pairs(threads) do
-	                if v:status() ~= "dead" then
-	                    activeThread = true
-	                    break
-	                end
-	            end
-	        until not activeThread
+			repeat
+				local activeThread
+				for k, v in pairs(threads) do
+					if v:status() ~= "dead" then
+						activeThread = true
+						break
+					end
+				end
+			until not activeThread
 
-	        for k, v in pairs(threads) do
-	            v:kill()
-	        end
-	    end
+			for k, v in pairs(threads) do
+				v:kill()
+			end
+		end
 	},
 	shell = {
-	    --resolve = shell.resolve,
-	    openTab = function(name, ...)
-	        --shell.execute(name, env, ...)
-	        return 0
-	    end,
-	    switchTab = function(num)
-	    end,
-	    getRunningProgram = function ()
-	        return selfpath
-	    end
+		--resolve = shell.resolve,
+		openTab = function(name, ...)
+			--shell.execute(name, env, ...)
+			return 0
+		end,
+		switchTab = function(num)
+		end,
+		getRunningProgram = function ()
+			return selfpath
+		end
 	},
 	peripheral = { --заглушка
-	    isPresent = function()
-	        return false
-	    end,
-	    getType = function()
-	        return nil
-	    end,
-	    getMethods = function()
-	        return nil
-	    end,
-	    call = function()
-	        return nil
-	    end,
-	    wrap = function()
-	        return nil
-	    end,
-	    find = function()
-	        return nil
-	    end,
-	    getNames = function()
-	        return {}
-	    end
+		isPresent = function()
+			return false
+		end,
+		getType = function()
+			return nil
+		end,
+		getMethods = function()
+			return nil
+		end,
+		call = function()
+			return nil
+		end,
+		wrap = function()
+			return nil
+		end,
+		find = function()
+			return nil
+		end,
+		getNames = function()
+			return {}
+		end
 	},
 	settings = {
-	    set = function()
-	    end,
-	    get = function()
-	    end,
-	    unset = function()
-	    end,
-	    clear = function()
-	    end,
-	    getNames = function()
-	        return {}
-	    end,
-	    load = function()
-	        return false
-	    end,
-	    save = function()
-	        return false
-	    end
+		set = function()
+		end,
+		get = function()
+		end,
+		unset = function()
+		end,
+		clear = function()
+		end,
+		getNames = function()
+			return {}
+		end,
+		load = function()
+			return false
+		end,
+		save = function()
+			return false
+		end
 	},
 
 	paintutils = {
-	    drawPixel = function (x, y, col)
-	        env.term.setBackgroundColor(col)
-	        env.term.setCursorPos(x, y)
-	        env.term.write(" ")
-	    end,
+		drawPixel = function (x, y, col)
+			env.term.setBackgroundColor(col)
+			env.term.setCursorPos(x, y)
+			env.term.write(" ")
+		end,
 	},
 
 	write = function (...)
-	    env.term.write(...)
+		env.term.write(...)
 	end,
 	print = function (...)
-	    env.term.write(...)
+		env.term.write(...)
 	end,
 
 	io = {
@@ -947,8 +947,8 @@ local func = assert(load(programmData, nil, nil, env))
 local ok, err = pcall(func, ...)
 if not ok then
 	if err == "interrupted" then
-	    return
+		return
 	else
-	    error(err, 0)
+		error(err, 0)
 	end
 end

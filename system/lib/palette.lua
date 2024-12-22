@@ -15,10 +15,10 @@ end
 
 function palette.fromFile(screen, path, noReg)
 	if noReg then
-	    local pal = assert(serialization.load(path))
-	    graphic.setPalette(screen, pal)
+		local pal = assert(serialization.load(path))
+		graphic.setPalette(screen, pal)
 	else
-	    pcall(sysinit.applyPalette, path, screen)
+		pcall(sysinit.applyPalette, path, screen)
 	end
 end
 
@@ -33,39 +33,39 @@ end
 function palette.setDefaultPalette(screen, noReg)
 	local depth = graphic.getDepth(screen)
 	if depth == 8 then
-	    palette.fromFile(screen, "/system/t3default.plt", noReg)
+		palette.fromFile(screen, "/system/t3default.plt", noReg)
 	elseif depth == 4 then
-	    palette.fromFile(screen, "/system/palettes/original.plt", noReg)
+		palette.fromFile(screen, "/system/palettes/original.plt", noReg)
 	end
 end
 
 function palette.setSystemPalette(path, regOnly, doNotOffScreen)
 	if pcall(sysinit.applyPalette, path, regOnly, doNotOffScreen) then
-	    if sysinit.savePalPath then
-	        pcall(fs.copy, path, sysinit.savePalPath)
-	    end
+		if sysinit.savePalPath then
+			pcall(fs.copy, path, sysinit.savePalPath)
+		end
 	else
-	    if sysinit.savePalPath then
-	        pcall(fs.copy, sysinit.defaultPalettePath, sysinit.savePalPath)
-	    end
-	    sysinit.applyPalette(sysinit.defaultPalettePath, regOnly, doNotOffScreen)
+		if sysinit.savePalPath then
+			pcall(fs.copy, sysinit.defaultPalettePath, sysinit.savePalPath)
+		end
+		sysinit.applyPalette(sysinit.defaultPalettePath, regOnly, doNotOffScreen)
 	end
 end
 
 function palette.reBaseColor(palPath)
 	if registry.wallpaperBaseColor then
-	    local oldPal = require("gui_container").indexsColors
-	    local newPal = serialization.load(palPath)
+		local oldPal = require("gui_container").indexsColors
+		local newPal = serialization.load(palPath)
 
-	    if newPal then
-	        local index = table.find(oldPal, registry.wallpaperBaseColor)
-	        if index then
-	            local newColor = newPal[index]
-	            if newColor then
-	                registry.wallpaperBaseColor = newColor
-	            end
-	        end
-	    end
+		if newPal then
+			local index = table.find(oldPal, registry.wallpaperBaseColor)
+			if index then
+				local newColor = newPal[index]
+				if newColor then
+					registry.wallpaperBaseColor = newColor
+				end
+			end
+		end
 	end
 end
 

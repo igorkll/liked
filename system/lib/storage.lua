@@ -9,12 +9,12 @@ function storage.getLang()
 	local lang = registry.lang or "eng"
 	local path = system.getResourcePath(paths.concat("lang", lang .. ".lang"))
 	if fs.exists(path) then
-	    return path
+		return path
 	end
 
 	path = system.getResourcePath("lang/eng.lang")
 	if fs.exists(path) then
-	    return path
+		return path
 	end
 end
 

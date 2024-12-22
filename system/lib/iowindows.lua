@@ -10,26 +10,26 @@ local function iowindow(screen, dirmode, exp, save)
 	---- title
 	local title = ""
 	if save then
-	    title = title .. "save "
+		title = title .. "save "
 	else
-	    title = title .. "select "
+		title = title .. "select "
 	end
 	
 	local exps
 	if exp then
-	    if type(exp) == "table" then
-	        exps = exp
-	        exp = exps[1]
-	    else
-	        exps = {exp}
-	    end
-	    title = title .. (gui_container.typenames[exp] or exp) .. " "
+		if type(exp) == "table" then
+			exps = exp
+			exp = exps[1]
+		else
+			exps = {exp}
+		end
+		title = title .. (gui_container.typenames[exp] or exp) .. " "
 	end
 
 	if dirmode then
-	    title = title .. "folder"
+		title = title .. "folder"
 	else
-	    title = title .. "file"
+		title = title .. "file"
 	end
 
 	---- main
@@ -37,135 +37,135 @@ local function iowindow(screen, dirmode, exp, save)
 	local pathPos = 5 + (save and 17 or 0)
 
 	local function retpathFunc(list, num, fullpath, confirm)
-	    local isDir = num == 1 or fs.isDirectory(fullpath)
-	    local lexp = paths.extension(fullpath)
+		local isDir = num == 1 or fs.isDirectory(fullpath)
+		local lexp = paths.extension(fullpath)
 
-	    if isDir and not confirm then
-	        path = gui_container.checkPath(screen, fullpath)
-	    else
-	        local exists = fs.exists(fullpath)
-	        if (not exists or isDir == dirmode) and (not exp or lexp == exp) then
-	            local retpath = fullpath
-	            if num and list and list[num].name == ".." then
-	                retpath = paths.canonical(path)
-	            end
-	            if save then
-	                if not exists or gui.yesno(screen, nil, nil, "are you sure you want to " .. (isDir and "merge the directory?" or "overwrite the file?")) then
-	                    return retpath
-	                end
-	            else
-	                return retpath
-	            end
-	        else
-	            gui.warn(screen, nil, nil, "select the " .. (dirmode and "folder" or "file") .. (exp and (" with the " .. exp .. " extension") or ""))
-	        end
-	    end
+		if isDir and not confirm then
+			path = gui_container.checkPath(screen, fullpath)
+		else
+			local exists = fs.exists(fullpath)
+			if (not exists or isDir == dirmode) and (not exp or lexp == exp) then
+				local retpath = fullpath
+				if num and list and list[num].name == ".." then
+					retpath = paths.canonical(path)
+				end
+				if save then
+					if not exists or gui.yesno(screen, nil, nil, "are you sure you want to " .. (isDir and "merge the directory?" or "overwrite the file?")) then
+						return retpath
+					end
+				else
+					return retpath
+				end
+			else
+				gui.warn(screen, nil, nil, "select the " .. (dirmode and "folder" or "file") .. (exp and (" with the " .. exp .. " extension") or ""))
+			end
+		end
 	end
 
 	local inputTextBuffer
 	local disableShadow
 	local clearShadow
 	while true do
-	    local list = {{".. (back / current)", gui_container.colors.black, name = ".."}}
-	    for i, file in ipairs(fs.list(path)) do
-	        local fullpath = paths.concat(path, file)
-	        local isDir = fs.isDirectory(fullpath)
-	        if gui.isVisible(screen, fullpath) and (isDir or not dirmode) then
-	            local name = paths.name(file)
-	            local lexp = paths.extension(name)
-	            if isDir or not exp or lexp == exp then
-	                if not gui_container.viewFileExps[screen] then
-	                    name = paths.hideExtension(name)
-	                end
+		local list = {{".. (back / current)", gui_container.colors.black, name = ".."}}
+		for i, file in ipairs(fs.list(path)) do
+			local fullpath = paths.concat(path, file)
+			local isDir = fs.isDirectory(fullpath)
+			if gui.isVisible(screen, fullpath) and (isDir or not dirmode) then
+				local name = paths.name(file)
+				local lexp = paths.extension(name)
+				if isDir or not exp or lexp == exp then
+					if not gui_container.viewFileExps[screen] then
+						name = paths.hideExtension(name)
+					end
 
-	                local smartString = format.smartConcat()
-	                smartString.add(1, gui_container.short(name, 34, true))
-	                smartString.add(47 - 5, lexp and gui_container.short(gui_container.typenames[lexp] or lexp, 6, true) or "", true)
-	                smartString.add(47, isDir and "DIR" or "FILE", true)
-	                table.insert(list, {smartString.get(), gui_container.typecolors[lexp] or gui_container.colors.black, name = file})
-	            end
-	        end
-	    end
-	    
-	    local reader
-	    local num, _, _, _, confirm, lClearShadow = gui.select(screen, nil, nil, title, list, nil, nil, function (window)
-	        window:set(1, window.sizeY, gui_container.colors.red, gui_container.colors.white, " + ")
-	        window:set(pathPos, window.sizeY, gui_container.colors.lightGray, gui_container.colors.white, gui_container.short(gui_container.toUserPath(screen, path), save and 18 or 35))
-	        local ret
-	        if save then
-	            if not reader then
-	                reader = window:readNoDraw(5, window.sizeY, 16, gui_container.colors.white, gui_container.colors.gray, nil, nil, nil, true)
-	                if inputTextBuffer then
-	                    reader.setBuffer(inputTextBuffer)
-	                    if #inputTextBuffer > 0 then
-	                        ret = true
-	                    end
-	                end
-	            end
-	            reader.redraw()
-	        end
-	        return ret
-	    end, function (windowEventData, window)
-	        local fakeConfirm
-	        if reader then
-	            inputTextBuffer = reader.getBuffer()
-	            fakeConfirm = #inputTextBuffer > 0
-	        end
+					local smartString = format.smartConcat()
+					smartString.add(1, gui_container.short(name, 34, true))
+					smartString.add(47 - 5, lexp and gui_container.short(gui_container.typenames[lexp] or lexp, 6, true) or "", true)
+					smartString.add(47, isDir and "DIR" or "FILE", true)
+					table.insert(list, {smartString.get(), gui_container.typecolors[lexp] or gui_container.colors.black, name = file})
+				end
+			end
+		end
+		
+		local reader
+		local num, _, _, _, confirm, lClearShadow = gui.select(screen, nil, nil, title, list, nil, nil, function (window)
+			window:set(1, window.sizeY, gui_container.colors.red, gui_container.colors.white, " + ")
+			window:set(pathPos, window.sizeY, gui_container.colors.lightGray, gui_container.colors.white, gui_container.short(gui_container.toUserPath(screen, path), save and 18 or 35))
+			local ret
+			if save then
+				if not reader then
+					reader = window:readNoDraw(5, window.sizeY, 16, gui_container.colors.white, gui_container.colors.gray, nil, nil, nil, true)
+					if inputTextBuffer then
+						reader.setBuffer(inputTextBuffer)
+						if #inputTextBuffer > 0 then
+							ret = true
+						end
+					end
+				end
+				reader.redraw()
+			end
+			return ret
+		end, function (windowEventData, window)
+			local fakeConfirm
+			if reader then
+				inputTextBuffer = reader.getBuffer()
+				fakeConfirm = #inputTextBuffer > 0
+			end
 
-	        if reader then
-	            local ret = reader.uploadEvent(windowEventData)
-	            if ret then
-	                return -1, fakeConfirm
-	            end
-	        end
+			if reader then
+				local ret = reader.uploadEvent(windowEventData)
+				if ret then
+					return -1, fakeConfirm
+				end
+			end
 
-	        if windowEventData[1] == "touch" then
-	            if windowEventData[4] == window.sizeY and windowEventData[3] <= 3 then
-	                local clear = gui.saveZone(screen)
-	                local name = gui.input(screen, nil, nil, "folder name")
-	                clear()
+			if windowEventData[1] == "touch" then
+				if windowEventData[4] == window.sizeY and windowEventData[3] <= 3 then
+					local clear = gui.saveZone(screen)
+					local name = gui.input(screen, nil, nil, "folder name")
+					clear()
 
-	                if name then
-	                    fs.makeDirectory(paths.concat(path, name))
-	                    return true, fakeConfirm
-	                end
-	            end
-	        end
+					if name then
+						fs.makeDirectory(paths.concat(path, name))
+						return true, fakeConfirm
+					end
+				end
+			end
 
-	        return nil, fakeConfirm
-	    end, true, disableShadow)
-	    disableShadow = true
-	    clearShadow = clearShadow or lClearShadow
+			return nil, fakeConfirm
+		end, true, disableShadow)
+		disableShadow = true
+		clearShadow = clearShadow or lClearShadow
 
-	    if num == -1 then
-	        num = nil
-	        confirm = true
-	    end
+		if num == -1 then
+			num = nil
+			confirm = true
+		end
 
-	    if num then
-	        if num ~= true then
-	            local fullpath = paths.concat(path, list[num].name)
-	            local retpath = retpathFunc(list, num, fullpath, confirm)
-	            if retpath then
-	                clearShadow()
-	                return retpath
-	            end
-	        end
-	    elseif confirm and reader then
-	        local buff = reader.getBuffer()
-	        if #buff == 0 or buff:find("%\\") or buff:find("%/") or (exp and buff:find("%.")) then
-	            gui.warn(screen, nil, nil, "incorrect file name")
-	        else
-	            local retpath = retpathFunc(nil, nil, paths.concat(path, buff .. (exp and ("." .. exp) or "")), true)
-	            if retpath then
-	                clearShadow()
-	                return retpath
-	            end
-	        end
-	    else
-	        clearShadow()
-	        return
-	    end
+		if num then
+			if num ~= true then
+				local fullpath = paths.concat(path, list[num].name)
+				local retpath = retpathFunc(list, num, fullpath, confirm)
+				if retpath then
+					clearShadow()
+					return retpath
+				end
+			end
+		elseif confirm and reader then
+			local buff = reader.getBuffer()
+			if #buff == 0 or buff:find("%\\") or buff:find("%/") or (exp and buff:find("%.")) then
+				gui.warn(screen, nil, nil, "incorrect file name")
+			else
+				local retpath = retpathFunc(nil, nil, paths.concat(path, buff .. (exp and ("." .. exp) or "")), true)
+				if retpath then
+					clearShadow()
+					return retpath
+				end
+			end
+		else
+			clearShadow()
+			return
+		end
 	end
 end
 

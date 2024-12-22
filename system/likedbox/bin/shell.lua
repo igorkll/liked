@@ -18,15 +18,15 @@ term1:writeLn("TEST INPUT.")
 term2:writeLn("TEST LOG.")
 
 local t = thread.create(function()
-  while true do
+while true do
 	term1:write("> ")
 	term1:writeLn("input: " .. (term1:readLn() or "nil"))
-  end
+end
 end)
 t:resume()
 
 while true do
-  term2:write("an likedbox example. " .. math.round(math.random(0, 9)))
-  os.sleep(1)
-  term2:newLine()
+term2:write("an likedbox example. " .. math.round(math.random(0, 9)))
+os.sleep(1)
+term2:newLine()
 end

@@ -36,9 +36,9 @@ layout:createText(2 + 7, 2, uix.colors.white, "vision protection")
 function visionProtection:onSwitch()
 	local screenOn = gui.hideScreen(screen)
 	if self.state then
-	    registry.visionProtection = true
+		registry.visionProtection = true
 	else
-	    registry.visionProtection = nil
+		registry.visionProtection = nil
 	end
 	sysinit.applyPalette(sysinit.initPalPath, screen, true)
 	selfReload(screenOn)
@@ -53,10 +53,10 @@ end
 if fs.exists(palettePath) then
 	selected = nil
 	for i, file in ipairs(fs.list(themesPath, true)) do
-	    if fs.equals(file, palettePath) then
-	        selected = i
-	        break
-	    end
+		if fs.equals(file, palettePath) then
+			selected = i
+			break
+		end
 	end
 end
 
@@ -68,35 +68,35 @@ function draw(set)
 	selectWindow:setCursor(1, 1)
 
 	for i, v in ipairs(gui_container.indexsColors) do
-	    colorsWindow:set(2, i + 1, v, 0, "      ")
+		colorsWindow:set(2, i + 1, v, 0, "      ")
 	end
 
 	for i, file in ipairs(themes) do
-	    file = paths.hideExtension(file)
-	    local str = file .. string.rep(" ", (selectWindow.sizeX - 2) - unicode.len(file))
+		file = paths.hideExtension(file)
+		local str = file .. string.rep(" ", (selectWindow.sizeX - 2) - unicode.len(file))
 
-	    local background = colors.black
-	    local foreground = selected == i and colors.white or colors.gray
+		local background = colors.black
+		local foreground = selected == i and colors.white or colors.gray
 
-	    selectWindow:write("╔" .. string.rep("═", unicode.len(str)) .. "╗\n", background, foreground)
-	    selectWindow:write("║", background, foreground)
-	    selectWindow:write(str, background, foreground)
-	    selectWindow:write("║" .. "\n", background, foreground)
-	    selectWindow:write("╚" .. string.rep("═", unicode.len(str)) .. "╝", background, foreground)
+		selectWindow:write("╔" .. string.rep("═", unicode.len(str)) .. "╗\n", background, foreground)
+		selectWindow:write("║", background, foreground)
+		selectWindow:write(str, background, foreground)
+		selectWindow:write("║" .. "\n", background, foreground)
+		selectWindow:write("╚" .. string.rep("═", unicode.len(str)) .. "╝", background, foreground)
 
-	    if i ~= #themes then selectWindow:write("\n") end
+		if i ~= #themes then selectWindow:write("\n") end
 	end
 
 	layout:draw()
 
 	if set then
-	    local screenOn = gui.hideScreen(screen)
-	    local palPath = paths.concat(themesPath, themes[selected])
-	    palette.reBaseColor(palPath)
-	    palette.setSystemPalette(palPath, nil, true)
-	    gui_container.refresh()
-	    event.push("redrawDesktop")
-	    selfReload(screenOn)
+		local screenOn = gui.hideScreen(screen)
+		local palPath = paths.concat(themesPath, themes[selected])
+		palette.reBaseColor(palPath)
+		palette.setSystemPalette(palPath, nil, true)
+		gui_container.refresh()
+		event.push("redrawDesktop")
+		selfReload(screenOn)
 	end
 end
 draw()
@@ -113,45 +113,45 @@ return function(eventData)
 	local selectWindowEventData = selectWindow:uploadEvent(eventData)
 
 	if selectWindowEventData[1] == "scroll" then
-	    if selected then
-	        local oldselected = selected
-	        if selectWindowEventData[5] > 0 then
-	            selected = selected - 1
-	            if selected < 1 then selected = 1 end
-	        else
-	            selected = selected + 1
-	            if selected > #themes then selected = #themes end
-	        end
-	        if selected ~= oldselected then
-	            draw(true)
-	        end
-	    else
-	        selected = 1
-	    end
+		if selected then
+			local oldselected = selected
+			if selectWindowEventData[5] > 0 then
+				selected = selected - 1
+				if selected < 1 then selected = 1 end
+			else
+				selected = selected + 1
+				if selected > #themes then selected = #themes end
+			end
+			if selected ~= oldselected then
+				draw(true)
+			end
+		else
+			selected = 1
+		end
 	elseif selectWindowEventData[1] == "touch" then
-	    local posY = ((selectWindowEventData[4] - 1) // 3) + 1
+		local posY = ((selectWindowEventData[4] - 1) // 3) + 1
 
-	    if posY >= 1 and posY <= #themes then
-	        if posY ~= selected then
-	            selected = posY
-	            draw(true)
-	        end
-	    end
+		if posY >= 1 and posY <= #themes then
+			if posY ~= selected then
+				selected = posY
+				draw(true)
+			end
+		end
 	elseif selectWindowEventData[1] == "key_down" then
-	    if selected then
-	        local oldselected = selected
-	        if selectWindowEventData[4] == 200 then
-	            selected = selected - 1
-	            if selected < 1 then selected = 1 end
-	        elseif selectWindowEventData[4] == 208 then
-	            selected = selected + 1
-	            if selected > #themes then selected = #themes end
-	        end
-	        if selected ~= oldselected then
-	            draw(true)
-	        end
-	    else
-	        selected = 1
-	    end
+		if selected then
+			local oldselected = selected
+			if selectWindowEventData[4] == 200 then
+				selected = selected - 1
+				if selected < 1 then selected = 1 end
+			elseif selectWindowEventData[4] == 208 then
+				selected = selected + 1
+				if selected > #themes then selected = #themes end
+			end
+			if selected ~= oldselected then
+				draw(true)
+			end
+		else
+			selected = 1
+		end
 	end
 end

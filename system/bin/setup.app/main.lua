@@ -30,13 +30,13 @@ function blinckedHi:onDraw()
 	local line = self.y
 	local gpu = graphic.findGpu(screen)
 	if gpu then
-	    gpu.setBackground(uix.colors.cyan)
-	    gpu.setForeground(colorlib.red, true)
+		gpu.setBackground(uix.colors.cyan)
+		gpu.setForeground(colorlib.red, true)
 	end
 
 	local function add(str)
-	    gpu.set(self.x, line, str)
-	    line = line + 1
+		gpu.set(self.x, line, str)
+		line = line + 1
 	end
 
 	add("███                 ███")
@@ -68,25 +68,25 @@ hiObj = helloLayout:createCustom(hiPos, (ry / 2) - 6, blinckedHi)
 
 if not tier1 then
 	local function blink()
-	    hiObj:draw()
-	    graphic.forceUpdate(screen)
+		hiObj:draw()
+		graphic.forceUpdate(screen)
 
-	    local tick = 90
-	    helloLayout:timer(0.1, function ()
-	        local value = math.abs(math.sin(math.rad(tick)))
-	        graphic.setPaletteColor(screen, colorlib.red, colorlib.blend(value * 255, value * 255, value * 255))
-	        tick = (tick + 12) % 360
+		local tick = 90
+		helloLayout:timer(0.1, function ()
+			local value = math.abs(math.sin(math.rad(tick)))
+			graphic.setPaletteColor(screen, colorlib.red, colorlib.blend(value * 255, value * 255, value * 255))
+			tick = (tick + 12) % 360
 
-	        if tick > 180 + 90 then
-	            return false
-	        end
-	    end, math.huge)
+			if tick > 180 + 90 then
+				return false
+			end
+		end, math.huge)
 	end
 
 	helloLayout:timer(4, blink, math.huge)
 
 	function helloLayout:onSelect()
-	    blink()
+		blink()
 	end
 end
 
@@ -112,14 +112,14 @@ licenseLayout = ui:simpleCreate(uix.colors.cyan, uix.styles[2])
 function licenseLayout:onSelect()
 	sysinit.initScreen(screen)
 	while true do
-	    if viewer.license(screen, "/system/LICENSE") then
-	        doSetup("inet")
-	        if registry.systemConfigured then
-	            os.exit()
-	        end
-	    else
-	        break
-	    end
+		if viewer.license(screen, "/system/LICENSE") then
+			doSetup("inet")
+			if registry.systemConfigured then
+				os.exit()
+			end
+		else
+			break
+		end
 	end
 	ui:select(helloLayout)
 end

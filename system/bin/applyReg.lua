@@ -10,9 +10,9 @@ if not screen then
 elseif liked.publicMode(screen, path) then
 	local name = gui.hideExtension(screen, path)
 	if force or gui.yesno(screen, nil, nil, "do you really want to apply the \"" .. name .. "\" registry modifier?") then
-	    if not force then
-	        gui.status(screen, nil, nil, "installing reg file \"" .. name .. "\"")
-	    end
-	    liked.applyReg(path, screen)
+		if not force then
+			gui.status(screen, nil, nil, "installing reg file \"" .. name .. "\"")
+		end
+		liked.applyReg(path, screen)
 	end
 end

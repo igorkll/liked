@@ -17,55 +17,55 @@ local openbox = {}
 function openbox.run(screen, program)
 	local restoreGraphic, gpuAddress
 	if screen then
-	    restoreGraphic, gpuAddress = vmx.hookGraphic(screen)
+		restoreGraphic, gpuAddress = vmx.hookGraphic(screen)
 	end
 
 	local result, result2, vm
 	local tunnel = {}
 	while true do
-	    vm = vmx.create(eepromPath, {boxPath, true, nil, "openos"})
-	    vm.env.os.program = paths.name(program)
-	    vm.env.os.tunnel = tunnel
-	    local progfs = vmx.fromVirtual(fs.dump(paths.path(program), false, nil, "program"))
-	    vm.bindComponent(progfs)
-	    vm.env.os.progfs = progfs
+		vm = vmx.create(eepromPath, {boxPath, true, nil, "openos"})
+		vm.env.os.program = paths.name(program)
+		vm.env.os.tunnel = tunnel
+		local progfs = vmx.fromVirtual(fs.dump(paths.path(program), false, nil, "program"))
+		vm.bindComponent(progfs)
+		vm.env.os.progfs = progfs
 
-	    if gpuAddress then
-	        vm.bindComponent(vmx.fromReal(gpuAddress))
-	    end
-	    
-	    if screen then
-	        vm.bindComponent(vmx.fromReal(screen))
-	        for _, keyboard in ipairs(lastinfo.keyboards[screen]) do
-	            if not vcomponent.isVirtual(keyboard) then
-	                vm.bindComponent(vmx.fromReal(keyboard))
-	            end
-	        end
-	    end
+		if gpuAddress then
+			vm.bindComponent(vmx.fromReal(gpuAddress))
+		end
+		
+		if screen then
+			vm.bindComponent(vmx.fromReal(screen))
+			for _, keyboard in ipairs(lastinfo.keyboards[screen]) do
+				if not vcomponent.isVirtual(keyboard) then
+					vm.bindComponent(vmx.fromReal(keyboard))
+				end
+			end
+		end
 
-	    for address, ctype in component.list() do
-	        if ctype ~= "screen" and ctype ~= "keyboard" and ctype ~= "filesystem" and ctype ~= "eeprom" then
-	            vm.bindComponent(vmx.fromReal(address))
-	        end
-	    end
-	    
-	    result2 = {xpcall(function()
-	        result = {vm.loop(vmx.pullEvent)}
-	    end, debug.traceback)}
+		for address, ctype in component.list() do
+			if ctype ~= "screen" and ctype ~= "keyboard" and ctype ~= "filesystem" and ctype ~= "eeprom" then
+				vm.bindComponent(vmx.fromReal(address))
+			end
+		end
+		
+		result2 = {xpcall(function()
+			result = {vm.loop(vmx.pullEvent)}
+		end, debug.traceback)}
 
-	    if not result or (result[1] ~= true or result[2] ~= "reboot") then
-	        break
-	    end
+		if not result or (result[1] ~= true or result[2] ~= "reboot") then
+			break
+		end
 	end
 	
 	if restoreGraphic then
-	    restoreGraphic()
+		restoreGraphic()
 	end
 
 	assert(table.unpack(result2))
 	assert(table.unpack(result))
 	if tunnel.progError then
-	    return nil, tunnel.progError
+		return nil, tunnel.progError
 	end
 	return true
 end

@@ -20,7 +20,7 @@ local cx, cy = 15, 15
 thread.listen(nil, function (...)
 	local localEventData = render:touchscreen({...})
 	if localEventData and (localEventData[1] == "touch" or localEventData[1] == "drag") then
-	    cx, cy = localEventData[3], localEventData[4]
+		cx, cy = localEventData[3], localEventData[4]
 	end
 end)
 

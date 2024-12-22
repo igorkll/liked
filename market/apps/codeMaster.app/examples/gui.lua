@@ -7,7 +7,7 @@ end
 
 local function drawtext(x, y, text, color)
 	for i = 1, #text do
-	    screen.set(x + (i - 1), y, text:sub(i, i), color)
+		screen.set(x + (i - 1), y, text:sub(i, i), color)
 	end
 end
 
@@ -31,7 +31,7 @@ end
 
 local function wait(func)
 	while not isPress(func) do
-	    sleep()
+		sleep()
 	end
 end
 
@@ -48,33 +48,33 @@ local function menu(title, actions)
 	screen.clear()
 	centertext(rx / 2, 2, title, yellow)
 	for i, action in ipairs(actions) do
-	    centertext(rx / 2, 3 + i, action[1], red)
+		centertext(rx / 2, 3 + i, action[1], red)
 	end
 
 	local oldPos
 	local function drawCustomPos(p)
-	    if oldPos == p then return end
-	    if oldPos then
-	        drawtext(2, 3 + oldPos, "   ", yellow)
-	    end
-	    drawtext(2, 3 + p, ">>>", yellow)
-	    oldPos = p
+		if oldPos == p then return end
+		if oldPos then
+			drawtext(2, 3 + oldPos, "   ", yellow)
+		end
+		drawtext(2, 3 + p, ">>>", yellow)
+		oldPos = p
 	end
 	
 	while true do
-	    drawCustomPos(pos)
+		drawCustomPos(pos)
 
-	    if isPress(keyboard.isUp) then
-	        pos = pos - 1
-	        if pos < 1 then pos = 1 end
-	    elseif isPress(keyboard.isDown) then
-	        pos = pos + 1
-	        if pos > #actions then pos = #actions end
-	    elseif isPress(keyboard.isAction) then
-	        actions[pos][2]()
-	    end
+		if isPress(keyboard.isUp) then
+			pos = pos - 1
+			if pos < 1 then pos = 1 end
+		elseif isPress(keyboard.isDown) then
+			pos = pos + 1
+			if pos > #actions then pos = #actions end
+		elseif isPress(keyboard.isAction) then
+			actions[pos][2]()
+		end
 
-	    sleep(0.1)
+		sleep(0.1)
 	end
 end
 
@@ -83,11 +83,11 @@ end
 splash("test")
 menu("test menu", {
 	{
-	    "reboot",
-	    device.reboot
+		"reboot",
+		device.reboot
 	},
 	{
-	    "shutdown",
-	    device.shutdown
+		"shutdown",
+		device.shutdown
 	}
 })

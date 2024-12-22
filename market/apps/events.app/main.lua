@@ -34,7 +34,7 @@ while true do
 
 	local output = {}
 	for k, v in pairs(eventData) do
-	    eventData[k] = tostring(v)
+		eventData[k] = tostring(v)
 	end
 
 	window:copy(1, 3, sizeX, sizeY - 2, 0, -1)

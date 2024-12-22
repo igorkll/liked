@@ -33,17 +33,17 @@ local function refreshList()
 	autorun.check()
 	autorunList.list = {}
 	for _, item in ipairs(autorun.list("user")) do
-	    table.insert(autorunList.list, 1, {gui.fpath(screen, item[1], autorunList.sizeX - 3), item[2], item[1]})
+		table.insert(autorunList.list, 1, {gui.fpath(screen, item[1], autorunList.sizeX - 3), item[2], item[1]})
 	end
 end
 refreshList()
 
 function autorunList:onTextClick(_, _, _, usertbl, eventData)
 	if eventData[5] then
-	    if gui.yesno(screen, nil, nil, "are you sure you want to remove the script from autorun?") then
-	        autorun.reg("user", usertbl[3], true)
-	        refreshList()
-	    end
+		if gui.yesno(screen, nil, nil, "are you sure you want to remove the script from autorun?") then
+			autorun.reg("user", usertbl[3], true)
+			refreshList()
+		end
 	end
 	redraw()
 end
@@ -57,8 +57,8 @@ local addScriptButton = layout:createButton(2, window.sizeY - 4, autorunScriptsL
 function addScriptButton:onDrop()
 	local scriptPath = iowindows.selectfile(screen, "lua")
 	if scriptPath then
-	    autorun.reg("user", scriptPath)
-	    refreshList()
+		autorun.reg("user", scriptPath)
+		refreshList()
 	end
 	redraw()
 end

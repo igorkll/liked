@@ -56,7 +56,7 @@ local function updateButtons()
 
 	local stateCol = _G.pistonBg2[piston] and colors.green or colors.lightGray
 	if not piston.pull then
-	    stateCol = colors.gray
+		stateCol = colors.gray
 	end
 	window:set(placeAt, 15, stateCol, colors.white, "           ")
 	window:set(placeAt, 16, stateCol, colors.white, " AUTO PULL ")
@@ -93,51 +93,51 @@ while true do
 	local windowEventData = window:uploadEvent(eventData)
 
 	if windowEventData[1] == "touch" then
-	    if checkButton(windowEventData, 3) then
-	        liked.assert(screen, piston.push(_G.pistonCurrentSide[piston]))
-	    elseif checkButton(windowEventData, 7) then
-	        if piston.pull then
-	            liked.assert(screen, piston.pull(_G.pistonCurrentSide[piston]))
-	        else
-	            local clear = saveZone(screen)
-	            gui.warn(screen, nil, nil, "this piston does not support \"pull\"")
-	            clear()
-	        end
-	    elseif checkButton(windowEventData, 11) then
-	        if _G.pistonBg[piston] then
-	            event.cancel(_G.pistonBg[piston])
-	            _G.pistonBg[piston] = nil
-	        else
-	            _G.pistonBg[piston] = event.timer(0.3, function ()
-	                pcall(piston.push, _G.pistonCurrentSide[piston])
-	            end, math.huge)
-	        end
-	        updateButtons()
-	    elseif checkButton(windowEventData, 15) then
-	        if piston.pull then
-	            if _G.pistonBg2[piston] then
-	                event.cancel(_G.pistonBg2[piston])
-	                _G.pistonBg2[piston] = nil
-	            else
-	                _G.pistonBg2[piston] = event.timer(0.3, function ()
-	                    pcall(piston.pull, _G.pistonCurrentSide[piston])
-	                end, math.huge)
-	            end
-	            updateButtons()
-	        else
-	            local clear = saveZone(screen)
-	            gui.warn(screen, nil, nil, "this piston does not support \"pull\"")
-	            clear()
-	        end
-	    elseif checkButton2(windowEventData, 3) then
-	        _G.pistonCurrentSide[piston] = sides.front
-	        updateButtons()
-	    elseif checkButton2(windowEventData, 7) then
-	        _G.pistonCurrentSide[piston] = sides.up
-	        updateButtons()
-	    elseif checkButton2(windowEventData, 11) then
-	        _G.pistonCurrentSide[piston] = sides.bottom
-	        updateButtons()
-	    end
+		if checkButton(windowEventData, 3) then
+			liked.assert(screen, piston.push(_G.pistonCurrentSide[piston]))
+		elseif checkButton(windowEventData, 7) then
+			if piston.pull then
+				liked.assert(screen, piston.pull(_G.pistonCurrentSide[piston]))
+			else
+				local clear = saveZone(screen)
+				gui.warn(screen, nil, nil, "this piston does not support \"pull\"")
+				clear()
+			end
+		elseif checkButton(windowEventData, 11) then
+			if _G.pistonBg[piston] then
+				event.cancel(_G.pistonBg[piston])
+				_G.pistonBg[piston] = nil
+			else
+				_G.pistonBg[piston] = event.timer(0.3, function ()
+					pcall(piston.push, _G.pistonCurrentSide[piston])
+				end, math.huge)
+			end
+			updateButtons()
+		elseif checkButton(windowEventData, 15) then
+			if piston.pull then
+				if _G.pistonBg2[piston] then
+					event.cancel(_G.pistonBg2[piston])
+					_G.pistonBg2[piston] = nil
+				else
+					_G.pistonBg2[piston] = event.timer(0.3, function ()
+						pcall(piston.pull, _G.pistonCurrentSide[piston])
+					end, math.huge)
+				end
+				updateButtons()
+			else
+				local clear = saveZone(screen)
+				gui.warn(screen, nil, nil, "this piston does not support \"pull\"")
+				clear()
+			end
+		elseif checkButton2(windowEventData, 3) then
+			_G.pistonCurrentSide[piston] = sides.front
+			updateButtons()
+		elseif checkButton2(windowEventData, 7) then
+			_G.pistonCurrentSide[piston] = sides.up
+			updateButtons()
+		elseif checkButton2(windowEventData, 11) then
+			_G.pistonCurrentSide[piston] = sides.bottom
+			updateButtons()
+		end
 	end
 end

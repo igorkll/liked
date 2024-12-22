@@ -57,25 +57,25 @@ while true do
 	local windowEventData = window:uploadEvent(eventData)
 
 	if windowEventData[1] == "touch" then
-	    if checkButton(windowEventData, 3) then
-	        magnet.suck()
-	    elseif checkButton(windowEventData, 7) then
-	        gui_status(screen, nil, nil, "sucking...")
-	        while magnet.suck() do
-	            os.sleep(0.1)
-	        end
-	        updateAll()
-	        updateButton()
-	    elseif checkButton(windowEventData, 11) then
-	        if _G.magnetBg then
-	            event.cancel(_G.magnetBg)
-	            _G.magnetBg = nil
-	        else
-	            _G.magnetBg = event.timer(0.1, function ()
-	                pcall(magnet.suck)
-	            end, math.huge)
-	        end
-	        updateButton()
-	    end
+		if checkButton(windowEventData, 3) then
+			magnet.suck()
+		elseif checkButton(windowEventData, 7) then
+			gui_status(screen, nil, nil, "sucking...")
+			while magnet.suck() do
+				os.sleep(0.1)
+			end
+			updateAll()
+			updateButton()
+		elseif checkButton(windowEventData, 11) then
+			if _G.magnetBg then
+				event.cancel(_G.magnetBg)
+				_G.magnetBg = nil
+			else
+				_G.magnetBg = event.timer(0.1, function ()
+					pcall(magnet.suck)
+				end, math.huge)
+			end
+			updateButton()
+		end
 	end
 end

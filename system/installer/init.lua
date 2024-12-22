@@ -7,21 +7,21 @@ end
 local function get(url)
 	local handle, err = internet.request(url)
 	if handle then
-	    local data = {}
-	    while true do
-	        local result, reason = handle.read(math.huge) 
-	        if result then
-	            table.insert(data, result)
-	        else
-	            handle.close()
-	            
-	            if reason then
-	                return nil, reason
-	            else
-	                return table.concat(data)
-	            end
-	        end
-	    end
+		local data = {}
+		while true do
+			local result, reason = handle.read(math.huge) 
+			if result then
+				table.insert(data, result)
+			else
+				handle.close()
+				
+				if reason then
+					return nil, reason
+				else
+					return table.concat(data)
+				end
+			end
+		end
 	end
 	return nil, tostring(err or "unknown")
 end

@@ -28,14 +28,14 @@ if not agent then
 	agent.speed = 1
 	agent.loop = false
 	agent.timer = event.timer(1, function ()
-	    if not component.isConnected(tape) then
-	        _G.tape_agent[tape.address] = nil
-	        return false
-	    end
-	    if agent.loop and tape.isEnd() then
-	        tape.seek(-tape.getSize())
-	        tape.play()
-	    end
+		if not component.isConnected(tape) then
+			_G.tape_agent[tape.address] = nil
+			return false
+		end
+		if agent.loop and tape.isEnd() then
+			tape.seek(-tape.getSize())
+			tape.play()
+		end
 	end, math.huge)
 	_G.tape_agent[tape.address] = agent
 end
@@ -86,9 +86,9 @@ local resetSpeedButton = layout:createButton(2, 11, 16, 1, nil, nil, "RESET SPEE
 
 local function tapeCheck()
 	if not tape.isReady() then
-	    gui.warn(screen, nil, nil, "tape is missing")
-	    redraw()
-	    return true
+		gui.warn(screen, nil, nil, "tape is missing")
+		redraw()
+		return true
 	end
 end
 
@@ -96,39 +96,39 @@ local function writeFile(path)
 	if tapeCheck() then return end
 
 	if not path then
-	    local clear = saveBigZone(screen)
-	    path = gui_filepicker(screen, nil, nil, nil, "dfpwm", false, false)
-	    if not path then
-	        redraw()
-	        return
-	    end
-	    clear()
+		local clear = saveBigZone(screen)
+		path = gui_filepicker(screen, nil, nil, nil, "dfpwm", false, false)
+		if not path then
+			redraw()
+			return
+		end
+		clear()
 	end
 
 	local label = tape.getLabel()
 	if not label or label == "" then
-	    label = "unknown"
+		label = "unknown"
 	end
 
 	if gui.yesno(screen, nil, nil, "are you sure you want to write \'" .. paths.hideExtension(paths.name(path)) .. "\' to \'" .. label .. "\' tape?") then
-	    if gui.yesno(screen, nil, nil, "rewind the tape?") then
-	        tape.stop()
-	        tape.seek(-tape.getSize())
-	    else
-	        tape.stop()
-	    end
+		if gui.yesno(screen, nil, nil, "rewind the tape?") then
+			tape.stop()
+			tape.seek(-tape.getSize())
+		else
+			tape.stop()
+		end
 
-	    gui.status(screen, nil, nil, "Writing The Tape...")
+		gui.status(screen, nil, nil, "Writing The Tape...")
 
-	    local file = fs.open(path, "rb")
-	    while true do
-	        local data = file.readMax()
-	        if not data then
-	            break
-	        end
-	        tape.write(data)
-	    end
-	    file.close()
+		local file = fs.open(path, "rb")
+		while true do
+			local data = file.readMax()
+			if not data then
+				break
+			end
+			tape.write(data)
+		end
+		file.close()
 	end
 
 	redraw()
@@ -143,31 +143,31 @@ local function setupConnection(url)
 	local connected
 
 	if not file then
-	    gui.warn(screen, nil, nil, "error requesting data from URL: " .. reason .. "\n")
-	    return false
+		gui.warn(screen, nil, nil, "error requesting data from URL: " .. reason .. "\n")
+		return false
 	end
 
 	for i = 1, 10 do
-	    connected, reason = file.finishConnect()
-	    os.sleep(0.1)
-	    if connected or connected == nil then
-	        break
-	    end
+		connected, reason = file.finishConnect()
+		os.sleep(0.1)
+		if connected or connected == nil then
+			break
+		end
 	end
-  
+
 	if connected == nil then
-	    gui.warn(screen, nil, nil, "Could not connect to server: " .. reason)
-	    return false
+		gui.warn(screen, nil, nil, "Could not connect to server: " .. reason)
+		return false
 	end
 
 	local status, message, header = file.response()
 
 	if status then
-	    status = string.format("%d", status)
-	    if status:sub(1,1) == "2" then
-	        return true, file
-	    end
-	    return false
+		status = string.format("%d", status)
+		if status:sub(1,1) == "2" then
+			return true, file
+		end
+		return false
 	end
 	gui.warn(screen, nil, nil, "no valid HTTP response - no response")
 	return false
@@ -178,47 +178,47 @@ function writeUrlButton:onClick()
 
 	local internet = component.internet
 	if not internet then
-	    gui.warn(screen, nil, nil, "an internet map component is required")
-	    redraw()
-	    return
+		gui.warn(screen, nil, nil, "an internet map component is required")
+		redraw()
+		return
 	end
 
 	local url = gui.input(screen, nil, nil, "dfpwm url")
 	if not url then
-	    redraw()
-	    return
+		redraw()
+		return
 	end
 
 	local label = tape.getLabel()
 	if not label or label == "" then
-	    label = "unknown"
+		label = "unknown"
 	end
 
 	if gui.yesno(screen, nil, nil, "are you sure you want to write \'" .. url .. "\' to \'" .. label .. "\' tape?") then
-	    if gui.yesno(screen, nil, nil, "rewind the tape?") then
-	        tape.stop()
-	        tape.seek(-tape.getSize())
-	    else
-	        tape.stop()
-	    end
+		if gui.yesno(screen, nil, nil, "rewind the tape?") then
+			tape.stop()
+			tape.seek(-tape.getSize())
+		else
+			tape.stop()
+		end
 
-	    gui.status(screen, nil, nil, "Writing The Tape...")
+		gui.status(screen, nil, nil, "Writing The Tape...")
 
-	    local success, file = setupConnection(url)
-	    if not success or not file then
-	        gui.warn(screen, nil, nil, tostring(file or "unknown error"))
-	        redraw()
-	        return
-	    end
+		local success, file = setupConnection(url)
+		if not success or not file then
+			gui.warn(screen, nil, nil, tostring(file or "unknown error"))
+			redraw()
+			return
+		end
 
-	    while true do
-	        local data = file.read(math.huge)
-	        if not data then
-	            break
-	        end
-	        tape.write(data)
-	    end
-	    file:close()
+		while true do
+			local data = file.read(math.huge)
+			if not data then
+				break
+			end
+			tape.write(data)
+		end
+		file:close()
 	end
 
 	redraw()
@@ -235,18 +235,18 @@ function wipeButton:onClick()
 	if tapeCheck() then return end
 
 	if gui.yesno(screen, nil, nil, "Are you sure you want to wipe this tape?") then
-	    gui.status(screen, nil, nil, "Cleaning The Tape...")
-	    local k = tape.getSize()
-	    tape.stop()
-	    tape.seek(-k)
-	    tape.stop() --Just making sure
-	    tape.seek(-90000)
-	    local s = string.rep("\xAA", 8192)
-	    for i = 1, k + 8191, 8192 do
-	        tape.write(s)
-	    end
-	    tape.seek(-k)
-	    tape.seek(-90000)
+		gui.status(screen, nil, nil, "Cleaning The Tape...")
+		local k = tape.getSize()
+		tape.stop()
+		tape.seek(-k)
+		tape.stop() --Just making sure
+		tape.seek(-90000)
+		local s = string.rep("\xAA", 8192)
+		for i = 1, k + 8191, 8192 do
+			tape.write(s)
+		end
+		tape.seek(-k)
+		tape.seek(-90000)
 	end
 
 	redraw()
@@ -287,60 +287,60 @@ local oldSeek
 local function doTape()
 	local ready = tape.isReady()
 	if ready ~= oldReady then
-	    if ready then
-	        tapeLabel.read.setBuffer(tape.getLabel() or "none")
-	        tapeLabel.read.setLock(false)
-	    else
-	        tapeLabel.read.setBuffer("TAPE IS MISSING")
-	        tapeLabel.read.setLock(true)
-	    end
-	    tapeLabel:draw()
-	    oldReady = ready
+		if ready then
+			tapeLabel.read.setBuffer(tape.getLabel() or "none")
+			tapeLabel.read.setLock(false)
+		else
+			tapeLabel.read.setBuffer("TAPE IS MISSING")
+			tapeLabel.read.setLock(true)
+		end
+		tapeLabel:draw()
+		oldReady = ready
 	end
 
 	local size = tape.getSize()
 	local state = tape.getState()
 	
 	if not seekBar.focus then
-	    local val = math.round((tape.getPosition() / size) * 80) / 80
-	    if val < 0 or val ~= val then val = 0 end
-	    if val > 1 then val = 1 end
-	    seekBar.value = val
-	    if seekBar.value ~= oldSeek then
-	        seekBar:draw()
-	        oldSeek = seekBar.value
-	    end
+		local val = math.round((tape.getPosition() / size) * 80) / 80
+		if val < 0 or val ~= val then val = 0 end
+		if val > 1 then val = 1 end
+		seekBar.value = val
+		if seekBar.value ~= oldSeek then
+			seekBar:draw()
+			oldSeek = seekBar.value
+		end
 	end
 
 	local playing = state == "PLAYING"
 	if playing ~= oldPlay then
-	    if playing then
-	        playLed.back = colors.yellow
-	        playLed:draw()
-	    else
-	        playLed.back = colors.gray
-	        playLed:draw()
-	    end
+		if playing then
+			playLed.back = colors.yellow
+			playLed:draw()
+		else
+			playLed.back = colors.gray
+			playLed:draw()
+		end
 
-	    oldPlay = playing
+		oldPlay = playing
 	end
 end
 
 thread.create(function ()
 	while true do
-	    doTape()
-	    os.sleep(0.25)
+		doTape()
+		os.sleep(0.25)
 	end
 end):resume()
 
 function redraw()
 	doTape()
 	if tape.isReady() then
-	    tapeLabel.read.setBuffer(tape.getLabel() or "none")
-	    tapeLabel.read.setLock(false)
+		tapeLabel.read.setBuffer(tape.getLabel() or "none")
+		tapeLabel.read.setLock(false)
 	else
-	    tapeLabel.read.setBuffer("TAPE IS MISSING")
-	    tapeLabel.read.setLock(true)
+		tapeLabel.read.setBuffer("TAPE IS MISSING")
+		tapeLabel.read.setLock(true)
 	end
 	layout:draw()
 	upRedraw()

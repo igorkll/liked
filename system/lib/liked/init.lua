@@ -36,9 +36,9 @@ function liked.isLikedDisk(address)
 
 	local file = component.invoke(address, "open", "/system/main.lua", "rb")
 	if file then
-	    local data = component.invoke(address, "read", file, #signature)
-	    component.invoke(address, "close", file)
-	    return signature == data
+		local data = component.invoke(address, "read", file, #signature)
+		component.invoke(address, "close", file)
+		return signature == data
 	end
 
 	return false
@@ -51,12 +51,12 @@ end
 	
 function liked.wait(screen)
 	while true do
-	    local eventData = {event.pull()}
-	    if eventData[1] == "close" and eventData[2] == screen then
-	        break
-	    elseif eventData[1] == "key_down" and table.exists(lastinfo.keyboards[screen], eventData[2]) and eventData[3] == 13 and eventData[4] == 28 then
-	        break
-	    end
+		local eventData = {event.pull()}
+		if eventData[1] == "close" and eventData[2] == screen then
+			break
+		elseif eventData[1] == "key_down" and table.exists(lastinfo.keyboards[screen], eventData[2]) and eventData[3] == 13 and eventData[4] == 28 then
+			break
+		end
 	end
 end
 
@@ -70,9 +70,9 @@ function liked.isUninstallAvailable(path)
 	local data = "/data/"
 	local vendor = "/vendor/"
 	if path:sub(1, #data) == data then --вы всегда можете удалить приложения из data
-	    return true
+		return true
 	elseif path:sub(1, #vendor) == vendor then --вы можете удалить приложения вендора только если в нем есть uninstall.lua
-	    return liked.isUninstallScript(path)
+		return liked.isUninstallScript(path)
 	end
 	return false
 end
@@ -86,26 +86,26 @@ end
 
 function liked.publicMode(screen, path)
 	if registry.disableCustomFiles then
-	    if not path or liked.isUserdata(path) then
-	        local clear = saveZone(screen)
-	        gui.warn(screen, nil, nil, "this file cannot be used on your liked edition")
-	        clear()
-	        return false
-	    end
+		if not path or liked.isUserdata(path) then
+			local clear = saveZone(screen)
+			gui.warn(screen, nil, nil, "this file cannot be used on your liked edition")
+			clear()
+			return false
+		end
 	end
 	return true
 end
 
 function liked.getFileFromRepo(path, branch)
 	if not branch then
-	    if package.isInstalled("sysdata") then
-	        branch = require("sysdata").get("branch")
-	    else
-	        branch = "main"
-	    end
+		if package.isInstalled("sysdata") then
+			branch = require("sysdata").get("branch")
+		else
+			branch = "main"
+		end
 	end
 	if path:sub(1, 1) ~= "/" then
-	    path = "/" .. path
+		path = "/" .. path
 	end
 	return require("internet").getInternetFile("https://raw.githubusercontent.com/igorkll/liked/" .. branch .. path)
 end
@@ -124,9 +124,9 @@ function liked.umountAll()
 	local hdd = require("hdd")
 
 	for address in component.list("filesystem") do
-	    if address ~= computer.tmpAddress() and address ~= fs.bootaddress then
-	        fs.umount(component.proxy(address))
-	    end
+		if address ~= computer.tmpAddress() and address ~= fs.bootaddress then
+			fs.umount(component.proxy(address))
+		end
 	end
 end
 
@@ -134,9 +134,9 @@ function liked.mountAll()
 	local hdd = require("hdd")
 
 	for address in component.list("filesystem") do
-	    if address ~= computer.tmpAddress() and address ~= fs.bootaddress then
-	        fs.mount(address, hdd.genName(address))
-	    end
+		if address ~= computer.tmpAddress() and address ~= fs.bootaddress then
+			fs.mount(address, hdd.genName(address))
+		end
 	end
 end
 
@@ -145,9 +145,9 @@ end
 function liked.assert(screen, ...)
 	local successful, err = ...
 	if not successful then
-	    local clear = saveZone(screen)
-	    gui.warn(screen, nil, nil, err or "unknown error")
-	    clear()
+		local clear = saveZone(screen)
+		gui.warn(screen, nil, nil, err or "unknown error")
+		clear()
 	end
 	return ...
 end
@@ -155,9 +155,9 @@ end
 function liked.bigAssert(screen, ...)
 	local successful, err = ...
 	if not successful then
-	    local clear = saveBigZone(screen)
-	    gui.bigWarn(screen, nil, nil, err or "unknown error")
-	    clear()
+		local clear = saveBigZone(screen)
+		gui.bigWarn(screen, nil, nil, err or "unknown error")
+		clear()
 	end
 	return ...
 end
@@ -165,7 +165,7 @@ end
 function liked.assertNoClear(screen, ...)
 	local successful, err = ...
 	if not successful then
-	    gui.warn(screen, nil, nil, err or "unknown error")
+		gui.warn(screen, nil, nil, err or "unknown error")
 	end
 	return ...
 end
@@ -175,13 +175,13 @@ end
 function liked.applyReg(path, screen, regObj)
 	regObj = regObj or registry
 	if screen then
-	    if liked.assert(screen, regObj.apply(path)) then
-	        gui_container.refresh()
-	        regObj.save()
-	    end
+		if liked.assert(screen, regObj.apply(path)) then
+			gui_container.refresh()
+			regObj.save()
+		end
 	elseif regObj.apply(path) then
-	    gui_container.refresh()
-	    regObj.save()
+		gui_container.refresh()
+		regObj.save()
 	end
 end
 
@@ -190,31 +190,31 @@ function liked.applyBufferType()
 	graphic.unloadBuffers()
 
 	if liked.recoveryMode then
-	    graphic.allowSoftwareBuffer = false
-	    graphic.allowHardwareBuffer = false
+		graphic.allowSoftwareBuffer = false
+		graphic.allowHardwareBuffer = false
 
-	    if bufferTimerId then
-	        event.cancel(bufferTimerId)
-	        bufferTimerId = nil
-	    end
+		if bufferTimerId then
+			event.cancel(bufferTimerId)
+			bufferTimerId = nil
+		end
 	else
-	    graphic.allowSoftwareBuffer = registry.bufferType == "software"
-	    graphic.allowHardwareBuffer = registry.bufferType == "hardware"
+		graphic.allowSoftwareBuffer = registry.bufferType == "software"
+		graphic.allowHardwareBuffer = registry.bufferType == "hardware"
 
-	    if graphic.allowHardwareBuffer or graphic.allowSoftwareBuffer then
-	        if not bufferTimerId then
-	            bufferTimerId = event.timer(0.1, function ()
-	                for address in component.list("screen") do
-	                    graphic.update(address)
-	                end
-	            end, math.huge)
-	        end
-	    else
-	        if bufferTimerId then
-	            event.cancel(bufferTimerId)
-	            bufferTimerId = nil
-	        end
-	    end
+		if graphic.allowHardwareBuffer or graphic.allowSoftwareBuffer then
+			if not bufferTimerId then
+				bufferTimerId = event.timer(0.1, function ()
+					for address in component.list("screen") do
+						graphic.update(address)
+					end
+				end, math.huge)
+			end
+		else
+			if bufferTimerId then
+				event.cancel(bufferTimerId)
+				bufferTimerId = nil
+			end
+		end
 	end
 end
 
@@ -229,61 +229,61 @@ local wakeupEvents = {
 }
 function liked.applyPowerMode()
 	if registry.powerMode == "power" then
-	    event.minTime = 0
-	    if energyTh then
-	        energyTh:kill()
-	        energyTh = nil
-	    end
+		event.minTime = 0
+		if energyTh then
+			energyTh:kill()
+			energyTh = nil
+		end
 	else
-	    event.minTime = 0.05
-	    if not energyTh then
-	        energyTh = thread.createBackground(function ()
-	            local oldWakeTIme = computer.uptime()
-	            while true do
-	                local eventData = {event.pull(1)}
-	                if eventData[1] and wakeupEvents[eventData[1]] then
-	                    event.minTime = 0.05
-	                    oldWakeTIme = computer.uptime()
-	                elseif computer.uptime() - oldWakeTIme > 10 then
-	                    event.minTime = 4
-	                end
-	            end
-	        end)
-	        energyTh:resume()
-	    end
+		event.minTime = 0.05
+		if not energyTh then
+			energyTh = thread.createBackground(function ()
+				local oldWakeTIme = computer.uptime()
+				while true do
+					local eventData = {event.pull(1)}
+					if eventData[1] and wakeupEvents[eventData[1]] then
+						event.minTime = 0.05
+						oldWakeTIme = computer.uptime()
+					elseif computer.uptime() - oldWakeTIme > 10 then
+						event.minTime = 4
+					end
+				end
+			end)
+			energyTh:resume()
+		end
 	end
 end
 
 function liked.noEnergySaver()
 	if registry.powerMode == "power" then
-	    return function () end
+		return function () end
 	end
 
 	energyTh:suspend()
 	event.minTime = 0.05
 	return function ()
-	    energyTh:resume()
+		energyTh:resume()
 	end
 end
 
 function liked.applyBeepState()
 	if registry.fullBeepDisable then
-	    computer.beep = system.stub
+		computer.beep = system.stub
 	else
-	    computer.beep = natives.computer.beep
+		computer.beep = natives.computer.beep
 	end
 end
 
 function liked.applyTimeZone()
 	logs.timeZone = registry.timeZone or 0
 	if not gui_container.timeZoneHook then
-	    package.applyHook(function (libname, lib)
-	        if libname == "logs" then
-	            lib.timeZone = registry.timeZone or 0
-	        end
-	        return lib
-	    end)
-	    gui_container.timeZoneHook = true
+		package.applyHook(function (libname, lib)
+			if libname == "logs" then
+				lib.timeZone = registry.timeZone or 0
+			end
+			return lib
+		end)
+		gui_container.timeZoneHook = true
 	end
 end
 
@@ -293,18 +293,18 @@ local function raw_drawUpBarTask(method, screen, ...)
 	local tbl = {...}
 	local localBeforeCallback
 	local function redraw(beforeCallback)
-	    localBeforeCallback = beforeCallback or localBeforeCallback
-	    if localBeforeCallback and localBeforeCallback ~= true then
-	        localBeforeCallback()
-	    end
-	    liked.drawUpBar(screen, table.unpack(tbl))
-	    graphic.updateFlag(screen)
+		localBeforeCallback = beforeCallback or localBeforeCallback
+		if localBeforeCallback and localBeforeCallback ~= true then
+			localBeforeCallback()
+		end
+		liked.drawUpBar(screen, table.unpack(tbl))
+		graphic.updateFlag(screen)
 	end
 	local th = method(function ()
-	    while true do
-	        redraw()
-	        os.sleep(5)
-	    end
+		while true do
+			redraw()
+			os.sleep(5)
+		end
 	end)
 	th:resume()
 	return th, redraw
@@ -312,8 +312,8 @@ end
 
 function liked.upBarShadow(screen)
 	if gui.scrShadow[screen] and gui.scrShadow[screen] > 0 then
-	    local rx = graphic.getResolution(screen)
-	    gui.shadow(screen, 1, 1, rx, 1, nil, true)
+		local rx = graphic.getResolution(screen)
+		gui.shadow(screen, 1, 1, rx, 1, nil, true)
 	end
 end
 
@@ -336,7 +336,7 @@ function liked.drawUpBar(screen, withoutFill, bgcolor, guiOffset, noShadow)
 	gpu.setBackground(bgcolor or gui_container.colors.gray)
 	gpu.setForeground(gui_container.colors.white)
 	if not withoutFill then
-	    gpu.fill(1, 1, rx, 1, " ")
+		gpu.fill(1, 1, rx, 1, " ")
 	end
 
 	local battery = "⣏⣉⣉⡷"
@@ -346,7 +346,7 @@ function liked.drawUpBar(screen, withoutFill, bgcolor, guiOffset, noShadow)
 	gpu.set(rx - #rtc - 7 - offset, 1, rtc)
 	gpu.set(rx - #gtc - 18 - offset, 1, gtc)
 	if charge <= gui_container.criticalChargeLevel then
-	    gpu.setForeground(gui_container.colors.red)
+		gpu.setForeground(gui_container.colors.red)
 	end
 	local chargestr = tostring(charge)
 	gpu.set(rx - 5 - offset, 1, "   ")
@@ -356,36 +356,36 @@ function liked.drawUpBar(screen, withoutFill, bgcolor, guiOffset, noShadow)
 	gpu.setForeground(gui_container.colors.white)
 
 	for i = 1, batteryLen do
-	    local char = unicode.sub(battery, i, i)
-	    if i == batteryLen then
-	        gpu.setBackground(bgcolor or gui_container.colors.gray)
-	    else
-	        if charge <= gui_container.criticalChargeLevel then
-	            if i == 1 then
-	                gpu.setBackground(gui_container.colors.red)
-	            else
-	                gpu.setBackground(bgcolor or gui_container.colors.gray)
-	            end
-	        else
-	            local last = 3
-	            if charge <= 50 then
-	                last = 1
-	            elseif charge <= 75 then
-	                last = 2
-	            end
+		local char = unicode.sub(battery, i, i)
+		if i == batteryLen then
+			gpu.setBackground(bgcolor or gui_container.colors.gray)
+		else
+			if charge <= gui_container.criticalChargeLevel then
+				if i == 1 then
+					gpu.setBackground(gui_container.colors.red)
+				else
+					gpu.setBackground(bgcolor or gui_container.colors.gray)
+				end
+			else
+				local last = 3
+				if charge <= 50 then
+					last = 1
+				elseif charge <= 75 then
+					last = 2
+				end
 
-	            if i <= last then
-	                gpu.setBackground(gui_container.colors.lime)
-	            else
-	                gpu.setBackground(bgcolor or gui_container.colors.gray)
-	            end
-	        end
-	    end
-	    gpu.set((rx - offset) + (i - 1), 1, char)
+				if i <= last then
+					gpu.setBackground(gui_container.colors.lime)
+				else
+					gpu.setBackground(bgcolor or gui_container.colors.gray)
+				end
+			end
+		end
+		gpu.set((rx - offset) + (i - 1), 1, char)
 	end
 
 	if not noShadow then
-	    liked.upBarShadow(screen)
+		liked.upBarShadow(screen)
 	end
 
 	graphic.updateFlag(screen)
@@ -397,41 +397,41 @@ local function raw_drawFullUpBarTask(method, screen, title, withoutFill, bgcolor
 	if wideExit == nil then wideExit = true end
 	local localBeforeCallback
 	local function redraw(beforeCallback)
-	    localBeforeCallback = beforeCallback or localBeforeCallback
-	    if localBeforeCallback and localBeforeCallback ~= true then
-	        localBeforeCallback()
-	    end
-	    liked.drawFullUpBar(screen, title, withoutFill, bgcolor, wideExit)
-	    graphic.updateFlag(screen)
+		localBeforeCallback = beforeCallback or localBeforeCallback
+		if localBeforeCallback and localBeforeCallback ~= true then
+			localBeforeCallback()
+		end
+		liked.drawFullUpBar(screen, title, withoutFill, bgcolor, wideExit)
+		graphic.updateFlag(screen)
 	end
 	local callbacks = {}
 	local th = method(function ()
-	    thread.create(function ()
-	        local rx, ry = graphic.getResolution(screen)
-	        local window = graphic.createWindow(screen, 1, 1, rx, 1)
-	        while true do
-	            local eventData = {event.pull()}
-	            local windowEventData = window:uploadEvent(eventData)
-	            if windowEventData[1] == "touch" then
-	                if callbacks.exit then
-	                    if wideExit then
-	                        if windowEventData[3] >= rx - 2 then
-	                            callbacks.exit()
-	                        end
-	                    else
-	                        if windowEventData[3] == rx then
-	                            callbacks.exit()
-	                        end
-	                    end
-	                end
-	            end
-	        end
-	    end):resume()
+		thread.create(function ()
+			local rx, ry = graphic.getResolution(screen)
+			local window = graphic.createWindow(screen, 1, 1, rx, 1)
+			while true do
+				local eventData = {event.pull()}
+				local windowEventData = window:uploadEvent(eventData)
+				if windowEventData[1] == "touch" then
+					if callbacks.exit then
+						if wideExit then
+							if windowEventData[3] >= rx - 2 then
+								callbacks.exit()
+							end
+						else
+							if windowEventData[3] == rx then
+								callbacks.exit()
+							end
+						end
+					end
+				end
+			end
+		end):resume()
 
-	    while true do
-	        redraw()
-	        os.sleep(5)
-	    end
+		while true do
+			redraw()
+			os.sleep(5)
+		end
 	end)
 	th:resume()
 	return th, redraw, callbacks
@@ -452,17 +452,17 @@ function liked.drawFullUpBar(screen, title, withoutFill, bgcolor, wideExit, noSh
 
 	gpu.setForeground(gui_container.colors.white)
 	if title then
-	    gpu.set(2, 1, title)
+		gpu.set(2, 1, title)
 	end
 	gpu.setBackground(gui_container.colors.red)
 	if wideExit then
-	    gpu.set(rx - 2, 1, " X ")
+		gpu.set(rx - 2, 1, " X ")
 	else
-	    gpu.set(rx, 1, "X")
+		gpu.set(rx, 1, "X")
 	end
 
 	if not noShadow then
-	    liked.upBarShadow(screen)
+		liked.upBarShadow(screen)
 	end
 end
 
@@ -475,22 +475,22 @@ function liked.getRegistry(address)
 	local regPath = paths.concat(mountpoint, "data/registry.dat")
 
 	if fs.exists(regPath) or not fs.isDirectory(regPath) then
-	    local regData = fs.readFile(regPath)
-	    fs.umount(mountpoint)
-	    if regData then
-	        local ok, regTbl = pcall(serialization.unserialize, regData)
-	        if ok and type(regTbl) == "table" then
-	            return regTbl
-	        end
-	    end
+		local regData = fs.readFile(regPath)
+		fs.umount(mountpoint)
+		if regData then
+			local ok, regTbl = pcall(serialization.unserialize, regData)
+			if ok and type(regTbl) == "table" then
+				return regTbl
+			end
+		end
 	else
-	    fs.umount(mountpoint)
+		fs.umount(mountpoint)
 	end
 end
 
 function liked.labelReadonly(proxy)
 	if type(proxy) == "string" then
-	    proxy = component.proxy(proxy)
+		proxy = component.proxy(proxy)
 	end
 	return not pcall(proxy.setLabel, proxy.getLabel() or nil)
 end
@@ -507,13 +507,13 @@ end
 function liked.getName(screen, path, isAlias)
 	local name
 	if not isAlias and gui_container.viewFileExps[screen] then
-	    name = paths.name(path)
+		name = paths.name(path)
 	else
-	    name = paths.name(paths.hideExtension(path))
+		name = paths.name(paths.hideExtension(path))
 	end
 	
 	if unicode.len(name) > 12 then
-	    return unicode.sub(name, 1, 12) .. gui_container.chars.threeDots, name
+		return unicode.sub(name, 1, 12) .. gui_container.chars.threeDots, name
 	end
 	return name, name
 end
@@ -522,7 +522,7 @@ function liked.selfApplicationName()
 	local scriptPath = system.getSelfScriptPath()
 	local application = paths.path(scriptPath)
 	if paths.extension(application) == "app" then
-	    application = scriptPath
+		application = scriptPath
 	end
 	return paths.hideExtension(paths.name(scriptPath))
 end
@@ -537,31 +537,31 @@ end
 function liked.getActions(path)
 	local files, strs, actives = {}, {}, {}
 	if fs.exists(path) and fs.isDirectory(path) then
-	    local actionPath = paths.concat(path, "actions.cfg") --раньше тут был lua файл, который выполнялся, но это слишком небезопастно
+		local actionPath = paths.concat(path, "actions.cfg") --раньше тут был lua файл, который выполнялся, но это слишком небезопастно
 
-	    if fs.exists(actionPath) and not fs.isDirectory(actionPath) then
-	        local content = fs.readFile(actionPath)
-	        if type(content) == "string" then
-	            local result = {pcall(serialization.unserialize, content)}
-	            event.yield() --предотващения краша при долгой десереализации
+		if fs.exists(actionPath) and not fs.isDirectory(actionPath) then
+			local content = fs.readFile(actionPath)
+			if type(content) == "string" then
+				local result = {pcall(serialization.unserialize, content)}
+				event.yield() --предотващения краша при долгой десереализации
 
-	            if result and result[1] and type(result[2]) == "table" then
-	                for _, value in ipairs(result[2]) do
-	                    if type(value) == "table" and type(value[1]) == "string" and type(value[3]) == "string" then
-	                        local action = value[1]
-	                        if unicode.len(action) < 24 then
-	                            table.insert(files, paths.xconcat(path, value[3]))
-	                            table.insert(strs, action)
-	                            table.insert(actives, not not value[2])
-	                            if #files >= 5 then --защита от приложений с большим количеством доп действий, так как это может использоваться для защиты от удаления
-	                                break
-	                            end
-	                        end
-	                    end
-	                end
-	            end
-	        end
-	    end
+				if result and result[1] and type(result[2]) == "table" then
+					for _, value in ipairs(result[2]) do
+						if type(value) == "table" and type(value[1]) == "string" and type(value[3]) == "string" then
+							local action = value[1]
+							if unicode.len(action) < 24 then
+								table.insert(files, paths.xconcat(path, value[3]))
+								table.insert(strs, action)
+								table.insert(actives, not not value[2])
+								if #files >= 5 then --защита от приложений с большим количеством доп действий, так как это может использоваться для защиты от удаления
+									break
+								end
+							end
+						end
+					end
+				end
+			end
+		end
 	end
 	return files, strs, actives
 end
@@ -569,11 +569,11 @@ end
 function liked.findIcon(name)
 	cache.cache.findIcon = cache.cache.findIcon or {}
 	if cache.cache.findIcon[name] then
-	    return cache.cache.findIcon[name]
+		return cache.cache.findIcon[name]
 	end
 
 	if registry.icons and registry.icons[name] then
-	    return registry.icons[name]
+		return registry.icons[name]
 	end
 
 	local path = bootloader.find(paths.concat("icons", name .. ".t2p"))
@@ -584,11 +584,11 @@ end
 function liked.getIcon(screen, path)
 	cache.cache.getIcon = cache.cache.getIcon or {}
 	if cache.cache.getIcon[path] then
-	    if not fs.exists(path) then
-	        cache.cache.getIcon[path] = nil
-	        return liked.findIcon("badicon")
-	    end
-	    return cache.cache.getIcon[path]
+		if not fs.exists(path) then
+			cache.cache.getIcon[path] = nil
+			return liked.findIcon("badicon")
+		end
+		return cache.cache.getIcon[path]
 	end
 
 	local exp = paths.extension(path)
@@ -596,80 +596,80 @@ function liked.getIcon(screen, path)
 	local icon
 	
 	if isDir then
-	    local fsProxy, fsLocalPath = fs.get(path)
-	    if fsLocalPath ~= "/" then
-	        fsProxy = nil
-	    end
-	    if fsProxy then
-	        local disklevel = system.getDiskLevel(fsProxy.address)
-	        if fsProxy.cloud then
-	            icon = liked.findIcon("cloud")
-	        elseif fsProxy.public then
-	            icon = liked.findIcon("publicStorage")
-	        elseif disklevel == "tmp" then
-	            icon = liked.findIcon("tmp")
-	        elseif disklevel == "fdd" then
-	            if fsProxy.exists("/init.lua") then
-	                icon = liked.findIcon("bootdevice")
-	            else
-	                icon = liked.findIcon("fdd")
-	            end
-	        elseif disklevel == "raid" then
-	            icon = liked.findIcon("raid")
-	        elseif disklevel == "tier1" then
-	            icon = liked.findIcon("hdd1")
-	        elseif disklevel == "tier2" then
-	            icon = liked.findIcon("hdd2")
-	        elseif disklevel == "tier3" then
-	            icon = liked.findIcon("hdd3")
-	        else
-	            icon = liked.findIcon("hdd")
-	        end
-	    end
+		local fsProxy, fsLocalPath = fs.get(path)
+		if fsLocalPath ~= "/" then
+			fsProxy = nil
+		end
+		if fsProxy then
+			local disklevel = system.getDiskLevel(fsProxy.address)
+			if fsProxy.cloud then
+				icon = liked.findIcon("cloud")
+			elseif fsProxy.public then
+				icon = liked.findIcon("publicStorage")
+			elseif disklevel == "tmp" then
+				icon = liked.findIcon("tmp")
+			elseif disklevel == "fdd" then
+				if fsProxy.exists("/init.lua") then
+					icon = liked.findIcon("bootdevice")
+				else
+					icon = liked.findIcon("fdd")
+				end
+			elseif disklevel == "raid" then
+				icon = liked.findIcon("raid")
+			elseif disklevel == "tier1" then
+				icon = liked.findIcon("hdd1")
+			elseif disklevel == "tier2" then
+				icon = liked.findIcon("hdd2")
+			elseif disklevel == "tier3" then
+				icon = liked.findIcon("hdd3")
+			else
+				icon = liked.findIcon("hdd")
+			end
+		end
 
-	    local iconpath = paths.concat(path, "icon.t2p")
-	    if fs.exists(iconpath) and not fs.isDirectory(iconpath) then
-	        icon = iconpath
-	    elseif not fsProxy then
-	        if exp == "app" then
-	            icon = liked.findIcon("app")
-	        else
-	            icon = liked.findIcon("folder")
-	        end
-	    end
+		local iconpath = paths.concat(path, "icon.t2p")
+		if fs.exists(iconpath) and not fs.isDirectory(iconpath) then
+			icon = iconpath
+		elseif not fsProxy then
+			if exp == "app" then
+				icon = liked.findIcon("app")
+			else
+				icon = liked.findIcon("folder")
+			end
+		end
 	else
-	    if exp == "t2p" then
-	        if path then
-	            local ok, sx, sy = pcall(image.size, path)
-	            if ok and sx == 8 and sy == 4 then
-	                icon = path
-	            else
-	                icon = liked.findIcon("t2p")
-	            end
-	        else
-	            icon = liked.findIcon("t2p")
-	        end
-	    elseif exp and #exp > 0 then
-	        icon = liked.findIcon(exp)
-	        if not icon then
-	            icon = liked.findIcon("unknown")
-	        end
-	    else
-	        icon = liked.findIcon("file")
-	    end
+		if exp == "t2p" then
+			if path then
+				local ok, sx, sy = pcall(image.size, path)
+				if ok and sx == 8 and sy == 4 then
+					icon = path
+				else
+					icon = liked.findIcon("t2p")
+				end
+			else
+				icon = liked.findIcon("t2p")
+			end
+		elseif exp and #exp > 0 then
+			icon = liked.findIcon(exp)
+			if not icon then
+				icon = liked.findIcon("unknown")
+			end
+		else
+			icon = liked.findIcon("file")
+		end
 	end
 
 	if not icon or not fs.exists(icon) then
-	    icon = liked.findIcon("unknown")
+		icon = liked.findIcon("unknown")
 	end
 
 	local ok, sx, sy = pcall(image.size, icon)
 	if not ok or sx ~= 8 or sy ~= 4 then
-	    icon = nil
+		icon = nil
 	end
 
 	if not icon or not fs.exists(icon) then
-	    icon = liked.findIcon("badicon")
+		icon = liked.findIcon("badicon")
 	end
 
 	cache.cache.getIcon[path] = icon
@@ -679,25 +679,25 @@ end
 function liked.getBaseWallpaperColor()
 	local baseColor = colors.lightBlue
 	if registry.wallpaperBaseColor then
-	    if type(registry.wallpaperBaseColor) == "string" then
-	        baseColor = colors[registry.wallpaperBaseColor]
-	    elseif type(registry.wallpaperBaseColor) == "number" then
-	        baseColor = registry.wallpaperBaseColor
-	    end
+		if type(registry.wallpaperBaseColor) == "string" then
+			baseColor = colors[registry.wallpaperBaseColor]
+		elseif type(registry.wallpaperBaseColor) == "number" then
+			baseColor = registry.wallpaperBaseColor
+		end
 	end
 	return baseColor
 end
 
 local function demoTitle(screen, gpu)
 	if registry.demoMode then
-	    local rx, ry = gpu.getResolution()
-	    if liked.recoveryMode then
-	        gpu.set(2, ry - 3, "a demo version is likeOS")
-	        gpu.set(2, ry - 2, "some functions may be disabled")
-	    else
-	        gui.drawtext(screen, 2, ry - 3, liked.colors.white, "a demo version is likeOS")
-	        gui.drawtext(screen, 2, ry - 2, liked.colors.white, "some functions may be disabled")
-	    end
+		local rx, ry = gpu.getResolution()
+		if liked.recoveryMode then
+			gpu.set(2, ry - 3, "a demo version is likeOS")
+			gpu.set(2, ry - 2, "some functions may be disabled")
+		else
+			gui.drawtext(screen, 2, ry - 3, liked.colors.white, "a demo version is likeOS")
+			gui.drawtext(screen, 2, ry - 2, liked.colors.white, "some functions may be disabled")
+		end
 	end
 end
 
@@ -706,12 +706,12 @@ function liked.drawWallpaper(screen, customFolder)
 	local rx, ry = gpu.getResolution()
 
 	if liked.recoveryMode then
-	    gpu.setBackground(liked.colors.black)
-	    gpu.setForeground(liked.colors.white)
-	    gpu.fill(1, 1, rx, ry, " ")
-	    gpu.set(rx - 14, ry - 2, "Recovery mode")
-	    demoTitle(screen, gpu)
-	    return
+		gpu.setBackground(liked.colors.black)
+		gpu.setForeground(liked.colors.white)
+		gpu.fill(1, 1, rx, ry, " ")
+		gpu.set(rx - 14, ry - 2, "Recovery mode")
+		demoTitle(screen, gpu)
+		return
 	end
 
 	local baseColor = liked.getBaseWallpaperColor()
@@ -720,16 +720,16 @@ function liked.drawWallpaper(screen, customFolder)
 	gpu.fill(1, 1, rx, ry, " ")
 
 	local function wdraw(path)
-	    local ok, sx, sy = pcall(image.size, path)
-	    if ok then
-	        local ix, iy = math.round((rx / 2) - (sx / 2)) + 1, math.round((ry / 2) - (sy / 2)) + 1
-	        pcall(image.draw, screen, path, ix, iy, nil, nil, registry.wallpaperLight)
-	    end
+		local ok, sx, sy = pcall(image.size, path)
+		if ok then
+			local ix, iy = math.round((rx / 2) - (sx / 2)) + 1, math.round((ry / 2) - (sy / 2)) + 1
+			pcall(image.draw, screen, path, ix, iy, nil, nil, registry.wallpaperLight)
+		end
 	end
 
 	local wallpaperPath = "/data/wallpaper.t2p"
 	if fs.exists(wallpaperPath) then
-	    wdraw(wallpaperPath)
+		wdraw(wallpaperPath)
 	end
 
 	demoTitle(screen, gpu)
@@ -737,9 +737,9 @@ function liked.drawWallpaper(screen, customFolder)
 	--[[ обои для папок были отключены, потому что это не совмем безопастно и в теории позволит сделать папку в которую нельзя будет зайти
 	local customPath = paths.concat(customFolder or paths.path(wallpaperPath), paths.name(wallpaperPath))
 	if fs.exists(customPath) then
-	    wdraw(customPath)
+		wdraw(customPath)
 	elseif fs.exists(wallpaperPath) then
-	    wdraw(wallpaperPath)
+		wdraw(wallpaperPath)
 	end
 	]]
 end
@@ -747,16 +747,16 @@ end
 function liked.minRamForDBuff()
 	local kb = 512
 	for _ in component.list("screen") do
-	    kb = kb + 512
+		kb = kb + 512
 	end
 	return kb
 end
 
 function liked.isRealKeyboards(screen)
 	for i, address in ipairs(lastinfo.keyboards[screen]) do
-	    if not vcomponent.isVirtual(address) then
-	        return true
-	    end
+		if not vcomponent.isVirtual(address) then
+			return true
+		end
 	end
 	return false
 end
@@ -769,40 +769,40 @@ function liked.regExit(screen, close, closeButton, enterAlias)
 	local baseTh = thread.current()
 	
 	thread.listen("close", function (_, uuid)
-	    if uuid == screen then
-	        if close then
-	            close()
-	        else
-	            baseTh:kill()
-	        end
-	    end
+		if uuid == screen then
+			if close then
+				close()
+			else
+				baseTh:kill()
+			end
+		end
 	end)
 
 	if enterAlias then
-	    thread.listen("key_down", function (_, uuid, code1, code2)
-	        if table.exists(lastinfo.keyboards[screen], uuid) and code1 == 13 and code2 == 28 then
-	            if close then
-	                close()
-	            else
-	                baseTh:kill()
-	            end
-	        end
-	    end)
+		thread.listen("key_down", function (_, uuid, code1, code2)
+			if table.exists(lastinfo.keyboards[screen], uuid) and code1 == 13 and code2 == 28 then
+				if close then
+					close()
+				else
+					baseTh:kill()
+				end
+			end
+		end)
 	end
 
 	if closeButton then
-	    thread.listen("touch", function (_, uuid, px, py)
-	        if uuid == screen then
-	            local rx, ry = graphic.getResolution(screen)
-	            if py == 1 and px >= rx - 2 then
-	                if close then
-	                    close()
-	                else
-	                    baseTh:kill()
-	                end
-	            end
-	        end
-	    end)
+		thread.listen("touch", function (_, uuid, px, py)
+			if uuid == screen then
+				local rx, ry = graphic.getResolution(screen)
+				if py == 1 and px >= rx - 2 then
+					if close then
+						close()
+					else
+						baseTh:kill()
+					end
+				end
+			end
+		end)
 	end
 end
 

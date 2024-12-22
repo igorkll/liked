@@ -8,10 +8,10 @@ local bricklogo = [[local component=component or require("component")local compu
 
 if disk then
 	pcall(function()
-	    disk.remove("/")
-	    local file = disk.open("/init.lua", "wb")
-	    disk.write(file, bricklogo)
-	    disk.close(file)
+		disk.remove("/")
+		local file = disk.open("/init.lua", "wb")
+		disk.write(file, bricklogo)
+		disk.close(file)
 	end)
 end
 

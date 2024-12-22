@@ -32,7 +32,7 @@ end
 function setColor(color)
 	local obj = drone or robot
 	if obj then
-	    obj.setLightColor(color)
+		obj.setLightColor(color)
 	end
 end
 currentColor = 0xffffff
@@ -40,26 +40,26 @@ setColor(currentColor)
 
 function setText(text)
 	if drone then
-	    drone.setStatusText(text)
-	    return 1
+		drone.setStatusText(text)
+		return 1
 	elseif gpu then
-	    local rx, ry = gpu.getResolution()
-	    gpu.setBackground(0)
-	    gpu.setForeground(0xffffff)
-	    gpu.fill(1, 1, rx, ry, " ")
-	    local line = 1
-	    local index = 1
-	    for i = 1, #text do
-	        local char = text:sub(i, i)
-	        if char == "\n" then
-	            line = line + 1
-	            index = 1
-	        else
-	            gpu.set(index, line, char)
-	            index = index + 1
-	        end
-	    end
-	    return 1
+		local rx, ry = gpu.getResolution()
+		gpu.setBackground(0)
+		gpu.setForeground(0xffffff)
+		gpu.fill(1, 1, rx, ry, " ")
+		local line = 1
+		local index = 1
+		for i = 1, #text do
+			local char = text:sub(i, i)
+			if char == "\n" then
+				line = line + 1
+				index = 1
+			else
+				gpu.set(index, line, char)
+				index = index + 1
+			end
+		end
+		return 1
 	end
 end
 local screenOk = setText("")
@@ -69,14 +69,14 @@ do
 	local deviceinfo = computer.getDeviceInfo()
 
 	local function isType(ctype)
-	    return component.list(ctype)() and ctype
+		return component.list(ctype)() and ctype
 	end
 	
 	local function isServer()
-	    local obj = deviceinfo[computer.address()]
-	    if obj and obj.description and obj.description:lower() == "server" then
-	        return "server"
-	    end
+		local obj = deviceinfo[computer.address()]
+		if obj and obj.description and obj.description:lower() == "server" then
+			return "server"
+		end
 	end
 	
 	devicetype = isType("tablet") or isType("microcontroller") or isType("drone") or isType("robot") or isServer() or isType("computer") or "unknown"
@@ -92,15 +92,15 @@ end
 
 local function passText()
 	if screenOk then
-	    if passwordHash then
-	        setText("password\nchanged")
-	    else
-	        randomPassword = ""
-	        for i = 1, 8 do
-	            randomPassword = randomPassword .. string.char(math.random(33, 126))
-	        end
-	        setText("password:\n" .. randomPassword)
-	    end
+		if passwordHash then
+			setText("password\nchanged")
+		else
+			randomPassword = ""
+			for i = 1, 8 do
+				randomPassword = randomPassword .. string.char(math.random(33, 126))
+			end
+			setText("password:\n" .. randomPassword)
+		end
 	end
 end
 passText()
@@ -108,38 +108,38 @@ passText()
 local function hash(str)
 	local values = {}
 	for i = 1, 16 do
-	    values[i] = ((8 * i * #str) + #str) % 256
+		values[i] = ((8 * i * #str) + #str) % 256
 	end
 	for i = 0, #str - 1 do
-	    local previous = str:byte(((i - 1) % #str) + 1)
-	    local byte = str:byte(i + 1)
-	    local next = str:byte(((i + 1) % #str) + 1)
-	    local index = ((i + previous + next) % 16) + 1
-	    values[index] = (((values[index] + byte + 13) * 3 * next) + (next * previous) + ((i + 1) * 6)) % 256
+		local previous = str:byte(((i - 1) % #str) + 1)
+		local byte = str:byte(i + 1)
+		local next = str:byte(((i + 1) % #str) + 1)
+		local index = ((i + previous + next) % 16) + 1
+		values[index] = (((values[index] + byte + 13) * 3 * next) + (next * previous) + ((i + 1) * 6)) % 256
 	end
 	local hashStr = ""
 	for i = 1, #values do
-	    hashStr = hashStr .. string.char(values[i])
+		hashStr = hashStr .. string.char(values[i])
 	end
 	return hashStr
 end
 
 local function checkPassword(password)
 	if passwordHash then
-	    return hash(password) == passwordHash
+		return hash(password) == passwordHash
 	elseif randomPassword then
-	    return password == randomPassword
+		return password == randomPassword
 	else
-	    return true
+		return true
 	end
 end
 
 local function send(id, isTunnel, address, ...)
 	local msg_title = "rc_ret:" .. id
 	if isTunnel then
-	    tunnel.send(msg_title, ...)
+		tunnel.send(msg_title, ...)
 	else
-	    modem.send(address, port, msg_title, ...)
+		modem.send(address, port, msg_title, ...)
 	end
 end
 
@@ -165,7 +165,7 @@ local function discon(id)
 	computer.beep(150, 0.2)
 	computer.beep(100, 0.8)
 	if id then
-	    send(id, isTunnel, currentUser, true)
+		send(id, isTunnel, currentUser, true)
 	end
 	currentUser = nil
 end
@@ -173,79 +173,79 @@ end
 while true do
 	local eventData = {computer.pullSignal(0.1)}
 	for k, v in pairs(tsks) do
-	    pcall(v, eventData)
+		pcall(v, eventData)
 	end
 
 	if currentUser then
-	    if autoDisconTimer and computer.uptime() - autoDisconTimer > 7 then
-	        discon()
-	    end
+		if autoDisconTimer and computer.uptime() - autoDisconTimer > 7 then
+			discon()
+		end
 
-	    if eventData[1] == "modem_message" and eventData[3] == currentUser then
-	        local cmd, arg, nexec = eventData[6], eventData[7]
-	        nexec = cmd == "rc_exec"
-	        if nexec or cmd == "rc_fexec" then
-	            ut()
-	            local code, err = load(arg)
-	            if nexec then
-	                if code then
-	                    send(eventData[8], isTunnel, currentUser, pcall(code, table.unpack(eventData, 9)))
-	                else
-	                    send(eventData[8], isTunnel, currentUser, false, err)
-	                end
-	            else
-	                pcall(code, table.unpack(eventData, 9))
-	            end
-	        elseif cmd == "rc_color" then
-	            currentColor = arg
-	            setColor(currentColor)
-	        elseif cmd == "rc_title" then
-	            setText(arg)
-	        elseif cmd == "rc_out" then
-	            discon(arg)
-	        end
-	    end
+		if eventData[1] == "modem_message" and eventData[3] == currentUser then
+			local cmd, arg, nexec = eventData[6], eventData[7]
+			nexec = cmd == "rc_exec"
+			if nexec or cmd == "rc_fexec" then
+				ut()
+				local code, err = load(arg)
+				if nexec then
+					if code then
+						send(eventData[8], isTunnel, currentUser, pcall(code, table.unpack(eventData, 9)))
+					else
+						send(eventData[8], isTunnel, currentUser, false, err)
+					end
+				else
+					pcall(code, table.unpack(eventData, 9))
+				end
+			elseif cmd == "rc_color" then
+				currentColor = arg
+				setColor(currentColor)
+			elseif cmd == "rc_title" then
+				setText(arg)
+			elseif cmd == "rc_out" then
+				discon(arg)
+			end
+		end
 	else
-	    if eventData[1] == "modem_message" then
-	        local sender = eventData[3]
-	        isTunnel = tunnel and eventData[2] == tunnel.address
-	        if eventData[6] == "rc_radv" then
-	            if modem then
-	                modem.send(sender, port, "rc_adv", devicetype, devicename)
-	            end
-	            if tunnel then
-	                tunnel.send("rc_adv", devicetype, devicename)
-	            end
-	        elseif eventData[6] == "rc_connect" and (randomPassword or passwordHash or eventData[5] <= 8) then
-	            if checkPassword(eventData[7]) then
-	                ut()
-	                setText("")
-	                setColor(0x00ff00)
-	                computer.beep(1800, 0.05)
-	                computer.beep(1800, 0.05)
-	                setColor(currentColor)
-	                send(eventData[8], isTunnel, sender, true)
-	                currentUser = sender
-	            else
-	                setColor(0xff0000)
-	                computer.beep(100, 0.1)
-	                computer.beep(100, 0.1)
-	                setColor(currentColor)
-	                send(eventData[8], isTunnel, sender, false)
-	            end
-	        end
-	    end
+		if eventData[1] == "modem_message" then
+			local sender = eventData[3]
+			isTunnel = tunnel and eventData[2] == tunnel.address
+			if eventData[6] == "rc_radv" then
+				if modem then
+					modem.send(sender, port, "rc_adv", devicetype, devicename)
+				end
+				if tunnel then
+					tunnel.send("rc_adv", devicetype, devicename)
+				end
+			elseif eventData[6] == "rc_connect" and (randomPassword or passwordHash or eventData[5] <= 8) then
+				if checkPassword(eventData[7]) then
+					ut()
+					setText("")
+					setColor(0x00ff00)
+					computer.beep(1800, 0.05)
+					computer.beep(1800, 0.05)
+					setColor(currentColor)
+					send(eventData[8], isTunnel, sender, true)
+					currentUser = sender
+				else
+					setColor(0xff0000)
+					computer.beep(100, 0.1)
+					computer.beep(100, 0.1)
+					setColor(currentColor)
+					send(eventData[8], isTunnel, sender, false)
+				end
+			end
+		end
 
-	    if modem then
-	        local uptime = computer.uptime()
-	        if uptime - oldAdvTime > 3 then
-	            if not randomPassword and not passwordHash then
-	                pcall(modem.setStrength, 8)
-	            end
-	            modem.broadcast(port, "rc_adv", devicetype, devicename)
-	            pcall(modem.setStrength, math.huge)
-	            oldAdvTime = uptime
-	        end
-	    end
+		if modem then
+			local uptime = computer.uptime()
+			if uptime - oldAdvTime > 3 then
+				if not randomPassword and not passwordHash then
+					pcall(modem.setStrength, 8)
+				end
+				modem.broadcast(port, "rc_adv", devicetype, devicename)
+				pcall(modem.setStrength, math.huge)
+				oldAdvTime = uptime
+			end
+		end
 	end
 end

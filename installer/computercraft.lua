@@ -25,15 +25,15 @@ local logo = {
 
 for _, str in ipairs(logo) do
 	for i = 1, #str do
-	    local char = str:sub(i, i)
-	    if char == "G" then
-	        term.setBackgroundColor(colors.lightGray)
-	    elseif char == "W" then
-	        term.setBackgroundColor(colors.white)
-	    else
-	        term.setBackgroundColor(colors.blue)
-	    end
-	    io.write(" ")
+		local char = str:sub(i, i)
+		if char == "G" then
+			term.setBackgroundColor(colors.lightGray)
+		elseif char == "W" then
+			term.setBackgroundColor(colors.white)
+		else
+			term.setBackgroundColor(colors.blue)
+		end
+		io.write(" ")
 	end
 	io.write("\n")
 end
@@ -47,15 +47,15 @@ local baseCoreUrl = "https://raw.githubusercontent.com/igorkll/likeOS/"
 local function selectPoint(name, points)
 	print("select " .. name .. ": ")
 	for i, v in ipairs(points) do
-	    print(i .. ". " .. v)
+		print(i .. ". " .. v)
 	end
 	local readed = io.read()
 	local point = points[tonumber(readed)]
 	if point then
-	    local _, y = term.getCursorPos()
-	    term.setCursorPos(#readed + 2, y - 1)
-	    print("- " .. point)
-	    return point
+		local _, y = term.getCursorPos()
+		term.setCursorPos(#readed + 2, y - 1)
+		print("- " .. point)
+		return point
 	end
 end
 
@@ -68,12 +68,12 @@ end
 local function wget(url)
 	local ok, err = assert(http.checkURL(url))
 	if not ok then
-	    return nil, tostring(err or "unknown error")
+		return nil, tostring(err or "unknown error")
 	end
 
 	local response, err = assert(http.get(url))
 	if not response then
-	    return nil, tostring(err or "unknown error")
+		return nil, tostring(err or "unknown error")
 	end
 
 	local data = response.readAll()
@@ -84,16 +84,16 @@ end
 local function download(path, dpath, mode)
 	local url
 	if mode == "cc" then
-	    url = baseUrl .. branch .. "/computercraft" .. path
+		url = baseUrl .. branch .. "/computercraft" .. path
 	elseif mode == "core" then
-	    url = baseCoreUrl .. branch .. path
+		url = baseCoreUrl .. branch .. path
 	else
-	    url = baseUrl .. branch .. path
+		url = baseUrl .. branch .. path
 	end
 
 	local str, err = assert(wget(url))
 	if not str then
-	    return nil, tostring(err or "unknown error")
+		return nil, tostring(err or "unknown error")
 	end
 
 	fs.makeDir("/" .. fs.getDir(dpath))
@@ -107,16 +107,16 @@ end
 local function split(str, sep)
 	local parts, count, i = {}, 1, 1
 	while 1 do
-	    if i > #str then break end
-	    local char = str:sub(i, #sep + (i - 1))
-	    if not parts[count] then parts[count] = "" end
-	    if char == sep then
-	        count = count + 1
-	        i = i + #sep
-	    else
-	        parts[count] = parts[count] .. str:sub(i, i)
-	        i = i + 1
-	    end
+		if i > #str then break end
+		local char = str:sub(i, #sep + (i - 1))
+		if not parts[count] then parts[count] = "" end
+		if char == sep then
+			count = count + 1
+			i = i + #sep
+		else
+			parts[count] = parts[count] .. str:sub(i, i)
+			i = i + 1
+		end
 	end
 	if str:sub(#str - (#sep - 1), #str) == sep then table.insert(parts, "") end
 	return parts
@@ -125,9 +125,9 @@ end
 local function processList(data)
 	local tbl = split(data, "\n")
 	for i = #tbl, 1, -1 do
-	    if tbl[i] == "" then
-	        table.remove(tbl, i)
-	    end
+		if tbl[i] == "" then
+			table.remove(tbl, i)
+		end
 	end
 	return tbl
 end
@@ -136,12 +136,12 @@ local function downloadList(listUrl, mode)
 	print("start downloading from list: ", listUrl)
 	local lst = processList(assert(wget(listUrl)))
 	for i, path in ipairs(lst) do
-	    local fullPath = path
-	    if mode ~= "cc" then
-	        fullPath = "/liked" .. path
-	    end
-	    print("downloading: ", fullPath)
-	    assert(download(path, fullPath, mode))
+		local fullPath = path
+		if mode ~= "cc" then
+			fullPath = "/liked" .. path
+		end
+		print("downloading: ", fullPath)
+		assert(download(path, fullPath, mode))
 	end
 end
 

@@ -31,7 +31,7 @@ local function checkHistory()
 	local history = split(historyDat, "\n")
 
 	while #history > 64 do
-	    table.remove(history, 1)
+		table.remove(history, 1)
 	end
 
 	local file = fs.open("/data/apps/chat.app/history.dat", "wb")
@@ -56,27 +56,27 @@ end
 local function beep(f, d)
 	local beepcard = component.list("beep")()
 	if beepcard then
-	    component.invoke(beepcard, "beep", {[f] = d})
+		component.invoke(beepcard, "beep", {[f] = d})
 	else
-	    computer.beep(f, d)
+		computer.beep(f, d)
 	end
 end
 
 event.listen("raw_chat_message", function(_, dist, label, nikname, color, messageType, message)
 	if not _G.chat_allow then return end
 	if label == "likedChatMessage" then
-	    dist = math.floor(dist + 0.5)
+		dist = math.floor(dist + 0.5)
 
-	    if messageType == "text" then
-	        beep(700, 0.2)
-	    elseif messageType == "image" then
-	        beep(2000, 0.2)
-	    elseif messageType == "file" then
-	        beep(1500, 0.2)
-	    end
+		if messageType == "text" then
+			beep(700, 0.2)
+		elseif messageType == "image" then
+			beep(2000, 0.2)
+		elseif messageType == "file" then
+			beep(1500, 0.2)
+		end
 
-	    addToHistory(nikname, color, messageType, message, dist)
-	    event.push("chat_message", nikname, color, messageType, message, dist)
+		addToHistory(nikname, color, messageType, message, dist)
+		event.push("chat_message", nikname, color, messageType, message, dist)
 	end
 end)
 

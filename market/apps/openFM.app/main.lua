@@ -25,7 +25,7 @@ if not fm then
 	return
 else
 	if not settings[fm] then
-	    settings[fm] = {url = stations[1][1], label = stations[1][2], index = 1}
+		settings[fm] = {url = stations[1][1], label = stations[1][2], index = 1}
 	end
 	fm = component.proxy(fm)
 end
@@ -39,9 +39,9 @@ local selectColor = layout:createButton(cx + 8, 2, 16, 1, colors.green, colors.g
 selectColor.fore = fm.getScreenColor()
 if selectColor.fore == selectColor.back then
 	if selectColor.back == colors.lime then
-	    selectColor.back = colors.green
+		selectColor.back = colors.green
 	else
-	    selectColor.back = colors.lime
+		selectColor.back = colors.lime
 	end
 end
 
@@ -69,7 +69,7 @@ end
 function statOld:onClick()
 	local index = settings[fm.address].index - 1
 	if index < 1 then
-	    index = #stations
+		index = #stations
 	end
 
 	settings[fm.address].index = index
@@ -95,7 +95,7 @@ end
 function statNext:onClick()
 	local index = settings[fm.address].index + 1
 	if index > #stations then
-	    index = 1
+		index = 1
 	end
 
 	settings[fm.address].index = index
@@ -121,17 +121,17 @@ end
 function selectColor:onClick()
 	local color = gui.selectcolor(screen, nil, nil, "Screen Color")
 	if color then
-	    if colorlib[color] and colors[colorlib[color]] then
-	        selectColor.fore = colors[colorlib[color]]
-	        if selectColor.fore == selectColor.back then
-	            if selectColor.back == colors.lime then
-	                selectColor.back = colors.green
-	            else
-	                selectColor.back = colors.lime
-	            end
-	        end
-	        fm.setScreenColor(selectColor.fore + 0.0)
-	    end
+		if colorlib[color] and colors[colorlib[color]] then
+			selectColor.fore = colors[colorlib[color]]
+			if selectColor.fore == selectColor.back then
+				if selectColor.back == colors.lime then
+					selectColor.back = colors.green
+				else
+					selectColor.back = colors.lime
+				end
+			end
+			fm.setScreenColor(selectColor.fore + 0.0)
+		end
 	end
 	ui:draw()
 end

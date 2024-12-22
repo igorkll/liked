@@ -104,26 +104,26 @@ end
 
 layout:thread(function ()
 	while true do
-	    updateBars(system.getCpuLoadLevel())
+		updateBars(system.getCpuLoadLevel())
 
-	    emptyPlane:draw()
+		emptyPlane:draw()
 
-	    ramBar:draw()
-	    romBar:draw()
-	    energyBar:draw()
-	    cpuBar:draw()
+		ramBar:draw()
+		romBar:draw()
+		energyBar:draw()
+		cpuBar:draw()
 
-	    cpuParam:draw()
-	    cpuParam2:draw()
+		cpuParam:draw()
+		cpuParam2:draw()
 
-	    ramParam:draw()
-	    ramParam2:draw()
+		ramParam:draw()
+		ramParam2:draw()
 
-	    romParam:draw()
-	    romParam2:draw()
+		romParam:draw()
+		romParam2:draw()
 
-	    energyParam:draw()
-	    energyParam2:draw()
+		energyParam:draw()
+		energyParam2:draw()
 	end
 end):resume()
 

@@ -53,9 +53,9 @@ end
 
 function compassCls:onDraw()
 	if component.tablet then
-	    local x, y = self.x + (imgX / 2), self.y + (imgY / 2)
-	    local rad = math.rad(-(component.tablet.getYaw()))
-	    draw:line(x, y, x + (math.sin(rad) * 6), y + (math.cos(rad) * 6), colors.red)
+		local x, y = self.x + (imgX / 2), self.y + (imgY / 2)
+		local rad = math.rad(-(component.tablet.getYaw()))
+		draw:line(x, y, x + (math.sin(rad) * 6), y + (math.cos(rad) * 6), colors.red)
 	end
 end
 
@@ -67,8 +67,8 @@ layout:draw()
 
 thread.create(function ()
 	while true do
-	    layout:draw()
-	    os.sleep(0.5)
+		layout:draw()
+		os.sleep(0.5)
 	end
 end):resume()
 

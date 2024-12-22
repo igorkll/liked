@@ -35,21 +35,21 @@ local function draw()
 	window:set(spaceshipPosX - 1, spaceshipPosY, colors.green, 0, " ")
 
 	for k, v in pairs(entites) do
-	    if v.skin == "warnShip" then
-	        window:set(v.x, v.y - 1, colors.black, colors.lightGray, "/")
-	        window:set(v.x, v.y + 1, colors.black, colors.lightGray, "\\")
-	        window:set(v.x, v.y, colors.black, colors.white, "<")
+		if v.skin == "warnShip" then
+			window:set(v.x, v.y - 1, colors.black, colors.lightGray, "/")
+			window:set(v.x, v.y + 1, colors.black, colors.lightGray, "\\")
+			window:set(v.x, v.y, colors.black, colors.white, "<")
 
-	        window:set(v.x + 1, v.y + 1, colors.lightGray, 0, " ")
-	        window:set(v.x + 1, v.y - 1, colors.lightGray, 0, " ")
-	        window:set(v.x + 1, v.y, colors.gray, 0, " ")
-	    end
-	    if v.x == spaceshipPosX and v.y == spaceshipPosY and v.warn then
-	        window:clear(colors.black)
-	        exit()
-	        running = false
-	        return
-	    end
+			window:set(v.x + 1, v.y + 1, colors.lightGray, 0, " ")
+			window:set(v.x + 1, v.y - 1, colors.lightGray, 0, " ")
+			window:set(v.x + 1, v.y, colors.gray, 0, " ")
+		end
+		if v.x == spaceshipPosX and v.y == spaceshipPosY and v.warn then
+			window:clear(colors.black)
+			exit()
+			running = false
+			return
+		end
 	end
 end
 draw()
@@ -58,12 +58,12 @@ while running do
 	local eventData = {event.pull()}
 	local windowEventData = window:uploadEvent(eventData)
 	if windowEventData[1] == "key_down" and (windowEventData[4] == 28 or (eventData[3] == 3 and eventData[4] == 46)) then
-	    exit()
-	    break
+		exit()
+		break
 	end
 	if windowEventData[1] == "touch" or windowEventData[1] == "drag" then
-	    spaceshipPosY = windowEventData[4]
-	    spaceshipPosX = windowEventData[3]
-	    draw()
+		spaceshipPosY = windowEventData[4]
+		spaceshipPosX = windowEventData[3]
+		draw()
 	end
 end

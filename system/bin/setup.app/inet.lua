@@ -23,15 +23,15 @@ local tier1 = graphic.getDepth(screen) == 1
 
 local function addRSbuttons(layout)
 	if rsButtons then
-	    local reboot = layout:createButton(rx - 17, 4, 16, 1, uix.colors.lightBlue, uix.colors.white, "reboot", true)
-	    function reboot:onClick()
-	        computer.shutdown(true, true)
-	    end
+		local reboot = layout:createButton(rx - 17, 4, 16, 1, uix.colors.lightBlue, uix.colors.white, "reboot", true)
+		function reboot:onClick()
+			computer.shutdown(true, true)
+		end
 
-	    local shutdown = layout:createButton(rx - 17, 2, 16, 1, uix.colors.lightBlue, uix.colors.white, "shutdown", true)
-	    function shutdown:onClick()
-	        computer.shutdown(nil, true)
-	    end
+		local shutdown = layout:createButton(rx - 17, 2, 16, 1, uix.colors.lightBlue, uix.colors.white, "shutdown", true)
+		function shutdown:onClick()
+			computer.shutdown(nil, true)
+		end
 	end
 end
 
@@ -49,23 +49,23 @@ addRSbuttons(inetLayout)
 local recheckButton = inetLayout:createButton(rx - 17, ry - 1, 16, 1, uix.colors.lightBlue, uix.colors.white, "recheck", true)
 function recheckButton:onClick()
 	if internet.check() then
-	    ui:select(accountLayout)
+		ui:select(accountLayout)
 	else
-	    gui.warn(screen, nil, nil, "there is still no internet connection")
-	    ui:draw()
+		gui.warn(screen, nil, nil, "there is still no internet connection")
+		ui:draw()
 	end
 end
 
 if not window then
 	local backButton = inetLayout:createButton(3, ry - 1, 8, 1, uix.colors.lightBlue, uix.colors.white, " ← back", true)
 	function backButton:onClick()
-	    os.exit()
+		os.exit()
 	end
 
 	local skipButton = inetLayout:createButton(rx - 17, ry - 3, 16, 1, uix.colors.lightBlue, uix.colors.white, "skip internet", true)
 	function skipButton:onClick()
-	    doSetup("end")
-	    os.exit()
+		doSetup("end")
+		os.exit()
 	end
 end
 
@@ -97,104 +97,104 @@ addRSbuttons(accountLayout)
 if not window then
 	next3 = accountLayout:createButton(rx - 7, ry - 1, 6, 1, uix.colors.lightBlue, uix.colors.white, "next", true)
 	function next3:onClick()
-	    doSetup("end")
-	    os.exit()
+		doSetup("end")
+		os.exit()
 	end
 end
 
 local function doLocked(locked)
 	if locked then
-	    event.push("closeSettings", screen)
+		event.push("closeSettings", screen)
 	end
 
 	if not locked then
-	    locked = nil
+		locked = nil
 	end
 
 	if locked ~= registry.oldLocked then
-	    if locked then
-	        registry.old_disableRecovery = registry.disableRecovery
-	        registry.disableRecovery = true
-	    else
-	        registry.disableRecovery = registry.old_disableRecovery
-	        registry.old_disableRecovery = nil
-	    end
-	    registry.oldLocked = locked
+		if locked then
+			registry.old_disableRecovery = registry.disableRecovery
+			registry.disableRecovery = true
+		else
+			registry.disableRecovery = registry.old_disableRecovery
+			registry.old_disableRecovery = nil
+		end
+		registry.oldLocked = locked
 	end
 end
 
 function accountLayout:onSelect()
 	if not accountLayout.imagePath then
-	    gui.status(screen, nil, nil, "internet connection...")
-	    accountLayout.locked = account.getLocked()
-	    accountLayout.login = account.getLogin()
-	    accountLayout.tokenIsValid = account.checkToken()
+		gui.status(screen, nil, nil, "internet connection...")
+		accountLayout.locked = account.getLocked()
+		accountLayout.login = account.getLogin()
+		accountLayout.tokenIsValid = account.checkToken()
 
-	    loginZone.read.setBuffer("")
-	    passwordZone.read.setBuffer("")
-	    passwordZone2.read.setBuffer("")
-	    loginZone.read.setLock(false)
+		loginZone.read.setBuffer("")
+		passwordZone.read.setBuffer("")
+		passwordZone2.read.setBuffer("")
+		loginZone.read.setLock(false)
 
-	    registerButton.disabledHidden = true
-	    loginButton.disabledHidden = true
-	    accountDelButton.disabledHidden = true
-	    unloginButton.disabledHidden = true
-	    changePassword.disabledHidden = true
-	    devicesControl.disabledHidden = true
-	    
-	    if next3 then
-	        next3.disabledHidden = false
-	    end
+		registerButton.disabledHidden = true
+		loginButton.disabledHidden = true
+		accountDelButton.disabledHidden = true
+		unloginButton.disabledHidden = true
+		changePassword.disabledHidden = true
+		devicesControl.disabledHidden = true
+		
+		if next3 then
+			next3.disabledHidden = false
+		end
 
-	    if vtext1 then vtext1:destroy() end
-	    if vtext2 then vtext2:destroy() end
-	    if accountImage then accountImage:destroy() end
+		if vtext1 then vtext1:destroy() end
+		if vtext2 then vtext2:destroy() end
+		if accountImage then accountImage:destroy() end
 
-	    local locked
-	    if accountLayout.login and accountLayout.tokenIsValid then
-	        accountLayout.imagePath = uix.getSysImgPath("accountLogin")
-	        if not tier1 then
-	            accountImage = accountLayout:createImage(((rx / 2) - (image.sizeX(accountLayout.imagePath) / 2)) + 1, 2, accountLayout.imagePath)
-	            accountImage.wallpaperMode = true
-	        end
+		local locked
+		if accountLayout.login and accountLayout.tokenIsValid then
+			accountLayout.imagePath = uix.getSysImgPath("accountLogin")
+			if not tier1 then
+				accountImage = accountLayout:createImage(((rx / 2) - (image.sizeX(accountLayout.imagePath) / 2)) + 1, 2, accountLayout.imagePath)
+				accountImage.wallpaperMode = true
+			end
 
-	        loginZone.read.setBuffer(accountLayout.login)
-	        loginZone.read.setLock(true)
+			loginZone.read.setBuffer(accountLayout.login)
+			loginZone.read.setLock(true)
 
-	        accountDelButton.disabledHidden = false
-	        unloginButton.disabledHidden = false
-	        changePassword.disabledHidden = false
-	        devicesControl.disabledHidden = false
-	    elseif accountLayout.locked then
-	        locked = true
-	        
-	        accountLayout.imagePath = uix.getSysImgPath("accountLock")
-	        if not tier1 then
-	            accountImage = accountLayout:createImage(((rx / 2) - (image.sizeX(accountLayout.imagePath) / 2)) + 1, 2, accountLayout.imagePath)
-	            accountImage.wallpaperMode = true
-	        end
+			accountDelButton.disabledHidden = false
+			unloginButton.disabledHidden = false
+			changePassword.disabledHidden = false
+			devicesControl.disabledHidden = false
+		elseif accountLayout.locked then
+			locked = true
+			
+			accountLayout.imagePath = uix.getSysImgPath("accountLock")
+			if not tier1 then
+				accountImage = accountLayout:createImage(((rx / 2) - (image.sizeX(accountLayout.imagePath) / 2)) + 1, 2, accountLayout.imagePath)
+				accountImage.wallpaperMode = true
+			end
 
-	        loginZone.read.setBuffer(accountLayout.locked)
-	        loginZone.read.setLock(true)
+			loginZone.read.setBuffer(accountLayout.locked)
+			loginZone.read.setLock(true)
 
-	        vtext1 = accountLayout:createVText(rx / 2, ry - 11, uix.colors.orange, "your device is locked")
-	        vtext2 = accountLayout:createVText(rx / 2, ry - 10, uix.colors.orange, "enter account password to confirm that you are the owner")
+			vtext1 = accountLayout:createVText(rx / 2, ry - 11, uix.colors.orange, "your device is locked")
+			vtext2 = accountLayout:createVText(rx / 2, ry - 10, uix.colors.orange, "enter account password to confirm that you are the owner")
 
-	        if next3 then
-	            next3.disabledHidden = true
-	        end
-	        loginButton.disabledHidden = false
-	    else
-	        accountLayout.imagePath = uix.getSysImgPath("account")
-	        if not tier1 then
-	            accountImage = accountLayout:createImage(((rx / 2) - (image.sizeX(accountLayout.imagePath) / 2)) + 1, 2, accountLayout.imagePath)
-	            accountImage.wallpaperMode = true
-	        end
+			if next3 then
+				next3.disabledHidden = true
+			end
+			loginButton.disabledHidden = false
+		else
+			accountLayout.imagePath = uix.getSysImgPath("account")
+			if not tier1 then
+				accountImage = accountLayout:createImage(((rx / 2) - (image.sizeX(accountLayout.imagePath) / 2)) + 1, 2, accountLayout.imagePath)
+				accountImage.wallpaperMode = true
+			end
 
-	        registerButton.disabledHidden = false
-	        loginButton.disabledHidden = false
-	    end
-	    doLocked(locked)
+			registerButton.disabledHidden = false
+			loginButton.disabledHidden = false
+		end
+		doLocked(locked)
 	end
 end
 
@@ -202,10 +202,10 @@ local function pass()
 	local pass1 = passwordZone.read.getBuffer()
 	local pass2 = passwordZone2.read.getBuffer()
 	if pass1 == pass2 then
-	    return pass1
+		return pass1
 	else
-	    gui.warn(screen, nil, nil, "passwords don't equals")
-	    ui:draw()
+		gui.warn(screen, nil, nil, "passwords don't equals")
+		ui:draw()
 	end
 end
 
@@ -216,11 +216,11 @@ local function pass2()
 	if not pass2 then ui:draw() return end
 
 	if pass1 == pass2 then
-	    ui:draw()
-	    return pass1
+		ui:draw()
+		return pass1
 	else
-	    gui.warn(screen, nil, nil, "passwords don't equals")
-	    ui:draw()
+		gui.warn(screen, nil, nil, "passwords don't equals")
+		ui:draw()
 	end
 end
 
@@ -239,81 +239,81 @@ end
 function registerButton:onClick()
 	local pass = pass()
 	if pass then
-	    local name = loginZone.read.getBuffer()
-	    local cid, ccode = account.captcha(screen)
-	    if cid then
-	        if msg(account.register(name, pass, cid, ccode)) then
-	            if noCaptcha then
-	                noCaptcha()
-	            end
-	            account.login(name, pass)
-	            refresh()
-	            return true
-	        end
-	    end
-	    
-	    if noCaptcha then
-	        noCaptcha()
-	    end
-	    ui:draw()
+		local name = loginZone.read.getBuffer()
+		local cid, ccode = account.captcha(screen)
+		if cid then
+			if msg(account.register(name, pass, cid, ccode)) then
+				if noCaptcha then
+					noCaptcha()
+				end
+				account.login(name, pass)
+				refresh()
+				return true
+			end
+		end
+		
+		if noCaptcha then
+			noCaptcha()
+		end
+		ui:draw()
 	end
 end
 
 function loginButton:onClick()
 	local pass = pass()
 	if pass then
-	    if msg(account.login(loginZone.read.getBuffer(), pass)) then
-	        if autoexit then
-	            doLocked(false)
-	            os.exit()
-	            return
-	        end
-	        
-	        refresh()
-	        return true
-	    end
+		if msg(account.login(loginZone.read.getBuffer(), pass)) then
+			if autoexit then
+				doLocked(false)
+				os.exit()
+				return
+			end
+			
+			refresh()
+			return true
+		end
 	end
 end
 
 function changePassword:onClick()
 	local pass = pass()
 	if pass then
-	    local newPassword = pass2()
-	    if newPassword then
-	        if msg(account.changePassword(pass, newPassword)) then
-	            refresh()
-	            return true
-	        end
-	    end
+		local newPassword = pass2()
+		if newPassword then
+			if msg(account.changePassword(pass, newPassword)) then
+				refresh()
+				return true
+			end
+		end
 	end
 end
 
 function accountDelButton:onClick()
 	local pass = pass()
 	if pass and gui.yesno(screen, nil, nil, "do you really want to delete your account :(") and gui.pleaseType(screen, "ACDEL", "delete account") then
-	    if msg(account.unregister(pass)) then
-	        refresh()
-	        return true
-	    end
+		if msg(account.unregister(pass)) then
+			refresh()
+			return true
+		end
 	else
-	    ui:draw()
+		ui:draw()
 	end
 end
 
 function unloginButton:onClick()
 	local pass = pass()
 	if pass then
-	    if msg(account.unlogin(pass)) then
-	        refresh()
-	        return true
-	    end
+		if msg(account.unlogin(pass)) then
+			refresh()
+			return true
+		end
 	end
 end
 
 if not window then
 	local backButton2 = accountLayout:createButton(3, ry - 1, 8, 1, uix.colors.lightBlue, uix.colors.white, " ← back", true)
 	function backButton2:onClick()
-	    os.exit()
+		os.exit()
 	end
 end
 
