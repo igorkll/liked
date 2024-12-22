@@ -219,7 +219,7 @@ local list = {
 		minDiskSpace = 64,
 
 		path = "/data/apps/magnet.app",
-		urlPrimaryPart = selfurlpart .. "/apps/magnet.app/", --часть url к которой будут присираться разные имена файлов для скачивания(обязателен / на конце)
+		urlPrimaryPart = selfurlpart .. "/apps/magnet.app/",
 		files = {"main.lua", "icon.t2p", "uninstall.lua"}
 	},
 	{
@@ -230,7 +230,7 @@ local list = {
 		minDiskSpace = 64,
 
 		path = "/data/apps/piston.app",
-		urlPrimaryPart = selfurlpart .. "/apps/piston.app/", --часть url к которой будут присираться разные имена файлов для скачивания(обязателен / на конце)
+		urlPrimaryPart = selfurlpart .. "/apps/piston.app/",
 		files = {"main.lua", "icon.t2p", "uninstall.lua"}
 	},
 	{
@@ -288,7 +288,7 @@ local list = {
 		path = "/data/apps/printer3d.app",
 		urlPrimaryPart = selfurlpart .. "/apps/printer3d.app/"
 	},
-	{ --need rewrite
+	{ --has no implementation (needs to be implemented)
 		name = "toolbox",
 		version = "1",
 		vendor = "logic",
@@ -579,7 +579,7 @@ local list = {
 		
 		path = "/data/apps/zxViewer.app",
 		urlPrimaryPart = selfurlpart .. "/apps/zxViewer.app/",
-		files = {"main.lua", "icon.t2p", "formats.cfg"}
+		files = {"main.lua", "icon.t2p", "formats.cfg", "config.cfg"}
 	},
 	{ --has no implementation (needs to be implemented)
 		name = "browser",
@@ -591,7 +591,19 @@ local list = {
 		path = "/data/apps/browser.app",
 		urlPrimaryPart = selfurlpart .. "/apps/browser.app/",
 		files = {"main.lua", "icon.t2p", "formats.cfg"}
-	}
+	},
+	{
+		name = "zxSlideshow",
+		version = "1",
+		vendor = "veeford",
+		description = "allows you to display images in the .scr format (ZX spectrum image format)\nmakes a slideshow of the ZX Spectrum images!\nmore images: https://zxart.ee/rus/grafika/",
+		minDiskSpace = 64,
+		libs = {"zximage"},
+		
+		path = "/data/apps/zxSlideshow.app",
+		urlPrimaryPart = selfurlpart .. "/apps/zxSlideshow.app/",
+		files = {"main.lua", "icon.t2p", "logo.t2p", "formats.cfg", "config.cfg"}
+	},
 }
 
 list.libs = {

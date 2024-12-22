@@ -188,28 +188,6 @@ local function inBlackList(path)
 	end
 end
 
-local function minifyFile(filepath, data)
-	if filepath:sub(#filepath - 3, #filepath) == ".lua" then
-		local partsData = {}
-		local addChar = false
-		for i = 1, #data do
-			antiTLWY()
-			local char = data:sub(i, i)
-			if char == "\n" then
-				table.insert(partsData, "\n")
-				addChar = false
-			elseif char ~= " " and char ~= "\t" then
-				addChar = true
-			end
-			if addChar then
-				table.insert(partsData, char)
-			end
-		end
-		return table.concat(partsData)
-	end
-	return data
-end
-
 local function installUrl(urlPart, state2)
 	local filelist = split(assert(getInternetFile(urlPart .. "/installer/filelist.txt")), "\n")
 	local count = 0
@@ -222,7 +200,7 @@ local function installUrl(urlPart, state2)
 				printState((((i - 1) / (#filelist - 1)) / 2) + (state2 and 0.5 or 0))
 			end
 
-			saveFile(filepath, minifyFile(filepath, filedata))
+			saveFile(filepath, filedata)
 			count = count + 1
 		end
 	end

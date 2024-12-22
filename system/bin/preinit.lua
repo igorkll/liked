@@ -47,7 +47,7 @@ if not liked.recoveryMode then
 	event.listen("accountChanged", check)
 end
 
-if registry.forceRestrictedLoader then
+if registry.forceRestrictedLoader and not _restrictedLoader then
 	local eepromlib = require("eeprom")
 	local firmware = eepromlib.find("Restricted Loader")
 	local errTitle = "the system configuration requires the \"Restricted Loader\" firmware. "
@@ -63,5 +63,3 @@ if registry.forceRestrictedLoader then
 		computer.shutdown("fast")
 	end
 end
-
---need to add an auto-update "likedloader" that will check the label and if it matches the liked loader and the firmware is different, then it will be updated
