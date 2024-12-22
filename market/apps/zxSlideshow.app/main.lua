@@ -11,6 +11,7 @@ local gui = require("gui")
 local storage = require("storage")
 local iowindows = require("iowindows")
 local palette = require("palette")
+local zximage = require("zximage")
 
 local config = storage.getConf({
 	interval = 4,
@@ -20,7 +21,7 @@ local config = storage.getConf({
 local screen = ...
 local manager = uix.manager(screen)
 local rx, ry = manager:zoneSize()
-local layout = manager:create("Slide Show")
+local layout = manager:create("ZX Slide Show")
 
 layout:createImage(rx - 29, 1, "logo.t2p", true, true)
 
@@ -30,7 +31,7 @@ local startButton = layout:createButton(2, ry - 3, rx - 2, 3, nil, nil, "Start S
 local waterMark = layout:createSwitch(21, 2, config.water)
 local folderText = layout:createText(2, 4)
 
-local invervalText = layout:createText(rx - 5, ry - 7)
+local intervalText = layout:createText(rx - 5, ry - 7)
 
 local function updateText()
 	folderText.text = "images folder: " .. (config.folder and paths.name(config.folder) or "not selected")
@@ -38,8 +39,8 @@ local function updateText()
 end
 
 local function updateSeekText()
-	invervalText.text = tostring(math.round(config.interval)) .. "S  "
-	invervalText:draw()
+	intervalText.text = tostring(math.round(config.interval)) .. "S  "
+	intervalText:draw()
 end
 
 updateText()
@@ -47,7 +48,7 @@ updateSeekText()
 
 local unselect = layout:createButton(2, 5, 10, 1, nil, nil, "unselect")
 local selectfolder = layout:createButton(13, 5, 8, 1, nil, nil, "select", true)
-layout:createText(2, ry - 7, nil, "inverval: ")
+layout:createText(2, ry - 7, nil, "interval: ")
 local seek = layout:createSeek(12, ry - 7, rx - 18, nil, nil, nil, math.map(config.interval, 1, 60, 0, 1))
 
 function seek:onSeek(value)
@@ -95,37 +96,14 @@ function startButton:onClick()
 				for _, name in ipairs(fs.list(path)) do
 					local fullpath = paths.concat(path, name)
 					local exp = paths.extension(name)
-					if exp == "t2p" and not hidden[fullpath] then
-						local sx, sy = image.size(fullpath, screen)
-						local cropped
-						if not graphic.isValidResolution(screen, sx, sy) or not pcall(graphic.setResolution, screen, sx, sy) then
-							sx, sy = graphic.maxResolution(screen)
-							cropped = true
-						end
-
-						if first then
-							graphic.fill(screen, 1, 1, sx, sy, 0, 0, " ")
-							graphic.forceUpdate(screen)
-							first = false
-						end
-
-						local customPalette
-						if graphic.getDepth(screen) == 4 then
-							if not image.applyPalette(screen, fullpath) then
-								palette.fromFile(screen, "/system/palettes/light.plt", true)
-							else
-								customPalette = true
-							end
-						else
-							palette.blackWhite(screen, true)
-						end
+					if exp == "scr" and not hidden[fullpath] then
 						local startTime = computer.uptime()
-						if cropped then
-							local ix, iy = image.size(fullpath, screen)
-							image.draw(screen, fullpath, 1 - (ix / 2), 1 - (iy / 2), nil, nil, nil, customPalette)
-						else
-							image.draw(screen, fullpath, 1, 1, nil, nil, nil, customPalette)
-						end
+						local crop = graphic.getDepth(screen) < 8
+						zximage.applyResolution(screen, crop)
+						zximage.applyPalette(screen)
+						zximage.draw(screen, fullpath, crop)
+
+						local sx, sy = graphic.getResolution(screen)
 						if waterMark.state then
 							gui.drawtext(screen, 2, sy - 3, 0xffffff, "Operating System     : likeOS & liked")
 							gui.drawtext(screen, 2, sy - 2, 0xffffff, "Application          : zxSlideshow")

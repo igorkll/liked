@@ -30,7 +30,7 @@ local startButton = layout:createButton(2, ry - 3, rx - 2, 3, nil, nil, "Start S
 local waterMark = layout:createSwitch(21, 2, config.water)
 local folderText = layout:createText(2, 4)
 
-local invervalText = layout:createText(rx - 5, ry - 7)
+local intervalText = layout:createText(rx - 5, ry - 7)
 
 local function updateText()
 	folderText.text = "images folder: " .. (config.folder and paths.name(config.folder) or "not selected")
@@ -38,8 +38,8 @@ local function updateText()
 end
 
 local function updateSeekText()
-	invervalText.text = tostring(math.round(config.interval)) .. "S  "
-	invervalText:draw()
+	intervalText.text = tostring(math.round(config.interval)) .. "S  "
+	intervalText:draw()
 end
 
 updateText()
@@ -47,7 +47,7 @@ updateSeekText()
 
 local unselect = layout:createButton(2, 5, 10, 1, nil, nil, "unselect")
 local selectfolder = layout:createButton(13, 5, 8, 1, nil, nil, "select", true)
-layout:createText(2, ry - 7, nil, "inverval: ")
+layout:createText(2, ry - 7, nil, "interval: ")
 local seek = layout:createSeek(12, ry - 7, rx - 18, nil, nil, nil, math.map(config.interval, 1, 60, 0, 1))
 
 function seek:onSeek(value)
