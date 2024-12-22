@@ -8,7 +8,7 @@ end
 function shell.execute(command, env, ...)
   local sh, reason = shell.getShell()
   if not sh then
-    return false, reason
+	return false, reason
   end
   local proc = process.load(sh, nil, nil, command)
   local result = table.pack(process.internal.continue(proc, env, command, ...))

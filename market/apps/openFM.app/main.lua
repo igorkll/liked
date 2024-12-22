@@ -14,7 +14,7 @@ local selffolder = paths.path(system.getSelfScriptPath())
 local stationsStrs = parser.split(unicode, assert(fs.readFile(paths.concat(selffolder, "list.txt"))), "\n")
 local stations = {}
 for index, str in ipairs(stationsStrs) do
-    stations[index] = parser.split(unicode, str, ";")
+	stations[index] = parser.split(unicode, str, ";")
 end
 
 local settings = require("registry").new(paths.concat(selffolder, "settings.dat"))
@@ -22,12 +22,12 @@ local screen = ...
 
 local fm = gui.selectcomponent(screen, nil, nil, {"openfm_radio"}, true)
 if not fm then
-    return
+	return
 else
-    if not settings[fm] then
-        settings[fm] = {url = stations[1][1], label = stations[1][2], index = 1}
-    end
-    fm = component.proxy(fm)
+	if not settings[fm] then
+	    settings[fm] = {url = stations[1][1], label = stations[1][2], index = 1}
+	end
+	fm = component.proxy(fm)
 end
 
 local ui = uix.manager(screen)
@@ -38,11 +38,11 @@ local layout = ui:create("OpenFM", colors.black)
 local selectColor = layout:createButton(cx + 8, 2, 16, 1, colors.green, colors.gray, "Screen Color", true)
 selectColor.fore = fm.getScreenColor()
 if selectColor.fore == selectColor.back then
-    if selectColor.back == colors.lime then
-        selectColor.back = colors.green
-    else
-        selectColor.back = colors.lime
-    end
+	if selectColor.back == colors.lime then
+	    selectColor.back = colors.green
+	else
+	    selectColor.back = colors.lime
+	end
 end
 
 local volDown = layout:createButton(cx - 6, 2, 3, 1, nil, nil, "<")
@@ -63,113 +63,113 @@ local startButton = layout:createButton(cx - 8, 8, 7, 1, nil, nil, "start")
 local stopButton = layout:createButton(cx + 2, 8, 7, 1, nil, nil, "stop")
 
 function isPlayingLed:beforeRedraw()
-    isPlayingLed.back = fm.isPlaying() and colors.yellow or colors.gray
+	isPlayingLed.back = fm.isPlaying() and colors.yellow or colors.gray
 end
 
 function statOld:onClick()
-    local index = settings[fm.address].index - 1
-    if index < 1 then
-        index = #stations
-    end
+	local index = settings[fm.address].index - 1
+	if index < 1 then
+	    index = #stations
+	end
 
-    settings[fm.address].index = index
-    settings[fm.address].label = stations[index][2]
-    settings[fm.address].url = stations[index][1]
-    settings.save()
+	settings[fm.address].index = index
+	settings[fm.address].label = stations[index][2]
+	settings[fm.address].url = stations[index][1]
+	settings.save()
 
-    local isPlaying = fm.isPlaying()
-    if isPlaying then fm.stop() end
-    fm.setScreenText(settings[fm.address].label)
-    fm.setURL(settings[fm.address].url)
-    if isPlaying then fm.start() end
+	local isPlaying = fm.isPlaying()
+	if isPlaying then fm.stop() end
+	fm.setScreenText(settings[fm.address].label)
+	fm.setURL(settings[fm.address].url)
+	if isPlaying then fm.start() end
 
-    fmLabel.read.setBuffer(settings[fm.address].label)
-    urlLabel.read.setBuffer(settings[fm.address].url)
-    fmLabel.read.setOffset(0, 0)
-    urlLabel.read.setOffset(0, 0)
+	fmLabel.read.setBuffer(settings[fm.address].label)
+	urlLabel.read.setBuffer(settings[fm.address].url)
+	fmLabel.read.setOffset(0, 0)
+	urlLabel.read.setOffset(0, 0)
 
-    fmLabel:draw()
-    urlLabel:draw()
+	fmLabel:draw()
+	urlLabel:draw()
 end
 
 function statNext:onClick()
-    local index = settings[fm.address].index + 1
-    if index > #stations then
-        index = 1
-    end
+	local index = settings[fm.address].index + 1
+	if index > #stations then
+	    index = 1
+	end
 
-    settings[fm.address].index = index
-    settings[fm.address].label = stations[index][2]
-    settings[fm.address].url = stations[index][1]
-    settings.save()
+	settings[fm.address].index = index
+	settings[fm.address].label = stations[index][2]
+	settings[fm.address].url = stations[index][1]
+	settings.save()
 
-    local isPlaying = fm.isPlaying()
-    if isPlaying then fm.stop() end
-    fm.setScreenText(settings[fm.address].label)
-    fm.setURL(settings[fm.address].url)
-    if isPlaying then fm.start() end
+	local isPlaying = fm.isPlaying()
+	if isPlaying then fm.stop() end
+	fm.setScreenText(settings[fm.address].label)
+	fm.setURL(settings[fm.address].url)
+	if isPlaying then fm.start() end
 
-    fmLabel.read.setBuffer(settings[fm.address].label)
-    urlLabel.read.setBuffer(settings[fm.address].url)
-    fmLabel.read.setOffset(0, 0)
-    urlLabel.read.setOffset(0, 0)
+	fmLabel.read.setBuffer(settings[fm.address].label)
+	urlLabel.read.setBuffer(settings[fm.address].url)
+	fmLabel.read.setOffset(0, 0)
+	urlLabel.read.setOffset(0, 0)
 
-    fmLabel:draw()
-    urlLabel:draw()
+	fmLabel:draw()
+	urlLabel:draw()
 end
 
 function selectColor:onClick()
-    local color = gui.selectcolor(screen, nil, nil, "Screen Color")
-    if color then
-        if colorlib[color] and colors[colorlib[color]] then
-            selectColor.fore = colors[colorlib[color]]
-            if selectColor.fore == selectColor.back then
-                if selectColor.back == colors.lime then
-                    selectColor.back = colors.green
-                else
-                    selectColor.back = colors.lime
-                end
-            end
-            fm.setScreenColor(selectColor.fore + 0.0)
-        end
-    end
-    ui:draw()
+	local color = gui.selectcolor(screen, nil, nil, "Screen Color")
+	if color then
+	    if colorlib[color] and colors[colorlib[color]] then
+	        selectColor.fore = colors[colorlib[color]]
+	        if selectColor.fore == selectColor.back then
+	            if selectColor.back == colors.lime then
+	                selectColor.back = colors.green
+	            else
+	                selectColor.back = colors.lime
+	            end
+	        end
+	        fm.setScreenColor(selectColor.fore + 0.0)
+	    end
+	end
+	ui:draw()
 end
 
 function startButton:onClick()
-    fm.start()
-    isPlayingLed:beforeRedraw()
-    isPlayingLed:draw()
+	fm.start()
+	isPlayingLed:beforeRedraw()
+	isPlayingLed:draw()
 end
 
 function stopButton:onClick()
-    fm.stop()
-    isPlayingLed:beforeRedraw()
-    isPlayingLed:draw()
+	fm.stop()
+	isPlayingLed:beforeRedraw()
+	isPlayingLed:draw()
 end
 
 function fmLabel:onTextChanged(text)
-    fm.setScreenText(text)
-    settings[fm.address].label = text
-    settings.save()
+	fm.setScreenText(text)
+	settings[fm.address].label = text
+	settings.save()
 end
 
 function urlLabel:onTextChanged(text)
-    fm.setURL(text)
-    settings[fm.address].url = text
-    settings.save()
+	fm.setURL(text)
+	settings[fm.address].url = text
+	settings.save()
 end
 
 function volDown:onClick()
-    fm.volDown()
-    currentVol.text = tostring(math.round(fm.getVol() * 10))
-    currentVol:draw()
+	fm.volDown()
+	currentVol.text = tostring(math.round(fm.getVol() * 10))
+	currentVol:draw()
 end
 
 function volUp:onClick()
-    fm.volUp()
-    currentVol.text = tostring(math.round(fm.getVol() * 10))
-    currentVol:draw()
+	fm.volUp()
+	currentVol.text = tostring(math.round(fm.getVol() * 10))
+	currentVol:draw()
 end
 
 ui:loop()

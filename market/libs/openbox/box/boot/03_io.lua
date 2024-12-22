@@ -6,7 +6,7 @@ local core_stdout = buffer.new("w", tty_stream)
 local core_stderr = buffer.new("w", setmetatable(
 {
   write = function(_, str)
-    return tty_stream:write("\27[31m"..str.."\27[37m")
+	return tty_stream:write("\27[31m"..str.."\27[37m")
   end
 }, {__index=tty_stream}))
 
@@ -23,10 +23,10 @@ core_stderr.close = tty_stream.close
 local io_mt = getmetatable(io) or {}
 io_mt.__index = function(_, k)
   return
-    k == 'stdin' and io.input() or
-    k == 'stdout' and io.output() or
-    k == 'stderr' and io.error() or
-    nil
+	k == 'stdin' and io.input() or
+	k == 'stdout' and io.output() or
+	k == 'stderr' and io.error() or
+	nil
 end
 
 setmetatable(io, io_mt)

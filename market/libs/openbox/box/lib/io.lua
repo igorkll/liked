@@ -12,25 +12,25 @@ end
 
 function io.lines(filename, ...)
   if filename then
-    local file, reason = io.open(filename)
-    if not file then
-      error(reason, 2)
-    end
-    local args = table.pack(...)
-    return function()
-      local result = table.pack(file:read(table.unpack(args, 1, args.n)))
-      if not result[1] then
-        if result[2] then
-          error(result[2], 2)
-        else -- eof
-          file:close()
-          return nil
-        end
-      end
-      return table.unpack(result, 1, result.n)
-    end
+	local file, reason = io.open(filename)
+	if not file then
+	  error(reason, 2)
+	end
+	local args = table.pack(...)
+	return function()
+	  local result = table.pack(file:read(table.unpack(args, 1, args.n)))
+	  if not result[1] then
+	    if result[2] then
+	      error(result[2], 2)
+	    else -- eof
+	      file:close()
+	      return nil
+	    end
+	  end
+	  return table.unpack(result, 1, result.n)
+	end
   else
-    return io.input():lines()
+	return io.input():lines()
   end
 end
 
@@ -39,9 +39,9 @@ function io.open(path, mode)
   local resolved_path = require("shell").resolve(path)
   local stream, result = require("filesystem").open(resolved_path, mode)
   if stream then
-    return require("buffer").new(mode, stream)
+	return require("buffer").new(mode, stream)
   else
-    return nil, result
+	return nil, result
   end
 end
 
@@ -51,10 +51,10 @@ function io.stream(fd,file,mode)
   assert(fd>=0,'fd must be >= 0. 0 is input, 1 is stdout, 2 is stderr')
   local dio = require("process").info().data.io
   if file then
-    if type(file) == "string" then
-      file = assert(io.open(file, mode))
-    end
-    dio[fd] = file
+	if type(file) == "string" then
+	  file = assert(io.open(file, mode))
+	end
+	dio[fd] = file
   end
   return dio[fd]
 end
@@ -82,19 +82,19 @@ end
 function io.tmpfile()
   local name = os.tmpname()
   if name then
-    return io.open(name, "a")
+	return io.open(name, "a")
   end
 end
 
 function io.type(object)
   if type(object) == "table" then
-    if getmetatable(object) == "file" then
-      if object.stream.handle then
-        return "file"
-      else
-        return "closed file"
-      end
-    end
+	if getmetatable(object) == "file" then
+	  if object.stream.handle then
+	    return "file"
+	  else
+	    return "closed file"
+	  end
+	end
   end
   return nil
 end
@@ -107,8 +107,8 @@ local dup_mt =   {__index = function(dfd, key)
   local fd_value = dfd.fd[key]
   if key ~= "close" and type(fd_value) ~= "function" then return fd_value end
   return function(self, ...)
-    if key == "close" or self._closed then self._closed = true return end
-    return fd_value(self.fd, ...)
+	if key == "close" or self._closed then self._closed = true return end
+	return fd_value(self.fd, ...)
   end
 end, __newindex = function(dfd, key, value)
   dfd.fd[key] = value

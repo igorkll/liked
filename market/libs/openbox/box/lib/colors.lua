@@ -20,10 +20,10 @@ local colors = {
 do
   local keys = {}
   for k in pairs(colors) do
-    table.insert(keys, k)
+	table.insert(keys, k)
   end
   for _, k in pairs(keys) do
-    colors[colors[k]] = k
+	colors[colors[k]] = k
   end
 end
 

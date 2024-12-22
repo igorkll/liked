@@ -4,7 +4,7 @@ local gui = require("gui")
 local screen, nickname = ...
 
 if registry.disableMarketForceMode then
-    gui.warn(screen, nil, nil, "mediastore force-mode is not available on your liked edition")
+	gui.warn(screen, nil, nil, "mediastore force-mode is not available on your liked edition")
 else
-    assert(require("apps").execute("market", screen, nickname, nil, true, true))
+	assert(require("apps").execute("market", screen, nickname, nil, true, true))
 end

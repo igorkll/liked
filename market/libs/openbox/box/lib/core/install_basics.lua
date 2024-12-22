@@ -7,8 +7,8 @@ local args, options = shell.parse(...)
 if options.help then
   io.write([[Usage: install [OPTION]...
   --from=ADDR        install filesystem at ADDR
-                     default: builds list of
-                     candidates and prompts user
+	                 default: builds list of
+	                 candidates and prompts user
   --to=ADDR          same as --from but for target
   --fromDir=PATH     install PATH from source
   --root=PATH        same as --fromDir but target
@@ -39,9 +39,9 @@ local source_filter_dev
 if source_filter then
   local from_path = shell.resolve(source_filter)
   if fs.isDirectory(from_path) then
-    source_filter_dev = fs.get(from_path)
-    source_filter = source_filter_dev.address
-    options.from = from_path
+	source_filter_dev = fs.get(from_path)
+	source_filter = source_filter_dev.address
+	options.from = from_path
   end
 end
 
@@ -50,9 +50,9 @@ local target_filter_dev
 if target_filter then
   local to_path = shell.resolve(target_filter)
   if fs.isDirectory(target_filter) then
-    target_filter_dev = fs.get(to_path)
-    target_filter = target_filter_dev.address
-    options.to = to_path
+	target_filter_dev = fs.get(to_path)
+	target_filter = target_filter_dev.address
+	options.to = to_path
   end
 end
 
@@ -67,8 +67,8 @@ local devices = {}
 -- not all mounts are components, only use components
 for dev, path in fs.mounts() do
   if comps[dev.address] then
-    local known = devices[dev]
-    devices[dev] = known and #known < #path and known or path
+	local known = devices[dev]
+	devices[dev] = known and #known < #path and known or path
   end
 end
 
@@ -82,17 +82,17 @@ for dev, path in pairs(devices) do
   local specified = target_filter and address:find(target_filter, 1, true) == 1
 
   if dev.isReadOnly() then
-    if specified then
-      io.stderr:write("Cannot install to " .. options.to .. ", it is read only\n")
-      os.exit(1)
-    end
+	if specified then
+	  io.stderr:write("Cannot install to " .. options.to .. ", it is read only\n")
+	  os.exit(1)
+	end
   elseif
-    specified or
-      not (source_filter and address:find(source_filter, 1, true) == 1) and -- specified for source
-        not target_filter and
-        address ~= tmpAddress
+	specified or
+	  not (source_filter and address:find(source_filter, 1, true) == 1) and -- specified for source
+	    not target_filter and
+	    address ~= tmpAddress
    then
-    table.insert(targets, {dev = dev, path = install_path, specified = specified})
+	table.insert(targets, {dev = dev, path = install_path, specified = specified})
   end
 end
 
@@ -108,28 +108,28 @@ for dev, path in pairs(devices) do
   local specified = source_filter and address:find(source_filter, 1, true) == 1
 
   if
-    fs.list(install_path)() and
-      (specified or
-        not source_filter and address ~= tmpAddress and not (address == rootfs.address and not rootfs.isReadOnly()))
+	fs.list(install_path)() and
+	  (specified or
+	    not source_filter and address ~= tmpAddress and not (address == rootfs.address and not rootfs.isReadOnly()))
    then
-    local prop = {}
-    local prop_path = path .. "/.prop"
-    local prop_file = fs.open(prop_path)
-    if prop_file then
-      local prop_data = prop_file:read(math.maxinteger or math.huge)
-      prop_file:close()
-      local prop_load = load("return " .. prop_data)
-      prop = prop_load and prop_load()
-      if not prop then
-        io.stderr:write("Ignoring " .. path .. " due to malformed prop file\n")
-        prop = {ignore = true}
-      end
-    end
-    if not prop.ignore then
-      if not label or label:lower() == (prop.label or dev.getLabel() or ""):lower() then
-        table.insert(sources, {dev = dev, path = install_path, prop = prop, specified = specified})
-      end
-    end
+	local prop = {}
+	local prop_path = path .. "/.prop"
+	local prop_file = fs.open(prop_path)
+	if prop_file then
+	  local prop_data = prop_file:read(math.maxinteger or math.huge)
+	  prop_file:close()
+	  local prop_load = load("return " .. prop_data)
+	  prop = prop_load and prop_load()
+	  if not prop then
+	    io.stderr:write("Ignoring " .. path .. " due to malformed prop file\n")
+	    prop = {ignore = true}
+	  end
+	end
+	if not prop.ignore then
+	  if not label or label:lower() == (prop.label or dev.getLabel() or ""):lower() then
+	    table.insert(sources, {dev = dev, path = install_path, prop = prop, specified = specified})
+	  end
+	end
   end
 end
 
@@ -158,15 +158,15 @@ local source_display = options.label or source.dev.getLabel() or source.path
 -- Remove the source from the target options
 for index, entry in ipairs(targets) do
   if entry.dev == source.dev then
-    table.remove(targets, index)
-    target = targets[1]
+	table.remove(targets, index)
+	target = targets[1]
   end
 end
 
 -- Ask the user to select a target
 if #targets ~= 1 then
   if #sources == 1 then
-    io.write(source_display, " selected for install\n")
+	io.write(source_display, " selected for install\n")
   end
 
   utils = utils or loadfile(utils_path, "bt", _G)
@@ -185,22 +185,22 @@ end
 local fullTargetPath = fs.concat(options.to, options.root)
 local transfer_args = {
   {
-    {resolveFrom("."), fullTargetPath},
-    {
-      cmd = "cp",
-      r = true, v = true, x = true, u = options.update, i = options.update,
-      skip = {resolveFrom(".prop")},
-    }
+	{resolveFrom("."), fullTargetPath},
+	{
+	  cmd = "cp",
+	  r = true, v = true, x = true, u = options.update, i = options.update,
+	  skip = {resolveFrom(".prop")},
+	}
   }
 }
 
 if source.prop.noclobber and #source.prop.noclobber > 0 then
   local noclobber_opts = {cmd = "cp", v = true, n = true}
   for _, noclobber in ipairs(source.prop.noclobber or {}) do
-    local noclobberFrom = resolveFrom(noclobber)
-    local noclobberTo = fs.concat(fullTargetPath, noclobber)
-    table.insert(transfer_args[1][2].skip, noclobberFrom)
-    table.insert(transfer_args, {{noclobberFrom, noclobberTo}, noclobber_opts})
+	local noclobberFrom = resolveFrom(noclobber)
+	local noclobberTo = fs.concat(fullTargetPath, noclobber)
+	table.insert(transfer_args[1][2].skip, noclobberFrom)
+	table.insert(transfer_args, {{noclobberFrom, noclobberTo}, noclobber_opts})
   end
 end
 
@@ -219,8 +219,8 @@ local installer_path = options.from .. "/.install"
 if fs.exists(installer_path) then
   local installer, reason = loadfile(installer_path, "bt", setmetatable({install = options}, {__index = _G}))
   if not installer then
-    io.stderr:write("installer failed to load: " .. tostring(reason) .. "\n")
-    os.exit(1)
+	io.stderr:write("installer failed to load: " .. tostring(reason) .. "\n")
+	os.exit(1)
   end
   os.exit(installer())
 end

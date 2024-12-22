@@ -6,7 +6,7 @@ local openbox = require("openbox")
 local screen = ...
 local program = iowindows.selectfile(screen, "lua")
 if not program then
-    return
+	return
 end
 
 openbox.runWithSplash(screen, program)

@@ -11,12 +11,12 @@ end
 function lib.internal.table_view(tbl,f,l)
   return setmetatable({},
   {
-    __index = function(_, key)
-      return (type(key) ~= 'number' or (key >= f and key <= l)) and tbl[key] or nil
-    end,
-    __len = function(_)
-      return l
-    end,
+	__index = function(_, key)
+	  return (type(key) ~= 'number' or (key >= f and key <= l)) and tbl[key] or nil
+	end,
+	__len = function(_)
+	  return l
+	end,
   })
 end
 local adjust=lib.internal.range_adjust
@@ -27,21 +27,21 @@ function lib.first(tbl,pred,f,l)
   checkArg(1,tbl,'table')
   checkArg(2,pred,'function','table')
   if type(pred)=='table'then
-    local set;set,pred=pred,function(e,fi,tbl)
-      for vi=1,#set do
-        local v=set[vi]
-        if lib.begins(tbl,v,fi) then return true,#v end
-      end
-    end
+	local set;set,pred=pred,function(e,fi,tbl)
+	  for vi=1,#set do
+	    local v=set[vi]
+	    if lib.begins(tbl,v,fi) then return true,#v end
+	  end
+	end
   end
   local s=#tbl
   f,l=adjust(f,l,s)
   tbl=view(tbl,f,l)
   for i=f,l do
-    local si,ei=pred(tbl[i],i,tbl)
-    if si then
-      return i,i+(ei or 1)-1
-    end
+	local si,ei=pred(tbl[i],i,tbl)
+	if si then
+	  return i,i+(ei or 1)-1
+	end
   end
 end
 
@@ -53,7 +53,7 @@ function lib.begins(tbl,v,f,l)
   f,l=adjust(f,l,#tbl)
   if vs>(l-f+1)then return end
   for i=1,vs do
-    if tbl[f+i-1]~=v[i] then return end
+	if tbl[f+i-1]~=v[i] then return end
   end
   return true
 end
@@ -61,14 +61,14 @@ end
 function lib.concat(...)
   local r,rn,k={},0
   for _,tbl in ipairs({...})do
-    if type(tbl)~='table'then
-      return nil,'parameter '..tostring(_)..' to concat is not a table'
-    end
-    local n=tbl.n or #tbl
-    k=k or tbl.n
-    for i=1,n do
-      rn=rn+1;r[rn]=tbl[i]
-    end
+	if type(tbl)~='table'then
+	  return nil,'parameter '..tostring(_)..' to concat is not a table'
+	end
+	local n=tbl.n or #tbl
+	k=k or tbl.n
+	for i=1,n do
+	  rn=rn+1;r[rn]=tbl[i]
+	end
   end
   r.n=k and rn or nil
   return r

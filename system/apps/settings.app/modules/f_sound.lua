@@ -18,23 +18,23 @@ local selectWindow = graphic.createWindow(screen, posX, posY, rx - (posX - 1), r
 local layout = uix.create(selectWindow, colors.black)
 
 layout:createSwitch(2, 2, registry.soundEnable).onSwitch = function (self)
-    registry.soundEnable = self.state
+	registry.soundEnable = self.state
 end
 layout:createText(9, 2, colors.white, "System Sounds")
 
 layout:createSwitch(2, 4, registry.diskSound).onSwitch = function (self)
-    registry.diskSound = self.state
+	registry.diskSound = self.state
 end
 layout:createText(9, 4, colors.white, "Disk Attach/Detach Sounds")
 
 layout:createSwitch(2, 6, registry.lowPowerSound).onSwitch = function (self)
-    registry.lowPowerSound = self.state
+	registry.lowPowerSound = self.state
 end
 layout:createText(9, 6, colors.white, "Low-Power Sound")
 
 layout:createSwitch(2, 8, registry.fullBeepDisable, colors.red).onSwitch = function (self)
-    registry.fullBeepDisable = self.state
-    liked.applyBeepState()
+	registry.fullBeepDisable = self.state
+	liked.applyBeepState()
 end
 layout:createText(9, 8, colors.white, "Full PC Speaker Disable")
 
@@ -43,5 +43,5 @@ layout:draw()
 ------------------------------------
 
 return function(eventData)
-    layout:uploadEvent(eventData)
+	layout:uploadEvent(eventData)
 end

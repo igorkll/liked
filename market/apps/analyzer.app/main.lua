@@ -17,19 +17,19 @@ layout1.clrButton = layout1:createButton(2, 2, 16, 1, uix.colors.white, uix.colo
 layout1.textzone = layout1:createCustom(2, 4, gobjs.scrolltext, rx - 2, ry - 8)
 
 function layout1.clrButton:onClick()
-    layout1.textzone:setText("")
-    layout1.textzone:draw()
+	layout1.textzone:setText("")
+	layout1.textzone:draw()
 end
 
 layout1:listen("tablet_use", function (_, data)
-    if type(data) == "table" then
-        data = serialization.serialize(data, 1024)
-    else
-        data = tostring(data or "error")
-    end
+	if type(data) == "table" then
+	    data = serialization.serialize(data, 1024)
+	else
+	    data = tostring(data or "error")
+	end
 
-    layout1.textzone:setText(data)
-    layout1.textzone:draw()
+	layout1.textzone:setText(data)
+	layout1.textzone:draw()
 end)
 
 ---------------------------------

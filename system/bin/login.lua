@@ -10,5 +10,5 @@ liked.drawUpBarTask(screen)
 liked.drawWallpaper(screen)
 
 repeat
-    os.sleep()
+	os.sleep()
 until gui.checkPasswordLoop(screen, nil, nil, true, true)

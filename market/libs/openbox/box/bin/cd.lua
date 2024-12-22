@@ -15,16 +15,16 @@ end
 if #args == 0 then
   local home = os.getenv("HOME")
   if not home then
-    io.stderr:write("cd: HOME not set\n")
-    return 1
+	io.stderr:write("cd: HOME not set\n")
+	return 1
   end
   path = home
 elseif args[1] == '-' then
   verbose = true
   local oldpwd = os.getenv("OLDPWD");
   if not oldpwd then
-    io.stderr:write("cd: OLDPWD not set\n")
-    return 1
+	io.stderr:write("cd: OLDPWD not set\n")
+	return 1
   end
   path = oldpwd
 else

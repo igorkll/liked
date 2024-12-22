@@ -46,9 +46,9 @@ end
 function keyboard.isKeyDown(charOrCode)
   checkArg(1, charOrCode, "string", "number")
   if type(charOrCode) == "string" then
-    return keyboard.pressedChars[utf8 and utf8.codepoint(charOrCode) or charOrCode:byte()]
+	return keyboard.pressedChars[utf8 and utf8.codepoint(charOrCode) or charOrCode:byte()]
   elseif type(charOrCode) == "number" then
-    return keyboard.pressedCodes[charOrCode]
+	return keyboard.pressedCodes[charOrCode]
   end
 end
 

@@ -22,13 +22,13 @@ rules[{"%[", "%d*", "[ABCD]"}] = function(window, _, n, dir)
   local dx, dy = 0, 0
   n = tonumber(n) or 1
   if dir == "A" then
-    dy = -n
+	dy = -n
   elseif dir == "B" then
-    dy = n
+	dy = n
   elseif dir == "C" then
-    dx = n
+	dx = n
   else -- D
-    dx = -n
+	dx = -n
   end
   set_cursor(window, window.x + dx, window.y + dy)
 end
@@ -83,11 +83,11 @@ end
 -- M               scroll down one line -- moves cursor up
 rules[{"[DEM]"}] = function(window, _, dir)
   if dir == "D" then
-    window.y = window.y + 1
+	window.y = window.y + 1
   elseif dir == "E" then
-    window.y = window.y + 1
-    window.x = 1
+	window.y = window.y + 1
+	window.x = 1
   else -- M
-    window.y = window.y -  1
+	window.y = window.y -  1
   end
 end

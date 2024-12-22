@@ -1,5 +1,5 @@
 --[[ Backwards compat for Lua 5.3; only loaded in 5.3 because package.loaded is
-     prepopulated with the existing global bit32 in 5.2. ]]
+	 prepopulated with the existing global bit32 in 5.2. ]]
 
 local bit32 = {}
 
@@ -9,7 +9,7 @@ local function fold(init, op, ...)
   local result = init
   local args = table.pack(...)
   for i = 1, args.n do
-    result = op(result, args[i])
+	result = op(result, args[i])
   end
   return result
 end
@@ -67,13 +67,13 @@ end
 
 function bit32.lrotate(x, disp)
   if disp == 0 then
-    return x
+	return x
   elseif disp < 0 then
-    return bit32.rrotate(x, -disp)
+	return bit32.rrotate(x, -disp)
   else
-    disp = disp & 31
-    x = trim(x)
-    return trim((x << disp) | (x >> (32 - disp)))
+	disp = disp & 31
+	x = trim(x)
+	return trim((x << disp) | (x >> (32 - disp)))
   end
 end
 
@@ -83,13 +83,13 @@ end
 
 function bit32.rrotate(x, disp)
   if disp == 0 then
-    return x
+	return x
   elseif disp < 0 then
-    return bit32.lrotate(x, -disp)
+	return bit32.lrotate(x, -disp)
   else
-    disp = disp & 31
-    x = trim(x)
-    return trim((x >> disp) | (x << (32 - disp)))
+	disp = disp & 31
+	x = trim(x)
+	return trim((x >> disp) | (x << (32 - disp)))
   end
 end
 

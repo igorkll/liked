@@ -133,11 +133,11 @@ keyboard.keys.numpadequals    = 0x8D
 setmetatable(keyboard.keys,
 {
   __index = function(tbl, k)
-    if type(k) ~= "number" then return end
-    for name,value in pairs(tbl) do
-      if value == k then
-        return name
-      end
-    end
+	if type(k) ~= "number" then return end
+	for name,value in pairs(tbl) do
+	  if value == k then
+	    return name
+	  end
+	end
   end
 })

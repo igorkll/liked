@@ -6,9 +6,9 @@ local event = require("event")
 function os.getenv(varname)
   local env = info().data.vars
   if not varname then
-    return env
+	return env
   elseif varname == '#' then
-    return #env
+	return #env
   end
   return env[varname]
 end
@@ -16,7 +16,7 @@ end
 function os.setenv(varname, value)
   checkArg(1, varname, "string", "number")
   if value ~= nil then
-    value = tostring(value)
+	value = tostring(value)
   end
   info().data.vars[varname] = value
   return value
@@ -26,7 +26,7 @@ function os.sleep(timeout)
   checkArg(1, timeout, "number", "nil")
   local deadline = computer.uptime() + (timeout or 0)
   repeat
-    event.pull(deadline - computer.uptime())
+	event.pull(deadline - computer.uptime())
   until computer.uptime() >= deadline
 end
 

@@ -28,8 +28,8 @@ function tty.getViewport()
   local window = tty.window
   local screen = tty.screen()
   if window.fullscreen and screen and not screen_cache[screen] then
-    screen_cache[screen] = true
-    window.width, window.height = window.gpu.getViewport()
+	screen_cache[screen] = true
+	window.width, window.height = window.gpu.getViewport()
   end
 
   return window.width, window.height, window.dx, window.dy, window.x, window.y
@@ -68,7 +68,7 @@ function tty.stream.read()
   local ok, result, reason = xpcall(core.read, debug.traceback, cursor)
 
   if not ok or not result then
-    pcall(cursor.update, cursor)
+	pcall(cursor.update, cursor)
   end
 
   return select(2, assert(ok, result, reason))
@@ -78,7 +78,7 @@ end
 function tty.stream:write(value)
   local gpu = tty.gpu()
   if not gpu then
-    return
+	return
   end
   local window = tty.window
   local cursor = window.cursor or {}
@@ -89,70 +89,70 @@ function tty.stream:write(value)
   local last_sleep = uptime()
   window.output_buffer = window.output_buffer .. value
   while true do
-    if uptime() - last_sleep > 3 then
-      os.sleep(0)
-      last_sleep = uptime()
-    end
+	if uptime() - last_sleep > 3 then
+	  os.sleep(0)
+	  last_sleep = uptime()
+	end
 
-    local ansi_print = require("vt100").parse(window)
+	local ansi_print = require("vt100").parse(window)
 
-    -- scroll before parsing next line
-    -- the value may only have been a newline
-    cursor.sy = cursor.sy + self.scroll()
-    -- we may have needed to scroll one last time [nowrap adjustments]
-    -- or the vt100 parse is incomplete, print nothing else
-    if #window.output_buffer == 0 or not ansi_print then
-      break
-    end
+	-- scroll before parsing next line
+	-- the value may only have been a newline
+	cursor.sy = cursor.sy + self.scroll()
+	-- we may have needed to scroll one last time [nowrap adjustments]
+	-- or the vt100 parse is incomplete, print nothing else
+	if #window.output_buffer == 0 or not ansi_print then
+	  break
+	end
 
-    local x, y = tty.getCursor()
+	local x, y = tty.getCursor()
 
-    local _, ei, delim = unicode.sub(window.output_buffer, 1, window.width):find("([\27\t\r\n\a\b\v\15])")
-    local segment = ansi_print .. (ei and window.output_buffer:sub(1, ei - 1) or window.output_buffer)
+	local _, ei, delim = unicode.sub(window.output_buffer, 1, window.width):find("([\27\t\r\n\a\b\v\15])")
+	local segment = ansi_print .. (ei and window.output_buffer:sub(1, ei - 1) or window.output_buffer)
 
-    if segment ~= "" then
-      local gpu_x, gpu_y = x + window.dx, y + window.dy
-      local tail = ""
-      local wlen_needed = unicode.wlen(segment)
-      local wlen_remaining = window.width - x + 1
-      if wlen_remaining < wlen_needed then
-        segment = unicode.wtrunc(segment, wlen_remaining + 1)
-        wlen_needed = unicode.wlen(segment)
-        tail = wlen_needed < wlen_remaining and " " or ""
-        cursor.tails[gpu_y - cursor.sy] = tail
-        if not window.nowrap then
-          -- we have to reparse the delimeter
-          ei = #segment
-          -- fake a newline
-          delim = "\n"
-        end
-      end
-      gpu.set(gpu_x, gpu_y, segment..tail)
-      x = x + wlen_needed
-    end
+	if segment ~= "" then
+	  local gpu_x, gpu_y = x + window.dx, y + window.dy
+	  local tail = ""
+	  local wlen_needed = unicode.wlen(segment)
+	  local wlen_remaining = window.width - x + 1
+	  if wlen_remaining < wlen_needed then
+	    segment = unicode.wtrunc(segment, wlen_remaining + 1)
+	    wlen_needed = unicode.wlen(segment)
+	    tail = wlen_needed < wlen_remaining and " " or ""
+	    cursor.tails[gpu_y - cursor.sy] = tail
+	    if not window.nowrap then
+	      -- we have to reparse the delimeter
+	      ei = #segment
+	      -- fake a newline
+	      delim = "\n"
+	    end
+	  end
+	  gpu.set(gpu_x, gpu_y, segment..tail)
+	  x = x + wlen_needed
+	end
 
-    window.output_buffer = ei and window.output_buffer:sub(ei + 1) or
-      unicode.sub(window.output_buffer, window.width + 1)
+	window.output_buffer = ei and window.output_buffer:sub(ei + 1) or
+	  unicode.sub(window.output_buffer, window.width + 1)
 
-    if delim == "\t" then
-      x = ((x-1) - ((x-1) % 8)) + 9
-    elseif delim == "\r" then
-      x = 1
-    elseif delim == "\n" then
-      x = 1
-      y = y + 1
-    elseif delim == "\b" then
-      x = x - 1
-    elseif delim == "\v" then
-      y = y + 1
-    elseif delim == "\a" and not beeped then
-      computer.beep()
-      beeped = true
-    elseif delim == "\27" then
-      window.output_buffer = delim .. window.output_buffer
-    end
+	if delim == "\t" then
+	  x = ((x-1) - ((x-1) % 8)) + 9
+	elseif delim == "\r" then
+	  x = 1
+	elseif delim == "\n" then
+	  x = 1
+	  y = y + 1
+	elseif delim == "\b" then
+	  x = x - 1
+	elseif delim == "\v" then
+	  y = y + 1
+	elseif delim == "\a" and not beeped then
+	  computer.beep()
+	  beeped = true
+	elseif delim == "\27" then
+	  window.output_buffer = delim .. window.output_buffer
+	end
 
-    tty.setCursor(x, y)
+	tty.setCursor(x, y)
   end
   return cursor.sy
 end
@@ -173,24 +173,24 @@ local gpu_intercept = {}
 function tty.bind(gpu)
   checkArg(1, gpu, "table")
   if not gpu_intercept[gpu] then
-    gpu_intercept[gpu] = true -- only override a gpu once
-    -- the gpu can change resolution before we get a chance to call events and handle screen_resized
-    -- unfortunately, we have to handle viewport changes by intercept
-    local setr, setv = gpu.setResolution, gpu.setViewport
-    gpu.setResolution = function(...)
-      screen_reset(gpu)
-      return setr(...)
-    end
-    gpu.setViewport = function(...)
-      screen_reset(gpu)
-      return setv(...)
-    end
+	gpu_intercept[gpu] = true -- only override a gpu once
+	-- the gpu can change resolution before we get a chance to call events and handle screen_resized
+	-- unfortunately, we have to handle viewport changes by intercept
+	local setr, setv = gpu.setResolution, gpu.setViewport
+	gpu.setResolution = function(...)
+	  screen_reset(gpu)
+	  return setr(...)
+	end
+	gpu.setViewport = function(...)
+	  screen_reset(gpu)
+	  return setv(...)
+	end
   end
   local window = tty.window
   if window.gpu ~= gpu then
-    window.gpu = gpu
-    window.keyboard = nil -- without a keyboard bound, always use the screen's main keyboard (1st)
-    tty.getViewport()
+	window.gpu = gpu
+	window.keyboard = nil -- without a keyboard bound, always use the screen's main keyboard (1st)
+	tty.getViewport()
   end
   screen_reset(gpu)
 end
@@ -200,7 +200,7 @@ function tty.keyboard()
   local window = tty.window
 
   if window.keyboard then
-    return window.keyboard
+	return window.keyboard
   end
 
   local system_keyboard = component.isAvailable("keyboard") and component.keyboard
@@ -209,19 +209,19 @@ function tty.keyboard()
   local screen = tty.screen()
 
   if not screen then
-    -- no screen, no known keyboard, use system primary keyboard if any
-    return system_keyboard
+	-- no screen, no known keyboard, use system primary keyboard if any
+	return system_keyboard
   end
 
   -- if we are using a gpu bound to the primary screen, then use the primary keyboard
   if component.isAvailable("screen") and component.screen.address == screen then
-    window.keyboard = system_keyboard
+	window.keyboard = system_keyboard
   else
-    -- calling getKeyboards() on the screen is costly (time)
-    -- changes to this design should avoid this on every key hit
+	-- calling getKeyboards() on the screen is costly (time)
+	-- changes to this design should avoid this on every key hit
 
-    -- this is expensive (slow!)
-    window.keyboard = component.invoke(screen, "getKeyboards")[1] or system_keyboard
+	-- this is expensive (slow!)
+	window.keyboard = component.invoke(screen, "getKeyboards")[1] or system_keyboard
   end
 
   return window.keyboard
@@ -230,7 +230,7 @@ end
 function tty.screen()
   local gpu = tty.gpu()
   if not gpu then
-    return nil
+	return nil
   end
   return gpu.getScreen()
 end
@@ -238,7 +238,7 @@ end
 function tty.stream.scroll(lines)
   local gpu = tty.gpu()
   if not gpu then
-    return 0
+	return 0
   end
   local width, height, dx, dy, x, y = tty.getViewport()
 
@@ -251,13 +251,13 @@ function tty.stream.scroll(lines)
 
   -- no lines count given, the user is asking to auto scroll y back into view
   if not lines then
-    if y < 1 then
-      lines = y - 1 -- y==0 scrolls back -1
-    elseif y > height then
-      lines = y - height -- y==height+1 scroll forward 1
-    else
-      return 0 -- do nothing
-    end
+	if y < 1 then
+	  lines = y - 1 -- y==0 scrolls back -1
+	elseif y > height then
+	  lines = y - height -- y==height+1 scroll forward 1
+	else
+	  return 0 -- do nothing
+	end
   end
 
   lines = math.min(lines, height)

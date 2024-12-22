@@ -10,7 +10,7 @@ function lib.sub(tbl,f,l)
   f,l=adjust(f,l,s)
   l=math.min(l,s)
   for i=math.max(f,1),l do
-    r[#r+1]=tbl[i]
+	r[#r+1]=tbl[i]
   end
   return r
 end
@@ -21,9 +21,9 @@ function lib.partition(tbl,partitioner,dropEnds,f,l)
   checkArg(2,partitioner,'function','table')
   checkArg(3,dropEnds,'boolean','nil')
   if type(partitioner)=='table'then
-    return lib.partition(tbl,function(e,i,tbl)
-      return lib.first(tbl,partitioner,i)
-    end,dropEnds,f,l)
+	return lib.partition(tbl,function(e,i,tbl)
+	  return lib.first(tbl,partitioner,i)
+	end,dropEnds,f,l)
   end
   local s=#tbl
   f,l=adjust(f,l,s)
@@ -33,34 +33,34 @@ function lib.partition(tbl,partitioner,dropEnds,f,l)
   local exp=function()if need then result[#result+1]={}need=false end end
   local i=f
   while i<=l do
-    local e=cut[i]
-    local ds,de=partitioner(e,i,cut)
-    -- true==partition here
-    if ds==true then ds,de=i,i
-    elseif ds==false then ds,de=nil,nil end
-    if ds~=nil then
-      ds,de=adjust(ds,de,l)
-      ds=ds>=i and ds--no more
-    end
-    if not ds then -- false or nil
-      exp()
-      table.insert(result[#result],e)
-    else
-      local sub=lib.sub(cut,i,not dropEnds and de or (ds-1))
-      if #sub>0 then
-        exp()
-        result[#result+math.min(#result[#result],1)]=sub
-      end
-      -- ensure i moves forward
-      local ensured=math.max(math.max(de or ds,ds),i)
-      if de and ds and de<ds and ensured==i then
-        if #result==0 then result[1]={} end
-        table.insert(result[#result],e)
-      end
-      i=ensured
-      need=true
-    end
-    i=i+1
+	local e=cut[i]
+	local ds,de=partitioner(e,i,cut)
+	-- true==partition here
+	if ds==true then ds,de=i,i
+	elseif ds==false then ds,de=nil,nil end
+	if ds~=nil then
+	  ds,de=adjust(ds,de,l)
+	  ds=ds>=i and ds--no more
+	end
+	if not ds then -- false or nil
+	  exp()
+	  table.insert(result[#result],e)
+	else
+	  local sub=lib.sub(cut,i,not dropEnds and de or (ds-1))
+	  if #sub>0 then
+	    exp()
+	    result[#result+math.min(#result[#result],1)]=sub
+	  end
+	  -- ensure i moves forward
+	  local ensured=math.max(math.max(de or ds,ds),i)
+	  if de and ds and de<ds and ensured==i then
+	    if #result==0 then result[1]={} end
+	    table.insert(result[#result],e)
+	  end
+	  i=ensured
+	  need=true
+	end
+	i=i+1
   end
 
   return result
@@ -77,20 +77,20 @@ function lib.foreach(tbl,c,f,l)
   tbl=view(tbl,f,l)
   local r={}
   for i=f,l do
-    local n,k=c(tbl[i],i,tbl)
-    if n~=nil then
-      if k then r[k]=n
-      else r[#r+1]=n end
-    end
+	local n,k=c(tbl[i],i,tbl)
+	if n~=nil then
+	  if k then r[k]=n
+	  else r[#r+1]=n end
+	end
   end
   return r
 end
 
 function lib.where(tbl,p,f,l)
   return lib.foreach(tbl,
-    function(e,i,tbl)
-      return p(e,i,tbl)and e or nil
-    end,f,l)
+	function(e,i,tbl)
+	  return p(e,i,tbl)and e or nil
+	end,f,l)
 end
 
 -- works with pairs on tables
@@ -100,10 +100,10 @@ function lib.at(tbl, index)
   checkArg(2, index, "number", "nil")
   local current_index = 1
   for k,v in pairs(tbl) do
-    if current_index == index then
-      return k,v
-    end
-    current_index = current_index + 1
+	if current_index == index then
+	  return k,v
+	end
+	current_index = current_index + 1
   end
   return nil, current_index - 1 -- went one too far
 end

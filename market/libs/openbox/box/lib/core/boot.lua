@@ -15,8 +15,8 @@ computer.runlevel = function() return _G.runlevel end
 computer.shutdown = function(reboot)
   _G.runlevel = reboot and 6 or 0
   if os.sleep then
-    computer.pushSignal("shutdown")
-    os.sleep(0.1) -- Allow shutdown processing.
+	computer.pushSignal("shutdown")
+	os.sleep(0.1) -- Allow shutdown processing.
   end
   shutdown(reboot)
 end
@@ -27,7 +27,7 @@ local gpu = screen and component.list("gpu", true)()
 if gpu then
   gpu = component.proxy(gpu)
   if not gpu.getScreen() then
-    gpu.bind(screen)
+	gpu.bind(screen)
   end
   _G.boot_screen = gpu.getScreen()
   w, h = gpu.maxResolution()
@@ -47,23 +47,23 @@ local last_sleep = uptime()
 local function status(msg)
   --[[
   if gpu then
-    gpu.set(1, y, msg)
-    if y == h then
-      gpu.copy(1, 2, w, h - 1, 0, -1)
-      gpu.fill(1, h, w, 1, " ")
-    else
-      y = y + 1
-    end
+	gpu.set(1, y, msg)
+	if y == h then
+	  gpu.copy(1, 2, w, h - 1, 0, -1)
+	  gpu.fill(1, h, w, 1, " ")
+	else
+	  y = y + 1
+	end
   end
   -- boot can be slow in some environments, protect from timeouts
   if uptime() - last_sleep > 1 then
-    local signal = table.pack(pull(0))
-    -- there might not be any signal
-    if signal.n > 0 then
-      -- push the signal back in queue for the system to use it
-      computer.pushSignal(table.unpack(signal, 1, signal.n))
-    end
-    last_sleep = uptime()
+	local signal = table.pack(pull(0))
+	-- there might not be any signal
+	if signal.n > 0 then
+	  -- push the signal back in queue for the system to use it
+	  computer.pushSignal(table.unpack(signal, 1, signal.n))
+	end
+	last_sleep = uptime()
   end
   ]]
 end
@@ -75,14 +75,14 @@ local function dofile(file)
   status("> " .. file)
   local program, reason = raw_loadfile(file)
   if program then
-    local result = table.pack(pcall(program))
-    if result[1] then
-      return table.unpack(result, 2, result.n)
-    else
-      error(result[2])
-    end
+	local result = table.pack(pcall(program))
+	if result[1] then
+	  return table.unpack(result, 2, result.n)
+	else
+	  error(result[2])
+	end
   else
-    error(reason)
+	error(reason)
   end
 end
 
@@ -130,7 +130,7 @@ local scripts = {}
 for _, file in ipairs(rom_invoke("list", "boot")) do
   local path = "boot/" .. file
   if not rom_invoke("isDirectory", path) then
-    table.insert(scripts, path)
+	table.insert(scripts, path)
   end
 end
 table.sort(scripts)

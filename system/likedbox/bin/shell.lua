@@ -19,8 +19,8 @@ term2:writeLn("TEST LOG.")
 
 local t = thread.create(function()
   while true do
-    term1:write("> ")
-    term1:writeLn("input: " .. (term1:readLn() or "nil"))
+	term1:write("> ")
+	term1:writeLn("input: " .. (term1:readLn() or "nil"))
   end
 end)
 t:resume()

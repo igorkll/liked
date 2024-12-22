@@ -14,11 +14,11 @@ local window = gui.customWindow(screen)
 
 local layout = uix.create(window, nil, uix.styles[2])
 if not registry.disableHiddenFiles then
-    local checkbox = layout:createCheckbox(2, 11, not not fs.getAttribute(path, "hidden"), colors.red, colors.gray, colors.black)
-    layout:createText(5, 11, colors.black, "hidden")
-    function checkbox:onSwitch()
-        fs.setAttribute(path, "hidden", self.state)
-    end
+	local checkbox = layout:createCheckbox(2, 11, not not fs.getAttribute(path, "hidden"), colors.red, colors.gray, colors.black)
+	layout:createText(5, 11, colors.black, "hidden")
+	function checkbox:onSwitch()
+	    fs.setAttribute(path, "hidden", self.state)
+	end
 end
 
 window:clear(colors.white)
@@ -31,7 +31,7 @@ layout:draw()
 local ctype = fs.isDirectory(path) and "directory" or "file"
 local exp = paths.extension(path)
 if exp then
-    ctype = (gui_container.typenames[exp] or exp) .. "-" .. ctype
+	ctype = (gui_container.typenames[exp] or exp) .. "-" .. ctype
 end
 
 local addr = fs.get(path).address
@@ -57,28 +57,28 @@ graphic.forceUpdate(screen)
 
 local sum = "-"
 if not fs.isDirectory(path) and size <= (16 * 1024) then
-    local content = fs.readFile(path)
-    if content then
-        sum = require("sha256").sha256hex(content)
-        sum = sum:sub(1, #addr) .. gui_container.chars.threeDots
-    end
+	local content = fs.readFile(path)
+	if content then
+	    sum = require("sha256").sha256hex(content)
+	    sum = sum:sub(1, #addr) .. gui_container.chars.threeDots
+	end
 end
 window:fill(2, 8, 49, 1, colors.white, 0, " ")
 window:set(2, 8, colors.white, colors.black, "sha256   : " .. sum)
 graphic.forceUpdate(screen)
 
 while true do
-    local eventData = {event.pull()}
-    local windowEventData = window:uploadEvent(eventData)
-    layout:uploadEvent(windowEventData)
+	local eventData = {event.pull()}
+	local windowEventData = window:uploadEvent(eventData)
+	layout:uploadEvent(windowEventData)
 
-    if windowEventData[1] == "key_down" then
-        if windowEventData[4] == 28 then
-            break
-        end
-    elseif windowEventData[1] == "touch" then
-        if windowEventData[3] >= window.sizeX - 2 and windowEventData[4] == 1 then
-            break
-        end
-    end
+	if windowEventData[1] == "key_down" then
+	    if windowEventData[4] == 28 then
+	        break
+	    end
+	elseif windowEventData[1] == "touch" then
+	    if windowEventData[3] >= window.sizeX - 2 and windowEventData[4] == 1 then
+	        break
+	    end
+	end
 end

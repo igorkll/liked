@@ -8,13 +8,13 @@ local sysinit = require("sysinit")
 local screen, _, path = ...
 path = path or iowindows.selectfile(screen, "scr")
 if not path then
-    return
+	return
 end
 
 local ok, err = zximage.check(path)
 if not ok then
-    gui.warn(screen, nil, nil, err)
-    return
+	gui.warn(screen, nil, nil, err)
+	return
 end
 
 local crop = graphic.getDepth(screen) < 8

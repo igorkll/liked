@@ -28,15 +28,15 @@ layout:createAutoUpBar("Tool Box")
 local watchCls = {}
 
 function watchCls:onCreate()
-    self.image = layout:createImage(self.x, self.y, watchIcon)
+	self.image = layout:createImage(self.x, self.y, watchIcon)
 end
 
 function watchCls:onDestroy()
-    self.image:destroy()
+	self.image:destroy()
 end
 
 function watchCls:onDraw()
-    
+	
 end
 
 --------------------------------------- compass
@@ -44,19 +44,19 @@ end
 local compassCls = {}
 
 function compassCls:onCreate()
-    self.image = layout:createImage(self.x, self.y, compassIcon)
+	self.image = layout:createImage(self.x, self.y, compassIcon)
 end
 
 function compassCls:onDestroy()
-    self.image:destroy()
+	self.image:destroy()
 end
 
 function compassCls:onDraw()
-    if component.tablet then
-        local x, y = self.x + (imgX / 2), self.y + (imgY / 2)
-        local rad = math.rad(-(component.tablet.getYaw()))
-        draw:line(x, y, x + (math.sin(rad) * 6), y + (math.cos(rad) * 6), colors.red)
-    end
+	if component.tablet then
+	    local x, y = self.x + (imgX / 2), self.y + (imgY / 2)
+	    local rad = math.rad(-(component.tablet.getYaw()))
+	    draw:line(x, y, x + (math.sin(rad) * 6), y + (math.cos(rad) * 6), colors.red)
+	end
 end
 
 ---------------------------------------
@@ -66,13 +66,13 @@ layout:createCustom(55, 6, compassCls)
 layout:draw()
 
 thread.create(function ()
-    while true do
-        layout:draw()
-        os.sleep(0.5)
-    end
+	while true do
+	    layout:draw()
+	    os.sleep(0.5)
+	end
 end):resume()
 
 while true do
-    local eventData = {event.pull()}
-    layout:uploadEvent(eventData)
+	local eventData = {event.pull()}
+	layout:uploadEvent(eventData)
 end

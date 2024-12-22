@@ -1,79 +1,79 @@
 if not bootAddress then
-    error("the address of the boot disk was not added to \"Restricted Loader\", it is incorrect to flash the EEPROM", 0)
+	error("the address of the boot disk was not added to \"Restricted Loader\", it is incorrect to flash the EEPROM", 0)
 end
 
 _restrictedLoader = true
 local eeprom = component.list("eeprom")()
 local invoke = component.invoke
 function component.invoke(address, method, ...)
-    if address == eeprom then
-        if method == "setData" or method == "getData" then
-            return ""
-        end
-    end
-    return invoke(address, method, ...)
+	if address == eeprom then
+	    if method == "setData" or method == "getData" then
+	        return ""
+	    end
+	end
+	return invoke(address, method, ...)
 end
 
 computer.setBootAddress = function(address)
 end
 
 computer.getBootAddress = function()
-    return bootAddress
+	return bootAddress
 end
 
 do
-    local screen = component.list("screen")()
-    local gpu = component.list("gpu")()
-    if gpu and screen then
-        invoke(gpu, "bind", screen)
-    end
+	local screen = component.list("screen")()
+	local gpu = component.list("gpu")()
+	if gpu and screen then
+	    invoke(gpu, "bind", screen)
+	end
 end
 
 local function checkSystem(address)
-    computer.beep(2000, 0.1)
-    if not invoke(address, "exists", "/init.lua") then
-        return false
-    end
-    local lastModTime = tonumber(invoke(eeprom, "getData"))
-    local function checkFile(path)
-        return invoke(address, "lastModified", path) > lastModTime
-    end
-    local function process(dir)
-        for _, name in ipairs(invoke(address, "list", dir) or {}) do
-            local path = dir .. name
-            if invoke(address, "isDirectory", path) then
-                if process(path) then return true end
-            elseif checkFile(path) then
-                return true
-            end
-        end
-    end
-    if process("/system/") then return false end
-    if checkFile("/init.lua") then return false end
-    return true
+	computer.beep(2000, 0.1)
+	if not invoke(address, "exists", "/init.lua") then
+	    return false
+	end
+	local lastModTime = tonumber(invoke(eeprom, "getData"))
+	local function checkFile(path)
+	    return invoke(address, "lastModified", path) > lastModTime
+	end
+	local function process(dir)
+	    for _, name in ipairs(invoke(address, "list", dir) or {}) do
+	        local path = dir .. name
+	        if invoke(address, "isDirectory", path) then
+	            if process(path) then return true end
+	        elseif checkFile(path) then
+	            return true
+	        end
+	    end
+	end
+	if process("/system/") then return false end
+	if checkFile("/init.lua") then return false end
+	return true
 end
 
 local function readFile(address, path)
-    local file = invoke(address, "open", path)
-    local buffer = ""
-    repeat
-        local data = invoke(address, "read", file, math.maxinteger or math.huge)
-        buffer = buffer .. (data or "")
-    until not data
-    invoke(address, "close", file)
-    return buffer
+	local file = invoke(address, "open", path)
+	local buffer = ""
+	repeat
+	    local data = invoke(address, "read", file, math.maxinteger or math.huge)
+	    buffer = buffer .. (data or "")
+	until not data
+	invoke(address, "close", file)
+	return buffer
 end
 
 local function writeFile(address, path, data)
-    local file = invoke(address, "open", path, "wb")
-    if file then
-        invoke(address, "write", file, data)
-        invoke(address, "close", file)
-    end
+	local file = invoke(address, "open", path, "wb")
+	if file then
+	    invoke(address, "write", file, data)
+	    invoke(address, "close", file)
+	end
 end
 
 if not component.proxy(bootAddress) then
-    error("restricted loader: the boot disk is missing", 0)
+	error("restricted loader: the boot disk is missing", 0)
 end
 
 local tmpAddress = computer.tmpAddress()
@@ -86,7 +86,7 @@ invoke(bootAddress, "remove", "/bootmanager") --attempt to remove bootmanager. r
 invoke(bootAddress, "remove", "/vendor/apps/bootmanager.app")
 
 if not checkSystem(bootAddress) then
-    error("restricted loader: the system failed verification", 0)
+	error("restricted loader: the system failed verification", 0)
 end
 
 computer.beep(1700, 0.05)
