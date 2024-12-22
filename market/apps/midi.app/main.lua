@@ -3,7 +3,21 @@ local uix = require("uix")
 local midi = require("midi")
 
 local screen, nickname, path = ...
+if _G.playerObj and path and _G.playerObj.filepath ~= path then
+	if gui.yesno(screen, nil, nil, "another midi file is currently playing. do you really want to stop playback?") then
+		if _G.playerThread then
+			_G.playerThread:kill()
+			_G.playerThread = nil
+		end
+
+		_G.playerObj = nil
+	else
+		return
+	end
+end
+
 local player = _G.playerObj or (path and midi.create(path, midi.instruments()))
+local midiFileName = player and gui.hideExtension(screen, player.filepath)
 
 local ui = uix.manager(screen)
 local rx, ry = ui:zoneSize()
@@ -15,11 +29,7 @@ local stopButton = layout:createButton(2, 6, 16, 1, nil, nil, "stop", true)
 local midfile = layout:createLabel(19, 2, 32, 1)
 local midth = layout:createLabel(19, 4, 32, 1)
 local function updateLabels()
-	if _G.playerObj then
-		midfile.text = gui.hideExtension(screen, _G.playerObj.filepath)
-	else
-		midfile.text = nil
-	end
+	midfile.text = midiFileName or ""
 
 	if _G.playerThread then
 		local state = _G.playerThread:status()
