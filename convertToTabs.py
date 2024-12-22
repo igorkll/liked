@@ -20,7 +20,9 @@ def process_directory(directory):
                 file_path = os.path.join(root, file)
                 replace_spaces_with_tabs(file_path)
 
-replace_spaces_with_tabs('init.lua')
+if os.path.isfile('init.lua'):
+    replace_spaces_with_tabs('init.lua')
+
 process_directory("system")
 process_directory("market")
 process_directory("installer")
