@@ -395,6 +395,7 @@ end
 
 local function raw_drawFullUpBarTask(method, screen, title, withoutFill, bgcolor, wideExit)
 	if wideExit == nil then wideExit = true end
+	local callbacks = {}
 	local localBeforeCallback
 	local function redraw(beforeCallback)
 		localBeforeCallback = beforeCallback or localBeforeCallback
@@ -402,9 +403,11 @@ local function raw_drawFullUpBarTask(method, screen, title, withoutFill, bgcolor
 			localBeforeCallback()
 		end
 		liked.drawFullUpBar(screen, title, withoutFill, bgcolor, wideExit)
+		if callbacks.draw then
+			callbacks.draw()
+		end
 		graphic.updateFlag(screen)
 	end
-	local callbacks = {}
 	local th = method(function ()
 		thread.create(function ()
 			local rx, ry = graphic.getResolution(screen)

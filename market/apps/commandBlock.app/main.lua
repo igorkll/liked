@@ -7,6 +7,7 @@ local event = require("event")
 local fs = require("filesystem")
 local parser = require("parser")
 local unicode = require("unicode")
+local uix = require("uix")
 
 local screen, nickname, path = ...
 local cb = gui.selectcomponentProxy(screen, nil, nil, {"command_block", "debug"}, true)
@@ -14,11 +15,34 @@ if not cb then
 	return
 end
 
-local _, drawUp, callbacks = liked.drawFullUpBarTask(screen, "CommandBlock")
+local _, drawUp, callbacks = liked.drawFullUpBarTask(screen, " CommandBlock")
+
 local rx, ry = graphic.getResolution(screen)
-local term = require("term").create(screen, 1, 2, rx, ry - 1, true)
+local term = require("term").create(screen, 1, 2, rx, ry - 4, true)
 term:clear()
 drawUp()
+
+local shortcuts = uix.create(graphic.createWindow(screen, 1, ry - 2, rx, 3), uix.colors.lightGray)
+shortcuts:draw()
+
+local shotcutPos = 2
+local function addShortcutCommand(name, command)
+	local len = unicode.len(name)
+	local button = shortcuts:createButton(shotcutPos, 2, len, 1, nil, nil, name)
+	shotcutPos = shotcutPos + len + 1
+
+	function button:onClick()
+		if cb.type == "debug" then
+			cb.runCommand(command)
+		else
+			cb.setCommand(command)
+			cb.executeCommand()
+		end
+	end
+end
+
+addShortcutCommand("day", "time set day")
+addShortcutCommand("night", "time set night")
 
 local baseTh = thread.current()
 function callbacks.exit()
@@ -33,6 +57,12 @@ if path then
 		table.insert(queue, command)
 	end
 end
+
+thread.create(function ()
+	while true do
+		shortcuts:uploadEvent({event.pull()})
+	end
+end):resume()
 
 while true do
 	term:write("> ")
