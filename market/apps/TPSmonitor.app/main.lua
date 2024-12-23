@@ -28,22 +28,23 @@ local function getTpsColor(tps)
 	end
 end
 
-local checktime = 0.1
+local tps, color
+local toggle = false
 
 graphic.clear(screen, colors.black)
 while true do
-	local tps = host.tps(checktime)
-	local color = getTpsColor(tps)
-
 	graphic.fill(screen, 1, 1, rx, 1, colors.black, 0, " ")
 	graphic.set(screen, 2, 1, colors.black, colors.white, "TPS:")
-	graphic.set(screen, 7, 1, colors.black, color, tostring(math.roundTo(tps, 3)))
+	graphic.set(screen, 7, 1, colors.black, color or colors.white, tps and tostring(math.roundTo(tps, 3)) or "CHECKING")
 
-	graphic.fill(screen, rx, 2, 1, ry, colors.black, 0, " ")
-	graphic.fill(screen, rx, math.map(tps, 0, 20, 9, 2), 1, ry, color, 0, " ")
-	graphic.copy(screen, 1, 2, rx, ry, -1, 0)
+	if color then
+		graphic.copy(screen, 1, 2, rx, ry, -1, 0)
+		graphic.fill(screen, rx, 2, 1, ry, colors.black, 0, " ")
+		graphic.fill(screen, rx, math.map(tps, 0, 20, 9, 2), 1, ry, color, 0, toggle and " " or "░")
+	end
 	
 	graphic.update(screen)
-
-	checktime = 2
+	tps = host.tps(2)
+	color = getTpsColor(tps)
+	toggle = not toggle
 end

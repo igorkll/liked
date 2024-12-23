@@ -401,7 +401,7 @@ local list = {
 	},
 	{ --need rewrite
 		name = "TPSmonitor",
-		version = "1",
+		version = "1.1",
 		vendor = "logic",
 		description = "allows you to view changes in TPS dynamics on the server",
 		minDiskSpace = 64,
