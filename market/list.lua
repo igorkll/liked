@@ -67,7 +67,7 @@ local list = {
 	},
 	{ --need rewrite
 		name = "chat",
-		version = "2.6",
+		version = "2.7",
 		vendor = "logic",
 		icon = selfurlpart .. "/apps/chat.app/icon.t2p",
 		description = "allows you to exchange messages, pictures and files between computers via a network card",

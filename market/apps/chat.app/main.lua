@@ -86,7 +86,7 @@ local function updateHistory()
 	
 		history = {}
 		for i, v in ipairs(split(data, "\n")) do
-			local tbl = serialization.unserialization(v)
+			local tbl = serialization.unserialize(v)
 			if tbl then
 				table.insert(history, tbl)
 				addNullStrs(tbl)
