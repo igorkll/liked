@@ -871,6 +871,7 @@ ox, oy, oz = nx, ny, nz]])
 	updateRotation()
 
 	controls.l1 = rcLayout:createButton(2, 12, 4, 2, colors.green, colors.white, "<<")
+	ui:bind(16, controls.l1)
 	function controls.l1:onDrop()
 		droneVirtualRotation = droneVirtualRotation - 1
 		if droneVirtualRotation < 0 then
@@ -880,6 +881,7 @@ ox, oy, oz = nx, ny, nz]])
 	end
 
 	controls.l2 = rcLayout:createButton(10, 12, 4, 2, colors.green, colors.white, ">>")
+	ui:bind(18, controls.l2)
 	function controls.l2:onDrop()
 		droneVirtualRotation = droneVirtualRotation + 1
 		if droneVirtualRotation > 3 then
