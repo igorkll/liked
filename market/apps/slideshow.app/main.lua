@@ -17,13 +17,16 @@ local config = storage.getConf({
 	water = true
 })
 
+if config.folder and (not fs.exists(config.folder) or not fs.isDirectory(config.folder)) then
+	config.folder = nil
+end
+
 local screen = ...
 local manager = uix.manager(screen)
 local rx, ry = manager:zoneSize()
 local layout = manager:create("Slide Show")
 
 layout:createImage(rx - 29, 1, "hue.t2p", true, true)
-
 layout:createText(2, ry - 5, nil, "Press 'Enter' key or 'ctrl+w' to exit from viewer")
 layout:createText(2, 2, nil, "likeOS water-mark: ")
 local startButton = layout:createButton(2, ry - 3, rx - 2, 3, nil, nil, "Start Slide Show", true)
