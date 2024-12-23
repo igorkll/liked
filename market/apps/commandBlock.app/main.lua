@@ -23,13 +23,12 @@ term:clear()
 drawUp()
 
 local shortcuts = uix.create(graphic.createWindow(screen, 1, ry - 2, rx, 3), uix.colors.lightGray)
-shortcuts:draw()
 
 local shotcutPos = 2
 local function addShortcutCommand(name, command)
 	local len = unicode.len(name)
-	local button = shortcuts:createButton(shotcutPos, 2, len, 1, nil, nil, name)
-	shotcutPos = shotcutPos + len + 1
+	local button = shortcuts:createButton(shotcutPos, 2, len + 2, 1, nil, nil, name)
+	shotcutPos = shotcutPos + len + 3
 
 	function button:onClick()
 		if cb.type == "debug" then
@@ -43,6 +42,10 @@ end
 
 addShortcutCommand("day", "time set day")
 addShortcutCommand("night", "time set night")
+addShortcutCommand("rain", "weather rain")
+addShortcutCommand("thunder", "weather thunder")
+addShortcutCommand("disable rain", "weather clear")
+shortcuts:draw()
 
 local baseTh = thread.current()
 function callbacks.exit()
