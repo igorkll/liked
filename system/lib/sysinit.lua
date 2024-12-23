@@ -201,9 +201,9 @@ function sysinit.init(box, lscreen)
 	local component = require("component")
 	local computer = require("computer")
 	local bootloader = require("bootloader")
-	local sysdata = require("sysdata")
+	local sysdata = not box and require("sysdata")
 
-	local targetEeprom = sysdata.get("eeprom")
+	local targetEeprom = sysdata and sysdata.get("eeprom")
 	if targetEeprom and component.list("eeprom")() ~= targetEeprom then
 		bootloader.bootSplash("the liked was expecting an EEPROM: " .. targetEeprom:sub(1, 6))
 		bootloader.waitEnter()
