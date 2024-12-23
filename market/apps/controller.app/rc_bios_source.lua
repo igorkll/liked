@@ -96,8 +96,8 @@ local function passText()
 			setText("password\nchanged")
 		else
 			randomPassword = ""
-			for i = 1, 8 do
-				randomPassword = randomPassword .. string.char(math.random(33, 126))
+			for i = 1, 4 do
+				randomPassword = randomPassword .. string.char(math.random(65, 90))
 			end
 			setText("password:\n" .. randomPassword)
 		end

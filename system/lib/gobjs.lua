@@ -86,7 +86,7 @@ end
 
 gobjs.checkboxgroup = {}
 
-function gobjs.checkboxgroup:onCreate(sizeX, sizeY)
+function gobjs.checkboxgroup:onCreate(sizeX, sizeY, enableScrollbar)
 	self.sizeX = sizeX
 	self.sizeY = sizeY
 
@@ -97,6 +97,7 @@ function gobjs.checkboxgroup:onCreate(sizeX, sizeY)
 	self.scroll = 0
 
 	self.w = uix.regDrawZone(self, sizeX, sizeY)
+	self.enableScrollbar = enableScrollbar
 end
 
 function gobjs.checkboxgroup:onDraw()

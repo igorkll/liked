@@ -599,14 +599,14 @@ end
 
 local actionsPosX, actionsPosY = 39, 2
 local actionsTitle = rcLayout:createText(actionsPosX, actionsPosY, colors.white, "actions")
-local actionsList = rcLayout:createCustom(actionsTitle.x, actionsTitle.y + 1, gobjs.checkboxgroup, 11, 5)
+local actionsList = rcLayout:createCustom(actionsTitle.x - 1, actionsTitle.y + 1, gobjs.checkboxgroup, 13, 5)
 actionsList.oneSelect = true
 actionsList.list = {
 	{"swing"},
 	{"use"},
-	{"use sneaky"},
+	{"use snk"},
 	{"place"},
-	{"place sneaky"},
+	{"place snk"},
 	{"drain"},
 	{"drain max"},
 	{"fill"},
@@ -667,6 +667,13 @@ ui:bind(200, move[1])
 ui:bind(205, move[2])
 ui:bind(208, move[3])
 ui:bind(203, move[4])
+
+local function actionOnSide(side)
+	local i = findObj(actionsList.list)
+	if i then
+		deviceSend(controlAddress, "rc_exec", actionsFuncs[i], side)
+	end
+end
 
 local function createDroneControl()
 	local droneMoveCode = [[local dx, dy, dz = ...
@@ -796,13 +803,6 @@ drone.move(mx, my, mz)
 ox, oy, oz = nx, ny, nz]])
 	end
 
-
-	actionsTitle.x = actionsPosX
-	actionsTitle.y = actionsPosY
-	actionsList.x = actionsPosX
-	actionsList.y = actionsPosY + 1
-	uix.updateDrawZone(actionsList)
-
 	action[1].x = firstActionPosX
 	action[1].y = firstActionPosY
 	move[1].onDrop = function (self)
@@ -819,12 +819,14 @@ ox, oy, oz = nx, ny, nz]])
 	end
 
 	move[5].text = "+Y"
+	action[5].text = "+Y"
 	action[5].x = upActPosX
 	action[5].y = upActPosY
 	move[5].onDrop = function (self)
 		droneMove(0, currentBlockCount, 0)
 	end
 	move[6].text = "-Y"
+	action[6].text = "-Y"
 	action[6].x = downActPosX
 	action[6].y = downActPosY
 	move[6].onDrop = function (self)
@@ -843,9 +845,16 @@ ox, oy, oz = nx, ny, nz]])
 	local function updateRotation(updateArrows)
 		for i = 0, 3 do
 			mvTitle[i + 1] = rawMvTitle[((i + droneVirtualRotation) % 4) + 1]
+
 			local arrow = move[i + 1]
 			arrow.text = mvTitle[i + 1]
 			arrow.fore = getArrowColor(arrow.text, colors.white)
+			if updateArrows then
+				arrow:draw()
+			end
+
+			arrow = action[i + 1]
+			arrow.text = mvTitle[i + 1]
 			if updateArrows then
 				arrow:draw()
 			end
@@ -972,24 +981,12 @@ return ci]]
 		end
 	end
 
-	local function actionOnSide(side)
-		local i = findObj(actionsList.list)
-		if i then
-			deviceSend(controlAddress, "rc_exec", actionsFuncs[i], side)
-		end
-	end
-
 	for i = 1, 4 do
 		local arrow = move[i]
 		arrow.fore = colors.white
 	end
 
 	local aOffset = -3
-	actionsTitle.x = actionsPosX + aOffset
-	actionsTitle.y = actionsPosY + 3
-	actionsList.x = actionsPosX
-	actionsList.y = actionsPosY + 1
-	uix.updateDrawZone(actionsList)
 
 	action[1].x = firstActionPosX + 4 + aOffset
 	action[1].y = firstActionPosY + 2
