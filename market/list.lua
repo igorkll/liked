@@ -45,7 +45,7 @@ local list = {
 	},
 	{
 		name = "controller",
-		version = "1.0",
+		version = "1.1",
 		vendor = "logic",
 		description = "allows you to remotely control robots and drones. supports wired wireless and tunnel connection",
 		minDiskSpace = 64,
