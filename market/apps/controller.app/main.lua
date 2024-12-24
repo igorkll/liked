@@ -130,8 +130,10 @@ local function deviceSend(address, ...)
 	end
 end
 
+local requestProcess = false
 local function rawDeviceRequest(timeout, address, ...)
 	if not address then return end
+	requestProcess = true
 	local backScreensaver = screensaver.noScreensaver(screen)
 	local startWaitTime = computer.uptime()
 	local id = uuid.next()
@@ -144,6 +146,7 @@ local function rawDeviceRequest(timeout, address, ...)
 			local eventData = {event.pull(0.5, "modem_message", address, nil, 0, nil, idRet)}
 			if eventData[1] then
 				backScreensaver()
+				requestProcess = false
 				return {eventData[5]}, table.unpack(eventData, 7)
 			end
 		end
@@ -153,11 +156,13 @@ local function rawDeviceRequest(timeout, address, ...)
 			local eventData = {event.pull(0.5, "modem_message", modem.address, address, port, nil, idRet)}
 			if eventData[1] then
 				backScreensaver()
+				requestProcess = false
 				return {eventData[5]}, table.unpack(eventData, 7)
 			end
 		end
 	end
 	backScreensaver()
+	requestProcess = false
 end
 
 local function deviceLongRequest(timeout, address, ...)
@@ -320,9 +325,9 @@ layout:listen("modem_message", function (_, localAddress, sender, senderPort, di
 		local writeAddr = isTunnel and localAddress or sender
 		local addTitle
 		if isTunnel then
-			addTitle = " | tunnel " .. localAddress:sub(1, 6)
+			addTitle = " | tunnel (" .. localAddress:sub(1, 6) .. ")"
 		elseif dist == 0 then
-			addTitle = " | wired " .. localAddress:sub(1, 6)
+			addTitle = " | wired (" .. localAddress:sub(1, 6) .. ")"
 		else
 			addTitle = " | distance: " .. math.roundTo(dist, 1)
 		end
@@ -360,7 +365,7 @@ end, math.huge)
 
 local infoLayout = ui:create("controller [INFO]", colors.black)
 infoLayout:createText(2, 2, colors.white, gui_container.chars.dot .. " to use, flash the EEPROM of the robot/drone with the \"RC Bios\" firmware through the settings>eeprom", rx - 2)
-infoLayout:createText(2, 4, colors.white, gui_container.chars.dot .. " if the robot has a screen and a video card, a random 8-character password will be set on it and it will be displayed on the screen", rx - 2)
+infoLayout:createText(2, 4, colors.white, gui_container.chars.dot .. " if the robot has a screen and a video card, a random 4-character password will be set on it and it will be displayed on the screen", rx - 2)
 infoLayout:createText(2, 6, colors.white, gui_container.chars.dot .. " if the robot does not have a screen and/or a video card, then by default it will not have a password", rx - 2)
 infoLayout:createText(2, 8, colors.white, gui_container.chars.dot .. " there is always a screen on the drone and therefore a password will be set for the drone in any case", rx - 2)
 infoLayout:createText(2, 10, colors.white, gui_container.chars.dot .. " the password will be generated randomly every time you start unless you set your password", rx - 2)
@@ -485,6 +490,10 @@ local function statsUpdate(noDraw)
 	return table.concat(tbl, "\n"), offset
 end)()]]
 
+	if ui.current ~= rcLayout then
+		noDraw = true
+	end
+
 	local requestOk, ok, val, strs, offset, acceleration = rawDeviceRequest(5, controlAddress, "rc_exec", getterCode)
 	if not requestOk then return true end
 	distanceTitle.text = "distance: " .. math.roundTo(requestOk[1], 1)
@@ -505,14 +514,27 @@ end)()]]
 
 	if offset then
 		colTitle.text = "collision: " .. math.roundTo(offset, 1)
-		colTitle:draw()
+		if ui.current == rcLayout then
+			colTitle:draw()
+		end
 	end
-	distanceTitle:draw()
+	if ui.current == rcLayout then
+		distanceTitle:draw()
+	end
 end
 
-rcLayout:thread(function ()
+local bgThread = thread.createBackground(function ()
 	while true do
-		if finalConnect and statsUpdate() then
+		if finalConnect and controlAddress and not requestProcess and (not rcLayout.active or screensaver.current(screen)) then
+			deviceSend(controlAddress, "rc_fexec", "") --resetting the shutdown timer when the blocking window is displayed
+		end
+		os.sleep(3)
+	end
+end)
+
+local bgThread2 = thread.createBackground(function ()
+	while true do
+		if finalConnect and controlAddress and not requestProcess and statsUpdate() then
 			controlAddress = nil
 			layout:select()
 		end
@@ -520,15 +542,8 @@ rcLayout:thread(function ()
 	end
 end)
 
-local bgThread = thread.createBackground(function ()
-	while true do
-		if finalConnect and controlAddress and (not rcLayout.active or screensaver.current(screen)) then
-			deviceSend(controlAddress, "rc_fexec", "") --resetting the shutdown timer when the blocking window is displayed
-		end
-		os.sleep(3)
-	end
-end)
 bgThread:resume()
+bgThread2:resume()
 
 local function blockPeerMoveTextUpdate(noDraw)
 	blockPeerMoveText.text = "blocks for movement: " .. currentBlockCount .. " "
@@ -598,8 +613,8 @@ function customPass:onDrop()
 end
 
 local actionsPosX, actionsPosY = 39, 2
-local actionsTitle = rcLayout:createText(actionsPosX, actionsPosY, colors.white, "actions")
-local actionsList = rcLayout:createCustom(actionsTitle.x - 1, actionsTitle.y + 1, gobjs.checkboxgroup, 13, 5)
+local actionsTitle = rcLayout:createText(1, 1, colors.white, "actions")
+local actionsList = rcLayout:createCustom(1, 1, gobjs.checkboxgroup, 13, 5)
 actionsList.oneSelect = true
 actionsList.list = {
 	{"swing"},
@@ -955,6 +970,12 @@ ox, oy, oz = nx, ny, nz]])
 		controls.syncDir.state = true
 		controls.syncDir:onSwitch()
 	end
+
+	actionsTitle.x = actionsPosX
+	actionsTitle.y = actionsPosY
+	actionsList.x = actionsTitle.x - 1
+	actionsList.y = actionsTitle.y + 1
+	uix.updateDrawZone(actionsList)
 end
 
 local function createRobotControl()
@@ -965,8 +986,8 @@ local ci = 0 for i = 1, count do
 	else
 		ci = ci + 1
 	end
+	ut()
 end
-ut()
 return ci]]
 
 	controls[1] = rcLayout:createText(2, 12, colors.white, "feedback on movement:")
@@ -979,7 +1000,7 @@ return ci]]
 				ui:mwindow(screen, gui.warn, screen, nil, nil, "the movement failed, " .. blocks .." blocks were passed")
 			end
 		else
-			deviceSend(controlAddress, "rc_exec", robotMoveCode, side, currentBlockCount)
+			deviceSend(controlAddress, "rc_fexec", robotMoveCode, side, currentBlockCount)
 		end
 	end
 
@@ -1034,6 +1055,12 @@ return ci]]
 	move[6].onDrop = function (self)
 		robotMove(sides.down)
 	end
+
+	actionsTitle.x = actionsPosX - 2
+	actionsTitle.y = actionsPosY + 3
+	actionsList.x = actionsTitle.x - 1
+	actionsList.y = actionsTitle.y + 1
+	uix.updateDrawZone(actionsList)
 end
 
 function rcLayout:onSelect(devicetype)
@@ -1173,7 +1200,9 @@ function colorpic:onColor(_, color)
 end
 
 ui:loop()
+
 bgThread:kill()
+bgThread2:kill()
 if controlAddress then
 	deviceSend(controlAddress, "rc_out")
 end
