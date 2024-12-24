@@ -438,13 +438,10 @@ for i = 1, 6 do
 	end
 
 	function execButton:onDrop()
-		ui:fullStop()
-		local ok, err = statusRequest(controlAddress, "rc_exec", inputStr.read.getBuffer())
+		local ok, err = ui:mwindow(screen, statusRequest, controlAddress, "rc_exec", inputStr.read.getBuffer())
 		if not ok then
-			gui.warn(screen, nil, nil, tostring(err))
+			ui:mwindow(screen, gui.warn, screen, nil, nil, tostring(err))
 		end
-		ui:fullStart()
-		ui:draw()
 	end
 end
 
