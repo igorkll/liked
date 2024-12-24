@@ -633,19 +633,19 @@ actionsList.list = {
 }
 
 local actionsFuncs = {
-	"(robot or drone).swing(...)",
-	"(robot or drone).use(...)",
-	"(robot or drone).use(..., true)",
-	"(robot or drone).place(...)",
-	"(robot or drone).place(..., true)",
-	"(robot or drone).drain(..., 1)",
-	"(robot or drone).drain(..., math.huge)",
-	"(robot or drone).fill(..., 1)",
-	"(robot or drone).fill(..., math.huge)",
-	"(robot or drone).drop(..., 1)",
-	"(robot or drone).drop(..., math.huge)",
-	"(robot or drone).suck(..., 1)",
-	"(robot or drone).suck(..., math.huge)"
+	"return (robot or drone).swing(...)",
+	"return (robot or drone).use(...)",
+	"return (robot or drone).use(..., true)",
+	"return (robot or drone).place(...)",
+	"return (robot or drone).place(..., true)",
+	"return (robot or drone).drain(..., 1)",
+	"return (robot or drone).drain(..., math.huge)",
+	"return (robot or drone).fill(..., 1)",
+	"return (robot or drone).fill(..., math.huge)",
+	"return (robot or drone).drop(..., 1)",
+	"return (robot or drone).drop(..., math.huge)",
+	"return (robot or drone).suck(..., 1)",
+	"return (robot or drone).suck(..., math.huge)"
 }
 
 local controls = {}
@@ -682,13 +682,6 @@ ui:bind(200, move[1])
 ui:bind(205, move[2])
 ui:bind(208, move[3])
 ui:bind(203, move[4])
-
-local function actionOnSide(side)
-	local i = findObj(actionsList.list)
-	if i then
-		deviceSend(controlAddress, "rc_exec", actionsFuncs[i], side)
-	end
-end
 
 local function createDroneControl()
 	local droneMoveCode = [[local dx, dy, dz = ...
@@ -990,8 +983,26 @@ local ci = 0 for i = 1, count do
 end
 return ci]]
 
-	controls[1] = rcLayout:createText(2, 12, colors.white, "feedback on movement:")
+	controls[1] = rcLayout:createText(2, 12, colors.white, "feedback:")
 	controls.feedback = rcLayout:createSwitch(controls[1].x + #controls[1].text + 1, controls[1].y, true)
+
+	local function actionOnSide(side)
+		local i = findObj(actionsList.list)
+		local execString
+		if i then
+			execString = actionsFuncs[i]
+		else
+			return
+		end
+
+		if controls.feedback.state then
+			if not select(2, assert(ui:mwindow(screen, statusLongRequest, 15, controlAddress, "rc_exec", execString, side))) then
+				ui:mwindow(screen, gui.warn, screen, nil, nil, "failed to perform action")
+			end
+		else
+			deviceSend(controlAddress, "rc_fexec", execString, side)
+		end
+	end
 
 	local function robotMove(side)
 		if controls.feedback.state then
