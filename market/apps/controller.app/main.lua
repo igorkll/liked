@@ -14,6 +14,7 @@ local screensaver = require("screensaver")
 local thread = require("thread")
 local sides = require("sides")
 local uuid = require("uuid")
+local graphic = require("graphic")
 local liked = require("liked")
 
 local screen = ...
@@ -392,6 +393,13 @@ local blockPeerMove = rcLayout:createSeek(2, rcLayout.sizeY - 9, 16)
 local blockPeerMoveText = rcLayout:createText(blockPeerMove.x + blockPeerMove.size + 1, rcLayout.sizeY - 9, colors.white)
 local acceleration = rcLayout:createSeek(43, rcLayout.sizeY - 9, 17)
 local accelerationText = rcLayout:createText(acceleration.x + acceleration.size + 1, rcLayout.sizeY - 9, colors.white)
+
+local hideButton = rcLayout:createButton(toOther.x + toOther.sx + 1, rcLayout.sizeY - 3, 6, 1, colors.white, colors.black, "hide")
+function hideButton:onClick()
+	fcontrol:select()
+end
+ui:bind(28, hideButton)
+
 local currentBlockCount
 local currentAcceleration
 local maxAcceleration
@@ -1188,6 +1196,23 @@ function wakeUpSwitch:onSwitch()
 		statusRequest(controlAddress, "rc_exec", "if tunnel then tunnel.setWakeMessage() end if modem then modem.setWakeMessage() end")
 	end
 end
+
+-----------------------------
+
+local retResX, retResY = graphic.getResolution(screen)
+fcontrol = ui:createCustom(graphic.createWindow(screen, 1, 1, 1, 1), colors.black, "square")
+
+function fcontrol:onSelect()
+	graphic.setResolution(screen, 1, 1)
+end
+
+local fcontrolBack = fcontrol:createButton(1, 1, 1, 1, colors.orange, colors.white, "<")
+function fcontrolBack:onClick()
+	graphic.setResolution(screen, retResX, retResY)
+	rcLayout:select()
+end
+
+ui:bind(28, fcontrolBack)
 
 -----------------------------
 
