@@ -487,10 +487,6 @@ local function statsUpdate(noDraw)
 	return table.concat(tbl, "\n"), offset
 end)()]]
 
-	if ui.current ~= rcLayout then
-		noDraw = true
-	end
-
 	local requestOk, ok, val, strs, offset, acceleration = rawDeviceRequest(5, controlAddress, "rc_exec", getterCode)
 	if not requestOk then return true end
 	distanceTitle.text = "distance: " .. math.roundTo(requestOk[1], 1)
@@ -511,13 +507,9 @@ end)()]]
 
 	if offset then
 		colTitle.text = "collision: " .. math.roundTo(offset, 1)
-		if ui.current == rcLayout then
-			colTitle:draw()
-		end
+		colTitle:draw()
 	end
-	if ui.current == rcLayout then
-		distanceTitle:draw()
-	end
+	distanceTitle:draw()
 end
 
 local bgThread = thread.createBackground(function ()

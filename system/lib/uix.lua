@@ -350,6 +350,10 @@ end
 
 function objclass:draw()
 	if self.hidden or self.disabledHidden then return end
+	if self.gui.smartGuiManager and self.gui ~= self.gui.smartGuiManager.current then
+		return
+	end
+
 	local style = self.style or self.gui.style
 	if self.type == "label" or self.type == "button" or self.type == "context" then
 		local back, fore = self.back, self.fore
