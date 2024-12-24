@@ -15,7 +15,7 @@ if not cb then
 	return
 end
 
-local _, drawUp, callbacks = liked.drawFullUpBarTask(screen, " CommandBlock")
+local _, drawUp, callbacks = liked.drawFullUpBarTask(screen, "CommandBlock")
 
 local rx, ry = graphic.getResolution(screen)
 local term = require("term").create(screen, 1, 2, rx, ry - 4, true)
