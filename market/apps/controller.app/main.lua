@@ -16,6 +16,7 @@ local sides = require("sides")
 local uuid = require("uuid")
 local graphic = require("graphic")
 local liked = require("liked")
+local lastinfo = require("lastinfo")
 
 local screen = ...
 local colors = uix.colors
@@ -645,6 +646,15 @@ local actionsFuncs = {
 	"return (robot or drone).suck(..., math.huge)"
 }
 
+local customBinds = {}
+local function customBind(code, item)
+	if not customBinds[item] then
+		customBinds[item] = {}
+	end
+	customBinds[item][code] = true
+	ui:bind(code, item)
+end
+
 local controls = {}
 local move = {
 	rcLayout:createButton(6, 5, 4, 2, colors.purple, colors.white),
@@ -654,6 +664,20 @@ local move = {
 	rcLayout:createButton(6+9, 5, 4, 2, colors.orange, colors.white),
 	rcLayout:createButton(6+9, 9, 4, 2, colors.orange, colors.white)
 }
+
+-- WASD, space, shift
+customBind(17, move[1])
+customBind(32, move[2])
+customBind(31, move[3])
+customBind(30, move[4])
+customBind(57, move[5])
+customBind(42, move[6])
+
+-- arrows
+customBind(200, move[1])
+customBind(205, move[2])
+customBind(208, move[3])
+customBind(203, move[4])
 
 local actionOffset = 18
 local firstActionPosX, firstActionPosY = actionOffset + 6, 5
@@ -667,18 +691,6 @@ local action = {
 	rcLayout:createButton(upActPosX, upActPosY, 4, 2, colors.pink, colors.white),
 	rcLayout:createButton(downActPosX, downActPosY, 4, 2, colors.pink, colors.white)
 }
-
-ui:bind(17, move[1])
-ui:bind(32, move[2])
-ui:bind(31, move[3])
-ui:bind(30, move[4])
-ui:bind(57, move[5])
-ui:bind(42, move[6])
-
-ui:bind(200, move[1])
-ui:bind(205, move[2])
-ui:bind(208, move[3])
-ui:bind(203, move[4])
 
 local function createDroneControl()
 	local droneMoveCode = [[local dx, dy, dz = ...
@@ -876,7 +888,7 @@ ox, oy, oz = nx, ny, nz]])
 	updateRotation()
 
 	controls.l1 = rcLayout:createButton(2, 12, 4, 2, colors.green, colors.white, "<<")
-	ui:bind(16, controls.l1)
+	customBind(16, controls.l1)
 	function controls.l1:onDrop()
 		droneVirtualRotation = droneVirtualRotation - 1
 		if droneVirtualRotation < 0 then
@@ -886,7 +898,7 @@ ox, oy, oz = nx, ny, nz]])
 	end
 
 	controls.l2 = rcLayout:createButton(10, 12, 4, 2, colors.green, colors.white, ">>")
-	ui:bind(18, controls.l2)
+	customBind(18, controls.l2)
 	function controls.l2:onDrop()
 		droneVirtualRotation = droneVirtualRotation + 1
 		if droneVirtualRotation > 3 then
@@ -910,40 +922,38 @@ ox, oy, oz = nx, ny, nz]])
 				tmpThreads.autoSync = thread.create(function ()
 					local oldDir = droneVirtualRotation
 					while true do
-						if rcLayout.selected then
-							local rawYaw = component.tablet.getYaw()
-							local yaw = math.floor(((-math.abs(rawYaw) + 180) / (360 / 4)) + 0.5)
-							local dir
-							if yaw == 2 or yaw == -2 then
-								if rawYaw > 0 then
-									dir = 2
-								else
-									dir = 0
-								end
-							elseif yaw == 1 then
-								if rawYaw > 0 then
-									dir = 1
-								else
-									dir = 3
-								end
-							elseif yaw == -1 then
-								if rawYaw > 0 then
-									dir = 3
-								else
-									dir = 1
-								end
+						local rawYaw = component.tablet.getYaw()
+						local yaw = math.floor(((-math.abs(rawYaw) + 180) / (360 / 4)) + 0.5)
+						local dir
+						if yaw == 2 or yaw == -2 then
+							if rawYaw > 0 then
+								dir = 2
 							else
-								if rawYaw > 0 then
-									dir = 0
-								else
-									dir = 2
-								end
+								dir = 0
 							end
-							if dir ~= oldDir then
-								droneVirtualRotation = dir
-								updateRotation(true)
-								oldDir = dir
+						elseif yaw == 1 then
+							if rawYaw > 0 then
+								dir = 1
+							else
+								dir = 3
 							end
+						elseif yaw == -1 then
+							if rawYaw > 0 then
+								dir = 3
+							else
+								dir = 1
+							end
+						else
+							if rawYaw > 0 then
+								dir = 0
+							else
+								dir = 2
+							end
+						end
+						if dir ~= oldDir then
+							droneVirtualRotation = dir
+							updateRotation(true)
+							oldDir = dir
 						end
 						os.sleep(0.5)
 					end
@@ -1199,6 +1209,30 @@ end
 
 -----------------------------
 
+local function keyboardCheck(eventData)
+	return table.exists(lastinfo.keyboards[screen], eventData[2])
+end
+
+thread.create(function ()
+	while true do
+		local eventData = {event.pull()}
+		local isDown = eventData[1] == "key_down"
+		if rcLayout ~= ui.current and (isDown or eventData[1] == "key_up") and keyboardCheck(eventData) then
+			for item, codes in pairs(customBinds) do
+				if codes[eventData[4]] then
+					if isDown then
+						if item.onClick then
+							item:onClick()
+						end
+					elseif item.onDrop then
+						item:onDrop()
+					end
+				end
+			end
+		end
+	end
+end):resume()
+
 local retResX, retResY = graphic.getResolution(screen)
 fcontrol = ui:createCustom(graphic.createWindow(screen, 1, 1, 1, 1), colors.black, "square")
 
@@ -1206,9 +1240,12 @@ function fcontrol:onSelect()
 	graphic.setResolution(screen, 1, 1)
 end
 
+function fcontrol:onUnselect()
+	graphic.setResolution(screen, retResX, retResY)
+end
+
 local fcontrolBack = fcontrol:createButton(1, 1, 1, 1, colors.orange, colors.white, "<")
 function fcontrolBack:onClick()
-	graphic.setResolution(screen, retResX, retResY)
 	rcLayout:select()
 end
 
