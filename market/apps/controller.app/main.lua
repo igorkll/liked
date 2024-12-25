@@ -694,6 +694,24 @@ local action = {
 	rcLayout:createButton(downActPosX, downActPosY, 4, 2, colors.pink, colors.white)
 }
 
+local function actionOnSide(side)
+	local i = findObj(actionsList.list)
+	local execString
+	if i then
+		execString = actionsFuncs[i]
+	else
+		return
+	end
+
+	if controls.feedback.state then
+		if not select(2, assert(ui:mwindow(screen, statusLongRequest, 15, controlAddress, "rc_exec", execString, side))) then
+			ui:mwindow(screen, gui.warn, screen, nil, nil, "failed to perform action")
+		end
+	else
+		deviceSend(controlAddress, "rc_fexec", execString, side)
+	end
+end
+
 local function createDroneControl()
 	local droneMoveCode = [[local dx, dy, dz = ...
 ox = (ox or 0) + dx
@@ -742,6 +760,24 @@ drone.move(dx, dy, dz)]]
 		if dx ~= 0 or dy ~= 0 or dz ~= 0 then
 			deviceSend(controlAddress, "rc_fexec", droneMoveCode, dx, dy, dz)
 		end
+	end
+
+	local function droneAction(title)
+		local side
+		if title == "+Y" then
+			side = sides.posy
+		elseif title == "-Y" then
+			side = sides.negy
+		elseif title == "+X" then
+			side = sides.posx
+		elseif title == "-X" then
+			side = sides.negx
+		elseif title == "+Z" then
+			side = sides.posz
+		elseif title == "-Z" then
+			side = sides.negz
+		end
+		actionOnSide(side)
 	end
 
 	controls.touchControl = rcLayout:createCanvas(rcLayout.sizeX - 25, 2, 24, 12, colors.white, 0, " ")
@@ -820,6 +856,12 @@ drone.move(dx, dy, dz)]]
 local mx, my, mz = nx - (ox or 0), ny - (oy or 0), nz - (oz or 0)
 drone.move(mx, my, mz)
 ox, oy, oz = nx, ny, nz]])
+	end
+
+	for i = 1, 6 do
+		action[i].onDrop = function (self)
+			droneAction(self.text)
+		end
 	end
 
 	action[1].x = firstActionPosX
@@ -914,6 +956,9 @@ ox, oy, oz = nx, ny, nz]])
 	controls[1] = rcLayout:createText(15, 12, colors.white, "sync direction:")
 	controls.syncDir = rcLayout:createSwitch(controls[1].x + #controls[1].text + 1, controls[1].y)
 
+	controls[2] = rcLayout:createText(controls[1].x, controls[1].y + 1, colors.white, "feedback:")
+	controls.feedback = rcLayout:createSwitch(controls[2].x + #controls[2].text + 1, controls[2].y, true)
+
 	function controls.syncDir:onSwitch()
 		if self.state and not component.tablet then
 			ui:mwindow(screen, gui.warn, screen, nil, nil, "this option is only available on the tablet")
@@ -999,24 +1044,6 @@ return ci]]
 
 	controls[1] = rcLayout:createText(2, 12, colors.white, "feedback:")
 	controls.feedback = rcLayout:createSwitch(controls[1].x + #controls[1].text + 1, controls[1].y, true)
-
-	local function actionOnSide(side)
-		local i = findObj(actionsList.list)
-		local execString
-		if i then
-			execString = actionsFuncs[i]
-		else
-			return
-		end
-
-		if controls.feedback.state then
-			if not select(2, assert(ui:mwindow(screen, statusLongRequest, 15, controlAddress, "rc_exec", execString, side))) then
-				ui:mwindow(screen, gui.warn, screen, nil, nil, "failed to perform action")
-			end
-		else
-			deviceSend(controlAddress, "rc_fexec", execString, side)
-		end
-	end
 
 	local function robotMove(side)
 		if controls.feedback.state then
