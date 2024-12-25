@@ -712,6 +712,12 @@ local function actionOnSide(side)
 	end
 end
 
+local control_l1 = rcLayout:createButton(2, 12, 4, 2, colors.green, colors.white, "<<")
+customBind(16, control_l1)
+
+local control_l2 = rcLayout:createButton(10, 12, 4, 2, colors.green, colors.white, ">>")
+customBind(18, control_l2)
+
 local function createDroneControl()
 	local droneMoveCode = [[local dx, dy, dz = ...
 ox = (ox or 0) + dx
@@ -931,9 +937,10 @@ ox, oy, oz = nx, ny, nz]])
 
 	updateRotation()
 
-	controls.l1 = rcLayout:createButton(2, 12, 4, 2, colors.green, colors.white, "<<")
-	customBind(16, controls.l1)
-	function controls.l1:onDrop()
+	control_l1.disabledHidden = false
+	control_l2.disabledHidden = false
+
+	function control_l1:onDrop()
 		droneVirtualRotation = droneVirtualRotation - 1
 		if droneVirtualRotation < 0 then
 			droneVirtualRotation = 3
@@ -941,9 +948,7 @@ ox, oy, oz = nx, ny, nz]])
 		updateRotation(true)
 	end
 
-	controls.l2 = rcLayout:createButton(10, 12, 4, 2, colors.green, colors.white, ">>")
-	customBind(18, controls.l2)
-	function controls.l2:onDrop()
+	function control_l2:onDrop()
 		droneVirtualRotation = droneVirtualRotation + 1
 		if droneVirtualRotation > 3 then
 			droneVirtualRotation = 0
@@ -1031,6 +1036,9 @@ ox, oy, oz = nx, ny, nz]])
 end
 
 local function createRobotControl()
+	control_l1.disabledHidden = true
+	control_l2.disabledHidden = true
+
 	local robotMoveCode = [[local side, count = ...
 local ci = 0 for i = 1, count do
 	if not robot.move(side) then
