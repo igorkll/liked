@@ -37,6 +37,8 @@ for tunnel in component.list("tunnel") do
 	allModems[tunnel] = true
 end
 
+local mc_1_7_10 = true
+
 if modem then
 	utils.openPort(modem, port)
 end
@@ -948,6 +950,13 @@ ox, oy, oz = nx, ny, nz]])
 								dir = 0
 							else
 								dir = 2
+							end
+						end
+						if mc_1_7_10 then
+							if dir == 0 then
+								dir = 2
+							elseif dir == 2 then
+								dir = 0
 							end
 						end
 						if dir ~= oldDir then
