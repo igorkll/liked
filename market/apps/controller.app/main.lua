@@ -925,38 +925,36 @@ ox, oy, oz = nx, ny, nz]])
 					local oldDir = droneVirtualRotation
 					while true do
 						local rawYaw = component.tablet.getYaw()
-						local yaw = math.floor(((-math.abs(rawYaw) + 180) / (360 / 4)) + 0.5)
 						local dir
-						if yaw == 2 or yaw == -2 then
-							if rawYaw > 0 then
-								dir = 2
-							else
-								dir = 0
-							end
-						elseif yaw == 1 then
-							if rawYaw > 0 then
-								dir = 1
-							else
-								dir = 3
-							end
-						elseif yaw == -1 then
-							if rawYaw > 0 then
-								dir = 3
-							else
-								dir = 1
-							end
-						else
-							if rawYaw > 0 then
-								dir = 0
-							else
-								dir = 2
-							end
-						end
 						if mc_1_7_10 then
-							if dir == 0 then
-								dir = 2
-							elseif dir == 2 then
-								dir = 0
+							dir = math.floor((math.abs(rawYaw) / (360 / 4)) + 0.5)
+							if dir == 4 then dir = 0 end
+						else
+							local yaw = math.floor(((-math.abs(rawYaw) + 180) / (360 / 4)) + 0.5)
+							if yaw == 2 or yaw == -2 then
+								if rawYaw > 0 then
+									dir = 2
+								else
+									dir = 0
+								end
+							elseif yaw == 1 then
+								if rawYaw > 0 then
+									dir = 1
+								else
+									dir = 3
+								end
+							elseif yaw == -1 then
+								if rawYaw > 0 then
+									dir = 3
+								else
+									dir = 1
+								end
+							else
+								if rawYaw > 0 then
+									dir = 0
+								else
+									dir = 2
+								end
 							end
 						end
 						if dir ~= oldDir then
@@ -1040,7 +1038,7 @@ return ci]]
 
 	action[1].x = firstActionPosX + 4 + aOffset
 	action[1].y = firstActionPosY + 2
-	action[1].text = "frow"
+	action[1].text = "forw"
 	action[1].onDrop = function()
 		actionOnSide(sides.front)
 	end

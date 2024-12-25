@@ -165,7 +165,7 @@ function objclass:uploadEvent(eventData)
 				end
 			end
 		else
-			if self.state and (eventData[1] == "touch" or eventData[1] == "drop") then
+			if self.state and eventData[1] == "drop" then
 				if self.type ~= "context" and not self.autoRelease then
 					self.state = false
 					self:draw()
