@@ -60,6 +60,5 @@ if registry.forceRestrictedLoader and not _restrictedLoader then
 		end
 	else
 		error(errTitle .. "the firmware image could not be found")
-		computer.shutdown("fast")
 	end
 end

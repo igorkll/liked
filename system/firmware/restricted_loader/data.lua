@@ -10,10 +10,6 @@ local serialization = require("serialization")
 local screen, _, hidden, otherDevice = ...
 local appendData = "local bootAddress = \"" .. fs.bootaddress .. "\"\n"
 
-if hidden then
-	return nil, appendData
-end
-
 local selectedDisk
 if otherDevice then
 	local clear = gui.saveBigZone(screen)
@@ -54,6 +50,10 @@ local function apply()
 	if not otherDevice then
 		computer.shutdown("fast")
 	end
+end
+
+if hidden then
+	return nil, appendData, apply
 end
 
 local clear = gui.saveBigZone(screen)
