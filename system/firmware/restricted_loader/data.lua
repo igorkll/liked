@@ -33,7 +33,7 @@ local function applyRestrictions(disk)
 		local registryTable = serialization.unserialize(registryData)
 		if type(registryTable) == "table" then
 			registryTable.disableRecovery = true
-			bootloader.writeFile(disk, serialization.serialize(registryTable))
+			bootloader.writeFile(disk, "/data/registry.dat", serialization.serialize(registryTable))
 		end
 	end
 
