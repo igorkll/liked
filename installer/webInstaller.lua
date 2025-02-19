@@ -444,14 +444,19 @@ local function downloadFile(diskProxy, branch, path, toPath)
 	diskProxy.close(file)
 end
 
-local function getRealTime()
+local function getRealTime(attemptTwo)
 	local tmpfs = component.proxy(computer.tmpAddress())
 
-	local file = assert(tmpfs.open("/tmp/null", "wb"))
+	local file = assert(tmpfs.open("/null", "wb"))
 	tmpfs.close(file)
 
-	local unixTime = tmpfs.lastModified("/tmp/null")
-	tmpfs.remove("/tmp/null")
+	local unixTime = tmpfs.lastModified("/null")
+	tmpfs.remove("/null")
+
+	if not unixTime and not attemptTwo then
+		tmpfs.remove("/")
+		return getRealTime(true)
+	end
 
 	return unixTime
 end
