@@ -64,6 +64,10 @@
 /system/firmware/restricted_loader/code.lua
 /system/firmware/restricted_loader/data.lua
 /system/firmware/restricted_loader/label.txt
+/system/firmware/restricted_loader_other/code.path
+/system/firmware/restricted_loader_other/data.lua
+/system/firmware/restricted_loader_other/flashLabel.txt
+/system/firmware/restricted_loader_other/label.txt
 /system/icons/afpx.t2p
 /system/icons/app.t2p
 /system/icons/badicon.t2p
