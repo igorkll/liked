@@ -1625,8 +1625,8 @@ function gui.selectcomponent(screen, cx, cy, types, allowAutoConfirm, control, c
 	end
 end
 
-function gui.selectcomponentProxy(screen, cx, cy, types, allowAutoConfirm, control, callbacks, blacklist)
-	local addr = gui.selectcomponent(screen, cx, cy, types, allowAutoConfirm, control, callbacks, blacklist)
+function gui.selectcomponentProxy(...)
+	local addr = gui.selectcomponent(...)
 	if addr then
 		return component.proxy(addr)
 	end

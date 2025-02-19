@@ -21,15 +21,26 @@ function eeprom.list(screen)
 			local label = paths.hideExtension(file):gsub("_", " ")
 			local data = ""
 			local code = file
+			local flashLabel
 
 			if fs.isDirectory(fullpath) then
 				label = fs.readFile(paths.concat(fullpath, "label.txt")) or label
 				data = fs.readFile(paths.concat(fullpath, "data.txt")) or data
 				code = paths.concat(fullpath, "code.lua")
+				if not fs.exists(code) then
+					code = fs.readFile(paths.concat(fullpath, "code.path"))
+				end
+
+				flashLabel = paths.concat(fullpath, "flashLabel.txt")
+				if fs.exists(flashLabel) then
+					flashLabel = fs.readFile(flashLabel)
+				else
+					flashLabel = nil
+				end
 			end
 
 			table.insert(labels, label)
-			table.insert(list, {label = label, data = data, code = code, makeData = function (hidden)
+			table.insert(list, {label = label, flashLabel = flashLabel, data = data, code = code, makeData = function (hidden)
 				local datamakePath = paths.concat(fullpath, "data.lua")
 				if fs.exists(datamakePath) then
 					local result = {apps.executeWithWarn(datamakePath, screen, nil, hidden)}
@@ -72,10 +83,10 @@ function eeprom.makeData(firmware, hidden)
 end
 
 function eeprom.flash(screen, firmware, force)
-	local data, appendData = eeprom.makeData(firmware)
+	local data, appendData, afterFlash = eeprom.makeData(firmware)
 	if data ~= true and (force or gui.pleaseType(screen, "FLASH", "flash eeprom")) then
 		gui.status(screen, nil, nil, "flashing...")
-		return eeprom.hiddenFlash(firmware, data, appendData)
+		return eeprom.hiddenFlash(firmware, data, appendData, afterFlash)
 	end
 end
 
@@ -89,13 +100,9 @@ function eeprom.isFirmware(firmware)
 	return false
 end
 
-function eeprom.hiddenFlash(firmware, data, appendData)
-	local afterFlash
-	if not data or not appendData then
-		local l1, l2, _afterFlash = eeprom.makeData(firmware, true)
-		data = l1 or data
-		appendData = l2 or appendData
-		afterFlash = _afterFlash
+function eeprom.hiddenFlash(firmware, data, appendData, afterFlash)
+	if not data and not appendData and not afterFlash then
+		data, appendData, afterFlash = eeprom.makeData(firmware, true)
 	end
 	local componentEeprom = component.eeprom
 	local _, err = componentEeprom.set((appendData or "") .. (firmware.rawCode or assert(fs.readFile(firmware.code))))
@@ -103,7 +110,7 @@ function eeprom.hiddenFlash(firmware, data, appendData)
 		return nil, err
 	end
 	componentEeprom.setData(data or "")
-	componentEeprom.setLabel(firmware.label or "UNKNOWN")
+	componentEeprom.setLabel(firmware.flashLabel or firmware.label or "UNKNOWN")
 	if afterFlash then
 		afterFlash()
 	end
