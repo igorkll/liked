@@ -1,3 +1,11 @@
+--[[
+supports operating systems:
+likeOS / liked
+mineOS
+openOS
+plan9k
+]]
+
 _G._bootmanager = true
 
 local computer = computer
@@ -104,7 +112,7 @@ local function mineOSboot(proxy)
 			if method == "getData" then
 				return proxy.address
 			else
-				error("access denied", 2) --у mineOS не будет доступа к eeprom, чтобы исключить воздействия вирусов(кой таких в mineOS пално)
+				error("access denied", 2)
 			end
 		end
 
