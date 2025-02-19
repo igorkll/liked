@@ -163,10 +163,11 @@ function layout.cleanButton:onClick()
 			local clear = gui.saveZone(screen)
 			gui.status(screen, nil, nil, "cleaning the system...")
 			local used = fs.spaceUsed("/")
+			local rootfs = fs.get("/mnt/root")
 			for i, removeList in ipairs(removeLists) do
 				if layout.actionList.list[i][2] then
 					for _, removePath in ipairs(removeList) do
-						fs.remove(removePath)
+						rootfs.remove(removePath)
 					end
 				end
 			end
