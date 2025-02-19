@@ -24,7 +24,7 @@ local funcs = {
 				for key, data in pairs(sysdata) do
 					sysdataStr = sysdataStr .. key .. "=\"" .. data .. "\","
 				end
-				sysdataStr = sysdataStr .. "}}"
+				sysdataStr = sysdataStr .. "},self=\"" .. startupPath .. "\"}"
 
 				local content = "local installdata = " .. sysdataStr .. "\n" .. bootloader.readFile(bootfs, "/system/likedlib/update/update.lua")
 				if bootloader.writeFile(bootfs, startupPath, content) then
