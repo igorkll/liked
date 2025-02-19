@@ -29,12 +29,16 @@ do
 	end
 end
 
+local ignore = {
+	["/system/sysdata/eeprom"] = 1
+}
 local function checkSystem(address)
 	if not invoke(address, "exists", "/init.lua") then
 		return false
 	end
 	local lastModTime = tonumber(invoke(eeprom, "getData"))
 	local function checkFile(path)
+		if ignore[path] then return false end
 		return invoke(address, "lastModified", path) > lastModTime
 	end
 	local function process(dir)

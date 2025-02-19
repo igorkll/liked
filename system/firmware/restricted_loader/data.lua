@@ -48,7 +48,7 @@ end
 
 local function apply()
 	local eeprom = component.list("eeprom")()
-	applyRestrictions(selectedDisk or fs.bootfs)
+	applyRestrictions(selectedDisk or bootloader.bootfs)
 	component.invoke(eeprom, "makeReadonly", component.invoke(eeprom, "getChecksum"))
 	component.invoke(eeprom, "setData", tostring(time.getRealTime()))
 	if not otherDevice then
