@@ -28,6 +28,9 @@ local funcs = {
 
 				local content = "local installdata = " .. sysdataStr .. "\n" .. bootloader.readFile(bootfs, "/system/likedlib/update/update.lua")
 				if bootloader.writeFile(bootfs, startupPath, content) then
+					local tmpfs = component.proxy(bootloader.tmpaddress)
+                    tmpfs.makeDirectory("/bootloader")
+					bootloader.writeFile(tmpfs, "/bootloader/bootaddr", bootfs.address)
 					computer.shutdown("fast")
 				end
 			end
