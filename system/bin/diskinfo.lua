@@ -11,6 +11,7 @@ local uix = require("uix")
 local registry = require("registry")
 local component = require("component")
 local system = require("system")
+local liked = require("liked")
 
 local window = gui.customWindow(screen)
 local layout = uix.create(window, nil, uix.styles[2])
@@ -22,7 +23,8 @@ window:set(window.sizeX - 2, 1, colors.red, colors.white, " X ")
 window:set(2, 1, colors.gray, colors.white, "disk-info")
 
 local proxy = component.proxy(diskUuid)
-local size, sizeWithBaseCost, filesCount, dirsCount = fs.size(fs.point(diskUuid))
+local point = fs.point(diskUuid)
+local size, sizeWithBaseCost, filesCount, dirsCount = fs.size(point)
 local totalSpace = proxy.spaceTotal() / 1024
 local usedSpace = proxy.spaceUsed() / 1024
 
@@ -37,6 +39,8 @@ layout:createText(2, ry - 4, 0x000000, "disk space:")
 layout:createText(2, ry - 3, 0x000000, "total: " .. math.roundTo(totalSpace, 1) .. " KB")
 layout:createText(2, ry - 2, 0x000000, "used : " .. math.roundTo(usedSpace, 1) .. " KB")
 layout:createText(2, ry - 1, 0x000000, "free : " .. math.roundTo(totalSpace - usedSpace, 1) .. " KB")
+
+layout:createImage(rx - 9, 5, liked.getIcon(screen, point), true)
 
 layout:draw()
 
