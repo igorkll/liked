@@ -306,7 +306,7 @@ local list = {
 		name = "chunkloader",
 		version = "1",
 		vendor = "logic",
-		description = "the program for managing the chunkloader",
+		description = "the program for control the chunkloader",
 		minDiskSpace = 64,
 
 		path = "/data/apps/chunkloader.app",
@@ -316,7 +316,7 @@ local list = {
 		name = "assembler",
 		version = "1",
 		vendor = "logic",
-		description = "the program for managing the assembler",
+		description = "the program for control the assembler",
 		minDiskSpace = 64,
 
 		path = "/data/apps/assembler.app",
@@ -660,52 +660,62 @@ list.libs = {
 	["vec"] = {
 		url = selfurlpart .. "/libs/vec.lua",
 		vendor = "logic",
-		version = "2"
+		version = "2",
+		minDiskSpace = 64
 	},
 	["brainfuck"] = {
 		url = selfurlpart .. "/libs/brainfuck.lua",
 		vendor = "logic",
-		version = "1"
+		version = "1",
+		minDiskSpace = 64
 	},
 	["rsa"] = {
 		url = selfurlpart .. "/libs/rsa.lua",
 		vendor = "logic",
-		version = "1"
+		version = "1",
+		minDiskSpace = 64
 	},
 	["host"] = {
 		url = selfurlpart .. "/libs/host.lua",
 		vendor = "logic",
-		version = "3"
+		version = "3",
+		minDiskSpace = 64
 	},
 	["midi"] = {
 		url = selfurlpart .. "/libs/midi.lua",
 		vendor = "logic",
-		version = "2"
+		version = "2",
+		minDiskSpace = 64
 	},
 	["vmx"] = {
 		url = selfurlpart .. "/libs/vmx.lua",
 		vendor = "logic",
-		version = "1"
+		version = "2",
+		minDiskSpace = 64
 	},
 	["draw"] = {
 		url = selfurlpart .. "/libs/draw.lua",
 		vendor = "logic",
-		version = "1"
+		version = "1",
+		minDiskSpace = 64
 	},
 	["adv"] = {
 		url = selfurlpart .. "/libs/adv.lua",
 		vendor = "logic",
-		version = "1"
+		version = "1",
+		minDiskSpace = 64
 	},
 	["glasses"] = {
 		url = selfurlpart .. "/libs/glasses.lua",
 		vendor = "logic",
-		version = "1"
+		version = "1",
+		minDiskSpace = 64
 	},
 	["xml"] = {
 		url = selfurlpart .. "/libs/xml.lua",
 		vendor = "logic",
-		version = "1"
+		version = "1",
+		minDiskSpace = 64
 	},
 	["bitMapFonts"] = {
 		url = selfurlpart .. "/libs/bitMapFonts/init.lua",
@@ -721,7 +731,8 @@ list.libs = {
 				url = selfurlpart .. "/libs/bitMapFonts/font.tbl",
 				path = "/data/lib/bitMapFonts/font.tbl"
 			}
-		}
+		},
+		minDiskSpace = 128
 	},
 	["zximage"] = {
 		url = selfurlpart .. "/libs/zximage/init.lua",
@@ -733,14 +744,16 @@ list.libs = {
 				url = selfurlpart .. "/libs/zximage/palette.plt",
 				path = "/data/lib/zximage/palette.plt"
 			}
-		}
+		},
+		minDiskSpace = 128
 	},
 	["openbox"] = {
 		url = selfurlpart .. "/libs/openbox/init.lua",
 		vendor = "logic",
-		version = "4",
+		version = "5",
 		path = "/data/lib/openbox/init.lua",
 		libs = {"vmx"},
+		minDiskSpace = 400,
 		files = (function ()
 			local boxlist = {
 				"box.lua",

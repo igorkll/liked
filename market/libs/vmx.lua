@@ -45,7 +45,6 @@ function vmx.createBaseEnv(vm)
 		table = table.deepclone(natives.table),
 		unicode = table.deepclone(unicode),
 		string = table.deepclone(string),
-		bit32 = table.deepclone(bit32),
 		debug = table.deepclone(debug),
 
 		os = {
@@ -95,8 +94,9 @@ function vmx.createBaseEnv(vm)
 	}
 
 	if _VERSION == "Lua 5.3" or _VERSION == "Lua 5.4" then
-		sandbox.bit32 = nil
 		sandbox.utf8 = table.deepclone(utf8)
+	else
+		sandbox.bit32 = table.deepclone(bit32)
 	end
 
 	sandbox._G = sandbox
@@ -188,7 +188,6 @@ function vmx.createComputerLib(vm)
 		tmpAddress = function()
 			return vm.tmpAddress
 		end,
-
 		freeMemory = function()
 			return computer.freeMemory()
 		end,
@@ -200,8 +199,12 @@ function vmx.createComputerLib(vm)
 		shutdown = function(reboot)
 			coroutine.yield(not not reboot)
 		end,
-		energy = computer.energy,
-		maxEnergy = computer.maxEnergy,
+		energy = function()
+			return computer.energy()
+		end,
+		maxEnergy = function()
+			return computer.maxEnergy()
+		end,
 	}
 	return computerlib, internalComputer
 end
@@ -507,6 +510,7 @@ function vmx.createVirtualEeprom(eepromPath, eepromCodePath, eepromLabelPath)
 			return true
 		end
 	}
+
 	return eeprom
 end
 
@@ -515,6 +519,9 @@ function vmx.create(eepromPath, diskSettings, address)
 	vm.env = vmx.createBaseEnv()
 	vm.address = address or uuid.next()
 	vm.deviceinfo = {}
+	vm.tunnelEvents = {
+		["tablet_use"] = true
+	}
 	for address, info in pairs(lastinfo.deviceinfo) do
 		if not component.isConnected(address) then
 			vm.deviceinfo[address] = info
@@ -542,7 +549,6 @@ function vmx.create(eepromPath, diskSettings, address)
 	end
 
 	function vm.bindTmp(address)
-		if vm.tmpAddress then return false end
 		vm.tmpAddress = address or uuid.next()
 
 		return true
@@ -607,16 +613,16 @@ function vmx.create(eepromPath, diskSettings, address)
 	vm.internalComputer = internalComputer
 
 	local componentComputer = vmx.createVirtualComputer(vm)
-	vm.bindComponent(componentComputer)
+	vm.bindComponent(componentComputer, true)
 	
 	---- bind components
 	if eepromPath then
 		vm.eeprom = vmx.createVirtualEeprom(eepromPath)
-		vm.bindComponent(vm.eeprom)
+		vm.bindComponent(vm.eeprom, true)
 	end
 
 	if diskSettings then
-		vm.bindComponent(vmx.fromVirtual(fs.dump(table.unpack(diskSettings))))
+		vm.bindComponent(vmx.fromVirtual(fs.dump(table.unpack(diskSettings))), true)
 	end
 
 	return vm
@@ -649,7 +655,7 @@ end
 
 function vmx.pullEvent(vm, timeout)
 	local eventData = {event.pull(timeout)}
-	if #eventData > 0 and (eventData[1] == "tablet_use" or inVmComponentExists(vm, eventData[2])) then
+	if #eventData > 0 and (vm.tunnelEvents[eventData[1]] or inVmComponentExists(vm, eventData[2])) then
 		return table.unpack(eventData)
 	end
 end

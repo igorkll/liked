@@ -12,6 +12,7 @@ local vcomponent = require("vcomponent")
 
 local boxPath = system.getResourcePath("box")
 local eepromPath = system.getResourcePath("eepromImage")
+local tempPath = "/tmp/openbox"
 local openbox = {}
 
 function openbox.run(screen, program)
@@ -26,26 +27,32 @@ function openbox.run(screen, program)
 		vm = vmx.create(eepromPath, {boxPath, true, nil, "openos"})
 		vm.env.os.program = paths.name(program)
 		vm.env.os.tunnel = tunnel
+
+		filesystem.makeDirectory(tempPath)
+		local tmpfs = vmx.fromVirtual(fs.dump(tempPath, math.round(filesystem.get(tempPath).spaceTotal() / 4), nil, "tmpfs"))
+		vm.bindComponent(tmpfs, true)
+		vm.bindTmp(tmpfs.address)
+
 		local progfs = vmx.fromVirtual(fs.dump(paths.path(program), false, nil, "program"))
-		vm.bindComponent(progfs)
+		vm.bindComponent(progfs, true)
 		vm.env.os.progfs = progfs
 
 		if gpuAddress then
-			vm.bindComponent(vmx.fromReal(gpuAddress))
+			vm.bindComponent(vmx.fromReal(gpuAddress), true)
 		end
 		
 		if screen then
-			vm.bindComponent(vmx.fromReal(screen))
+			vm.bindComponent(vmx.fromReal(screen), true)
 			for _, keyboard in ipairs(lastinfo.keyboards[screen]) do
 				if not vcomponent.isVirtual(keyboard) then
-					vm.bindComponent(vmx.fromReal(keyboard))
+					vm.bindComponent(vmx.fromReal(keyboard), true)
 				end
 			end
 		end
 
 		for address, ctype in component.list() do
 			if ctype ~= "screen" and ctype ~= "keyboard" and ctype ~= "filesystem" and ctype ~= "eeprom" then
-				vm.bindComponent(vmx.fromReal(address))
+				vm.bindComponent(vmx.fromReal(address), true)
 			end
 		end
 		
