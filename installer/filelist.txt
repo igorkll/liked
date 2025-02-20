@@ -17,12 +17,14 @@
 /system/apps/market.app/forceMode.lua
 /system/apps/market.app/icon.t2p
 /system/apps/market.app/main.lua
+/system/apps/market.app/noIcons.lua
 /system/apps/mediastore.app/actions.cfg
 /system/apps/mediastore.app/clearCache.lua
 /system/apps/mediastore.app/custom.lua
 /system/apps/mediastore.app/forceMode.lua
 /system/apps/mediastore.app/icon.t2p
 /system/apps/mediastore.app/main.lua
+/system/apps/mediastore.app/noIcons.lua
 /system/apps/settings.app/icon.t2p
 /system/apps/settings.app/main.lua
 /system/apps/settings.app/shadow_demo.t2p
@@ -96,6 +98,7 @@
 /system/icons/t1p.t2p
 /system/icons/t2p.t2p
 /system/icons/t3p.t2p
+/system/icons/tar.t2p
 /system/icons/tmp.t2p
 /system/icons/txt.t2p
 /system/icons/unknown.t2p

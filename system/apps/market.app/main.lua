@@ -20,7 +20,7 @@ local colors = gui_container.colors
 
 ------------------------------------
 
-local screen, nickname, _, forceMode, mediaMode = ...
+local screen, nickname, _, forceMode, mediaMode, noIcons = ...
 local _, noShadow = gui.status(screen, nil, nil, "loading content list...")
 
 local title = "Market"
@@ -341,7 +341,7 @@ local function applicationLabel(data, x, y)
 		pcall(image.draw, screen, custImg or img, x, y, true)
 	end
 	
-	if data.icon then
+	if not noIcons and data.icon then
 		img = paths.concat(cachePath, (data.name or "unknown") .. ".t2p")
 		if not downloaded[img] then
 			if not fs.exists(img) or cacheReg[data.name or "unknown"] ~= data.version then
