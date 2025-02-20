@@ -47,6 +47,7 @@
 /system/bin/applyReg.lua
 /system/bin/boxInstall.lua
 /system/bin/desktop.lua
+/system/bin/diskinfo.lua
 /system/bin/edit.lua
 /system/bin/fileinfo.lua
 /system/bin/login.lua
