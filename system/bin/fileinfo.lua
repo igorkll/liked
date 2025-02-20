@@ -50,9 +50,9 @@ graphic.forceUpdate(screen)
 local size, sizeWithBaseCost, filesCount, dirsCount = fs.size(path)
 window:fill(2, 6, 49, 1, colors.white, 0, " ")
 window:fill(2, 7, 49, 1, colors.white, 0, " ")
-window:set(2, 6, colors.white, colors.black, "real size: " .. tostring(math.roundTo(size / 1024, 1)) .. "KB")
-window:set(2, 7, colors.white, colors.black, "disk size: " .. tostring(math.roundTo(sizeWithBaseCost / 1024, 1)) .. "KB")
-window:set(2, 9, colors.white, colors.black, "f/d count: " .. tostring(filesCount) .. "-files / " .. tostring(dirsCount) .. "-dirs")
+window:set(2, 6, colors.white, colors.black, "real size: " .. math.roundTo(size / 1024, 1) .. " KB")
+window:set(2, 7, colors.white, colors.black, "disk size: " .. math.roundTo(sizeWithBaseCost / 1024, 1) .. " KB")
+window:set(2, 9, colors.white, colors.black, "f/d count: " .. filesCount .. "-files / " .. dirsCount .. "-dirs")
 graphic.forceUpdate(screen)
 
 local sum = "-"

@@ -641,6 +641,9 @@ local function doIcon(windowEventData)
 								table.insert(active, not registry.disableExternalBoot and not _restrictedLoader)
 							end
 
+							table.insert(strs, "  info")
+							table.insert(active, true)
+
 							table.insert(strs, "  unmount")
 							table.insert(active, true)
 
@@ -685,6 +688,10 @@ local function doIcon(windowEventData)
 							elseif str == "  unmount" then
 								fs.umount(v.path)
 								draw()
+							elseif str == "  info" then
+								return function ()
+									simpleExecute("diskinfo", windowEventData[6], v.fs.address)
+								end
 							elseif str == "  eject" then
 								pcall(component.invoke, ejectDrive, "eject")
 							elseif str == "  create dump" then
