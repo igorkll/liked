@@ -175,6 +175,7 @@
 /system/palettes/original.plt
 /system/screenSavers/black_screen.scrsv
 /system/screenSavers/color_dots.scrsv
+/system/screenSavers/matrix.scrsv
 /system/screenSavers/random_colors.scrsv
 /system/wallpapers/box.t2p
 /system/wallpapers/car.t2p
