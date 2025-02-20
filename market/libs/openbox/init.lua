@@ -24,12 +24,12 @@ function openbox.run(screen, program)
 	local result, result2, vm
 	local tunnel = {}
 	while true do
-		vm = vmx.create(eepromPath, {boxPath, true, nil, "openos"})
+		vm = vmx.create(eepromPath, {boxPath, false, nil, "openos"})
 		vm.env.os.program = paths.name(program)
 		vm.env.os.tunnel = tunnel
 
-		filesystem.makeDirectory(tempPath)
-		local tmpfs = vmx.fromVirtual(fs.dump(tempPath, math.round(filesystem.get(tempPath).spaceTotal() / 4), nil, "tmpfs"))
+		fs.makeDirectory(tempPath)
+		local tmpfs = vmx.fromVirtual(fs.dump(tempPath, math.round(fs.get(tempPath).spaceTotal() / 4), nil, "tmpfs"))
 		vm.bindComponent(tmpfs, true)
 		vm.bindTmp(tmpfs.address)
 

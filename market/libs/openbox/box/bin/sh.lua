@@ -5,6 +5,7 @@ local sh = require("sh")
 local fs = require("filesystem")
 local process = require("process")
 local computer = require("computer")
+local component = require("component")
 
 local args = shell.parse(...)
 
@@ -59,6 +60,10 @@ if #args == 0 then
 
 		fs.mount(os.progfs, "/home")
 		shell.setWorkingDirectory("/home")
+
+		--without this, the first print calls simply don't work
+		os.sleep(1)
+
 		local co, err = process.load(
 			fs.concat("/home", os.program),
 			_ENV,
