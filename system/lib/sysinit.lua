@@ -356,7 +356,7 @@ function sysinit.init(box, lscreen)
 		if isTablet then
 			pcall(fs.copy, registry.defaultScreenSaverPath or "/system/screenSavers/black_screen.scrsv", gui_container.screenSaverPath)
 		else
-			pcall(fs.copy, registry.defaultScreenSaverPath or "/system/screenSavers/matrix.scrsv", gui_container.screenSaverPath)
+			pcall(fs.copy, registry.defaultScreenSaverPath or "/system/screenSavers/color_dots.scrsv", gui_container.screenSaverPath)
 		end
 		registry.defaultScreenSaverPath = nil
 		registry.screenSaverDefaultSetted = true
