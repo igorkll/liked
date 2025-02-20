@@ -1058,10 +1058,11 @@ function gui.actionContext(screen, x, y, actions, isParent)
 	while true do
 		local eventData = {event.pull()}
 		local isClick = eventData[1] == "touch"
-		if isClick or eventData[1] == "drag" then
+		local isScroll = eventData[1] == "scroll"
+		if isClick or isScroll or eventData[1] == "drag" then
 			selected = nil
 			local newSelected = (eventData[4] - y) + 1
-			if eventData[3] >= x and eventData[3] < x + sizeX then
+			if not isScroll and eventData[3] >= x and eventData[3] < x + sizeX then
 				if newSelected >= 1 and newSelected <= #actions then
 					if eventData[5] == 0 then
 						if type(actions[newSelected]) == "table" and actions[newSelected].active then
@@ -1084,7 +1085,7 @@ function gui.actionContext(screen, x, y, actions, isParent)
 			if selected then
 				local action = actions[selected]
 				if type(action) == "table" and action.callback then
-					if action:callback() then
+					if action.callback == true or action:callback() then
 						clear()
 						return selected
 					end
@@ -1304,7 +1305,7 @@ function gui.select(screen, cx, cy, label, actions, scroll, noCloseButton, overl
 			local ret, lAlwaysConfirm = windowEventCallback(windowEventData, window)
 			if ret ~= nil then
 				if not noCleanShadow and noShadow then noShadow() end
-				return ret, nil, nil, nil, nil, noShadow
+				return ret, scroll, windowEventData[5], windowEventData, nil, noShadow
 			end
 			if alwaysConfirm ~= lAlwaysConfirm then
 				alwaysConfirm = lAlwaysConfirm

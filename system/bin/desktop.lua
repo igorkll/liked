@@ -990,7 +990,7 @@ local function doIcon(windowEventData)
 								end
 							elseif str == "  pack to archive" then
 								local clear = gui.saveBigZone(screen)
-								local outPath = require("iowindows").savefile(screen, "afpx")
+								local outPath = require("iowindows").savefile(screen, gui_container.archiveFormats)
 								clear()
 
 								if outPath then

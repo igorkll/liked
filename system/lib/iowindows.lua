@@ -7,29 +7,62 @@ local format = require("format")
 local iowindows = {}
 
 local function iowindow(screen, dirmode, exp, save)
-	---- title
-	local title = ""
-	if save then
-		title = title .. "save "
-	else
-		title = title .. "select "
-	end
-	
 	local exps
+	local expSelectable = false
 	if exp then
 		if type(exp) == "table" then
 			exps = exp
-			exp = exps[1]
+			expSelectable = #exps > 1
 		else
 			exps = {exp}
 		end
-		title = title .. (gui_container.typenames[exp] or exp) .. " "
 	end
 
-	if dirmode then
-		title = title .. "folder"
+	local expSelectMenuSettings
+	if expSelectable then
+		expSelectMenuSettings = {}
+		for _, exp in ipairs(exps) do
+			table.insert(expSelectMenuSettings, {
+				title = exp,
+				active = true,
+				callback = true
+			})
+		end
+	end
+
+	---- title
+	local title
+	local titleExp
+	local function updateTitle()
+		title = ""
+
+		if save then
+			title = title .. "save "
+		else
+			title = title .. "select "
+		end
+		
+		if exp then
+			titleExp = gui_container.typenames[exp] and (gui_container.typenames[exp] .. " (" .. exp .. ")") or exp
+			title = title .. titleExp .. " "
+		end
+
+		if dirmode then
+			title = title .. "folder"
+		else
+			title = title .. "file"
+		end
+	end
+
+	local function selectExp(newExp)
+		exp = newExp
+		updateTitle()
+	end
+
+	if exps then
+		selectExp(exps[1])
 	else
-		title = title .. "file"
+		selectExp()
 	end
 
 	---- main
@@ -61,7 +94,8 @@ local function iowindow(screen, dirmode, exp, save)
 			end
 		end
 	end
-
+	
+	local scrollList = {}
 	local inputTextBuffer
 	local disableShadow
 	local clearShadow
@@ -88,8 +122,11 @@ local function iowindow(screen, dirmode, exp, save)
 		end
 		
 		local reader
-		local num, _, _, _, confirm, lClearShadow = gui.select(screen, nil, nil, title, list, nil, nil, function (window)
+		local num, lastScroll, _, _, confirm, lClearShadow = gui.select(screen, nil, nil, title, list, scrollList[path], nil, function (window)
 			window:set(1, window.sizeY, gui_container.colors.red, gui_container.colors.white, " + ")
+			if expSelectable then
+				window:set(7, 1, gui_container.colors.white, gui_container.colors.black, titleExp)
+			end
 			window:set(pathPos, window.sizeY, gui_container.colors.lightGray, gui_container.colors.white, gui_container.short(gui_container.toUserPath(screen, path), save and 18 or 35))
 			local ret
 			if save then
@@ -129,6 +166,12 @@ local function iowindow(screen, dirmode, exp, save)
 						fs.makeDirectory(paths.concat(path, name))
 						return true, fakeConfirm
 					end
+				elseif expSelectable and windowEventData[4] == 1 and (windowEventData[3] >= 7 and windowEventData[3] < (7 + #titleExp)) then
+					local selected = gui.actionContext(screen, window.x + windowEventData[3] - 1, window.y + windowEventData[4], expSelectMenuSettings)
+					if selected then
+						selectExp(exps[selected])
+						return true
+					end
 				end
 			end
 
@@ -136,6 +179,7 @@ local function iowindow(screen, dirmode, exp, save)
 		end, true, disableShadow)
 		disableShadow = true
 		clearShadow = clearShadow or lClearShadow
+		scrollList[path] = lastScroll
 
 		if num == -1 then
 			num = nil
