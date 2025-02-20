@@ -1058,11 +1058,13 @@ function gui.actionContext(screen, x, y, actions, isParent)
 	while true do
 		local eventData = {event.pull()}
 		local isClick = eventData[1] == "touch"
-		local isScroll = eventData[1] == "scroll"
-		if isClick or isScroll or eventData[1] == "drag" then
+		if eventData[1] == "scroll" then
+			event.push(table.unpack(eventData))
+			break
+		elseif isClick or eventData[1] == "drag" then
 			selected = nil
 			local newSelected = (eventData[4] - y) + 1
-			if not isScroll and eventData[3] >= x and eventData[3] < x + sizeX then
+			if eventData[3] >= x and eventData[3] < x + sizeX then
 				if newSelected >= 1 and newSelected <= #actions then
 					if eventData[5] == 0 then
 						if type(actions[newSelected]) == "table" and actions[newSelected].active then
