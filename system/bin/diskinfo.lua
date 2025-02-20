@@ -10,9 +10,11 @@ local gui = require("gui")
 local uix = require("uix")
 local registry = require("registry")
 local component = require("component")
+local system = require("system")
 
 local window = gui.customWindow(screen)
 local layout = uix.create(window, nil, uix.styles[2])
+local rx, ry = layout.sizeX, layout.sizeY
 
 window:clear(colors.white)
 window:fill(1, 1, window.sizeX, 1, colors.gray, 0, " ")
@@ -24,11 +26,17 @@ local size, sizeWithBaseCost, filesCount, dirsCount = fs.size(fs.point(diskUuid)
 local totalSpace = proxy.spaceTotal() / 1024
 local usedSpace = proxy.spaceUsed() / 1024
 
-layout:createText(2, 3, 0x000000, "uuid       : " .. diskUuid)
-layout:createText(2, 4, 0x000000, "total space: " .. math.roundTo(totalSpace, 1) .. " KB")
-layout:createText(2, 5, 0x000000, "used  space: " .. math.roundTo(usedSpace, 1) .. " KB")
-layout:createText(2, 6, 0x000000, "free  space: " .. math.roundTo(totalSpace - usedSpace, 1) .. " KB")
-layout:createText(2, 7, 0x000000, "f/d count  : " .. filesCount .. "-files / " .. (dirsCount - 1) .. "-dirs")
+layout:createText(2, 3, 0x000000, "uuid     : " .. diskUuid)
+layout:createText(2, 4, 0x000000, "label    : " .. (proxy.getLabel() or "[NONE]"))
+layout:createText(2, 5, 0x000000, "type     : " .. system.getDiskLevel(diskUuid))
+layout:createText(2, 6, 0x000000, "read only: " .. tostring(fs.isReadOnly(proxy)))
+layout:createText(2, 7, 0x000000, "label  RO: " .. tostring(fs.isLabelReadOnly(proxy)))
+layout:createText(2, 8, 0x000000, "f/d count: " .. filesCount .. "-files / " .. (dirsCount - 1) .. "-dirs")
+
+layout:createText(2, ry - 4, 0x000000, "disk space:")
+layout:createText(2, ry - 3, 0x000000, "total: " .. math.roundTo(totalSpace, 1) .. " KB")
+layout:createText(2, ry - 2, 0x000000, "used : " .. math.roundTo(usedSpace, 1) .. " KB")
+layout:createText(2, ry - 1, 0x000000, "free : " .. math.roundTo(totalSpace - usedSpace, 1) .. " KB")
 
 layout:draw()
 

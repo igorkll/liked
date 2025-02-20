@@ -1159,7 +1159,7 @@ local function doIcon(windowEventData)
 				
 				if addr then
 					local function doMount()
-						local name = gui.input(screen, nil, nil, "mount name")
+						local name = gui.input(screen, nil, nil, "mount name", nil, nil, paths.name(require("hdd").genName(addr)))
 						if name and name ~= "" and not name:find("%\\") and not name:find("%/") then
 							fs.mount(component.proxy(addr), paths.concat(userPath, name))
 						end
