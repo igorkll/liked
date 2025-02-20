@@ -27,6 +27,7 @@ local point = fs.point(diskUuid)
 local size, sizeWithBaseCost, filesCount, dirsCount = fs.size(point)
 local totalSpace = proxy.spaceTotal() / 1024
 local usedSpace = proxy.spaceUsed() / 1024
+local maxDiskSize = 1024 * 4 * 3 --raid completely filled with tier 3 disks
 
 layout:createText(2, 3, 0x000000, "uuid     : " .. diskUuid)
 layout:createText(2, 4, 0x000000, "label    : " .. (proxy.getLabel() or "[NONE]"))
@@ -39,6 +40,10 @@ layout:createText(2, ry - 4, 0x000000, "disk space:")
 layout:createText(2, ry - 3, 0x000000, "total: " .. math.roundTo(totalSpace, 1) .. " KB")
 layout:createText(2, ry - 2, 0x000000, "used : " .. math.roundTo(usedSpace, 1) .. " KB")
 layout:createText(2, ry - 1, 0x000000, "free : " .. math.roundTo(totalSpace - usedSpace, 1) .. " KB")
+
+layout:createProgress(20, ry - 3, 30, uix.colors.red, uix.colors.orange, totalSpace / maxDiskSize)
+layout:createProgress(20, ry - 2, 30, uix.colors.red, uix.colors.orange, usedSpace / totalSpace)
+layout:createProgress(20, ry - 1, 30, uix.colors.red, uix.colors.orange, (totalSpace - usedSpace) / totalSpace)
 
 layout:createImage(rx - 9, 5, liked.getIcon(screen, point), true)
 
