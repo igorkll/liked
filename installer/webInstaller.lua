@@ -461,6 +461,11 @@ local function getRealTime(attemptTwo)
 	return unixTime
 end
 
+local function updateEepromApi(disk) --the new bios can store data in the EEPROM in a different way. and it is unknown how the old bios stores the data
+	function computer.setBootAddress() end
+	function computer.getBootAddress() return disk end
+end
+
 local function flashRestricted(disk, branch)
 	local eeprom = component.proxy(component.list("eeprom")() or "")
 	if eeprom then
@@ -474,6 +479,8 @@ local function flashRestricted(disk, branch)
 		eeprom.setLabel(assert(wget(baseUrl .. branch .. "/system/firmware/restricted_loader/label.txt")))
 		eeprom.set(appendData .. assert(wget(baseUrl .. branch .. "/system/firmware/restricted_loader/code.lua")))
 		eeprom.makeReadonly(eeprom.getChecksum())
+
+		updateEepromApi(disk)
 	end
 end
 
@@ -501,10 +508,6 @@ local function install(disk, branch, edition, doOpenOS, doMineOS, otherDevice)
 		flashRestrictedFlag = true
 	end
 
-	if flashRestrictedFlag and not otherDevice then
-		flashRestricted(disk, branch)
-	end
-
 	assert(load(buildUpdater(branch, edition), "=updater", nil, _G))(disk)
 	if otherDevice then
 		gpu.setBackground(0x000000)
@@ -513,6 +516,10 @@ local function install(disk, branch, edition, doOpenOS, doMineOS, otherDevice)
 		gpu.fill(1, 1, rx, ry, " ")
 		showWarn("liked-" .. branch .. "-" .. edition .. " has been successfully installed on the " .. generateTitle(disk) .. " disk", " DONE ")
 	else
+		if flashRestrictedFlag then
+			flashRestricted(disk, branch)
+		end
+
 		pcall(computer.setBootAddress, disk)
 		pcall(computer.shutdown, "fast")
 	end
