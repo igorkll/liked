@@ -1691,14 +1691,16 @@ end
 -------------------------------------------------------------------------------
 
 do
-	local f = fs.open(filename, "r")
+	local f = fs.open(filename, "r", 4096)
 	if f then
-		local data = require("calls").call("split", lineMod(f.readAll()), "\n")
-		f.close()
-
 		local x, y, w, h = getArea()
 		local chars = 0
-		for _, fline in ipairs(data) do
+		while true do
+			local fline = f.readLine()
+			if not fline then
+				break
+			end
+			fline = lineMod(fline)
 			table.insert(buffer, fline)
 			chars = chars + unicode.len(fline)
 			if #buffer <= h then
