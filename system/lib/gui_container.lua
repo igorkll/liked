@@ -27,11 +27,6 @@ gui_container.chars = {
 	dot = "●"
 }
 
-gui_container.archiveFormats = {
-	"tar",
-	"afpx"
-}
-
 gui_container.screenSaverPath = "/data/screenSaver.scrsv"
 
 ---------------------------- необходимо сканфигурировать это все, в своей програме для поддержки свого формата

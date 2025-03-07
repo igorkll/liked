@@ -693,13 +693,20 @@ end
 
 local function demoTitle(screen, gpu)
 	if registry.demoMode then
+		local demoStrs = {
+			"a demo version is likeOS & liked",
+			"some functions may be disabled"
+		}
+		
 		local rx, ry = gpu.getResolution()
 		if liked.recoveryMode then
-			gpu.set(2, ry - 3, "a demo version is likeOS")
-			gpu.set(2, ry - 2, "some functions may be disabled")
+			for i = 1, #demoStrs do
+				gpu.set(2, ry - (3 - (i - 1)), demoStrs[i])
+			end
 		else
-			gui.drawtext(screen, 2, ry - 3, liked.colors.white, "a demo version is likeOS")
-			gui.drawtext(screen, 2, ry - 2, liked.colors.white, "some functions may be disabled")
+			for i = 1, #demoStrs do
+				gui.drawtext(screen, 2, ry - (3 - (i - 1)), liked.colors.white, demoStrs[i])
+			end
 		end
 	end
 end

@@ -11,7 +11,7 @@ local modify = {}
 modify.newCreate = { --структура {name, exp, allowCheck(), create(path)}
 	{
 		"system-dump",
-		"afpx",
+		"tar",
 		function (path)
 			return not fs.isReadOnly(path)
 		end,

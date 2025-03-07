@@ -9,6 +9,7 @@ local iowindows = {}
 local function iowindow(screen, dirmode, exp, save)
 	local exps
 	local expSelectable = false
+	local selectExpPos = save and 7 or 9
 	if exp then
 		if type(exp) == "table" then
 			exps = exp
@@ -125,7 +126,7 @@ local function iowindow(screen, dirmode, exp, save)
 		local num, lastScroll, _, _, confirm, lClearShadow = gui.select(screen, nil, nil, title, list, scrollList[path], nil, function (window)
 			window:set(1, window.sizeY, gui_container.colors.red, gui_container.colors.white, " + ")
 			if expSelectable then
-				window:set(7, 1, gui_container.colors.white, gui_container.colors.black, titleExp)
+				window:set(selectExpPos, 1, gui_container.colors.white, gui_container.colors.black, titleExp)
 			end
 			window:set(pathPos, window.sizeY, gui_container.colors.lightGray, gui_container.colors.white, gui_container.short(gui_container.toUserPath(screen, path), save and 18 or 35))
 			local ret
@@ -166,7 +167,7 @@ local function iowindow(screen, dirmode, exp, save)
 						fs.makeDirectory(paths.concat(path, name))
 						return true, fakeConfirm
 					end
-				elseif expSelectable and windowEventData[4] == 1 and (windowEventData[3] >= 7 and windowEventData[3] < (7 + #titleExp)) then
+				elseif expSelectable and windowEventData[4] == 1 and (windowEventData[3] >= selectExpPos and windowEventData[3] < (selectExpPos + #titleExp)) then
 					local selected = gui.actionContext(screen, window.x + windowEventData[3] - 1, window.y + windowEventData[4], expSelectMenuSettings)
 					if selected then
 						selectExp(exps[selected])

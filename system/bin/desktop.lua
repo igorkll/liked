@@ -697,11 +697,11 @@ local function doIcon(windowEventData)
 							elseif str == "  create dump" then
 								local archiver = require("archiver")
 								local clear = saveBigZone(screen)
-								local targetPath = gui_filepicker(screen, nil, nil, nil, archiver.supported[1], true)
+								local targetPath = require("iowindows").savefile(screen, archiver.supported)
 								
 								if targetPath then
 									clear()
-									gui_status(screen, nil, nil, "creating dump...")
+									gui.status(screen, nil, nil, "creating dump...")
 									local ok, err = archiver.pack(v.path, targetPath)
 									if not ok then
 										warn(err)
@@ -715,12 +715,12 @@ local function doIcon(windowEventData)
 							elseif str == "  flash archive" then
 								local archiver = require("archiver")
 								local clear = saveBigZone(screen)
-								local archivePath = gui_filepicker(screen, nil, nil, nil, archiver.supported[1])
+								local archivePath = require("iowindows").selectfile(screen, archiver.supported)
 								
 								if archivePath then
 									clear()
 									if gui.yesno(screen, nil, nil, "are you sure you want to flash the \"" .. gui.hideExtension(screen, archivePath) .. "\" archive to the \"" .. v.name .. "\"?") then
-										gui_status(screen, nil, nil, "archive flashing...")
+										gui.status(screen, nil, nil, "archive flashing...")
 										local ok, err = archiver.unpack(archivePath, v.path)
 										if not ok then
 											warn(err)
@@ -733,7 +733,7 @@ local function doIcon(windowEventData)
 								local state = gui.pleaseType(screen, v.fs.address == fs.bootaddress and "FRMT_SYSROOT" or "FORMAT")
 								
 								if state then
-									gui_status(screen, nil, nil, "formatting...")
+									gui.status(screen, nil, nil, "formatting...")
 									liked.assert(screen, v.fs.remove("/"))
 									draw()
 								else
@@ -990,7 +990,7 @@ local function doIcon(windowEventData)
 								end
 							elseif str == "  pack to archive" then
 								local clear = gui.saveBigZone(screen)
-								local outPath = require("iowindows").savefile(screen, gui_container.archiveFormats)
+								local outPath = require("iowindows").savefile(screen, archiver.supported)
 								clear()
 
 								if outPath then
