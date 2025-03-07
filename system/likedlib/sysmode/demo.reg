@@ -1,9 +1,11 @@
 {
-    settingsBlackList = {reg_adds={"screen_saver", "account"}},
-    defaultScreenSaverPath = "/system/screenSavers/color_dots.scrsv",
-    systemConfigured = true,
-    demoMode = true,
-    screenSaverTimer = 10,
+	settingsBlackList = {reg_adds={"screen_saver", "account", "users", "lock"}},
+	defaultScreenSaverPath = "/system/screenSavers/color_dots.scrsv",
+	systemConfigured = true,
+	demoMode = true,
+	screenSaverTimer = 10,
+	banningUpdates = true,
+	disableShutdown = true,
 
-    modifierVersion = 1
+	modifierVersion = 1
 }

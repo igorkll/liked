@@ -26,6 +26,10 @@ function update.needWipe(branch, mode)
 end
 
 function update.run(branch, mode, wipedata)
+	if registry.banningUpdates then
+		error("updates are prohibited by the system configuration", 2)
+	end
+
 	local data = sysdata.list()
 	data.branch = branch or data.branch
 	data.mode = mode or data.mode

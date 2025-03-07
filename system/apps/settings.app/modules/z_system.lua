@@ -54,8 +54,10 @@ local function update(newBranch)
 	layout:draw()
 end
 
-layout:createButton(20, 8, 16, 1, nil, nil, "UPDATE SYSTEM", true).onClick = function ()
-	update()
+if not registry.banningUpdates then
+	layout:createButton(20, 8, 16, 1, nil, nil, "UPDATE SYSTEM", true).onClick = function ()
+		update()
+	end
 end
 
 if not registry.disableSystemSettings then
