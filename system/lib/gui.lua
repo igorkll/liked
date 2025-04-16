@@ -526,7 +526,7 @@ function gui.done(screen, cx, cy, str, backgroundColor)
         window:set(2, 1, color, colors.green, "  " .. unicode.char(0x2800 + 192) .. "  ")
         window:set(2, 2, color, colors.green, " ◢█◣ ")
         window:set(2, 3, color, colors.green, "◢███◣")
-        window:set(4, 2, colors.green, colors.white, "~")
+        window:set(4, 2, colors.green, colors.white, "!")
     end)
 
     window:set(32 - 4, 7, colors.lightBlue, colors.white, " OK ")

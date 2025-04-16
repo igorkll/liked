@@ -82,20 +82,36 @@ if not registry.disableSystemSettings then
 			if not registry.disableChangeBranch then
 				local changeBranchButton = layout:createButton(3, planePos+7, nil, 1, nil, nil, "update to another branch", true)
 				function changeBranchButton:onClick()
-					local branchs = {"main", "test", "dev"}
-					for i = #branchs, 1, -1 do
-						if branchs[i] == branch then
-							table.remove(branchs, i)
-							break
+                    local branchs = {"main", "test", "dev"}
+                    local branchsSelector = {}
+					for i, lbranch in ipairs(branchs) do
+						if lbranch == branch then
+							branchsSelector[i] = lbranch .. " (current)"
+                        else
+                            branchsSelector[i] = lbranch
 						end
 					end
-					local newBranch = gui.select(screen, nil, nil, "select a new branch", branchs)
+
+					local newBranch = gui.select(screen, nil, nil, "select a new branch", branchsSelector)
 					if newBranch then
 						newBranch = branchs[newBranch]
-						gRedraw()
-						layout:draw()
-						update(newBranch)
+
+                        local action = gui.select(screen, nil, nil, "select a new branch", {"update to the " .. newBranch .. " branch", "only change the branch to " .. newBranch})
+                        if action then
+                            gRedraw()
+    						layout:draw()
+
+                            if action == 1 then
+                                update(newBranch)
+                            elseif action == 2 then
+                                sysdata.set("branch", newBranch)
+                                gui.done(screen, nil, nil, "")
+                                selfReload()
+                                return
+                            end
+                        end
 					end
+
 					gRedraw()
 					layout:draw()
 				end

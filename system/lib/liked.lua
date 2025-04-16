@@ -798,32 +798,16 @@ function liked.getComputerScore()
     return score
 end
 
-function liked.getScoreColor()
-    local cpuLevel = require("system").getCpuLevel()
-    local ram = require("computer").totalMemory() / 1024
-    local score = 0
-
-    if cpuLevel >= 3 then
-        score = score + 5
-    elseif cpuLevel == 2 then
-        score = score + 3
-    else
-        score = score + 1
+function liked.getScoreColor(score)
+    if score >= 10 then
+        return colors.cyan
+    elseif score >= 7 then
+        return colors.green
+    elseif score >= 5 then
+        return colors.orange
     end
-
-    if ram >= 2048 then
-        score = score + 5
-    elseif ram >= 1024 + 512 then
-        score = score + 4
-    elseif ram >= 1024 then
-        score = score + 3
-    elseif ram >= 768 then
-        score = score + 2
-    else
-        score = score + 1
-    end
-
-    return score
+    
+    return colors.red
 end
 
 -------------------------------------------------------- simple api
