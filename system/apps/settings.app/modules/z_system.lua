@@ -122,21 +122,15 @@ if not registry.disableSystemSettings then
 			layout:createText(10, planePos+5, colors.white, "disable auto-reboot on system error")
 			
 			function disableRecoverySwitch:onSwitch()
-				registry.data.disableRecovery = self.state
-				if registry.data.disableRecovery == false then registry.data.disableRecovery = nil end
-				registry.save()
+				registry.disableRecovery = self.state
 			end
 			
 			function disableLogoSwitch:onSwitch()
-				registry.data.disableLogo = self.state
-				if registry.data.disableLogo == false then registry.data.disableLogo = nil end
-				registry.save()
+				registry.disableLogo = self.state
 			end
 			
 			function disableAutoReboot:onSwitch()
-				registry.data.disableAutoReboot = self.state
-				if registry.data.disableAutoReboot == false then registry.data.disableAutoReboot = nil end
-				registry.save()
+				registry.disableAutoReboot = self.state
 			end
 		end
 
