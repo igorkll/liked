@@ -34,6 +34,14 @@ _restrictedLoader_update = function(updaterData)
 	
 end
 
+_restrictedLoader_likelockSet = function(lockstate)
+	
+end
+
+_restrictedLoader_likelock = function()
+	
+end
+
 local ignore = {
 	["/system/sysdata/eeprom"] = 1
 }
