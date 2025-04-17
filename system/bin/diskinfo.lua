@@ -24,7 +24,7 @@ window:set(2, 1, colors.gray, colors.white, "disk-info")
 
 local proxy = component.proxy(diskUuid)
 local point = fs.point(diskUuid)
-local size, sizeWithBaseCost, filesCount, dirsCount = fs.size(point)
+local size, sizeWithBaseCost, filesCount, dirsCount = fs.size(point, true)
 local totalSpace = proxy.spaceTotal() / 1024
 local usedSpace = proxy.spaceUsed() / 1024
 local maxDiskSize = 1024 * 4 * 3 --raid completely filled with tier 3 disks
@@ -34,7 +34,7 @@ layout:createText(2, 4, 0x000000, "label    : " .. (proxy.getLabel() or "[NONE]"
 layout:createText(2, 5, 0x000000, "type     : " .. system.getDiskLevel(diskUuid))
 layout:createText(2, 6, 0x000000, "read only: " .. tostring(fs.isReadOnly(proxy)))
 layout:createText(2, 7, 0x000000, "label  RO: " .. tostring(fs.isLabelReadOnly(proxy)))
-layout:createText(2, 8, 0x000000, "f/d count: " .. filesCount .. "-files / " .. (dirsCount - 1) .. "-dirs")
+layout:createText(2, 8, 0x000000, "f/d count: " .. filesCount .. "-files / " .. dirsCount .. "-dirs")
 
 layout:createText(2, ry - 4, 0x000000, "disk space:")
 layout:createText(2, ry - 3, 0x000000, "total: " .. math.roundTo(totalSpace, 1) .. " KB")
