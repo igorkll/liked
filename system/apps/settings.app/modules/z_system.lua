@@ -105,7 +105,7 @@ if not registry.disableSystemSettings then
                                 update(newBranch)
                             elseif action == 2 then
                                 sysdata.set("branch", newBranch)
-                                gui.done(screen, nil, nil, "")
+                                gui.done(screen, nil, nil, "the branch was successfully changed to " .. newBranch)
                                 selfReload()
                                 return
                             end
