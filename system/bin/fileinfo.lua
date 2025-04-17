@@ -26,8 +26,6 @@ window:fill(1, 1, window.sizeX, 1, colors.gray, 0, " ")
 window:set(window.sizeX - 2, 1, colors.red, colors.white, " X ")
 window:set(2, 1, colors.gray, colors.white, "file-info")
 
-layout:draw()
-
 local ctype = fs.isDirectory(path) and "directory" or "file"
 local exp = paths.extension(path)
 if exp then
@@ -41,10 +39,44 @@ window:set(2, 4, colors.white, colors.black, "path     : " .. gui_container.shor
 window:set(2, 5, colors.white, colors.black, "disk     : " .. addr)
 
 window:set(2, 9, colors.white, colors.black, "f/d count: please wait...")
-
 window:set(2, 6, colors.white, colors.black, "real size: please wait...")
 window:set(2, 7, colors.white, colors.black, "disk size: please wait...")
-window:set(2, 8, colors.white, colors.black, "sha256   : please wait...")
+
+if not fs.isDirectory(path) then
+    window:set(2, 8, colors.white, colors.black, "sha256   : ")
+    local generateSha256 = layout:createButton(13, 8, 10, 1, colors.cyan, colors.white, "generate")
+    generateSha256.style = "round"
+
+    function generateSha256:onDropInZone()
+        generateSha256:destroy()
+
+        window:fill(1, 8, window.sizeX, 1, colors.white, colors.black, " ")
+        window:set(2, 8, colors.white, colors.black, "sha256   : please wait...")
+        local sum = "-"
+        local content = fs.readFile(path)
+        if content then
+            local sha256Result = require("sha256").sha256hex(content)
+            sum = sha256Result
+            sum = sum:sub(1, 29) .. gui_container.chars.threeDots
+
+            local copySha256 = layout:createButton(44, 8, 6, 1, colors.cyan, colors.white, "copy")
+            copySha256.style = "round"
+
+            function copySha256:onDropInZone(_, nickname)
+                require("clipboard").set(nickname, sha256Result)
+            end
+        end
+        window:fill(2, 8, 49, 1, colors.white, 0, " ")
+        window:set(2, 8, colors.white, colors.black, "sha256   : " .. sum)
+
+        layout:draw()
+        graphic.forceUpdate(screen)
+    end
+else
+    window:set(2, 8, colors.white, colors.black, "sha256   : does not exist for the directory")
+end
+
+layout:draw()
 graphic.forceUpdate(screen)
 
 local size, sizeWithBaseCost, filesCount, dirsCount = fs.size(path)
@@ -53,18 +85,6 @@ window:fill(2, 7, 49, 1, colors.white, 0, " ")
 window:set(2, 6, colors.white, colors.black, "real size: " .. math.roundTo(size / 1024, 1) .. " KB")
 window:set(2, 7, colors.white, colors.black, "disk size: " .. math.roundTo(sizeWithBaseCost / 1024, 1) .. " KB")
 window:set(2, 9, colors.white, colors.black, "f/d count: " .. filesCount .. "-files / " .. dirsCount .. "-dirs")
-graphic.forceUpdate(screen)
-
-local sum = "-"
-if not fs.isDirectory(path) and size <= (16 * 1024) then
-	local content = fs.readFile(path)
-	if content then
-		sum = require("sha256").sha256hex(content)
-		sum = sum:sub(1, #addr) .. gui_container.chars.threeDots
-	end
-end
-window:fill(2, 8, 49, 1, colors.white, 0, " ")
-window:set(2, 8, colors.white, colors.black, "sha256   : " .. sum)
 graphic.forceUpdate(screen)
 
 while true do
