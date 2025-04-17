@@ -50,17 +50,17 @@ layout:createImage(rx - 9, 5, liked.getIcon(screen, point), true)
 layout:draw()
 
 while true do
-	local eventData = {event.pull()}
-	local windowEventData = window:uploadEvent(eventData)
-	layout:uploadEvent(windowEventData)
+    local eventData = {event.pull()}
+    local windowEventData = window:uploadEvent(eventData)
+    layout:uploadEvent(windowEventData)
 
-	if windowEventData[1] == "key_down" then
-		if windowEventData[4] == 28 then
-			break
-		end
-	elseif windowEventData[1] == "touch" then
-		if windowEventData[3] >= window.sizeX - 2 and windowEventData[4] == 1 then
-			break
-		end
-	end
+    if windowEventData[1] == "key_down" then
+        if windowEventData[4] == 28 then
+            break
+        end
+    elseif windowEventData[1] == "touch" then
+        if windowEventData[3] >= window.sizeX - 2 and windowEventData[4] == 1 then
+            break
+        end
+    end
 end

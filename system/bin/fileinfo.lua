@@ -9,16 +9,17 @@ local paths = require("paths")
 local gui = require("gui")
 local uix = require("uix")
 local registry = require("registry")
+local time = require("time")
 
 local window = gui.customWindow(screen)
 
 local layout = uix.create(window, nil, uix.styles[2])
 if not registry.disableHiddenFiles then
-	local checkbox = layout:createCheckbox(2, 11, not not fs.getAttribute(path, "hidden"), colors.red, colors.gray, colors.black)
-	layout:createText(5, 11, colors.black, "hidden")
-	function checkbox:onSwitch()
-		fs.setAttribute(path, "hidden", self.state)
-	end
+    local checkbox = layout:createCheckbox(2, 12, not not fs.getAttribute(path, "hidden"), colors.red, colors.gray, colors.black)
+    layout:createText(5, 12, colors.black, "hidden")
+    function checkbox:onSwitch()
+        fs.setAttribute(path, "hidden", self.state)
+    end
 end
 
 window:clear(colors.white)
@@ -29,7 +30,7 @@ window:set(2, 1, colors.gray, colors.white, "file-info")
 local ctype = fs.isDirectory(path) and "directory" or "file"
 local exp = paths.extension(path)
 if exp then
-	ctype = (gui_container.typenames[exp] or exp) .. "-" .. ctype
+    ctype = (gui_container.typenames[exp] or exp) .. "-" .. ctype
 end
 
 local addr = fs.get(path).address
@@ -37,6 +38,7 @@ local addr = fs.get(path).address
 window:set(2, 3, colors.white, colors.black, "type     : " .. ctype)
 window:set(2, 4, colors.white, colors.black, "path     : " .. gui_container.short(path, #addr))
 window:set(2, 5, colors.white, colors.black, "disk     : " .. addr)
+window:set(2, 10, colors.white, colors.black, "last mod : " .. time.formatTime(time.addTimeZone(fs.lastModified(path), registry.timeZone or 0), true, true))
 
 window:set(2, 9, colors.white, colors.black, "f/d count: please wait...")
 window:set(2, 6, colors.white, colors.black, "real size: please wait...")
@@ -88,17 +90,17 @@ window:set(2, 9, colors.white, colors.black, "f/d count: " .. filesCount .. "-fi
 graphic.forceUpdate(screen)
 
 while true do
-	local eventData = {event.pull()}
-	local windowEventData = window:uploadEvent(eventData)
-	layout:uploadEvent(windowEventData)
+    local eventData = {event.pull()}
+    local windowEventData = window:uploadEvent(eventData)
+    layout:uploadEvent(windowEventData)
 
-	if windowEventData[1] == "key_down" then
-		if windowEventData[4] == 28 then
-			break
-		end
-	elseif windowEventData[1] == "touch" then
-		if windowEventData[3] >= window.sizeX - 2 and windowEventData[4] == 1 then
-			break
-		end
-	end
+    if windowEventData[1] == "key_down" then
+        if windowEventData[4] == 28 then
+            break
+        end
+    elseif windowEventData[1] == "touch" then
+        if windowEventData[3] >= window.sizeX - 2 and windowEventData[4] == 1 then
+            break
+        end
+    end
 end
