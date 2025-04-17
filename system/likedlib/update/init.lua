@@ -34,11 +34,19 @@ function update.run(branch, mode, wipedata)
     data.branch = branch or data.branch
     data.mode = mode or data.mode
 
-    update._write({ data = data, filesBlackList = registry.filesBlackList })
-    if wipedata then
-        fs.remove("/data")
+    local updaterData = { data = data, filesBlackList = registry.filesBlackList }
+    if _restrictedLoader_update then
+        if wipedata then
+            fs.remove("/data")
+        end
+        _restrictedLoader_update(updaterData)
+    else
+        update._write(updaterData)
+        if wipedata then
+            fs.remove("/data")
+        end
+        computer.shutdown("fast")
     end
-    computer.shutdown("fast")
 end
 
 update.unloadable = true

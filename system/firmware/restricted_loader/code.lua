@@ -2,7 +2,6 @@ if not bootAddress then
 	error("the address of the boot disk was not added to \"Restricted Loader\", it is incorrect to flash the EEPROM", 0)
 end
 
-_restrictedLoader = true
 local eeprom = component.list("eeprom")()
 local invoke = component.invoke
 function component.invoke(address, method, ...)
@@ -29,31 +28,37 @@ do
 	end
 end
 
+_restrictedLoader = true
+
+_restrictedLoader_update = function(updaterData)
+	
+end
+
 local ignore = {
 	["/system/sysdata/eeprom"] = 1
 }
 local function checkSystem(address)
 	if not invoke(address, "exists", "/init.lua") then
-		return false
+		return
 	end
 	local lastModTime = tonumber(invoke(eeprom, "getData"))
 	local function checkFile(path)
-		if ignore[path] then return false end
+		if ignore[path] then return end
 		return invoke(address, "lastModified", path) > lastModTime
 	end
 	local function process(dir)
 		for _, name in ipairs(invoke(address, "list", dir) or {}) do
 			local path = dir .. name
 			if invoke(address, "isDirectory", path) then
-				if process(path) then return true end
+				if process(path) then return 1 end
 			elseif checkFile(path) then
-				return true
+				return 1
 			end
 		end
 	end
-	if process("/system/") then return false end
-	if checkFile("/init.lua") then return false end
-	return true
+	if process("/system/") then return end
+	if checkFile("/init.lua") then return end
+	return 1
 end
 
 local function readFile(address, path)
