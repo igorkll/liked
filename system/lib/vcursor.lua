@@ -17,7 +17,7 @@ function vcursor.hook(screen)
     local posx, posy = 1, 1
 
     local function invertPos(x, y)
-        pcall(function ()
+        pcall(function()
             local char, fore, back = graphic.get(screen, x or posx, y or posy)
             if char then
                 graphic.set(screen, x or posx, y or posy, 0xffffff - back, 0xffffff - fore, char)
@@ -25,10 +25,10 @@ function vcursor.hook(screen)
         end)
     end
 
-    event.hyperHook(function (...)
-        local eventData = {...}
+    event.hyperHook(function(...)
+        local eventData = { ... }
 
-        return utils.safeExec(function ()
+        return utils.safeExec(function()
             if not enabled[screen] then
                 if active and not invertFlag then
                     invertPos()
@@ -111,7 +111,7 @@ function vcursor.hook(screen)
                                 if pressed1 then
                                     event.push("drag", screen, posx, posy, 0, eventData[5])
                                 end
-            
+
                                 if pressed2 then
                                     event.push("drag", screen, posx, posy, 1, eventData[5])
                                 end
@@ -147,7 +147,7 @@ function vcursor.hook(screen)
                     if pressed2 then
                         event.push("drop", screen, posx, posy, 1, eventData[5])
                     end
-                    
+
                     pressed1 = false
                     pressed2 = false
                 end

@@ -6,6 +6,6 @@ local paths = require("paths")
 fs.remove(paths.path(system.getSelfScriptPath()))
 
 if _G.magnetBg then
-    event.cancel(_G.magnetBg)
-    _G.magnetBg = nil
+	event.cancel(_G.magnetBg)
+	_G.magnetBg = nil
 end

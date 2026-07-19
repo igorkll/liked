@@ -6,6 +6,8 @@ local internet = require("internet")
 local thread = require("thread")
 local liked = require("liked")
 local apps = require("apps")
+local registry = require("registry")
+local computer = require("computer")
 
 if not liked.recoveryMode then
     local storagePath = "/data/userdata/cloudStorage"
@@ -43,4 +45,20 @@ if not liked.recoveryMode then
     realCheck()
     event.timer(60, check, math.huge)
     event.listen("accountChanged", check)
+end
+
+if registry.forceRestrictedLoader and not _restrictedLoader then
+    local eepromlib = require("eeprom")
+    local firmware = eepromlib.find("Restricted Loader")
+    local errTitle = "the system configuration requires the \"Restricted Loader\" firmware. "
+    if firmware then
+        if not eepromlib.isFirmware(firmware) then
+            if not eepromlib.hiddenFlash(firmware) then
+                error(errTitle .. "failed to flash the EEPROM")
+            end
+            computer.shutdown("fast") --after flashing, you need to restart the computer, since there is no guarantee that spyware has not been installed in a third-party EEPROM
+        end
+    else
+        error(errTitle .. "the firmware image could not be found")
+    end
 end

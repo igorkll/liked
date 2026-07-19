@@ -17,25 +17,25 @@ local programs = require("programs")
 local clipboard = require("clipboard")
 local parser = require("parser")
 local lastinfo = require("lastinfo")
-local gui = {colors = colors}
+local gui = { colors = colors }
 gui.blackMode = false
 gui.smartShadowsColors = {
     colorslib.lightGray, --1)  white
-    colorslib.brown,     --2)  orange
-    colorslib.purple,    --3)  magenta
-    colorslib.cyan,      --4)  lightBlue
-    colorslib.orange,    --5)  yellow
-    colorslib.green,     --6)  lime
-    colorslib.magenta,   --7)  pink
-    colorslib.black,     --8)  gray
-    colorslib.gray,      --9)  lightGray
-    colorslib.blue,      --10) cyan
-    colorslib.blue,      --11) purple
-    colorslib.brown,     --12) blue
-    colorslib.black,     --13) brown
-    colorslib.gray,      --14) green
-    colorslib.brown,     --15) red
-    colorslib.gray       --16) black
+    colorslib.brown,  --2)  orange
+    colorslib.purple, --3)  magenta
+    colorslib.cyan,   --4)  lightBlue
+    colorslib.orange, --5)  yellow
+    colorslib.green,  --6)  lime
+    colorslib.magenta, --7)  pink
+    colorslib.black,  --8)  gray
+    colorslib.gray,   --9)  lightGray
+    colorslib.blue,   --10) cyan
+    colorslib.blue,   --11) purple
+    colorslib.brown,  --12) blue
+    colorslib.black,  --13) brown
+    colorslib.gray,   --14) green
+    colorslib.brown,  --15) red
+    colorslib.gray    --16) black
 }
 
 function gui.hideExtension(screen, path)
@@ -55,8 +55,12 @@ function gui.hideExtensionPath(screen, path)
     end
 end
 
-function gui.fpath(screen, path)
-    return gui.hideExtensionPath(screen, gui_container.toUserPath(screen, path))
+function gui.fpath(screen, path, maxlen, endcheck)
+    local lpath = gui.hideExtensionPath(screen, gui_container.toUserPath(screen, path))
+    if maxlen then
+        return gui_container.short(lpath, maxlen, endcheck)
+    end
+    return lpath
 end
 
 function gui.isVisible(screen, path)
@@ -104,8 +108,8 @@ gui.veryBigZoneY = 18
 gui.scrShadow = {}
 
 function gui.hideScreen(screen)
-    pcall(component.invoke, screen, "turnOff")    
-    return function ()
+    pcall(component.invoke, screen, "turnOff")
+    return function()
         pcall(component.invoke, screen, "turnOn")
     end
 end
@@ -162,6 +166,35 @@ function gui.saveBigZone(screen)
 end
 
 ------------------------------------
+
+function gui.getShadowWindow(screen, x, y, sx, sy, withWindow)
+    local shadowMode = registry.shadowMode
+    local gpu = graphic.findGpu(screen)
+    local rx, ry = gpu.getResolution()
+    local x2, y2, sx2, sy2
+    if shadowMode == "screen" then
+        x2, y2, sx2, sy2 = 1, 1, rx, ry
+    elseif shadowMode == "round" then
+        x2, y2, sx2, sy2 = x - 2, y - 1, sx + 4, sy + 2
+    elseif shadowMode == "full" then
+        if withWindow then
+            x2, y2, sx2, sy2 = x, y, sx + 2, sy + 1
+        else
+            x2, y2, sx2, sy2 = x + 2, y + 1, sx, sy
+        end
+    else
+        if withWindow then
+            x2, y2, sx2, sy2 = x, y, sx + 1, sy + 1
+        else
+            x2, y2, sx2, sy2 = x + 1, y + 1, sx, sy
+        end
+    end
+    if x2 < 1 then x2 = 1 end
+    if y2 < 1 then y2 = 1 end
+    if sx2 > rx then sx2 = rx end
+    if sy2 > ry then sy2 = ry end
+    return x2, y2, sx2, sy2
+end
 
 function gui.shadow(screen, x, y, sx, sy, mul, full, noSaveShadowState)
     if gui.skipShadow then
@@ -236,7 +269,7 @@ function gui.shadow(screen, x, y, sx, sy, mul, full, noSaveShadowState)
                 for i = y + 1, y + sy do
                     table.insert(shadowPosesX, x + sx)
                     table.insert(shadowPosesY, i)
-    
+
                     if registry.shadowMode == "full" then
                         table.insert(shadowPosesX, x + sx + 1)
                         table.insert(shadowPosesY, i)
@@ -298,7 +331,7 @@ function gui.shadow(screen, x, y, sx, sy, mul, full, noSaveShadowState)
                         else
                             gpu.setForeground(colorslib.colorMul(fore, mul))
                         end
-                        
+
                         local backPal = getPalCol(back)
                         if backPal then
                             gpu.setBackground(gui_container.indexsColors[gui.smartShadowsColors[backPal + 1] + 1])
@@ -339,7 +372,7 @@ function gui.shadow(screen, x, y, sx, sy, mul, full, noSaveShadowState)
     end
 
     local cleared
-    return function ()
+    return function()
         if cleared then
             return
         end
@@ -355,7 +388,7 @@ function gui.shadow(screen, x, y, sx, sy, mul, full, noSaveShadowState)
             gpu.setBackground(origsB[i])
             gpu.set(x, origsY[i], origsC[i])
         end
-        
+
         origsX = nil
         origsY = nil
         origsC = nil
@@ -426,20 +459,21 @@ function gui.customWindow(screen, sx, sy)
 end
 
 function gui.status(screen, cx, cy, str, backgroundColor)
-    local window, noShadow = gui.smallWindow(screen, cx, cy, str, backgroundColor or colors.lightGray, function (window, color)
-        window:set(2, 1, color, colors.blue, "  " .. unicode.char(0x2800+192) ..  "  ")
-        window:set(2, 2, color, colors.blue, " ◢█◣ ")
-        window:set(2, 3, color, colors.blue, "◢███◣")
-        window:set(4, 2, colors.blue, colors.white, "P")
-    end, nil, nil, true)
+    local window, noShadow = gui.smallWindow(screen, cx, cy, str, backgroundColor or colors.lightGray,
+        function(window, color)
+            window:set(2, 1, color, colors.blue, "  " .. unicode.char(0x2800 + 192) .. "  ")
+            window:set(2, 2, color, colors.blue, " ◢█◣ ")
+            window:set(2, 3, color, colors.blue, "◢███◣")
+            window:set(4, 2, colors.blue, colors.white, "P")
+        end, nil, nil, true)
     graphic.forceUpdate(screen)
     event.yield()
     return window, noShadow
 end
 
 function gui.warn(screen, cx, cy, str, backgroundColor)
-    local window, noShadow = gui.smallWindow(screen, cx, cy, str, backgroundColor, function (window, color)
-        window:set(2, 1, color, colors.orange, "  " .. unicode.char(0x2800+192) ..  "  ")
+    local window, noShadow = gui.smallWindow(screen, cx, cy, str, backgroundColor, function(window, color)
+        window:set(2, 1, color, colors.orange, "  " .. unicode.char(0x2800 + 192) .. "  ")
         window:set(2, 2, color, colors.orange, " ◢█◣ ")
         window:set(2, 3, color, colors.orange, "◢███◣")
         window:set(4, 2, colors.orange, colors.white, "!")
@@ -458,7 +492,7 @@ function gui.warn(screen, cx, cy, str, backgroundColor)
     end
 
     while true do
-        local eventData = {computer.pullSignal()}
+        local eventData = { computer.pullSignal() }
         local windowEventData = window:uploadEvent(eventData)
         if windowEventData[1] == "touch" and windowEventData[5] == 0 then
             if windowEventData[4] == 7 and windowEventData[3] > (32 - 5) and windowEventData[3] <= ((32 - 5) + 4) then
@@ -473,12 +507,26 @@ function gui.warn(screen, cx, cy, str, backgroundColor)
     noShadow()
 end
 
+function gui.simpleWarn(screen, cx, cy, str, backgroundColor)
+    local window, noShadow = gui.smallWindow(screen, cx, cy, str, backgroundColor, function(window, color)
+        window:set(2, 1, color, colors.orange, "  " .. unicode.char(0x2800 + 192) .. "  ")
+        window:set(2, 2, color, colors.orange, " ◢█◣ ")
+        window:set(2, 3, color, colors.orange, "◢███◣")
+        window:set(4, 2, colors.orange, colors.white, "!")
+    end)
+
+    graphic.forceUpdate(screen)
+    if registry.soundEnable then
+        sound.warn()
+    end
+end
+
 function gui.done(screen, cx, cy, str, backgroundColor)
-    local window, noShadow = gui.smallWindow(screen, cx, cy, str, backgroundColor, function (window, color)
-        window:set(2, 1, color, colors.green, "  " .. unicode.char(0x2800+192) ..  "  ")
+    local window, noShadow = gui.smallWindow(screen, cx, cy, str, backgroundColor, function(window, color)
+        window:set(2, 1, color, colors.green, "  " .. unicode.char(0x2800 + 192) .. "  ")
         window:set(2, 2, color, colors.green, " ◢█◣ ")
         window:set(2, 3, color, colors.green, "◢███◣")
-        window:set(4, 2, colors.green, colors.white, "~")
+        window:set(4, 2, colors.green, colors.white, "!")
     end)
 
     window:set(32 - 4, 7, colors.lightBlue, colors.white, " OK ")
@@ -494,7 +542,7 @@ function gui.done(screen, cx, cy, str, backgroundColor)
     end
 
     while true do
-        local eventData = {computer.pullSignal()}
+        local eventData = { computer.pullSignal() }
         local windowEventData = window:uploadEvent(eventData)
         if windowEventData[1] == "touch" and windowEventData[5] == 0 then
             if windowEventData[4] == 7 and windowEventData[3] > (32 - 5) and windowEventData[3] <= ((32 - 5) + 4) then
@@ -512,8 +560,8 @@ end
 function gui.bigWarn(screen, cx, cy, str, backgroundColor)
     local bwSizeX, bwSizeY = gui.bwSize(screen)
 
-    local window, noShadow = gui.smallWindow(screen, cx, cy, str, backgroundColor, function (window, color)
-        window:set(2, 1, color, colors.orange, "  " .. unicode.char(0x2800+192) ..  "  ")
+    local window, noShadow = gui.smallWindow(screen, cx, cy, str, backgroundColor, function(window, color)
+        window:set(2, 1, color, colors.orange, "  " .. unicode.char(0x2800 + 192) .. "  ")
         window:set(2, 2, color, colors.orange, " ◢█◣ ")
         window:set(2, 3, color, colors.orange, "◢███◣")
         window:set(4, 2, colors.orange, colors.white, "!")
@@ -532,7 +580,7 @@ function gui.bigWarn(screen, cx, cy, str, backgroundColor)
     end
 
     while true do
-        local eventData = {computer.pullSignal()}
+        local eventData = { computer.pullSignal() }
         local windowEventData = window:uploadEvent(eventData)
         if windowEventData[1] == "touch" and windowEventData[5] == 0 then
             if windowEventData[4] == (bwSizeY - 1) and windowEventData[3] > (bwSizeX - 5) and windowEventData[3] <= ((bwSizeX - 5) + 4) then
@@ -555,12 +603,15 @@ function gui.pleaseCharge(screen, minCharge, str)
 
     local clear = gui.saveZone(screen)
 
-    local window = gui.smallWindow(screen, nil, nil, "in order to make " .. str .. ",\nthe charge level of the device must be at least " .. tostring(math.floor(minCharge)) .. "%", nil, function (window, color)
-        window:set(2, 1, color, colors.red, "  " .. unicode.char(0x2800+192) ..  "  ")
-        window:set(2, 2, color, colors.red, " ◢█◣ ")
-        window:set(2, 3, color, colors.red, "◢███◣")
-        window:set(4, 2, colors.red, colors.white, "!")
-    end)
+    local window = gui.smallWindow(screen, nil, nil,
+        "in order to make " ..
+        str .. ",\nthe charge level of the device must be at least " .. tostring(math.floor(minCharge)) .. "%", nil,
+        function(window, color)
+            window:set(2, 1, color, colors.red, "  " .. unicode.char(0x2800 + 192) .. "  ")
+            window:set(2, 2, color, colors.red, " ◢█◣ ")
+            window:set(2, 3, color, colors.red, "◢███◣")
+            window:set(4, 2, colors.red, colors.white, "!")
+        end)
 
     window:set(32 - 4, 7, colors.lightBlue, colors.white, " OK ")
     local function drawYes()
@@ -575,7 +626,7 @@ function gui.pleaseCharge(screen, minCharge, str)
     end
 
     while true do
-        local eventData = {computer.pullSignal()}
+        local eventData = { computer.pullSignal() }
         local windowEventData = window:uploadEvent(eventData)
         if windowEventData[1] == "touch" and windowEventData[5] == 0 then
             if windowEventData[4] == 7 and windowEventData[3] > (32 - 5) and windowEventData[3] <= ((32 - 5) + 4) then
@@ -600,12 +651,14 @@ function gui.pleaseSpace(screen, minSpace, str)
 
     local clear = gui.saveZone(screen)
 
-    local window = gui.smallWindow(screen, nil, nil, "in order to make " .. str .. ",\nyou need a minimum " .. tostring(math.floor(minSpace)) .. "KB space", nil, function (window, color)
-        window:set(2, 1, color, colors.red, "  " .. unicode.char(0x2800+192) ..  "  ")
-        window:set(2, 2, color, colors.red, " ◢█◣ ")
-        window:set(2, 3, color, colors.red, "◢███◣")
-        window:set(4, 2, colors.red, colors.white, "!")
-    end)
+    local window = gui.smallWindow(screen, nil, nil,
+        "in order to make " .. str .. ",\nyou need a minimum " .. tostring(math.floor(minSpace)) .. "KB space", nil,
+        function(window, color)
+            window:set(2, 1, color, colors.red, "  " .. unicode.char(0x2800 + 192) .. "  ")
+            window:set(2, 2, color, colors.red, " ◢█◣ ")
+            window:set(2, 3, color, colors.red, "◢███◣")
+            window:set(4, 2, colors.red, colors.white, "!")
+        end)
 
     window:set(32 - 4, 7, colors.lightBlue, colors.white, " OK ")
     local function drawYes()
@@ -620,7 +673,7 @@ function gui.pleaseSpace(screen, minSpace, str)
     end
 
     while true do
-        local eventData = {computer.pullSignal()}
+        local eventData = { computer.pullSignal() }
         local windowEventData = window:uploadEvent(eventData)
         if windowEventData[1] == "touch" and windowEventData[5] == 0 then
             if windowEventData[4] == 7 and windowEventData[3] > (32 - 5) and windowEventData[3] <= ((32 - 5) + 4) then
@@ -678,7 +731,7 @@ function gui.selectcolor(screen, cx, cy, str)
     graphic.forceUpdate(screen)
 
     while true do
-        local eventData = {computer.pullSignal()}
+        local eventData = { computer.pullSignal() }
         local windowEventData = window:uploadEvent(eventData)
         if windowEventData[1] == "touch" then
             if windowEventData[3] == window.sizeX and windowEventData[4] == 1 then
@@ -741,7 +794,7 @@ function gui.input(screen, cx, cy, str, hidden, backgroundColor, default, disabl
     end
 
     while true do
-        local eventData = {event.pull()}
+        local eventData = { event.pull() }
         local windowEventData = window:uploadEvent(eventData)
         local out = reader.uploadEvent(eventData)
         if out then
@@ -863,7 +916,7 @@ function gui.context(screen, posX, posY, strs, active, disShadow)
 
     local selectedNum
     while true do
-        local eventData = {computer.pullSignal()}
+        local eventData = { computer.pullSignal() }
         if eventData[2] == screen then
             local windowEventData = window:uploadEvent(eventData)
             if windowEventData[1] == "drop" and windowEventData[5] == 0 then
@@ -898,7 +951,7 @@ end
 function gui.contextAuto(screen, posX, posY, strs, active)
     local posX, posY, sizeX, sizeY = gui.contextPos(screen, posX, posY, strs)
     local clear = graphic.screenshot(screen, posX, posY, sizeX + 2, sizeY + 1)
-    local result = {gui.context(screen, posX, posY, strs, active)}
+    local result = { gui.context(screen, posX, posY, strs, active) }
     clear()
     return table.unpack(result)
 end
@@ -911,6 +964,161 @@ function gui.contextFunc(screen, posX, posY, strs, active, funcs)
     if num and funcs and funcs[num] then
         funcs[num]()
     end
+end
+
+--[[
+{
+	{
+		title = "title",
+		active = true,
+		callback = function()
+
+			return true --return from context
+		end
+	},
+	true, --break line
+	{
+		title = "menu",
+		active = true,
+		menu = {
+			{
+				title = "1",
+				active = true,
+				callback = function() end
+			},
+			{
+				title = "2",
+				active = true,
+				callback = function() end
+			},
+			{
+				title = "3",
+				active = true,
+				callback = function() end
+			}
+		}
+	}
+}
+]]
+
+function gui.actionContext(screen, x, y, actions, isParent)
+    local gpu = graphic.findGpu(screen)
+
+    local selected
+    local sizeX = 0
+    local sizeY = #actions
+    for i, action in ipairs(actions) do
+        if type(action) == "table" then
+            local title = action.title
+            if #title > sizeX then
+                sizeX = #title
+            end
+        end
+    end
+    sizeX = sizeX + 3
+
+    local rx, ry = gpu.getResolution()
+    x = math.min(x, (rx - sizeX) + 1)
+    y = math.min(y, (ry - sizeY) + 1)
+
+    local window = graphic.createWindow(screen, x, y, sizeX, sizeY)
+    local clear
+    if not isParent or registry.shadowMode ~= "screen" then
+        clear = graphic.screenshot(screen, gui.getShadowWindow(screen, x, y, sizeX, sizeY, true))
+        gui.shadow(screen, x, y, sizeX, sizeY)
+    else
+        clear = graphic.screenshot(screen, x, y, sizeX, sizeY)
+    end
+
+    for i, action in ipairs(actions) do
+        if type(action) == "table" and action.active == nil then
+            action.active = true
+        end
+    end
+
+    local function redraw(noRedrawShadow)
+        for i, action in ipairs(actions) do
+            if action == true then
+                window:fill(1, i, sizeX, 1, colors.white, colors.lightGray, gui_container.chars.splitLine)
+            else
+                if i == selected then
+                    window:fill(1, i, sizeX, 1, colors.blue, 0, " ")
+                    window:set(3, i, colors.blue, colors.white, action.title)
+                    if action.menu then
+                        window:set(sizeX, i, colors.blue, colors.white, ">")
+                    end
+                else
+                    local col = action.active and colors.black or colors.lightGray
+                    window:fill(1, i, sizeX, 1, colors.white, 0, " ")
+                    window:set(3, i, colors.white, col, action.title)
+                    if action.menu then
+                        window:set(sizeX, i, colors.white, col, ">")
+                    end
+                end
+            end
+        end
+        graphic.update(screen)
+    end
+    redraw()
+
+    while true do
+        local eventData = { event.pull() }
+        local isClick = eventData[1] == "touch"
+        if eventData[1] == "scroll" then
+            event.push(table.unpack(eventData))
+            break
+        elseif isClick or eventData[1] == "drag" then
+            selected = nil
+            local newSelected = (eventData[4] - y) + 1
+            if eventData[3] >= x and eventData[3] < x + sizeX then
+                if newSelected >= 1 and newSelected <= #actions then
+                    if eventData[5] == 0 then
+                        if type(actions[newSelected]) == "table" and actions[newSelected].active then
+                            selected = newSelected
+                        end
+                    elseif isClick then
+                        event.push(table.unpack(eventData))
+                        break
+                    end
+                elseif isClick then
+                    event.push(table.unpack(eventData))
+                    break
+                end
+            elseif isClick then
+                event.push(table.unpack(eventData))
+                break
+            end
+            redraw()
+        elseif eventData[1] == "drop" then
+            if selected then
+                local action = actions[selected]
+                if type(action) == "table" and action.callback then
+                    if action.callback == true or action:callback() then
+                        clear()
+                        return selected
+                    end
+                    selected = nil
+                    redraw()
+                elseif action.menu then
+                    if actions.redrawCallback then
+                        actions.redrawCallback()
+                        redraw()
+                        if not action.menu.redrawCallback then
+                            action.menu.redrawCallback = actions.redrawCallback
+                        end
+                    end
+                    if gui.actionContext(screen, x + sizeX, eventData[4], action.menu, true) then
+                        clear()
+                        return selected
+                    end
+                else
+                    clear()
+                    return selected
+                end
+            end
+        end
+    end
+    clear()
 end
 
 function gui.drawtext(screen, posX, posY, foreground, text)
@@ -945,7 +1153,8 @@ function gui.drawtext(screen, posX, posY, foreground, text)
     end
 end
 
-function gui.select(screen, cx, cy, label, actions, scroll, noCloseButton, overlay, windowEventCallback, noCleanShadow, disableShadow, alwaysConfirm)
+function gui.select(screen, cx, cy, label, actions, scroll, noCloseButton, overlay, windowEventCallback, noCleanShadow,
+                    disableShadow, alwaysConfirm)
     --=gui_select(screen, nil, nil, "LOLZ", {"test 1", "test 2", "test 3"})
 
     local gpu = graphic.findGpu(screen)
@@ -971,12 +1180,14 @@ function gui.select(screen, cx, cy, label, actions, scroll, noCloseButton, overl
         if #actions == 1 then
             window:set(window.sizeX, 2, colors.white, 0, " ")
         else
-            window:set(window.sizeX, math.round(math.map(scroll, 0, #actions - 1, 2, window.sizeY - 1)), colors.white, 0, " ")
+            window:set(window.sizeX, math.round(math.map(scroll, 0, #actions - 1, 2, window.sizeY - 1)), colors.white, 0,
+                " ")
         end
     end
 
     local function redrawButton()
-        window:set(window.sizeX - 9, window.sizeY, (sel or alwaysConfirm) and colors.lime or colors.green, colors.white, " CONFIRM ")
+        window:set(window.sizeX - 9, window.sizeY, (sel or alwaysConfirm) and colors.lime or colors.green, colors.white,
+            " CONFIRM ")
     end
 
     local function drawBase()
@@ -1014,7 +1225,7 @@ function gui.select(screen, cx, cy, label, actions, scroll, noCloseButton, overl
         if not pos then
             drawBase()
         end
-        
+
         addrs = {}
         addrsIdx = {}
         local lastLine = 1
@@ -1046,7 +1257,7 @@ function gui.select(screen, cx, cy, label, actions, scroll, noCloseButton, overl
     local function drawUp()
         scroll = scroll - 1
         window:copy(1, 2, window.sizeX - 1, 13, 0, 1)
-        
+
         addrs = {}
         addrsIdx = {}
         for index, action in ipairs(actions) do
@@ -1070,7 +1281,7 @@ function gui.select(screen, cx, cy, label, actions, scroll, noCloseButton, overl
     local function drawDown()
         scroll = scroll + 1
         window:copy(1, 3, window.sizeX - 1, 13, 0, -1)
-        
+
         local noDraw
         addrs = {}
         addrsIdx = {}
@@ -1099,13 +1310,13 @@ function gui.select(screen, cx, cy, label, actions, scroll, noCloseButton, overl
     draw()
 
     while true do
-        local eventData = {computer.pullSignal()}
+        local eventData = { computer.pullSignal() }
         local windowEventData = window:uploadEvent(eventData)
         if windowEventCallback then
             local ret, lAlwaysConfirm = windowEventCallback(windowEventData, window)
             if ret ~= nil then
                 if not noCleanShadow and noShadow then noShadow() end
-                return ret, nil, nil, nil, nil, noShadow
+                return ret, scroll, windowEventData[5], windowEventData, nil, noShadow
             end
             if alwaysConfirm ~= lAlwaysConfirm then
                 alwaysConfirm = lAlwaysConfirm
@@ -1193,7 +1404,7 @@ function gui.selectcomponent(screen, cx, cy, types, allowAutoConfirm, control, c
     local vcomponent = require("vcomponent")
 
     if types and type(types) ~= "table" then
-        types = {types}
+        types = { types }
     end
 
     if not cx or not cy then
@@ -1230,7 +1441,7 @@ function gui.selectcomponent(screen, cx, cy, types, allowAutoConfirm, control, c
     local selfAddress = computer.address()
 
     local th
-    th = thread.create(function ()
+    th = thread.create(function()
         if allTypesFlag then
             allTypes()
         end
@@ -1272,7 +1483,11 @@ function gui.selectcomponent(screen, cx, cy, types, allowAutoConfirm, control, c
                         end
                         clabel = gui_container.short(clabel, 20)
 
-                        table.insert(strs, ctype .. string.rep(" ", 38 - unicode.wlen(ctype) - unicode.wlen(clabel)) .. clabel .. string.rep(" ", (1 - unicode.wlen(clabel)) + unicode.wlen(clabel)) .. addr:sub(1, 8))
+                        table.insert(strs,
+                            ctype ..
+                            string.rep(" ", 38 - unicode.wlen(ctype) - unicode.wlen(clabel)) ..
+                            clabel ..
+                            string.rep(" ", (1 - unicode.wlen(clabel)) + unicode.wlen(clabel)) .. addr:sub(1, 8))
                     end
                 end
             end
@@ -1283,7 +1498,8 @@ function gui.selectcomponent(screen, cx, cy, types, allowAutoConfirm, control, c
                 return
             end
 
-            local idx, lscroll, button, eventData, _, noShadow = gui.select(screen, cx, cy, typesstr, strs, scroll, control, nil, nil, true, shadowDrawed)
+            local idx, lscroll, button, eventData, _, noShadow = gui.select(screen, cx, cy, typesstr, strs, scroll,
+                control, nil, nil, true, shadowDrawed)
             scroll = lscroll
             if not shadowDrawed then
                 gNoShadow = noShadow
@@ -1324,14 +1540,15 @@ function gui.selectcomponent(screen, cx, cy, types, allowAutoConfirm, control, c
                     local clear = graphic.screenshot(screen, x, y, sx + 2, sy + 1)
                     local _, action = gui.context(screen, x, y, strs)
                     clear()
-                    if action == 1 then 
+                    if action == 1 then
                         clipboard.set(eventData[6], component.type(addr))
                     elseif action == 2 then
                         clipboard.set(eventData[6], addr)
                     elseif action == 3 then
                         local liked = require("liked")
                         liked.umountAll()
-                        local str = gui.input(screen, subWindowX, subWindowY, "new name", nil, nil, advLabeling.getLabel(addr))
+                        local str = gui.input(screen, subWindowX, subWindowY, "new name", nil, nil,
+                            advLabeling.getLabel(addr))
                         if type(str) == "string" then
                             advLabeling.setLabel(addr, str)
                         end
@@ -1354,7 +1571,8 @@ function gui.selectcomponent(screen, cx, cy, types, allowAutoConfirm, control, c
                     elseif action == 5 then
                         local format = require("format")
 
-                        local tempfile = paths.concat("/tmp", component.type(addr) .. "_" .. math.round(math.random(0, 9999)) .. ".txt")
+                        local tempfile = paths.concat("/tmp",
+                            component.type(addr) .. "_" .. math.round(math.random(0, 9999)) .. ".txt")
                         local file = fs.open(tempfile, "wb")
                         local methods = component.methods(addr)
                         local maxMethodLen = 0
@@ -1367,7 +1585,8 @@ function gui.selectcomponent(screen, cx, cy, types, allowAutoConfirm, control, c
                             local smart = format.smartConcat()
                             smart.add(1, name)
                             smart.add(maxMethodLen + 2, direct and "DIRECT" or "INDIRECT")
-                            smart.add(maxMethodLen + 2 + 8, " - " .. (component.doc(addr, name) or "Undocumented") .. "\n")
+                            smart.add(maxMethodLen + 2 + 8,
+                                " - " .. (component.doc(addr, name) or "Undocumented") .. "\n")
                             file.write(smart.get())
                         end
                         file.close()
@@ -1409,9 +1628,9 @@ function gui.selectcomponent(screen, cx, cy, types, allowAutoConfirm, control, c
         end
     end)
     th:resume()
-    
+
     while true do
-        local eventData = {computer.pullSignal(0.1)}
+        local eventData = { computer.pullSignal(0.1) }
 
         if cancel or out then
             if gNoShadow then gNoShadow() end
@@ -1426,15 +1645,29 @@ function gui.selectcomponent(screen, cx, cy, types, allowAutoConfirm, control, c
     end
 end
 
-function gui.selectcomponentProxy(screen, cx, cy, types, allowAutoConfirm, control, callbacks, blacklist)
-    local addr = gui.selectcomponent(screen, cx, cy, types, allowAutoConfirm, control, callbacks, blacklist)
+function gui.selectcomponentProxy(...)
+    local addr = gui.selectcomponent(...)
     if addr then
         return component.proxy(addr)
     end
 end
 
 function gui.selectExternalFs(screen, cx, cy)
-    return gui.selectcomponentProxy(screen, cx, cy, {"filesystem"}, false, false, nil, {fs.bootaddress, fs.tmpaddress})
+    return gui.selectcomponentProxy(screen, cx, cy, { "filesystem" }, false, false, nil, { fs.bootaddress, fs.tmpaddress })
+end
+
+function gui.comfurmPassword(screen, px, py)
+    local password1 = gui.input(screen, px, py, "enter new password", true)
+    if password1 then
+        local password2 = gui.input(screen, px, py, "comfurm new password", true)
+        if password2 then
+            if password1 == password2 then
+                return password1
+            else
+                gui.warn(screen, px, py, "passwords don't match")
+            end
+        end
+    end
 end
 
 function gui.checkPassword(screen, cx, cy, disableStartSound, noCancel)
@@ -1447,14 +1680,17 @@ function gui.checkPassword(screen, cx, cy, disableStartSound, noCancel)
 
             if password then
                 if require("sha256").sha256(password .. (regData.passwordSalt or "")) == regData.password then
-                    return true
+                    if regData.encrypt then
+                        require("efs").init(password)
+                    end
+                    return true, password
                 else
                     local clear = gui.saveZone(screen)
                     gui.warn(screen, cx, cy, "invalid password")
                     clear()
                 end
             else
-                return false --false означает что пользователь отказался от ввода пароля
+                return false, password --false означает что пользователь отказался от ввода пароля
             end
         else
             return true
@@ -1474,8 +1710,8 @@ function gui.checkPasswordLoop(...)
 end
 
 function gui.yesno(screen, cx, cy, str, backgroundColor)
-    local window, noShadow = gui.smallWindow(screen, cx, cy, str, backgroundColor, function (window, color)
-        window:set(2, 1, color, colors.green, "  " .. unicode.char(0x2800+192) ..  "  ")
+    local window, noShadow = gui.smallWindow(screen, cx, cy, str, backgroundColor, function(window, color)
+        window:set(2, 1, color, colors.green, "  " .. unicode.char(0x2800 + 192) .. "  ")
         window:set(2, 2, color, colors.green, " ◢█◣ ")
         window:set(2, 3, color, colors.green, "◢███◣")
         window:set(4, 2, colors.green, colors.white, "?")
@@ -1496,7 +1732,7 @@ function gui.yesno(screen, cx, cy, str, backgroundColor)
     end
 
     while true do
-        local eventData = {computer.pullSignal()}
+        local eventData = { computer.pullSignal() }
         local windowEventData = window:uploadEvent(eventData)
         if windowEventData[1] == "touch" and windowEventData[5] == 0 then
             if windowEventData[4] == 7 and windowEventData[3] > (32 - 6) and windowEventData[3] <= ((32 - 5) + 4) then
@@ -1518,24 +1754,68 @@ function gui.yesno(screen, cx, cy, str, backgroundColor)
     end
 end
 
+function gui.nextOrCancel(screen, cx, cy, str, backgroundColor)
+    local window, noShadow = gui.smallWindow(screen, cx, cy, str, backgroundColor, function(window, color)
+        window:set(2, 1, color, colors.orange, "  " .. unicode.char(0x2800 + 192) .. "  ")
+        window:set(2, 2, color, colors.orange, " ◢█◣ ")
+        window:set(2, 3, color, colors.orange, "◢███◣")
+        window:set(4, 2, colors.orange, colors.white, "!")
+    end, 50, 16)
+
+    window:set(50 - 6, 15, colors.lightBlue, colors.white, " next ")
+    window:set(2, 15, colors.red, colors.white, " cancel ")
+
+    graphic.forceUpdate(screen)
+    if registry.soundEnable then
+        sound.warn()
+    end
+
+    local function drawYes()
+        window:set(50 - 6, 15, colors.blue, colors.white, " next ")
+        graphic.forceUpdate(screen)
+        event.sleep(0.1)
+    end
+
+    while true do
+        local eventData = { computer.pullSignal() }
+        local windowEventData = window:uploadEvent(eventData)
+        if windowEventData[1] == "touch" and windowEventData[5] == 0 then
+            if windowEventData[4] == 15 and windowEventData[3] > (50 - 7) and windowEventData[3] <= ((50 - 5) + 4) then
+                drawYes()
+                noShadow()
+                return true
+            elseif windowEventData[4] == 15 and windowEventData[3] >= 2 and windowEventData[3] <= (2 + 3 + 4) then
+                window:set(2, 15, colors.brown, colors.white, " cancel ")
+                graphic.forceUpdate(screen)
+                event.sleep(0.1)
+                noShadow()
+                return false
+            end
+        elseif windowEventData[1] == "key_down" and windowEventData[4] == 28 then
+            drawYes()
+            noShadow()
+            return true
+        end
+    end
+end
 
 function gui.clearRun(func, screen, ...)
     local clear = gui.saveZone(screen)
-    local result = {func(screen, ...)}
+    local result = { func(screen, ...) }
     clear()
     return table.unpack(result)
 end
 
 function gui.clearBigRun(func, screen, ...)
     local clear = gui.saveBigZone(screen)
-    local result = {func(screen, ...)}
+    local result = { func(screen, ...) }
     clear()
     return table.unpack(result)
 end
 
 function gui.clearScreenRun(func, screen, ...)
     local clear = graphic.screenshot(screen)
-    local result = {func(screen, ...)}
+    local result = { func(screen, ...) }
     clear()
     return table.unpack(result)
 end

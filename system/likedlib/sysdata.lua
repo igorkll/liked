@@ -2,43 +2,39 @@ local fs = require("filesystem")
 local paths = require("paths")
 
 local sysdata = {}
-sysdata.defaults = {
+local varsPath = "/system/sysdata"
+local defaults = {
     ["branch"] = "main",
     ["mode"] = "full"
 }
 
 function sysdata.path(key)
-    return paths.concat("/system/sysdata", key)
+    return paths.concat(varsPath, key)
 end
-
-function sysdata.default(key)
-    return sysdata.defaults[key]
-end
-
 
 function sysdata.get(key)
     local path = sysdata.path(key)
     if fs.exists(path) then
-        return fs.readFile(path) or error("key not found", 2)
+        return fs.readFile(path) or defaults[key]
     else
-        return sysdata.default(key) or error("key not found", 2)
+        return defaults[key]
     end
 end
 
 function sysdata.set(key, value)
     local path = sysdata.path(key)
-    return fs.writeFile(path, value or sysdata.default(key))
+    return fs.writeFile(path, value or defaults[key])
 end
 
-function sysdata.update(key)
-    local path = sysdata.path(key)
-    if not fs.exists(path) then
-        return sysdata.set(key)
+function sysdata.list()
+    local lst = {}
+    for k, v in pairs(defaults) do
+        lst[k] = v
     end
-end
-
-for key in pairs(sysdata.defaults) do
-    sysdata.update(key)
+    for _, name in ipairs(fs.list(varsPath)) do
+        lst[name] = sysdata.get(name)
+    end
+    return lst
 end
 
 sysdata.unloadable = true

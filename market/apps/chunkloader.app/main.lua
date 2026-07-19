@@ -29,14 +29,14 @@ local up = layout:createAutoUpBar("Chunkloader")
 local switch = layout:createBigSwitch((rx / 2) - 7, ry <= 16 and 1 or 6, chunkloader.isActive())
 
 function switch:onSwitch()
-    chunkloader.setActive(self.state)
-    up:draw()
+	chunkloader.setActive(self.state)
+	up:draw()
 end
 
 layout:draw()
 up:draw()
 
 while true do
-    local eventData = {event.pull()}
-    layout:uploadEvent(eventData)
+	local eventData = {event.pull()}
+	layout:uploadEvent(eventData)
 end

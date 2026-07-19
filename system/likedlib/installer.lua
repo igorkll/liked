@@ -71,7 +71,13 @@ function installer.install_liked(vfs)
     if not success then return nil, err end
 
     installer.rmTarget("system") --удаляю старую систему чтобы не было канфликтов версий и не оставалось лишних файлов
-    return installer.uinit(vfs, "liked", installer.toTarget("system"))
+
+    local success, err = installer.toTarget("system")
+    if not success then return nil, err end
+
+    installer.rmTarget("system/sysdata/eeprom") --the cloned system should not be linked to the EEPROM
+
+    return installer.uinit(vfs, "liked", true)
 end
 
 function installer.install_likedbox(vfs)
@@ -86,13 +92,13 @@ function installer.install_likedbox(vfs)
     local bl = assert(serialization.load("/system/liked/box.lst"))
     local systemFolder = installer.selfPath("system")
     local targetSystemFolder = installer.targetPath("system")
-    local success, err = fs.copy(systemFolder, targetSystemFolder, function (from)
+    local success, err = fs.copy(systemFolder, targetSystemFolder, function(from)
         for _, lpath in ipairs(bl) do
             if paths.equals(paths.concat(systemFolder, lpath), from) then
                 return false
             end
         end
-        
+
         return true
     end)
     if not success then return nil, err end
@@ -104,14 +110,9 @@ function installer.install_installer(vfs)
     local success, err = installer.init(vfs)
     if not success then return nil, err end
 
-    local success, err = installer.toTarget("init.lua")
-    if not success then return nil, err end
-
-    installer.rmTarget("system")
-    local success, err = installer.toTarget("system/core")
-    if not success then return nil, err end
-
-    return installer.uinit(vfs, "likeOS installer", fs.copy(installer.selfPath("system/installer"), installer.targetPath("system")))
+    installer.rmTarget(".")
+    return installer.uinit(vfs, "liked installer",
+        fs.copy(installer.selfPath("system/installer"), installer.targetPath(".")))
 end
 
 function installer.install_selfsys(vfs)
@@ -129,9 +130,9 @@ function installer.install_boxfile(vfs, path, splashCallback)
     -- format
     if splashCallback then splashCallback("formatting...") end
     installer.rmTarget(".")
-    
+
     -- installing likedbox or core
-    local exp = paths.extension(path) 
+    local exp = paths.extension(path)
     local ok, err
     if exp == "sbox" then
         if splashCallback then splashCallback("installing core...") end
@@ -172,7 +173,7 @@ end
 
 function installer.ui_install_boxfile(screen, vfs, path)
     local clear
-    return installer.install_boxfile(vfs, path, function (str)
+    return installer.install_boxfile(vfs, path, function(str)
         if clear then clear() end
         clear = gui.saveZone(screen)
         gui.status(screen, nil, nil, str)
@@ -181,7 +182,7 @@ end
 
 function installer.context(screen, posX, posY, vfs)
     local label, num = gui.contextAuto(screen, posX, posY, {
-        "likeOS installer",
+        "liked installer",
         "liked",
         "likedbox",
         "likeOS (core only)",
@@ -208,7 +209,7 @@ function installer.context(screen, posX, posY, vfs)
     local clear = gui.saveZone(screen)
     if gui.yesno(screen, nil, nil, "install \"" .. label .. "\" to \"" .. name .. "\"?") then
         gui.status(screen, nil, nil, "installing \"" .. label .. "\" to \"" .. name .. "\"...")
-        local result = {liked.assert(screen, installers[num](vfs))}
+        local result = { liked.assert(screen, installers[num](vfs)) }
         clear()
         return table.unpack(result)
     end

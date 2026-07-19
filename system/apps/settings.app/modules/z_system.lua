@@ -26,96 +26,122 @@ local lastVersion, lastVersionErr
 ------------------------------------
 
 layout:createButton(2, 8, 16, 1, nil, nil, "WIPE USER DATA", true).onClick = function ()
-    if gui.checkPasswordLoop(screen) and gui.pleaseType(screen, "WIPE") then
-        if liked.assert(screen, fs.remove("/data")) then
-            computer.shutdown("fast")
-        end
-    end
-    layout:draw()
+	if gui.checkPasswordLoop(screen) and gui.pleaseType(screen, "WIPE") then
+		if liked.assert(screen, fs.remove("/data")) then
+			computer.shutdown("fast")
+		end
+	end
+	layout:draw()
 end
 
 local branch = sysdata.get("branch")
 local currentMode = sysdata.get("mode")
 
 local function update(newBranch)
-    if not lastVersion then
-        gui.warn(screen, nil, nil, "connection problems\ntry again later")
-    elseif gui.pleaseCharge(screen, 80, "update") and gui.pleaseSpace(screen, 512, "update") and gui.checkPasswordLoop(screen) and gui.yesno(screen, nil, nil, newBranch and "ATTENTION, changing the branch to \"" .. newBranch .."\" can break the system! are you sure?" or (currentVersion ~= lastVersion and "start updating now?" or "you have the latest version installed. do you still want to start updating?")) then
-        require("update").run(newBranch or branch, currentMode)
-    end
-    layout:draw()
+	if not lastVersion then
+		gui.warn(screen, nil, nil, "connection problems\ntry again later")
+	elseif gui.pleaseCharge(screen, 80, "update") and gui.pleaseSpace(screen, 512, "update") and gui.checkPasswordLoop(screen) then
+		local updatelib = require("update")
+		if updatelib.needWipe(newBranch or branch, currentMode) then
+			gui.warn(screen, nil, nil, "to upgrade to this version, you need to erase the data")
+			if gui.pleaseType(screen, "WIPE") then
+				updatelib.run(newBranch or branch, currentMode, true)
+			end
+		elseif gui.yesno(screen, nil, nil, currentVersion ~= lastVersion and "start updating now?" or "you have the latest version installed. do you still want to start updating?") then
+			updatelib.run(newBranch or branch, currentMode)
+		end
+	end
+	layout:draw()
 end
 
-layout:createButton(20, 8, 16, 1, nil, nil, "UPDATE SYSTEM", true).onClick = function ()
-    update()
+if not registry.banningUpdates then
+	layout:createButton(20, 8, 16, 1, nil, nil, "UPDATE SYSTEM", true).onClick = function ()
+		update()
+	end
 end
 
 if not registry.disableSystemSettings then
-    local planeSize = 9
-    local planePos = layout.sizeY - planeSize
-    local hidePlane = layout:createPlane(2, planePos, layout.sizeX - 2, planeSize, colors.red)
-    local show = layout:createButton(layout.sizeX - 9, planePos+1, 8, 1, colors.orange, colors.white, "show")
-    local showText = layout:createText(3, planePos+1, colors.white, "dangerous settings")
+	local planeSize = 9
+	local planePos = layout.sizeY - planeSize
+	local hidePlane = layout:createPlane(2, planePos, layout.sizeX - 2, planeSize, colors.red)
+	local show = layout:createButton(layout.sizeX - 9, planePos+1, 8, 1, colors.orange, colors.white, "show")
+	local showText = layout:createText(3, planePos+1, colors.white, "dangerous settings")
 
-    function show:onDrop()
-        if gui.checkPasswordLoop(screen) and gui.pleaseType(screen, "DNGRUS") then
-            hidePlane.disabledHidden = true
-            show.disabledHidden = true
-            showText.disabledHidden = true
+	function show:onDrop()
+		if gui.checkPasswordLoop(screen) and gui.pleaseType(screen, "DNGRUS") then
+			hidePlane.disabledHidden = true
+			show.disabledHidden = true
+			showText.disabledHidden = true
 
-            layout:createPlane(2, planePos, layout.sizeX - 2, planeSize, colors.lightGray)
-            layout:createText(layout.sizeX - 18, planePos, colors.black, "dangerous settings")
+			layout:createPlane(2, planePos, layout.sizeX - 2, planeSize, colors.lightGray)
+			layout:createText(layout.sizeX - 18, planePos, colors.black, "dangerous settings")
 
-            local disableRecoverySwitch = layout:createSwitch(3, planePos+1, registry.disableRecovery)
-            local disableLogoSwitch = layout:createSwitch(3, planePos+3, registry.disableLogo)
-            local disableAutoReboot = layout:createSwitch(3, planePos+5, registry.disableAutoReboot)
-            if not registry.disableChangeBranch then
-                local changeBranchButton = layout:createButton(3, planePos+7, nil, 1, nil, nil, "update to another branch", true)
-                function changeBranchButton:onClick()
+			local disableRecoverySwitch = layout:createSwitch(3, planePos+1, registry.disableRecovery)
+			local disableLogoSwitch = layout:createSwitch(3, planePos+3, registry.disableLogo)
+			local disableAutoReboot = layout:createSwitch(3, planePos+5, registry.disableAutoReboot)
+			if not registry.disableChangeBranch then
+				local changeBranchButton = layout:createButton(3, planePos+7, nil, 1, nil, nil, "update to another branch", true)
+				function changeBranchButton:onClick()
                     local branchs = {"main", "test", "dev"}
-                    for i = #branchs, 1, -1 do
-                        if branchs[i] == branch then
-                            table.remove(branchs, i)
-                            break
+                    local branchsSelector = {}
+					for i, lbranch in ipairs(branchs) do
+						if lbranch == branch then
+							branchsSelector[i] = lbranch .. " (current)"
+                        else
+                            branchsSelector[i] = lbranch
+						end
+					end
+
+					local newBranch = gui.select(screen, nil, nil, "select a new branch", branchsSelector)
+					if newBranch then
+						newBranch = branchs[newBranch]
+
+                        local action = gui.select(screen, nil, nil, "select a new branch", {"update to the " .. newBranch .. " branch", "only change the branch to " .. newBranch})
+                        if action then
+                            gRedraw()
+    						layout:draw()
+
+                            if action == 1 then
+                                update(newBranch)
+                            elseif action == 2 then
+                                sysdata.set("branch", newBranch)
+                                gui.done(screen, nil, nil, "the branch was successfully changed to " .. newBranch)
+                                selfReload()
+                                return
+                            end
                         end
-                    end
-                    local newBranch = gui.select(screen, nil, nil, "select a new branch", branchs)
-                    if newBranch then
-                        newBranch = branchs[newBranch]
-                        gRedraw()
-                        layout:draw()
-                        update(newBranch)
-                    end
-                    gRedraw()
-                    layout:draw()
-                end
-            end
+					end
 
-            layout:createText(10, planePos+1, colors.white, "disable system recovery menu")
-            layout:createText(10, planePos+3, colors.white, "disable startup logo")
-            layout:createText(10, planePos+5, colors.white, "disable auto-reboot on system error")
-            
-            function disableRecoverySwitch:onSwitch()
-                registry.disableRecovery = self.state
-            end
-            
-            function disableLogoSwitch:onSwitch()
-                registry.disableLogo = self.state
-            end
-            
-            function disableAutoReboot:onSwitch()
-                registry.disableAutoReboot = self.state
-            end
-        end
+					gRedraw()
+					layout:draw()
+				end
+			end
 
-        layout:draw()
-    end
+			layout:createText(10, planePos+1, colors.white, "disable system recovery menu")
+			layout:createText(10, planePos+3, colors.white, "disable startup logo")
+			layout:createText(10, planePos+5, colors.white, "disable auto-reboot on system error")
+			
+			function disableRecoverySwitch:onSwitch()
+				registry.disableRecovery = self.state
+			end
+			
+			function disableLogoSwitch:onSwitch()
+				registry.disableLogo = self.state
+			end
+			
+			function disableAutoReboot:onSwitch()
+				registry.disableAutoReboot = self.state
+			end
+		end
+
+		layout:draw()
+	end
 end
 
 local function systemWeight()
-    local _, initOnDisk = fs.size("/init.lua")
-    local _, sysOnDisk = fs.size("/system")
-    return math.round((initOnDisk + sysOnDisk) / 1024)
+	local _, initOnDisk = fs.size("/init.lua")
+	local _, sysOnDisk = fs.size("/system")
+	return math.round((initOnDisk + sysOnDisk) / 1024)
 end
 
 layout:createText(2, 2, colors.white, "current version: " .. currentVersion)
@@ -132,15 +158,15 @@ graphic.forceUpdate(screen)
 
 lastVersion, lastVersionErr = liked.lastVersion()
 if lastVersion then
-    lastVersionText.text = "last    version: " .. lastVersion
+	lastVersionText.text = "last    version: " .. lastVersion
 else
-    lastVersionText.text = "last    version: " .. lastVersionErr
+	lastVersionText.text = "last    version: " .. lastVersionErr
 end
 
 layout:draw()
 graphic.forceUpdate(screen)
 
 return function(eventData)
-    local windowEventData = window:uploadEvent(eventData)
-    layout:uploadEvent(windowEventData)
+	local windowEventData = window:uploadEvent(eventData)
+	layout:uploadEvent(windowEventData)
 end

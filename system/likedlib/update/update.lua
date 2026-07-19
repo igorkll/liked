@@ -9,18 +9,18 @@ local function initScreen(gpu, screen)
         gpu.bind(screen, false)
     end
 
-    local rx, ry = 50, 16
     local mrx, mry = gpu.maxResolution()
-    if component.list("tablet", true)() then
-        rx, ry = mrx, mry
+    if mrx > 80 then
+        mrx = 80
+        mry = 25
     end
 
     gpu.setDepth(1)
     gpu.setDepth(gpu.maxDepth())
-    gpu.setResolution(rx, ry)
+    gpu.setResolution(mrx, mry)
     gpu.setBackground(0)
     gpu.setForeground(0xffffff)
-    gpu.fill(1, 1, rx, ry, " ")
+    gpu.fill(1, 1, mrx, mry, " ")
 end
 
 local function centerPrint(gpu, text, y)
@@ -87,16 +87,25 @@ printState(0)
 local internet = component.proxy(component.list("internet")() or error("no internet card found", 0))
 local proxy = component.proxy((...) or computer.getBootAddress())
 
+local oldInterruptTime = 0
+local function antiTLWY()
+    local uptime = computer.uptime()
+    if uptime - oldInterruptTime > 2 then
+        computer.pullSignal(0.1)
+        oldInterruptTime = uptime
+    end
+end
+
 local function getInternetFile(url)
     local handle, data, result, reason = internet.request(url), ""
     if handle then
         while true do
-            result, reason = handle.read(math.huge) 
+            result, reason = handle.read(math.huge)
             if result then
                 data = data .. result
             else
                 handle.close()
-                
+
                 if reason then
                     return nil, reason
                 else
@@ -182,15 +191,16 @@ end
 local function installUrl(urlPart, state2)
     local filelist = split(assert(getInternetFile(urlPart .. "/installer/filelist.txt")), "\n")
     local count = 0
-    for i, v in ipairs(filelist) do
-        if v ~= "" and not inBlackList(v) then
-            local filedata = assert(getInternetFile(urlPart .. v))
+    for i, filepath in ipairs(filelist) do
+        antiTLWY()
+        if filepath ~= "" and not inBlackList(filepath) then
+            local filedata = assert(getInternetFile(urlPart .. filepath))
 
             if count % 5 == 0 then
                 printState((((i - 1) / (#filelist - 1)) / 2) + (state2 and 0.5 or 0))
             end
 
-            saveFile(v, filedata)
+            saveFile(filepath, filedata)
             count = count + 1
         end
     end
@@ -228,17 +238,19 @@ if installdata.self then
 end
 
 --отображаем 100% в течении секунды
+local setBootAddr = not installdata.noSetBootaddress and computer.getBootAddress and computer.setBootAddress and
+computer.getBootAddress() ~= proxy.address
 if printState(1) then
-    if computer.getBootAddress and computer.setBootAddress and computer.getBootAddress() ~= proxy.address then
+    if setBootAddr then
         computer.setBootAddress(proxy.address)
     elseif not installdata.noWait then
         sleep(1)
     end
-elseif computer.getBootAddress and computer.setBootAddress and computer.getBootAddress() ~= proxy.address then
+elseif setBootAddr then
     computer.setBootAddress(proxy.address)
 end
 
 --перезагружаем устройтсво
-if computer.setBootAddress then
+if not installdata.noReboot then
     computer.shutdown("fast")
 end

@@ -1,0 +1,134 @@
+local uix = require("uix")
+local event = require("event")
+local lastinfo = require("lastinfo")
+local image = require("image")
+local fs = require("filesystem")
+local paths = require("paths")
+local graphic = require("graphic")
+local thread = require("thread")
+local computer = require("computer")
+local gui = require("gui")
+local storage = require("storage")
+local iowindows = require("iowindows")
+local palette = require("palette")
+local zximage = require("zximage")
+
+local config = storage.getConf({
+	interval = 4,
+	water = true
+})
+
+if config.folder and (not fs.exists(config.folder) or not fs.isDirectory(config.folder)) then
+	config.folder = nil
+end
+
+local screen = ...
+local manager = uix.manager(screen)
+local rx, ry = manager:zoneSize()
+local layout = manager:create("ZX Slide Show")
+
+layout:createImage(rx - 29, 1, "logo.t2p", true, true)
+layout:createText(2, ry - 5, nil, "Press 'Enter' key or 'ctrl+w' to exit from viewer")
+layout:createText(2, 2, nil, "likeOS water-mark: ")
+local startButton = layout:createButton(2, ry - 3, rx - 2, 3, nil, nil, "Start Slide Show", true)
+local waterMark = layout:createSwitch(21, 2, config.water)
+local folderText = layout:createText(2, 4)
+
+local intervalText = layout:createText(rx - 5, ry - 7)
+
+local function updateText()
+	folderText.text = "images folder: " .. (config.folder and paths.name(config.folder) or "not selected")
+	folderText:draw()
+end
+
+local function updateSeekText()
+	intervalText.text = tostring(math.round(config.interval)) .. "S  "
+	intervalText:draw()
+end
+
+updateText()
+updateSeekText()
+
+local unselect = layout:createButton(2, 5, 10, 1, nil, nil, "unselect")
+local selectfolder = layout:createButton(13, 5, 8, 1, nil, nil, "select", true)
+layout:createText(2, ry - 7, nil, "interval: ")
+local seek = layout:createSeek(12, ry - 7, rx - 18, nil, nil, nil, math.map(config.interval, 1, 60, 0, 1))
+
+function seek:onSeek(value)
+	config.interval = math.mapRound(value, 0, 1, 1, 60)
+	updateSeekText()
+end
+
+
+function unselect:onClick()
+	config.folder = nil
+	updateText()
+end
+
+function selectfolder:onClick()
+	local folder = iowindows.selectfolder(screen)
+	if folder then
+		config.folder = folder
+		updateText()
+	end
+	layout:draw()
+end
+
+function waterMark:onSwitch()
+	config.water = self.state
+end
+
+function startButton:onClick()
+	local path = config.folder
+	
+	if path then
+		layout.active = false
+		layout:stop()
+
+		local first = true
+
+		thread.create(function ()
+			local hidden = {}
+			for _, fullpath in ipairs(fs.list(path, true)) do
+				if fs.getAttribute(fullpath, "hidden") then
+					hidden[fullpath] = true
+				end
+			end
+
+			while true do
+				for _, name in ipairs(fs.list(path)) do
+					local fullpath = paths.concat(path, name)
+					local exp = paths.extension(name)
+					if exp == "scr" and not hidden[fullpath] then
+						local startTime = computer.uptime()
+						local crop = graphic.getDepth(screen) < 8
+						zximage.applyResolution(screen, crop)
+						zximage.applyPalette(screen)
+						zximage.draw(screen, fullpath, crop)
+
+						local sx, sy = graphic.getResolution(screen)
+						if waterMark.state then
+							gui.drawtext(screen, 2, sy - 3, 0xffffff, "Operating System     : likeOS & liked")
+							gui.drawtext(screen, 2, sy - 2, 0xffffff, "Application          : zxSlideshow")
+							gui.drawtext(screen, 2, sy - 1, 0xffffff, "Developer In Discord : smlogic")
+						end
+						graphic.forceUpdate(screen)
+
+						local drawTime = computer.uptime() - startTime
+						local waitTime = config.interval - drawTime
+						if waitTime < 0.1 then waitTime = 0.1 end
+						os.sleep(waitTime)
+					end
+				end
+				os.sleep(0.1)
+			end
+		end):resume()
+	else
+		gui.warn(screen, nil, nil, "first, select the folder with the pictures")
+		layout:draw()
+	end
+end
+
+manager:setExit_ctrlW()
+manager:setExit_enter()
+manager:loop()

@@ -22,7 +22,7 @@ layout:createText(2, 4, uix.colors.black, "Boot Disk        : " .. fs.bootaddres
 layout:createText(2, 5, uix.colors.black, "Device Type      : " .. system.getDeviceType())
 layout:createText(2, 6, uix.colors.black, "Processor        : tier-" .. tostring(cpuLevel) .. (isApu and " (APU)" or "") .. (isCreative and " (Creative)" or ""))
 layout:createText(2, 7, uix.colors.black, "Computer Score   : ")
-layout:createText(21, 7, liked.getScoreColor(score), tostring(score) .. " / 10", 1, liked.getScoreColor(score))
+layout:createText(21, 7, liked.getScoreColor(score), tostring(score) .. " / 10")
 
 local linePoses = 22
 local textSizes = 16
@@ -54,71 +54,77 @@ local energyParam2 = layout:createText(paramsPoses2, energyBar.y, uix.colors.bla
 local coreLicenseButton = layout:createButton(rx - 18, 2, 17, 1, uix.colors.orange, uix.colors.white, "core license", true)
 coreLicenseButton.back2 = uix.colors.lightGray
 function coreLicenseButton:onClick(_, nickname)
-    ui:execute("edit", screen, nickname, "/system/core/LICENSE", true)
+	ui:fullStop()
+	require("viewer").license(screen, "/system/core/LICENSE", nil, nil, nil, true)
+	ui:fullStart()
+	ui:draw()
 end
 
 local licenseButton = layout:createButton(rx - 18, 4, 17, 1, uix.colors.orange, uix.colors.white, "liked license", true)
 licenseButton.back2 = uix.colors.lightGray
 function licenseButton:onClick(_, nickname)
-    ui:execute("edit", screen, nickname, "/system/LICENSE", true)
+	ui:fullStop()
+	require("viewer").license(screen, "/system/LICENSE", nil, nil, nil, true)
+	ui:fullStart()
+	ui:draw()
 end
 
 local function updateBars(cpuLoadLevel)
-    local totalMemory = computer.totalMemory()
-    local freeMemory = computer.freeMemory()
+	local totalMemory = computer.totalMemory()
+	local freeMemory = computer.freeMemory()
 
-    local totalEnergy = computer.energy()
-    local maxEnergy = computer.maxEnergy()
-    
-    local hddUsedValue = hddUsedSpace / hddTotalSpace
-    local ramUsedValue = 1 - (freeMemory / totalMemory)
-    local energyVal = totalEnergy / maxEnergy
+	local totalEnergy = computer.energy()
+	local maxEnergy = computer.maxEnergy()
+	
+	local hddUsedValue = hddUsedSpace / hddTotalSpace
+	local ramUsedValue = 1 - (freeMemory / totalMemory)
+	local energyVal = totalEnergy / maxEnergy
 
-    ramBar.value = ramUsedValue
-    romBar.value = hddUsedValue
-    energyBar.value = energyVal
-    cpuBar.value = cpuLoadLevel
+	ramBar.value = ramUsedValue
+	romBar.value = hddUsedValue
+	energyBar.value = energyVal
+	cpuBar.value = cpuLoadLevel
 
-    cpuParam.text = tostring(math.round(cpuLoadLevel * 100)) .. "%"
-    cpuParam2.text = "/ " .. tostring(100) .. "%"
+	cpuParam.text = tostring(math.round(cpuLoadLevel * 100)) .. "%"
+	cpuParam2.text = "/ " .. tostring(100) .. "%"
 
-    ramParam.text = tostring(math.round((totalMemory - freeMemory) / 1024)) .. "KB"
-    ramParam2.text = "/ " .. tostring(math.round(totalMemory / 1024)) .. "KB"
+	ramParam.text = tostring(math.round((totalMemory - freeMemory) / 1024)) .. "KB"
+	ramParam2.text = "/ " .. tostring(math.round(totalMemory / 1024)) .. "KB"
 
-    romParam.text = tostring(math.round(hddUsedSpace / 1024)) .. "KB"
-    romParam2.text = "/ " .. tostring(math.round(hddTotalSpace / 1024)) .. "KB"
+	romParam.text = tostring(math.round(hddUsedSpace / 1024)) .. "KB"
+	romParam2.text = "/ " .. tostring(math.round(hddTotalSpace / 1024)) .. "KB"
 
-    energyParam.text = tostring(math.round(computer.energy()))
-    energyParam2.text = "/ " .. tostring(math.round(computer.maxEnergy()))
+	energyParam.text = tostring(math.round(computer.energy()))
+	energyParam2.text = "/ " .. tostring(math.round(computer.maxEnergy()))
 end
 
 function layout:onRedraw()
-    updateBars(0)
+	updateBars(0)
 end
 
 layout:thread(function ()
-    while true do
-        updateBars(system.getCpuLoadLevel())
+	while true do
+		updateBars(system.getCpuLoadLevel())
 
-        emptyPlane:draw()
+		emptyPlane:draw()
 
-        ramBar:draw()
-        romBar:draw()
-        energyBar:draw()
-        cpuBar:draw()
+		ramBar:draw()
+		romBar:draw()
+		energyBar:draw()
+		cpuBar:draw()
 
-        cpuParam:draw()
-        cpuParam2:draw()
+		cpuParam:draw()
+		cpuParam2:draw()
 
-        ramParam:draw()
-        ramParam2:draw()
+		ramParam:draw()
+		ramParam2:draw()
 
-        romParam:draw()
-        romParam2:draw()
+		romParam:draw()
+		romParam2:draw()
 
-        energyParam:draw()
-        energyParam2:draw()
-    end
+		energyParam:draw()
+		energyParam2:draw()
+	end
 end):resume()
 
 ---------------------------------

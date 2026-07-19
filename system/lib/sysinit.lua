@@ -4,14 +4,14 @@ sysinit.initedScreens = {}
 sysinit.defaultPalettePath = "/system/palettes/light.plt"
 
 function sysinit.applyPalette(path, screen, doNotOffScreen)
-    local fs = require("filesystem")
+    local fs            = require("filesystem")
     local serialization = require("serialization")
-    local component  = require("component")
-    local graphic = require("graphic")
+    local component     = require("component")
+    local graphic       = require("graphic")
     local gui_container = require("gui_container")
-    local registry = require("registry")
+    local registry      = require("registry")
 
-    local colors = assert(serialization.load(path))
+    local colors        = assert(serialization.load(path))
 
     local function movetable(maintable, newtable)
         for k, v in pairs(maintable) do
@@ -28,7 +28,7 @@ function sysinit.applyPalette(path, screen, doNotOffScreen)
     if registry.visionProtection then
         local colorlib = require("colors")
         local format = require("format")
-        
+
         for i, v in ipairs(colors) do
             colors[i] = format.visionProtectionConvert(v)
         end
@@ -119,7 +119,7 @@ function sysinit.initScreen(screen)
     local component = require("component")
     local event = require("event")
     local lastinfo = require("lastinfo")
-    
+
     pcall(component.invoke, screen, "turnOff")
     if graphic.isAvailable(screen) then
         -- resolution & depth
@@ -171,7 +171,7 @@ function sysinit.runShell(screen, customShell)
     if sysinit.screenThreads[screen] then
         sysinit.screenThreads[screen]:kill()
     end
-    
+
     local shellName = "shell"
     if customShell then
         shellName = customShell
@@ -189,11 +189,53 @@ function sysinit.runShell(screen, customShell)
 end
 
 function sysinit.init(box, lscreen)
+    local package = require("package")
+    table.insert(package.paths, "/system/likedlib")
+    package.hardAutoUnloading = true
+    if package.isInstalled("sysmode") then
+        require("sysmode").init()
+    end
+
+    local registry = require("registry")
     local fs = require("filesystem")
-    _G._OSVERSION = "liked-v" .. assert(fs.readFile("/system/version.cfg"))
-    require("calls") --подгрузка лютай легаси дичи
+    local component = require("component")
+    local computer = require("computer")
     local bootloader = require("bootloader")
+    local sysdata = not box and require("sysdata")
+
+    local computer_shutdown = computer.shutdown
+    function computer.shutdown(mode)
+        if registry.disableShutdown and not mode then
+            mode = true
+        end
+        return computer_shutdown(mode)
+    end
+
+    local targetEeprom = sysdata and sysdata.get("eeprom")
+    if targetEeprom and component.list("eeprom")() ~= targetEeprom then
+        bootloader.bootSplash("the liked was expecting an EEPROM: " .. targetEeprom:sub(1, 6))
+        bootloader.waitEnter()
+        computer.shutdown()
+        return
+    elseif registry.onlyInternalDisk and component.slot(fs.bootaddress) < 0 then
+        bootloader.bootSplash("loading from external disk is disabled")
+        bootloader.waitEnter()
+        computer.shutdown()
+        return
+    elseif registry.noBootViaBootmanager and _G._bootmanager then
+        bootloader.bootSplash("booting via bootmanager is disabled")
+        bootloader.waitEnter()
+        computer.shutdown()
+        return
+    end
+
+    if registry.noBootmanager then
+        fs.remove("/bootmanager")
+    end
+
+    _G._OSVERSION = "liked-v" .. assert(fs.readFile("/system/version.cfg"))
     bootloader.runlevel = "user"
+    require("calls") --подгрузка лютай легаси дичи
 
     if lscreen and bootloader.recoveryApi then
         bootloader.recoveryApi.offScreens()
@@ -201,11 +243,6 @@ function sysinit.init(box, lscreen)
 
     local graphic = require("graphic")
     local programs = require("programs")
-    local component = require("component")
-    local package = require("package")
-    local registry = require("registry")
-
-    table.insert(package.paths, "/system/likedlib")
     table.insert(programs.paths, "/data/apps")
     table.insert(programs.paths, "/system/apps")
     table.insert(programs.paths, "/vendor/apps")
@@ -249,7 +286,7 @@ function sysinit.init(box, lscreen)
 
     ------------------------------------
 
-    if box or lscreen then --likedbox or recovery mode
+    if box or lscreen then                               --likedbox or recovery mode
         if lscreen then
             sysinit.initPalPath = "/system/palettes/original.plt" --recovery mode
             sysinit.savePalPath = "/data/palette.plt"
@@ -275,22 +312,15 @@ function sysinit.init(box, lscreen)
 
     local gui_container = require("gui_container")
     local gui = require("gui") --нужно подключить заранию чтобы функции записались в calls.loaded
-
-    package.hardAutoUnloading = true
-    if package.isInstalled("sysmode") then
-        require("sysmode").init()
-    end
-
     local thread = require("thread")
     local liked = require("liked")
     local apps = require("apps")
     local event = require("event")
     local system = require("system")
-    local computer = require("computer")
 
     local devicetype = system.getDeviceType()
     local isTablet = devicetype == "tablet"
-    
+
     ------------------------------------
 
     if not box and not registry.wallpaperBaseColor then
@@ -332,9 +362,11 @@ function sysinit.init(box, lscreen)
 
     if not box and not fs.exists(gui_container.screenSaverPath) and not registry.screenSaverDefaultSetted then
         if isTablet then
-            pcall(fs.copy, registry.defaultScreenSaverPath or "/system/screenSavers/black_screen.scrsv", gui_container.screenSaverPath)
+            pcall(fs.copy, registry.defaultScreenSaverPath or "/system/screenSavers/black_screen.scrsv",
+                gui_container.screenSaverPath)
         else
-            pcall(fs.copy, registry.defaultScreenSaverPath or "/system/screenSavers/color_dots.scrsv", gui_container.screenSaverPath)
+            pcall(fs.copy, registry.defaultScreenSaverPath or "/system/screenSavers/color_dots.scrsv",
+                gui_container.screenSaverPath)
         end
         registry.defaultScreenSaverPath = nil
         registry.screenSaverDefaultSetted = true
@@ -362,15 +394,12 @@ function sysinit.init(box, lscreen)
     ------------------------------------
 
     if not liked.recoveryMode then
-        bootloader.unittests("/vendor/unittests")
-        bootloader.unittests("/data/unittests")
-
         bootloader.autorunsIn("/vendor/autoruns")
         bootloader.autorunsIn("/data/autoruns")
 
         require("autorun").autorun()
     end
-    
+
     if programs.find("preinit") then
         apps.execute("preinit")
     end
@@ -388,7 +417,7 @@ function sysinit.init(box, lscreen)
         end
     end
 
-    event.hyperListen(function (eventType, cuuid, ctype)
+    event.hyperListen(function(eventType, cuuid, ctype)
         if ctype == "screen" then
             if eventType == "component_added" then
                 if not liked.recoveryMode and not sysinit.screenThreads[cuuid] then
@@ -403,7 +432,7 @@ function sysinit.init(box, lscreen)
         end
     end)
 
-    thread.create(function ()
+    thread.create(function()
         while true do
             for screen, th in pairs(sysinit.screenThreads) do
                 if th:status() == "dead" then
@@ -417,7 +446,7 @@ function sysinit.init(box, lscreen)
 
     sysinit.init = nil
     sysinit.inited = true
-    event.timer(1, function ()
+    event.timer(1, function()
         sysinit.full = true
     end)
 end

@@ -1,0 +1,3 @@
+{
+    inputs = {reg_rm_list={"cntr1", "cntr2", "cntr3", "cntr4"}}
+}

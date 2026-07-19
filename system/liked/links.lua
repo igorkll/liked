@@ -11,11 +11,11 @@ local modify = {}
 modify.newCreate = { --структура {name, exp, allowCheck(), create(path)}
     {
         "system-dump",
-        "afpx",
-        function (path)
+        "tar",
+        function(path)
             return not fs.isReadOnly(path)
         end,
-        function (path)
+        function(path)
             return require("archiver").pack("/mnt/root", path)
         end
     }
@@ -27,6 +27,7 @@ modify.filesExps = { --дополнительные действия к файл
 
 modify.openVia = {
     ["afpx"] = "unpackArchive",
+    ["tar"] = "unpackArchive",
     ["reg"] = "applyReg",
     ["xpkg"] = "xpkgInstall",
     ["box"] = "boxInstall",
@@ -36,6 +37,10 @@ modify.openVia = {
 }
 
 modify.typecolors = {
+    ["app"] = gui_container.colors.red,
+    ["afpx"] = gui_container.colors.orange,
+    ["tar"] = gui_container.colors.orange,
+    ["lua"] = gui_container.colors.lime
 }
 
 modify.typenames = {
@@ -44,11 +49,12 @@ modify.typenames = {
     ["t3p"] = "image",
     ["txt"] = "text",
     ["afpx"] = "archive",
+    ["tar"] = "archive",
     ["scrsv"] = "screensaver"
 }
 
 modify.knownExps = { --данные файлы не будет предложинно открыть в текстовом редакторе(если поставить editable то будет предложенно)
-    ["scrsv"] = true,   
+    ["scrsv"] = true,
     ["lua"] = true,
     ["app"] = true,
     ["t1p"] = true,
@@ -59,6 +65,7 @@ modify.knownExps = { --данные файлы не будет предложи�
     ["cfg"] = true,
     ["log"] = true,
     ["afpx"] = true,
+    ["tar"] = true,
     ["txt"] = true, --текстовому документу не нужно отдельная кнопка, он по умалчанию открываеться через редактор
     ["reg"] = true,
     ["xpkg"] = true,

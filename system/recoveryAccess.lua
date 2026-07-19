@@ -6,7 +6,7 @@ do
     local function sha256bin(msg)
         local datauuid = component.list("data")()
         if datauuid then
-            local result = {pcall(component.invoke, datauuid, "sha256", msg)}
+            local result = { pcall(component.invoke, datauuid, "sha256", msg) }
             if result[1] and type(result[2]) == "string" then
                 return result[2]
             end
@@ -15,7 +15,9 @@ do
         msg = preproc(msg, #msg)
         local H = initH256({})
         for i = 1, #msg, 64 do digestblock(msg, i, H) end
-        return num2s(H[1], 4) .. num2s(H[2], 4) .. num2s(H[3], 4) .. num2s(H[4], 4) .. num2s(H[5], 4) .. num2s(H[6], 4) .. num2s(H[7], 4) .. num2s(H[8], 4)
+        return num2s(H[1], 4) ..
+        num2s(H[2], 4) ..
+        num2s(H[3], 4) .. num2s(H[4], 4) .. num2s(H[5], 4) .. num2s(H[6], 4) .. num2s(H[7], 4) .. num2s(H[8], 4)
     end
 
     function sha256hex(msg)

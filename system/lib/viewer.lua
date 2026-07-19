@@ -15,14 +15,15 @@ function viewer.license(screen, path, isText, window, backTitle, nextTitle)
     else
         text = assert(fs.readFile(path))
     end
-    text = parser.fastChange(text, {["\r"] = "", ["\t"] = "  "})
+    text = parser.fastChange(text, { ["\r"] = "", ["\t"] = "  " })
 
     local licenseLayout = ui:createCustom(window or ui.screen, uix.colors.cyan, uix.styles[2])
     local rx, ry = licenseLayout.sizeX, licenseLayout.sizeY
     licenseLayout:createCustom(3, 2, gobjs.scrolltext, rx - 4, ry - 4, table.concat(parser.toLinesLn(text, rx - 6), "\n"))
 
     if backTitle ~= true then
-        local back1 = licenseLayout:createButton(3, ry - 1, 8, 1, uix.colors.lightBlue, uix.colors.white, backTitle or " ← back", true)
+        local back1 = licenseLayout:createButton(3, ry - 1, 8, 1, uix.colors.lightBlue, uix.colors.white,
+            backTitle or " ← back", true)
         back1.alignment = "left"
         function back1:onClick()
             ret = false
@@ -31,7 +32,8 @@ function viewer.license(screen, path, isText, window, backTitle, nextTitle)
     end
 
     if nextTitle ~= true then
-        local next2 = licenseLayout:createButton(rx - 17, ry - 1, 16, 1, uix.colors.lightBlue, uix.colors.white, nextTitle or "accept & next", true)
+        local next2 = licenseLayout:createButton(rx - 17, ry - 1, 16, 1, uix.colors.lightBlue, uix.colors.white,
+            nextTitle or "accept & next", true)
         function next2:onClick()
             ret = true
             ui.exitFlag = true

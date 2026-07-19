@@ -7,29 +7,63 @@ local format = require("format")
 local iowindows = {}
 
 local function iowindow(screen, dirmode, exp, save)
-    ---- title
-    local title = ""
-    if save then
-        title = title .. "save "
-    else
-        title = title .. "select "
-    end
-    
     local exps
+    local expSelectable = false
+    local selectExpPos = save and 7 or 9
     if exp then
         if type(exp) == "table" then
             exps = exp
-            exp = exps[1]
+            expSelectable = #exps > 1
         else
-            exps = {exp}
+            exps = { exp }
         end
-        title = title .. (gui_container.typenames[exp] or exp) .. " "
     end
 
-    if dirmode then
-        title = title .. "folder"
+    local expSelectMenuSettings
+    if expSelectable then
+        expSelectMenuSettings = {}
+        for _, exp in ipairs(exps) do
+            table.insert(expSelectMenuSettings, {
+                title = exp,
+                active = true,
+                callback = true
+            })
+        end
+    end
+
+    ---- title
+    local title
+    local titleExp
+    local function updateTitle()
+        title = ""
+
+        if save then
+            title = title .. "save "
+        else
+            title = title .. "select "
+        end
+
+        if exp then
+            titleExp = gui_container.typenames[exp] and (gui_container.typenames[exp] .. " (" .. exp .. ")") or exp
+            title = title .. titleExp .. " "
+        end
+
+        if dirmode then
+            title = title .. "folder"
+        else
+            title = title .. "file"
+        end
+    end
+
+    local function selectExp(newExp)
+        exp = newExp
+        updateTitle()
+    end
+
+    if exps then
+        selectExp(exps[1])
     else
-        title = title .. "file"
+        selectExp()
     end
 
     ---- main
@@ -57,16 +91,19 @@ local function iowindow(screen, dirmode, exp, save)
                     return retpath
                 end
             else
-                gui.warn(screen, nil, nil, "select the " .. (dirmode and "folder" or "file") .. (exp and (" with the " .. exp .. " extension") or ""))
+                gui.warn(screen, nil, nil,
+                    "select the " ..
+                    (dirmode and "folder" or "file") .. (exp and (" with the " .. exp .. " extension") or ""))
             end
         end
     end
 
+    local scrollList = {}
     local inputTextBuffer
     local disableShadow
     local clearShadow
     while true do
-        local list = {{".. (back / current)", gui_container.colors.black, name = ".."}}
+        local list = { { ".. (back / current)", gui_container.colors.black, name = ".." } }
         for i, file in ipairs(fs.list(path)) do
             local fullpath = paths.concat(path, file)
             local isDir = fs.isDirectory(fullpath)
@@ -80,21 +117,29 @@ local function iowindow(screen, dirmode, exp, save)
 
                     local smartString = format.smartConcat()
                     smartString.add(1, gui_container.short(name, 34, true))
-                    smartString.add(47 - 5, lexp and gui_container.short(gui_container.typenames[lexp] or lexp, 6, true) or "", true)
+                    smartString.add(47 - 5,
+                        lexp and gui_container.short(gui_container.typenames[lexp] or lexp, 6, true) or "", true)
                     smartString.add(47, isDir and "DIR" or "FILE", true)
-                    table.insert(list, {smartString.get(), gui_container.typecolors[lexp] or gui_container.colors.black, name = file})
+                    table.insert(list,
+                        { smartString.get(), gui_container.typecolors[lexp] or gui_container.colors.black, name = file })
                 end
             end
         end
-        
+
         local reader
-        local num, _, _, _, confirm, lClearShadow = gui.select(screen, nil, nil, title, list, nil, nil, function (window)
+        local num, lastScroll, _, _, confirm, lClearShadow = gui.select(screen, nil, nil, title, list, scrollList[path],
+            nil, function(window)
             window:set(1, window.sizeY, gui_container.colors.red, gui_container.colors.white, " + ")
-            window:set(pathPos, window.sizeY, gui_container.colors.lightGray, gui_container.colors.white, gui_container.short(gui_container.toUserPath(screen, path), save and 18 or 35))
+            if expSelectable then
+                window:set(selectExpPos, 1, gui_container.colors.white, gui_container.colors.black, titleExp)
+            end
+            window:set(pathPos, window.sizeY, gui_container.colors.lightGray, gui_container.colors.white,
+                gui_container.short(gui_container.toUserPath(screen, path), save and 18 or 35))
             local ret
             if save then
                 if not reader then
-                    reader = window:readNoDraw(5, window.sizeY, 16, gui_container.colors.white, gui_container.colors.gray, nil, nil, nil, true)
+                    reader = window:readNoDraw(5, window.sizeY, 16, gui_container.colors.white, gui_container.colors
+                    .gray, nil, nil, nil, true)
                     if inputTextBuffer then
                         reader.setBuffer(inputTextBuffer)
                         if #inputTextBuffer > 0 then
@@ -105,7 +150,7 @@ local function iowindow(screen, dirmode, exp, save)
                 reader.redraw()
             end
             return ret
-        end, function (windowEventData, window)
+        end, function(windowEventData, window)
             local fakeConfirm
             if reader then
                 inputTextBuffer = reader.getBuffer()
@@ -129,6 +174,13 @@ local function iowindow(screen, dirmode, exp, save)
                         fs.makeDirectory(paths.concat(path, name))
                         return true, fakeConfirm
                     end
+                elseif expSelectable and windowEventData[4] == 1 and (windowEventData[3] >= selectExpPos and windowEventData[3] < (selectExpPos + #titleExp)) then
+                    local selected = gui.actionContext(screen, window.x + windowEventData[3] - 1,
+                        window.y + windowEventData[4], expSelectMenuSettings)
+                    if selected then
+                        selectExp(exps[selected])
+                        return true
+                    end
                 end
             end
 
@@ -136,6 +188,7 @@ local function iowindow(screen, dirmode, exp, save)
         end, true, disableShadow)
         disableShadow = true
         clearShadow = clearShadow or lClearShadow
+        scrollList[path] = lastScroll
 
         if num == -1 then
             num = nil
