@@ -1,7 +1,7 @@
 local parser = require("parser")
 local unicode = require("unicode")
 local function lineMod(str)
-  return parser.fastChange(str, {["\r"] = "", ["\t"] = "  "})
+return parser.fastChange(str, {["\r"] = "", ["\t"] = "  "})
 end
 
 --[[
@@ -176,58 +176,58 @@ local keyboard = {pressedChars = {}, pressedCodes = {}}
 -- __index loads all key data from /lib/tools/keyboard_full.lua (only once)
 -- new key metadata should be added here if required for boot
 keyboard.keys = {
-  c               = 0x2E,
-  d               = 0x20,
-  q               = 0x10,
-  w               = 0x11,
-  back            = 0x0E, -- backspace
-  delete          = 0xD3,
-  down            = 0xD0,
-  enter           = 0x1C,
-  home            = 0xC7,
-  lcontrol        = 0x1D,
-  left            = 0xCB,
-  lmenu           = 0x38, -- left Alt
-  lshift          = 0x2A,
-  pageDown        = 0xD1,
-  rcontrol        = 0x9D,
-  right           = 0xCD,
-  rmenu           = 0xB8, -- right Alt
-  rshift          = 0x36,
-  space           = 0x39,
-  tab             = 0x0F,
-  up              = 0xC8,
-  ["end"]         = 0xCF,
-  enter           = 0x1C,
-  tab             = 0x0F,
-  numpadenter     = 0x9C,
+c               = 0x2E,
+d               = 0x20,
+q               = 0x10,
+w               = 0x11,
+back            = 0x0E, -- backspace
+delete          = 0xD3,
+down            = 0xD0,
+enter           = 0x1C,
+home            = 0xC7,
+lcontrol        = 0x1D,
+left            = 0xCB,
+lmenu           = 0x38, -- left Alt
+lshift          = 0x2A,
+pageDown        = 0xD1,
+rcontrol        = 0x9D,
+right           = 0xCD,
+rmenu           = 0xB8, -- right Alt
+rshift          = 0x36,
+space           = 0x39,
+tab             = 0x0F,
+up              = 0xC8,
+["end"]         = 0xCF,
+enter           = 0x1C,
+tab             = 0x0F,
+numpadenter     = 0x9C,
 }
 
 -------------------------------------------------------------------------------
 
 function keyboard.isAltDown()
-  return keyboard.pressedCodes[keyboard.keys.lmenu] or keyboard.pressedCodes[keyboard.keys.rmenu]
+return keyboard.pressedCodes[keyboard.keys.lmenu] or keyboard.pressedCodes[keyboard.keys.rmenu]
 end
 
 function keyboard.isControl(char)
-  return type(char) == "number" and (char < 0x20 or (char >= 0x7F and char <= 0x9F))
+return type(char) == "number" and (char < 0x20 or (char >= 0x7F and char <= 0x9F))
 end
 
 function keyboard.isControlDown()
-  return keyboard.pressedCodes[keyboard.keys.lcontrol] or keyboard.pressedCodes[keyboard.keys.rcontrol]
+return keyboard.pressedCodes[keyboard.keys.lcontrol] or keyboard.pressedCodes[keyboard.keys.rcontrol]
 end
 
 function keyboard.isKeyDown(charOrCode)
-  checkArg(1, charOrCode, "string", "number")
-  if type(charOrCode) == "string" then
+checkArg(1, charOrCode, "string", "number")
+if type(charOrCode) == "string" then
     return keyboard.pressedChars[utf8 and utf8.codepoint(charOrCode) or charOrCode:byte()]
-  elseif type(charOrCode) == "number" then
+elseif type(charOrCode) == "number" then
     return keyboard.pressedCodes[charOrCode]
-  end
+end
 end
 
 function keyboard.isShiftDown()
-  return keyboard.pressedCodes[keyboard.keys.lshift] or keyboard.pressedCodes[keyboard.keys.rshift]
+return keyboard.pressedCodes[keyboard.keys.lshift] or keyboard.pressedCodes[keyboard.keys.rshift]
 end
 
 -------------------------------------------------------------------------------
@@ -364,14 +364,14 @@ keyboard.keys.numpadequals    = 0x8D
 -- Create inverse mapping for name lookup.
 setmetatable(keyboard.keys,
 {
-  __index = function(tbl, k)
+__index = function(tbl, k)
     if type(k) ~= "number" then return end
     for name,value in pairs(tbl) do
-      if value == k then
+    if value == k then
         return name
-      end
     end
-  end
+    end
+end
 })
 
 
@@ -384,12 +384,12 @@ local term
 
 
 local function onKeyChangeFoKeyboard(ev, uuid, char, code)
-  -- nil might be slightly more mem friendly during runtime
-  -- and `or nil` appears to only cost 30 bytes
-  if term.keyboard() == uuid then
+-- nil might be slightly more mem friendly during runtime
+-- and `or nil` appears to only cost 30 bytes
+if term.keyboard() == uuid then
     keyboard.pressedChars[char] = ev == "key_down" or nil
     keyboard.pressedCodes[code] = ev == "key_down" or nil
-  end
+end
 end
 
 
@@ -412,77 +412,77 @@ end
 local lib={}
 lib.internal={}
 function lib.internal.range_adjust(f,l,s)
-  checkArg(1,f,'number','nil')
-  checkArg(2,l,'number','nil')
-  checkArg(3,s,'number')
-  if f==nil then f=1 elseif f<0 then f=s+f+1 end
-  if l==nil then l=s elseif l<0 then l=s+l+1 end
-  return f,l
+checkArg(1,f,'number','nil')
+checkArg(2,l,'number','nil')
+checkArg(3,s,'number')
+if f==nil then f=1 elseif f<0 then f=s+f+1 end
+if l==nil then l=s elseif l<0 then l=s+l+1 end
+return f,l
 end
 function lib.internal.table_view(tbl,f,l)
-  return setmetatable({},
-  {
+return setmetatable({},
+{
     __index = function(_, key)
-      return (type(key) ~= 'number' or (key >= f and key <= l)) and tbl[key] or nil
+    return (type(key) ~= 'number' or (key >= f and key <= l)) and tbl[key] or nil
     end,
     __len = function(_)
-      return l
+    return l
     end,
-  })
+})
 end
 local adjust=lib.internal.range_adjust
 local view=lib.internal.table_view
 
 -- first(p1,p2) searches for the first range in p1 that satisfies p2
 function lib.first(tbl,pred,f,l)
-  checkArg(1,tbl,'table')
-  checkArg(2,pred,'function','table')
-  if type(pred)=='table'then
+checkArg(1,tbl,'table')
+checkArg(2,pred,'function','table')
+if type(pred)=='table'then
     local set;set,pred=pred,function(e,fi,tbl)
-      for vi=1,#set do
+    for vi=1,#set do
         local v=set[vi]
         if lib.begins(tbl,v,fi) then return true,#v end
-      end
     end
-  end
-  local s=#tbl
-  f,l=adjust(f,l,s)
-  tbl=view(tbl,f,l)
-  for i=f,l do
+    end
+end
+local s=#tbl
+f,l=adjust(f,l,s)
+tbl=view(tbl,f,l)
+for i=f,l do
     local si,ei=pred(tbl[i],i,tbl)
     if si then
-      return i,i+(ei or 1)-1
+    return i,i+(ei or 1)-1
     end
-  end
+end
 end
 
 -- returns true if p1 at first p3 equals element for element p2
 function lib.begins(tbl,v,f,l)
-  checkArg(1,tbl,'table')
-  checkArg(2,v,'table')
-  local vs=#v
-  f,l=adjust(f,l,#tbl)
-  if vs>(l-f+1)then return end
-  for i=1,vs do
+checkArg(1,tbl,'table')
+checkArg(2,v,'table')
+local vs=#v
+f,l=adjust(f,l,#tbl)
+if vs>(l-f+1)then return end
+for i=1,vs do
     if tbl[f+i-1]~=v[i] then return end
-  end
-  return true
+end
+return true
 end
 
 function lib.concat(...)
-  local r,rn,k={},0
-  for _,tbl in ipairs({...})do
+local r,rn,k={},0
+for _,tbl in ipairs({...})do
     if type(tbl)~='table'then
-      return nil,'parameter '..tostring(_)..' to concat is not a table'
+    return nil,'parameter '..tostring(_)..' to concat is not a table'
     end
     local n=tbl.n or #tbl
     k=k or tbl.n
     for i=1,n do
-      rn=rn+1;r[rn]=tbl[i]
+    rn=rn+1;r[rn]=tbl[i]
     end
-  end
-  r.n=k and rn or nil
-  return r
+end
+r.n=k and rn or nil
+return r
 end
 
 
@@ -493,107 +493,107 @@ local view=lib.internal.table_view
 
 -- works like string.sub but on elements of an indexed table
 function lib.sub(tbl,f,l)
-  checkArg(1,tbl,'table')
-  local r,s={},#tbl
-  f,l=adjust(f,l,s)
-  l=math.min(l,s)
-  for i=math.max(f,1),l do
+checkArg(1,tbl,'table')
+local r,s={},#tbl
+f,l=adjust(f,l,s)
+l=math.min(l,s)
+for i=math.max(f,1),l do
     r[#r+1]=tbl[i]
-  end
-  return r
+end
+return r
 end 
 
 -- Returns a list of subsets of tbl where partitioner acts as a delimiter.
 function lib.partition(tbl,partitioner,dropEnds,f,l)
-  checkArg(1,tbl,'table')
-  checkArg(2,partitioner,'function','table')
-  checkArg(3,dropEnds,'boolean','nil')
-  if type(partitioner)=='table'then
+checkArg(1,tbl,'table')
+checkArg(2,partitioner,'function','table')
+checkArg(3,dropEnds,'boolean','nil')
+if type(partitioner)=='table'then
     return lib.partition(tbl,function(e,i,tbl)
-      return lib.first(tbl,partitioner,i)
+    return lib.first(tbl,partitioner,i)
     end,dropEnds,f,l)
-  end
-  local s=#tbl
-  f,l=adjust(f,l,s)
-  local cut=view(tbl,f,l)
-  local result={}
-  local need=true
-  local exp=function()if need then result[#result+1]={}need=false end end
-  local i=f
-  while i<=l do
+end
+local s=#tbl
+f,l=adjust(f,l,s)
+local cut=view(tbl,f,l)
+local result={}
+local need=true
+local exp=function()if need then result[#result+1]={}need=false end end
+local i=f
+while i<=l do
     local e=cut[i]
     local ds,de=partitioner(e,i,cut)
     -- true==partition here
     if ds==true then ds,de=i,i
     elseif ds==false then ds,de=nil,nil end
     if ds~=nil then
-      ds,de=adjust(ds,de,l)
-      ds=ds>=i and ds--no more
+    ds,de=adjust(ds,de,l)
+    ds=ds>=i and ds--no more
     end
     if not ds then -- false or nil
-      exp()
-      table.insert(result[#result],e)
+    exp()
+    table.insert(result[#result],e)
     else
-      local sub=lib.sub(cut,i,not dropEnds and de or (ds-1))
-      if #sub>0 then
+    local sub=lib.sub(cut,i,not dropEnds and de or (ds-1))
+    if #sub>0 then
         exp()
         result[#result+math.min(#result[#result],1)]=sub
-      end
-      -- ensure i moves forward
-      local ensured=math.max(math.max(de or ds,ds),i)
-      if de and ds and de<ds and ensured==i then
+    end
+    -- ensure i moves forward
+    local ensured=math.max(math.max(de or ds,ds),i)
+    if de and ds and de<ds and ensured==i then
         if #result==0 then result[1]={} end
         table.insert(result[#result],e)
-      end
-      i=ensured
-      need=true
+    end
+    i=ensured
+    need=true
     end
     i=i+1
-  end
+end
 
-  return result
+return result
 end 
 
 -- calls callback(e,i,tbl) for each ith element e in table tbl from first
 function lib.foreach(tbl,c,f,l)
-  checkArg(1,tbl,'table')
-  checkArg(2,c,'function','string')
-  local ck=c
-  c=type(c)=="string" and function(e) return e[ck] end or c
-  local s=#tbl
-  f,l=adjust(f,l,s)
-  tbl=view(tbl,f,l)
-  local r={}
-  for i=f,l do
+checkArg(1,tbl,'table')
+checkArg(2,c,'function','string')
+local ck=c
+c=type(c)=="string" and function(e) return e[ck] end or c
+local s=#tbl
+f,l=adjust(f,l,s)
+tbl=view(tbl,f,l)
+local r={}
+for i=f,l do
     local n,k=c(tbl[i],i,tbl)
     if n~=nil then
-      if k then r[k]=n
-      else r[#r+1]=n end
+    if k then r[k]=n
+    else r[#r+1]=n end
     end
-  end
-  return r
+end
+return r
 end
 
 function lib.where(tbl,p,f,l)
-  return lib.foreach(tbl,
+return lib.foreach(tbl,
     function(e,i,tbl)
-      return p(e,i,tbl)and e or nil
+    return p(e,i,tbl)and e or nil
     end,f,l)
 end
 
 -- works with pairs on tables
 -- returns the kv pair, or nil and the number of pairs iterated
 function lib.at(tbl, index)
-  checkArg(1, tbl, "table")
-  checkArg(2, index, "number", "nil")
-  local current_index = 1
-  for k,v in pairs(tbl) do
+checkArg(1, tbl, "table")
+checkArg(2, index, "number", "nil")
+local current_index = 1
+for k,v in pairs(tbl) do
     if current_index == index then
-      return k,v
+    return k,v
     end
     current_index = current_index + 1
-  end
-  return nil, current_index - 1 -- went one too far
+end
+return nil, current_index - 1 -- went one too far
 end 
 
 
@@ -624,122 +624,122 @@ text.internal = {}
 text.syntax = {"^%d?>>?&%d+","^%d?>>?",">>?","<%&%d+","<",";","&&","||?"}
 
 function text.trim(value) -- from http://lua-users.org/wiki/StringTrim
-  local from = string.match(value, "^%s*()")
-  return from > #value and "" or string.match(value, ".*%S", from)
+local from = string.match(value, "^%s*()")
+return from > #value and "" or string.match(value, ".*%S", from)
 end
 
 -- used by lib/sh
 function text.escapeMagic(txt)
-  return txt:gsub('[%(%)%.%%%+%-%*%?%[%^%$]', '%%%1')
+return txt:gsub('[%(%)%.%%%+%-%*%?%[%^%$]', '%%%1')
 end
 
 function text.removeEscapes(txt)
-  return txt:gsub("%%([%(%)%.%%%+%-%*%?%[%^%$])","%1")
+return txt:gsub("%%([%(%)%.%%%+%-%*%?%[%^%$])","%1")
 end
 
 function text.internal.tokenize(value, options)
-  checkArg(1, value, "string")
-  checkArg(2, options, "table", "nil")
-  options = options or {}
-  local delimiters = options.delimiters
-  local custom = not not options.delimiters
-  delimiters = delimiters or text.syntax
+checkArg(1, value, "string")
+checkArg(2, options, "table", "nil")
+options = options or {}
+local delimiters = options.delimiters
+local custom = not not options.delimiters
+delimiters = delimiters or text.syntax
 
-  local words, reason = text.internal.words(value, options)
+local words, reason = text.internal.words(value, options)
 
-  local splitter = text.escapeMagic(custom and table.concat(delimiters) or "<>|;&")
-  if type(words) ~= "table" or 
+local splitter = text.escapeMagic(custom and table.concat(delimiters) or "<>|;&")
+if type(words) ~= "table" or 
     #splitter == 0 or
     not value:find("["..splitter.."]") then
     return words, reason
-  end
+end
 
-  return text.internal.splitWords(words, delimiters)
+return text.internal.splitWords(words, delimiters)
 end
 
 -- tokenize input by quotes and whitespace
 function text.internal.words(input, options)
-  checkArg(1, input, "string")
-  checkArg(2, options, "table", "nil")
-  options = options or {}
-  local quotes = options.quotes
-  local show_escapes = options.show_escapes
-  local qr = nil
-  quotes = quotes or {{"'","'",true},{'"','"'},{'`','`'}}
-  local function append(dst, txt, _qr)
+checkArg(1, input, "string")
+checkArg(2, options, "table", "nil")
+options = options or {}
+local quotes = options.quotes
+local show_escapes = options.show_escapes
+local qr = nil
+quotes = quotes or {{"'","'",true},{'"','"'},{'`','`'}}
+local function append(dst, txt, _qr)
     local size = #dst
     if size == 0 or dst[size].qr ~= _qr then
-      dst[size+1] = {txt=txt, qr=_qr}
+    dst[size+1] = {txt=txt, qr=_qr}
     else
-      dst[size].txt = dst[size].txt..txt
+    dst[size].txt = dst[size].txt..txt
     end
-  end
-  -- token meta is {string,quote rule}
-  local tokens, token = {}, {}
-  local escaped, start = false, -1
-  for i = 1, unicode.len(input) do
+end
+-- token meta is {string,quote rule}
+local tokens, token = {}, {}
+local escaped, start = false, -1
+for i = 1, unicode.len(input) do
     local char = unicode.sub(input, i, i)
     if escaped then -- escaped character
-      escaped = false
-      -- include escape char if show_escapes
-      -- or the followwing are all true
-      -- 1. qr active
-      -- 2. the char escaped is NOT the qr closure
-      -- 3. qr is not literal
-      if show_escapes or (qr and not qr[3] and qr[2] ~= char) then
+    escaped = false
+    -- include escape char if show_escapes
+    -- or the followwing are all true
+    -- 1. qr active
+    -- 2. the char escaped is NOT the qr closure
+    -- 3. qr is not literal
+    if show_escapes or (qr and not qr[3] and qr[2] ~= char) then
         append(token, '\\', qr)
-      end
-      append(token, char, qr)
+    end
+    append(token, char, qr)
     elseif char == "\\" and (not qr or not qr[3]) then
         escaped = true
     elseif qr and qr[2] == char then -- end of quoted string
-      -- if string is empty, we can still capture a quoted empty arg
-      if #token == 0 or #token[#token] == 0 then
+    -- if string is empty, we can still capture a quoted empty arg
+    if #token == 0 or #token[#token] == 0 then
         append(token, '', qr)
-      end
-      qr = nil
-    elseif not qr and tx.first(quotes,function(Q)
-      qr=Q[1]==char and Q or nil return qr end) then
-      start = i
-    elseif not qr and string.find(char, "%s") then
-      if #token > 0 then
-        table.insert(tokens, token)
-      end
-      token = {}
-    else -- normal char
-      append(token, char, qr)
     end
-  end
-  if qr then
+    qr = nil
+    elseif not qr and tx.first(quotes,function(Q)
+    qr=Q[1]==char and Q or nil return qr end) then
+    start = i
+    elseif not qr and string.find(char, "%s") then
+    if #token > 0 then
+        table.insert(tokens, token)
+    end
+    token = {}
+    else -- normal char
+    append(token, char, qr)
+    end
+end
+if qr then
     return nil, "unclosed quote at index " .. start
-  end
+end
 
-  if #token > 0 then
+if #token > 0 then
     table.insert(tokens, token)
-  end
+end
 
-  return tokens
+return tokens
 end
 
 -- separate string value into an array of words delimited by whitespace
 -- groups by quotes
 -- options is a table used for internal undocumented purposes
 function text.tokenize(value, options)
-  checkArg(1, value, "string")
-  checkArg(2, options, "table", "nil")
-  options = options or {}
+checkArg(1, value, "string")
+checkArg(2, options, "table", "nil")
+options = options or {}
 
-  local tokens, reason = text.internal.tokenize(value, options)
+local tokens, reason = text.internal.tokenize(value, options)
 
-  if type(tokens) ~= "table" then
+if type(tokens) ~= "table" then
     return nil, reason
-  end
+end
 
-  if options.doNotNormalize then
+if options.doNotNormalize then
     return tokens
-  end
+end
 
-  return text.internal.normalize(tokens)
+return text.internal.normalize(tokens)
 end
 
 -------------------------------------------------------------------------------
@@ -747,41 +747,41 @@ end
 -- splits input into an array for sub strings delimited by delimiters
 -- delimiters are included in the result if not dropDelims
 function text.split(input, delimiters, dropDelims, di)
-  checkArg(1, input, "string")
-  checkArg(2, delimiters, "table")
-  checkArg(3, dropDelims, "boolean", "nil")
-  checkArg(4, di, "number", "nil")
+checkArg(1, input, "string")
+checkArg(2, delimiters, "table")
+checkArg(3, dropDelims, "boolean", "nil")
+checkArg(4, di, "number", "nil")
 
-  if #input == 0 then return {} end
-  di = di or 1
-  local result = {input}
-  if di > #delimiters then return result end
+if #input == 0 then return {} end
+di = di or 1
+local result = {input}
+if di > #delimiters then return result end
 
-  local function add(part, index, r, s, e)
+local function add(part, index, r, s, e)
     local sub = part:sub(s,e)
     if #sub == 0 then return index end
     local subs = r and text.split(sub,delimiters,dropDelims,r) or {sub}
     for i=1,#subs do
-      table.insert(result, index+i-1, subs[i])
+    table.insert(result, index+i-1, subs[i])
     end
     return index+#subs
-  end
+end
 
-  local i,d=1,delimiters[di]
-  while true do
+local i,d=1,delimiters[di]
+while true do
     local next = table.remove(result,i)
     if not next then break end
     local si,ei = next:find(d)
     if si and ei and ei~=0 then -- delim found
-      i=add(next, i, di+1, 1, si-1)
-      i=dropDelims and i or add(next, i, false, si, ei)
-      i=add(next, i, di, ei+1)
+    i=add(next, i, di+1, 1, si-1)
+    i=dropDelims and i or add(next, i, false, si, ei)
+    i=add(next, i, di, ei+1)
     else
-      i=add(next, i, di+1, 1, #next)
+    i=add(next, i, di+1, 1, #next)
     end
-  end
-  
-  return result
+end
+
+return result
 end
 
 -----------------------------------------------------------------------------
@@ -790,217 +790,217 @@ end
 -- delimiters are kept as their own words
 -- quoted word parts are not split
 function text.internal.splitWords(words, delimiters)
-  checkArg(1,words,"table")
-  checkArg(2,delimiters,"table")
+checkArg(1,words,"table")
+checkArg(2,delimiters,"table")
 
-  local split_words = {}
-  local next_word
-  local function add_part(part)
+local split_words = {}
+local next_word
+local function add_part(part)
     if next_word then
-      split_words[#split_words+1] = {}
+    split_words[#split_words+1] = {}
     end
     table.insert(split_words[#split_words], part)
     next_word = false
-  end
-  for wi=1,#words do local word = words[wi]
+end
+for wi=1,#words do local word = words[wi]
     next_word = true
     for pi=1,#word do local part = word[pi]
-      local qr = part.qr
-      if qr then
+    local qr = part.qr
+    if qr then
         add_part(part)
-      else
+    else
         local part_text_splits = text.split(part.txt, delimiters)
         tx.foreach(part_text_splits, function(sub_txt)
-          local delim = #text.split(sub_txt, delimiters, true) == 0
-          next_word = next_word or delim
-          add_part({txt=sub_txt,qr=qr})
-          next_word = delim
+        local delim = #text.split(sub_txt, delimiters, true) == 0
+        next_word = next_word or delim
+        add_part({txt=sub_txt,qr=qr})
+        next_word = delim
         end)
-      end
     end
-  end
+    end
+end
 
-  return split_words
+return split_words
 end
 
 function text.internal.normalize(words, omitQuotes)
-  checkArg(1, words, "table")
-  checkArg(2, omitQuotes, "boolean", "nil")
-  local norms = {}
-  for _,word in ipairs(words) do
+checkArg(1, words, "table")
+checkArg(2, omitQuotes, "boolean", "nil")
+local norms = {}
+for _,word in ipairs(words) do
     local norm = {}
     for _,part in ipairs(word) do
-      norm = tx.concat(norm, not omitQuotes and part.qr and {part.qr[1], part.txt, part.qr[2]} or {part.txt})
+    norm = tx.concat(norm, not omitQuotes and part.qr and {part.qr[1], part.txt, part.qr[2]} or {part.txt})
     end
     norms[#norms+1]=table.concat(norm)
-  end
-  return norms
+end
+return norms
 end
 
 function text.internal.stream_base(binary)
-  return
-  {
+return
+{
     binary = binary,
     plen = binary and string.len or unicode.len,
     psub = binary and string.sub or unicode.sub,
     seek = function (handle, whence, to)
-      if not handle.txt then
+    if not handle.txt then
         return nil, "bad file descriptor"
-      end
-      to = to or 0
-      local offset = handle:indexbytes()
-      if whence == "cur" then
+    end
+    to = to or 0
+    local offset = handle:indexbytes()
+    if whence == "cur" then
         offset = offset + to
-      elseif whence == "set" then
+    elseif whence == "set" then
         offset = to
-      elseif whence == "end" then
+    elseif whence == "end" then
         offset = handle.len + to
-      end
-      offset = math.max(0, math.min(offset, handle.len))
-      handle:byteindex(offset)
-      return offset
+    end
+    offset = math.max(0, math.min(offset, handle.len))
+    handle:byteindex(offset)
+    return offset
     end,
     indexbytes = function (handle)
-      return handle.psub(handle.txt, 1, handle.index):len()
+    return handle.psub(handle.txt, 1, handle.index):len()
     end,
     byteindex = function (handle, offset)
-      local sub = string.sub(handle.txt, 1, offset)
-      handle.index = handle.plen(sub)
+    local sub = string.sub(handle.txt, 1, offset)
+    handle.index = handle.plen(sub)
     end,
-  }
+}
 end
 
 function text.internal.reader(txt, mode)
-  checkArg(1, txt, "string")
-  local reader = setmetatable(
-  {
+checkArg(1, txt, "string")
+local reader = setmetatable(
+{
     txt = txt,
     len = string.len(txt),
     index = 0,
     read = function(_, n)
-      checkArg(1, n, "number")
-      if not _.txt then
+    checkArg(1, n, "number")
+    if not _.txt then
         return nil, "bad file descriptor"
-      end
-      if _.index >= _.plen(_.txt) then
+    end
+    if _.index >= _.plen(_.txt) then
         return nil
-      end
-      local next = _.psub(_.txt, _.index + 1, _.index + n)
-      _.index = _.index + _.plen(next)
-      return next
+    end
+    local next = _.psub(_.txt, _.index + 1, _.index + n)
+    _.index = _.index + _.plen(next)
+    return next
     end,
     close = function(_)
-      if not _.txt then
+    if not _.txt then
         return nil, "bad file descriptor"
-      end
-      _.txt = nil
-      return true
+    end
+    _.txt = nil
+    return true
     end,
-  }, {__index=text.internal.stream_base((mode or ""):match("b"))})
+}, {__index=text.internal.stream_base((mode or ""):match("b"))})
 
-  return require("buffer").new("r", reader)
+return require("buffer").new("r", reader)
 end
 
 function text.internal.writer(ostream, mode, append_txt)
-  if type(ostream) == "table" then
+if type(ostream) == "table" then
     local mt = getmetatable(ostream) or {}
     checkArg(1, mt.__call, "function")
-  end
-  checkArg(1, ostream, "function", "table")
-  checkArg(2, append_txt, "string", "nil")
-  local writer = setmetatable(
-  {
+end
+checkArg(1, ostream, "function", "table")
+checkArg(2, append_txt, "string", "nil")
+local writer = setmetatable(
+{
     txt = "",
     index = 0, -- last location of write
     len = 0,
     write = function(_, ...)
-      if not _.txt then
+    if not _.txt then
         return nil, "bad file descriptor"
-      end
-      local pre = _.psub(_.txt, 1, _.index)
-      local vs = {}
-      local pos = _.psub(_.txt, _.index + 1)
-      for _,v in ipairs({...}) do
+    end
+    local pre = _.psub(_.txt, 1, _.index)
+    local vs = {}
+    local pos = _.psub(_.txt, _.index + 1)
+    for _,v in ipairs({...}) do
         table.insert(vs, v)
-      end
-      vs = table.concat(vs)
-      _.index = _.index + _.plen(vs)
-      _.txt = pre .. vs .. pos
-      _.len = string.len(_.txt)
-      return true
+    end
+    vs = table.concat(vs)
+    _.index = _.index + _.plen(vs)
+    _.txt = pre .. vs .. pos
+    _.len = string.len(_.txt)
+    return true
     end,
     close = function(_)
-      if not _.txt then
+    if not _.txt then
         return nil, "bad file descriptor"
-      end
-      ostream((append_txt or "") .. _.txt)
-      _.txt = nil
-      return true
+    end
+    ostream((append_txt or "") .. _.txt)
+    _.txt = nil
+    return true
     end,
-  }, {__index=text.internal.stream_base((mode or ""):match("b"))})
+}, {__index=text.internal.stream_base((mode or ""):match("b"))})
 
-  return require("buffer").new("w", writer)
+return require("buffer").new("w", writer)
 end
 
 function text.detab(value, tabWidth)
-  checkArg(1, value, "string")
-  checkArg(2, tabWidth, "number", "nil")
-  tabWidth = tabWidth or 8
-  local function rep(match)
+checkArg(1, value, "string")
+checkArg(2, tabWidth, "number", "nil")
+tabWidth = tabWidth or 8
+local function rep(match)
     local spaces = tabWidth - match:len() % tabWidth
     return match .. string.rep(" ", spaces)
-  end
-  local result = value:gsub("([^\n]-)\t", rep) -- truncate results
-  return result
+end
+local result = value:gsub("([^\n]-)\t", rep) -- truncate results
+return result
 end
 
 function text.padLeft(value, length)
-  checkArg(1, value, "string", "nil")
-  checkArg(2, length, "number")
-  if not value or unicode.wlen(value) == 0 then
+checkArg(1, value, "string", "nil")
+checkArg(2, length, "number")
+if not value or unicode.wlen(value) == 0 then
     return string.rep(" ", length)
-  else
+else
     return string.rep(" ", length - unicode.wlen(value)) .. value
-  end
+end
 end
 
 function text.padRight(value, length)
-  checkArg(1, value, "string", "nil")
-  checkArg(2, length, "number")
-  if not value or unicode.wlen(value) == 0 then
+checkArg(1, value, "string", "nil")
+checkArg(2, length, "number")
+if not value or unicode.wlen(value) == 0 then
     return string.rep(" ", length)
-  else
+else
     return value .. string.rep(" ", length - unicode.wlen(value))
-  end
+end
 end
 
 function text.wrap(value, width, maxWidth)
-  checkArg(1, value, "string")
-  checkArg(2, width, "number")
-  checkArg(3, maxWidth, "number")
-  local line, nl = value:match("([^\r\n]*)(\r?\n?)") -- read until newline
-  if unicode.wlen(line) > width then -- do we even need to wrap?
+checkArg(1, value, "string")
+checkArg(2, width, "number")
+checkArg(3, maxWidth, "number")
+local line, nl = value:match("([^\r\n]*)(\r?\n?)") -- read until newline
+if unicode.wlen(line) > width then -- do we even need to wrap?
     local partial = unicode.wtrunc(line, width)
     local wrapped = partial:match("(.*[^a-zA-Z0-9._()'`=])")
     if wrapped or unicode.wlen(line) > maxWidth then
-      partial = wrapped or partial
-      return partial, unicode.sub(value, unicode.len(partial) + 1), true
+    partial = wrapped or partial
+    return partial, unicode.sub(value, unicode.len(partial) + 1), true
     else
-      return "", value, true -- write in new line.
+    return "", value, true -- write in new line.
     end
-  end
-  local start = unicode.len(line) + unicode.len(nl) + 1
-  return line, start <= unicode.len(value) and unicode.sub(value, start) or nil, unicode.len(nl) > 0
+end
+local start = unicode.len(line) + unicode.len(nl) + 1
+return line, start <= unicode.len(value) and unicode.sub(value, start) or nil, unicode.len(nl) > 0
 end
 
 function text.wrappedLines(value, width, maxWidth)
-  local line
-  return function()
+local line
+return function()
     if value then
-      line, value = text.wrap(value, width, maxWidth)
-      return line
+    line, value = text.wrap(value, width, maxWidth)
+    return line
     end
-  end
+end
 end
 
 
@@ -1015,9 +1015,9 @@ local file_parentpath = paths.path(filename)
 
 local gpu = graphic.findGpu(screen)
 if graphic.getDepth(screen) == 1 then
-  gpu.setBackground(0)
+gpu.setBackground(0)
 else
-  gpu.setBackground(colors.gray)
+gpu.setBackground(colors.gray)
 end
 gpu.setForeground(colors.white)
 
@@ -1030,7 +1030,7 @@ term = {clear = function()
     local rx, ry = gpu.getResolution()
     gpu.fill(1, 1, rx, ry, " ")
 end, pull = function(...)
-      graphic.updateFlag(screen)
+    graphic.updateFlag(screen)
 
     if blinkingTerm then
         local gpu = graphic.findGpu(screen)
@@ -1041,17 +1041,17 @@ end, pull = function(...)
     end
     local eventData = {event.pull(...)}
     if eventData[1] == "key_down" or eventData[1] == "key_up" then
-      onKeyChangeFoKeyboard(table.unpack(eventData))
+    onKeyChangeFoKeyboard(table.unpack(eventData))
     end
     if blinkingTerm then
-      local gpu = graphic.findGpu(screen)
-      local char, fore, back = gpu.get(cx, cy)
-      gpu.setBackground(fore)
-      gpu.setForeground(back)
-      gpu.set(cx, cy, char)
+    local gpu = graphic.findGpu(screen)
+    local char, fore, back = gpu.get(cx, cy)
+    gpu.setBackground(fore)
+    gpu.setForeground(back)
+    gpu.set(cx, cy, char)
     end
 
-      graphic.updateFlag(screen)
+    graphic.updateFlag(screen)
 
     return table.unpack(eventData)
 end, setCursor = function(x, y)
@@ -1480,22 +1480,22 @@ local function find()
 
         local eventt, address, char, code = term.pull() 
         if eventt == "key_down" then
-          if address == term.keyboard() then
-              local handler, name = getKeyBindHandler(code)
-              highlight(cbx, cby, unicode.wlen(findText), false)
-              if name == "newline" then
-                  break
-              elseif name == "close" then
-                  handler()
-              elseif name == "backspace" then
-                  findText = unicode.sub(findText, 1, -2)
-              elseif name == "find" or name == "findnext" then
-                  ibx = cbx + 1
-                  iby = cby
-              elseif not keyboard.isControl(char) then
-                  findText = findText .. unicode.char(char)
-              end
-          end
+        if address == term.keyboard() then
+            local handler, name = getKeyBindHandler(code)
+            highlight(cbx, cby, unicode.wlen(findText), false)
+            if name == "newline" then
+                break
+            elseif name == "close" then
+                handler()
+            elseif name == "backspace" then
+                findText = unicode.sub(findText, 1, -2)
+            elseif name == "find" or name == "findnext" then
+                ibx = cbx + 1
+                iby = cby
+            elseif not keyboard.isControl(char) then
+                findText = findText .. unicode.char(char)
+            end
+        end
         end
     end
     setCursor(cbx, cby)
@@ -1634,7 +1634,7 @@ getKeyBindHandler = function(code)
                             (shift == not (not keyboard.isShiftDown(keyboardAddress))) and
                             code == keyboard.keys[key] and
                             #keybind > resultWeight
-                     then
+                    then
                         resultWeight = #keybind
                         resultName = command
                         result = keyBindHandlers[command]
@@ -1691,14 +1691,16 @@ end
 -------------------------------------------------------------------------------
 
 do
-    local f = fs.open(filename, "r")
+    local f = fs.open(filename, "r", 4096)
     if f then
-        local data = require("calls").call("split", lineMod(f.readAll()), "\n")
-        f.close()
-
         local x, y, w, h = getArea()
         local chars = 0
-        for _, fline in ipairs(data) do
+        while true do
+            local fline = f.readLine()
+            if not fline then
+                break
+            end
+            fline = lineMod(fline)
             table.insert(buffer, fline)
             chars = chars + unicode.len(fline)
             if #buffer <= h then

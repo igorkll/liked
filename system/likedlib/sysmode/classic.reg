@@ -1,5 +1,9 @@
 {
+    forceRestrictedLoader = true,
     interpreterSandbox = true,
+    onlyInternalDisk = true,
+    noBootmanager = true,
+    noBootViaBootmanager = true,
     disableCustomMarketUrls = true,
     disableRootAccess = true,
     disableRecovery = true,

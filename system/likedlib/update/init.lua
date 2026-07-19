@@ -5,6 +5,7 @@ local computer = require("computer")
 local serialization = require("serialization")
 local sysdata = require("sysdata")
 local registry = require("registry")
+local liked = require("liked")
 local update = {}
 update.updaterPath = paths.concat(paths.path(system.getSelfScriptPath()), "update.lua")
 
@@ -19,13 +20,33 @@ function update._write(data)
     assert(fs.writeFile(data.self, update._generate(data)))
 end
 
-function update.run(branch, mode)
-    local data = {}
-    data.branch = branch or sysdata.get("branch")
-    data.mode = mode or sysdata.get("mode")
-    
-    update._write({data = data, filesBlackList = registry.filesBlackList})
-    computer.shutdown("fast")
+function update.needWipe(branch, mode)
+    if sysdata.get("branch") ~= branch then return true end
+    return liked.getFileFromRepo("/system/dataVersion.cfg", branch) ~= fs.readFile("/system/dataVersion.cfg")
+end
+
+function update.run(branch, mode, wipedata)
+    if registry.banningUpdates then
+        error("updates are prohibited by the system configuration", 2)
+    end
+
+    local data = sysdata.list()
+    data.branch = branch or data.branch
+    data.mode = mode or data.mode
+
+    local updaterData = { data = data, filesBlackList = registry.filesBlackList }
+    if _restrictedLoader_update then
+        if wipedata then
+            fs.remove("/data")
+        end
+        _restrictedLoader_update(updaterData)
+    else
+        update._write(updaterData)
+        if wipedata then
+            fs.remove("/data")
+        end
+        computer.shutdown("fast")
+    end
 end
 
 update.unloadable = true

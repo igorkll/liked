@@ -11,13 +11,16 @@ cache.static.screensaver_enabled = cache.static.screensaver_enabled or {}
 cache.static.screensaver_current = cache.static.screensaver_current or {}
 
 function screensaver.isEnabled(screen)
-    return cache.static.screensaver_enabled[screen] == true or cache.static.screensaver_enabled[screen] == nil
+    return cache.static.screensaver_enabled[screen] == nil
 end
 
 function screensaver.setEnabled(screen, state)
-    cache.static.screensaver_enabled[screen] = not not state
+    if state then
+        cache.static.screensaver_enabled[screen] = nil
+    else
+        cache.static.screensaver_enabled[screen] = false
+    end
 end
-
 
 function screensaver.current(screen)
     return cache.static.screensaver_current[screen]
@@ -31,7 +34,7 @@ function screensaver.start(screen, path)
         th.parentData.screen = screen
         th:resume()
         event.yield()
-        event.listen(nil, function (eventName, uuid)
+        event.listen(nil, function(eventName, uuid)
             if uuid == screen and (eventName == "touch" or eventName == "drag" or eventName == "scroll") then
                 cache.static.screensaver_current[screen] = nil
                 th:kill()
@@ -55,7 +58,7 @@ end
 function screensaver.noScreensaver(screen)
     local oldScreenSaverState = screensaver.isEnabled(screen)
     screensaver.setEnabled(screen, false)
-    return function ()
+    return function()
         screensaver.setEnabled(screen, oldScreenSaverState)
     end
 end

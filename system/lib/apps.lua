@@ -16,6 +16,7 @@ local archiver = require("archiver")
 local component = require("component")
 local text = require("text")
 local unicode = require("unicode")
+local lregs = require("lregs")
 local apps = {}
 
 local installedInfo = registry.new("/data/installedInfo.dat")
@@ -40,7 +41,7 @@ local function createShadow(appName)
     local function move(file)
         fs.copy(paths.concat(appsPath, appName, file), paths.concat(shadowPath, appName, file))
     end
-    
+
     move("unreg.reg")
     move("formats.cfg")
     move("uninstall.lua")
@@ -56,7 +57,7 @@ local function doFormats(appPath, path, delete)
     if not registry.data.gui_container.editable then registry.data.gui_container.editable = {} end
     if not registry.data.gui_container.openVia then registry.data.gui_container.openVia = {} end
     if not registry.data.icons then registry.data.icons = {} end
-    
+
     local function rmData(extension, key)
         registry.data.gui_container[key][extension] = nil
         gui_container[key][extension] = nil
@@ -163,6 +164,7 @@ function apps.load(name, screen, nickname, mainEnv, exitEnv)
     end
 
     local oldScreenSaverState
+    local backEnergySaving
     local oldPrecise
 
     --------------------------------
@@ -194,6 +196,10 @@ function apps.load(name, screen, nickname, mainEnv, exitEnv)
                 screensaver.setEnabled(screen, false)
             end
 
+            if configTbl.noEnergySaver then
+                backEnergySaving = liked.noEnergySaver()
+            end
+
             if configTbl.res then
                 graphic.setResolution(screen, table.unpack(configTbl.res))
             end
@@ -208,7 +214,7 @@ function apps.load(name, screen, nickname, mainEnv, exitEnv)
     local function appEnd()
         if screen then
             if configTbl.restoreGraphic then
-                log{pcall(sysinit.initScreen, screen)}
+                log { pcall(sysinit.initScreen, screen) }
             else
                 if paletteFile or configTbl.restorePalette or configTbl.blackWhite or configTbl.advancedColors then
                     palette.system(screen)
@@ -223,18 +229,22 @@ function apps.load(name, screen, nickname, mainEnv, exitEnv)
                 screensaver.setEnabled(screen, oldScreenSaverState)
             end
 
+            if configTbl.noEnergySaver then
+                backEnergySaving()
+            end
+
             if oldPrecise ~= nil then
                 component.invoke(screen, "setPrecise", oldPrecise)
             end
         end
     end
 
-    return function (...)
+    return function(...)
         appStart()
-        local result = log{thread.stub(mainCode, screen, nickname, ...)}
+        local result = log { thread.stub(mainCode, screen, nickname, ...) }
         appEnd()
         if exitCode then
-            local result2 = log{thread.stub(exitCode, screen, nickname, ...)}
+            local result2 = log { thread.stub(exitCode, screen, nickname, ...) }
             if not result2[1] then
                 if result[1] then
                     result[1] = false
@@ -264,7 +274,7 @@ function apps.execute(name, screen, nickname, ...)
                         ok, err = false, programTh.out[3]
                     end
                 end
-                out = {table.unpack(programTh.out, 2)}
+                out = { table.unpack(programTh.out, 2) }
                 break
             end
 
@@ -285,7 +295,7 @@ function apps.execute(name, screen, nickname, ...)
 end
 
 function apps.executeWithWarn(name, screen, nickname, ...)
-    local result = {apps.execute(name, screen, nickname, ...)}
+    local result = { apps.execute(name, screen, nickname, ...) }
     if screen and not result[1] then
         local clear = gui.saveBigZone(screen)
         gui.bigWarn(screen, nil, nil, tostring(result[2] or "unknown error"))
@@ -305,13 +315,19 @@ function apps.postInstall(screen, nickname, path, version)
 
     version = tostring(version or "unknown")
     local pname = paths.name(path)
-    if installedInfo.data[pname] and installedInfo.data[pname] == version then
+    local sname = paths.hideExtension(pname)
+    if installedInfo.data[sname] and installedInfo.data[sname] == version then
         return false
     end
 
     local regPath = paths.concat(path, "reg.reg")
     if fs.exists(regPath) then
         liked.applyReg(regPath)
+    end
+
+    local regPrivatePath = paths.concat(path, "reg_private.reg")
+    if fs.exists(regPrivatePath) then
+        liked.applyReg(regPrivatePath, nil, lregs.private)
     end
 
     local formatsPath = paths.concat(path, "formats.cfg")
@@ -332,7 +348,7 @@ function apps.postInstall(screen, nickname, path, version)
 
     if normalAppPath then
         createShadow(pname)
-        installedInfo.data[pname] = version
+        installedInfo.data[sname] = version
         installedInfo.save()
     end
 
@@ -349,16 +365,18 @@ function apps.uninstall(screen, nickname, path, hide)
             liked.assert(screen, ...)
         end
     end
-    
+
     local vendorApp = text.startwith(unicode, path, vendorAppsPath)
     if fs.get(path).address ~= fs.bootaddress then
         if screen then
-            gui.warn(screen, nil, nil, "it is not possible to uninstall the application from another disk.\nuse the \"remove\" operation")
+            gui.warn(screen, nil, nil,
+                "it is not possible to uninstall the application from another disk.\nuse the \"remove\" operation")
         end
         return
     elseif not text.startwith(unicode, path, appsPath) and not text.startwith(unicode, path, shadowPath) and not vendorApp then
         if screen then
-            gui.warn(screen, nil, nil, "it is not possible to uninstall applications from here.\nuse the \"remove\" operation")
+            gui.warn(screen, nil, nil,
+                "it is not possible to uninstall applications from here.\nuse the \"remove\" operation")
         end
         return
     elseif not hide and screen then
@@ -370,6 +388,11 @@ function apps.uninstall(screen, nickname, path, hide)
     local unregPath = paths.concat(path, "unreg.reg")
     if fs.exists(unregPath) then
         liked.applyReg(unregPath)
+    end
+
+    local unregPrivatePath = paths.concat(path, "unreg_private.reg")
+    if fs.exists(unregPrivatePath) then
+        liked.applyReg(unregPrivatePath, nil, lregs.private)
     end
 
     local formatsPath = paths.concat(path, "formats.cfg")
@@ -392,7 +415,7 @@ function apps.uninstall(screen, nickname, path, hide)
     else
         fs.remove(paths.concat(shadowPath, pname))
         fs.remove(paths.concat(appsPath, pname))
-        installedInfo.data[pname] = nil
+        installedInfo.data[paths.hideExtension(pname)] = nil
         installedInfo.save()
     end
 
@@ -403,7 +426,8 @@ end
 function apps.install(screen, nickname, path, hide)
     if not hide then
         local name = gui.hideExtension(screen, path)
-        if not gui.yesno(screen, nil, nil, "Are you sure you want to install the \"" .. name .."\" package?") then return false, "cancel" end
+        if not gui.yesno(screen, nil, nil, "Are you sure you want to install the \"" .. name .. "\" package?") then return
+            false, "cancel" end
         gui.status(screen, nil, nil, "installing \"" .. name .. "\"...")
     end
 
@@ -416,7 +440,7 @@ end
 
 function apps.check(screen, nickname)
     if liked.recoveryMode then return end
-    
+
     local installedApps = appList(appsPath)
     local shadowApps = appList(shadowPath)
 
@@ -425,12 +449,13 @@ function apps.check(screen, nickname)
             createShadow(name)
         end
 
-        if not installedInfo.data[name] then
+        if not installedInfo.data[paths.hideExtension(name)] then
             apps.postInstall(screen, nickname, paths.concat(appsPath, name))
         end
     end
 
     for name in pairs(installedInfo.data) do
+        name = name .. ".app"
         if not installedApps[name] then
             local lpath = paths.concat(shadowPath, name)
             if fs.isDirectory(lpath) then
@@ -438,6 +463,33 @@ function apps.check(screen, nickname)
             end
         end
     end
+end
+
+function apps.list()
+    local list = {}
+
+    local function addToList(path)
+        for _, rawAppName in ipairs(fs.list(path, true)) do
+            local appName = paths.hideExtension(paths.name(rawAppName))
+            local obj = {}
+            local externCfg = paths.concat(rawAppName, "extern.cfg")
+            if fs.exists(externCfg) then
+                obj.extern = serialization.load(externCfg)
+            end
+            obj.version = installedInfo.data[appName]
+            obj.path = rawAppName
+            list[appName] = obj
+        end
+    end
+
+    for i = #programs.paths, 1, -1 do
+        local path = programs.paths[i]
+        if text.endwith(unicode, path, "apps") or text.endwith(unicode, path, "apps/") then
+            addToList(path)
+        end
+    end
+
+    return list
 end
 
 apps.unloadable = true

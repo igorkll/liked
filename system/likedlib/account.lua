@@ -74,7 +74,7 @@ function account.captcha(screen)
 
         local imagePath = paths.concat("/tmp", id)
         fs.writeFile(imagePath, img)
-        
+
         if lNoShadow then
             lNoShadow()
             lNoShadow = nil
@@ -86,7 +86,8 @@ function account.captcha(screen)
         layout:createPlane(1, 1, layout.sizeX, 1, uix.colors.gray)
         layout:createVText(window.sizeX / 2, 2, uix.colors.white, "enter the text from the image")
         layout:createImage(2, 4, imagePath)
-        local input = layout:createInput(12, 15, layout.sizeX - 12 - 9 - 1, uix.colors.white, uix.colors.black, nil, nil, nil, 8)
+        local input = layout:createInput(12, 15, layout.sizeX - 12 - 9 - 1, uix.colors.white, uix.colors.black, nil, nil,
+            nil, 8)
         local refresh = layout:createButton(2, 15, 9, 1, uix.colors.blue, uix.colors.white, "refresh", true)
         local enter = layout:createButton(50 - 9, 15, 9, 1, uix.colors.blue, uix.colors.white, "enter", true)
         local exit = layout:createButton(window.sizeX - 2, 1, 3, 1, uix.colors.red, uix.colors.white, "X", true)
@@ -119,7 +120,7 @@ function account.captcha(screen)
         end
 
         while true do
-            local eventData = {event.pull(1)}
+            local eventData = { event.pull(1) }
             local windowEventData = window:uploadEvent(eventData)
             layout:uploadEvent(windowEventData)
 
@@ -148,19 +149,19 @@ end
 
 function account.check()
     if registry.account then
-        if not post(userExistsHost, {name = registry.account}) then
+        if not post(userExistsHost, { name = registry.account }) then
             registry.accountToken = nil
             registry.account = nil
         end
 
         if registry.account and registry.accountToken then
-            post(lockUpdateHost, {name = registry.account, token = registry.accountToken, device = account.deviceId()})
+            post(lockUpdateHost, { name = registry.account, token = registry.accountToken, device = account.deviceId() })
         end
     end
 end
 
 function account.updateToken(name, password)
-    local ok, tokenOrError = post(getTokenHost, {name = name, password = password, device = account.deviceId()})
+    local ok, tokenOrError = post(getTokenHost, { name = name, password = password, device = account.deviceId() })
     if ok then
         registry.accountToken = tokenOrError
         event.push("accountChanged")
@@ -171,7 +172,8 @@ function account.updateToken(name, password)
 end
 
 function account.checkToken()
-    return registry.account and registry.accountToken and (post(checkTokenHost, {name = registry.account, token = registry.accountToken}))
+    return registry.account and registry.accountToken and
+    (post(checkTokenHost, { name = registry.account, token = registry.accountToken }))
 end
 
 function account.isStorage()
@@ -179,7 +181,7 @@ function account.isStorage()
 end
 
 function account.getStorage()
-    if not account.isStorage() then return end    
+    if not account.isStorage() then return end
 
     local card = internet.cardProxy()
     if not card then return end
@@ -201,8 +203,8 @@ function account.getStorage()
             umount()
             return
         end
-        
-        local sendTbl = {name = registry.account, token = registry.accountToken, method = name}
+
+        local sendTbl = { name = registry.account, token = registry.accountToken, method = name }
         local addContent
         if type(args) == "string" then
             addContent = args
@@ -211,7 +213,7 @@ function account.getStorage()
         else
             sendTbl.args = {}
         end
-        
+
 
         local data = json.encode(sendTbl)
         if addContent then
@@ -234,10 +236,10 @@ function account.getStorage()
 
                     if contentLen then
                         if #str >= contentLen then
-                            return {str}
+                            return { str }
                         end
                     elseif (firstChar == "{" and lastChar == "}") or (firstChar == "[" and lastChar == "]") then
-                        local result = {pcall(json.decode, str)}
+                        local result = { pcall(json.decode, str) }
                         if result[1] then
                             return result[2] or {}
                         end
@@ -283,38 +285,36 @@ function account.getStorage()
     end
 
     function proxy.exists(path)
-        return request("exists", {path})
+        return request("exists", { path })
     end
 
     function proxy.isDirectory(path)
-        return request("isDirectory", {path})
+        return request("isDirectory", { path })
     end
 
     function proxy.lastModified(path)
-        return request("lastModified", {path})
+        return request("lastModified", { path })
     end
 
     function proxy.remove(path)
-        return request("remove", {path})
+        return request("remove", { path })
     end
 
     function proxy.rename(path, path2)
-        return request("rename", {path, path2})
+        return request("rename", { path, path2 })
     end
 
     function proxy.size(path)
-        return request("size", {path})
+        return request("size", { path })
     end
 
     function proxy.makeDirectory(path)
-        return request("makeDirectory", {path})
+        return request("makeDirectory", { path })
     end
 
     function proxy.list(path)
-        return request("list", {path})
+        return request("list", { path })
     end
-
-
 
     function proxy.isReadOnly()
         return request("isReadOnly")
@@ -331,11 +331,11 @@ function account.getStorage()
     ------------------------------------
 
     local function readFile(path)
-        return request("readFile", {path})
+        return request("readFile", { path })
     end
 
     local function writeFile(path, data)
-        if request("pushPath", {path}) then
+        if request("pushPath", { path }) then
             return request("pushContent", data)
         end
     end
@@ -415,7 +415,8 @@ function account.loginWindow(screen)
 end
 
 function account.isLoginWindowNeed(screen)
-    return component.isPrimary(screen) and (registry.oldLocked or (internet.check() and account.getLocked() and not account.checkToken()))
+    return component.isPrimary(screen) and
+    (registry.oldLocked or (internet.check() and account.getLocked() and not account.checkToken()))
 end
 
 function account.smartLoginWindow(screen)
@@ -427,7 +428,7 @@ end
 --------------------------------
 
 local function getLocked()
-    local ok, data = post(getLockedHost, {device = account.deviceId()})
+    local ok, data = post(getLockedHost, { device = account.deviceId() })
     if ok then
         return data
     end
@@ -461,7 +462,7 @@ function account.login(name, password)
 end
 
 function account.checkPassword(name, password)
-    return (post(isPasswordHost, {name = name, password = password}))
+    return (post(isPasswordHost, { name = name, password = password }))
 end
 
 function account.unlogin(password)
@@ -469,7 +470,7 @@ function account.unlogin(password)
         return false, "you are not logged in to account"
     end
 
-    local ok, err = post(detachHost, {name = registry.account, password = password, device = account.deviceId()})
+    local ok, err = post(detachHost, { name = registry.account, password = password, device = account.deviceId() })
     if ok then
         registry.account = nil
         registry.accountPassword = nil
@@ -480,9 +481,8 @@ function account.unlogin(password)
     end
 end
 
-
 function account.register(name, password, cid, ccode)
-    return post(regHost, {name = name, password = password, cid = cid, ccode = ccode})
+    return post(regHost, { name = name, password = password, cid = cid, ccode = ccode })
 end
 
 function account.unregister(password)
@@ -490,7 +490,7 @@ function account.unregister(password)
         return false, "you are not logged in to account"
     end
 
-    local ok, err = post(unregHost, {name = registry.account, password = password})
+    local ok, err = post(unregHost, { name = registry.account, password = password })
     if ok then
         account.unlogin(password)
     end
@@ -502,7 +502,7 @@ function account.changePassword(password, newPassword)
         return false, "you are not logged in to account"
     end
 
-    local ok, err = post(changePasswordHost, {name = registry.account, password = password, newPassword = newPassword})
+    local ok, err = post(changePasswordHost, { name = registry.account, password = password, newPassword = newPassword })
     if ok then
         account.login(registry.account, newPassword)
     end

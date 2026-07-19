@@ -70,7 +70,8 @@ function vkeyboard.input(screen, splash, allowActions)
         returnVal = true
     end
 
-    local space = layout:createButton(3, window.sizeY - 1, window.sizeX / 2, 1, uix.colors.blue, uix.colors.white, "⣇" .. ("⣀"):rep(4) .. "⣸", true)
+    local space = layout:createButton(3, window.sizeY - 1, window.sizeX / 2, 1, uix.colors.blue, uix.colors.white,
+        "⣇" .. ("⣀"):rep(4) .. "⣸", true)
     function space:onClick()
         currentInput = currentInput .. " "
         doInput()
@@ -80,7 +81,8 @@ function vkeyboard.input(screen, splash, allowActions)
     layout:createText(43, window.sizeY - 1, nil, "Upper Case")
 
     local function addButton(index, y, char, func, line1)
-        local button = layout:createButton(8 + ((index - 1) * 4), (line1 and 2 or 4) + (y * 3), 3, 3, func and uix.colors.green or uix.colors.blue, uix.colors.white, char, true)
+        local button = layout:createButton(8 + ((index - 1) * 4), (line1 and 2 or 4) + (y * 3), 3, 3,
+            func and uix.colors.green or uix.colors.blue, uix.colors.white, char, true)
         button.postDraw = postDraw
         function button:onClick()
             if func then
@@ -102,7 +104,7 @@ function vkeyboard.input(screen, splash, allowActions)
             char = 0
         end
         char = tostring(char)
-        
+
         addButton(i, 0, char)
     end
 
@@ -164,7 +166,7 @@ function vkeyboard.input(screen, splash, allowActions)
     addButton(16, 3, "*")
 
     if allowActions then
-        addButton(13, 4, "#", function ()
+        addButton(13, 4, "#", function()
             selectLayout(layout2)
         end)
     end
@@ -179,35 +181,35 @@ function vkeyboard.input(screen, splash, allowActions)
         selectLayout(layout1)
     end
 
-    addButton(0, 0, "^W", function ()
-        returnVal = {23, 17}
+    addButton(0, 0, "^W", function()
+        returnVal = { 23, 17 }
     end, true)
 
-    addButton(1, 0, "^A", function ()
-        returnVal = {1, 30}
+    addButton(1, 0, "^A", function()
+        returnVal = { 1, 30 }
     end, true)
 
-    addButton(2, 0, "^C", function ()
-        returnVal = {3, 46}
+    addButton(2, 0, "^C", function()
+        returnVal = { 3, 46 }
     end, true)
 
-    addButton(3, 0, "^V", function ()
-        returnVal = {22, 47}
+    addButton(3, 0, "^V", function()
+        returnVal = { 22, 47 }
     end, true)
 
-    addButton(4, 0, "^X", function ()
-        returnVal = {24, 45}
+    addButton(4, 0, "^X", function()
+        returnVal = { 24, 45 }
     end, true)
 
-    addButton(5, 0, "^Y", function ()
-        returnVal = {25, 21}
+    addButton(5, 0, "^Y", function()
+        returnVal = { 25, 21 }
     end, true)
 
 
     selectLayout(layout1)
 
     while true do
-        local eventData = {event.pull()}
+        local eventData = { event.pull() }
         local windowEventData = window:uploadEvent(eventData)
         layout:uploadEvent(windowEventData)
 
@@ -232,7 +234,7 @@ function vkeyboard.save(screen)
         end
     end
 
-    return function ()
+    return function()
         for window, state in pairs(oldStates) do
             window.selected = state
         end
@@ -249,8 +251,8 @@ function vkeyboard.hook(screen, exitCallback)
     hooked[screen] = true
 
     local virtualKeyboardUuid = uuid.next()
-    hook.addComponentHook(screen, function (address, method, args)
-        return address, method, args, function (result)
+    hook.addComponentHook(screen, function(address, method, args)
+        return address, method, args, function(result)
             if result[1] and method == "getKeyboards" then
                 if type(result[2]) == "table" then
                     table.insert(result[2], virtualKeyboardUuid)
@@ -261,10 +263,10 @@ function vkeyboard.hook(screen, exitCallback)
     end)
     vcomponent.register(virtualKeyboardUuid, "keyboard", {}, {})
 
-    event.hyperHook(function (...)
-        local tbl = {...}
+    event.hyperHook(function(...)
+        local tbl = { ... }
 
-        return utils.safeExec(function ()
+        return utils.safeExec(function()
             if tbl[1] == "touch" then
                 if tbl[2] == screen and #lastinfo.keyboards[screen] <= 1 then
                     if clicks[tbl[2]] then
@@ -277,10 +279,10 @@ function vkeyboard.hook(screen, exitCallback)
                                 event.push("vkeyboard", tbl[2], tbl[6])
                             end
                         else
-                            clicks[tbl[2]] = {tbl[3], tbl[4], computer.uptime(), 1}
+                            clicks[tbl[2]] = { tbl[3], tbl[4], computer.uptime(), 1 }
                         end
                     else
-                        clicks[tbl[2]] = {tbl[3], tbl[4], computer.uptime(), 1}
+                        clicks[tbl[2]] = { tbl[3], tbl[4], computer.uptime(), 1 }
                     end
                 end
             elseif tbl[1] == "vkeyboard" and tbl[2] == screen and not opened[tbl[2]] then

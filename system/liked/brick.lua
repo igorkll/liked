@@ -18,7 +18,7 @@ end
 if eeprom then
     local checksum
     pcall(eeprom.set, bricklogo)
-    pcall(function () checksum = eeprom.getChecksum() end)
+    pcall(function() checksum = eeprom.getChecksum() end)
     pcall(eeprom.makeReadonly, checksum or "")
     pcall(eeprom.setData, "")
     pcall(eeprom.setLabel, "bricked eeprom")

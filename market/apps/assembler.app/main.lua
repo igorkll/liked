@@ -33,63 +33,63 @@ local allowStart = false
 local oldAllowStart
 
 function startButton:onClick()
-    if allowStart then
-        local ok = assembler.start()
-        if not ok then
-            gui.warn(screen, nil, nil, "failed to start the assembly")
-            layout:draw()
-        end
-    end
+	if allowStart then
+		local ok = assembler.start()
+		if not ok then
+			gui.warn(screen, nil, nil, "failed to start the assembly")
+			layout:draw()
+		end
+	end
 end
 
 local function reloadStatus()
-    local status, allow = assembler.status()
-    if type(allow) == "boolean" then
-        allowStart = allow
-        local value = 0
-        if progressBar.value ~= value then
-            progressBar.value = value
-            progressBar:draw()
-        end
-    else
-        allowStart = false
-        if type(allow) == "number" then
-            local value = allow / 100
-            if progressBar.value ~= value then
-                progressBar.value = value
-                progressBar:draw()
-            end
-        end
-    end
-    if allowStart ~= oldAllowStart then
-        if allowStart then
-            startButton.back = colors.white
-            startButton.fore = colors.gray
-            startButton.back2 = startButton.fore
-            startButton.fore2 = startButton.back
-            startButton.disabled = false
-        else
-            startButton.back = colors.lightGray
-            startButton.fore = colors.gray
-            startButton.back2 = startButton.fore
-            startButton.fore2 = startButton.back
-            startButton.disabled = true
-        end
-        startButton:draw()
-        oldAllowStart = allowStart
-    end
+	local status, allow = assembler.status()
+	if type(allow) == "boolean" then
+		allowStart = allow
+		local value = 0
+		if progressBar.value ~= value then
+			progressBar.value = value
+			progressBar:draw()
+		end
+	else
+		allowStart = false
+		if type(allow) == "number" then
+			local value = allow / 100
+			if progressBar.value ~= value then
+				progressBar.value = value
+				progressBar:draw()
+			end
+		end
+	end
+	if allowStart ~= oldAllowStart then
+		if allowStart then
+			startButton.back = colors.white
+			startButton.fore = colors.gray
+			startButton.back2 = startButton.fore
+			startButton.fore2 = startButton.back
+			startButton.disabled = false
+		else
+			startButton.back = colors.lightGray
+			startButton.fore = colors.gray
+			startButton.back2 = startButton.fore
+			startButton.fore2 = startButton.back
+			startButton.disabled = true
+		end
+		startButton:draw()
+		oldAllowStart = allowStart
+	end
 
-    if status ~= statusLabel.text then
-        statusLabel.text = status
-        statusLabel:draw()
-    end
+	if status ~= statusLabel.text then
+		statusLabel.text = status
+		statusLabel:draw()
+	end
 end
 
 reloadStatus()
 layout:draw()
 
 while true do
-    local eventData = {event.pull(0.5)}
-    layout:uploadEvent(eventData)
-    reloadStatus()
+	local eventData = {event.pull(0.5)}
+	layout:uploadEvent(eventData)
+	reloadStatus()
 end

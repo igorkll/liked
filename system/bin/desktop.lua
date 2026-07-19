@@ -638,8 +638,11 @@ local function doIcon(windowEventData)
 
                             if v.fs.exists("/init.lua") then
                                 table.insert(strs, "  boot from this disk")
-                                table.insert(active, not registry.disableExternalBoot)
+                                table.insert(active, not registry.disableExternalBoot and not _restrictedLoader)
                             end
+
+                            table.insert(strs, "  info")
+                            table.insert(active, true)
 
                             table.insert(strs, "  unmount")
                             table.insert(active, true)
@@ -685,16 +688,20 @@ local function doIcon(windowEventData)
                             elseif str == "  unmount" then
                                 fs.umount(v.path)
                                 draw()
+                            elseif str == "  info" then
+                                return function ()
+                                    simpleExecute("diskinfo", windowEventData[6], v.fs.address)
+                                end
                             elseif str == "  eject" then
                                 pcall(component.invoke, ejectDrive, "eject")
                             elseif str == "  create dump" then
                                 local archiver = require("archiver")
                                 local clear = saveBigZone(screen)
-                                local targetPath = gui_filepicker(screen, nil, nil, nil, archiver.supported[1], true)
+                                local targetPath = require("iowindows").savefile(screen, archiver.supported)
                                 
                                 if targetPath then
                                     clear()
-                                    gui_status(screen, nil, nil, "creating dump...")
+                                    gui.status(screen, nil, nil, "creating dump...")
                                     local ok, err = archiver.pack(v.path, targetPath)
                                     if not ok then
                                         warn(err)
@@ -708,12 +715,12 @@ local function doIcon(windowEventData)
                             elseif str == "  flash archive" then
                                 local archiver = require("archiver")
                                 local clear = saveBigZone(screen)
-                                local archivePath = gui_filepicker(screen, nil, nil, nil, archiver.supported[1])
+                                local archivePath = require("iowindows").selectfile(screen, archiver.supported)
                                 
                                 if archivePath then
                                     clear()
                                     if gui.yesno(screen, nil, nil, "are you sure you want to flash the \"" .. gui.hideExtension(screen, archivePath) .. "\" archive to the \"" .. v.name .. "\"?") then
-                                        gui_status(screen, nil, nil, "archive flashing...")
+                                        gui.status(screen, nil, nil, "archive flashing...")
                                         local ok, err = archiver.unpack(archivePath, v.path)
                                         if not ok then
                                             warn(err)
@@ -726,7 +733,7 @@ local function doIcon(windowEventData)
                                 local state = gui.pleaseType(screen, v.fs.address == fs.bootaddress and "FRMT_SYSROOT" or "FORMAT")
                                 
                                 if state then
-                                    gui_status(screen, nil, nil, "formatting...")
+                                    gui.status(screen, nil, nil, "formatting...")
                                     liked.assert(screen, v.fs.remove("/"))
                                     draw()
                                 else
@@ -782,7 +789,7 @@ local function doIcon(windowEventData)
 
                                 if state then
                                     liked.umountAll()
-                                    if not pcall(v.fs.setLabel, nil) then
+                                    if not pcall(v.fs.setLabel, nil) and not pcall(v.fs.setLabel, "") then
                                         warn("invalid name")
                                     end
                                     liked.mountAll()
@@ -791,9 +798,9 @@ local function doIcon(windowEventData)
                                     clear2()
                                 end
                             elseif str == "  boot from this disk" then
-                                if not registry.disableExternalBoot then
-                                    pcall(computer.setBootAddress, v.fs.address)
-                                    pcall(computer.setBootFile, "/init.lua")
+                                if not registry.disableExternalBoot and not _restrictedLoader then
+                                    fs.writeFile("/tmp/bootloader/bootaddr", v.fs.address)
+                                    fs.writeFile("/tmp/bootloader/bootfile", "/init.lua")
                                     pcall(computer.shutdown, "fast")
                                 end
                             end
@@ -982,13 +989,15 @@ local function doIcon(windowEventData)
                                     simpleExecute("fileinfo", windowEventData[6], v.path)
                                 end
                             elseif str == "  pack to archive" then
+                                local archiver = require("archiver")
+
                                 local clear = gui.saveBigZone(screen)
-                                local outPath = require("iowindows").savefile(screen, "afpx")
+                                local outPath = require("iowindows").savefile(screen, archiver.supported)
                                 clear()
 
                                 if outPath then
                                     gui.status(screen, nil, nil, "packaging \"" .. gui.fpath(screen, v.path) .. "\" to \"" .. gui.fpath(screen, outPath) .. "\"")
-                                    liked.assertNoClear(screen, require("archiver").pack(v.path, outPath))
+                                    liked.assertNoClear(screen, archiver.pack(v.path, outPath))
                                     draw()
                                 end
                             elseif str == "  remove" then
@@ -1152,7 +1161,7 @@ local function doIcon(windowEventData)
                 
                 if addr then
                     local function doMount()
-                        local name = gui.input(screen, nil, nil, "mount name")
+                        local name = gui.input(screen, nil, nil, "mount name", nil, nil, paths.name(require("hdd").genName(addr)))
                         if name and name ~= "" and not name:find("%\\") and not name:find("%/") then
                             fs.mount(component.proxy(addr), paths.concat(userPath, name))
                         end

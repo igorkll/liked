@@ -8,7 +8,7 @@ local internet = component.proxy(component.list("internet")() or error("no inter
 local likeScreen = ...
 local gpu
 local updateScreen
-pcall(function ()
+pcall(function()
     local graphic = require("graphic")
     gpu = graphic.findGpu(likeScreen)
     updateScreen = function()
@@ -29,7 +29,8 @@ end
 
 gpu.setBackground(0x000000)
 gpu.setForeground(0xffffff)
-local rx, ry = gpu.maxResolution()
+local orx, ory = gpu.maxResolution()
+local rx, ry = orx, ory
 gpu.setResolution(math.min(rx, 80), math.min(ry, 25))
 rx, ry = gpu.getResolution()
 gpu.fill(1, 1, rx, ry, " ")
@@ -37,13 +38,16 @@ gpu.fill(1, 1, rx, ry, " ")
 --------------------------------------------
 
 local drive
-pcall(function ()
+pcall(function()
     drive = computer.getBootAddress() --в случаи с luabios если сменить EEPROM после запуска компьтера то данный метод вернет nil и строку об отсутвии компонента
 end)
-if not drive then --если через getBootAddress не получилось(например если чип EEPROM был сменен, в bios с которого произошла загрузка не может без него вернуть строку с адресом диска)
-    pcall(function ()
+if not drive then                  --если через getBootAddress не получилось(например если чип EEPROM был сменен, в bios с которого произошла загрузка не может без него вернуть строку с адресом диска)
+    pcall(function()
         drive = require("filesystem").get("/").address
     end)
+end
+if drive and not component.proxy(drive) then
+    drive = nil
 end
 
 --------------------------------------------
@@ -66,12 +70,12 @@ local function wget(url)
     if handle then
         local data = {}
         while true do
-            local result, reason = handle.read(math.huge) 
+            local result, reason = handle.read(math.huge)
             if result then
                 table.insert(data, result)
             else
                 handle.close()
-                
+
                 if reason then
                     return nil, reason
                 else
@@ -116,7 +120,7 @@ local function menu(label, lstrs, funcs, withoutBackButton, refresh)
     end
 
     if not withoutBackButton then
-        table.insert(strs, "Back")
+        table.insert(strs, "back")
     end
 
     local function redraw()
@@ -139,17 +143,17 @@ local function menu(label, lstrs, funcs, withoutBackButton, refresh)
     redraw()
 
     while true do
-        local eventData = {computer.pullSignal()}
+        local eventData = { computer.pullSignal() }
         if eventData[1] == "key_down" and isKeyboard(eventData[2]) then
             if eventData[4] == 28 then
                 if funcs[selected] then
                     if funcs[selected](strs[selected], eventData[5]) then
-                        break
+                        return true
                     else
                         if refresh then
                             local lstrs, lfuncs = refresh()
                             if not withoutBackButton then
-                                table.insert(lstrs, "Back")
+                                table.insert(lstrs, "back")
                             end
                             strs = lstrs
                             funcs = lfuncs
@@ -163,7 +167,7 @@ local function menu(label, lstrs, funcs, withoutBackButton, refresh)
                 selected = selected - 1
                 if selected < 1 then
                     selected = 1
-                else 
+                else
                     redraw()
                 end
             elseif eventData[4] == 208 then
@@ -224,7 +228,7 @@ local function serialize(value, pretty)
             table.insert(result_pack, (string.format("%q", current_value):gsub("\\\n", "\\n")))
         elseif
             t == "nil" or t == "boolean" or pretty and (t ~= "table" or (getmetatable(current_value) or {}).__tostring)
-         then
+        then
             table.insert(result_pack, tostring(current_value))
         elseif t == "table" then
             if ts[current_value] then
@@ -259,16 +263,16 @@ local function serialize(value, pretty)
                 local n = 0
                 f =
                     table.pack(
-                    function()
-                        n = n + 1
-                        local k = ks[n]
-                        if k ~= nil then
-                            return k, current_value[k]
-                        else
-                            return nil
+                        function()
+                            n = n + 1
+                            local k = ks[n]
+                            if k ~= nil then
+                                return k, current_value[k]
+                            else
+                                return nil
+                            end
                         end
-                    end
-                )
+                    )
             else
                 f = table.pack(pairs(current_value))
             end
@@ -322,16 +326,16 @@ local function serialize(value, pretty)
 end
 
 local function unserialize(data)
-    local result, reason = load("return " .. data, "=unserialize", nil, {math = {huge = math.huge}})
+    local result, reason = load("return " .. data, "=unserialize", nil, { math = { huge = math.huge } })
     if not result then
         return nil, reason
     end
-    
+
     local ok, output = pcall(result)
     if not ok then
         return nil, output
     end
-    
+
     if type(output) == "table" then
         return output
     end
@@ -341,8 +345,18 @@ end
 --------------------------------------------
 
 local baseUrl = "https://raw.githubusercontent.com/igorkll/liked/"
-local branches = {"main", "test", "dev"}
-local editions = {"full", "classic", "demo"}
+local branches = { "main", "test", "dev" }
+local editions = { "full", "classic", "demo" }
+
+local allowSaveOS = {
+    ["full"] = true
+}
+
+local mainWarn = "ATTENTION, after installing this version of the system, other operating systems will not work on this device! if you want to install another OS in the future or another edition of liked, then you will have to change the EEPROM and format the disk. and only then will you be able to run the installer"
+local warnOS = {
+    ["classic"] = mainWarn,
+    ["demo"] = mainWarn .. ". the demo version was created solely for familiarization with the system, computers on the demo version can be used as an advertising shield demonstrating the capabilities of the OS in public, this version is extremely unsuitable for use"
+}
 
 --------------------------------------------
 
@@ -382,6 +396,9 @@ end
 
 --------------------------------------------
 
+local showWarn
+local generateTitle
+
 local function getBlackList(branch, edition)
     local editionInfo = assert(wget(baseUrl .. branch .. "/system/likedlib/sysmode/" .. edition .. ".reg"))
     if editionInfo then
@@ -393,7 +410,14 @@ local function getBlackList(branch, edition)
 end
 
 local function getInstallData(branch, edition)
-    return {data = {branch = branch, mode = edition}, filesBlackList = getBlackList(branch, edition), label = "liked", noWait = true}
+    return {
+        data = { branch = branch, mode = edition },
+        filesBlackList = getBlackList(branch, edition),
+        label = "liked",
+        noWait = true,
+        noReboot = true,
+        noSetBootaddress = true
+    }
 end
 
 local function getInstallDataStr(branch, edition)
@@ -401,7 +425,8 @@ local function getInstallDataStr(branch, edition)
 end
 
 local function buildUpdater(branch, edition)
-    return getInstallDataStr(branch, edition) .. "\n" .. assert(wget(baseUrl .. branch .. "/system/likedlib/update/update.lua"))
+    return getInstallDataStr(branch, edition) ..
+    "\n" .. assert(wget(baseUrl .. branch .. "/system/likedlib/update/update.lua"))
 end
 
 local function isOpenOS(address)
@@ -409,7 +434,8 @@ local function isOpenOS(address)
 end
 
 local function isMineOS(address)
-    return component.invoke(address, "exists", "/OS.lua")
+    --return component.invoke(address, "exists", "/OS.lua")
+    return false
 end
 
 local function downloadFile(diskProxy, branch, path, toPath)
@@ -420,8 +446,50 @@ local function downloadFile(diskProxy, branch, path, toPath)
     diskProxy.close(file)
 end
 
-local function install(disk, branch, edition, doOpenOS, doMineOS)
+local function getRealTime(attemptTwo)
+    local tmpfs = component.proxy(computer.tmpAddress())
+
+    local file = assert(tmpfs.open("/null", "wb"))
+    tmpfs.close(file)
+
+    local unixTime = tmpfs.lastModified("/null")
+    tmpfs.remove("/null")
+
+    if not unixTime and not attemptTwo then
+        tmpfs.remove("/")
+        return getRealTime(true)
+    end
+
+    return unixTime
+end
+
+local function updateEepromApi(disk) --the new bios can store data in the EEPROM in a different way. and it is unknown how the old bios stores the data
+    function computer.setBootAddress() end
+
+    function computer.getBootAddress() return disk end
+end
+
+local function flashRestricted(disk, branch)
+    local eeprom = component.proxy(component.list("eeprom")() or "")
+    if eeprom then
+        local appendData = "local bootAddress = \"" .. disk .. "\"\n"
+        local diskProxy = component.proxy(disk)
+        local file = diskProxy.open("/system/sysdata/eeprom", "wb")
+        diskProxy.write(file, eeprom.address)
+        diskProxy.close(file)
+
+        eeprom.setData(tostring(getRealTime()))
+        eeprom.setLabel(assert(wget(baseUrl .. branch .. "/system/firmware/restricted_loader/label.txt")))
+        eeprom.set(appendData .. assert(wget(baseUrl .. branch .. "/system/firmware/restricted_loader/code.lua")))
+        eeprom.makeReadonly(eeprom.getChecksum())
+
+        updateEepromApi(disk)
+    end
+end
+
+local function install(disk, branch, edition, doOpenOS, doMineOS, otherDevice)
     local diskProxy = component.proxy(disk)
+    local flashRestrictedFlag = edition ~= "full"
 
     if doOpenOS then
         diskProxy.rename("/init.lua", "/openOS.lua")
@@ -440,23 +508,28 @@ local function install(disk, branch, edition, doOpenOS, doMineOS)
         downloadFile(diskProxy, branch, "/market/apps/mineOS.app/main.lua", "/vendor/apps/mineOS.app/main.lua")
         downloadFile(diskProxy, branch, "/market/apps/mineOS.app/uninstall.lua", "/vendor/apps/mineOS.app/uninstall.lua")
         downloadFile(diskProxy, branch, "/market/apps/mineOS.app/mineOS.lua", "/mineOS.lua")
-
-        local eeprom = component.proxy(component.list("eeprom")() or "")
-        if eeprom then
-            eeprom.setData("")
-            eeprom.setLabel(assert(wget(baseUrl .. branch .. "/system/firmware/likeloader/label.txt")))
-            eeprom.set(assert(wget(baseUrl .. branch .. "/system/firmware/likeloader/code.lua")))
-        end
     end
 
     assert(load(buildUpdater(branch, edition), "=updater", nil, _G))(disk)
-    pcall(computer.setBootAddress, disk)
-    pcall(computer.shutdown, "fast")
+    if otherDevice then
+        gpu.setBackground(0x000000)
+        gpu.setForeground(0xffffff)
+        gpu.setResolution(rx, ry)
+        gpu.fill(1, 1, rx, ry, " ")
+        showWarn("liked-" .. branch .. "-" .. edition .. " has been successfully installed on the " .. generateTitle(disk) .. " disk", " DONE ")
+    else
+        if flashRestrictedFlag then
+            flashRestricted(disk, branch)
+        end
+
+        pcall(computer.setBootAddress, disk)
+        pcall(computer.shutdown, "fast")
+    end
 end
 
 --------------------------------------------
 
-local function generateTitle(address)
+function generateTitle(address)
     local title = address:sub(1, 8) .. "-" .. (component.invoke(address, "getLabel") or "no label")
     if address == drive then
         title = title .. " (self disk)"
@@ -474,39 +547,97 @@ local function openOSMineOSStr(openOS, mineOS)
     end
 end
 
+local function toParts(tool, str, max)
+    local strs = {}
+    while tool.len(str) > 0 do
+        table.insert(strs, tool.sub(str, 1, max))
+        str = tool.sub(str, tool.len(strs[#strs]) + 1)
+    end
+    return strs
+end
+
+function showWarn(str, title)
+    clearScreen()
+    invertColor()
+    centerPrint(2, title or " WARNING ")
+    invertColor()
+    centerPrint(ry - 1, "press enter to continue")
+
+    for i, v in ipairs(toParts(string, str, rx - 4)) do
+        centerPrint(3 + i, v)
+    end
+
+    if updateScreen then updateScreen() end
+
+    while true do
+        local eventData = { computer.pullSignal() }
+        if eventData[1] == "key_down" and isKeyboard(eventData[2]) then
+            if eventData[4] == 28 then
+                break
+            end
+        end
+    end
+end
+
 local function generateFunction(address)
     local title = generateTitle(address)
-    return function ()
+    return function()
         local funcs = {}
         for _, branch in ipairs(branches) do
-            table.insert(funcs, function ()
+            table.insert(funcs, function()
                 local funcs = {}
                 for _, edition in ipairs(editions) do
-                    table.insert(funcs, function ()
-                        local openOS, mineOS = isOpenOS(address), isMineOS(address)
-                        local omStr = openOSMineOSStr(openOS, mineOS)
+                    table.insert(funcs, function()
+                        local funcs = {}
+                        for i = 1, 2 do
+                            table.insert(funcs, function()
+                                if warnOS[edition] then
+                                    showWarn(warnOS[edition])
+                                end
 
-                        local strs, funcs = {"format disk"}, {function ()
-                            status("installation...")
-                            component.invoke(address, "remove", "/")
-                            install(address, branch, edition)
-                        end}
+                                local openOS, mineOS, saveSystemStr
+                                if allowSaveOS[edition] then
+                                    openOS, mineOS = isOpenOS(address), isMineOS(address)
+                                    saveSystemStr = openOSMineOSStr(openOS, mineOS)
+                                end
 
-                        if omStr then
-                            table.insert(strs, omStr)
-                            table.insert(funcs, function ()
-                                status("installation...")
-                                install(address, branch, edition, openOS, mineOS)
+                                local strs, funcs = { "format disk" }, { function()
+                                    status("installation...")
+                                    component.invoke(address, "remove", "/")
+                                    install(address, branch, edition, nil, nil, i == 2)
+                                    return true
+                                end }
+
+                                if saveSystemStr then
+                                    table.insert(strs, saveSystemStr)
+                                    table.insert(funcs, function()
+                                        status("installation...")
+                                        install(address, branch, edition, openOS, mineOS, i == 2)
+                                        return true
+                                    end)
+                                end
+
+                                if menu(title .. " | installation options", strs, funcs) then
+                                    return true
+                                end
                             end)
                         end
-
-                        menu(title .. " | installation options", strs, funcs)
+                        if menu(title .. " | where the OS will be used (important)", {
+                                "on this device (flash the EEPROM if necessary and reboot into the system)",
+                                "on another device (do not flash the EEPROM and do not turn off the device)"
+                            }, funcs) then
+                            return true
+                        end
                     end)
                 end
-                menu(title .. " | select edition", editions, funcs)
+                if menu(title .. " | select edition", editions, funcs) then
+                    return true
+                end
             end)
         end
-        menu(title .. " | select branch", branches, funcs)
+        if menu(title .. " | select branch", branches, funcs) then
+            return true
+        end
     end
 end
 
@@ -532,3 +663,12 @@ end
 --------------------------------------------
 
 menu("liked & likeOS - web installer", generateList())
+
+gpu.setBackground(0x000000)
+gpu.setForeground(0xffffff)
+gpu.setResolution(orx, ory)
+gpu.fill(1, 1, orx, ory, " ")
+pcall(function()
+    require("term").clear()
+end)
+if updateScreen then updateScreen() end

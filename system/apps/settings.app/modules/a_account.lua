@@ -16,13 +16,13 @@ window:set(2, 2, colors.cyan, colors.white, "loading account control panel...")
 graphic.update(screen)
 
 local th = thread.create(function ()
-    assert(apps.execute("/system/bin/setup.app/inet.lua", screen, nil, window, nil, function ()
-        gRedraw()
-    end))
+	assert(apps.execute("/system/bin/setup.app/inet.lua", screen, nil, window, nil, function ()
+		gRedraw()
+	end))
 end)
 th:resume()
 
 return function(eventData)
 end, function ()
-    th:kill()
+	th:kill()
 end

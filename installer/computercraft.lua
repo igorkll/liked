@@ -59,7 +59,7 @@ local function selectPoint(name, points)
     end
 end
 
-local branch = selectPoint("branch", {"main", "test", "dev"})
+local branch = selectPoint("branch", { "main", "test", "dev" })
 if not branch then
     cancel()
     return

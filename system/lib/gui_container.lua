@@ -14,8 +14,8 @@ local paths = require("paths")
 
 gui_container.defaultUserRoot = "/data/userdata/"
 
-gui_container.userRoot = {} --{screen = path, ...}
-gui_container.viewFileExps = {} --если адрес экрана сдесь равен true то разширения имен файлов не будут скрыты
+gui_container.userRoot = {}      --{screen = path, ...}
+gui_container.viewFileExps = {}  --если адрес экрана сдесь равен true то разширения имен файлов не будут скрыты
 gui_container.devModeStates = {} --легаси, и почти негде не используеться, dev-mode был удален из системы
 gui_container.unlockedDisks = {}
 gui_container.hiddenFiles = {}
@@ -79,7 +79,7 @@ function gui_container.toUserPath(screen, path) --конвертирует ру�
     return paths.canonical(unicode.sub(path, unicode.len(gui_container.getUserRoot(screen)), unicode.len(path)))
 end
 
-function gui_container.checkPath(screen, path) --проверяет не вышел ли пользователь из своий папки
+function gui_container.checkPath(screen, path) --проверяет не вышел ли пользователь из своей папки
     local userPath = gui_container.getUserRoot(screen)
     if unicode.sub(path, 1, unicode.len(userPath)) ~= userPath then
         return userPath
@@ -88,16 +88,6 @@ function gui_container.checkPath(screen, path) --проверяет не выш�
 end
 
 function gui_container.refresh()
-    local colors = {
-        ["app"] = gui_container.colors.red,
-        ["afpx"] = gui_container.colors.orange,
-        ["lua"] = gui_container.colors.lime
-    }
-
-    for k, v in pairs(colors) do
-        gui_container.typecolors[k] = v
-    end
-
     local registry = require("registry")
     for str, tbl in pairs(registry.gui_container or {}) do
         for key, value in pairs(tbl) do

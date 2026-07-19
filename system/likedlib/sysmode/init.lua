@@ -50,7 +50,7 @@ function sysmode.init()
             end
         end
     end
-    
+
     if registry.filesBlackList then
         for _, path in ipairs(registry.filesBlackList) do
             if fs.exists(path) then

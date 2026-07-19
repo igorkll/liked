@@ -36,7 +36,7 @@ function sound.beep(freq, delay, blocked)
 
     local beep = componentCoroutine("beep")
     if beep then
-        component.invoke(beep, "beep", {[freq] = delay})
+        component.invoke(beep, "beep", { [freq] = delay })
         wait()
     else
         local noise = componentCoroutine("noise")
@@ -84,8 +84,6 @@ function rawSounds.input()
     sound.beep(2000, 0.1, true)
     sound.beep(1500, 0.1)
 end
-
-
 
 for name, func in pairs(rawSounds) do
     sound[name] = function()

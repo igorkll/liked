@@ -21,7 +21,7 @@ function hdd.move(from, to)
     fs.umount("/mnt/to")
     fs.mount(from, "/mnt/from")
     fs.mount(to, "/mnt/to")
-    local result = {fs.copy("/mnt/from", "/mnt/to")}
+    local result = { fs.copy("/mnt/from", "/mnt/to") }
     fs.umount("/mnt/from")
     fs.umount("/mnt/to")
     return table.unpack(result)
@@ -45,13 +45,16 @@ function hdd.clone(screen, proxy, selectFrom)
     local gui = require("gui")
 
     local from, to
-    local blacklist = {proxy.address}
+    local blacklist = { proxy.address, fs.tmpaddress }
+    if registry.disableRootAccess then
+        table.insert(blacklist, fs.bootaddress)
+    end
 
     local clear = saveBigZone(screen)
 
     if selectFrom then
         to = proxy
-        from = gui.selectcomponentProxy(screen, nil, nil, {"filesystem"}, false, nil, nil, blacklist)
+        from = gui.selectcomponentProxy(screen, nil, nil, { "filesystem" }, false, nil, nil, blacklist)
     else
         for addr in component.list("filesystem", true) do
             if component.invoke(addr, "isReadOnly") then
@@ -59,7 +62,7 @@ function hdd.clone(screen, proxy, selectFrom)
             end
         end
 
-        to = gui.selectcomponentProxy(screen, nil, nil, {"filesystem"}, false, nil, nil, blacklist)
+        to = gui.selectcomponentProxy(screen, nil, nil, { "filesystem" }, false, nil, nil, blacklist)
         from = proxy
     end
 
@@ -86,7 +89,7 @@ function hdd.clone(screen, proxy, selectFrom)
         if ok then
             local fromlabel = from.getLabel()
             if fromlabel then
-                to.setLabel(fromlabel)
+                pcall(to.setLabel, fromlabel)
             end
         end
         liked.mountAll()

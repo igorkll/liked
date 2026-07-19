@@ -12,10 +12,10 @@ local strs = {
     "Run System Web Installer"
 }
 local funcs = {
-    function (str)
+    function(str)
         if component.list("internet")() then
             if recoveryApi.yesno(str) then
-                local sysdata = {branch = "main", mode = "full"}
+                local sysdata = { branch = "main", mode = "full" }
                 for _, file in ipairs(bootfs.list("/system/sysdata") or {}) do
                     sysdata[file] = bootloader.readFile(bootfs, "/system/sysdata/" .. file)
                 end
@@ -24,10 +24,14 @@ local funcs = {
                 for key, data in pairs(sysdata) do
                     sysdataStr = sysdataStr .. key .. "=\"" .. data .. "\","
                 end
-                sysdataStr = sysdataStr .. "}}"
+                sysdataStr = sysdataStr .. "},self=\"" .. startupPath .. "\"}"
 
-                local content = "local installdata = " .. sysdataStr .. "\n" .. bootloader.readFile(bootfs, "/system/likedlib/update/update.lua")
+                local content = "local installdata = " ..
+                sysdataStr .. "\n" .. bootloader.readFile(bootfs, "/system/likedlib/update/update.lua")
                 if bootloader.writeFile(bootfs, startupPath, content) then
+                    local tmpfs = component.proxy(bootloader.tmpaddress)
+                    tmpfs.makeDirectory("/bootloader")
+                    bootloader.writeFile(tmpfs, "/bootloader/bootaddr", bootfs.address)
                     computer.shutdown("fast")
                 end
             end
@@ -35,15 +39,15 @@ local funcs = {
             recoveryApi.info("An internet card is required")
         end
     end,
-    function (str)
+    function(str)
         if recoveryApi.yesno(str) then
             bootloader.dofile("/system/liked/reset.lua", _ENV, bootfs)
             recoveryApi.info("Settings Successfully Reset")
         end
     end,
-    function ()
+    function()
         if not require then
-            recoveryApi.info({"Initializing The Kernel", "Please Wait"}, true)
+            recoveryApi.info({ "Initializing The Kernel", "Please Wait" }, true)
             local ok, err = pcall(bootloader.bootstrap)
             if not ok then
                 recoveryApi.info(tostring(err or "Unknown Error"))
@@ -54,9 +58,9 @@ local funcs = {
         bootloader.recoveryApi = recoveryApi
         bootloader.runShell(bootloader.defaultShellPath, recoveryApi.screen)
     end,
-    function ()
+    function()
         if component.list("internet")() then
-            recoveryApi.info({"Downloading The Installer", "Please Wait"}, true)
+            recoveryApi.info({ "Downloading The Installer", "Please Wait" }, true)
             local branch = "main"
             local branchPath = "/system/sysdata/branch"
             if bootfs.exists(branchPath) then
@@ -77,7 +81,7 @@ local funcs = {
 
 if bootfs.exists(startupPath) then
     strs[1] = "Cancel Scheduled Recover"
-    funcs[1] = function ()
+    funcs[1] = function()
         bootfs.remove(startupPath)
         computer.shutdown("fast")
     end

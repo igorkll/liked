@@ -60,7 +60,7 @@ function gobjs.scrolltext:onDraw()
                 maxSize = maxSize - 2
             end
             str = unicode.sub(str, 1, maxSize)
-            
+
             local linePosX = self.x
             if self.padding then
                 linePosX = linePosX + 1
@@ -69,8 +69,6 @@ function gobjs.scrolltext:onDraw()
         end
     end
 end
-
-
 
 function gobjs.scrolltext:reLines()
     self.lines = self.lines or parser.split(unicode, self.text, "\n")
@@ -86,7 +84,7 @@ end
 
 gobjs.checkboxgroup = {}
 
-function gobjs.checkboxgroup:onCreate(sizeX, sizeY)
+function gobjs.checkboxgroup:onCreate(sizeX, sizeY, enableScrollbar)
     self.sizeX = sizeX
     self.sizeY = sizeY
 
@@ -97,6 +95,7 @@ function gobjs.checkboxgroup:onCreate(sizeX, sizeY)
     self.scroll = 0
 
     self.w = uix.regDrawZone(self, sizeX, sizeY)
+    self.enableScrollbar = enableScrollbar
 end
 
 function gobjs.checkboxgroup:onDraw()
@@ -105,7 +104,7 @@ function gobjs.checkboxgroup:onDraw()
     for i, item in ipairs(self.list) do
         local linePos = i - self.scroll
         if linePos >= 1 and linePos <= self.sizeY then
-            self.itemsPos[linePos] = {i, item}
+            self.itemsPos[linePos] = { i, item }
             self:redrawPoint(linePos, item)
         end
     end
@@ -124,13 +123,32 @@ function gobjs.checkboxgroup:onEvent(eventData)
                 self:draw()
             end
         elseif eventData[1] == "touch" then
-            if eventData[3] <= 2 and self.itemsPos then
+            if self.itemsPos then
                 local item = self.itemsPos[eventData[4]]
                 if item then
-                    item[2][2] = not item[2][2]
-                    self:redrawPoint(eventData[4], item[2])
-                    if self.onSwitch then
-                        self:onSwitch(item[1], item[2][1], item[2][2])
+                    if eventData[3] <= 2 then
+                        if self.oneSelect and not item[2][2] then
+                            for i, lstobj in ipairs(self.list) do
+                                if lstobj[2] then
+                                    lstobj[2] = false
+                                    local linePos = i - self.scroll
+                                    if linePos >= 1 and linePos <= self.sizeY then
+                                        self:redrawPoint(linePos, lstobj)
+                                    end
+                                    if self.onSwitch then
+                                        self:onSwitch(i, lstobj[1], lstobj[2], lstobj, eventData) --index, title, state, usertbl, event
+                                    end
+                                end
+                            end
+                        end
+                        item[2][2] = not item[2][2]
+                        self:redrawPoint(eventData[4], item[2])
+                        if self.onSwitch then
+                            self:onSwitch(item[1], item[2][1], item[2][2], item[2], eventData) --index, title, state, usertbl, event
+                        end
+                        self.lastInteraction = item[2]
+                    elseif self.onTextClick then
+                        self:onTextClick(item[1], item[2][1], item[2][2], item[2], eventData)
                     end
                 end
             end
@@ -178,8 +196,6 @@ function gobjs.manager:onEvent(eventData)
         self.current:uploadEvent(eventData)
     end
 end
-
-
 
 function gobjs.manager:fullStop()
     if self.current then

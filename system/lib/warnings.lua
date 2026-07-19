@@ -8,7 +8,8 @@ function warnings.list(screen)
     local list = {}
 
     if not liked.isRealKeyboards(screen) then
-        table.insert(list, "there is no physical keyboard\nto use the virtual keyboard, tap the screen three times quickly")
+        table.insert(list,
+            "there is no physical keyboard\nto use the virtual keyboard, tap the screen three times quickly")
     end
 
     if computer.totalMemory() / 1024 < 512 then

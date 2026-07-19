@@ -12,66 +12,73 @@ local vcomponent = require("vcomponent")
 
 local boxPath = system.getResourcePath("box")
 local eepromPath = system.getResourcePath("eepromImage")
+local tempPath = "/tmp/openbox"
 local openbox = {}
 
 function openbox.run(screen, program)
-    local restoreGraphic, gpuAddress
-    if screen then
-        restoreGraphic, gpuAddress = vmx.hookGraphic(screen)
-    end
+	local restoreGraphic, gpuAddress
+	if screen then
+		restoreGraphic, gpuAddress = vmx.hookGraphic(screen)
+	end
 
-    local result, result2, vm
-    local tunnel = {}
-    while true do
-        vm = vmx.create(eepromPath, {boxPath, true, nil, "openos"})
-        vm.env.os.program = paths.name(program)
-        vm.env.os.tunnel = tunnel
-        local progfs = vmx.fromVirtual(fs.dump(paths.path(program), false, nil, "program"))
-        vm.bindComponent(progfs)
-        vm.env.os.progfs = progfs
+	local result, result2, vm
+	local tunnel = {}
+	while true do
+		vm = vmx.create(eepromPath, {boxPath, false, nil, "openos"})
+		vm.env.os.program = paths.name(program)
+		vm.env.os.tunnel = tunnel
 
-        if gpuAddress then
-            vm.bindComponent(vmx.fromReal(gpuAddress))
-        end
-        
-        if screen then
-            vm.bindComponent(vmx.fromReal(screen))
-            for _, keyboard in ipairs(lastinfo.keyboards[screen]) do
-                if not vcomponent.isVirtual(keyboard) then
-                    vm.bindComponent(vmx.fromReal(keyboard))
-                end
-            end
-        end
+		fs.makeDirectory(tempPath)
+		local tmpfs = vmx.fromVirtual(fs.dump(tempPath, math.round(fs.get(tempPath).spaceTotal() / 4), nil, "tmpfs"))
+		vm.bindComponent(tmpfs, true)
+		vm.bindTmp(tmpfs.address)
 
-        for address, ctype in component.list() do
-            if ctype ~= "screen" and ctype ~= "keyboard" and ctype ~= "filesystem" and ctype ~= "eeprom" then
-                vm.bindComponent(vmx.fromReal(address))
-            end
-        end
-        
-        result2 = {xpcall(function()
-            result = {vm.loop(vmx.pullEvent)}
-        end, debug.traceback)}
+		local progfs = vmx.fromVirtual(fs.dump(paths.path(program), false, nil, "program"))
+		vm.bindComponent(progfs, true)
+		vm.env.os.progfs = progfs
 
-        if not result or (result[1] ~= true or result[2] ~= "reboot") then
-            break
-        end
-    end
-    
-    if restoreGraphic then
-        restoreGraphic()
-    end
+		if gpuAddress then
+			vm.bindComponent(vmx.fromReal(gpuAddress), true)
+		end
+		
+		if screen then
+			vm.bindComponent(vmx.fromReal(screen), true)
+			for _, keyboard in ipairs(lastinfo.keyboards[screen]) do
+				if not vcomponent.isVirtual(keyboard) then
+					vm.bindComponent(vmx.fromReal(keyboard), true)
+				end
+			end
+		end
 
-    assert(table.unpack(result2))
-    assert(table.unpack(result))
-    if tunnel.progError then
-        return nil, tunnel.progError
-    end
-    return true
+		for address, ctype in component.list() do
+			if ctype ~= "screen" and ctype ~= "keyboard" and ctype ~= "filesystem" and ctype ~= "eeprom" then
+				vm.bindComponent(vmx.fromReal(address), true)
+			end
+		end
+		
+		result2 = {xpcall(function()
+			result = {vm.loop(vmx.pullEvent)}
+		end, debug.traceback)}
+
+		if not result or (result[1] ~= true or result[2] ~= "reboot") then
+			break
+		end
+	end
+	
+	if restoreGraphic then
+		restoreGraphic()
+	end
+
+	assert(table.unpack(result2))
+	assert(table.unpack(result))
+	if tunnel.progError then
+		return nil, tunnel.progError
+	end
+	return true
 end
 
 function openbox.runWithSplash(screen, program)
-    return liked.bigAssert(screen, openbox.run(screen, program))
+	return liked.bigAssert(screen, openbox.run(screen, program))
 end
 
 openbox.unloadable = true
